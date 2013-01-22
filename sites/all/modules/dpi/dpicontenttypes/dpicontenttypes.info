@@ -1,0 +1,9 @@
+name = DPI Contenttypes
+description = Create customized lists and queries from your database.
+package = DPI
+core = 7.x
+
+
+
+
+files[] = dpicontenttypes.api.inc
