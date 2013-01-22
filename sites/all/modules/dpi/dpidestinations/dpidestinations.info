@@ -1,0 +1,9 @@
+name = DPI Destinations
+description = Create customized lists and queries from your database.
+package = DPI
+core = 7.x
+
+dependencies[] = dpicontenttypes
+
+
+files[] = dpidestinations.api.inc

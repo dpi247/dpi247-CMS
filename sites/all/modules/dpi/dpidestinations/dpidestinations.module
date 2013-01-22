@@ -1,0 +1,63 @@
+<?php
+
+
+/**
+ * Implements hook_field_info().
+ *
+ * Provides the description of the field.
+ */
+function dpidestinations_field_info() {
+  return array(
+      // We name our field as the associative name of the array.
+      'field_destinations' => array(
+          'label' => t('Destinations'),
+          'description' => t('A destination is a quadruplet of four information that define Where and how a node will be displayed.'),
+          'default_widget' => 'field_destinations_default_widget',
+          'default_formatter' => 'field_destinations_default_formatter',
+      ),
+  );
+}
+
+
+/**
+ * Implements hook_field_validate().
+ *
+ * This hook gives us a chance to validate content that's in our
+ * field. If it doesn't validate, we add
+ *  our own error notification to the $errors parameter.
+ *
+ * @see dpidestinations_field_widget_error()
+ * @see dpidestinations_field_is_empty()
+ */
+function dpidestinations_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  
+  //Ici, il n'y a pas lieu de faire le validate car le hook_field_is_emtpy 
+  //ne déclenche pas la validation si le field est vide. or dans notre cas, 
+  //le hook_field_is_empty check justement la valeur du tid...
+  // mais on laisse ca juste pour illustrer
+  /*
+  foreach ($items as $delta => $item) {
+    if (!empty($item['tid'])) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'field_destinations_tid',
+            'message' => t('ou must select a destination.'),
+        );
+    }
+  }
+  */
+}
+
+
+
+/**
+ * Implements hook_field_is_empty().
+ *
+ * hook_field_is_emtpy() is where Drupal asks us if this field is empty.
+ * Return TRUE if it does not contain data, FALSE if it does. This lets
+ * the form API flag an error when required fields are empty.
+ */
+function dpidestinations_field_is_empty($item, $field) {
+  if(empty($item['tid']) and empty($item['tid']))
+    return TRUE;
+  return FALSE;
+}

@@ -1,0 +1,49 @@
+<?php 
+
+/**
+ * Implements hook_field_schema().
+ *
+ * Defines the database schema of the field, using the format used by the
+ * Schema API.
+ *
+ * The data we will store here is just one 7-character element, even
+ * though the widget presents the three portions separately.
+ *
+ * All implementations of hook_field_schema() must be in the module's
+ * .install file.
+ *
+ * @see http://drupal.org/node/146939
+ * @see schemaapi
+ * @see hook_field_schema()
+ * @ingroup field_example
+ */
+function dpidestinations_field_schema($field) {
+  $columns = array(
+      'nid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+      'tid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+      'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+      'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+      'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
+      'time_rank' => array('type' => 'float',  'not null' => FALSE),
+  );
+  $indexes = array(
+      'nid' => array('nid'),
+      'tid' => array('tid'),
+      'time_rank' => array('time_rank'),
+  );
+  $unique_keys=array('unique'=>array('nid','tid','target'));
+  
+  $foreign_keys= array(
+    'node' => array(
+      'table' => 'node',
+      'columns' => array('nid' => 'nid'),
+     ),
+  );
+  return array(
+      'columns' => $columns,
+      'indexes' => $indexes,
+      'unique keys'=>$unique_keys,
+      'foreign keys' => $foreign_keys,
+  );
+}
+
