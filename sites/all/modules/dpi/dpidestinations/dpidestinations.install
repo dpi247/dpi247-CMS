@@ -19,31 +19,24 @@
  */
 function dpidestinations_field_schema($field) {
   $columns = array(
-      'nid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
       'tid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
       'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
       'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
       'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
-      'time_rank' => array('type' => 'float',  'not null' => FALSE),
+      'time_rank' => array('type' => 'float',  'size' => 'big','not null' => FALSE),
+      //'time_rank' => array('type' => 'int',  'size' => 'normal', 'not null' => TRUE),
+      
   );
   $indexes = array(
-      'nid' => array('nid'),
       'tid' => array('tid'),
       'time_rank' => array('time_rank'),
   );
-  $unique_keys=array('unique'=>array('nid','tid','target'));
+  $unique_keys=array('unique'=>array('tid','target'));
   
-  $foreign_keys= array(
-    'node' => array(
-      'table' => 'node',
-      'columns' => array('nid' => 'nid'),
-     ),
-  );
   return array(
       'columns' => $columns,
       'indexes' => $indexes,
       'unique keys'=>$unique_keys,
-      'foreign keys' => $foreign_keys,
   );
 }
 
