@@ -1,8 +1,8 @@
 <?php
 
-//module_load_include('inc', 'dpidestinations','dpidestinations.api');
-//module_load_include('inc', 'dpidestinations','dpidestinations.private');
-//module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
+module_load_include('inc', 'dpidestinations','dpidestinations.api');
+module_load_include('inc', 'dpidestinations','dpidestinations.private');
+module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
 
 /**
  * Implements hook_field_info().
@@ -144,7 +144,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     '#value' => $element_key,
   );
 
-  $tids_options=dpidestinations_api_get_all_destinations_term_available();
+  $tids_options=dpidestinations_api_get_all_destinations_term_available_as_select_options();
 
   //$widget = $element;
   $widget['#delta'] = $delta;
@@ -174,7 +174,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           // select elements), but valid values include any jQuery event,
           // most notably 'mousedown', 'blur', and 'submit'.
           // 'event' => 'change',
-          'callback' => 'dpidestinations_dependent_dropdown_ajax_callback',
+          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
           'wrapper' => 'dropdown-target-replace_'.$delta,
           'method'=>'replace',
         ),
@@ -187,7 +187,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('Define the target where the node will appear in the page'),
         '#ajax' => array(
-          'callback' => 'dpidestinations_dependent_dropdown_ajax_callback',
+          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
           'wrapper' => 'dropdown-target-replace_'.$delta,
           'method'=>'replace',
         ),
@@ -200,7 +200,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The way your article will be render in the target'),
         '#ajax' => array(
-          'callback' => 'dpidestinations_dependent_dropdown_ajax_callback',
+          'callback' => 'dpidestination_ajax_callbacks_dependent_dropdown',
           'wrapper' => 'dropdown-target-replace_'.$delta,
           'method'=> 'replace',
         ),
@@ -215,7 +215,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
       );
       $widget['time_rank'] = array(
         '#type' => 'value',
-        "#value"=> $microtime,
+        "#value"=> microtime(TRUE),
       );
 
       break;
@@ -227,17 +227,6 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 }
 
 
-function dpidestinations_validate_tid($element, &$form_state)
-{
-  // Search through the form values to find the current address.
-  $parents = $element['#parents'];
-  array_pop($parents);
-  $destinations = drupal_array_get_nested_value($form_state['values'], $parents);
-
-  // Store the present address values in the form state for retrieval by the
-  // widget form regardless of where the widget sits in the $form array.
-  $form_state['destinationsfield'][$destinations['element_key']] = array_diff_key($destinationss, array('element_key' => ''));
-}
 
 /**
  * Implements hook_field_formatter_info().
@@ -361,48 +350,15 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 
 
 
-function  dpidestinations_api_get_all_destinations_term_available(){
-  return array(
-    1=>'News',
-    2=>'Sport',
-  );
-}
 
 
-function dpidestinations_api_get_all_targets_available_for_destination_tid($tid){
-  $options=array();
-  if($tid==1)
-    $options= array(1=>"Belgium",2=>"World",3=>"Footer");
-  if($tid==2)
-    $options= array(1=>"Football",2=>"Tennis",3=>"Footer");
-  return $options;
 
-}
 
-function dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($tid,$target){
-  $options=array();
-  if($target==1)
-    $options= array(1=>"Small",2=>"Medium",3=>"Large");
-  if($target==2)
-    $options= array(2=>"Medium",3=>"Large");
-  return $options;
 
-}
 
-function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($tid,$target){
-  $options=array();
-  if($target==1)
-    $options= array(0=>'Top',1,2,3);
-  if($target==2)
-    $options= array(0=>'Bottom',1,2,3);
-  return $options;
-
-}
-
-function dpidestinations_dependent_dropdown_ajax_callback($form, $form_state){
+function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
-  //dsm($array_parents);
   // Iterate over the form parents to find the element.
   $element = $form;
   foreach ($array_parents as $name) {
