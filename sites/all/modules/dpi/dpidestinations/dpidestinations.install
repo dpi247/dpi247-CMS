@@ -40,3 +40,50 @@ function dpidestinations_field_schema($field) {
   );
 }
 
+function dpidestinations_schema() {
+  $schema['dpidestinations_target'] = array (
+    'description' => 'The target entity table',
+    'fields' => array(
+      'tid' => array(
+        'description' => 'Primary key for our table of target',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'label' => array(
+        'description' => 'The label of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      
+      'description' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Administrative description for this target.',
+        'object default' => '',
+      ),
+     
+      'view_name' => array(
+        'type'=>'varchar',
+        'length' => 64,
+        'not null' => TRUE
+      ),
+      'view_id' =>array(
+        'type'=>'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('tid'),
+  );
+
+  return $schema;
+}
+

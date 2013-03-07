@@ -349,9 +349,199 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 }
 
 
+/**
+ * Implements hook_entity_info().
+ */
+function dpidestinations_entity_info(){
+  $entities=array();
+
+  $entities['target']=array(
+    'label' => t('Target'),
+    // seulement si on utilise le module entity API
+    //'entity class' => 'DpidestinationsTarget',
+    'controller class' => 'TargetController',
+    'base table' => 'dpidestinations_target',
+    'fieldable' => TRUE,
+    'uri callback' => 'dpidestinations_target_uri',
+
+    'entity keys' => array(
+      'id' => 'tid',
+    ),
+    'view modes' => array( 
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+  );
+  return $entities;
+  
+}
+
+
+function dpidestinations_target_uri($target_entity){
+  //Attention que l'attrribut de l'entité est ici id et non tid.
+  //Cet attribut est fournit automatiquement par Drupal Core en fonction de hook_entity_info
+  return array(
+    'path' => 'target/'.$target_entity->id,
+  );
+  return array(
+    
+  );
+}
+
+function dpidestinations_menu(){
+  $items['admin/structure/target/manage'] = array(
+    'title' => 'Target Admin',
+    'description' => 'Manage Target structure',
+    'page callback' => 'target_info',
+    'access arguments' => array('administer target'),
+  );
+  $items['target/%target'] = array(
+    'title callback' => 'target_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'target_page_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view targets'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['target/add'] = array(
+    'title' => 'Add Target!',
+    'page callback' => 'target_add',
+    'access arguments' => array('create target'),
+  );
+  return $items;
+}
+
+function dpidestinations_permission(){
+  return array(
+    'administer targets' =>  array(
+      'title' => t('Administer targets'),
+      'restrict access' => TRUE,
+    ),
+    'view targetss' => array(
+      'title' => t('View targets'),
+    )
+  );
+}
 
 
 
+function target_load($tid = NULL, $reset = FALSE){
+  $tids = (isset ($tid) ? array($tid) : array());
+  $target = target_load_multiple($tids, $reset);
+  return $target ? reset ($target) : FALSE;
+}
+
+function target_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('target', $tids, $conditions, $reset);
+}
+function dpidestinations_field_extra_fields() {
+  $return = array();
+  $return['target']['target'] = array(
+    'form' => array(
+      'label' => array(
+        'label' => t('Label'),
+        'description' => t('Label'),
+      ),
+    ),
+  );
+
+  return $return;
+}
+
+
+function target_info() {
+  return ('Welcome to the administration page for your targets!');
+}
+
+function target_page_title($target){
+  return $target->tid;
+}
+
+function target_page_view($target, $view_mode = 'full'){
+  $target->content = array();
+
+  // Build fields content.
+  field_attach_prepare_view('target', array($target->tid => $target), $view_mode);
+  entity_prepare_view('target', array($target->tid => $target));
+  $target->content += field_attach_view('target', $target, $view_mode);
+
+  return $target->content;
+}
+
+
+
+
+function target_add() {
+  $target = (object) array (
+    'tid' => '',
+    'type' => 'target',
+    'machine_name' => '',
+    'label' => '',
+    'description' => '',
+    'view_name' => '',
+    'view_id' => '',
+  );
+  return drupal_get_form('target_add_form', $target);
+}
+
+
+function target_add_form($form, &$form_state, $target) {
+  $form['machine_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Machine Name'),
+    '#required' => TRUE,
+  );
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#required' => TRUE,
+  );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#required' => TRUE,
+  );
+  $form['view_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View Name'),
+    '#required' => TRUE,
+  );
+  $form['view_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View Id'),
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  field_attach_form('target', $target, $form, $form_state);
+
+  return $form;
+}
+
+
+
+function target_add_form_submit($form, &$form_state) {
+  $target_submission = (object) $form_state['values'];
+  field_attach_submit('target', $target_submission, $form, $form_state);
+  $target = target_save($target_submission);
+  $form_state['redirect'] = "target/$target->tid";
+}
+
+
+function target_save(&$target){
+    return entity_get_controller('target')->save($target);
+  
+}
 
 
 
