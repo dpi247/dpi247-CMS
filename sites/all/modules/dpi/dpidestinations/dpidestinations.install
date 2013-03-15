@@ -44,7 +44,7 @@ function dpidestinations_schema() {
   $schema['dpidestinations_target'] = array (
     'description' => 'The target entity table',
     'fields' => array(
-      'tid' => array(
+      'targetid' => array(
         'description' => 'Primary key for our table of target',
         'type' => 'serial',
         'unsigned' => TRUE,
@@ -81,7 +81,7 @@ function dpidestinations_schema() {
         'not null' => TRUE,
       ),
     ),
-    'primary key' => array('tid'),
+    'primary key' => array('targetid'),
   );
 
   return $schema;

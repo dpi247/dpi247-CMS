@@ -1,4 +1,4 @@
-<?php
+  <?php
 
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
@@ -37,7 +37,7 @@ function dpidestinations_field_validate($entity_type, $entity, $field, $instance
   //ne déclenche pas la validation si le field est vide. or dans notre cas,
   //le hook_field_is_empty check justement la valeur du tid...
   // mais on laisse ca juste pour illustrer
-
+/*
   foreach ($items as $delta => $item) {
     if (!empty($item['tid'])) {
       $errors[$field['field_name']][$langcode][$delta][] = array(
@@ -46,6 +46,7 @@ function dpidestinations_field_validate($entity_type, $entity, $field, $instance
       );
     }
   }
+  */
 
 
 }
@@ -119,10 +120,12 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   $destinations = array();
 
   if (!empty($form_state_destinations_values['tid'])) {
+
     // Use the value from the form_state if available.
     $destinations = $form_state_destinations_values;
   }
   elseif (!empty($items[$delta]['tid'])) {
+
     // Else use the saved value for the field.
     $destinations = $items[$delta];
 
@@ -132,7 +135,6 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     $destinations = (array) $instance['default_value'][0];
 
   }
-
   // Generate a specific key used to identify this element to restore a default
   // value upon AJAX submission regardless of where this element is in the
   // $form array.
@@ -358,15 +360,27 @@ function dpidestinations_entity_info(){
   $entities['target']=array(
     'label' => t('Target'),
     // seulement si on utilise le module entity API
-    //'entity class' => 'DpidestinationsTarget',
+    'entity class' => 'TargetEntity',
     'controller class' => 'TargetController',
     'base table' => 'dpidestinations_target',
     'fieldable' => TRUE,
-    'uri callback' => 'dpidestinations_target_uri',
-
+    // Make use the class' label() and uri() implementation by default.
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    
     'entity keys' => array(
-      'id' => 'tid',
+      'id' => 'targetid',
     ),
+    'bundles'=>array(
+      'target'=>array(
+        'label' => 'target',
+        'admin' => array(
+          'path' => 'admin/structure/target/manage/target',
+          'real path' => 'admin/structure/types/manage/target',
+          'access arguments' => array('administer content types'),
+        ),
+        ),
+      ),
     'view modes' => array( 
       'minimal' => array(
         'label' => t('Minimal'),
@@ -377,34 +391,32 @@ function dpidestinations_entity_info(){
         'custom settings' => TRUE,
       ),
     ),
+    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    'module'=> 'dpidestinations',
+    'access callback' => 'target_access_admin_callback',
+    
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'label' => 'ti',
+      
+      'path' => 'admin/structure/target',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      //'file' => 'target.admin.inc',
+      //'controller class' => 'EntityDefaultUIController',
+    ),
   );
   return $entities;
   
 }
 
 
-function dpidestinations_target_uri($target_entity){
-  //Attention que l'attrribut de l'entité est ici id et non tid.
-  //Cet attribut est fournit automatiquement par Drupal Core en fonction de hook_entity_info
-  return array(
-    'path' => 'target/'.$target_entity->id,
-  );
-  return array(
-    
-  );
-}
 
 function dpidestinations_menu(){
-  $items['admin/structure/target/manage'] = array(
-    'title' => 'Target Admin',
-    'description' => 'Manage Target structure',
-    'page callback' => 'target_info',
-    'access arguments' => array('administer target'),
-  );
+
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
     'title arguments' => array(1),
-    'page callback' => 'target_page_view',
+    'page callback' => 'target_view',
     'page arguments' => array(1),
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
@@ -440,58 +452,99 @@ function target_load($tid = NULL, $reset = FALSE){
 function target_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
   return entity_load('target', $tids, $conditions, $reset);
 }
+
+
 function dpidestinations_field_extra_fields() {
   $return = array();
   $return['target']['target'] = array(
     'form' => array(
+      'targetid' => array(
+        'label' => t('Target Id'),
+        'description' => t('Unique ID of the target from DB\'s primary key'),
+        'weight' => 0,
+      ),
+      'machine_name' => array(
+          'label' => t('Machine name'),
+          'description' => t('Machine name\'s target'),
+        'weight' => 0,
+        ),
       'label' => array(
         'label' => t('Label'),
-        'description' => t('Label'),
+        'description' => t('Human\s readable label'),
+        'weight' => 0,
       ),
+      'description' => array(
+        'label' => t('Description'),
+        'description' => t('Description\'s target'),
+        'weight' => 0,
+      ),
+      'view_name' => array(
+        'label' => t('View name'),
+        'description' => t('The view associated to the target'),
+        'weight' => 0,
+      ), 
+      'view_id' => array(
+          'label' => t('View Display'),
+          'description' => t('The view display associated to the target'),
+          'weight' => 0,
+        ),
     ),
+    'display'=>array(
+      'targetid' => array(
+        'label' => t('Target Id'),
+        'description' => t('Unique ID of the target from DB\'s primary key'),
+        'weight' => 0,
+      ),
+      'machine_name' => array(
+        'label' => t('Machine name'),
+        'description' => t('Machine name\'s target'),
+        'weight' => 0,
+      ),
+      'label' => array(
+        'label' => t('Label'),
+        'description' => t('Human\s readable label'),
+        'weight' => 0,
+      ),
+      'description' => array(
+        'label' => t('Description'),
+        'description' => t('Description\'s target'),
+        'weight' => 0,
+      ),
+      'view_name' => array(
+        'label' => t('View name'),
+        'description' => t('The view associated to the target'),
+        'weight' => 0,
+      ),
+      'view_id' => array(
+        'label' => t('View Display'),
+        'description' => t('The view display associated to the target'),
+        'weight' => 0,
+      ),
+      ),
+    
+    
   );
 
   return $return;
 }
 
-
-function target_info() {
-  return ('Welcome to the administration page for your targets!');
+function target_access_admin_callback(){
+  return TRUE;
 }
 
 function target_page_title($target){
-  return $target->tid;
+  return $target->machine_name;
 }
 
-function target_page_view($target, $view_mode = 'full'){
-  $target->content = array();
-
-  // Build fields content.
-  field_attach_prepare_view('target', array($target->tid => $target), $view_mode);
-  entity_prepare_view('target', array($target->tid => $target));
-  $target->content += field_attach_view('target', $target, $view_mode);
-
-  return $target->content;
+function target_view($target, $view_mode = 'full'){
+  return $target->view();
 }
 
 
 
 
-function target_add() {
-  $target = (object) array (
-    'tid' => '',
-    'type' => 'target',
-    'machine_name' => '',
-    'label' => '',
-    'description' => '',
-    'view_name' => '',
-    'view_id' => '',
-  );
-  return drupal_get_form('target_add_form', $target);
-}
 
-
-function target_add_form($form, &$form_state, $target) {
+function target_form($form, &$form_state, $target) {
   $form['machine_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Machine Name'),
@@ -530,24 +583,39 @@ function target_add_form($form, &$form_state, $target) {
 
 
 
-function target_add_form_submit($form, &$form_state) {
+function target_form_submit($form, &$form_state) {
   $target_submission = (object) $form_state['values'];
   field_attach_submit('target', $target_submission, $form, $form_state);
-  $target = target_save($target_submission);
-  $form_state['redirect'] = "target/$target->tid";
+  target_save($target_submission);
+  $form_state['redirect'] = "target/".$target_submission->targetid;
+}
+/**
+ * Save target.
+ */
+function target_save($target) {
+  entity_save('target', $target);
 }
 
-
-function target_save(&$target){
-    return entity_get_controller('target')->save($target);
-  
+/**
+ * Delete single target.
+ */
+function target_delete($target) {
+  entity_delete('target', entity_id('target' ,$target));
 }
 
+/**
+ * Delete multiple targets.
+ */
+function target_delete_multiple($target_ids) {
+  entity_delete_multiple('target', $target_ids);
+}
 
 
 
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
+  
   $array_parents = $form_state['triggering_element']['#array_parents'];
+  dsm('dd',"<pre>".print_r($array_parents,1)."</pre>");
   array_pop($array_parents);
   // Iterate over the form parents to find the element.
   $element = $form;

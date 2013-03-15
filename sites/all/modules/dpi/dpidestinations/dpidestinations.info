@@ -7,5 +7,6 @@ dependencies[] = dpicontenttypes
 
 
 files[] = dpidestinations.api.inc
-files[] = target.controller.inc
+files[] = target.controller.class.inc
+files[] = target.entity.class.inc
 files[] = plugins/views/dpidestinations_plugin_display_targetblock.inc
