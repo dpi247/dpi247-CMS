@@ -4,6 +4,7 @@ package = DPI
 core = 7.x
 
 dependencies[] = dpicontenttypes
+dependencies[] = entity
 
 
 files[] = dpidestinations.api.inc
