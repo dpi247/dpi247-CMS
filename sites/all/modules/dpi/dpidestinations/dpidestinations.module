@@ -360,6 +360,7 @@ function dpidestinations_entity_info(){
   $entities['target']=array(
     'label' => t('Target'),
     // seulement si on utilise le module entity API
+    'exportable'=>TRUE,
     'entity class' => 'TargetEntity',
     'controller class' => 'TargetController',
     'base table' => 'dpidestinations_target',
@@ -367,21 +368,18 @@ function dpidestinations_entity_info(){
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
-    
+  
     'entity keys' => array(
       'id' => 'targetid',
+      'name' => 'machine_name',
+      'label' => 'label',
     ),
+  
     'bundles'=>array(
       'target'=>array(
-        'label' => 'target',
-        'admin' => array(
-          'path' => 'admin/structure/target/manage/target',
-          'real path' => 'admin/structure/types/manage/target',
-          'access arguments' => array('administer content types'),
-        ),
-        ),
       ),
-    'view modes' => array( 
+    ),
+    'view modes' => array(
       'minimal' => array(
         'label' => t('Minimal'),
         'custom settings' => FALSE,
@@ -394,12 +392,61 @@ function dpidestinations_entity_info(){
     //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
     'module'=> 'dpidestinations',
     'access callback' => 'target_access_admin_callback',
-    
+  
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'label' => 'ti',
-      
+  
       'path' => 'admin/structure/target',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      //'file' => 'target.admin.inc',
+      //'controller class' => 'EntityDefaultUIController',
+    ),
+  );
+  
+  
+
+  $entities['target_block']=array(
+    'label' => t('Target Block'),
+    // seulement si on utilise le module entity API
+    'exportable'=>TRUE,
+    'entity class' => 'TargetBlockEntity',
+    'controller class' => 'TargetBlockController',
+    'base table' => 'dpidestinations_targetblock',
+    'fieldable' => TRUE,
+    // Make use the class' label() and uri() implementation by default.
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+  
+    'entity keys' => array(
+      'id' => 'targetblockid',
+     // 'name' => 'machine_name',
+      'label' => 'label',
+    ),
+  
+    'bundles'=>array(
+      'targetblock'=>array(
+      ),
+    ),
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    'module'=> 'dpidestinations',
+    'access callback' => 'targetblock_access_admin_callback',
+  
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'label' => 'ti',
+  
+      'path' => 'admin/structure/targetblock',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       //'file' => 'target.admin.inc',
       //'controller class' => 'EntityDefaultUIController',
@@ -412,7 +459,14 @@ function dpidestinations_entity_info(){
 
 
 function dpidestinations_menu(){
-
+  $items['destination/%destination'] = array(
+    'title callback' => 'destination_view',
+    'title arguments' => array(1),
+    'page callback' => 'destination_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view targets'),
+    'type' => MENU_CALLBACK,
+  );
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
     'title arguments' => array(1),
@@ -442,6 +496,18 @@ function dpidestinations_permission(){
 }
 
 
+
+function dpidestinations_ctools_plugin_directory($module, $plugin) {
+  dsm($module,module);
+  dsm($plugin,plug);
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/content_types';
+  }
+  if ($module == 'page_manager' && $plugin == 'tasks') {
+    return 'plugins/tasks';
+  }
+  
+}
 
 function target_load($tid = NULL, $reset = FALSE){
   $tids = (isset ($tid) ? array($tid) : array());
@@ -528,7 +594,20 @@ function dpidestinations_field_extra_fields() {
   return $return;
 }
 
+function destination_load($destination_id){
+  return taxonomy_term_load($destination_id);
+  
+  
+}
+function destination_view($destination){
+  
+  return 'coco';
+}
+
 function target_access_admin_callback(){
+  return TRUE;
+}
+function targetblock_access_admin_callback(){
   return TRUE;
 }
 
