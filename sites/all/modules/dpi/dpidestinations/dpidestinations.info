@@ -5,6 +5,8 @@ core = 7.x
 
 dependencies[] = dpicontenttypes
 dependencies[] = entity
+dependencies[] = panels
+dependencies[] = devel
 
 
 files[] = dpidestinations.api.inc

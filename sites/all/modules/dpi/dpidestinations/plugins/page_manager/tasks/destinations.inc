@@ -10,16 +10,19 @@ function dpidestinations_destinations_page_manager_tasks() {
     'admin path' => 'destination/%destination',
 
     // Menu hooks so that we can alter the node/%node menu entry to point to us.
-    'hook menu alter' => 'page_manager_destinations_menu_alter',
+    'hook menu alter' => 'dpidestinations_destinations_menu_alter',
 
     // This is task uses 'context' handlers and must implement these to give the
     // handler data it needs.
     'handler type' => 'context',
+      'get arguments' => 'page_manager_term_view_get_arguments',
+      'get context placeholders' => 'page_manager_term_view_get_contexts',
+       
 
     // Allow this to be enabled or disabled:
-    'disabled' => variable_get('page_manager_destinations_disabled', TRUE),
-    'enable callback' => 'page_manager_destinations_enable',
-    'access callback' => 'page_manager_destinations_access_check',
+    'disabled' => variable_get('dpidestinations_destinations_disabled', TRUE),
+    'enable callback' => 'dpidestinations_destinations_enable',
+    'access callback' => 'dpidestinations_destinations_access_check',
   );
 }
 
@@ -29,8 +32,8 @@ function dpidestinations_destinations_page_manager_tasks() {
  * Alter the node edit input so that node edit comes to us rather than the
  * normal node edit process.
  */
-function page_manager_destinations_menu_alter(&$items, $task) {
-  if (variable_get('page_manager_destinations_disabled', TRUE)) {
+function dpidestinations_destinations_menu_alter(&$items, $task) {
+  if (variable_get('dpidestinations_destinations_disabled', TRUE)) {
     return;
   }
   
@@ -38,7 +41,7 @@ function page_manager_destinations_menu_alter(&$items, $task) {
   
   // Override the node edit handler for our purpose.
   if ($callback == 'destination_view') {
-    $items['destination/%destination']['page callback'] = 'page_manager_destinations';
+    $items['destination/%destination']['page callback'] = 'dpidestinations_destinations';
     $items['destination/%destination']['file path'] = $task['path'];
     $items['destination/%destination']['file'] = $task['file'];
   }
@@ -52,39 +55,54 @@ function page_manager_destinations_menu_alter(&$items, $task) {
 
 
 /**
- * Entry point for our overridden site contact.
+ * Entry point for our overridden term view.
  *
  * This function asks its assigned handlers who, if anyone, would like
  * to run with it. If no one does, it passes through to Drupal core's
- * node edit, which is node_page_edit().
+ * term view, which is term_page_view().
  */
-function page_manager_destinations() {
+function dpidestinations_destinations($destination) {
+  // Assign the term name as the page title, just as the original page
+  // callback did.
+  
+  drupal_set_title($destination->name);
+
+  // While we ordinarily should never actually get feeds through here,
+  // just in case
   // Load my task plugin
   $task = page_manager_get_task('destinations');
 
+  // Load the term into a context.
   ctools_include('context');
   ctools_include('context-task-handler');
-  $output = ctools_context_handler_render($task, '', array(), array());
+  $contexts = ctools_context_handler_get_task_contexts($task, '', array($destination));
+  
+  /*
+  if (empty($contexts)) {
+    return drupal_not_found();
+  }
+  */
+
+  $output = ctools_context_handler_render($task, '', $contexts, array($destination->tid));
+  return 'd';
   if ($output !== FALSE) {
     return $output;
   }
-
-  module_load_include('inc', 'contact', 'contact.pages');
-  $function = 'contact_site_form';
+  $function = 'taxonomy_term_page';
   foreach (module_implements('page_manager_override') as $module) {
     $call = $module . '_page_manager_override';
-    if (($rc = $call('contact_site')) && function_exists($rc)) {
+    if (($rc = $call('term_view')) && function_exists($rc)) {
       $function = $rc;
       break;
     }
   }
 
   // Otherwise, fall back.
-  if ($function == 'contact_site_form') {
-    return drupal_get_form($function);
+  if ($function == 'taxonomy_term_page') {
+    module_load_include('inc', 'taxonomy', 'taxonomy.pages');
   }
-  return 'rrf';
-  return $function();
+  return '';
+  return $function($term);
 }
 
 
@@ -92,13 +110,13 @@ function page_manager_destinations() {
 /**
  * Callback to enable/disable the page from the UI.
  */
-function page_manager_destinations_enable($cache, $status) {
-  variable_set('page_manager_destinations_disabled', $status);
+function dpidestinations_destinations_enable($cache, $status) {
+  variable_set('dpidestinations_destinations_disabled', $status);
   // Set a global flag so that the menu routine knows it needs
   // to set a message if enabling cannot be done.
-  dsm('cou');
+  dsm(status,$status);
   if (!$status) {
-    $GLOBALS['page_manager_enabling_destinations'] = TRUE;
+    $GLOBALS['dpidestinations_enabling_destinations'] = TRUE;
   }
 }
 
@@ -114,7 +132,7 @@ function page_manager_destinations_enable($cache, $status) {
  * @return
  *   TRUE if the current user can access the page.
  */
-function page_manager_contact_access_check($task, $subtask_id, $contexts) {
+function dpidestinations_destinations_access_check($task, $subtask_id, $contexts) {
   return TRUE;
 }
 

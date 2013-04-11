@@ -167,6 +167,64 @@ function dpidestinations_schema() {
     ),
     'primary key' => array('targetblockid'),
   );
+ /*
+  $schema['dpidestinations_destinationvariant'] = array (
+    'description' => 'The target entity table',
+    'fields' => array(
+      
+      'page_manager_handlers_did' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+  
+      'pager_override' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'split_flag' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'split_number' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'split_total' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+  
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => ENTITY_CUSTOM,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+  
+    ),
+    'primary key' => array('targetblockid'),
+  );
+  
+  */
 
   return $schema;
 }
