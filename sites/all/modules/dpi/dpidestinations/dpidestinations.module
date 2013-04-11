@@ -3,463 +3,28 @@
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
-
-/**
- * Implements hook_field_info().
- *
- * Provides the description of the field.
- */
-function dpidestinations_field_info() {
-  return array(
-    // We name our field as the associative name of the array.
-    'field_destinations' => array(
-      'label' => t('Destinations'),
-      'description' => t('A destination is a quadruplet of four information that define Where and how a node will be displayed.'),
-      'default_widget' => 'field_destinations_default_widget',
-      'default_formatter' => 'field_destinations_default_formatter',
-    ),
-  );
-}
-
-
-/**
- * Implements hook_field_validate().
- *
- * This hook gives us a chance to validate content that's in our
- * field. If it doesn't validate, we add
- *  our own error notification to the $errors parameter.
- *
- * @see dpidestinations_field_widget_error()
- * @see dpidestinations_field_is_empty()
- */
-function dpidestinations_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
-  //Ici, il n'y a pas lieu de faire le validate car le hook_field_is_emtpy
-  //ne déclenche pas la validation si le field est vide. or dans notre cas,
-  //le hook_field_is_empty check justement la valeur du tid...
-  // mais on laisse ca juste pour illustrer
-/*
-  foreach ($items as $delta => $item) {
-    if (!empty($item['tid'])) {
-      $errors[$field['field_name']][$langcode][$delta][] = array(
-        'error' => 'field_destinations_tid',
-        'message' => t('You must select at least a destination term.'),
-      );
-    }
-  }
-  */
-
-
-}
+module_load_include('inc', 'dpidestinations','dpidestinations.field');
+module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 
 
 
 /**
- * Implements hook_field_is_empty().
- *
- * hook_field_is_emtpy() is where Drupal asks us if this field is empty.
- * Return TRUE if it does not contain data, FALSE if it does. This lets
- * the form API flag an error when required fields are empty.
+ * Implementation of hook_theme()
  */
-function dpidestinations_field_is_empty($item, $field) {
-  if(empty($item['tid']) and empty($item['tid'])){
-    return TRUE;
-  }
-  return FALSE;
-}
-
-/**
- * Implements hook_field_widget_info().
- *
- * We only provide one default widget for the moment.
- * Later we would develop another Ajax based widget.
- *
- * These widget types will eventually show up in hook_field_widget_form,
- * where we will have to flesh them out.
- *
- * @see dpidestinations_field_widget_form()
- */
-function dpidestinations_field_widget_info() {
-  return array(
-    'field_destinations_default_widget' => array(
-      'label' => t('Destination default widget'),
-      'field types' => array('field_destinations'),
-    ),
-  );
-}
-
-/**
- * Implements hook_field_widget_form().
- *
- * hook_widget_form() is where Drupal tells us to create form elements for
- * our field's widget.
- *
- * We provide one form for the moment: field_destinations_default_widget.
- *
- *
- * 'field_destinations_default_widget' define four form element that are simple selectbox
- *
- */
-function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-
-  // Iterate over the form parents to find the element.
-  if(isset($form_state['triggering_element']['#array_parents'])){
-    $array_parents = $form_state['triggering_element']['#array_parents'];
-    array_pop($array_parents);
-
-    $form_state_destinations_values = $form_state["values"];
-    foreach ($array_parents as $name) {
-      $form_state_destinations_values = &$form_state_destinations_values[$name];
-
-    }
-  }
-
-
-  // Get the default destinations used to build the widget form elements, looking
-  // first in the form state, then in the stored value for the field, and then
-  // in the default values of the instance.
-  $destinations = array();
-
-  if (!empty($form_state_destinations_values['tid'])) {
-
-    // Use the value from the form_state if available.
-    $destinations = $form_state_destinations_values;
-  }
-  elseif (!empty($items[$delta]['tid'])) {
-
-    // Else use the saved value for the field.
-    $destinations = $items[$delta];
-
-  }
-  else {
-    // Otherwise use the instance default.
-    $destinations = (array) $instance['default_value'][0];
-
-  }
-  // Generate a specific key used to identify this element to restore a default
-  // value upon AJAX submission regardless of where this element is in the
-  // $form array.
-  $element_key = implode('|', array($element['#entity_type'], $element['#bundle'], $element['#field_name'], $element['#language'], $element['#delta']));
-  // Store the key in the element array as a value so it can be easily retrieved
-  // in context in the $form_state['values'] array in the element validator.
-  $element['element_key'] = array(
-    '#type' => 'value',
-    '#value' => $element_key,
+function dpidestinations_theme() {
+ 
+  $theme['dpidestinations_add_content_modal'] = array(
+    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL,'group' => NULL, 'categories'=> array(), 'column_count' => 2),
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'template' => 'dpidestinations-add-content-modal',
   );
 
-  $tids_options=dpidestinations_api_get_all_destinations_term_available_as_select_options();
-
-  //$widget = $element;
-  $widget['#delta'] = $delta;
-  $widget['#prefix']= '<div id="dropdown-target-replace_'.$delta.'">';
-  $widget['#suffix']= '</div>';
-
-  switch ($instance['widget']['type']) {
-
-    case 'field_destinations_default_widget':
-      // Make this a fieldset with the four fields.
-      $widget += array(
-      '#type' => 'fieldset',
-      '#attributes' => array('class' => array('field-destinations-widget')),
-
-      );
-
-      $widget['tid'] = array(
-        '#type' => 'select',
-        '#options' => $tids_options,
-        '#default_value'=>$destinations['tid'],
-        '#title' => t("Destination's term"),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The destination page where the node will appear'),
-        '#ajax' => array(
-          // When 'event' occurs, Drupal will perform an ajax request in the
-          // background. Usually the default value is sufficient (eg. change for
-          // select elements), but valid values include any jQuery event,
-          // most notably 'mousedown', 'blur', and 'submit'.
-          // 'event' => 'change',
-          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method'=>'replace',
-        ),
-      );
-      $widget['target'] = array(
-        '#type' => 'select',
-        '#options' => dpidestinations_api_get_all_targets_available_for_destination_tid($destinations['tid']),
-        '#default_value'=> $destinations['target'],
-        '#title' => t("Destination's target"),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('Define the target where the node will appear in the page'),
-        '#ajax' => array(
-          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method'=>'replace',
-        ),
-      );
-      $widget['layout'] = array(
-        '#type' => 'select',
-        '#options' => dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'],$destinations['target']),
-        '#default_value'=> $destinations['layout'],
-        '#title' => t("Destination's layout"),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The way your article will be render in the target'),
-        '#ajax' => array(
-          'callback' => 'dpidestination_ajax_callbacks_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method'=> 'replace',
-        ),
-      );
-      $widget['rank'] = array(
-        '#type' => 'select',
-        '#options' => dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($destinations['tid'],$destinations['target']),
-        '#default_value'=> $destinations['rank'],
-        '#title' => t("Destination's rank"),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The position of the article in the target'),
-      );
-      $widget['time_rank'] = array(
-        '#type' => 'value',
-        "#value"=> microtime(TRUE),
-      );
-
-      break;
-  }
-  $element = $widget;
-  $element['#dpidestinationsfield'] = TRUE;
-
-  return $element;
+    return $theme;
 }
-
-
-
-/**
- * Implements hook_field_formatter_info().
- *
- * We need to tell Drupal that we have one or more formatters
- * for this field. The default one will display all the information of the quadruplet
- * that define a destination
- * each other will display only one information of the quadruplet
- *
- * @see fdpidestinations_field_formatter_view()
- */
-function dpidestinations_field_formatter_info() {
-  return array(
-    // This formatter just displays the hex value in the color indicated.
-    'field_destinations_default_formatter' => array(
-      'label' => t('Simple text-based formatter of the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    'field_destinations_tid_formatter' => array(
-      'label' => t('Simple text-based formatter of the term of the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    'field_destinations_tid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    'field_destinations_tid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name  of the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    'field_destinations_main_tid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    'field_destinations_main_tid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
-    ),
-    //@todo: http://drupal.stackexchange.com/questions/34823/what-does-the-property-type-key-do-in-hook-field-info/34826#34826
-  );
-}
-
-/**
- * Implements hook_field_formatter_view().
- *
- * Two formatters are implemented.
- * - field_example_simple_text just outputs markup indicating the color that
- *   was entered and uses an inline style to set the text color to that value.
- * - field_example_color_background does the same but also changes the
- *   background color of div.region-content.
- *
- * @see field_example_field_formatter_info()
- */
-function dpidestinations_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
-
-
-  switch ($display['type']) {
-    // This formatter simply outputs the field as text and with a color.
-
-    case 'field_destinations_default_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'].'-'.$item['target'].'-'.$item['layout'].'-'.$item['rank'],
-        );
-      }
-      break;
-    case 'field_destinations_tid_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'],
-        );
-      }
-      break;
-    case 'field_destinations_tid_name_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => taxonomy_term_title($term),
-        );
-      }
-      break;
-    case 'field_destinations_tid_name_linked_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-        );
-      }
-
-      break;
-    case 'field_destinations_main_tid_name_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => taxonomy_term_title($term),
-      );
-      break;
-    case 'field_destinations_main_tid_name__linked_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-      );
-      break;
-
-  }
-
-  return $element;
-}
-
-
-/**
- * Implements hook_entity_info().
- */
-function dpidestinations_entity_info(){
-  $entities=array();
-
-  $entities['target']=array(
-    'label' => t('Target'),
-    // seulement si on utilise le module entity API
-    'exportable'=>TRUE,
-    'entity class' => 'TargetEntity',
-    'controller class' => 'TargetController',
-    'base table' => 'dpidestinations_target',
-    'fieldable' => TRUE,
-    // Make use the class' label() and uri() implementation by default.
-    'label callback' => 'entity_class_label',
-    'uri callback' => 'entity_class_uri',
-  
-    'entity keys' => array(
-      'id' => 'targetid',
-      'name' => 'machine_name',
-      'label' => 'label',
-    ),
-  
-    'bundles'=>array(
-      'target'=>array(
-      ),
-    ),
-    'view modes' => array(
-      'minimal' => array(
-        'label' => t('Minimal'),
-        'custom settings' => FALSE,
-      ),
-      'full' => array(
-        'label' => t('Full'),
-        'custom settings' => TRUE,
-      ),
-    ),
-    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-    'module'=> 'dpidestinations',
-    'access callback' => 'target_access_admin_callback',
-  
-    // Enable the entity API's admin UI.
-    'admin ui' => array(
-      'label' => 'ti',
-  
-      'path' => 'admin/structure/target',
-      // OPTIONAL- See "Customize the User Interface" below if you set.
-      //'file' => 'target.admin.inc',
-      //'controller class' => 'EntityDefaultUIController',
-    ),
-  );
-  
-  
-
-  $entities['target_block']=array(
-    'label' => t('Target Block'),
-    // seulement si on utilise le module entity API
-    'exportable'=>TRUE,
-    'entity class' => 'TargetBlockEntity',
-    'controller class' => 'TargetBlockController',
-    'base table' => 'dpidestinations_targetblock',
-    'fieldable' => TRUE,
-    // Make use the class' label() and uri() implementation by default.
-    'label callback' => 'entity_class_label',
-    'uri callback' => 'entity_class_uri',
-  
-    'entity keys' => array(
-      'id' => 'targetblockid',
-     // 'name' => 'machine_name',
-      'label' => 'label',
-    ),
-  
-    'bundles'=>array(
-      'targetblock'=>array(
-      ),
-    ),
-    'view modes' => array(
-      'minimal' => array(
-        'label' => t('Minimal'),
-        'custom settings' => FALSE,
-      ),
-      'full' => array(
-        'label' => t('Full'),
-        'custom settings' => TRUE,
-      ),
-    ),
-    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-    'module'=> 'dpidestinations',
-    'access callback' => 'targetblock_access_admin_callback',
-  
-    // Enable the entity API's admin UI.
-    'admin ui' => array(
-      'label' => 'ti',
-  
-      'path' => 'admin/structure/targetblock',
-      // OPTIONAL- See "Customize the User Interface" below if you set.
-      //'file' => 'target.admin.inc',
-      //'controller class' => 'EntityDefaultUIController',
-    ),
-  );
-  return $entities;
-  
-}
-
-
 
 function dpidestinations_menu(){
-  $items['destination/%destination'] = array(
+  $items['destination/%destinationterm'] = array(
     'title callback' => 'destination_view',
     'title arguments' => array(1),
     'page callback' => 'destination_view',
@@ -495,208 +60,31 @@ function dpidestinations_permission(){
   );
 }
 
-
+function dpidestinations_panels_display_save($display){
+  foreach($display->content as &$pane){
+    if($pane->type =='targetblock'){
+      $pane->configuration['override_title_text']='rr';
+      $pane->configuration['override_title']=1;
+    }
+    
+  }
+}
 
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
-    return 'plugins/content_types';
+    return 'plugins/ctools/content_types';
   }
   if ($module == 'page_manager' && $plugin == 'tasks') {
-    return 'plugins/tasks';
+    return 'plugins/page_manager/tasks';
+  }
+
+  if ($module == 'page_manager' && $plugin == 'task_handlers') {
+    return 'plugins/page_manager/task_handlers';
+  }
+  if ($module == 'panels' && $plugin == 'display_renderers') {
+    return 'plugins/panels/display_renderers';
   }
   
-}
-
-function target_load($tid = NULL, $reset = FALSE){
-  dsm(ttt);
-  $tids = (isset ($tid) ? array($tid) : array());
-  $target = target_load_multiple($tids, $reset);
-  return $target ? reset ($target) : FALSE;
-}
-
-function target_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-  return entity_load('target', $tids, $conditions, $reset);
-}
-
-
-function dpidestinations_field_extra_fields() {
-  $return = array();
-  $return['target']['target'] = array(
-    'form' => array(
-      'targetid' => array(
-        'label' => t('Target Id'),
-        'description' => t('Unique ID of the target from DB\'s primary key'),
-        'weight' => 0,
-      ),
-      'machine_name' => array(
-          'label' => t('Machine name'),
-          'description' => t('Machine name\'s target'),
-        'weight' => 0,
-        ),
-      'label' => array(
-        'label' => t('Label'),
-        'description' => t('Human\s readable label'),
-        'weight' => 0,
-      ),
-      'description' => array(
-        'label' => t('Description'),
-        'description' => t('Description\'s target'),
-        'weight' => 0,
-      ),
-      'view_name' => array(
-        'label' => t('View name'),
-        'description' => t('The view associated to the target'),
-        'weight' => 0,
-      ), 
-      'view_id' => array(
-          'label' => t('View Display'),
-          'description' => t('The view display associated to the target'),
-          'weight' => 0,
-        ),
-    ),
-    'display'=>array(
-      'targetid' => array(
-        'label' => t('Target Id'),
-        'description' => t('Unique ID of the target from DB\'s primary key'),
-        'weight' => 0,
-      ),
-      'machine_name' => array(
-        'label' => t('Machine name'),
-        'description' => t('Machine name\'s target'),
-        'weight' => 0,
-      ),
-      'label' => array(
-        'label' => t('Label'),
-        'description' => t('Human\s readable label'),
-        'weight' => 0,
-      ),
-      'description' => array(
-        'label' => t('Description'),
-        'description' => t('Description\'s target'),
-        'weight' => 0,
-      ),
-      'view_name' => array(
-        'label' => t('View name'),
-        'description' => t('The view associated to the target'),
-        'weight' => 0,
-      ),
-      'view_id' => array(
-        'label' => t('View Display'),
-        'description' => t('The view display associated to the target'),
-        'weight' => 0,
-      ),
-      ),
-    
-    
-  );
-
-  return $return;
-}
-
-function destination_load($destination_id){
-  return taxonomy_term_load($destination_id);
-  
-  
-}
-function destination_view($destination){
-  
-  return 'coco';
-}
-
-function target_access_admin_callback(){
-  return TRUE;
-}
-function targetblock_access_admin_callback(){
-  return TRUE;
-}
-
-function target_page_title($target){
-  return $target->machine_name;
-}
-
-function target_view($target, $view_mode = 'full'){
-  return $target->view();
-}
-
-
-
-
-
-function target_form($form, &$form_state, $target) {
-
-  $form['targetid'] = array(
-    '#type' => 'value',
-    '#value'=> $target->targetid,
-  );
-  $form['machine_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Machine Name'),
-    '#default_value'=> $target->machine_name,
-    '#required' => TRUE,
-  );
-  $form['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#default_value'=> $target->label,
-    '#required' => TRUE,
-  );
-  $form['description'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Description'),
-    '#default_value'=> $target->description,    
-    '#required' => TRUE,
-  );
-  $form['view_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View Name'),
-    '#default_value'=> $target->view_name,
-    '#required' => TRUE,
-  );
-  $form['view_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View Id'),
-    '#default_value'=> $target->view_id,
-    '#required' => TRUE,
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-
-  field_attach_form('target', $target, $form, $form_state);
-
-  return $form;
-}
-
-
-
-function target_form_submit($form, &$form_state) {
-  $target_submission = (object) $form_state['values'];
-  field_attach_submit('target', $target_submission, $form, $form_state);
-  target_save($target_submission);
-  $form_state['redirect'] = "target/".$target_submission->targetid;
-}
-/**
- * Save target.
- */
-function target_save($target) {
-  //dsm($target);
-  entity_save('target', $target);
-}
-
-/**
- * Delete single target.
- */
-function target_delete($target) {
-  entity_delete('target', entity_id('target' ,$target));
-}
-
-/**
- * Delete multiple targets.
- */
-function target_delete_multiple($target_ids) {
-  entity_delete_multiple('target', $target_ids);
 }
 
 
@@ -704,7 +92,6 @@ function target_delete_multiple($target_ids) {
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
   
   $array_parents = $form_state['triggering_element']['#array_parents'];
-  dsm('dd',"<pre>".print_r($array_parents,1)."</pre>");
   array_pop($array_parents);
   // Iterate over the form parents to find the element.
   $element = $form;
@@ -721,6 +108,18 @@ function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
   return $element;
 
 
+}
+
+
+
+function destinationterm_load($destination_id){
+  return 1;
+  return taxonomy_term_load($destination_id);
+
+
+}
+function destination_view($destination){
+  return 'You need to activate the page manager';
 }
 
 
