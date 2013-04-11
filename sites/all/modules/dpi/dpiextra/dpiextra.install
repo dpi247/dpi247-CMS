@@ -1,0 +1,39 @@
+<?php
+function dpiextra_schema() {
+
+	$schema['dpiextra_remotehtml'] = array (
+			'description' => 'The remote html entity table',
+			'fields' => array(
+					'rid' => array(
+							'description' => 'Primary key for our table of remotehtml',
+							'type' => 'serial',
+							'size' => 'big',
+							'unsigned' => TRUE,
+							'not null' => TRUE,
+					),
+					'name' => array(
+							'description' => 'The name of our html remote adresse',
+							'type' => 'varchar',
+							'length' => '255',
+							'not null' => TRUE,
+					),
+					'html_adresse' => array(
+							'description' => 'The remote html adresse',
+							'type' => 'varchar',
+							'length' => '255',
+							'not null' => TRUE,	
+					),
+					
+					'refresh_time' => array(
+							'description' => 'The remote html refresh time',
+							'type' => 'int',
+							'not null' => TRUE,
+					),
+			),
+			'primary key' => array('rid'),
+	);
+	//create a table for the remotehtml cache
+ 	$schema['cache_remotehtml'] = drupal_get_schema_unprocessed('system', 'cache');
+	
+	return $schema;
+}

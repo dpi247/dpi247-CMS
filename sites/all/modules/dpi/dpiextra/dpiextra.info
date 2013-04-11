@@ -1,0 +1,12 @@
+core = "7.x"
+description = "Dpi extra plugins containing all content types CTools created by Dpi and the most_view view"
+features[views][] = "most_view"
+features[views_api][] = "api:2"
+name = "DPI extra"
+package = DPI
+
+dependencies[] = entity
+
+files[] = remotehtml.controller.class.inc
+files[] = remotehtml.entity.class.inc
+files[] = remotehtml.ui.inc

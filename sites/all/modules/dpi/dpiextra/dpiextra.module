@@ -1,0 +1,305 @@
+<?php 
+
+/**
+ * Implementation of hook_menu()
+ * 
+ * @return $items
+ */
+function dpiextra_menu(){
+	
+	$items['remotehtml/%remotehtml'] = array(
+			'title callback' => 'remotehtml_view',
+			'title arguments' => array(1),
+			'page callback' => 'remotehtml_view',
+			'page arguments' => array(1),
+			'access arguments' => array('view remotehtml'),
+			'type' => MENU_CALLBACK,
+	);
+	$items['remotehtml/%remotehtml'] = array(
+			'title callback' => 'remotehtml_page_title',
+			'title arguments' => array(1),
+			'page callback' => 'remotehtml_view',
+			'page arguments' => array(1),
+			'access arguments' => array('view remotehtml'),
+			'type' => MENU_CALLBACK,
+	);
+	return $items;
+}
+
+/**
+ * Implementation of hook_entity_info()
+ *
+ * @return $entities
+ * an array of definition
+ */
+function dpiextra_entity_info(){
+
+	$entities = array();
+	$entities['remotehtml'] = array(
+			'label' => t('Remote Html'),
+			'entity class' => 'RemoteHtmlEntity',
+			'controller class' => 'RemotehtmlController',
+			'base table' => 'dpiextra_remotehtml',
+			'fieldable' => True,
+			'label callback' => 'entity_class_label',
+			'uri callback' => 'entity_class_uri',
+			'entity keys' => array(
+					'id'=>'rid',
+					'name' => 'name',
+						
+			),
+			
+			'bundles' => array(
+					'remotehtml'=>array(
+					),
+			),
+			
+			'view modes' => array(
+					'minimal' => array(
+							'label' => t('Minimal'),
+							'custom settings' => FALSE,
+					),
+					'full' => array(
+							'label' => t('Full'),
+							'custom settings' => TRUE,
+					),
+			),
+				
+			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+			'module'=> 'dpiextra',
+			'access callback' => 'remotehtml_access_admin_callback',
+				
+			// Enable the entity API's admin UI.
+			'admin ui' => array(
+					//'label' => 'ri',
+						
+					'path' => 'admin/structure/remotehtml',
+					// OPTIONAL- See "Customize the User Interface" below if you set.
+					'file' => 'includes/remotehtml.admin.inc',
+					//'controller class' => 'remotehtmlUIController',
+			),
+	);
+	return $entities;
+}
+
+
+
+function remotehtml_access_admin_callback(){
+
+	return TRUE;
+}
+
+/**
+ * load an entity with this id
+ *
+ * @param $tid
+ * @param $reset
+ */
+function remotehtml_load($tid = NULL, $reset = FALSE){
+
+	$tids = (isset ($tid) ? array($tid) : array());
+
+	$remotehtml = remotehtml_load_multiple($tids, $reset);
+
+	return $remotehtml ? reset ($remotehtml) : FALSE;
+}
+
+/**
+ * retrieve multiple entities
+ *
+ * @param $tids
+ * their ids
+ * @param $conditions
+ *
+ * @param $reset
+ *
+ * @return object
+ * return the entities
+ */
+function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
+
+	return entity_load('remotehtml', $tids, $conditions, $reset);
+}
+
+/**
+ * this function verify the validity of an url
+ *
+ * @param $url
+ * the url
+ * @return $isGood
+ * return a boolean
+ */
+function remotehtml_url_verification($url){
+
+	if (isset($url))
+	{
+		//http request on the url
+		$uri_response = drupal_http_request($url, array(), 'GET', NULL);
+		if ($uri_response->status_message != 'OK')
+		{
+			$isGood = false;
+		}
+		else
+		{
+			$isGood = true;
+		}
+	}
+
+	return $isGood;
+}
+
+/**
+ * return name of the given entities
+ *
+ * @param $remotehtml
+ * the given entities (remote html)
+ */
+function remotehtml_page_title($remotehtml){
+
+	return $remotehtml->name;
+}
+
+
+/**
+ * Delete single entity.
+ *
+ * @param $remotehtml
+ * the entity
+ */
+function remotehtml_delete($remotehtml) {
+
+	entity_delete('remotehtml', entity_id('remotehtml' ,$remotehtml));
+}
+
+/**
+ * Delete multiple entities.
+ *
+ * @param $remotehtml_ids
+ * their ids
+ */
+function remotehtml_delete_multiple($remotehtml_ids) {
+
+	entity_delete_multiple('remotehtml', $remotehtml_ids);
+}
+
+/**
+ * Save an entity
+ *
+ * @param $remotehtml
+ */
+function remotehtml_save(&$remotehtml){
+
+	return entity_save('remotehtml', $remotehtml);
+}
+
+/**
+ * Generate an array for rendering the given entities
+ *
+ * @param $remotehtml
+ * the given entities
+ * @param $view_mode
+ */
+function remotehtml_view($remotehtml, $view_mode = 'full'){
+
+	return $remotehtml->view();
+}
+
+/**
+ *
+ * @param $remotehtml
+ * @param $view_mode
+ */
+function remotehtml_page_view($remotehtml, $view_mode = 'full'){
+
+	$remotehtml->content = array();
+
+	// Build fields content.
+	field_attach_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml), $view_mode);
+	entity_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml));
+	$remotehtml->content += field_attach_view('remotehtml', $remotehtml, $view_mode);
+
+	return $remotehtml->content;
+}
+
+/**
+ * Implementation of permission
+ * 
+ * @return array 
+ */
+function dpiextra_permission(){
+	
+	return array(
+			'administer remotehtml' =>  array(
+					'title' => t('Administer remotehtml'),
+					'restrict access' => TRUE,
+			),
+			'view remotehtml' => array(
+					'title' => t('View remotehtml'),
+			)
+	);
+}
+
+
+/** 
+ * Create a new object for the given $table.
+ *
+ * @param $table
+ *   The name of the table to use to retrieve $schema values. This table
+ *   must have an 'export' section containing data or this function
+ *   will fail.
+ * @param $plugin_name
+ *   The name of the concerned plugin.
+ * @param $set_defaults
+ *   If TRUE, which is the default, then default values will be retrieved
+ *   from schema fields and set on the object.
+ *
+ * @return
+ *   The loaded object.
+ */
+function dpiextra_newctoolsexport($table, $plugin_name, $set_defaults = TRUE) {
+	
+	$schema = ctools_export_get_schema($table);
+	
+	$export = $schema['export'];
+
+	if (!empty($export['create callback']) && function_exists($export['create callback'])) 
+	{
+		return $export['create callback']($plugin_name, $set_defaults);
+	}
+	else 
+	{
+		return ctools_export_new_object($table, $set_defaults);
+	}
+}
+
+/**
+ * Implements hook_field_is_empty().
+ *
+ * hook_field_is_emtpy() is where Drupal asks us if this field is empty.
+ * Return TRUE if it does not contain data, FALSE if it does. This lets
+ * the form API flag an error when required fields are empty.
+ */
+function dpiextra_field_is_empty($item, $field) {
+	
+	if(empty($item['tid']) and empty($item['tid']))
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+/**
+ * Implementation of ctools_plugin_directory()
+ * 
+ * @param $module
+ * @param $plugin
+ * @return string
+ */
+function dpiextra_ctools_plugin_directory($module, $plugin) {
+
+	if ($module == 'ctools' && $plugin == 'content_types') 
+	{
+		return 'plugins/content_types';
+	}
+
+}
