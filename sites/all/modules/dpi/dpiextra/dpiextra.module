@@ -1,5 +1,8 @@
 <?php 
 
+//load all entity function for remotehtml and custom content
+module_load_include('inc', 'dpiextra','dpiextra.entity');
+
 /**
  * Implementation of hook_menu()
  * 
@@ -23,202 +26,134 @@ function dpiextra_menu(){
 			'access arguments' => array('view remotehtml'),
 			'type' => MENU_CALLBACK,
 	);
+	
+	$items['custom_content/%custom_content'] = array(
+			'title callback' => 'custom_content_view',
+			'title arguments' => array(1),
+			'page callback' => 'custom_content_view',
+			'page arguments' => array(1),
+			'access arguments' => array('view custom content'),
+			'type' => MENU_CALLBACK,
+	);
+	$items['custom_content/%custom_content'] = array(
+			'title callback' => 'custom_content_page_title',
+			'title arguments' => array(1),
+			'page callback' => 'custom_content_view',
+			'page arguments' => array(1),
+			'access arguments' => array('view custom content'),
+			'type' => MENU_CALLBACK,
+	);
+	
+	$items['dpiextra/custom_content/form/%/ajax'] = array(
+			'page callback'    => 'dpiextra_ajax_custom_contentform',
+			'access arguments' => array('access content'),
+			'type'             => MENU_CALLBACK,
+			'page arguments'   => array(3),
+	);
+	
+	$items['dpiextra/custom_content/getversion/%/ajax'] = array(
+			'page callback'    => 'dpiextra_ajax_custom_content_getversion',
+			'access arguments' => array('access content'),
+			'type'             => MENU_CALLBACK,
+			'page arguments'   => array(3),
+	);
+
+	$items['dpiextra/custom_content/setdefault/%/ajax'] = array(
+			'page callback'    => 'dpiextra_ajax_custom_content_set_revision_default',
+			'access arguments' => array('access content'),
+			'type'             => MENU_CALLBACK,
+			'page arguments'   => array(3),
+	);
+	
 	return $items;
 }
 
 /**
- * Implementation of hook_entity_info()
- *
- * @return $entities
- * an array of definition
+ * Callback in ajax, send the form for the custom content
+ *  @param $type_form
+ *  type of form (version or custom content)
  */
-function dpiextra_entity_info(){
+function dpiextra_ajax_custom_contentform($type_form){
 
-	$entities = array();
-	$entities['remotehtml'] = array(
-			'label' => t('Remote Html'),
-			'entity class' => 'RemoteHtmlEntity',
-			'controller class' => 'RemotehtmlController',
-			'base table' => 'dpiextra_remotehtml',
-			'fieldable' => True,
-			'label callback' => 'entity_class_label',
-			'uri callback' => 'entity_class_uri',
-			'entity keys' => array(
-					'id'=>'rid',
-					'name' => 'name',
-						
-			),
-			
-			'bundles' => array(
-					'remotehtml'=>array(
-					),
-			),
-			
-			'view modes' => array(
-					'minimal' => array(
-							'label' => t('Minimal'),
-							'custom settings' => FALSE,
-					),
-					'full' => array(
-							'label' => t('Full'),
-							'custom settings' => TRUE,
-					),
-			),
-				
-			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-			'module'=> 'dpiextra',
-			'access callback' => 'remotehtml_access_admin_callback',
-				
-			// Enable the entity API's admin UI.
-			'admin ui' => array(
-					//'label' => 'ri',
-						
-					'path' => 'admin/structure/remotehtml',
-					// OPTIONAL- See "Customize the User Interface" below if you set.
-					'file' => 'includes/remotehtml.admin.inc',
-					//'controller class' => 'remotehtmlUIController',
-			),
-	);
-	return $entities;
-}
-
-
-
-function remotehtml_access_admin_callback(){
-
-	return TRUE;
-}
-
-/**
- * load an entity with this id
- *
- * @param $tid
- * @param $reset
- */
-function remotehtml_load($tid = NULL, $reset = FALSE){
-
-	$tids = (isset ($tid) ? array($tid) : array());
-
-	$remotehtml = remotehtml_load_multiple($tids, $reset);
-
-	return $remotehtml ? reset ($remotehtml) : FALSE;
-}
-
-/**
- * retrieve multiple entities
- *
- * @param $tids
- * their ids
- * @param $conditions
- *
- * @param $reset
- *
- * @return object
- * return the entities
- */
-function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-
-	return entity_load('remotehtml', $tids, $conditions, $reset);
-}
-
-/**
- * this function verify the validity of an url
- *
- * @param $url
- * the url
- * @return $isGood
- * return a boolean
- */
-function remotehtml_url_verification($url){
-
-	if (isset($url))
-	{
-		//http request on the url
-		$uri_response = drupal_http_request($url, array(), 'GET', NULL);
-		if ($uri_response->status_message != 'OK')
-		{
-			$isGood = false;
-		}
-		else
-		{
-			$isGood = true;
-		}
+	module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
+	ctools_include('ajax');
+	ctools_include('modal');
+	ctools_modal_add_js();
+	ctools_add_js('ajax-responder');
+	
+	$commands = array();
+	if ($type_form == 'custom'){
+		$untype = 'version';
+	} elseif ($type_form == 'version'){
+		$untype = 'custom';
 	}
 
-	return $isGood;
+	$commands[] = ctools_ajax_command_attr('#'.$untype.'_form', 'style', 'display:none;');
+	$commands[] = ctools_ajax_command_attr('#'.$type_form.'_form', 'style', 'display:block;');
+	$commands[] = ajax_command_html('.messages status', theme('status_messages'));
+	$commands[] = ajax_command_html('.messages warning', theme('status_messages'));
+	$commands[] = ajax_command_html('.messages error', theme('status_messages'));
+	$commands[] = ctools_ajax_command_attr('#'.$type_form, 'class', 'active');
+	$commands[] = ctools_ajax_command_attr('#'.$untype, 'class', '');
+
+	print ajax_render($commands);
+	exit;
+}
+/**
+ * this function set the revision by default
+ * 
+ * @param $revision_id
+ * The revision id
+ */
+function dpiextra_ajax_custom_content_set_revision_default($revision_id){
+	$typeEntity = 'custom_content';
+	 $entity_revision = entity_revision_load($typeEntity, $revision_id);
+	
+	if(!entity_revision_is_default($typeEntity, $entity_revision)){
+		$customContent_submission->is_new = FALSE;
+		$customContent_submission->is_new_revision = FALSE;
+		entity_revision_set_default($typeEntity, $entity_revision);
+		entity_save($typeEntity, $entity_revision);
+		drupal_set_message(t('the revision has been set by default'),'status');
+	}
+	else
+	{
+		drupal_set_message(t('the revision is already the default revision'),'error');
+	}
+	
+	dpiextra_ajax_custom_contentform('version');
 }
 
-/**
- * return name of the given entities
- *
- * @param $remotehtml
- * the given entities (remote html)
- */
-function remotehtml_page_title($remotehtml){
-
-	return $remotehtml->name;
-}
-
 
 /**
- * Delete single entity.
- *
- * @param $remotehtml
- * the entity
+ * Callback in ajax, display the content of the revision
+ *  
+ *  @param $revision_id
+ *  revision to display
  */
-function remotehtml_delete($remotehtml) {
+function dpiextra_ajax_custom_content_getversion($revision_id){
+	
+	module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
+	ctools_include('ajax');
+	ctools_include('modal');
+	ctools_modal_add_js();
+	ctools_add_js('ajax-responder');
+	
+	$commands = array();
+	$revision = entity_revision_load('custom_content', $revision_id);
 
-	entity_delete('remotehtml', entity_id('remotehtml' ,$remotehtml));
-}
+	$content  = '<textarea class = "form-textarea resizable textarea-processed" rows="5" cols = "60">'.$revision->body.'</textarea>';
+	$content .= '<div>'.ctools_ajax_text_button(t('Switch back to this revision'), 'dpiextra/custom_content/setdefault/'.$revision_id.'/ajax', t('Switch')).'</div>';
+	$commands[] = ajax_command_html('.messages status', theme('status_messages'));
+	$commands[] = ajax_command_html('.messages warning', theme('status_messages'));
+	$commands[] = ajax_command_html('.messages error', theme('status_messages'));
+	$commands[] = ajax_command_html('#dpiextra_version', $content);
+	$commands[] = ctools_ajax_command_attr('.dpiextra_version_list', 'style', 'font-weight:none');
+	$commands[] = ctools_ajax_command_attr('#dpiextra_version_'.$revision_id, 'style', 'font-weight:bold');
+	
+	print ajax_render($commands);
+	exit;
 
-/**
- * Delete multiple entities.
- *
- * @param $remotehtml_ids
- * their ids
- */
-function remotehtml_delete_multiple($remotehtml_ids) {
-
-	entity_delete_multiple('remotehtml', $remotehtml_ids);
-}
-
-/**
- * Save an entity
- *
- * @param $remotehtml
- */
-function remotehtml_save(&$remotehtml){
-
-	return entity_save('remotehtml', $remotehtml);
-}
-
-/**
- * Generate an array for rendering the given entities
- *
- * @param $remotehtml
- * the given entities
- * @param $view_mode
- */
-function remotehtml_view($remotehtml, $view_mode = 'full'){
-
-	return $remotehtml->view();
-}
-
-/**
- *
- * @param $remotehtml
- * @param $view_mode
- */
-function remotehtml_page_view($remotehtml, $view_mode = 'full'){
-
-	$remotehtml->content = array();
-
-	// Build fields content.
-	field_attach_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml), $view_mode);
-	entity_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml));
-	$remotehtml->content += field_attach_view('remotehtml', $remotehtml, $view_mode);
-
-	return $remotehtml->content;
 }
 
 /**
@@ -302,4 +237,53 @@ function dpiextra_ctools_plugin_directory($module, $plugin) {
 		return 'plugins/content_types';
 	}
 
+}
+
+
+/**
+ * Get all the versions of a custom content type
+ *
+ * @param $id
+ * the id of the custom content type
+ *
+ * @return
+ * an array whith all the versions of the custom content type
+ */
+function dpiextra_custom_content_type_getrevision($id){
+	$items = array();
+	
+	if ($id !== NULL) {
+		$result = db_query("SELECT *
+    					        FROM {dpiextra_custom_content_revision} r
+    				            WHERE r.cid = :cid", array(':cid' => $id));
+		foreach($result as $revision){
+			$items[] = $revision;
+		}
+	}
+	return $items;
+}
+
+
+
+/**
+ *  Implémentation du hook_theme();
+ */
+function dpiextra_theme(&$var) {
+
+	$path = drupal_get_path('module', 'dpiextra');
+	$base = array(
+			'file' => 'theme.inc',
+			'path' => "$path/theme",
+	);
+
+	return array(
+
+			'custom_content_form' => $base + array(
+					'render element' => 'form',
+			),
+
+			'dpiextra_custom_content_type_listversion' => $base + array(
+					'arguments' => array('versions' => NULL),
+			),
+	);
 }

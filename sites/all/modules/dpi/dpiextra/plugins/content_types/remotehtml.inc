@@ -30,7 +30,7 @@ function dpiextra_remotehtml_content_type_content_types(){
 	foreach($results as $record)
 	{
 		$remotehtml[$record->name]= array(
-			'title' => t($record->name),
+			'title' => t('remotehtml : '.$record->name),
 			'rid' => $record->rid,
 			'description' => t(''),
 			//'required context' => new ctools_context_required(t('Destination'), 'destination'),
@@ -50,7 +50,7 @@ function dpiextra_remotehtml_content_type_content_types(){
 	    'all contexts'   => TRUE,
 	    //'check editable' => 'wallyextra_custom_version_content_type_editable',
 	  );
-	//dsm($remotehtml);
+	
 	return  $remotehtml;
 }
 /**
@@ -61,40 +61,28 @@ function dpiextra_remotehtml_content_type_content_types(){
  * @return $form
  */
 function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
-	//dsm($form_state,build_build);
-	/*if(isset($_POST['html_adresse']))
-	{
+
+	if(empty($form_state['input']['name'])){
 		$entity = remotehtml_load($form_state['subtype']['rid']);
-		$entity->name = $_POST['name'];
-		$entity->html_adresse = $_POST['html_adresse'];
-		$entity->refresh_time = $_POST['refresh_time'];
+		$form_state['build_info']['args'][] = $entity;
 	}
 	else
-	{*/if(empty($form_state['input']['name'])){
-		$entity = remotehtml_load($form_state['subtype']['rid']);
+	{
+		$form_state['build_info']['args'][] = $form_state['input'];
 	}
-	$a=rand();
-	$form_state["toto_ $a"]=1;
+
 	$tempForm = $form;
 
-	//module_load_include('inc', 'dpiextra','includes/remotehtml.admin');
-	//$form_state = form_state_defaults();
-	//$form_state = array();
-	$form_state['build_info']['args'][] = $entity;
-	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/remotehtml.admin');
 	
-	dsm($form_state,'form state default');
 	
-	//$formFromRemotehtml = drupal_build_form('remotehtml_form', $form_state2);
+	//$formFromRemotehtml = drupal_retrieve_form('remotehtml_form', $form_state);
 	$formFromRemotehtml = drupal_build_form('remotehtml_form',$form_state);
 	//$formFromRemotehtml3 = entity_ui_get_form('remotehtml',$entity,'edit',$form_state);
 	
-	//dsm($formFromRemotehtml);
 	$form = $formFromRemotehtml;
 
 	$form['buttons'] = $tempForm['buttons'];
-	dsm($form_state['build_info']['args'][0],'remotehtml form');
 
 	return $form;
 	
@@ -121,7 +109,6 @@ function dpiextra_remotehtml_get_all(){
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_submit($form, $form_state){
-	dsm($form_state,build_aftrer);
 	$remotehtml_submission = (object) $form_state['values'];
 	remotehtml_save($remotehtml_submission);
 	//$form_state['conf']['url'] = $form_state['values']['html_adresse']; 
@@ -142,9 +129,7 @@ function dpiextra_remotehtml_content_type_render($subtype, $conf, $panel_args, $
 	$block = new stdClass();
 	$block->module = 'dpiextra';
 	$block->title = 'HTML Block';
-	dsm($conf);
-	dsm($subtype);
-	dsm($panel_args);
+
 	//$htmlblock = dpiextra_remotehtml_get_cache_or_create('cache_remotehtml',$conf);
 	//get html of the url
 	$block->content = file_get_contents($conf['url']);;
@@ -152,12 +137,11 @@ function dpiextra_remotehtml_content_type_render($subtype, $conf, $panel_args, $
 	return $block;
 }
 function dpiextra_remotehtml_content_type_edit_form_validate($form, $form_state){
-	//dsm($form_state);
+
 	//return TRUE;
-	dsm('validate');
+
 	$remotehtml_submission = (object) $form_state['values'];
 
-	dsm($remotehtml_submission->html_adresse);
 	//validate url
 	if(!remotehtml_url_verification($remotehtml_submission->html_adresse))
 	{

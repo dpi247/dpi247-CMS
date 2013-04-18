@@ -7,6 +7,8 @@ package = DPI
 
 dependencies[] = entity
 
-files[] = remotehtml.controller.class.inc
-files[] = remotehtml.entity.class.inc
+files[] = entity_controller/remotehtml.controller.class.inc
+files[] = entity_class/remotehtml.entity.class.inc
+files[] = entity_controller/custom_content.controller.class.inc
+files[] = entity_class/custom_content.entity.class.inc
 files[] = remotehtml.ui.inc
