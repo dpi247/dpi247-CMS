@@ -61,40 +61,18 @@ function dpiextra_remotehtml_content_type_content_types(){
  * @return $form
  */
 function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
-	//dsm($form_state,build_build);
-	/*if(isset($_POST['html_adresse']))
-	{
-		$entity = remotehtml_load($form_state['subtype']['rid']);
-		$entity->name = $_POST['name'];
-		$entity->html_adresse = $_POST['html_adresse'];
-		$entity->refresh_time = $_POST['refresh_time'];
-	}
-	else
-	{*/if(empty($form_state['input']['name'])){
-		$entity = remotehtml_load($form_state['subtype']['rid']);
-	}
-	$a=rand();
-	$form_state["toto_ $a"]=1;
-	$tempForm = $form;
-
-	//module_load_include('inc', 'dpiextra','includes/remotehtml.admin');
-	//$form_state = form_state_defaults();
-	//$form_state = array();
+	
+  dsm($form_state,outer_form_state);
+	$entity=dpiextra_get_remotehtmlentity_from_subtype($form_state);
+  dsm($entity,ENTITY);
+	
 	$form_state['build_info']['args'][] = $entity;
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/remotehtml.admin');
 	
-	dsm($form_state,'form state default');
+  // see: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form
+	$form = drupal_retrieve_form('remotehtml_form',$form_state,$entity);
 	
-	//$formFromRemotehtml = drupal_build_form('remotehtml_form', $form_state2);
-	$formFromRemotehtml = drupal_build_form('remotehtml_form',$form_state);
-	//$formFromRemotehtml3 = entity_ui_get_form('remotehtml',$entity,'edit',$form_state);
-	
-	//dsm($formFromRemotehtml);
-	$form = $formFromRemotehtml;
-
-	$form['buttons'] = $tempForm['buttons'];
-	dsm($form_state['build_info']['args'][0],'remotehtml form');
 
 	return $form;
 	
@@ -102,16 +80,22 @@ function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
 }
 
 
-/**
- * this function get all remote html name from db
- * 
- * @return $allRemotehtml
- * return all remote html
- */
-function dpiextra_remotehtml_get_all(){
-	//get all remotehtml
-	$results = db_query('SELECT * FROM {dpiextra_remotehtml}');
-	return $results;
+
+
+function dpiextra_remotehtml_content_type_edit_form_validate($form, $form_state){
+dsm($form_state,FS_VALIDATE);
+
+  $form_state2=array();
+  form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+  
+  // see: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form
+  $formFromRemotehtml = drupal_retrieve_form('remotehtml_form',$form_state2,$entity);
+  
+  $form_state2['values']=$form_state['values'];
+  $form_state['build_info']['args'] = array();
+  drupal_validate_form('remotehtml_form', $formFromRemotehtml, $form_state2);
+  
+
 }
 
 /**
@@ -121,10 +105,15 @@ function dpiextra_remotehtml_get_all(){
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_submit($form, $form_state){
-	dsm($form_state,build_aftrer);
-	$remotehtml_submission = (object) $form_state['values'];
-	remotehtml_save($remotehtml_submission);
-	//$form_state['conf']['url'] = $form_state['values']['html_adresse']; 
+  dsm($form_state,FS_SUBM);
+  
+  $form_state2=array();
+  $form_state2['values']=$form_state['values'];
+
+  $entity=dpiextra_get_remotehtmlentity_from_subtype($form_state);
+  form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+  drupal_form_submit('remotehtml_form', $form_state2,$entity);
+  
 }
 
 /**
@@ -142,31 +131,34 @@ function dpiextra_remotehtml_content_type_render($subtype, $conf, $panel_args, $
 	$block = new stdClass();
 	$block->module = 'dpiextra';
 	$block->title = 'HTML Block';
-	dsm($conf);
-	dsm($subtype);
-	dsm($panel_args);
 	//$htmlblock = dpiextra_remotehtml_get_cache_or_create('cache_remotehtml',$conf);
 	//get html of the url
 	$block->content = file_get_contents($conf['url']);;
 
 	return $block;
 }
-function dpiextra_remotehtml_content_type_edit_form_validate($form, $form_state){
-	//dsm($form_state);
-	//return TRUE;
-	dsm('validate');
-	$remotehtml_submission = (object) $form_state['values'];
 
-	dsm($remotehtml_submission->html_adresse);
-	//validate url
-	if(!remotehtml_url_verification($remotehtml_submission->html_adresse))
-	{
-		form_set_error('html adresse',t('you must enter a valid url adresse'));
-	}
-	//validate the refresh time
-	if(!is_numeric($remotehtml_submission->refresh_time))
-	{
-		form_set_error('refresh time',t('you must enter a number for the refresh time'));
-	}
 
+/**
+ * this function get all remote html name from db
+ *
+ * @return $allRemotehtml
+ * return all remote html
+ */
+function dpiextra_remotehtml_get_all(){
+  //get all remotehtml
+  $results = db_query('SELECT * FROM {dpiextra_remotehtml}');
+  return $results;
+}
+
+function dpiextra_get_remotehtmlentity_from_subtype($form_state){
+  if(isset($form_state['subtype']['rid'])){
+    $entity = remotehtml_load($form_state['subtype']['rid']);
+  }
+  else{
+    watchdog('RemoteHTML','remote_html_tentity error when fetching the entity');
+    return false;
+  }
+  return $entity;
+  
 }
