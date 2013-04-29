@@ -43,10 +43,9 @@ function dpiextra_entity_info(){
 			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
 			'module'=> 'dpiextra',
 			'access callback' => 'remotehtml_access_admin_callback',
-				
 			// Enable the entity API's admin UI.
 			'admin ui' => array(
-						
+			
 					'path' => 'admin/structure/remotehtml',
 					// OPTIONAL- See "Customize the User Interface" below if you set.
 					'file' => 'includes/remotehtml.admin.inc',
@@ -88,7 +87,6 @@ function dpiextra_entity_info(){
 			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
 			'module'=> 'dpiextra',
 			'access callback' => 'custom_content_access_admin_callback',
-	
 			// Enable the entity API's admin UI.
 			'admin ui' => array(
 					'path' => 'admin/structure/custom_content',

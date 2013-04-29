@@ -9,9 +9,8 @@
  * @return array
  */
 function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
-dsm($remotehtml,REMOHTML);
-dsm($form_state,INNERFORMSTATE);
-$form_state['values']['rid']=$remotehtml->rid;
+
+	$form_state['values']['rid']=$remotehtml->rid;
 	$form['rid'] = array(
 			'#type' => 'value',
 			'#value'=> $remotehtml->rid,
@@ -44,7 +43,7 @@ $form_state['values']['rid']=$remotehtml->rid;
 
 	
 	field_attach_form('remotehtml', $remotehtml, $form, $form_state);
-dsm($form,FORM);
+
 	return $form;
 }
 
@@ -54,18 +53,18 @@ dsm($form,FORM);
  * @param $form
  * @param $form_state
  */
-function remotehtml_form_validate($form, $form_state){
+function remotehtml_form_validate($form, &$form_state){
 	$remotehtml_submission = (object) $form_state['values'];
-	
+
 	//validate url
 	if(!remotehtml_url_verification($remotehtml_submission->html_adresse))
 	{
-		form_set_error('html adresse',t('you must enter a valid url adresse'));
+		form_set_error('html_adresse',t('you must enter a valid url adresse'));
 	}
 	//validate the refresh time
 	if(!is_numeric($remotehtml_submission->refresh_time))
 	{
-		form_set_error('refresh time',t('you must enter a number for the refresh time'));
+		form_set_error('refresh_time',t('you must enter a number for the refresh time'));
 	}
 	
 }
@@ -80,11 +79,12 @@ function remotehtml_form_submit($form, &$form_state) {
 
 	
 	$remotehtml_submission = (object) $form_state['values'];
-	dsm($remotehtml_submission,objectTOSAVE);
 	field_attach_submit('remotehtml', $remotehtml_submission, $form, $form_state);
 	//save the entity
-	$form_state['conf']['url'] = $remotehtml_submission->html_adresse;
 	remotehtml_save($remotehtml_submission);
+	//put entity in formstate to find it later
+	$form_state['remotehtml'] = $remotehtml_submission;
+	
 	//and redirect to display the new entity
 	$form_state['redirect'] = "remotehtml/".$remotehtml_submission->rid;
 }
