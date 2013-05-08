@@ -12,46 +12,16 @@ $plugin = array(
 			//'add form' => 'dpiextra_custom_content_content_type_add_form',
 		'edit text' => t('Edit'),
 		'all contexts' => TRUE,
-    'edit form' => array(
-        'dpiextra_custom_content_content_type_view_form'=>'custom content',
-        'dpiextra_custom_content_content_type_edit_form'=>'edit',
-        'dpiextra_custom_content_type_revision_form'=>'view revision',
-    ),
-    'add form' 		 => array('dpiextra_custom_content_content_type_add_form'=> 'Add'),
+        'edit form' => array(
+          'dpiextra_custom_content_content_type_view_form'=>'custom content',
+          'dpiextra_custom_content_content_type_edit_form'=>'edit',
+          'dpiextra_custom_content_type_revision_form'=>'view revision',
+        ),
+        'add form' 		 => array('dpiextra_custom_content_content_type_add_form'=> 'Add'),
     
 );
-/**
- * Implementation of edit_form() to display revision
- *
- * @param $form
- * @param $form_state
- * @return $form
- */
-function dpiextra_custom_content_type_revision_form($form, $form_state){
-	
-	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
-	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
-	
-	$form['machine_name']['#value'] = $entity->machine_name;
-	//unset buttons return and cancel
-	unset($form['buttons']['return']);
-	unset($form['buttons']['cancel']);
-	unset($form['buttons']['next']);
-	//change the step of the previous button
-	$form['buttons']['previous']['#next'] = 'step1';
-	
-	return $form;
-	
-}
-/**
- * Implementation of edit_form_submit() to display revision
- *
- * @param $form
- * @param $form_state
- */
-function dpiextra_custom_content_type_revision_form_submit($form, $form_state){
-	
-}
+
+
 /**
  * Implementation of hook_content_type_content_types()
  *
@@ -70,8 +40,11 @@ function dpiextra_custom_content_content_type_content_types(){
 				'description' => t(''),
 				'category' => t('Dpi extra'),
 				'subtype'=> $record->machine_name,
-		   
-		    'add form'=>array(),
+		    'add form' => array(
+		        'dpiextra_custom_content_content_type_view_form'=>'custom content',
+		        'dpiextra_custom_content_content_type_edit_form'=>'edit',
+		        'dpiextra_custom_content_type_revision_form'=>'view revision',
+		    ),
 		    
 		);
 
@@ -91,6 +64,28 @@ function dpiextra_custom_content_content_type_content_types(){
 	);
 
 	return  $custom_content;
+}
+
+
+/**
+ * Implementation of content_type_render()
+ * @param $subtype
+ * @param $conf
+ * @param $panel_args
+ * @param $context
+ */
+function dpiextra_custom_content_content_type_render($subtype, $conf, $panel_args, $context){
+  $block = new stdClass();
+  //get the custom content entity
+  //$entity = $conf['custom_content'];
+  $entity = _dpiextra_custom_content_get_entity_by_subtype($subtype);
+  $entity->body = unserialize($entity->body);
+  //create the renderable block
+  $block->module = 'dpiextra';
+  $block->title = t($entity->title);
+  $block->content = check_markup($entity->body['value'], $entity->body['format']);
+
+  return $block;
 }
 
 /**
@@ -287,25 +282,39 @@ function dpiextra_custom_content_content_type_view_form_submit($form,&$form_stat
 	}
 	
 }
+
+
 /**
- * Implementation of content_type_render()
- * @param $subtype
- * @param $conf
- * @param $panel_args
- * @param $context
+ * Implementation of edit_form() to display revision
+ *
+ * @param $form
+ * @param $form_state
+ * @return $form
  */
-function dpiextra_custom_content_content_type_render($subtype, $conf, $panel_args, $context){
-	$block = new stdClass();
-	//get the custom content entity
-	//$entity = $conf['custom_content'];
-	$entity = _dpiextra_custom_content_get_entity_by_subtype($subtype);
-	$entity->body = unserialize($entity->body);
-	//create the renderable block
-	$block->module = 'dpiextra';
-	$block->title = t($entity->title);
-	$block->content = check_markup($entity->body['value'], $entity->body['format']);
-	
-	return $block;
+function dpiextra_custom_content_type_revision_form($form, $form_state){
+
+  form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
+  $entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
+
+  $form['machine_name']['#value'] = $entity->machine_name;
+  //unset buttons return and cancel
+  unset($form['buttons']['return']);
+  unset($form['buttons']['cancel']);
+  unset($form['buttons']['next']);
+  //change the step of the previous button
+  $form['buttons']['previous']['#next'] = 'step1';
+
+  return $form;
+
+}
+/**
+ * Implementation of edit_form_submit() to display revision
+ *
+ * @param $form
+ * @param $form_state
+ */
+function dpiextra_custom_content_type_revision_form_submit($form, $form_state){
+
 }
 /**
  * this function get all custom content from db
