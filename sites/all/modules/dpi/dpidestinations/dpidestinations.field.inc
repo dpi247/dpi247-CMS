@@ -420,3 +420,25 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 
   return $element;
 }
+
+
+function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
+
+	$array_parents = $form_state['triggering_element']['#array_parents'];
+	array_pop($array_parents);
+	// Iterate over the form parents to find the element.
+	$element = $form;
+	foreach ($array_parents as $name) {
+		$element = &$element[$name];
+		if (!empty($element['#dpidestinationsfield'])) {
+			break;
+		}
+	}
+
+	// Return the address block, but remove the '_weight' element inserted
+	// by the field API.
+	unset($element['_weight']);
+	return $element;
+
+
+}

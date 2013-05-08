@@ -87,28 +87,18 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
   
 }
 
-
-
-function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
+function dpidestinations_entity_info_alter(&$entity_info){
+  $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
   
-  $array_parents = $form_state['triggering_element']['#array_parents'];
-  array_pop($array_parents);
-  // Iterate over the form parents to find the element.
-  $element = $form;
-  foreach ($array_parents as $name) {
-    $element = &$element[$name];
-    if (!empty($element['#dpidestinationsfield'])) {
-      break;
-    }
-  }
-
-  // Return the address block, but remove the '_weight' element inserted
-  // by the field API.
-  unset($element['_weight']);
-  return $element;
-
-
 }
+
+function dpidestinations_term_uri($term){
+  return array(
+      'path' => 'destination/' . $term->tid,
+  );
+}
+
+
 
 
 
@@ -121,6 +111,5 @@ function destinationterm_load($destination_id){
 function destination_view($destination){
   return 'You need to activate the page manager';
 }
-
 
 

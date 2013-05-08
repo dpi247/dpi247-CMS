@@ -103,14 +103,15 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#default_value' => $conf['override_pager_settings'],
   );
 
-  $form['pager_settings']['total_nodes_per_page'] = array(
+  $form['pager_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['total_nodes_per_page'],
-    '#title' => t('Total nodes per pages'),
+    '#default_value' => $conf['node_count_for_targetblockinstance'],
+    '#title' => t('Node count for this targetblock instance'),
     '#size' => 4,
-    '#description' => t('The total number of nodes on the page.'),
+    '#description' => t('The node count for this targetblock instance.'),
     '#dependency' => array('override-pager-checkbox' => array(1)),
   );
+  
   $form['pager_settings']['use_pager'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use pager'),
@@ -135,11 +136,11 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       ),
       
   );
-  $form['pager_settings']['nodes_per_page'] = array(
+  $form['pager_settings']['node_count_per_target'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['nodes_per_page'],
+    '#default_value' => $conf['node_count_per_target'],
     '#size' => 4,
-    '#title' => t('Number of posts displayed on the page for this target'),
+    '#title' => t('Node count for this targetblock (sum of the targetblock instance)'),
     '#states' => array(
       'visible' => array(   // action to take.
         ':input[name="use_splitted"]' // element to evaluate condition on
@@ -234,10 +235,10 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   $confs=array(
     'override_title',
     'override_pager_settings',
-    'total_nodes_per_page',
+    'nodes_count_for_targetblockinstance',
     'use_pager',
     'use_splitted',
-    'nodes_per_page',
+    'node_count_for_target',
     'offset',
     'split_index_count',
     'split_total_count',

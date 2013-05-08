@@ -122,12 +122,42 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => TRUE
       ),
-
-      'pager_override' => array(
+      'override_pager_settings' => array(
         'description' => 'The machine name of the target',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
+      ),
+      'node_count_for_targetblockinstance' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
+      ),
+      'node_count_per_target' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
+      ),
+      'use_pager' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
+      ),
+    		
+      'offset' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
+      ),	
+      'hide_pager' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'varchar',
+    	'length' => '255',
+    	'not null' => TRUE
       ),
       'split_flag' => array(
         'description' => 'The machine name of the target',
