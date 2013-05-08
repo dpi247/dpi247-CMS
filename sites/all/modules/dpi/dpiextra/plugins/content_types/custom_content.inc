@@ -9,14 +9,16 @@ $plugin = array(
 		'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
 		'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
 		// Make sure the edit form is only used for some subtypes.
-		'edit form' => array(
-				'dpiextra_custom_content_content_type_edit_form'=>'custom content',
-				'dpiextra_custom_contentEditable_content_type_edit_form'=>'edit',
-				'dpiextra_view_revision_content_type_edit_form'=>'view revision',
-				),
-		//'add form' => 'dpiextra_custom_contentNew_content_type_edit_form',
+			//'add form' => 'dpiextra_custom_content_content_type_add_form',
 		'edit text' => t('Edit'),
 		'all contexts' => TRUE,
+    'edit form' => array(
+        'dpiextra_custom_content_content_type_view_form'=>'custom content',
+        'dpiextra_custom_content_content_type_edit_form'=>'edit',
+        'dpiextra_custom_content_type_revision_form'=>'view revision',
+    ),
+    'add form' 		 => array('dpiextra_custom_content_content_type_add_form'=> 'Add'),
+    
 );
 /**
  * Implementation of edit_form() to display revision
@@ -25,12 +27,12 @@ $plugin = array(
  * @param $form_state
  * @return $form
  */
-function dpiextra_view_revision_content_type_edit_form($form, $form_state){
+function dpiextra_custom_content_type_revision_form($form, $form_state){
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	
-	$form['cid']['#value'] = $entity->cid;
+	$form['machine_name']['#value'] = $entity->machine_name;
 	//unset buttons return and cancel
 	unset($form['buttons']['return']);
 	unset($form['buttons']['cancel']);
@@ -47,7 +49,7 @@ function dpiextra_view_revision_content_type_edit_form($form, $form_state){
  * @param $form
  * @param $form_state
  */
-function dpiextra_view_revision_content_type_edit_form_submit($form, $form_state){
+function dpiextra_custom_content_type_revision_form_submit($form, $form_state){
 	
 }
 /**
@@ -65,10 +67,12 @@ function dpiextra_custom_content_content_type_content_types(){
 		//existant content type
 		$custom_content[$record->machine_name]= array(
 				'title' => t('custom content version : '.$record->title),
-				'cid' => $record->cid,
 				'description' => t(''),
 				'category' => t('Dpi extra'),
 				'subtype'=> $record->machine_name,
+		   
+		    'add form'=>array(),
+		    
 		);
 
 	}
@@ -81,8 +85,9 @@ function dpiextra_custom_content_content_type_content_types(){
 			'top level'      => TRUE,
 			'category'       => t('Custom'),
 			'description'    => t('Create a completely custom piece of custom content.'),
-			'add form' 		 => 'dpiextra_custom_contentNew_content_type_edit_form',
-			'all contexts'   => TRUE,
+	    'edit form' => array(),
+	         
+	    'all contexts'   => TRUE,
 	);
 
 	return  $custom_content;
@@ -95,16 +100,12 @@ function dpiextra_custom_content_content_type_content_types(){
  * @param $form_state
  * @return $form 
  */
-function dpiextra_custom_contentNew_content_type_edit_form($form,$form_state){
+function dpiextra_custom_content_content_type_add_form($form,$form_state){
 
 	//$form_state['pane']->pid = 'new';
 	//$form_state['pane']->subtype = 'custom';
-	dsm($form_state['display']->content);
 	$form = dpiextra_get_entity_form('custom_content_form', $form_state);
 	unset($form['revision']);
-	dsm($form_state,Newform);
-	dsm($form_state['display cache'],cache);
-	dsm($form_state['pane'],NEwformpane);
 	return $form;
 }
 /**
@@ -113,7 +114,7 @@ function dpiextra_custom_contentNew_content_type_edit_form($form,$form_state){
  * @param $form
  * @param $form_state
  */
-function dpiextra_custom_contentNew_content_type_edit_form_validate($form, &$form_state){
+function dpiextra_custom_content_content_type_add_form_validate($form, &$form_state){
 
 	$form_state2=array();
 	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
@@ -132,7 +133,7 @@ function dpiextra_custom_contentNew_content_type_edit_form_validate($form, &$for
  * @param $form
  * @param $form_state
  */
-function dpiextra_custom_contentNew_content_type_edit_form_submit($form,$form_state){
+function dpiextra_custom_content_content_type_add_form_submit($form,&  $form_state){
 	
 	$form_state2=array();
 	$form_state2['values']=$form_state['values'];
@@ -140,12 +141,7 @@ function dpiextra_custom_contentNew_content_type_edit_form_submit($form,$form_st
 	form_load_include($form_state2, 'inc', 'dpiextra','includes/custom_content.admin');
 	//submit
 	drupal_form_submit('custom_content_form', $form_state2);
-	//for the render function
-	//$form_state['conf']['custom_content'] = $form_state2['custom_content'];
 	$form_state['pane']->subtype = $form_state2['custom_content']->machine_name;
-	dsm($form_state['display']->content);
-	dsm($form_state,Newformsubmit);
-	dsm($form_state['pane'],NEwformSubmitpane);
 }
 /**
  * Implementation edit_form() for edit a custom content block
@@ -154,7 +150,7 @@ function dpiextra_custom_contentNew_content_type_edit_form_submit($form,$form_st
  * @param $form_state
  * @return $form
  */
-function dpiextra_custom_contentEditable_content_type_edit_form($form,$form_state){
+function dpiextra_custom_content_content_type_edit_form($form,$form_state){
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
 	//get the entity
@@ -173,8 +169,6 @@ function dpiextra_custom_contentEditable_content_type_edit_form($form,$form_stat
 			'#wizard type' => 'next',
 			'#weight' => 1000,
 			);
-	dsm($form_state,editableform);
-	dsm($form_state['pane'],editableformpane);
 	return $form;
 }
 /**
@@ -183,7 +177,7 @@ function dpiextra_custom_contentEditable_content_type_edit_form($form,$form_stat
  * @param $form
  * @param $form_state
  */
-function dpiextra_custom_contentEditable_content_type_edit_form_validate($form, &$form_state){
+function dpiextra_custom_content_content_type_edit_form_validate($form, &$form_state){
 
 	$form_state2=array();
 	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
@@ -202,18 +196,20 @@ function dpiextra_custom_contentEditable_content_type_edit_form_validate($form, 
  * @param $form
  * @param $form_state
  */
-function dpiextra_custom_contentEditable_content_type_edit_form_submit($form,$form_state){
+function dpiextra_custom_content_content_type_edit_form_submit($form,$form_state){
 
 	$form_state2=array();
 	$form_state2['values']=$form_state['values'];
 	//get entity
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	
+	//We Need the CID for the "drupal_write_record"
 	$form_state2['values']['cid'] = $entity->cid;
 	//load form include
 	form_load_include($form_state2, 'inc', 'dpiextra','includes/custom_content.admin');
 	//submit
 	drupal_form_submit('custom_content_form', $form_state2,$entity);
+	
 
 }
 /**
@@ -223,11 +219,10 @@ function dpiextra_custom_contentEditable_content_type_edit_form_submit($form,$fo
  * @param $form_state
  * @return $form
  */
-function dpiextra_custom_content_content_type_edit_form($form, $form_state){
+function dpiextra_custom_content_content_type_view_form($form, $form_state){
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
 	//get the entity
-	dsm($form_state);
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	//when the revision is changing the subtype is overwrite so the entity
 	//is saved in $form_state['conf']['custom_content']
@@ -274,8 +269,6 @@ function dpiextra_custom_content_content_type_edit_form($form, $form_state){
 			'#value' => 'Cancel',
 			'#wizard type' => 'cancel',
 	);
-	dsm($form_state,editform);
-	dsm($form_state['pane'],editformpane);
 	return $form;
 }
 
@@ -284,18 +277,15 @@ function dpiextra_custom_content_content_type_edit_form($form, $form_state){
  * @param $form
  * @param $form_state
  */
-function dpiextra_custom_content_content_type_edit_form_submit($form,&$form_state){
-	dsm(ccc);
-	dsm($form_state);
-	dsm($form_state['pane']);
+function dpiextra_custom_content_content_type_view_form_submit($form,&$form_state){
 	if($form_state['clicked_button']['#wizard type'] == 'finish'){
 		//get entity*/
 		$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
-		
 		//for the render function
 		//$form_state['conf']['custom_content'] = $entity;
 		//$form_state['pane']->subtype = $entity->machine_name;
 	}
+	
 }
 /**
  * Implementation of content_type_render()
@@ -305,7 +295,6 @@ function dpiextra_custom_content_content_type_edit_form_submit($form,&$form_stat
  * @param $context
  */
 function dpiextra_custom_content_content_type_render($subtype, $conf, $panel_args, $context){
-	dsm($subtype);
 	$block = new stdClass();
 	//get the custom content entity
 	//$entity = $conf['custom_content'];
