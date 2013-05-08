@@ -586,8 +586,12 @@ function ctools_content_form($op, $form_info, &$form_state, $plugin, $subtype_na
   if (empty($form_info['order'])) {
     return FALSE;
   }
-
-  ctools_include('wizard');
+  /*
+dsm($form_info,$step);
+dsm($subtype_name,subtype_name);
+dsm($conf,conf);
+*/
+ctools_include('wizard');
   return ctools_wizard_multistep_form($form_info, $step, $form_state);
 
 }
