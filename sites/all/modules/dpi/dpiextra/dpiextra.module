@@ -294,7 +294,7 @@ function dpiextra_theme(&$var) {
 
 	return array(
 
-			'dpiextra_view_revision_content_type_edit_form' => $base + array(
+			'dpiextra_custom_content_type_revision_form___' => $base + array(
 					'render element' => 'form',
 			),
 
