@@ -1,5 +1,5 @@
 <?php
- 
+
 /**
  * @file
  * Contains general utility functions for CTools that do not need to be
