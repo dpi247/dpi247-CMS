@@ -16,11 +16,9 @@ function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') 
 			'#value'=> $custom_content->cid,
 	);
 
-	$form['name'] = array(
-			'#type' => 'textfield',
-			'#title' => t('name'),
-			'#required' => TRUE,
-			'#default_value' => $custom_content->name,
+	$form['machine_name'] = array(
+			'#type' => 'value',
+			'#value'=> $custom_content->machine_name,
 	);
 	
 	$form['title'] = array(
@@ -38,13 +36,15 @@ function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') 
 			'#default_value' => $body['value'],
 			'#format' => $body['format'],
 	);
-	
-	$form['new_revision'] = array(
-			'#type' => 'checkbox',
-			'#title' => 'create a new revision ?',
-			'#default_value' => FALSE,
-	);
-	
+
+	if(!isset($custom_content->is_new)){
+		$form['revision'] = array(
+				'#type' => 'radios',
+				'#title' => t('About Revision'),
+				'#options' => array(t('New revision'), t('Overwrite')),
+				'#default_value' => 0,
+		);
+	}
 	$form['submit'] = array(
 			'#type' => 'submit',
 			'#value' => t('Save'),
@@ -63,7 +63,29 @@ function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') 
  * @param $form_state
  */
 function custom_content_form_validate($form, &$form_state){
-	//no realy need the form_validate
+    // Check for string identifier sanity
+  /*  if (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['name'])) {
+      form_error($form['name'], t('The custom content has not added/modify because the name can only 
+      		consist of lowercase letters, underscores, and numbers.'));
+    }
+    // Check for string identifier sanity
+    if (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['title'])) {
+    	form_error($form['title'], t('The custom content has not added/modify because the title can only 
+    			consist of lowercase letters, underscores, and numbers.'));
+    }*/
+	
+	$customContent_submission = (object) $form_state['values'];
+	$results = dpiextra_custom_content_get_all();
+	if($results!=Null){
+		foreach($results as $record){
+			//validate title
+			if($customContent_submission->cid != $record->cid){
+				if($customContent_submission->title == $record->title){
+					form_set_error('title',t('the title already exist'));
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -73,34 +95,40 @@ function custom_content_form_validate($form, &$form_state){
  * @param $form_state
  */
 function custom_content_form_submit($form, &$form_state) {
-
-	//get the good value from the new_revision checkbox
-	$form_state['values']['new_revision'] = $form_state['input']['new_revision'];
-
+	
+	if(isset($form_state['values']['revision'])){
+		$is_revision = $form_state['values']['revision'];
+	}
+	else
+	{
+		$is_revision = FALSE;
+	}
+	unset($form_state['values']['revision']);
 	$customContent_submission = (object) $form_state['values'];
 	$customContent_submission->body = serialize($customContent_submission->body);
+	$customContent_submission->machine_name = str_replace(' ', '_', $customContent_submission->title);
 	$customContent_submission->date = time();
-	
+		
 	field_attach_submit('custom_content', $customContent_submission, $form, $form_state);
-	
+		
 	$customContent_submission->is_new = FALSE;
-	$customContent_submission->is_new_revision = $form_state['values']['new_revision'];
-	//don't create a new revision
+	$customContent_submission->is_new_revision = !$is_revision;
+dsm($customContent_submission,save);
 	//overwrite the current revision
-	if(!$form_state['values']['new_revision']){
+	if($is_revision){
 		$entity = custom_content_load($customContent_submission->cid);
 		$customContent_submission->revision_id = $entity->revision_id;
 	}
-	
 	//set the default revision
 	entity_revision_set_default('custom_content', $customContent_submission);
 	//save the entity
 	custom_content_save($customContent_submission);
+
 	//put entity in formstate to find it later
 	$form_state['custom_content']=$customContent_submission;
-
 	//and redirect to display the new entity
 	$form_state['redirect'] = "custom_content/".$customContent_submission->cid;
+
 }
 
 

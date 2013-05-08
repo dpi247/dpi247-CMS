@@ -20,8 +20,7 @@ function dpiextra_entity_info(){
 			'uri callback' => 'entity_class_uri',
 			'entity keys' => array(
 					'id'=>'rid',
-					'name' => 'name',
-						
+					'machine_name' => 'machine_name',
 			),
 			
 			'bundles' => array(
@@ -213,7 +212,7 @@ function remotehtml_url_verification($url){
  */
 function remotehtml_page_title($remotehtml){
 
-	return $remotehtml->name;
+	return $remotehtml->machine_name;
 }
 
 
@@ -348,4 +347,16 @@ function custom_content_page_view($custom_content, $view_mode = 'full'){
 	$custom_content->content += field_attach_view('custom_content', $custom_content, $view_mode);
 
 	return $custom_content->content;
+}
+
+/**
+ * this function get all remote html name from db
+ *
+ * @return $allRemotehtml
+ * return all remote html
+ */
+function dpiextra_remotehtml_get_all(){
+	//get all remotehtml
+	$results = db_query('SELECT * FROM {dpiextra_remotehtml}');
+	return $results;
 }

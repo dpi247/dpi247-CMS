@@ -16,10 +16,10 @@ class Custom_contentEntity extends Entity {
 	public $cid;
 
 	/**
-	 * the name of custom content
-	 * @var $name
+	 * the machine_name of custom content
+	 * @var $machine_name
 	 */
-	public $name;
+	public $machine_name;
 	
 	/**
 	 * the title of custom content
@@ -56,7 +56,7 @@ class Custom_contentEntity extends Entity {
 	 * @see Entity::defaultLabel()
 	 */
 	protected function defaultLabel() {
-		return $this->name;
+		return $this->machine_name;
 	}
 	 
 	/**
@@ -65,7 +65,7 @@ class Custom_contentEntity extends Entity {
 	 * @see Entity::defaultUri()
 	 */
 	protected function defaultUri() {
-		return array('path' => 'custom_content/' . $this->name);
+		return array('path' => 'custom_content/' . $this->machine_name);
 	}
 
 }

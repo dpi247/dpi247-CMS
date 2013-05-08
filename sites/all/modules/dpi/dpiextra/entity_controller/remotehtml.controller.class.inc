@@ -15,7 +15,8 @@ class RemotehtmlController extends EntityAPIControllerExportable{
 		global $user;
 		$values += array(
 				'rid' => '',
-				'name' => '',
+				'machine_name' => '',
+				'label' => '',
 				'html_adresse' => '',
 				'refresh_time' => '',
 		);

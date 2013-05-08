@@ -65,7 +65,24 @@ function dpiextra_menu(){
 			'page arguments'   => array(3),
 	);
 	
+	$items['dpiextra/custom_content/delete_revision/%/ajax'] = array(
+			'page callback'    => 'dpiextra_ajax_custom_content_delete_revision',
+			'access arguments' => array('access content'),
+			'type'             => MENU_CALLBACK,
+			'page arguments'   => array(3),
+	);
+	
 	return $items;
+}
+/**
+ * Callback in ajax, delete a custom content revision
+ * @param $revision_id
+ * the revision id
+ */
+function dpiextra_ajax_custom_content_delete_revision($revision_id){
+	entity_revision_delete('custom_content', $revision_id);
+	drupal_set_message(t('the revision has been Deleted'),'status');
+	dpiextra_ajax_custom_contentform('custom');
 }
 
 /**
@@ -73,32 +90,19 @@ function dpiextra_menu(){
  *  @param $type_form
  *  type of form (version or custom content)
  */
-function dpiextra_ajax_custom_contentform($type_form){
+function dpiextra_ajax_custom_contentform($content){
 
 	module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
 	ctools_include('ajax');
 	ctools_include('modal');
 	ctools_modal_add_js();
 	ctools_add_js('ajax-responder');
-
-	//$commands = array();
-	if ($type_form == 'custom'){
-		$untype = 'version';
-	} elseif ($type_form == 'version'){
-		$untype = 'custom';
-	}
 	$commands = array();
-	$commands[] = ctools_ajax_command_attr('#'.$untype.'_form', 'style', 'display:none;');
-	$commands[] = ctools_ajax_command_attr('#'.$type_form.'_form', 'style', 'display:block;');
+	$commands[] = ctools_ajax_command_attr('#version_form', 'style', 'display:block;');
 	
 	//Display status, warning, error messages
 	$commands[] = ajax_command_html('.messages', theme('status_messages'));
-
 	
-	$commands[] = ctools_ajax_command_attr('#'.$type_form, 'class', 'active');
-	$commands[] = ctools_ajax_command_attr('#'.$untype, 'class', '');
-	
-	//ajax_render() replace ctools_ajax_render()
 	print ajax_render($commands);
 	exit;
 }
@@ -109,13 +113,8 @@ function dpiextra_ajax_custom_contentform($type_form){
  * @param $revision_id
  * The revision id
  */
-/*function dpiextra_ajax_custom_content_set_revision_default($revision_id){
+function dpiextra_ajax_custom_content_set_revision_default($revision_id){
 
-	module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
-	ctools_include('ajax');
-	ctools_include('modal');
-	ctools_modal_add_js();
-	ctools_add_js('ajax-responder');
 	$typeEntity = 'custom_content';
 	$entity_revision = entity_revision_load($typeEntity, $revision_id);
 	
@@ -133,10 +132,10 @@ function dpiextra_ajax_custom_contentform($type_form){
 	{
 		drupal_set_message(t('the revision is already the default revision'),'error');
 	}
-	//ctools_ajax_command_submit('#edit-return--2');
-	dpiextra_ajax_custom_contentform('custom',$form);
 	
-}*/
+	dpiextra_ajax_custom_contentform('custom');
+	
+}
 
 
 /**
@@ -156,63 +155,23 @@ function dpiextra_ajax_custom_content_getversion($revision_id){
 	$commands = array();
 	//load the revision
 	$revision = entity_revision_load('custom_content', $revision_id);
-	//$body = unserialize($revision->body);
+	$body = unserialize($revision->body);
 	
 	//display the content of the revision
-	//$content  = '<textarea class = "form-textarea resizable textarea-processed" rows="5" cols = "60">'.$body['value'].'</textarea>';
-	//$content .= '<div>'.ctools_ajax_text_button(t('Switch back to this revision'), 'dpiextra/custom_content/setdefault/'.$revision_id.'/ajax', t('Switch')).'</div>';
-	$form_state['conf']['revision'] = $revision;
-	//render the form from custom content entity
-	$content = drupal_render(drupal_build_form('dpiextra_custom_content_revision_form', $form_state));
-	//Dipslay status, warning, error messages
-	//$commands[] = ajax_command_html('.messages', theme('status_messages'));
+	$content  = '<input type="text" readonly="readonly" value="'.$revision->title.'"/></br>';
+	$content .= '<textarea class = "form-textarea resizable textarea-processed" rows="10" cols = "100" readonly="readonly">'.$body['value'].'</textarea>';
+	$content .= '<div>'.ctools_ajax_text_button(t('Switch back to this revision'), 'dpiextra/custom_content/setdefault/'.$revision_id.'/ajax', t('Switch')).'</div>';
 
 	//Display content
 	$commands[] = ajax_command_html('#dpiextra_version', $content);
 	$commands[] = ctools_ajax_command_attr('.dpiextra_version_list', 'style', 'font-weight:none');
 	$commands[] = ctools_ajax_command_attr('#dpiextra_version_'.$revision_id, 'style', 'font-weight:bold');
 	
-	//ajax_render() replace ctools_ajax_render()
 	print ajax_render($commands);
 	exit;
 
 }
 
-function dpiextra_custom_content_revision_form($form,$form_state){
-
-	dsm($form_state);
-	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
-	//$form_state['build_info']['args'][] = $form_state['conf']['revision'];
-	//$form = drupal_retrieve_form('dpiextra_custom_content_content_type_edit_form',$form_state);
-	$form = dpiextra_get_entity_form('custom_content_form', $form_state, $form_state['conf']['revision']);
-	$form['submit'] = array(
-			'#type' => 'submit',
-			'#wizard type' =>'finish',
-			'#value' => t('Save'),
-			'#ajax' => array(
-					'callback' => '',
-					'wrapper' => '',
-					),
-	);
-	
-	unset($form['new_revision']);
-	return $form;
-}
-function dpiextra_custom_content_revision_form_submit($form,$form_state){
-	
-	$typeEntity = 'custom_content';
-	$entity_revision = $form_state['conf']['revision'];
-	
-	drupal_set_message(t('the revision has been set by default'),'status');
-	//set the revision by default
-	entity_revision_set_default($typeEntity, $entity_revision);
-	//save
-	dsm(save);
-	dsm($form_state);
-	entity_save($typeEntity, $entity_revision);
-	$form_state['conf']['custom_content'] = $entity_revision;
-	exit;
-}
 /**
  * Implementation of permission
  * 
@@ -335,7 +294,7 @@ function dpiextra_theme(&$var) {
 
 	return array(
 
-			'dpiextra_custom_content_content_type_edit_form' => $base + array(
+			'dpiextra_view_revision_content_type_edit_form' => $base + array(
 					'render element' => 'form',
 			),
 
@@ -354,7 +313,6 @@ function dpiextra_theme(&$var) {
  * return the form
  */
 function dpiextra_get_entity_form($form_id,$form_state,$entity){
-
 
 	$form_state['build_info']['args'][] = $entity;
 	// see: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form

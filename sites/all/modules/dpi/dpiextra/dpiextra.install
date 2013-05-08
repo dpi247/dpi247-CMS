@@ -4,15 +4,22 @@ function dpiextra_schema() {
 	$schema['dpiextra_remotehtml'] = array (
 			'description' => 'The remote html entity table',
 			'fields' => array(
+					
 					'rid' => array(
-							'description' => 'Primary key for our table of remotehtml',
+							'description' => 'Primary key for our table of custom content',
 							'type' => 'serial',
 							'size' => 'big',
 							'unsigned' => TRUE,
 							'not null' => TRUE,
 					),
-					'name' => array(
-							'description' => 'The name of our html remote adresse',
+					'machine_name' => array(
+							'description' => 'The machine name of our html remote adresse',
+							'type' => 'varchar',
+							'length' => '255',
+							'not null' => TRUE,
+					),
+					'title' => array(
+							'description' => 'The title of our html remote adresse',
 							'type' => 'varchar',
 							'length' => '255',
 							'not null' => TRUE,
@@ -31,6 +38,9 @@ function dpiextra_schema() {
 					),
 			),
 			'primary key' => array('rid'),
+			'unique keys' => array(
+					'machine_name' => array('machine_name')
+				),
 	);
 	//create a table for the remotehtml cache
  	//$schema['cache_remotehtml'] = drupal_get_schema_unprocessed('system', 'cache');
@@ -45,7 +55,7 @@ function dpiextra_schema() {
 							'unsigned' => TRUE,
 							'not null' => TRUE,
 					),
-					'name' => array(
+					'machine_name' => array(
 							'description' => 'The name of our html custom content',
 							'type' => 'varchar',
 							'length' => '255',
@@ -72,6 +82,9 @@ function dpiextra_schema() {
 					
 			),
 			'primary key' => array('cid'),
+			'unique keys' => array(
+					'machine_name' => array('machine_name')
+				),
 	);
 	
 	
@@ -96,12 +109,12 @@ function dpiextra_schema() {
     	'default' => NULL,
     	'description' => 'The ID of the attached entity custom_content.',
   	);
-  	$schema['dpiextra_custom_content_revision']['fields']['name'] = array(
+  	$schema['dpiextra_custom_content_revision']['fields']['machine_name'] = array(
 		'type' => 'varchar',
 		'length' => '255',
 		'not null' => TRUE,
   	);
   	$schema['dpiextra_custom_content_revision']['primary key'] = array('revision_id');
-	
+	$schema['dpiextra_custom_content_revision']['unique keys'] = array();
 	return $schema;
 }

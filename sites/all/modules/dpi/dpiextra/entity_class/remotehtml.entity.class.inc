@@ -7,18 +7,24 @@
  */
 class RemoteHtmlEntity extends Entity {
 	
+	
 	/**
-	 * the id of remotehtml
-	 * 
+	 * the rid of remotehtml
 	 * @var $rid
 	 */
 	public $rid;
 	
 	/**
-	 * the name of remotehtml
-	 * @var $name
+	 * the machine_name of remotehtml
+	 * @var $machine_name
 	 */
-	public $name;
+	public $machine_name;
+	
+	/**
+	 * the title of remotehtml
+	 * @var $title
+	 */
+	public $title;
 	
 	/**
 	 * the html adresse of remotehtml
@@ -40,7 +46,7 @@ class RemoteHtmlEntity extends Entity {
 	 * @see Entity::defaultLabel()
 	 */
 	protected function defaultLabel() {
-    	return $this->name;
+    	return $this->title;
   	}
   	
   	/**
@@ -49,7 +55,7 @@ class RemoteHtmlEntity extends Entity {
   	 * @see Entity::defaultUri()
   	 */
   	protected function defaultUri() {
-    	return array('path' => 'remotehtml/' . $this->name);
+    	return array('path' => 'remotehtml/' . $this->rid);
   	}
 
 }

@@ -15,12 +15,15 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
 			'#type' => 'value',
 			'#value'=> $remotehtml->rid,
 	);
-
-	$form['name'] = array(
+	$form['machine_name'] = array(
+			'#type' => 'value',
+			'#value'=> $remotehtml->machine_name,
+	);
+	$form['title'] = array(
 			'#type' => 'textfield',
-			'#title' => t('Name'),
+			'#title' => t('Title'),
 			'#required' => TRUE,
-			'#default_value' => $remotehtml->name,
+			'#default_value' => $remotehtml->title,
 	);
 	$form['html_adresse'] = array(
 			'#type' => 'textfield',
@@ -55,7 +58,18 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
  */
 function remotehtml_form_validate($form, &$form_state){
 	$remotehtml_submission = (object) $form_state['values'];
-
+	$results = dpiextra_remotehtml_get_all();
+	if($results!=Null){
+		foreach($results as $record){
+			//validate label
+			if($remotehtml_submission->rid != $record->rid){
+				if($remotehtml_submission->title == $record->title){
+					form_set_error('title',t('the label already exist'));
+				}
+			}
+		}
+	}
+	
 	//validate url
 	if(!remotehtml_url_verification($remotehtml_submission->html_adresse))
 	{
@@ -79,7 +93,15 @@ function remotehtml_form_submit($form, &$form_state) {
 
 	
 	$remotehtml_submission = (object) $form_state['values'];
+	$remotehtml_submission->machine_name = str_replace(' ', '_', $remotehtml_submission->title);
 	field_attach_submit('remotehtml', $remotehtml_submission, $form, $form_state);
+	/*if($remotehtml_submission->machine_name == NULL){
+		$remotehtml_submission->is_new = TRUE;
+		$remotehtml_submission->machine_name = str_replace(' ', '_', $remotehtml_submission->label);
+	}
+	else{
+		$remotehtml_submission->is_new = False;
+	}*/
 	//save the entity
 	remotehtml_save($remotehtml_submission);
 	//put entity in formstate to find it later
