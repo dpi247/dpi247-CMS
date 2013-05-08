@@ -54,7 +54,7 @@ function dpidestinations_entity_info(){
 
 
 
-  $entities['target_block']=array(
+  $entities['targetblock']=array(
     'label' => t('Target Block'),
     // seulement si on utilise le module entity API
     'exportable'=>TRUE,
@@ -188,9 +188,8 @@ function target_form($form, &$form_state, $target) {
 
 
 function target_form_submit($form, &$form_state) {
-  $target_submission = (object) $form_state['values'];
-  field_attach_submit('target', $target_submission, $form, $form_state);
-  target_save($target_submission);
+  $target = entity_ui_form_submit_build_entity($form, $form_state);
+  $target->save();
   $form_state['redirect'] = "target/".$target_submission->targetid;
 }
 /**
@@ -212,4 +211,148 @@ function target_delete($target) {
  */
 function target_delete_multiple($target_ids) {
   entity_delete_multiple('target', $target_ids);
+}
+
+
+
+
+
+
+
+
+
+
+
+function targetblock_form($form, &$form_state, $targetblock) {
+
+	$form['pager_settings'] = array(
+			'#type' => 'fieldset',
+			'#collapsible' => FALSE,
+			'#title' => t('Custom pager settings'),
+	);
+	
+	$form['pager_settings']['override_pager_settings'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Overriding view settings'),
+			'#default_value' => $targetblock->override_pager_settings,
+	);
+	
+	$form['pager_settings']['node_count_for_targetblockinstance'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->node_count_for_targetblockinstance,
+			'#title' => t('Total nodes per pages'),
+			'#size' => 4,
+			'#description' => t('The total number of nodes on the page.'),
+			'#dependency' => array('override-pager-checkbox' => array(1)),
+	);
+	$form['pager_settings']['use_pager'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Use pager'),
+			'#default_value' => $targetblock->use_pager,
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="override_pager_settings"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	);
+	
+	$form['pager_settings']['split_flag'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Use splited blocks'),
+			'#default_value' => $targetblock->split_flag,
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="override_pager_settings"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	
+	);
+	$form['pager_settings']['node_count_per_target'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->node_count_per_target,
+			'#size' => 4,
+			'#title' => t('Number of posts displayed on the page for this target'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	);
+	
+	$form['pager_settings']['offset'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->offset,
+			'#title' => t('Offset'),
+			'#size' => 4,
+			'#description' => t('The number of items to skip and not display.'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	);
+	
+	
+	$form['pager_settings']['split_index_count'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->split_index_count,
+			'#title' => t('Split index'),
+			'#size' => 4,
+			'#description' => t('The index of this redacblock -if this is the third splitted redabclokc it will be 3- (Only if the redac block is splitted across the page).'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	);
+	
+	$form['pager_settings']['split_total_count'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->split_total_count,
+			'#title' => t('# of splited blocks'),
+			'#size' => 4,
+			'#description' => t('The total number of splitted block. I there is three redacblock it will be 3'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	
+	);
+	
+	$form['pager_settings']['hide_pager'] = array(
+			'#type' => 'checkbox',
+			'#default_value' => $targetblock->hide_pager,
+			'#title' => t('Hide pager'),
+			'#size' => 4,
+			'#description' => t('Check this if you don\'t want the pager to display above this redacblock'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	);
+	
+	$form['pager_settings']['pager_id'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $targetblock->pager_id,
+			'#title' => t('Pager ID'),
+			'#size' => 4,
+			'#description' => t('This ID is use to synchronize the splitted blocks with the pager. You need to set the same one on each splitted block.'),
+			'#states' => array(
+					'visible' => array(   // action to take.
+							':input[name="use_splitted"]' // element to evaluate condition on
+							=> array('checked' => TRUE),  // condition
+					),
+			),
+	
+	);
+	
 }
