@@ -14,7 +14,7 @@ function dpicontenttypes_node_info(){
       'base'=>'article_package',
       'description'=>t('Article package from DPI'),
       'has_title'=>TRUE,  
-      'locked' => FALSE,
+      'locked' => TRUE,
                 
     ),
     'gallery_package'=>array(
@@ -23,19 +23,19 @@ function dpicontenttypes_node_info(){
           'base'=>'article_package',
           'description'=>t('Article package from DPI'),
           'has_title'=>TRUE,
-          'locked' => FALSE,
+          'locked' => TRUE,
       
       ),
       'poll_package'=>array(
           'name'=>t("Poll Package"),
-      
           'base'=>'article_package',
           'description'=>t('Article package from DPI'),
           'has_title'=>TRUE,
-          'locked' => FALSE,
+          'locked' => TRUE,
       
       ),
   );
+  
 }
 
 
@@ -62,3 +62,28 @@ function poll_package_form($node, $form_state) {
 }
 
 
+
+//@todo: documenter cette partie on fait l'alter uniquement pour fournir un build mode suplémentaire...
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * We need to modify the default node entity info by adding a new view mode to
+ * be used in functions like node_view() or node_build_content().
+ */
+function dpicontenttypes_entity_info_alter(&$entity_info) {
+  // Add our new view mode to the list of view modes...
+  $entity_info['node']['view modes']['article_package'] = array(
+      'label' => t('Target default'),
+      'custom settings' => FALSE,
+  );
+}
+
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
+	if ($module == 'entityreference' && $plugin=="behavior") {
+		return 'plugins/entityreference/' . $plugin;
+	}
+}

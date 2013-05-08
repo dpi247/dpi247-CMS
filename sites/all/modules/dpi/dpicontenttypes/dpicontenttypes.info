@@ -1,9 +1,7 @@
 name = DPI Contenttypes
-description = Create customized lists and queries from your database.
+description = Create set of content types related to the dpi247 distribution.
 package = DPI
 core = 7.x
-
-
 
 
 files[] = dpicontenttypes.api.inc
