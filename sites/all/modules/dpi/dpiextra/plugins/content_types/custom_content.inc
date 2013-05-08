@@ -28,7 +28,6 @@ $plugin = array(
 function dpiextra_view_revision_content_type_edit_form($form, $form_state){
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
-	$entity=dpiextra_get_custom_contententity_from_subtype($form_state);
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	
 	$form['cid']['#value'] = $entity->cid;
@@ -142,7 +141,7 @@ function dpiextra_custom_contentNew_content_type_edit_form_submit($form,$form_st
 	//submit
 	drupal_form_submit('custom_content_form', $form_state2);
 	//for the render function
-	$form_state['conf']['custom_content'] = $form_state2['custom_content'];
+	//$form_state['conf']['custom_content'] = $form_state2['custom_content'];
 	$form_state['pane']->subtype = $form_state2['custom_content']->machine_name;
 	dsm($form_state['display']->content);
 	dsm($form_state,Newformsubmit);
@@ -159,7 +158,6 @@ function dpiextra_custom_contentEditable_content_type_edit_form($form,$form_stat
 	
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
 	//get the entity
-	$entity=dpiextra_get_custom_contententity_from_subtype($form_state);
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	
 	$form = dpiextra_get_entity_form('custom_content_form', $form_state,$entity);
@@ -175,8 +173,8 @@ function dpiextra_custom_contentEditable_content_type_edit_form($form,$form_stat
 			'#wizard type' => 'next',
 			'#weight' => 1000,
 			);
-dsm($form_state,editableform);
-dsm($form_state['pane'],editableformpane);
+	dsm($form_state,editableform);
+	dsm($form_state['pane'],editableformpane);
 	return $form;
 }
 /**
@@ -209,7 +207,6 @@ function dpiextra_custom_contentEditable_content_type_edit_form_submit($form,$fo
 	$form_state2=array();
 	$form_state2['values']=$form_state['values'];
 	//get entity
-	$entity = dpiextra_get_custom_contententity_from_subtype($form_state);
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	
 	$form_state2['values']['cid'] = $entity->cid;
@@ -231,11 +228,10 @@ function dpiextra_custom_content_content_type_edit_form($form, $form_state){
 	form_load_include($form_state, 'inc', 'dpiextra','includes/custom_content.admin');
 	//get the entity
 	dsm($form_state);
-	$entity=dpiextra_get_custom_contententity_from_subtype($form_state);
 	$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 	//when the revision is changing the subtype is overwrite so the entity
 	//is saved in $form_state['conf']['custom_content']
-	$form_state['conf']['custom_content'] = $entity;
+	//$form_state['conf']['custom_content'] = $entity;
 	//unserialize the body and the format
 	$body = unserialize($entity->body);
 	
@@ -294,11 +290,10 @@ function dpiextra_custom_content_content_type_edit_form_submit($form,&$form_stat
 	dsm($form_state['pane']);
 	if($form_state['clicked_button']['#wizard type'] == 'finish'){
 		//get entity*/
-		$entity = dpiextra_get_custom_contententity_from_subtype($form_state);
 		$entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 		
 		//for the render function
-		$form_state['conf']['custom_content'] = $entity;
+		//$form_state['conf']['custom_content'] = $entity;
 		//$form_state['pane']->subtype = $entity->machine_name;
 	}
 }
@@ -313,7 +308,8 @@ function dpiextra_custom_content_content_type_render($subtype, $conf, $panel_arg
 	dsm($subtype);
 	$block = new stdClass();
 	//get the custom content entity
-	$entity = $conf['custom_content'];
+	//$entity = $conf['custom_content'];
+	$entity = _dpiextra_custom_content_get_entity_by_subtype($subtype);
 	$entity->body = unserialize($entity->body);
 	//create the renderable block
 	$block->module = 'dpiextra';
@@ -332,30 +328,6 @@ function dpiextra_custom_content_get_all(){
 	//get all remotehtml
 	$results = db_query('SELECT * FROM {dpiextra_custom_content}');
 	return $results;
-}
-
-/**
- * this function get the entity with this id from form_state['subtype']
- *
- * @param $form_state
- * @return $entity
- * the entity
- */
-function dpiextra_get_custom_contententity_from_subtype($form_state){
-	
-	if(isset($form_state['subtype']['cid'])){
-		$entity = custom_content_load($form_state['subtype']['cid']);
-	}
-	else if(isset($form_state['conf']['custom_content']))
-	{
-		$entity = custom_content_load($form_state['conf']['custom_content']->cid);
-	}
-	else{
-		watchdog('CustomContent','custom_content entity error when fetching the entity');
-		return false;
-	}
-	return $entity;
-
 }
 
 function _dpiextra_custom_content_get_entity_by_subtype($subtype){
