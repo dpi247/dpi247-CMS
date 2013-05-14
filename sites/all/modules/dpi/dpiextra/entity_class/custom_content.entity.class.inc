@@ -35,6 +35,13 @@ class Custom_contentEntity extends Entity {
 	public $body;
 	
 	/**
+	 * the format of custom content
+	 *
+	 * @var $format
+	 */
+	public $format;
+	
+	/**
 	 * the date of custom content
 	 *
 	 * @var $date

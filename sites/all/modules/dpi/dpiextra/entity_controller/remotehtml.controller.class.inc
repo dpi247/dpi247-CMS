@@ -11,6 +11,11 @@ class RemotehtmlController extends EntityAPIControllerExportable{
 	 * Overrides create function from EntityApiController
 	 * @see EntityAPIController::create()
 	 */
+	public function load_by_machine_name($machine_name) {
+		$results=$this->load(FALSE,array('machine_name'=>$machine_name));
+		$result=current($results);
+		return $result;
+	}
 	public function create(array $values = array()) {
 		global $user;
 		$values += array(

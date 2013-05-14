@@ -10,7 +10,7 @@
  * @return array
  */
 function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') {
-	$body = unserialize($custom_content->body);
+	
 	$form['cid'] = array(
 			'#type' => 'value',
 			'#value'=> $custom_content->cid,
@@ -33,8 +33,8 @@ function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') 
 			'#type' => 'text_format',
 			'#description' => t(''),
 			'#required' => TRUE,
-			'#default_value' => $body['value'],
-			'#format' => $body['format'],
+			'#default_value' => $custom_content->body,
+			'#format' => $custom_content->format,
 	);
 
 	if(!isset($custom_content->is_new)){
@@ -63,17 +63,7 @@ function custom_content_form($form, &$form_state, $custom_content,$op = 'edit') 
  * @param $form_state
  */
 function custom_content_form_validate($form, &$form_state){
-    // Check for string identifier sanity
-  /*  if (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['name'])) {
-      form_error($form['name'], t('The custom content has not added/modify because the name can only 
-      		consist of lowercase letters, underscores, and numbers.'));
-    }
-    // Check for string identifier sanity
-    if (!preg_match('!^[a-z0-9_]+$!', $form_state['values']['title'])) {
-    	form_error($form['title'], t('The custom content has not added/modify because the title can only 
-    			consist of lowercase letters, underscores, and numbers.'));
-    }*/
-	
+
 	$customContent_submission = (object) $form_state['values'];
 	$results = dpiextra_custom_content_get_all();
 	if($results!=Null){
@@ -95,7 +85,7 @@ function custom_content_form_validate($form, &$form_state){
  * @param $form_state
  */
 function custom_content_form_submit($form, &$form_state) {
-	
+
 	if(isset($form_state['values']['revision'])){
 		$is_revision = $form_state['values']['revision'];
 	}
@@ -105,15 +95,22 @@ function custom_content_form_submit($form, &$form_state) {
 	}
 	unset($form_state['values']['revision']);
 	$customContent_submission = (object) $form_state['values'];
-	$customContent_submission->body = serialize($customContent_submission->body);
+	
+	$body = $customContent_submission->body;
+	
+	$customContent_submission->body = $body['value'];
+	$customContent_submission->format = $body['format'];
+
+	//create the machine name with the title
 	$customContent_submission->machine_name = str_replace(' ', '_', $customContent_submission->title);
+	$customContent_submission->machine_name = strtolower($customContent_submission->machine_name);
 	$customContent_submission->date = time();
 		
 	field_attach_submit('custom_content', $customContent_submission, $form, $form_state);
 		
 	$customContent_submission->is_new = FALSE;
 	$customContent_submission->is_new_revision = !$is_revision;
-dsm($customContent_submission,save);
+
 	//overwrite the current revision
 	if($is_revision){
 		$entity = custom_content_load($customContent_submission->cid);
@@ -123,7 +120,6 @@ dsm($customContent_submission,save);
 	entity_revision_set_default('custom_content', $customContent_submission);
 	//save the entity
 	custom_content_save($customContent_submission);
-
 	//put entity in formstate to find it later
 	$form_state['custom_content']=$customContent_submission;
 	//and redirect to display the new entity

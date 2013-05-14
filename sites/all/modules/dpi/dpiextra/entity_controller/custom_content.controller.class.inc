@@ -23,6 +23,7 @@ class Custom_contentController extends EntityAPIControllerExportable{
 				'machine_name' => '',
 				'title' => '',
 				'body' => '',
+				'format' => '',
 				'date' => '',
 		);
 		return parent::create($values);

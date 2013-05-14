@@ -9,8 +9,10 @@ $plugin = array(
 		'no title override' => TRUE,
 		'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
 		'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
-		// Make sure the edit form is only used for some subtypes.
-		'edit form' => 'dpiextra_remotehtml_content_type_edit_form',
+		'edit form' => array(
+				'dpiextra_remotehtml_content_type_view_form'=>'view remotehtml',
+				'dpiextra_remotehtml_content_type_edit_form'=>'edit remotehtml',
+				),
 		'edit text' => t('Edit'),
 		'all contexts' => TRUE,
 );
@@ -29,9 +31,12 @@ function dpiextra_remotehtml_content_type_content_types(){
 	{
 		$remotehtml[$record->machine_name]= array(
 			'title' => t('remote html : '.$record->title),
-			'rid' => $record->rid,
 			'machine_name' => $record->machine_name,
 			'description' => t(''),
+			'add form'      => array(
+				'dpiextra_remotehtml_content_type_view_form'=>'view remotehtml',
+				'dpiextra_remotehtml_content_type_edit_form'=>'edit remotehtml',
+				),
 			'category' => t('Dpi extra'),
 		);
 		
@@ -42,32 +47,42 @@ function dpiextra_remotehtml_content_type_content_types(){
 	    'name'           => 'remotehtml',
 	    'title'          => t('New remote html'),
 	    'top level'      => TRUE,
-	    'category'       => t('Custoeem'),
+	    'category'       => t('Custom'),
 	    'description'    => t('Create a completely custom piece of HTML content.'),
-	    'edit form'      => 'dpiextra_remotehtml_content_type_edit_form',
-	    'add form'		=> 'dpiextra_remotehtml_content_type_addnewremote_form',
+	    'add form'		=> 'dpiextra_remotehtml_content_type_add_form',
 		'all contexts'   => TRUE,
 	  );
 	
 	return  $remotehtml;
 }
+/**
+ * Implementation of add_form()
+ * 
+ * @param $form
+ * @param $form_state
+ * @return $form
+ */
+function dpiextra_remotehtml_content_type_add_form($form, &$form_state){
 
-function dpiextra_remotehtml_content_type_addnewremote_form($form, &$form_state){
 	form_load_include($form_state, 'inc', 'dpiextra','includes/remotehtml.admin');
 	//get the entity form and unset the save button
 	$form = dpiextra_get_entity_form('remotehtml_form', $form_state);
-	dsm($form);
 	return $form;
 }
-
-function dpiextra_remotehtml_content_type_addnewremote_form_validate($form, &$form_state){
+/**
+ * Implementation of add_form_validate()
+ * 
+ * @param $form
+ * @param $form_state
+ */
+function dpiextra_remotehtml_content_type_add_form_validate($form, &$form_state){
+	
 	if($form_state['clicked_button']['#wizard type']!='cancel'){
+		
 		$form_state2=array();
 		form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
 		
-		// see: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form
 		$formFromRemotehtml = drupal_build_form('remotehtml_form',$form_state2);
-		dsm($form_state);
 		$form_state2['values'] = $form_state['values'];
 		//unset the wrong token
 		unset($formFromRemotehtml['#token']);
@@ -75,23 +90,29 @@ function dpiextra_remotehtml_content_type_addnewremote_form_validate($form, &$fo
 		drupal_validate_form('remotehtml_form', $formFromRemotehtml, $form_state2);
 	}
 }
-
-function dpiextra_remotehtml_content_type_addnewremote_form_submit($form, &$form_state){
+/**
+ * Implementation of add_form_submit()
+ * 
+ * @param $form
+ * @param $form_state
+ */
+function dpiextra_remotehtml_content_type_add_form_submit($form, &$form_state){
+	
 	$form_state2=array();
 	//create a new form_state with just the values
-	$form_state2['values']=$form_state['values'];
+	$form_state2['values'] = $form_state['values'];
+	
 	//load form include
 	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+	
 	//submit
 	drupal_form_submit('remotehtml_form', $form_state2);
 	$entity = $form_state2['remotehtml'];
-	
-	//for the render function
-	$form_state['conf']['remotehtml'] = $entity;
+	//change the subtype "custom" by his machine name
 	$form_state['pane']->subtype = $entity->machine_name;
 }
 /**
- * Implementation of content_type_form()
+ * Implementation of edit_form()
  * 
  * @param $form
  * @param $form_state
@@ -100,11 +121,27 @@ function dpiextra_remotehtml_content_type_addnewremote_form_submit($form, &$form
 function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
 
 	form_load_include($form_state, 'inc', 'dpiextra','includes/remotehtml.admin');
-	//get the entity id from subtype or conf
-	$entity=dpiextra_get_remotehtmlentity_from_subtype($form_state);
+	//get the entity with the machine_name
+	$entity = _dpiextra_remotehtml_get_entity_by_subtype($form_state['subtype']['machine_name']);
 	//get the entity form and unset the save button
 	$form = dpiextra_get_entity_form('remotehtml_form', $form_state, $entity);
-	
+	//unset finish and cancel buttons
+	unset($form['buttons']['return']);
+	unset($form['buttons']['cancel']);
+	//add previous button Back
+	$form['buttons']['previous'] = array(
+			'#type' => 'submit',
+			'#value' => t('Back'),
+			'#next' => 'step1',
+			'#wizard type' => 'next',
+	);
+	//add next button Save
+	$form['buttons']['next'] = array(
+			'#type' => 'submit',
+			'#value' => t('Save'),
+			'#next' => 'step1',
+			'#wizard type' => 'next',
+	);
 	return $form;
 	
 }
@@ -116,47 +153,102 @@ function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_validate($form, &$form_state){
-
-  	$form_state2=array();
-  	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
-  
-  	// see: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form
-  	$formFromRemotehtml = drupal_build_form('remotehtml_form',$form_state2,$entity);
-  
-  	$form_state2['values'] = $form_state['values'];
-  	//unset the wrong token
-	unset($formFromRemotehtml['#token']);
-  	//validate the form
-  	drupal_validate_form('remotehtml_form', $formFromRemotehtml, $form_state2);
+	
+	if($form_state['clicked_button']['#value'] == 'Save'){
+	  	
+		$form_state2=array();
+	  	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+	  
+	  	$formFromRemotehtml = drupal_build_form('remotehtml_form',$form_state2,$entity);
+	  
+	  	$form_state2['values'] = $form_state['values'];
+	  	//unset the wrong token
+		unset($formFromRemotehtml['#token']);
+	  	//validate the form
+	  	drupal_validate_form('remotehtml_form', $formFromRemotehtml, $form_state2);
+	}
 }
 
 /**
- * Implementation of content_type_form()
+ * Implementation of edit_form_submit()
  * 
  * @param $form
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_submit($form, $form_state){
-  
-	$form_state2=array();
-	//create a new form_state with just the values
-	$form_state2['values']=$form_state['values'];
 	
-	$entity = dpiextra_get_remotehtmlentity_from_subtype($form_state);
-	//$form_state2['values']['machine_name'] = $entity->machine_name;
-	
-	//load form include
-	form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
-	//submit
-	drupal_form_submit('remotehtml_form', $form_state2,$entity);
-
-	$entity = $form_state2['remotehtml'];
-	
-	//for the render function
-	$form_state['conf']['remotehtml'] = $entity;
-	$form_state['pane']->subtype = $entity->machine_name;
+	if($form_state['clicked_button']['#value'] == 'Save'){
+		
+		$form_state2=array();
+		//create a new form_state with just the values
+		$form_state2['values']=$form_state['values'];
+		$entity = _dpiextra_remotehtml_get_entity_by_subtype($form_state['subtype']['machine_name']);
+		//load form include
+		form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+		//submit
+		drupal_form_submit('remotehtml_form', $form_state2,$entity);
+	}
 }
+/**
+ * Implementation of view_form()
+ *
+ * @param $form
+ * @param $form_state
+ * @return $form
+ */
+function dpiextra_remotehtml_content_type_view_form($form,&$form_state){
 
+	//get the entity
+	$entity= _dpiextra_remotehtml_get_entity_by_subtype($form_state['subtype']['machine_name']);
+	
+	$form['machine_name'] = array(
+			'#markup' => '<h4>Machine name : '.$entity->machine_name.'</h4>'
+	);
+	$form['title'] = array(
+			'#markup' => '<p>Title : '.$entity->title.'</p>'
+	);
+	$form['html_adresse'] = array(
+			'#markup' => '<p>url adresse : '.$entity->html_adresse.'</p>'
+	);
+	$form['refresh_time'] = array(
+			'#markup' => '<p>refresh time in minutes : '.$entity->refresh_time.'</p>'
+	);
+	
+	//add the modify button
+	$form['modify'] = array(
+			'#type' => 'submit',
+			'#value' => t('Modify'),
+			'#next' => 'step2',
+			'#wizard type' => 'next',
+	);
+	
+	
+	unset($form['buttons']);
+	//add the finish button
+	$form['buttons']['return'] = array(
+			'#type' => 'submit',
+			'#value' => 'Finish',
+			'#wizard type' => 'finish',
+	);
+	
+	//add the cancel button
+	$form['buttons']['cancel'] = array(
+			'#type' => 'submit',
+			'#value' => 'Cancel',
+			'#wizard type' => 'cancel',
+	);
+	
+	return $form;
+}
+/**
+ * Implementation of view_form_submit()
+ *
+ * @param $form
+ * @param $form_state
+ */
+function dpiextra_remotehtml_content_type_view_form_submit($form,&$form_state){
+
+}
 /**
  * Implementation of content_type_render()
  * 
@@ -168,7 +260,8 @@ function dpiextra_remotehtml_content_type_edit_form_submit($form, $form_state){
  * return the block
  */
 function dpiextra_remotehtml_content_type_render($subtype, $conf, $panel_args, $context){
-	$entity = $conf['remotehtml'];
+	
+	$entity = _dpiextra_remotehtml_get_entity_by_subtype($subtype);
 	//create new block
 	$block = new stdClass();
 	$block->module = 'dpiextra';
@@ -178,29 +271,19 @@ function dpiextra_remotehtml_content_type_render($subtype, $conf, $panel_args, $
 
 	return $block;
 }
-
-
-
-
 /**
- * this function get the entity with this id from form_state['subtype'] or 
- * $form_state['conf']['remotehtml']
+ * This function allow to get the remotehtml entity by machine_name
  * 
- * @param $form_state
+ * @param $machine_name
+ * The machine name
  * @return $entity
- * the entity
+ * return the entity
  */
-function dpiextra_get_remotehtmlentity_from_subtype($form_state){
-  	dsm($form_state['subtype']);
-	//get entity id from subtype
-	if(isset($form_state['subtype']['rid'])){
-    	$entity = remotehtml_load($form_state['subtype']['rid']);
-  	}
-  	else{
-  		dsm(prob);
-    	watchdog('RemoteHTML','remote_html_tentity error when fetching the entity');
-    	return false;
-  	}
-  	return $entity;
-  
+function _dpiextra_remotehtml_get_entity_by_subtype($machine_name){
+
+	//create a new remotehtml controller
+	$remotehtmlController = new RemotehtmlController('remotehtml');
+	//return the remotehtml entity
+	return $remotehtmlController->load_by_machine_name($machine_name);
+
 }

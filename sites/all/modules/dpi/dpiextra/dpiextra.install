@@ -42,8 +42,7 @@ function dpiextra_schema() {
 					'machine_name' => array('machine_name')
 				),
 	);
-	//create a table for the remotehtml cache
- 	//$schema['cache_remotehtml'] = drupal_get_schema_unprocessed('system', 'cache');
+
 	
 	$schema['dpiextra_custom_content'] = array (
 			'description' => 'The custom content entity table',
@@ -72,6 +71,13 @@ function dpiextra_schema() {
 							'type' => 'text',
 							'size' => 'big',
 							'not null' => TRUE,	
+					),
+					
+					'format' => array(
+							'description' => 'The format of our custom content',
+							'type' => 'varchar',
+							'length' => '255',
+							'not null' => TRUE,
 					),
 					
 					'date' => array(

@@ -9,8 +9,25 @@
  * @return array
  */
 function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
-
+	
+	ctools_include('dependent');
 	$form_state['values']['rid']=$remotehtml->rid;
+
+	if($remotehtml->rid==''){
+		$form['define'] = array(
+				'#type' => 'checkbox',
+				'#title' => t('define or edit the machine name ?'),
+		);
+		
+		$form['machine_name_edit'] = array(
+				'#type'          => 'textfield',
+				'#title'         => t('machine name'),
+				'#description'   => t('Define machine name'),
+				'#default_value' => $remotehtml->machine_name,
+				'#process' => array('ctools_dependent_process'),
+				'#dependency' => array('edit-define' => array(1)),
+		);
+	}
 	$form['rid'] = array(
 			'#type' => 'value',
 			'#value'=> $remotehtml->rid,
@@ -57,14 +74,39 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
  * @param $form_state
  */
 function remotehtml_form_validate($form, &$form_state){
+	
 	$remotehtml_submission = (object) $form_state['values'];
 	$results = dpiextra_remotehtml_get_all();
-	if($results!=Null){
+	//if the user want to define the machine name
+	if($form_state['input']['define']){
+		$machine_name = $remotehtml_submission->machine_name_edit;
+		// Check for string identifier sanity
+		if (!preg_match('!^[a-z0-9_]+$!', $machine_name)) {
+			form_set_error('machine_name_edit', t('The machine name can only consist of lowercase letters, underscores, and numbers.'));
+		}
+		else{
+			foreach($results as $record){
+				
+				if($remotehtml_submission->rid != $record->rid){
+					//if machine name already exist
+					if($machine_name == $record->machine_name){
+						form_set_error('machine_name_edit',t('the machine name already exist'));
+					}
+				}
+			}
+		}
+	}
+	//the machine name is define on the title
+	else if($results!=Null){
+		//construct the new machine name on the title
+		$machine_name = str_replace(' ', '_', $remotehtml_submission->title);
+		$machine_name = strtolower($machine_name);
 		foreach($results as $record){
-			//validate label
+			
 			if($remotehtml_submission->rid != $record->rid){
-				if($remotehtml_submission->title == $record->title){
-					form_set_error('title',t('the label already exist'));
+				//if the machine name already exist
+				if($machine_name == $record->machine_name){
+					form_set_error('title',t('the machine name based on the title already exist change your title or define a custom machine name'));
 				}
 			}
 		}
@@ -84,24 +126,34 @@ function remotehtml_form_validate($form, &$form_state){
 }
 
 /**
- * Implementation of hook_submit()
+ * Implementation of hook_form_submit()
  *
  * @param $form
  * @param $form_state
  */
 function remotehtml_form_submit($form, &$form_state) {
 
-	
 	$remotehtml_submission = (object) $form_state['values'];
-	$remotehtml_submission->machine_name = str_replace(' ', '_', $remotehtml_submission->title);
+	$remotehtml_submission->define = $form_state['input']['define'];
 	field_attach_submit('remotehtml', $remotehtml_submission, $form, $form_state);
-	/*if($remotehtml_submission->machine_name == NULL){
+	
+	//the user want define the machine name
+	if($remotehtml_submission->define && $remotehtml_submission->machine_name == NULL){
 		$remotehtml_submission->is_new = TRUE;
-		$remotehtml_submission->machine_name = str_replace(' ', '_', $remotehtml_submission->label);
+		$remotehtml_submission->machine_name = $remotehtml_submission->machine_name_edit;
 	}
-	else{
+	//the machine name is define on the title
+	else if(!$remotehtml_submission->define && $remotehtml_submission->machine_name == NULL){
+		$remotehtml_submission->is_new = TRUE;
+		$remotehtml_submission->machine_name = str_replace(' ', '_', $remotehtml_submission->title);
+		$remotehtml_submission->machine_name = strtolower($remotehtml_submission->machine_name);
+	}
+	//the remotehtml entity exist and the machine name can't be redefine
+	else
+	{
 		$remotehtml_submission->is_new = False;
-	}*/
+	}
+	
 	//save the entity
 	remotehtml_save($remotehtml_submission);
 	//put entity in formstate to find it later

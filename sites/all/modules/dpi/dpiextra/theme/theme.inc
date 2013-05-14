@@ -6,7 +6,7 @@
  * @param $variables
  * @return string
  */
-function theme_dpiextra_view_revision_content_type_edit_form($variables) {
+function theme_dpiextra_custom_content_type_revision_form($variables) {
 	
 	ctools_include('ajax');
 	$form = $variables['form'];
@@ -14,8 +14,7 @@ function theme_dpiextra_view_revision_content_type_edit_form($variables) {
   	$content .= '<button type="button" id = "version" class = "active">'.ctools_ajax_text_button(t('Display all Revision'), 'dpiextra/custom_content/form/version/ajax', t('Revision')).'</button>';
   	$content .= '<div id = "version_form" style = "display:none;">';
   	//get revisions
-  	$versions = dpiextra_custom_content_type_getrevision($form['cid']['#value']);
-
+  	$versions = dpiextra_custom_content_type_getrevision($form['machine_name']['#value']);
   	$content .= theme('dpiextra_custom_content_type_listversion',$versions);
   	$content .= '</div>';
   	$content .= '<div id = "custom_form">';
@@ -25,6 +24,7 @@ function theme_dpiextra_view_revision_content_type_edit_form($variables) {
   	
   return $content;
 }
+
 
 /**
  * Theme function that display a list of all revision
