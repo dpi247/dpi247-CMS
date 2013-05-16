@@ -1,0 +1,2 @@
+<?php 
+module_load_include('inc', 'dpicache','dpicache.api');

@@ -1,0 +1,9 @@
+<?php 
+
+function dpicache_schema() {
+  $schemas = array();
+  
+  $schemas['dpi_variables'] = drupal_get_schema_unprocessed('system', 'variable');
+  $schemas['dpi_variables']['description'] = t('Named variable/value pairs created by any other module or theme. These variables are cached but not systematically processed.');
+  return $schemas;
+}
