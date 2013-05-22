@@ -3,6 +3,7 @@
 /**
  * Implements hook_entity_info().
  */
+variable_set($name, $value);
 function dpidestinations_entity_info(){
   $entities=array();
 
@@ -116,13 +117,30 @@ function target_load_multiple($tids = array(), $conditions = array(), $reset = F
 }
 
 
+/**
+ * Save target.
+ */
+function target_save($target) {
+  entity_save('target', $target);
+}
+
+/**
+ * Delete single target.
+ */
+function target_delete($target) {
+  entity_delete('target', entity_id('target' ,$target));
+}
+
+/**
+ * Delete multiple targets.
+ */
+function target_delete_multiple($target_ids) {
+  entity_delete_multiple('target', $target_ids);
+}
 
 
 
 function target_access_admin_callback(){
-  return TRUE;
-}
-function targetblock_access_admin_callback(){
   return TRUE;
 }
 
@@ -144,6 +162,7 @@ function target_form($form, &$form_state, $target) {
     '#type' => 'value',
     '#value'=> $target->targetid,
   );
+  
   $form['machine_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Machine Name'),
@@ -174,6 +193,20 @@ function target_form($form, &$form_state, $target) {
     '#default_value'=> $target->view_id,
     '#required' => TRUE,
   );
+  $form['available_targetlayouts'] = array(
+      '#type' => 'checkboxes',
+      '#options' => drupal_map_assoc(array(t('SAT'), t('ACT'))),
+      '#default_value'=> unserialize($target->available_targetlayouts),
+      
+      '#title' => t('What standardized tests did you take?'),
+   );
+  $form['available_templateoverrides'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Description'),
+      '#default_value'=> $target->available_templateoverrides,
+      '#required' => TRUE,
+      '#description'=> t('One template override per line in the following format: machine_name|label')
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -189,37 +222,66 @@ function target_form($form, &$form_state, $target) {
 
 function target_form_submit($form, &$form_state) {
   $target = entity_ui_form_submit_build_entity($form, $form_state);
+  $target->available_targetlayouts=serialize($target->available_targetlayouts);
   $target->save();
-  $form_state['redirect'] = "target/".$target_submission->targetid;
+  $form_state['redirect'] = "target/".$target_submission->tid;
 }
+
+
+
+
+
+
+
+
+
+
+
+function targetblock_load($tid = NULL, $reset = FALSE){
+  $tids = (isset ($tid) ? array($tid) : array());
+  $targetblock = targetblock_load_multiple($tids, $reset);
+  return $targetblock ? reset ($targetblock) : FALSE;
+}
+
+//tids set to FALSE to load all entities
+function targetblock_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('targetblock', $tids, $conditions, $reset);
+}
+
+
 /**
  * Save target.
  */
-function target_save($target) {
-  entity_save('target', $target);
+function targetblock_save($targetblock) {
+  entity_save('targetblock', $targetblock);
 }
 
 /**
  * Delete single target.
  */
-function target_delete($target) {
-  entity_delete('target', entity_id('target' ,$target));
+function targetblock_delete($targetblock) {
+  entity_delete('targetblock', entity_id('targetblock' ,$targetblock));
 }
 
 /**
  * Delete multiple targets.
  */
-function target_delete_multiple($target_ids) {
-  entity_delete_multiple('target', $target_ids);
+function targetblock_delete_multiple($targetblock_ids) {
+  entity_delete_multiple('targetblock', $targetblock_ids);
 }
 
 
+function targetblock_access_admin_callback(){
+  return TRUE;
+}
 
+function targetblock_page_title($targetblock){
+  return $targetblock->id;
+}
 
-
-
-
-
+function targetblock_view($targetblock, $view_mode = 'full'){
+  return $targetblock->view();
+}
 
 
 
@@ -354,5 +416,6 @@ function targetblock_form($form, &$form_state, $targetblock) {
 			),
 	
 	);
+	return $form;
 	
 }

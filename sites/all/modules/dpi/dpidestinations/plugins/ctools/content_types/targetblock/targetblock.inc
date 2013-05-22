@@ -86,9 +86,16 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
  */
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
   $conf = $form_state['conf'];
-  // Make the other form items dependent upon it.
-  ctools_include('dependent');
-  ctools_add_js('dependent');
+  $targetController=new TargetBlockController('targetblock');
+  $target_block= $targetController->load_targetblock_by_panels_panelid($form_state['pane']->pid);
+  
+  
+  //If the targetblock is not defined check if we have some info
+  // on the conf (when adding a new block and edit the targetblock without 
+  //previously save the display)
+  if(!isset($target_block->targetblockid)){
+    $target_block=(object)  $conf;
+  }
   
   
   $form['pager_settings'] = array(
@@ -100,22 +107,26 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form['pager_settings']['override_pager_settings'] = array(
     '#type' => 'checkbox',
     '#title' => t('Overriding view settings'),
-    '#default_value' => $conf['override_pager_settings'],
+    '#default_value' => $target_block->override_pager_settings,
   );
 
   $form['pager_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['node_count_for_targetblockinstance'],
+    '#default_value' => $target_block->node_count_for_targetblockinstance,
     '#title' => t('Node count for this targetblock instance'),
     '#size' => 4,
     '#description' => t('The node count for this targetblock instance.'),
-    '#dependency' => array('override-pager-checkbox' => array(1)),
-  );
+    '#states' => array(
+      'visible' => array(   // action to take.
+        ':input[name="override_pager_settings"]' // element to evaluate condition on
+          => array('checked' => TRUE),  // condition
+        ),
+      ),     );
   
   $form['pager_settings']['use_pager'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use pager'),
-    '#default_value' => $conf['use_pager'],
+    '#default_value' => $target_block->use_pager,
     '#states' => array(
       'visible' => array(   // action to take.
         ':input[name="override_pager_settings"]' // element to evaluate condition on
@@ -127,7 +138,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form['pager_settings']['use_splitted'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use splited blocks'),
-    '#default_value' => $conf['use_splitted'],
+    '#default_value' => $target_block->use_splitted,
     '#states' => array(
       'visible' => array(   // action to take.
         ':input[name="override_pager_settings"]' // element to evaluate condition on
@@ -138,7 +149,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   );
   $form['pager_settings']['node_count_per_target'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['node_count_per_target'],
+    '#default_value' => $target_block->node_count_per_target,
     '#size' => 4,
     '#title' => t('Node count for this targetblock (sum of the targetblock instance)'),
     '#states' => array(
@@ -151,7 +162,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
 
   $form['pager_settings']['offset'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['offset'],
+    '#default_value' =>$target_block->offset,
     '#title' => t('Offset'),
     '#size' => 4,
     '#description' => t('The number of items to skip and not display.'),
@@ -166,7 +177,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   
   $form['pager_settings']['split_index_count'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['split_index_count'],
+    '#default_value' => $target_block->split_index_count,
     '#title' => t('Split index'),
     '#size' => 4,
     '#description' => t('The index of this redacblock -if this is the third splitted redabclokc it will be 3- (Only if the redac block is splitted across the page).'),
@@ -180,7 +191,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
 
   $form['pager_settings']['split_total_count'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['split_total_count'],
+    '#default_value' => $target_block->split_total_count,
     '#title' => t('# of splited blocks'),
     '#size' => 4,
     '#description' => t('The total number of splitted block. I there is three redacblock it will be 3'),
@@ -195,7 +206,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
 
   $form['pager_settings']['hide_pager'] = array(
     '#type' => 'checkbox',
-    '#default_value' => $conf['hide_pager'],
+    '#default_value' => $target_block->hide_pager,
     '#title' => t('Hide pager'),
     '#size' => 4,
     '#description' => t('Check this if you don\'t want the pager to display above this redacblock'),
@@ -209,7 +220,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
 
   $form['pager_settings']['pager_id'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['pager_id'],
+    '#default_value' => $target_block->pager_id,
     '#title' => t('Pager ID'),
     '#size' => 4,
     '#description' => t('This ID is use to synchronize the splitted blocks with the pager. You need to set the same one on each splitted block.'),
@@ -235,10 +246,10 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   $confs=array(
     'override_title',
     'override_pager_settings',
-    'nodes_count_for_targetblockinstance',
+    'node_count_for_targetblockinstance',
     'use_pager',
     'use_splitted',
-    'node_count_for_target',
+    'node_count_per_target',
     'offset',
     'split_index_count',
     'split_total_count',

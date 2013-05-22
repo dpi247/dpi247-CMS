@@ -80,6 +80,23 @@ function dpidestinations_schema() {
         'length' => 64,
         'not null' => TRUE,
       ),
+      'view_id' =>array(
+            'type'=>'varchar',
+            'length' => 64,
+            'not null' => TRUE,
+        ),
+      'available_targetlayouts' => array(
+            'description' => 'Wich target layout are available for this target.',
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => FALSE,
+      ),
+      'available_templateoverrides' => array(
+            'description' => 'Allow Webmaster to override template logic by choosing a fixed template',
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => FALSE,
+        ),
       
       'status' => array(
         'type' => 'int',
@@ -116,8 +133,14 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => TRUE
       ),
-      'page_manager_handlers_did' => array(
-        'description' => 'The machine name of the target',
+      'did' => array(
+        'description' => 'The ctools page manager display id (did)',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'pid' => array(
+        'description' => 'The ctools page manager panel id (pid)',
         'type' => 'varchar',
         'length' => '255',
         'not null' => TRUE
@@ -126,56 +149,50 @@ function dpidestinations_schema() {
         'description' => 'The machine name of the target',
     	'type' => 'varchar',
     	'length' => '255',
-    	'not null' => TRUE
-      ),
-      'node_count_for_targetblockinstance' => array(
-    	'description' => 'The machine name of the target',
-    	'type' => 'varchar',
-    	'length' => '255',
-    	'not null' => TRUE
+    	'not null' => FALSE
       ),
       'node_count_per_target' => array(
     	'description' => 'The machine name of the target',
     	'type' => 'varchar',
     	'length' => '255',
-    	'not null' => TRUE
+    	'not null' => FALSE
       ),
       'use_pager' => array(
     	'description' => 'The machine name of the target',
     	'type' => 'varchar',
     	'length' => '255',
-    	'not null' => TRUE
+    	'not null' => FALSE
       ),
     		
       'offset' => array(
     	'description' => 'The machine name of the target',
     	'type' => 'varchar',
     	'length' => '255',
-    	'not null' => TRUE
+    	'not null' => FALSE
       ),	
       'hide_pager' => array(
     	'description' => 'The machine name of the target',
     	'type' => 'varchar',
     	'length' => '255',
-    	'not null' => TRUE
+    	'not null' => FALSE
       ),
-      'split_flag' => array(
+      'use_split' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
-        'not null' => TRUE
+        'not null' => FALSE
       ),
       'split_number' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
-        'not null' => TRUE
+        'not null' => FALSE
       ),
       'split_total' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
-        'not null' => TRUE
+        'not null' => FALSE
       ),
       
       'status' => array(

@@ -7,9 +7,14 @@ dependencies[] = dpicontenttypes
 dependencies[] = entity
 dependencies[] = panels
 dependencies[] = devel
+dependencies[] = dpicache
 
 
 files[] = dpidestinations.api.inc
 files[] = target.controller.class.inc
 files[] = target.entity.class.inc
+files[] = targetblock.controller.class.inc
+files[] = targetblock.entity.class.inc
+
 files[] = plugins/views/dpidestinations_plugin_display_targetblock.inc
+files[] = plugins/views/dpidestinations.views.inc

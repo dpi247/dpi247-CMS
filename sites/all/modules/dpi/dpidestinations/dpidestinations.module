@@ -22,7 +22,9 @@ function dpidestinations_theme() {
 
     return $theme;
 }
-
+/**
+ * Implementation of hook_menu()
+ */
 function dpidestinations_menu(){
   $items['destination/%destinationterm'] = array(
     'title callback' => 'destination_view',
@@ -47,7 +49,9 @@ function dpidestinations_menu(){
   );
   return $items;
 }
-
+/**
+ * Implementation of hook_permission()
+ */
 function dpidestinations_permission(){
   return array(
     'administer targets' =>  array(
@@ -60,16 +64,66 @@ function dpidestinations_permission(){
   );
 }
 
+/**
+ * Implementation of hook_panels_display_save()
+ */
 function dpidestinations_panels_display_save($display){
-  foreach($display->content as &$pane){
+  dsm($display);
+  
+  //STEP 1: First delete all targetblock that doesn't exist anymore.
+  $targetController=new TargetBlockController('targetblock');
+  $existing_target_block= $targetController->load_targetblock_by_panels_display($display->did);
+  
+  $targetblock_by_pid=array();
+  foreach($existing_target_block as $targetblockid  => $targetblock){
+    $targetblock_by_pid[$targetblock->pid]=$targetblock;
+  }
+  foreach($display->content as $id => $pane){
     if($pane->type =='targetblock'){
-      $pane->configuration['override_title_text']='rr';
-      $pane->configuration['override_title']=1;
+      if(!strstr($id, 'new')){
+        $panels_in_display_by_pid[$pane->pid]=$pane;
+      }
+    }
+  }
+  
+  $targetblocks_to_delete_temp=array_diff_key($targetblock_by_pid, $panels_in_display_by_pid);
+  
+  $targetblocks_to_delete=array();
+  foreach($targetblocks_to_delete_temp as $targetblock_to_delete_temp){
+    if(isset($existing_target_block[$targetblock_to_delete_temp->targetblockid ])){
+      $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ]=$targetblock_to_delete_temp->targetblockid ;
+    }
+  }
+  targetblock_delete_multiple($targetblocks_to_delete);
+  
+  //STEP 2: Create or update other redacblock
+  foreach($display->content as $id => &$pane){
+    if($pane->type =='targetblock'){
+      if(!strstr($id, 'new')){
+        
+        dsm($pane,$id);
+        
+        $targetblock=(object)$pane->configuration;
+        $targetblock->did=$pane->did;
+        $targetblock->pid=$pane->pid;
+        $targetblock->target=$pane->subtype;
+
+        if(isset($targetblock_by_pid[$pane->pid])){
+          $targetblock->targetblockid=$targetblock_by_pid[$pane->pid]->targetblockid;
+        }
+        targetblock_save($targetblock);
+        unset($targetblock);
+        
+      }
     }
     
   }
 }
 
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
     return 'plugins/ctools/content_types';
@@ -84,6 +138,7 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
   if ($module == 'panels' && $plugin == 'display_renderers') {
     return 'plugins/panels/display_renderers';
   }
+ 
   
 }
 
@@ -112,4 +167,69 @@ function destination_view($destination){
   return 'You need to activate the page manager';
 }
 
+
+
+/**
+ * Implementation of hook_views_plugins
+ */
+function dpidestinations_views_plugins() {
+  $path = drupal_get_path('module', 'dpidestinations');
+  $views_path = drupal_get_path('module', 'views');
+  //require_once "./$path/theme/theme.inc";
+
+  return array(
+      'display' => array(
+          'targetblock' => array(
+              'title' => t('Target block'),
+              'help' => t('View display used for the default target, use this as a basis for custom destination views and targetss.'),
+              'handler' => 'dpidestinations_plugin_display_targetblock',
+              'path' => drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+              //  'theme path' => drupal_get_path('module', 'views') . '/theme',
+              //  'theme' => 'views_view',
+              'use ajax' => FALSE,
+              'use pager' => FALSE,
+              'use more' => FALSE,
+              'accept attachments' => TRUE,
+              'help topic' => 'targetblock',
+              'admin' => t('Target Content pane'),
+              //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
+
+          ),
+      ),
+      /*
+       'style' => array( //declare the style plugin
+  'target_style' => array(
+  'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+  'title' => t('Target Style'),
+  'help' => t('Used for WallyEdit previews'),
+  'handler' => 'dpidestinations_views_plugin_style_targetblock',
+  'theme' => 'dpidestinations_style_targetblock',
+  'theme file' => 'theme.inc',
+  'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
+  'uses row plugin' => TRUE,
+  'uses fields' => FALSE,
+  'uses options' => TRUE,
+  'type' => 'normal',
+  ),
+  ),
+
+  'row' => array( //declare the unformatted row plugin
+  'targetblock_row' => array(
+  'title' => t('Target block Row'),
+  'help' => t('(Displays the node according to the layout of his destination.'),
+  'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+  'handler' => 'dpidestinations_views_plugin_row_targetblock',
+  'theme' => 'dpidestinations_row_targetblock',
+  'theme file' => 'theme.inc',
+  'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
+  'uses row plugin' => TRUE,
+  'uses options' => TRUE,
+  'type' => 'normal',
+  )
+  )
+  */
+  )
+  ;
+
+}
 
