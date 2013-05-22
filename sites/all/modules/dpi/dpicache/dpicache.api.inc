@@ -3,7 +3,7 @@
 /**
  * Returns a persistent variable.
  *
- * Case-sensitivity of the _wally_variable_* functions depends on the database
+ * Case-sensitivity of the dpi_variable_* functions depends on the database
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  * 
@@ -17,8 +17,8 @@
  * @see  dpi_variable_del(), dpi_variable_set(), dpi_variable_get_all()
  */
 function dpi_variable_get($name, $default, $regenerate = FALSE) {
-  
   $dpivariables = &drupal_static(__FUNCTION__);
+
   if (!isset($dpivariables[$name]) || $regenerate) {
     $result=db_query('SELECT value FROM {dpi_variables} WHERE name = :name', array(':name'=>$name));
     if($variable = $result->fetchAssoc()) {
@@ -29,13 +29,14 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
   
 }
 
+
 /**
- * Alias to _dpi_variable_get_all
+ * Returns all persistents variables.
  *
  * @return
  *   The value of the variables.
  *
- * @see dpi_variable_get_all(), dpi_variable_get(), dpi_variable_del(), dpi_variable_set()
+ * @see dpi_variable_set()
  */
 function dpi_variable_get_all() {
   $dpivariables = &drupal_static("dpivariables");
@@ -49,7 +50,11 @@ function dpi_variable_get_all() {
 }
 
 /**
- * Alias to _dpi_variable_set
+ * Sets a persistent variable.
+ *
+ * Case-sensitivity of the dpi_variable_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * variable names.
  *
  * @param $name
  *   The name of the variable to set.
@@ -57,7 +62,7 @@ function dpi_variable_get_all() {
  *   The value to set. This can be any PHP data type; these functions take care
  *   of serialization as necessary.
  *
- * @see _dpi_variable_set(), dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
+ * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
  */
 function dpi_variable_set($name, $value) {
   $dpivariables = &drupal_static("dpivariables");
@@ -77,12 +82,16 @@ function dpi_variable_set($name, $value) {
 }
 
 /**
- * Alias to _dpi_variable_del
+ * Unsets a persistent variable.
+ *
+ * Case-sensitivity of the dpi_variable_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * variable names.
  *
  * @param $name
  *   The name of the variable to undefine.
  *
- * @see _dpi_variable_del(), dpi_variable_get(), dpi_variable_set(), dpi_variable_get_all()
+ * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
  */
 function dpi_variable_del($name) {
   db_delete('dpi_variables')
