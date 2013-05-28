@@ -8,7 +8,7 @@ class TargetController extends EntityAPIControllerExportable{
       'label' => '',
       'description' => '',
       'view_name' => '',
-      'view_id' => '',
+      'view_display' => '',
     );
     return parent::create($values);
   }

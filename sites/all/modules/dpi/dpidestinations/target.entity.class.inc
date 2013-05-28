@@ -30,11 +30,11 @@ class TargetEntity extends Entity{
   public $view_name;
 
   /**
-   * The view_id.
+   * The view_display.
    *
    * @var string
    */
-  public $view_id;
+  public $view_display;
   
   protected function defaultLabel() {
     return $this->label;
