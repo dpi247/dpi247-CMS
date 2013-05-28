@@ -40,7 +40,6 @@ class TargetEntity extends Entity{
     return $this->label;
   }
   protected function defaultUri() {
-    dsm($this);
     return array('path' => 'target/' . $this->targetid);
   }
 }

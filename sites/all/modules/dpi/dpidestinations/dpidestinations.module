@@ -68,7 +68,6 @@ function dpidestinations_permission(){
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
-  dsm($display);
   
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController=new TargetBlockController('targetblock');
@@ -101,7 +100,6 @@ function dpidestinations_panels_display_save($display){
     if($pane->type =='targetblock'){
       if(!strstr($id, 'new')){
         
-        dsm($pane,$id);
         
         $targetblock=(object)$pane->configuration;
         $targetblock->did=$pane->did;

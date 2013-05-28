@@ -1072,10 +1072,6 @@ function template_preprocess_entity(&$variables) {
  * Label callback that refers to the entity classes label method.
  */
 function entity_class_label($entity) {
-  dsm('rr');
-  dsm($entity,co);
-  var_dump($entity);
-  watchdog('rr','rrr');
   return $entity->label();
 }
 

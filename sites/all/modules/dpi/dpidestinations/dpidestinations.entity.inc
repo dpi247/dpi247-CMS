@@ -235,7 +235,14 @@ function target_view($target, $view_mode = 'full'){
 
 
 function target_form($form, &$form_state, $target) {
-
+  $view_name_options=dpidestinations_helpers_dependant_target_viewname_and_display_options_for_view_name();
+  
+  $selected_view_name = isset($form_state['values']['view_name']) ? $form_state['values']['view_name'] : $target->view_name;
+  if($selected_view_name=="" or $selected_view_name==NULL){
+    $selected_view_name=key($view_name_options);
+  }
+  $selected_view_display = isset($form_state['values']['view_display']) ? $form_state['values']['view_display'] : $target->view_display;
+  
   $form['targetid'] = array(
     '#type' => 'value',
     '#value'=> $target->targetid,
@@ -267,16 +274,30 @@ function target_form($form, &$form_state, $target) {
     '#required' => TRUE,
   );
   $form['view_name'] = array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#title' => t('View Name'),
-    '#default_value'=> $target->view_name,
+    '#options' => $view_name_options,
+    '#default_value'=> $selected_view_name,
     '#required' => TRUE,
+    '#ajax' => array(
+      // When 'event' occurs, Drupal will perform an ajax request in the
+      // background. Usually the default value is sufficient (eg. change for
+      // select elements), but valid values include any jQuery event,
+          // most notably 'mousedown', 'blur', and 'submit'.
+          // 'event' => 'change',
+          'callback' => '_dpidestinations_ajaxcallback_viewname_viewdisplay',
+          'wrapper' => 'dropdown-view-display',
+      ),
   );
   $form['view_display'] = array(
-    '#type' => 'textfield',
+    '#type' => 'select',
     '#title' => t('View Display'),
-    '#default_value'=> $target->view_display,
+    '#options' => dpidestinations_helpers_dependant_target_viewname_and_display_options_for_view_display($selected_view_name),
+    '#default_value'=> $selected_view_display,
     '#required' => TRUE,
+    '#prefix' => '<div id="dropdown-view-display">',
+    '#suffix' => '</div>',
+    
   );
   $form['available_targetlayouts'] = array(
     '#type' => 'checkboxes',
@@ -296,12 +317,11 @@ function target_form($form, &$form_state, $target) {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-
+ 
   field_attach_form('target', $target, $form, $form_state);
 
   return $form;
 }
-
 
 
 function target_form_submit($form, &$form_state) {
