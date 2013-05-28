@@ -256,7 +256,7 @@ function dpidestinations_field_extra_fields() {
         'description' => t('The view associated to the target'),
         'weight' => 0,
       ),
-      'view_id' => array(
+      'view_display' => array(
         'label' => t('View Display'),
         'description' => t('The view display associated to the target'),
         'weight' => 0,
@@ -288,7 +288,7 @@ function dpidestinations_field_extra_fields() {
         'description' => t('The view associated to the target'),
         'weight' => 0,
       ),
-      'view_id' => array(
+      'view_display' => array(
         'label' => t('View Display'),
         'description' => t('The view display associated to the target'),
         'weight' => 0,
