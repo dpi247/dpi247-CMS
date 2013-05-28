@@ -179,10 +179,10 @@ function dpidestinations_views_plugins() {
 
   return array(
       'display' => array(
-          'targetblock' => array(
+          'targetview' => array(
               'title' => t('Target block'),
               'help' => t('View display used for the default target, use this as a basis for custom destination views and targetss.'),
-              'handler' => 'dpidestinations_plugin_display_targetblock',
+              'handler' => 'dpidestinations_plugin_display_targetview',
               'path' => drupal_get_path('module', 'dpidestinations') . '/plugins/views',
               //  'theme path' => drupal_get_path('module', 'views') . '/theme',
               //  'theme' => 'views_view',
@@ -190,8 +190,8 @@ function dpidestinations_views_plugins() {
               'use pager' => FALSE,
               'use more' => FALSE,
               'accept attachments' => TRUE,
-              'help topic' => 'targetblock',
-              'admin' => t('Target Content pane'),
+              'help topic' => 'targetview',
+              'admin' => t('Target View'),
               //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
 
           ),
