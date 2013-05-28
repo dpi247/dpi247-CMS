@@ -6,7 +6,7 @@
  * @param $variables
  * @return string
  */
-function theme_dpiextra_view_revision_content_type_edit_form($variables) {
+function theme_dpiextra_custom_content_type_revision_form($variables) {
 	
 	ctools_include('ajax');
 	$form = $variables['form'];
