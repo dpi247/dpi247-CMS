@@ -63,7 +63,7 @@ function dpiextra_entity_info(){
 			'uri callback' => 'entity_class_uri',
 			'entity keys' => array(
 					'id'=>'cid',
-					'name'=>'name',
+					'machine_name' => 'machine_name',
 					'revision' => 'revision_id',
 			),
 				

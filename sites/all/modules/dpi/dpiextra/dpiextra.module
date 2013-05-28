@@ -74,6 +74,8 @@ function dpiextra_menu(){
 	
 	return $items;
 }
+
+
 /**
  * Callback in ajax, delete a custom content revision
  * @param $revision_id
@@ -155,11 +157,10 @@ function dpiextra_ajax_custom_content_getversion($revision_id){
 	$commands = array();
 	//load the revision
 	$revision = entity_revision_load('custom_content', $revision_id);
-	$body = unserialize($revision->body);
 	
 	//display the content of the revision
 	$content  = '<input type="text" readonly="readonly" value="'.$revision->title.'"/></br>';
-	$content .= '<textarea class = "form-textarea resizable textarea-processed" rows="10" cols = "100" readonly="readonly">'.$body['value'].'</textarea>';
+	$content .= '<textarea class = "form-textarea resizable textarea-processed" rows="10" cols = "100" readonly="readonly">'.$revision->body.'</textarea>';
 	$content .= '<div>'.ctools_ajax_text_button(t('Switch back to this revision'), 'dpiextra/custom_content/setdefault/'.$revision_id.'/ajax', t('Switch')).'</div>';
 
 	//Display content
@@ -265,13 +266,13 @@ function dpiextra_ctools_plugin_directory($module, $plugin) {
  * @return
  * an array whith all the versions of the custom content type
  */
-function dpiextra_custom_content_type_getrevision($id){
+function dpiextra_custom_content_type_getrevision($machine_name){
 	$items = array();
 	
-	if ($id !== NULL) {
+	if ($machine_name !== NULL) {
 		$result = db_query("SELECT *
     					        FROM {dpiextra_custom_content_revision} r
-    				            WHERE r.cid = :cid", array(':cid' => $id));
+    				            WHERE r.machine_name = :machine_name", array(':machine_name' => $machine_name));
 		foreach($result as $revision){
 			$items[] = $revision;
 		}
@@ -282,7 +283,10 @@ function dpiextra_custom_content_type_getrevision($id){
 
 
 /**
- *  Implémentation du hook_theme();
+ *  Implémentation of hook_theme();
+ *  @param $var
+ *  return array
+ *  
  */
 function dpiextra_theme(&$var) {
 
@@ -294,13 +298,14 @@ function dpiextra_theme(&$var) {
 
 	return array(
 
-			'dpiextra_custom_content_type_revision_form___' => $base + array(
+			'dpiextra_custom_content_type_revision_form' => $base + array(
 					'render element' => 'form',
 			),
 
 			'dpiextra_custom_content_type_listversion' => $base + array(
 					'arguments' => array('versions' => NULL),
 			),
+			
 	);
 }
 /**
