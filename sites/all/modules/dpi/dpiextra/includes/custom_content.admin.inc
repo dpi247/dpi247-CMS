@@ -113,7 +113,7 @@ function custom_content_form_submit($form, &$form_state) {
 		
 	$customContent_submission->is_new = FALSE;
 	$customContent_submission->is_new_revision = !$is_revision;
-dsm($customContent_submission,save);
+    dsm($customContent_submission,save);
 	//overwrite the current revision
 	if($is_revision){
 		$entity = custom_content_load($customContent_submission->cid);

@@ -701,6 +701,8 @@ function panels_panel_context_edit_content_submit(&$form, &$form_state) {
 
   // update the cached display:
   $display = $form_state['page']->display_cache[$form_state['handler_id']]->display;
+  dsm($display,'taskhandler_content_submit');
+  
   $handler->conf['display'] = $display;
   unset($form_state['page']->display_cache[$form_state['handler_id']]);
 
