@@ -140,12 +140,7 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => TRUE
       ),
-      'override_pager_settings' => array(
-        'description' => 'The machine name of the target',
-    	'type' => 'varchar',
-    	'length' => '255',
-    	'not null' => FALSE
-      ),
+      
       'node_count_per_target' => array(
     	'description' => 'The machine name of the target',
     	'type' => 'varchar',

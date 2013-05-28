@@ -320,11 +320,7 @@ function targetblock_form($form, &$form_state, $targetblock) {
     '#title' => t('Custom pager settings'),
   );
 
-  $form['pager_settings']['override_pager_settings'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Overriding view settings'),
-    '#default_value' => $targetblock->override_pager_settings,
-  );
+  
 
   $form['pager_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',

@@ -104,11 +104,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t('Custom pager settings'),
   );
 
-  $form['pager_settings']['override_pager_settings'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Overriding view settings'),
-    '#default_value' => $target_block->override_pager_settings,
-  );
+  
 
   $form['pager_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
@@ -116,35 +112,20 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t('Node count for this targetblock instance'),
     '#size' => 4,
     '#description' => t('The node count for this targetblock instance.'),
-    '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="override_pager_settings"]' // element to evaluate condition on
-          => array('checked' => TRUE),  // condition
-        ),
-      ),     );
+  );
   
   $form['pager_settings']['use_pager'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use pager'),
     '#default_value' => $target_block->use_pager,
-    '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="override_pager_settings"]' // element to evaluate condition on
-          => array('checked' => TRUE),  // condition
-        ),
-      ),    
+    
   );
 
   $form['pager_settings']['use_splitted'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use splited blocks'),
     '#default_value' => $target_block->use_splitted,
-    '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="override_pager_settings"]' // element to evaluate condition on
-          => array('checked' => TRUE),  // condition
-        ),
-      ),
+  
       
   );
   $form['pager_settings']['node_count_per_target'] = array(
@@ -232,6 +213,37 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       ),
     
   );
+  
+  $form['rank_behavior'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => t('Rank Settings'),
+    '#description' => t('Rank behavior: Beware that thoses settings could be overwrited by a specific destination term settings'),
+  );
+  $form['rank_behavior']['rank_max_value'] = array(
+    '#type' => 'select',
+    '#title' => t('Max reserved possition'),
+    '#options'=> array(1,2,3,4,5,6),
+  );
+
+  $form['rank_behavior']['rank_behavior'] = array(
+    '#type' => 'select',
+    '#title' => t('Rank behavior'),
+    '#options'=> array('top'=>t('Top'),'bottom'=>t('Bottom')),
+  );
+  
+  $form['template'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => t('Templates'),
+    '#description' => t('Beware that thoses settings could be overwrited by a specific destination term settings'),
+  );
+  $form['template']['template_rule'] = array(
+    '#type' => 'select',
+    '#title' => t('Template rule override'),
+    '#options'=> array(''=>t('No override: Use graphical chart'),'red'=>t('Red')),
+  );
+  
   return $form;
 }
 

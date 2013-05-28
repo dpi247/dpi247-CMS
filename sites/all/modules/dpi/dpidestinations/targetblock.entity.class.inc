@@ -29,13 +29,7 @@ class TargetBlockEntity extends Entity{
    */
   public $page_manager_handlers_did;
 
-  /**
-   * Is the settings of the view ovverided.
-   *
-   * @var boolean
-   */
-  public $override_pager_settings;
-
+ 
   /**
    * Total numbers of nodes displayed in this target.
    *
