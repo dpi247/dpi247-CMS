@@ -75,16 +75,11 @@ function dpidestinations_schema() {
         'length' => 64,
         'not null' => TRUE
       ),
-      'view_id' =>array(
+      'view_display' =>array(
         'type'=>'varchar',
         'length' => 64,
         'not null' => TRUE,
       ),
-      'view_id' =>array(
-            'type'=>'varchar',
-            'length' => 64,
-            'not null' => TRUE,
-        ),
       'available_targetlayouts' => array(
             'description' => 'Wich target layout are available for this target.',
             'type' => 'varchar',
