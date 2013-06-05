@@ -879,7 +879,6 @@ function panels_load_display($did) {
  * @return object $display instanceof panels_display \n
  */
 function panels_save_display(&$display) {
-  dsm($display,'display');
   $update = (isset($display->did) && is_numeric($display->did)) ? array('did') : array();
   drupal_write_record('panels_display', $display, $update);
 
