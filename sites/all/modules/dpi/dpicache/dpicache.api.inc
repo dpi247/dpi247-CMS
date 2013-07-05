@@ -24,6 +24,9 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
     if($variable = $result->fetchAssoc()) {
       $dpivariables[$name] =  unserialize($variable['value']);
     }
+    else{
+      return $default;
+    }
   }
   return $dpivariables[$name];
   
