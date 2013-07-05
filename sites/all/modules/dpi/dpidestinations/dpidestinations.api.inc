@@ -1,7 +1,6 @@
 <?php
 
 function dpidestinations_api_get_destinations_vocabulary_vid(){
-
   return 2;
 }
 
@@ -16,9 +15,14 @@ function dpidestinations_api_get_all_destinations_terms_hierachical_struct($vid,
   return taxonomy_get_tree($vid, $parent, NULL, $load_entities);
   
 }
-function dpidestinations_api_get_all_destinations_term_available_as_select_options(){
+function dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update){
   $terms=dpidestinations_api_get_all_destinations_terms_flat_struct();
-  $options=array();
+  
+  if($is_update)
+    $options=array(''=>'Remove this destination');
+  else
+    $options=array(''=>'Add a new destination');
+    
   foreach ($terms as $term){
     $options[(int)  $term->tid]=$term->name;
     
@@ -26,12 +30,13 @@ function dpidestinations_api_get_all_destinations_term_available_as_select_optio
   return $options;
 }
 
+
 function dpidestinations_api_get_all_targets_available_for_destination_tid($tid){
   if($tid==2){
-    return array(1=>"Default",2=>"BHV");
+    return array('target1'=>"Default","target2"=>"BHV");
   }
-  return array(1=>"Actu",2=>"Football");
-  
+  return array("target1"=>"Default","target3"=>"Football");
+
 }
 
 function dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($tid,$target){
@@ -39,7 +44,38 @@ function dpidestinations_api_get_all_layouts_available_for_destination_tid_and_t
 
 }
 
-function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($tid,$target){
-  return array(1,2);
+function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update=FALSE){
+  
 
+  $controller=new TargetBlockController('targetblock');
+  $targetblock=$controller->load_targetblock_by_termid_and_target($term_id,$target_name);
+  $rank_options=array();
+  if($targetblock){
+    $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+    
+    $rank_max_value= $wrapper->rank_max_value->value();
+    $rank_options=array();
+    for($i=1;$i<=$rank_max_value;$i++){
+      $rank_options[$i]=$i;
+    }
+  }
+  return $rank_options;
+  
 }
+
+
+function dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id){
+  $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
+  return $display->did;
+}
+function dpidestination_api_get_panelsdisplay_for_destinationterm($term_id){
+  $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
+  return $display;
+}
+
+
+
+function hook_dpidestinations_virtualrank_dispersion($term_id,$target_name,$nids){
+  //Clear some cache for example
+}
+

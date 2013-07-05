@@ -24,8 +24,8 @@ $plugin = array(
   'tab operation' => 'panels_panel_context_tab_operation',
   
   // Callback to render the data.
-  'render' => 'dpidestinations_destination_renderer_editor',
   'render' => 'panels_panel_context_render',
+  //'render' => 'panels_panel_context_render',
   // Callback to return addressable data
   'addressable callback' => 'panels_panel_context_get_addressable',
   
@@ -207,9 +207,9 @@ $plugin = array(
      ),
   ),
   'default conf' => array(
-    'title' => t('Panel'),
+    'title' => t('Destination'),
     'no_blocks' => FALSE,
-    'pipeline' => 'standard',
+    'pipeline' => 'dpidestinations_viewer',
     'body_classes_to_remove' => '',
     'body_classes_to_add' => '',
     'css_id' => '',
@@ -233,6 +233,7 @@ function dpidestinations_destinations_context_edit_content($form, &$form_state) 
   
   $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . ':' . $form_state['handler_id']);
   $form_state['renderer'] = panels_get_renderer_handler('dpidestinations_editor', $cache->display);
+  
   $form_state['renderer']->cache = &$cache;
   
   $form_state['display'] = &$cache->display;
@@ -250,7 +251,19 @@ function dpidestinations_destinations_context_edit_content($form, &$form_state) 
     $form['buttons']['preview'] = $form['buttons']['return'];
     $form['buttons']['preview']['#value'] = t('Update and preview');
   };
-  return $form;}
+  return $form;
+}
+
+/**
+ * Validate changes to the panel content form.
+ */
+function dpidestinations_destinations_context_edit_content_validate(&$form, &$form_state) {
+  panels_panel_context_edit_content_validate($form, $form_state);
+}
+
+function dpidestinations_destinations_context_edit_content_submit(&$form, &$form_state) {
+  panels_panel_context_edit_content_submit($form, $form_state);
+}
 
 function dpidestinations_destination_renderer_editor($handler, $base_contexts, $args, $test = TRUE) {
   // Go through arguments and see if they match.
@@ -294,8 +307,7 @@ function dpidestinations_destination_renderer_editor($handler, $base_contexts, $
   panels_get_current_page_display($display);
 
   $renderer = panels_get_renderer($handler->conf['pipeline'], $display);
-
-
+  
   // Remove and add body element classes
   $panel_body_css = &drupal_static('panel_body_css');
 

@@ -14,10 +14,9 @@ files[] = dpidestinations.api.inc
 
 ; Entity API controllers
 files[] = dpidestinations.info.inc
-files[] = target.controller.class.inc
-files[] = target.entity.class.inc
-files[] = targetblock.controller.class.inc
-files[] = targetblock.entity.class.inc
+files[] = dpidestinations.controller.class.inc
+files[] = dpidestinations.entity.class.inc
+
 
 
 files[] = plugins/views/dpidestinations_plugin_display_targetview.inc

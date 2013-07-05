@@ -8,7 +8,6 @@ $plugin = array(
   //'required context' => new ctools_context_required(t('Destination'), 'destination'),
   'category' => t('Target'),
   'group'=>t('DPI Core'),
-  
   'all contexts' => TRUE,
   
 );
@@ -29,7 +28,6 @@ function dpidestinations_targetblock_content_type_content_types() {
       //'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t('Target'),
       'group'=>t('DPI Core'),
-      
       //'all contexts' => TRUE,
     
     );
@@ -47,37 +45,33 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $module = 'dpidestinations';
   $block = new stdClass();
   $block->module = $module;
-  $block->title = t('Redacblock');
-  $block->content = t('Redacblock Content dsfs dfsdv dsv qfv sdfvdsfv dfsv sdrversvrqz verqv eqrv
-  reqsfser fqer
-  fqer gfvqerfv zqerf
-  eqrfv erqv
-  qerv qerv
-  qerfv qezrfvqe
-  srgvfqe rsfvqers
-  fge qrfvqer
-  gvqer fvgeqr
-  v');
-     $block->admin_links = array(
-      array(
-        'title' => t('Configure block'),
-        'href' => "admin/structure/block/manage/$module/$delta/configure",
-        'query' => drupal_get_destination(),
-      ),
-    );
+  
+  $did=$context['argument_destination_1']->data->handler->did;
+
+  $targetBlockController=new TargetBlockController('targetblock');
+  $targetblock=$targetBlockController->load_targetblock_by_did_target_and_splitdelta($did,$subtype,0);
+  
+  //@todo: check si on a pas de targetblock
+  //si on a pas  si le user est admin afficher un block d'erreur
+  // Si user est anonyme=> block vide 
+  // et watchdog
+  
+  
+  $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+  $target=$targetblock_wrapper->target->value();
+  $target_wrapper = entity_metadata_wrapper('target', $target);
+  $targetview=$target_wrapper->targetview->value();
+  
+  _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
+  
+  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
+  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
+  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
+  
+  
+  
   return $block;
   
-  if (empty($context->data)) {
-    return FALSE;
-  }
-  
-  $module = 'dpidestinations';
-  $block = new stdClass();
-  $block->module = $module;
-  $block->title = t('Redacblock');
-  
-  $block->content ='rr';
-  return $block;
 }
 
 
@@ -87,7 +81,8 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
   $conf = $form_state['conf'];
   $targetController=new TargetBlockController('targetblock');
-  $target_block= $targetController->load_targetblock_by_panels_panelid($form_state['pane']->pid);
+  
+  $target_block= $targetController->load_targetblock_by_panels_panelpid($form_state['pane']->pid);
   
   
   //If the targetblock is not defined check if we have some info
@@ -121,26 +116,13 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     
   );
 
-  $form['pager_settings']['use_splitted'] = array(
+  $form['pager_settings']['use_split'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use splited blocks'),
-    '#default_value' => $target_block->use_splitted,
+    '#default_value' => $target_block->use_split,
   
       
   );
-  $form['pager_settings']['node_count_per_target'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $target_block->node_count_per_target,
-    '#size' => 4,
-    '#title' => t('Node count for this targetblock (sum of the targetblock instance)'),
-    '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
-          => array('checked' => TRUE),  // condition
-        ),
-      ),
-  );
-
   $form['pager_settings']['offset'] = array(
     '#type' => 'textfield',
     '#default_value' =>$target_block->offset,
@@ -149,41 +131,27 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#description' => t('The number of items to skip and not display.'),
      '#states' => array(
       'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
+        ':input[name="use_split"]' // element to evaluate condition on
           => array('checked' => TRUE),  // condition
         ),
       ),
   );
 
   
-  $form['pager_settings']['split_index_count'] = array(
+  $form['pager_settings']['split_delta'] = array(
     '#type' => 'textfield',
-    '#default_value' => $target_block->split_index_count,
+    '#default_value' => $target_block->split_delta,
     '#title' => t('Split index'),
     '#size' => 4,
     '#description' => t('The index of this redacblock -if this is the third splitted redabclokc it will be 3- (Only if the redac block is splitted across the page).'),
      '#states' => array(
       'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
+        ':input[name="use_split"]' // element to evaluate condition on
           => array('checked' => TRUE),  // condition
         ),
       ),
   );
 
-  $form['pager_settings']['split_total_count'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $target_block->split_total_count,
-    '#title' => t('# of splited blocks'),
-    '#size' => 4,
-    '#description' => t('The total number of splitted block. I there is three redacblock it will be 3'),
-     '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
-          => array('checked' => TRUE),  // condition
-        ),
-      ),
-    
-  );
 
   $form['pager_settings']['hide_pager'] = array(
     '#type' => 'checkbox',
@@ -193,7 +161,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#description' => t('Check this if you don\'t want the pager to display above this redacblock'),
   	 '#states' => array(
       'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
+        ':input[name="use_split"]' // element to evaluate condition on
           => array('checked' => TRUE),  // condition
         ),
       ),
@@ -207,7 +175,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#description' => t('This ID is use to synchronize the splitted blocks with the pager. You need to set the same one on each splitted block.'),
      '#states' => array(
       'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
+        ':input[name="use_split"]' // element to evaluate condition on
           => array('checked' => TRUE),  // condition
         ),
       ),
@@ -257,16 +225,17 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   //DEFAULT SAVE OVERRIDABLE VARIABLES:
   $confs=array(
     'override_title',
-    'override_pager_settings',
     'node_count_for_targetblockinstance',
     'use_pager',
-    'use_splitted',
-    'node_count_per_target',
+    'use_split',
+    'node_count_for_targetblock',
     'offset',
-    'split_index_count',
-    'split_total_count',
+    'split_delta',
     'hide_pager',
     'pager_id',
+    'rank_max_value',
+    'rank_behavior',
+    'template_rule'
   );
   foreach($confs as $conf){
     $form_state['conf'][$conf] = $form_state['values'][$conf];
@@ -277,3 +246,66 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
     $form_state['conf'][$key] = $form_state['values'][$key];
   }
 }
+
+
+
+
+
+function   _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype, $conf,$args,$context,$target_wrapper,$targetblock,& $targetview){
+  
+  
+  $term_value=$context['argument_destination_1']->data->tid;
+  $target_value=$target_wrapper->machine_name->value();
+  _dpidestinations_targetview_initialize_view( $targetview, $term_value,$target_value,$targetblock);
+  
+  
+  
+}
+
+
+
+
+function _dpidestinations_targetblock_content_type_helper_get_title($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+  if($conf['override_title']){
+    $title = $conf['override_title_text'];
+  }
+  else{
+    $title = t('Redacblock');
+  }
+  return $title;
+}
+function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+  $content="";
+  
+  //see:https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s 
+  $targetview->dom_id=uniqid();
+  $targetview->execute();
+  
+  $a=array(1,2,3,4,5,6,7,8,9,10);
+  foreach($a as$b){
+    $targetview->render();
+  }
+  
+  
+  return $targetview->render();
+}
+
+
+function _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+  return array(
+    array(
+      'title' => t('Configure target block'),
+      'href' => "admin/structure/block/manage/configure",
+      'query' => drupal_get_destination(),
+    ),
+    array(
+      'title'=>t('Reorder TargetView'),
+      'href'=> "admin/targetview_reorder/%term/%targetblock",
+      'query' => drupal_get_destination(),
+      
+      ),
+  );
+}
+
+
+

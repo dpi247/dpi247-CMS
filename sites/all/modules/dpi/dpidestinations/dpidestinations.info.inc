@@ -54,7 +54,22 @@ class DpiDestinationsTargetblockMetadataController extends EntityDefaultMetadata
       'field_name' => array(),
       'language' => array(),
     );
+    //Handling entity references
 
+    unset($properties['target']);
+    
+    $properties['target']=array(
+      'label' => t("Target"),
+      'type' => 'target',
+      'description' => t("The target of the target node."),
+      'required' => TRUE,
+      'schema field' => 'target',
+      );
+    
+    //differ when targetblockinstaance is splitted: sum of all splitted instance
+    $properties['other_splitted_targetblocks']['getter callback']='_targetblock_metadata_getter';
+    
+    
     return $info;
   }
 }

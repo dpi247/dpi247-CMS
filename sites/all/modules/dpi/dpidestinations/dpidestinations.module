@@ -19,6 +19,12 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
   );
+  $theme['dpidestination_targetview_page_reorder_form'] = array(
+    'template' => 'dpidestination-targetview-page-reorder-form',
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'render element' => 'form',
+  );
 
     return $theme;
 }
@@ -29,10 +35,18 @@ function dpidestinations_menu(){
   $items['destination/%destinationterm'] = array(
     'title callback' => 'destination_view',
     'title arguments' => array(1),
-    'page callback' => 'destination_view',
+    'page callback' => 'dpidestination_page_destination_view',
     'page arguments' => array(1),
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
+  );
+  $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
+    'page callback' => 'dpidestination_targetview_page_reorder',
+    'page arguments' => array(2,3),
+    'access arguments' => array('reorder target'),
+    'type' => MENU_CALLBACK,
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+    'file' => 'dpidestinations.pages.reorder.inc'
   );
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
@@ -71,10 +85,10 @@ function dpidestinations_panels_display_save($display){
   
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController=new TargetBlockController('targetblock');
-  $existing_target_block= $targetController->load_targetblock_by_panels_display($display->did);
+  $existing_targetblocks= $targetController->load_targetblocks_by_panels_display($display->did);
   
   $targetblock_by_pid=array();
-  foreach($existing_target_block as $targetblockid  => $targetblock){
+  foreach($existing_targetblocks as $targetblockid  => $targetblock){
     $targetblock_by_pid[$targetblock->pid]=$targetblock;
   }
   foreach($display->content as $id => $pane){
@@ -89,7 +103,7 @@ function dpidestinations_panels_display_save($display){
   
   $targetblocks_to_delete=array();
   foreach($targetblocks_to_delete_temp as $targetblock_to_delete_temp){
-    if(isset($existing_target_block[$targetblock_to_delete_temp->targetblockid ])){
+    if(isset($existing_targetblocks[$targetblock_to_delete_temp->targetblockid ])){
       $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ]=$targetblock_to_delete_temp->targetblockid ;
     }
   }
@@ -119,14 +133,69 @@ function dpidestinations_panels_display_save($display){
 }
 
 
+
+function dpidestinations_default_panels_renderer_pipeline() {
+  $pipelines = array();
+  $pipeline = new stdClass;
+  $pipeline->disabled = FALSE; /* Edit this to true to make a default pipeline disabled initially */
+  $pipeline->api_version = 1;
+  $pipeline->name = 'dpidestinations_viewer';
+  $pipeline->admin_title = t('CPS Print');
+  $pipeline->admin_description = t('To print cps.');
+  $pipeline->weight = 0;
+  //This is add to know that this a print pipeline
+  $pipeline->settings = array(
+
+    'renderers' => array(
+      0 => array(
+        'access' => array(),
+        'renderer' => 'dpidestinations_viewer',
+        'options' => array(),
+      ),
+    ),
+  );
+  $pipelines[$pipeline->name] = $pipeline;
+
+  return $pipelines;
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpidestinations_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+      'version' => 1,
+      'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
+    );
+  }
+}
+
+
+
 /**
  * Implementation of hook_ctools_plugin_directory()
  */
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' && $plugin == 'content_types') {
-    return 'plugins/ctools/content_types';
+if ($module == 'ctools' && $plugin == 'arguments') {
+    return 'plugins/ctools/arguments';
   }
-  if ($module == 'page_manager' && $plugin == 'tasks') {
+  if ($module == 'ctools' && $plugin == 'contexts') {
+      return 'plugins/ctools/contexts';
+    }
+  if ($module == 'ctools' && $plugin == 'content_types') {
+      return 'plugins/ctools/content_types';
+    }
+    if ($module == 'page_manager' && $plugin == 'tasks') {
     return 'plugins/page_manager/tasks';
   }
 
@@ -141,6 +210,7 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
 }
 
 function dpidestinations_entity_info_alter(&$entity_info){
+  //@todo: ne pas coder en dur le nom du vocabulaire
   $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
   
 }
@@ -156,12 +226,10 @@ function dpidestinations_term_uri($term){
 
 
 function destinationterm_load($destination_id){
-  return 1;
   return taxonomy_term_load($destination_id);
 
-
 }
-function destination_view($destination){
+function dpidestination_page_destination_view($destination){
   return 'You need to activate the page manager';
 }
 
@@ -182,8 +250,8 @@ function dpidestinations_views_plugins() {
               'help' => t('View display used for the default target, use this as a basis for custom destination views and targetss.'),
               'handler' => 'dpidestinations_plugin_display_targetview',
               'path' => drupal_get_path('module', 'dpidestinations') . '/plugins/views',
-              //  'theme path' => drupal_get_path('module', 'views') . '/theme',
-              //  'theme' => 'views_view',
+              'theme path' => drupal_get_path('module', 'views') . '/theme',
+              'theme' => 'views_view',
               'use ajax' => FALSE,
               'use pager' => FALSE,
               'use more' => FALSE,
@@ -230,4 +298,22 @@ function dpidestinations_views_plugins() {
   ;
 
 }
+
+/**
+ * We use the hook_views_pre_render when we have a splitted targetblock.
+ * We will use this technique to  avoid execute the sql querry multiple times
+ *
+ *
+ * This hook can be utilized by themes.
+ * @param $view
+ *   The view object about to be processed.
+ */
+function dpidestinations_views_pre_render(&$view) {
+  // Scramble the order of the rows shown on this result page.
+  // Note that this could be done earlier, but not later in the view execution
+  // process.
+  
+}
+
+
 

@@ -1,5 +1,14 @@
 <?php 
-
+ function dpidestinations_install(){
+   dpi_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
+   dpi_variable_set("dpidestinations_virtualrank_delta",30);
+   
+ }
+ function dpidestinations_uninstall(){
+   dpi_variable_del("dpidestinations_targetview_reorder_default");
+   dpi_variable_del("dpidestinations_virtualrank_delta");
+   dpi_variable_del("dpidestinations_available_targetlayouts");
+ }
 /**
  * Implements hook_field_schema().
  *
@@ -23,13 +32,12 @@ function dpidestinations_field_schema($field) {
       'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
       'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
       'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
-      'time_rank' => array('type' => 'float',  'size' => 'big','not null' => FALSE),
-      //'time_rank' => array('type' => 'int',  'size' => 'normal', 'not null' => TRUE),
+      'virtual_rank' => array('type' => 'int',  'size' => 'big','not null' => FALSE),
       
   );
   $indexes = array(
       'tid' => array('tid'),
-      'time_rank' => array('time_rank'),
+      'virtual_rank' => array('virtual_rank'),
   );
   $unique_keys=array('unique'=>array('tid','target'));
   
@@ -141,11 +149,15 @@ function dpidestinations_schema() {
         'not null' => TRUE
       ),
       
-      'node_count_per_target' => array(
+      'node_count_for_targetblockinstance' => array(
     	'description' => 'The machine name of the target',
-    	'type' => 'varchar',
-    	'length' => '255',
-    	'not null' => FALSE
+    	'type' => 'int',
+    	'not null' => TRUE
+      ),      
+      'node_count_for_targetblock' => array(
+    	'description' => 'The machine name of the target',
+    	'type' => 'int',
+    	'not null' => TRUE
       ),
       'use_pager' => array(
     	'description' => 'The machine name of the target',
@@ -172,13 +184,28 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => FALSE
       ),
-      'split_number' => array(
+      'split_delta' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'int',
+        'default' => 0,
+        'not null' => TRUE
+      ),
+      'rank_max_value'=>array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The maximum rank value.'
+       ),
+      'rank_behavior'=> array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
         'not null' => FALSE
       ),
-      'split_total' => array(
+      'template_rule'=> array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',

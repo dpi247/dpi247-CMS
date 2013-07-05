@@ -158,7 +158,7 @@ function target_view($target, $view_mode = 'full'){
 
 
 function target_form($form, &$form_state, $target) {
-  $view_name_options=dpidestinations_helpers_dependant_target_viewname_and_display_options_for_view_name();
+  $view_name_options= __dpidestinations_dependant_target_viewname_and_display_options_for_view_name();
   
   $selected_view_name = isset($form_state['values']['view_name']) ? $form_state['values']['view_name'] : $target->view_name;
   if($selected_view_name=="" or $selected_view_name==NULL){
@@ -182,7 +182,7 @@ function target_form($form, &$form_state, $target) {
     '#machine_name'=> array(
       'source'=>array('label'),
       'label' => t('Target Machine name'),
-      'exists' => '_dpidestinations_targetmachine_name_exists',
+      'exists' => '_dpidestinations_target_machine_name_exists',
 
 
     ),
@@ -215,7 +215,7 @@ function target_form($form, &$form_state, $target) {
   $form['view_display'] = array(
     '#type' => 'select',
     '#title' => t('View Display'),
-    '#options' => dpidestinations_helpers_dependant_target_viewname_and_display_options_for_view_display($selected_view_name),
+    '#options' => __dpidestinations_dependant_target_viewname_and_display_options_for_view_display($selected_view_name),
     '#default_value'=> $selected_view_display,
     '#required' => TRUE,
     '#prefix' => '<div id="dropdown-view-display">',
@@ -342,10 +342,10 @@ function targetblock_form($form, &$form_state, $targetblock) {
     ),
   );
 
-  $form['pager_settings']['split_flag'] = array(
+  $form['pager_settings']['use_split'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use splited blocks'),
-    '#default_value' => $targetblock->split_flag,
+    '#default_value' => $targetblock->use_split,
     '#states' => array(
       'visible' => array(   // action to take.
         ':input[name="override_pager_settings"]' // element to evaluate condition on
@@ -382,10 +382,10 @@ function targetblock_form($form, &$form_state, $targetblock) {
   );
 
 
-  $form['pager_settings']['split_index_count'] = array(
+  $form['pager_settings']['split_delta'] = array(
     '#type' => 'textfield',
-    '#default_value' => $targetblock->split_index_count,
-    '#title' => t('Split index'),
+    '#default_value' => $targetblock->split_delta,
+    '#title' => t('Split Delta'),
     '#size' => 4,
     '#description' => t('The index of this redacblock -if this is the third splitted redabclokc it will be 3- (Only if the redac block is splitted across the page).'),
     '#states' => array(
@@ -394,21 +394,6 @@ function targetblock_form($form, &$form_state, $targetblock) {
         => array('checked' => TRUE),  // condition
       ),
     ),
-  );
-
-  $form['pager_settings']['split_total_count'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $targetblock->split_total_count,
-    '#title' => t('# of splited blocks'),
-    '#size' => 4,
-    '#description' => t('The total number of splitted block. I there is three redacblock it will be 3'),
-    '#states' => array(
-      'visible' => array(   // action to take.
-        ':input[name="use_splitted"]' // element to evaluate condition on
-        => array('checked' => TRUE),  // condition
-      ),
-    ),
-
   );
 
   $form['pager_settings']['hide_pager'] = array(
@@ -439,15 +424,16 @@ function targetblock_form($form, &$form_state, $targetblock) {
     ),
 
   );
-
-  $form['template'] = array(
-    '#type' => 'select',
-    '#default_value' => $targetblock->template,
-    '#title' => t('Template'),
-    '#options'=>array('default'=>'Use templates rules')+$target->available_templateoverrides,
-
-
-  );
+ if($target){
+    $form['template'] = array(
+      '#type' => 'select',
+      '#default_value' => $targetblock->template,
+      '#title' => t('Template'),
+      '#options'=>array('default'=>'Use templates rules')+$target->available_templateoverrides,
+  
+  
+    );
+ }
   return $form;
 
 }

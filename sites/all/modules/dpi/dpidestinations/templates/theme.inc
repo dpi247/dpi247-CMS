@@ -51,7 +51,6 @@ function dpidestinations_preprocess_dpidestinations_add_content_modal(&$vars) {
  */
 function dpidestinations_process_dpidestinations_add_content_modal(&$vars) {
    $content = !empty($vars['categories'][$vars['category']]['content']) ? $vars['categories'][$vars['category']]['content'] : array();
-dsm($content);
   // If no category is selected or the category is empty or our special empty
   // category render a 'header' that will appear instead of the columns.
   if (empty($vars['category']) || empty($content) || $vars['category'] == 'root') {
@@ -76,3 +75,8 @@ dsm($content);
 
   $vars['messages'] = theme('status_messages');
 }
+
+
+
+
+

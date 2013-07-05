@@ -1,5 +1,4 @@
 <?php
-
 $plugin = array(
   'renderer' => 'dpidestinations_renderer_editor',
 );
@@ -9,7 +8,9 @@ $plugin = array(
  */
 
 class dpidestinations_renderer_editor extends panels_renderer_editor {
-
+  function init($plugin, &$display) {
+    parent::init($plugin, $display);
+  }
   /**
    *
    *
