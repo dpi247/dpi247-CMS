@@ -386,17 +386,21 @@ function _dpidestinatons_targetblock_sync_node_count_for_targetblock(& $targetbl
  * $targetview->pre_execute();
  * $targetview->execute();
  */
-function _dpidestinations_targetviewreorder_initialize_view($targetblock){
+function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   
   $target=$targetblock_wrapper->target->value();
+  list($targetview_reorder_view_name,$targetview_reorder_display)=dpi_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
+  $target->view_name=$targetview_reorder_view_name;
+  $target->view_display=$targetview_reorder_display;
+  
   $target_wrapper = entity_metadata_wrapper('target', $target);
   
   //We use the targetview_reorder view to ensure we got the proper information.
-  list($targetview_reorder_view_name,$targetview_reorder_display)=dpi_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
-  //$target_wrapper->view_name->set($targetview_reorder_view_name);
-  //$target_wrapper->view_display->set($targetview_reorder_display);
+  
   $targetview=$target_wrapper->targetview->value();
+  
+  dsm($targetview);
   
   //We double the number of rows and force the use of pager
   $targetblock->node_count_for_targetblockinstance=2*$targetblock->node_count_for_targetblockinstance;
@@ -406,7 +410,7 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock){
   $target_value=$target->machine_name;
   
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
-  
+  return $targetview;
   
 }
 function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){

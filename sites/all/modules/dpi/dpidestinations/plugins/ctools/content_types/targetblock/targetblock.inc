@@ -253,12 +253,9 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
 
 function   _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype, $conf,$args,$context,$target_wrapper,$targetblock,& $targetview){
   
-  
   $term_value=$context['argument_destination_1']->data->tid;
   $target_value=$target_wrapper->machine_name->value();
   _dpidestinations_targetview_initialize_view( $targetview, $term_value,$target_value,$targetblock);
-  
-  
   
 }
 
@@ -281,12 +278,6 @@ function _dpidestinations_targetblock_content_type_helper_get_content($subtype, 
   $targetview->dom_id=uniqid();
   $targetview->execute();
   
-  $a=array(1,2,3,4,5,6,7,8,9,10);
-  foreach($a as$b){
-    $targetview->render();
-  }
-  
-  
   return $targetview->render();
 }
 
@@ -294,16 +285,17 @@ function _dpidestinations_targetblock_content_type_helper_get_content($subtype, 
 function _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
   return array(
     array(
-      'title' => t('Configure target block'),
-      'href' => "admin/structure/block/manage/configure",
-      'query' => drupal_get_destination(),
-    ),
-    array(
       'title'=>t('Reorder TargetView'),
       'href'=> "admin/targetview_reorder/%term/%targetblock",
       'query' => drupal_get_destination(),
       
       ),
+    array(
+      'title' => t('Configure target block'),
+      'href' => "admin/structure/block/manage/configure",
+      'query' => drupal_get_destination(),
+    ),
+   
   );
 }
 

@@ -41,7 +41,7 @@ function dpidestinations_menu(){
     'type' => MENU_CALLBACK,
   );
   $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
-    'page callback' => 'dpidestination_targetview_page_reorder',
+    'page callback' => 'dpidestinations_targetview_page_reorder',
     'page arguments' => array(2,3),
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,

@@ -7,22 +7,24 @@
  * 
  */
 
-function dpidestination_targetview_page_reorder($term,$targetblock){
+function dpidestinations_targetview_page_reorder($term,$targetblock){
 
-  $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock);
+  dsm($targetblock);
+  $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
   
   $targetview->pre_execute();
   $targetview->execute();
   
   
   $nodes=$targetview->result;
-  
-  return drupal_get_form('dpidestinations_targetview_page_reorder_form',$nodes,$term_value ,$target_value);
+
+  dsm($nodes);
+  return drupal_get_form('dpidestinations_targetview_page_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }
 
 
-function dpidestination_targetview_page_reorder_form($form, &$form_state, $nodes, $destination_term, $destination_target){
+function dpidestinations_targetview_page_reorder_form($form, &$form_state, $nodes, $destination_term, $destination_target){
   $form['#tree'] = TRUE;
   
   
@@ -66,7 +68,7 @@ function dpidestination_targetview_page_reorder_form($form, &$form_state, $nodes
 }
 
 
-function dpidestination_targetview_page_reorder_form_submit(& $form, &$form_state){
+function dpidestinations_targetview_page_reorder_form_submit(& $form, &$form_state){
   dsm($form_id);
   dsm($form);
   dsm($form_state);
