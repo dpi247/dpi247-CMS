@@ -78,5 +78,3 @@ function dpidestinations_process_dpidestinations_add_content_modal(&$vars) {
 
 
 
-
-

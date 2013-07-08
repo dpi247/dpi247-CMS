@@ -19,8 +19,8 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
   );
-  $theme['dpidestination_targetview_page_reorder_form'] = array(
-    'template' => 'dpidestination-targetview-page-reorder-form',
+  $theme['dpidestinations_targetview_page_reorder_form'] = array(
+    'template' => 'dpidestinations-targetview-page-reorder-form',
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
     'file' => 'theme.inc',
     'render element' => 'form',

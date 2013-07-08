@@ -27,11 +27,11 @@
 ?>
 <?php
   // Add table javascript.
-  drupal_add_js('misc/tableheader.js');
-  drupal_add_js(drupal_get_path('module', 'block') . '/block.js');
-  
-  drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
-  
+drupal_add_js('misc/tableheader.js');
+drupal_add_js(drupal_get_path('module', 'block') . '/block.js');
+
+drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
+
 ?>
 <table id="targetview" class="sticky-enabled">
   <thead>
@@ -45,7 +45,6 @@
   </thead>
   <tbody>
     <?php $row = 0; ?>
-    <?php dsm($node_listing,nl)?>
       <?php foreach ($node_listing as $delta => $data): ?>
       <tr class="draggable <?php print $row % 2 == 0 ? 'odd' : 'even'; ?>">
         <td class="node"><?php print $data->node_title; ?></td>

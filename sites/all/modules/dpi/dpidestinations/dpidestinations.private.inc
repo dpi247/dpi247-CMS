@@ -337,6 +337,25 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
 
 }
 
+function _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $new_virtual_rank){
+  
+  //@todo: avoid hard coding of the table...
+  $destination_table='field_data_field_destinations';
+  
+  db_update($destination_table) // Table name no longer needs {}
+  ->fields(array(
+  'field_destinations_virtual_rank' => $new_virtual_rank,
+  ))
+  ->condition('entity_id',$nid)
+  ->condition('field_destinations_tid',$term_id)
+  ->condition('field_destinations_target',$target_name)
+  ->execute();
+  
+  entity_get_controller('node')->resetCache(array($nid));
+  
+  
+  
+}
 
 function _dpidestinatons_targetblock_calculate_node_count_for_targetblock(& $targetblock){
 
@@ -400,7 +419,6 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   
   $targetview=$target_wrapper->targetview->value();
   
-  dsm($targetview);
   
   //We double the number of rows and force the use of pager
   $targetblock->node_count_for_targetblockinstance=2*$targetblock->node_count_for_targetblockinstance;
