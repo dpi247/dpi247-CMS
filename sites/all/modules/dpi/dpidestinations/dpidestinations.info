@@ -7,7 +7,6 @@ dependencies[] = dpicontenttypes
 dependencies[] = entity
 dependencies[] = panels
 dependencies[] = devel
-dependencies[] = dpicache
 
 
 files[] = dpidestinations.api.inc

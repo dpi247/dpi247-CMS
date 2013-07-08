@@ -1,13 +1,13 @@
 <?php 
  function dpidestinations_install(){
-   dpi_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
-   dpi_variable_set("dpidestinations_virtualrank_delta",30);
+   _dpidestinations_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
+   _dpidestinations_variable_set("dpidestinations_virtualrank_delta",30);
    
  }
  function dpidestinations_uninstall(){
-   dpi_variable_del("dpidestinations_targetview_reorder_default");
-   dpi_variable_del("dpidestinations_virtualrank_delta");
-   dpi_variable_del("dpidestinations_available_targetlayouts");
+   _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
+   _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
+   _dpidestinations_variable_del("dpidestinations_available_targetlayouts");
  }
 /**
  * Implements hook_field_schema().

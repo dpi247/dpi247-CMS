@@ -224,7 +224,7 @@ function target_form($form, &$form_state, $target) {
   );
   $form['available_targetlayouts'] = array(
     '#type' => 'checkboxes',
-    '#options' => dpi_variable_get('dpidestinations_available_targetlayouts'),
+    '#options' => _dpidestinations_variable_get('dpidestinations_available_targetlayouts'),
     '#default_value'=> unserialize($target->available_targetlayouts),
     '#title' => t('Available target\'s layout'),
   );

@@ -1,6 +1,50 @@
 <?php
 
 
+/*
+ * Wrapper function to avoid dependancy of dpicache
+*/
+function _dpidestinations_variable_get( $name, $default_value){
+  if(function_exists('dpi_variable_get')){
+    return dpi_variable_get($name,$default_value);
+  }
+  else{
+    return variable_get($name,$default_value);
+  }
+
+}
+
+/*
+ * Wrapper function to avoid dependancy of dpicache
+*/
+function _dpidestinations_variable_set( $name, $default_value){
+  if(function_exists('dpi_variable_set')){
+    return dpi_variable_set($name,$default_value);
+  }
+  else{
+    return variable_set($name,$default_value);
+  }
+
+}
+
+/*
+ * Wrapper function to avoid dependancy of dpicache
+*/
+function _dpidestinations_variable_del( $name){
+  if(function_exists('dpi_variable_del')){
+    return dpi_variable_del($name,$default_value);
+  }
+  else{
+    return variable_del($name,$default_value);
+  }
+
+}
+
+function _dpidestinations_variable_set( $form, $form_state){
+  return $form['view_display'];
+
+}
+
 function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
   return $form['view_display'];
   
@@ -270,11 +314,11 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $rank_max_value = $wrapper->rank_max_value->value();
     
     
-    $virtual_rank =  dpi_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
+    $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   }
   else{
     if($position==1){
-      $virtual_rank =  $array_results[0]->field_destinations_virtual_rank+ dpi_variable_get('dpidestinations_virtualrank_delta',1000);
+      $virtual_rank =  $array_results[0]->field_destinations_virtual_rank+ _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000);
     }
     if($position>1){
       if(count($array_results)>1){
@@ -309,7 +353,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     
     $nids=array();
     foreach($results2 as $index => $row_result){
-      $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*dpi_variable_get('dpidestinations_virtualrank_delta',1000));
+      $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*_dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000));
       $nids[]=array('nid'=>$row_result->entity_id,'virtual_rank'=>$new_virtual_rank);
       $keyed_nids[$index]=$row_result->entity_id;
       $keyed_virtualranks[$index]=$new_virtual_rank;
@@ -409,7 +453,7 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   
   $target=$targetblock_wrapper->target->value();
-  list($targetview_reorder_view_name,$targetview_reorder_display)=dpi_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
+  list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   $target->view_name=$targetview_reorder_view_name;
   $target->view_display=$targetview_reorder_display;
   
