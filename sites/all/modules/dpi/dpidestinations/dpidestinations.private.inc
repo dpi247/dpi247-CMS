@@ -32,18 +32,14 @@ function _dpidestinations_variable_set( $name, $default_value){
 */
 function _dpidestinations_variable_del( $name){
   if(function_exists('dpi_variable_del')){
-    return dpi_variable_del($name,$default_value);
+    return dpi_variable_del($name);
   }
   else{
-    return variable_del($name,$default_value);
+    return variable_del($name);
   }
 
 }
 
-function _dpidestinations_variable_set( $form, $form_state){
-  return $form['view_display'];
-
-}
 
 function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
   return $form['view_display'];
