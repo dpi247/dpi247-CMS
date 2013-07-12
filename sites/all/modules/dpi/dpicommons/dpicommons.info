@@ -1,0 +1,6 @@
+name = DPI Commons
+description = Variable definitions and functions relative to dpi247 distribution.
+package = DPI
+core = 7.x
+
+

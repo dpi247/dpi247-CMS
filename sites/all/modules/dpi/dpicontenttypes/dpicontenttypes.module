@@ -1,4 +1,77 @@
 <?php
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
+
+
+/**
+* Implementation of hook_menu()
+*/
+function dpicontenttypes_menu(){
+  $items = array();
+  
+  $dpiproperties_uri = 'dpiproperties/%dpiproperties';
+  $dpiproperties_uri_argument_position = 1;
+  
+  $items[$dpiproperties_uri] = array(
+    'title callback' => 'entity_label',
+    'title arguments' => array('dpiproperties', $dpiproperties_uri_argument_position),
+    'page callback' => 'dpiproperties_view',
+    'page arguments' => array($dpiproperties_uri_argument_position),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'dpiproperties', $dpiproperties_uri_argument_position),
+    'file' => 'dpicontenttypes.entity.inc',
+  );
+  
+  $items[$dpiproperties_uri . '/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  
+  $items[$dpiproperties_uri . '/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiproperties_form', $dpiproperties_uri_argument_position),
+    'access callback' => 'entity_access',
+    'access arguments' => array('edit', 'dpiproperties', $dpiproperties_uri_argument_position),
+    'file' => 'dpicontenttypes.entity.inc',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  
+  $items['admin/structure/dpiproperties-types/%dpiproperties_type/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiproperties_type_form_delete_confirm', 4),
+    'access arguments' => array('administer dpiproperties types'),
+    'weight' => 1,
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dpicontenttypes.entity.inc',
+  );
+  
+  return $items;
+}
+
+/**
+* Implementation of hook_permission()
+*/
+function dpicontenttypes_permission(){
+  return array(
+    'administer dpiproperties' =>  array(
+      'title' => t('Administer DPI properties'),
+      'restrict access' => TRUE,
+    ),
+    'view dpiproperties' => array(
+      'title' => t('View DPI properties'),
+    ),
+    'edit dpiproperties' => array(
+      'title' => t('Edit DPI properties'),
+    ),
+    'create dpiproperties' => array(
+      'title' => t('Create DPI properties'),
+    ),
+  );
+}
 
 
 /**
@@ -8,39 +81,58 @@
  */
 function dpicontenttypes_node_info(){
   return array(
-    'article_package'=>array(
-      'name'=>t("Article Package"),
-        
-      'base'=>'article_package',
-      'description'=>t('Article package from DPI'),
-      'has_title'=>TRUE,  
+    'article_package' => array(
+      'name' => t("Article Package"),
+      'base' => 'article_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => TRUE,
       'locked' => TRUE,
-                
     ),
-    'gallery_package'=>array(
-          'name'=>t("Gallery Package"),
-      
-          'base'=>'article_package',
-          'description'=>t('Article package from DPI'),
-          'has_title'=>TRUE,
-          'locked' => TRUE,
-      
-      ),
-      'poll_package'=>array(
-          'name'=>t("Poll Package"),
-          'base'=>'article_package',
-          'description'=>t('Article package from DPI'),
-          'has_title'=>TRUE,
-          'locked' => TRUE,
-      
-      ),
+    'gallery_package' => array(
+      'name' => t("Gallery Package"),
+      'base' => 'article_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => TRUE,
+      'locked' => TRUE,      
+    ),
+    'poll_package' => array(
+      'name' => t("Poll Package"),
+      'base' => 'article_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => TRUE,
+      'locked' => TRUE,
+    ),
   );
-  
 }
+/**
+ * Implementation of hook_node_presave
+ * @param object $node
+ */
+function dpicontenttypes_node_insert($node){
 
-
-
-
+  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())){
+    if (!isset($node->dpiproperties)){
+      //If no dpiproperties are defined, set default values
+      $values = array(
+        'nid' => $node->nid,
+        'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
+        'description' => '',
+        'source' => 'dpi247',
+        'product_id' => dpi_variable_get('dpicommons_product', ''),
+        
+      );
+      $dpiproperties = new DPIPropertiesEntity($values, 'dpiproperties');
+      $dpiproperties->type = 'default';
+      dpiproperties_save($dpiproperties);
+    } else {
+      //if dpiproperties are defined, save it
+      $dpiproperties = $node->dpiproperties;
+      $dpiproperties->nid = $node->nid;
+      $dpiproperties->type = 'default';
+      dpiproperties_save($dpiproperties);
+    }
+  }
+}
 /**
  * Implement hook_form().
  *
@@ -73,9 +165,19 @@ function poll_package_form($node, $form_state) {
 function dpicontenttypes_entity_info_alter(&$entity_info) {
   // Add our new view mode to the list of view modes...
   $entity_info['node']['view modes']['article_package'] = array(
-      'label' => t('Target default'),
-      'custom settings' => FALSE,
+    'label' => t('Target default'),
+    'custom settings' => FALSE,
   );
+  foreach (dpiproperties_types() as $type => $info) {
+    $entity_info['dpiproperties']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/dpiproperties-types/manage/%dpiproperties_type',
+        'real path' => 'admin/structure/dpiproperties-types/manage/' . $type,
+        'bundle argument' => 4,
+      ),
+    );
+  }
 }
 
 
@@ -83,7 +185,7 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
  * Implements hook_ctools_plugin_directory().
  */
 function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
-	if ($module == 'entityreference' && $plugin=="behavior") {
-		return 'plugins/entityreference/' . $plugin;
-	}
+  if ($module == 'entityreference' && $plugin == "behavior") {
+	return 'plugins/entityreference/' . $plugin;
+  }
 }

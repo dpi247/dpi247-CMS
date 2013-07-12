@@ -72,9 +72,12 @@ function dpidestinations_permission(){
       'title' => t('Administer targets'),
       'restrict access' => TRUE,
     ),
-    'view targetss' => array(
+    'view targets' => array(
       'title' => t('View targets'),
-    )
+    ),
+    'create targets' => array(
+      'title' => t('Create targets'),
+    ),
   );
 }
 

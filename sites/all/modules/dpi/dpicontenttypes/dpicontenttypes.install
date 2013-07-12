@@ -1,0 +1,143 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the node module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function dpicontenttypes_schema() {
+  $schema['dpicontenttypes_properties'] = array(
+    'description' => 'The base table for DPI Properties.',
+    'fields' => array(
+      'dpid' => array(
+        'description' => 'The primary identifier for a DPI properties.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+  	  'type' => array(
+        'description' => 'The type (bundle) of this DPI properties.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'nid' => array(
+        'description' => 'The nid of the node attatch to this properties.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'external_reference' => array(
+        'description' => 'The external reference of the node.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'description' => array(
+        'description' => 'The description of the node.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      'source' => array(
+        'description' => 'The source of the node.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'product_id' => array(
+        'description' => 'The product ID.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'nid'                => array('nid'),
+      'external_reference' => array('external_reference'),
+    ),
+    'foreign keys' => array(
+      'nid' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+    ),
+    'primary key' => array('dpid'),
+  );
+
+  $schema['dpicontenttypes_properties_type'] = array(
+    'description' => 'Stores information about all defined dpiproperties types.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique dpiproperties type ID.',
+      ),
+      'type' => array(
+        'description' => 'The machine-readable name of this type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'A brief description of this type.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+        'translatable' => TRUE,
+      ),
+    ) + entity_exportable_schema_fields(),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'type' => array('type'),
+    ),
+  );
+  return $schema;
+}
+/**
+ * 
+ * Implementation of hook_install
+ */
+function dpicontenttypes_install(){
+  $values = array(
+      'type' => 'default',
+      'label' => 'default',
+      'description' => 'Default DPIPropertiesType',
+      'status' => 1,
+      'module' => 'dpicontenttypes',
+  );
+  $dpipropertiestype = new DPIPropertiesTypeEntity($values);
+  dpiproperties_type_save($dpipropertiestype);
+}
+/**
+ * Creation of the table dpi_properties
+ */
+function dpicontenttypes_update_7000(){
+  //Creation of table dpi_properties
+  $schema = drupal_get_schema('dpicontenttypes_properties', TRUE);
+  db_create_table('dpicontenttypes_properties', $schema);
+  $schema = drupal_get_schema('dpicontenttypes_properties_type', TRUE);
+  db_create_table('dpicontenttypes_properties_type', $schema);
+  
+  $values = array(
+    'type' => 'default',
+    'label' => 'default',
+    'description' => 'Default DPIPropertiesType',
+    'status' => 1,
+    'module' => 'dpicontenttypes',
+  );
+  $dpipropertiestype = new DPIPropertiesTypeEntity($values);
+  dpiproperties_type_save($dpipropertiestype);
+}
