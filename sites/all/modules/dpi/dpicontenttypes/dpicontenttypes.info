@@ -4,4 +4,9 @@ package = DPI
 core = 7.x
 
 
-files[] = dpicontenttypes.api.inc
+dependencies[] = entity
+
+
+; Entity API controllers
+files[] = dpicontenttypes.controller.class.inc
+files[] = dpicontenttypes.entity.class.inc
