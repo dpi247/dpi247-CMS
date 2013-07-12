@@ -1,7 +1,6 @@
 <?php
 class TargetController extends EntityAPIControllerExportable{
   public function create(array $values = array()) {
-    global $user;
     $values += array(
       'targetid' => '',
       'machine_name' => '',
