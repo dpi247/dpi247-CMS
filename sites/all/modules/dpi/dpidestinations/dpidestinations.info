@@ -9,8 +9,6 @@ dependencies[] = panels
 dependencies[] = devel
 
 
-files[] = dpidestinations.api.inc
-
 ; Entity API controllers
 files[] = dpidestinations.info.inc
 files[] = dpidestinations.controller.class.inc
