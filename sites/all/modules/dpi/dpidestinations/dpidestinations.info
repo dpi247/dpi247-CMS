@@ -3,7 +3,7 @@ description = Create customized lists and queries from your database.
 package = DPI
 core = 7.x
 
-dependencies[] = dpicontenttypes
+;dependencies[] = dpicontenttypes
 dependencies[] = entity
 dependencies[] = panels
 dependencies[] = devel
