@@ -1,0 +1,6 @@
+core = "7.x"
+description = "Dpi Log enable dpi logging functionality. This module should used on production site with care."
+name = "dpilog"
+package = DPI
+
+dependencies[] = dpicache

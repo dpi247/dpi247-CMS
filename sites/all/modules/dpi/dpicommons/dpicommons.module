@@ -1,4 +1,8 @@
 <?php 
+
+module_load_include('inc', 'dpilog','dpilog.private');
+
+
 /**
  * Implementation of hook_menu
  */
@@ -28,4 +32,12 @@ function dpicommons_menu(){
   
   return $items;
  
+}
+
+
+function dpi_log($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAULT,$uid=NULL, $id=NULL,$variables=array(),$keep_backtrace=FALSE){
+  if(module_exists('dpilog')){
+    _dpilog_log($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
+  }
+
 }

@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+
+
+select option[value="0"]{
+    background: white;
+}
+
+select option[value="1"]{
+    background: green;
+}
+
+select option[value="2"]{
+    background: red;
+}

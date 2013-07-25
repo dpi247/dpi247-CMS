@@ -1,0 +1,45 @@
+<?php 
+
+
+function dpilog_install(){
+}
+
+function dpilog_uninstall(){
+  dpi_variable_del('dpilog_configuration_granularity');
+  dpi_variable_del('dpilog_configuration_display');
+  
+}
+/**
+ * Implements hook_schema().
+ *
+ */
+function dpilog_schema() {
+  $indexes = array(
+    'log_name' => array('log_name'),
+    'id' => array('id'),
+    'timestamp' => array('timestamp'),
+   // 'compound' => array('log_name','action','lid'),
+  );
+  
+  $schema['dpilog_logs'] = array (
+     'description'=>"de",
+     'fields' => array(
+        'lid' => array('type' => 'serial','unsigned' => TRUE, 'not null' => TRUE),
+        'log_name' => array('type' => 'varchar', 'length' => 254, 'not null' => TRUE),
+        'action' => array('type' => 'varchar', 'length' => 254, 'not null' => TRUE),
+        'thread_id' => array('type' => 'varchar', 'length' => 254, 'not null' => TRUE),
+        'message' => array('type' => 'text', 'not null' => TRUE),
+        'variables' => array('type' => 'text', 'not null' => FALSE),
+        'trace' => array('type' => 'text', 'not null' => FALSE),
+        'id' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+        'user' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+        'severity' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+        'timestamp' => array('type' => 'int',  'not null' => TRUE),
+      ),
+     'primary key' => array('lid'),
+     'indexes' => $indexes,
+     'mysql_engine' => 'MyISAM',
+    );
+  
+  return $schema;
+}
