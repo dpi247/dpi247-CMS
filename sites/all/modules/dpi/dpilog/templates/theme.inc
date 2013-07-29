@@ -74,13 +74,13 @@ function theme_dpilog_form_page_configure_display_form(&$variables){
 
     $display_table=array();
     $display_table['header']=$display_header;
-    
+
     foreach(element_children($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions']) as $action_name ){
        
       $display_table['rows'][$action_name] = array(
         $action_name,
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['timeline']['color']),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['timeline']['tag']),
+        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['display']['color']),
+        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['display']['tag']),
          
       );
 

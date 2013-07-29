@@ -1,11 +1,11 @@
 <?php 
-module_load_include('inc', 'dpilog','dpilog.private');
+module_load_include('inc', 'dpilog', 'dpilog.private');
 
 
 function dpilog_boot(){
   global $dpilog_thread_id;
   $dpilog_thread_id = uniqid();
-  
+
 }
 
 
@@ -17,7 +17,24 @@ function dpilog_menu(){
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpilog_form_page_view_list_form'),
     'weight'=>1,
-    
+
+  );
+  $items['admin/dpilog/log/%'] = array(
+    'title'=> 'Logs',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpilog_form_page_log'),
+    'access arguments'=>array(3),
+    'file'=>'includes/dpilog.admin.inc',
+    'weight'=>2,
+  );
+  $items['admin/dpilog/view'] = array(
+    'title'=> 'Logs',
+    'page callback' => 'dpilog_page_view_list',
+    //'page arguments' => array('dpilog_form_page_view_list_form'),
+    'access arguments'=>array('view dpilog'),
+    'file'=>'includes/dpilog.admin.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight'=>2,
   );
 
   $items['admin/dpilog/view/list'] = array(
@@ -25,90 +42,100 @@ function dpilog_menu(){
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight'=>2,
   );
-    $items['admin/dpilog/view/timeline'] = array(
+  
+  $items['admin/dpilog/view/timeline'] = array(
     'title'=> 'TimeLine',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpilog_form_page_view_timeline_form'),
-          'access arguments'=>array('view dpilog'),
+    'page callback' => 'dpilog_page_view_timeline',
+    //'page arguments' => array('dpilog_form_page_view_timeline_form'),
+    'access arguments'=>array('view dpilog'),
     'file'=>'includes/dpilog.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight'=>3,
-      
-    );
 
-    $items['admin/dpilog/log_message/%'] = array(
-      'title'=> 'Logs',
-      'page callback' => 'dpilog_log_message',
-      'page arguments' => array('3'),
-      'access arguments'=>array('view dpilog'),
-      'file'=>'includes/dpilog.admin.inc',
-      'weight'=>2,
-    );
- 
+  );
+  $items['admin/dpilog/view/timeline/json'] = array(
+    'title'=> 'TimeLine',
+    'page callback' => 'dpilog_page_view_timeline_json',
+    //'page arguments' => array('dpilog_form_page_view_timeline_form'),
+    'access arguments'=>array('view dpilog'),
+    'file'=>'includes/dpilog.admin.inc',
+    'weight'=>3,
+  
+  );
+/*
+  $items['admin/dpilog/log_message/%'] = array(
+    'title'=> 'Logs',
+    'page callback' => 'dpilog_log_message',
+    'page arguments' => array('3'),
+    'access arguments'=>array('view dpilog'),
+    'file'=>'includes/dpilog.admin.inc',
+    'weight'=>2,
+  );
+*/
   $items['admin/dpilog/flush'] = array(
     'title'=> 'Flush',
     'page arguments' => array('dpilog_form_page_flush_form'),
-    
+
     'access arguments'=>array('flush dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.inc',
-  'weight'=>4,
-  ); 
+    'weight'=>4,
+  );
 
   $items['admin/dpilog/configure'] = array(
     'title'=> 'configure',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
-  
+
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.inc',
     'weight'=>5,
-  
+
   );
   $items['admin/dpilog/configure/granularity'] = array(
     'title'=> 'granularity',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
-    
+
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.inc',
-  'weight'=>5,
-    
+    'weight'=>5,
+
   );
   $items['admin/dpilog/configure/display'] = array(
     'title'=> 'display',
     'page arguments' => array('dpilog_form_page_configure_display_form'),
-  
+
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.inc',
     'weight'=>6,
-  
+
   );
-  
-  
+
+
   return $items;
 }
 
 function dpilog_theme(){
-  
+
   return array(
     'dpilog_form_page_configure_granularity_form'=>array(
       'render element' => 'form',
       'file'=>'templates/theme.inc',
-      ),
-  'dpilog_form_page_configure_display_form'=>array(
-    'render element' => 'form',
-    'file'=>'templates/theme.inc',
-  ),
+    ),
+    'dpilog_form_page_configure_display_form'=>array(
+      'render element' => 'form',
+      'file'=>'templates/theme.inc',
+    ),
   );
 }
 function dpilog_permission(){
-   return array(
-     'view dpilog' => array(
+  return array(
+    'view dpilog' => array(
       'title' => t('View dpilog'),
       'description' => t('View dpilog.'),
-    ), 
+    ),
     'configure dpilog' => array(
       'title' => t('Configure dpilog'),
       'description' => t('Define wich actions should be loged and where.'),
@@ -117,21 +144,21 @@ function dpilog_permission(){
       'title' => t('Flush dpilog'),
       'description' => t('Flush all logs'),
     )
-    );
+  );
 
 }
 
 function dpilog_exit(){
   global $dpilog_delayed_save;
-  
+
   if(count($dpilog_delayed_save['dpilog'])){
     $querry=db_insert('dpilog_logs')
-      ->fields(array('log_name','action','thread_id','message','variables','id','user','severity','trace','timestamp'));
+    ->fields(array('log_name','action','thread_id','message','variables','id','user','severity','trace','timestamp'));
     foreach($dpilog_delayed_save['dpilog'] as $record){
       $querry->values((array)$record);
-    } 
+    }
     $querry->execute();
   }
-  
-  
+
+
 }

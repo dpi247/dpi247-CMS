@@ -1,0 +1,17 @@
+@CHARSET "UTF-8";
+
+
+
+
+form div.form-item,.form-type-date-popup {
+float: left;
+padding:10px !important; 
+margin:10px !important;
+}
+fieldset{
+	clear:both;
+}
+.container-inline-date{
+	float:left;
+	clear: none;
+}

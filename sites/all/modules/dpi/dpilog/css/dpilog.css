@@ -12,3 +12,7 @@ select option[value="1"]{
 select option[value="2"]{
     background: red;
 }
+
+.vertical-tabs .form-type-textfield input {
+width: auto;
+}
