@@ -35,9 +35,27 @@ function dpicommons_menu(){
 }
 
 
-function dpi_log($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAULT,$uid=NULL, $id=NULL,$variables=array(),$keep_backtrace=FALSE){
-  if(module_exists('dpilog')){
+function dpi_log($log_name, $action, $message, $severity=DPILOG_SEVERITY_DEFAULT, $uid=NULL, $id=NULL, $variables=array(), $keep_backtrace=FALSE){
+  if (module_exists('dpilog')){
     _dpilog_log($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
   }
-
+}
+/**
+ * 
+ * Check if an URL is valid and return a 200
+ * Return TRUE if so False if not.
+ * @param String $url
+ * @return Boolean $response
+ */
+function dpicommons_checkurlresponse($url){
+  $response = TRUE;
+  if (!valid_url($url)){
+    $response = FALSE;
+  } else {
+    $request = drupal_http_request($url, array('timeout' => dpi_variable_get('dpicommons_http_request_timeout', 3)));
+    if ($request->code != '200'){
+      $response = FALSE;
+    }
+  }
+  return $response;
 }
