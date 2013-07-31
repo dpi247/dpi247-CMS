@@ -1,0 +1,38 @@
+<?php 
+
+/**
+ * Implements hook_field_schema().
+ *
+ * Defines the database schema of the field, using the format used by the
+ * Schema API.
+ *
+ * The licenceplate we will store here is just a text.
+ *
+ * All implementations of hook_field_schema() must be in the module's
+ * .install file.
+ *
+ * @see http://drupal.org/node/146939
+ * @see schemaapi
+ * @see hook_field_schema()
+ * @ingroup field_example
+ */
+function simplefield_field_schema($field) {
+  switch ($field['type']) {
+    case 'licenceplate':
+  
+      $columns = array(
+          'licenceplaternumberdb' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+      );
+      $indexes = array(
+          'index_on_licenceplaternumberdb' => array('licenceplaternumberdb'),
+      );
+      $unique_keys=array();
+    break;
+  }    
+  return array(
+      'columns' => $columns,
+      'indexes' => $indexes,
+      'unique keys'=>$unique_keys,
+  );
+}
+

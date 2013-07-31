@@ -1,0 +1,663 @@
+<?php
+
+/**
+ * @file
+ * Performance hacks which are too hacky to hack into core.
+ */
+
+/**
+ * Implements hook_menu_alter().
+ */
+function performance_hacks_menu_alter(&$items) {
+  // Use a custom callback for node/% to bypass node_tag_new().
+  $items['node/%node']['page callback'] = 'performance_hacks_node_show';
+
+  // Replace _node_revision_access() with a callback that doesn't do a COUNT()
+  // query on the node table. Will show revisions tab to all users with access
+  // even if there's only one revision.
+  // @see http://drupal.org/node/808739
+  $items['node/%node/revisions']['access callback'] = '_performance_hacks_node_revision_access';
+}
+
+/**
+ *  Implements hook_flush_caches().
+ */
+function performance_hacks_flush_caches() {
+  return array('cache_performance_hacks');
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function performance_hacks_module_implements_alter(&$implementations, $hook) {
+  // node_field_display_module_alter() disables all labels on all fields
+  // when the view mode is 'search_index'. If you set display modes for
+  // this view mode by hand, then the hook isn't needed. Since this
+  // may be called hundreds of times on some pages, it's worth disabling it.
+  // @see http://drupal.org/node/834278
+  if ($hook == 'field_display_node_alter') {
+    unset($implementations['node']);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function performance_hacks_form_alter(&$form, $form_state, $form_id) {
+  if (!empty($form['#node_edit_form'])) {
+    $node_form_submit = array_search('node_form_submit', $form['actions']['submit']['#submit']);
+    if ($node_form_submit !== FALSE) {
+      $form['actions']['submit']['#submit'][$node_form_submit] = 'performance_hacks_node_form_submit';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function performance_hacks_form_comment_form_alter(&$form, $form_state) {
+  $comment_form_submit = array_search('comment_form_submit', $form['#submit']);
+  if ($comment_form_submit !== FALSE) {
+    $form['#submit'][$comment_form_submit] = 'performance_hacks_comment_form_submit';
+  }
+}
+
+/**
+ * Exact copy of node_form_submit, except for cache clearing.
+ */
+function performance_hacks_node_form_submit($form, &$form_state) {
+  $node = node_form_submit_build_node($form, $form_state);
+  $insert = empty($node->nid);
+  node_save($node);
+  $node_link = l(t('view'), 'node/' . $node->nid);
+  $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
+  $t_args = array('@type' => node_type_get_name($node), '%title' => $node->title);
+
+  if ($insert) {
+    watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been created.', $t_args));
+  }
+  else {
+    watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
+    drupal_set_message(t('@type %title has been updated.', $t_args));
+  }
+  if ($node->nid) {
+    $form_state['values']['nid'] = $node->nid;
+    $form_state['nid'] = $node->nid;
+    $form_state['redirect'] = 'node/' . $node->nid;
+  }
+  else {
+    // In the unlikely case something went wrong on save, the node will be
+    // rebuilt and node form redisplayed the same way as in preview.
+    drupal_set_message(t('The post could not be saved.'), 'error');
+    $form_state['rebuild'] = TRUE;
+  }
+  // Only change from Drupal core - try to keep this updated.
+  // Clear the page and block caches.
+  //cache_clear_all();
+}
+
+/**
+ * Exact copy of comment_form_submit() except for cache clearing.
+ */
+function performance_hacks_comment_form_submit($form, &$form_state) {
+  $node = node_load($form_state['values']['nid']);
+  $comment = comment_form_submit_build_comment($form, $form_state);
+  if (user_access('post comments') && (user_access('administer comments') || $node->comment == COMMENT_NODE_OPEN)) {
+    // Save the anonymous user information to a cookie for reuse.
+    if (!$comment->uid) {
+      user_cookie_save(array_intersect_key($form_state['values'], array_flip(array('name', 'mail', 'homepage'))));
+    }
+
+    comment_save($comment);
+    $form_state['values']['cid'] = $comment->cid;
+
+    // Add an entry to the watchdog log.
+    watchdog('content', 'Comment posted: %subject.', array('%subject' => $comment->subject), WATCHDOG_NOTICE, l(t('view'), 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)));
+
+    // Explain the approval queue if necessary.
+    if ($comment->status == COMMENT_NOT_PUBLISHED) {
+      if (!user_access('administer comments')) {
+        drupal_set_message(t('Your comment has been queued for review by site administrators and will be published after approval.'));
+      }
+    }
+    else {
+      drupal_set_message(t('Your comment has been posted.'));
+    }
+    $query = array();
+    // Find the current display page for this comment.
+    $page = comment_get_display_page($comment->cid, $node->type);
+    if ($page > 0) {
+      $query['page'] = $page;
+    }
+    // Redirect to the newly posted comment.
+    $redirect = array('node/' . $node->nid, array('query' => $query, 'fragment' => 'comment-' . $comment->cid));
+  }
+  else {
+    watchdog('content', 'Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject), WATCHDOG_WARNING);
+    drupal_set_message(t('Comment: unauthorized comment submitted or comment submitted to a closed post %subject.', array('%subject' => $comment->subject)), 'error');
+    // Redirect the user to the node they are commenting on.
+    $redirect = 'node/' . $node->nid;
+  }
+  $form_state['redirect'] = $redirect;
+  // Clear the block and page caches so that anonymous users see the comment
+  // they have posted.
+  //cache_clear_all();
+}
+
+
+
+
+/**
+ * Clear the page cache for a node/n path.
+ */
+function performance_hacks_clear_page_cache($nid) {
+  $cid = url("node/$nid", array('absolute' => TRUE));
+  cache_clear_all($cid, 'cache_page');
+}
+
+/**
+ * Implementation of hook_page_alter().
+ */
+function performance_hacks_page_alter(&$page) {
+  // Put back the comment form we removed from the node content.
+  // Using the same check as comment.module for consistency, except for view_mode
+  // which isn't available.
+  if (($node = menu_get_object()) && $node->comment && node_is_page($node) && empty($node->in_preview) && user_access('access comments')) {
+    if (user_access('post comments') && $node->comment == COMMENT_NODE_OPEN && isset($GLOBALS['conf']['performance_hacks_comment_setting']) && $GLOBALS['conf']['performance_hacks_comment_setting'] == COMMENT_FORM_BELOW) {
+      $page['content']['system_main']['comment_form'] = drupal_get_form('comment_form', (object) array('nid' => $node->nid));
+    }
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function performance_hacks_node_update($node) {
+  performance_hacks_clear_node_render_cache($node->nid);
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function performance_hacks_node_delete($node) {
+  performance_hacks_clear_node_render_cache($node->nid);
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function performance_hacks_comment_insert($comment) {
+  performance_hacks_clear_node_render_cache($comment->nid);
+}
+
+/**
+ * Implements hook_comment_update().
+ */
+function performance_hacks_comment_update($comment) {
+  performance_hacks_clear_node_render_cache($comment->nid);
+}
+
+/**
+ * Implements hook_comment_delete().
+ */
+function performance_hacks_comment_delete($comment) {
+  performance_hacks_clear_node_render_cache($comment->nid);
+}
+
+/**
+ * Page callback to display a node.
+ *
+ * node_tag_new() causes an SQL merge query on every page. This will cause
+ * new/updated marks not to work.
+ *
+ * @see node_show()
+ */
+function performance_hacks_node_show($node, $message = FALSE) {
+  if ($message) {
+    drupal_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+  }
+
+  // For markup consistency with other pages, use node_view_multiple() rather
+  // than node_view().
+  return performance_hacks_node_view_multiple(array($node->nid => $node), 'full');
+}
+
+/**
+ * Construct a drupal_render() style array from an array of loaded nodes.
+ *
+ * Direct replacement for node_view_multiple which render caches node teasers.
+ *
+ * @see @node_view_multiple().
+ */
+function performance_hacks_node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0) {
+
+  // If all nodes are cached, running the prepare view hooks is pointless.
+  // However if any nodes aren't cached and we're rendering a list of nodes,
+  // it's better for them to run in multiple mode. By not running these hooks
+  // for only one node, we skip them entirely on cached single node views.
+  // For multiple views, we assume that popular pages with a high cache hit
+  // rate also have frequently updated content anyway.
+  if (count($nodes) > 1) {
+    field_attach_prepare_view('node', $nodes, $view_mode);
+    entity_prepare_view('node', $nodes);
+  }
+  $build = array();
+  foreach ($nodes as $node) {
+    $build['nodes'][$node->nid] = performance_hacks_replace_node_view($node, $view_mode);
+    $build['nodes'][$node->nid]['#weight'] = $weight;
+    $weight++;
+  }
+  $build['nodes']['#sorted'] = TRUE;
+  return $build;
+}
+
+/**
+ * Generate an array for rendering the given node.
+ *
+ * Replacement for node_view() which does drupal_render() caching.
+ */
+function performance_hacks_replace_node_view($node, $view_mode = 'full') {
+  $cid = _performance_hacks_node_render_cache_key($node, $view_mode);
+
+  // Cache for a maximum of three days, updates to users, taxonomy terms,
+  // theming, or other things which affect the rendered node output without
+  // updating the node object directly will not trigger a cache flush. So a
+  // three day expiry allows these changes to propagate to node listings
+  // gradually. Custom settings per view mode can be put in $conf.
+  $expire = variable_get('node_cache_' . $view_mode . '_expire', 86400 * 3);
+
+  // @todo: figure out a way for comment.module to not make this such a pain.
+  _performance_hacks_why_do_i_maintain_comment_module_again($node);
+
+  $build = array(
+    '#theme' => 'node',
+    '#node' => $node,
+    '#view_mode' => $view_mode,
+    '#pre_render' => array('_performance_hacks_node_build_content'),
+  );
+  if (performance_hacks_node_render_is_cacheable(NULL, $node)) {
+    $build['#cache'] = array(
+      'cid' => $cid,
+      'bin' => 'cache_performance_hacks',
+      'expire' => REQUEST_TIME + $expire,
+    );
+  }
+  // Add contextual links for this node, except when the node is already being
+  // displayed on its own page. Modules may alter this behavior (for example,
+  // to restrict contextual links to certain view modes) by implementing
+  // hook_node_view_alter().
+  if (!node_is_page($node)) {
+    $build['#contextual_links']['node'] = array('node', array($node->nid));
+  }
+
+  return $build;
+}
+
+/**
+ * Generate a cache key for a node.
+ *
+ * @param $node
+ *   The node object.
+ * @param $view_mode
+ *   The view mode as passed to node_view() or node_view_multiple().
+ *
+ * @return
+ *   A string to use as the cache key.
+ */
+function _performance_hacks_node_render_cache_key($node, $view_mode) {
+  global $user;
+
+  $cid = "node:render:$node->nid:$view_mode:" . (int) empty($user->uid);
+  return $cid;
+}
+
+/**
+ * Determine if a node render is cacheable.
+ *
+ * @param $allow_caching
+ *   Set to FALSE to ensure the node render is not cached.
+ * @param $node
+ *   The node object.
+ *
+ * @return
+ *   Boolean indicating whether the node is cacheable or not.
+ */
+function performance_hacks_node_render_is_cacheable($allow_caching = NULL, $node = NULL) {
+  $allow_caching_static = &drupal_static(__FUNCTION__, TRUE);
+  if (isset($allow_caching)) {
+    $allow_caching_static = $allow_caching;
+    return $allow_caching;
+  }
+  // Prevent caching if:
+  // - there are any additional $_GET parameters.
+  // - the user has access to edit or delete the node.
+  // If the only $_GET parameter is XDEBUG_PROFILE unset it so that caching is
+  // taken into account during profiling.
+  $get = drupal_get_query_parameters();
+
+  if (isset($get['XDEBUG_PROFILE'])) {
+    unset($get['XDEBUG_PROFILE']);
+  }
+  return $allow_caching_static && empty($get) && !node_access($node, 'update') && !node_access($node, 'delete');
+}
+/**
+ * Determine all possible cache keys for a node.
+ */
+function performance_hacks_clear_node_render_cache($nid) {
+  $keys = array();
+  $entity_info = entity_get_info();
+  $view_modes = array_keys($entity_info['node']['view modes']);
+
+  // Create a cache key for each view mode, and for whether the user is
+  // authenticated or not.
+  foreach ($view_modes as $mode) {
+    foreach (array(0, 1) as $auth) {
+      $keys[] = "node:render:$nid:$mode:$auth";
+    }
+  }
+  cache_clear_all($keys, 'cache_performance_hacks');
+
+  // Also clear the page cache for 'node/nid'.
+  performance_hacks_clear_page_cache($nid);
+}
+
+/**
+ * Prevent comment module from putting the comment form into $node->content.
+ */
+function _performance_hacks_why_do_i_maintain_comment_module_again($node) {
+  // Special handling for the comment form. comment_node_page_additions() puts
+  // this into the node content, yet this form contains user-specific information
+  // which means we'd have to do per-user caching for authenticated users. Instead
+  // record the setting which controls display of the form here
+  $GLOBALS['conf']['performance_hacks_comment_setting'] = variable_get('comment_form_location_' . $node->type, COMMENT_FORM_BELOW);
+  $GLOBALS['conf']['comment_form_location_' . $node->type] = COMMENT_FORM_SEPARATE_PAGE;
+}
+
+/**
+ * Replacement for node_build_content() for pre_render().
+ */
+function _performance_hacks_node_build_content($element) {
+  // To avoid rewriting the whole function, assign $node and
+  // $view_mode, the $node will be passed by reference so no need
+  // to stuff it back at the end.
+  $node = $element['#node'];
+  $view_mode = $element['#view_mode'];
+  // Remove previously built content, if exists.
+  $node->content = array();
+
+  // The 'view' hook can be implemented to overwrite the default function
+  // to display nodes.
+  if (node_hook($node, 'view')) {
+    $node = node_invoke($node, 'view', $view_mode);
+  }
+
+  // Build fields content.
+  // In case of a multiple view, node_view_multiple() already ran the
+  // 'prepare_view' step. An internal flag prevents the operation from running
+  // twice.
+  field_attach_prepare_view('node', array($node->nid => $node), $view_mode);
+  entity_prepare_view('node', array($node->nid => $node));
+  $node->content += field_attach_view('node', $node, $view_mode);
+
+  // Always display a read more link on teasers because we have no way
+  // to know when a teaser view is different than a full view.
+  $links = array();
+  $node->content['links'] = array(
+    '#theme' => 'links__node',
+    '#pre_render' => array('drupal_pre_render_links'),
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+  if ($view_mode == 'teaser') {
+    $node_title_stripped = strip_tags($node->title);
+    $links['node-readmore'] = array(
+      'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
+      'href' => 'node/' . $node->nid,
+      'html' => TRUE,
+      'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
+    );
+  }
+  $node->content['links']['node'] = array(
+    '#theme' => 'links__node__node',
+    '#links' => $links,
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+
+  // Allow modules to make their own additions to the node.
+  module_invoke_all('node_view', $node, $view_mode);
+
+  // merge $node->content into $element
+  foreach (element_children($node->content) as $child) {
+    if (isset($element[$child])) {
+      $element[$child] = array_merge($element[$child], $node->content[$child]);
+    }
+    else {
+      $element[$child] = $node->content[$child];
+    }
+  }
+
+  unset($node->content);
+
+  // Run hook_node_view_alter() here instead of in node_view() because this
+  // is the last time you're going to see a renderable array again. mwahaha.
+  drupal_alter('node_view', $element);
+
+  return $element;
+}
+
+/**
+ * Replace node_feed() to incorporate render caching.
+ */
+function performance_hacks_replace_node_feed($nids = FALSE, $channel = array()) {
+  global $base_url, $language;
+
+  if ($nids === FALSE) {
+    $nids = db_select('node', 'n')
+      ->fields('n', array('nid', 'created'))
+      ->condition('n.promote', 1)
+      ->condition('status', 1)
+      ->orderBy('n.created', 'DESC')
+      ->range(0, variable_get('feed_default_items', 10))
+      ->addTag('node_access')
+      ->execute()
+      ->fetchCol();
+  }
+
+  $item_length = variable_get('feed_item_length', 'fulltext');
+  $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
+  $teaser = ($item_length == 'teaser');
+
+  // Load all nodes to be rendered.
+  $nodes = node_load_multiple($nids);
+  $items = '';
+  foreach ($nodes as $node) {
+    // Implement our own caching here instead of using drupal_render() caching
+    // since node_feed() brokenly does additional processing of the node
+    // returned by node_view() after rendering it, and relies on all view hooks
+    // firing on every request.
+    $cid = _performance_hacks_node_render_cache_key($node, 'rss');
+    if (performance_hacks_node_render_is_cacheable(NULL, $node) && $cached = cache_get($cid, 'cache_performance_hacks')) {
+      $items .= $cached->data;
+    }
+    else {
+      $item_text = '';
+
+      $node->link = url("node/$node->nid", array('absolute' => TRUE));
+      $node->rss_namespaces = array();
+      $node->rss_elements = array(
+        array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
+        array('key' => 'dc:creator', 'value' => $node->name),
+        array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false'))
+      );
+
+      // The node gets built and modules add to or modify $node->rss_elements
+      // and $node->rss_namespaces.
+      $build = node_view($node, 'rss');
+      unset($build['#theme']);
+
+      if (!empty($node->rss_namespaces)) {
+        $namespaces = array_merge($namespaces, $node->rss_namespaces);
+      }
+
+      if ($item_length != 'title') {
+        // We render node contents and force links to be last.
+        $build['links']['#weight'] = 1000;
+        $item_text .= drupal_render($build);
+      }
+
+      $item = format_rss_item($node->title, $node->link, $item_text, $node->rss_elements);
+      // Allow modules to disable node render caching during node_view().
+      if (performance_hacks_node_render_is_cacheable(NULL, $node)) {
+        cache_set($cid, $item, 'cache_performance_hacks');
+      }
+      $items .= $item;
+    }
+  }
+
+  $channel_defaults = array(
+    'version'     => '2.0',
+    'title'       => variable_get('site_name', 'Drupal'),
+    'link'        => $base_url,
+    'description' => variable_get('feed_description', ''),
+    'language'    => $language->language
+  );
+  $channel_extras = array_diff_key($channel, $channel_defaults);
+  $channel = array_merge($channel_defaults, $channel);
+
+  $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  $output .= "<rss version=\"" . $channel["version"] . "\" xml:base=\"" . $base_url . "\" " . drupal_attributes($namespaces) . ">\n";
+  $output .= format_rss_channel($channel['title'], $channel['link'], $channel['description'], $items, $channel['language'], $channel_extras);
+  $output .= "</rss>\n";
+
+  drupal_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
+  print $output;
+}
+
+/**
+ * Copy of _node_revision_access() which skips doing a COUNT().
+ */
+function _performance_hacks_node_revision_access($node, $op = 'view') {
+  $access = &drupal_static(__FUNCTION__, array());
+  if (!isset($access[$node->vid])) {
+    // To save additional calls to the database, return early if the user
+    // doesn't have the required permissions.
+    $map = array('view' => 'view revisions', 'update' => 'revert revisions', 'delete' => 'delete revisions');
+    if (isset($map[$op]) && (!user_access($map[$op]) && !user_access('administer nodes'))) {
+      $access[$node->vid] = FALSE;
+      return FALSE;
+    }
+
+    $node_current_revision = node_load($node->nid);
+    $is_current_revision = $node_current_revision->vid == $node->vid;
+
+    // There should be at least two revisions. If the vid of the given node
+    // and the vid of the current revision differs, then we already have two
+    // different revisions so there is no need for a separate database check.
+    // Also, if you try to revert to or delete the current revision, that's
+    // not good.
+    if ($is_current_revision && ($op == 'update' || $op == 'delete')) {
+      $access[$node->vid] = FALSE;
+    }
+    elseif (user_access('administer nodes')) {
+      $access[$node->vid] = TRUE;
+    }
+    else {
+      // First check the access to the current revision and finally, if the
+      // node passed in is not the current revision then access to that, too.
+      $access[$node->vid] = node_access($op, $node_current_revision) && ($is_current_revision || node_access($op, $node));
+    }
+  }
+  return $access[$node->vid];
+}
+
+/**
+ * Replace menu_secondary_menu().
+ */
+function performance_hacks_replace_menu_secondary_menu() {
+  // If the secondary menu source is set as the primary menu, we display the
+  // second level of the primary menu.
+  if (variable_get('menu_secondary_links_source', 'user-menu') == variable_get('menu_main_links_source', 'main-menu')) {
+    return performance_hacks_replace_menu_navigation_links(variable_get('menu_main_links_source', 'main-menu'), 1);
+  }
+  else {
+    return performance_hacks_replace_menu_navigation_links(variable_get('menu_secondary_links_source', 'user-menu'), 0);
+  }
+}
+
+/**
+ * Replace menu_navigation_links().
+ *
+ * This should only be used for primary links variable with simply menus.
+ */
+function performance_hacks_replace_menu_navigation_links($menu_name, $level = 0) {
+  // Don't even bother querying the menu table if no menu is specified.
+  if (empty($menu_name)) {
+    return array();
+  }
+
+  // Get the menu hierarchy for the current page.
+  $tree = performance_hacks_replace_menu_tree_page_data($menu_name, $level + 1);
+
+  // Go down the active trail until the right level is reached.
+  while ($level-- > 0 && $tree) {
+    // Loop through the current level's items until we find one that is in trail.
+    while ($item = array_shift($tree)) {
+      if ($item['link']['in_active_trail']) {
+        // If the item is in the active trail, we continue in the subtree.
+        $tree = empty($item['below']) ? array() : $item['below'];
+        break;
+      }
+    }
+  }
+
+  // Create a single level of links.
+  $links = array();
+  foreach ($tree as $item) {
+    if (!$item['link']['hidden']) {
+      $class = '';
+      $l = $item['link']['localized_options'];
+      $l['href'] = $item['link']['href'];
+      $l['title'] = $item['link']['title'];
+      if ($item['link']['in_active_trail']) {
+        $class = ' active-trail';
+      }
+      // Keyed with the unique mlid to generate classes in theme_links().
+      $links['menu-' . $item['link']['mlid'] . $class] = $l;
+    }
+  }
+  return $links;
+}
+
+/**
+ * Replacement for menu_tree_page_data().
+ *
+ * This version of menu_tree_page_data() changes the per-page cache to a
+ * global cache, and doesn't bother trying to find parents or children
+ * for the current menu item. This saves 3 queries per page with a cold
+ * menu cache.
+ */
+function performance_hacks_replace_menu_tree_page_data($menu_name, $max_depth = NULL) {
+  $tree = &drupal_static(__FUNCTION__, array());
+
+  // Load the menu item corresponding to the current page.
+  if ($item = menu_get_item()) {
+    if (isset($max_depth)) {
+      $max_depth = min($max_depth, MENU_MAX_DEPTH);
+    }
+    // Generate a cache ID (cid) specific for this page.
+    $cid = 'links:' . $menu_name . ':page-cid:' . ':' . $GLOBALS['language']->language . ':' . (int) $item['access'] . ':' . (int) $max_depth;
+
+    if (!isset($tree[$cid])) {
+      $tree_parameters = array(
+        'min_depth' => 1,
+        'max_depth' => $max_depth,
+      );
+      // Build the tree using the parameters; the resulting tree will be cached
+      // by _menu_build_tree().
+      $tree[$cid] = menu_build_tree($menu_name, $tree_parameters);
+    }
+    return $tree[$cid];
+  }
+
+  return array();
+}

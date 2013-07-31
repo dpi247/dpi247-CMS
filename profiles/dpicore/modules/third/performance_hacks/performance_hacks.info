@@ -1,0 +1,14 @@
+name = Performance hacks
+description = Performance hacks which are too hacky to hack into core.
+
+core = 7.x
+
+files[] = performance_hacks.module
+files[] = performance_hacks.install
+
+; Information added by drupal.org packaging script on 2013-05-25
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "performance_hacks"
+datestamp = "1369449880"
+

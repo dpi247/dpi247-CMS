@@ -1,0 +1,165 @@
+<?php
+module_load_include('inc', 'simplefield','simplefield.api');
+
+/**
+ * Implements hook_field_info().
+ *
+ * Provides the description of the field.
+ */
+function simplefield_field_info() {
+  return array(
+      // We name our field as the associative name of the array.
+      'licenceplate' => array(
+          'label' => t('Licence plate'),
+          'description' => t('A simple field  as example that represent  licene plates in the Belgian\'s Format XXX-XXX.'),
+          'default_widget' => 'field_simplefield_default_widget',
+          'default_formatter' => 'field_simplefield_default_formatter',
+      ),
+  );
+}
+
+/**
+ * Implements hook_field_validate().
+ *
+ * We only accept in DB sting in the following format : XXX-XXX Where is is an int or a character
+ */
+function simplefield_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  foreach ($items as $delta => $item) {
+    if (!empty($item['licenceplaternumberdb'])) {
+      if (! preg_match('@([A-Z]|[0-9]){3}-([A-Z]|[0-9]){3}@', $item['licenceplaternumberdb'])) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'field_example_invalid',
+            'message' => t('Liscence plate must be in the following format XXX-XXX Where X is from A To Z in uppercase or a number.'),
+        );
+      }
+    }
+  }
+ 
+}
+
+
+/**
+ * Implements hook_field_field_is_empty().
+ *
+ */
+function simplefield_field_is_empty($item, $field) {
+  return empty($item['licenceplaternumberdb']);
+}
+
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * We need to tell Drupal that we have one or more formatters
+ * for this field. The default one will display all the information of the quadruplet
+ * that define a destination
+ * each other will display only one information of the quadruplet
+ *
+ * @see fdpidestinations_field_formatter_view()
+ */
+function simplefield_field_formatter_info() {
+  return array(
+      // This formatter just displays the hex value in the color indicated.
+      'field_simplefield_default_formatter' => array(
+          'label' => t('Simple text-based formatter of the destination'),
+          'field types' => array('licenceplate'),
+      ),
+    
+  );
+}
+
+
+/**
+ * Implements hook_field_formatter_view().
+ *
+ * Two formatters are implemented.
+ * - field_example_simple_text just outputs markup indicating the color that
+ *   was entered and uses an inline style to set the text color to that value.
+ * - field_example_color_background does the same but also changes the
+ *   background color of div.region-content.
+ *
+ * @see field_example_field_formatter_info()
+ */
+function simplefield_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+dsm($element);dsm($field);dsm($instance);
+  switch ($display['type']) {
+    // This formatter simply outputs the field as text and with a color.
+    case 'field_simplefield_default_formatter':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+            // We create a render array (see REnder API) to produce the desired markup,
+            // See theme_html_tag().
+            '#type' => 'html_tag',
+            '#tag' => 'span',
+            '#attributes' => array(
+                'style' => 'color: ' . $item['tid'],
+            ),
+            '#value' => $item['licenceplate_formvalue'],
+        );
+      }
+      break;
+
+  }
+
+  return $element;
+}
+
+
+
+/**
+ * Implements hook_field_widget_info().
+ *
+ * We only provide one default widget for the moment.
+ * Later we would develop another widget.
+ *
+ *
+ * @see dpidestinations_field_widget_form()
+ */
+function simplefield_field_widget_info() {
+  return array(
+      'field_simplefield_default_widget' => array(
+          'label' => t('Simple Field default widget'),
+          'field types' => array('licenceplate'),
+      ),
+  );
+}
+
+
+
+/**
+ * Implements hook_field_widget_form().
+ *
+ * hook_widget_form() is where Drupal tells us to create form elements for
+ * our field's widget.
+ *
+ * We provide one form for the moment: field_simplefield_default_widget.
+ *
+ *
+ * 'field_simplefield_default_widget' declare only a textfield.
+ *
+ */
+function simplefield_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  
+  
+  $value = isset($items[$delta]['licenceplaternumberdb']) ? $items[$delta]['licenceplaternumberdb'] : '';
+  
+  $widget = $element;
+  $widget['#delta'] = $delta;
+
+  switch ($instance['widget']['type']) {
+
+    case 'field_simplefield_default_widget':
+      $widget += array(
+          '#type' => 'textfield',
+          '#title' => t('Licence Plate'),
+          '#default_value' => $value,
+          
+      );
+      break;
+  }
+  $element['licenceplaternumberdb'] = $widget;
+  
+
+  return $element;
+}
