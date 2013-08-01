@@ -282,7 +282,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
     '#ajax' => array(
       'event' => 'change',
       'wrapper' => 'importer-version',
-      'callback' => 'dpimport_ajaxcallback_page_form_importer',
+      'callback' => '_dpimport_ajaxcallback_page_form_importer',
       'method' => 'replace',
     ),
   );
@@ -325,7 +325,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
  * @param Array $form
  * @param Array $form_state
  */
-function dpimport_ajaxcallback_page_form_importer($form, $form_state) {  
+function _dpimport_ajaxcallback_page_form_importer($form, $form_state) {  
   return render($form['default']['version']);
 }
 
