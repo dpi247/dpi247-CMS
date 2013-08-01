@@ -46,7 +46,7 @@ function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state)
   
 }
 
-function _dpidestination_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
+function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
   
   $vid = dpidestinations_api_get_destinations_vocabulary_vid();
   
@@ -79,7 +79,7 @@ function _dpidestinations_target_machine_name_exists($value){
 
 
 
-function _dpidestination_get_all_targetviews(){
+function _dpidestinations_get_all_targetviews(){
   //@todo: Peut être interessant de mettre un cache statique ici pour performance (DDU)
   // Il faudrait alors implémenter le hook_views_invalidate_cache()
   $targetviews=array();
@@ -614,7 +614,7 @@ function __dpidestinations_get_selectoption_get_targets_for_destinationterm($ter
 *
 */
 function __dpidestinations_dependant_target_viewname_and_display_options_for_view_name($include_blank=TRUE){
-  $target_views=_dpidestination_get_all_targetviews();
+  $target_views=_dpidestinations_get_all_targetviews();
 
   $options=array();
   foreach($target_views as $target_view_name=> $target_view ){
@@ -631,7 +631,7 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 *
 */
 function __dpidestinations_dependant_target_viewname_and_display_options_for_view_display($view_name=NULL){
-  $target_views=_dpidestination_get_all_targetviews();
+  $target_views=_dpidestinations_get_all_targetviews();
 
   $options=array();
 

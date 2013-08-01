@@ -6,7 +6,7 @@ function dpidestinations_api_get_destinations_vocabulary_vid(){
 
 function dpidestinations_api_get_all_destinations_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){
  
-  return _dpidestination_api_get_all_destinations_terms_from_db($reset_cache);
+  return _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache);
 }
 
 function dpidestinations_api_get_all_destinations_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
