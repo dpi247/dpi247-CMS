@@ -10,3 +10,4 @@ dependencies[] = entity
 ; Entity API controllers
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc
+files[] = plugins/dpimport/importer/dpixmlv1.class.inc

@@ -1,0 +1,69 @@
+<?php 
+/**
+ * 
+ * Implementation of hook_schema
+ */
+function dpimport_schema() {
+  $schema['dpimport_importer'] = array(
+    'description' => 'The base table for DPI Importer.',
+    'fields' => array(
+      'iid' => array(
+        'description' => 'The primary identifier for a DPI properties.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+  	  'type' => array(
+        'description' => 'The type of the importer.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'version' => array(
+        'description' => 'The version of the importer.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The unique name of the instance.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'description' => array(
+        'description' => 'The description of the Importer.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      'dispatcher' => array(
+        'description' => 'The dispatcher of this import.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'dispatcher_settings' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized settings for Dispatcher config',
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+      'importer_settings' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized settings for Importer config',
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+    ),
+    'indexes' => array(
+      'name' => array('name'),
+    ),
+    'primary key' => array('iid'),
+  );
+  
+  return $schema;
+}
