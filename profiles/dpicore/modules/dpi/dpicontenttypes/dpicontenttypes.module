@@ -82,7 +82,7 @@ function dpicontenttypes_permission(){
  *
  * We use hook_node_info() to define our node content type.
  */
-/*
+
 function dpicontenttypes_node_info(){
   return array(
     'article_package' => array(
@@ -108,7 +108,7 @@ function dpicontenttypes_node_info(){
     ),
   );
 }
-*/
+
 /**
  * Implementation of hook_node_presave
  * @param object $node
@@ -216,7 +216,6 @@ function dpicontenttypes_library() {
       $path . '/css/dpiatom_reference.css' => array(),
     ),
   );
-  dsm($libraries);
 
   return $libraries;
 }

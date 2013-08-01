@@ -124,29 +124,6 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
         ),
       ),
     ),
-    'media_type' => array(
-      'name' => 'Media Type',
-      'machine_name' => 'media_type',
-      'description' => 'media type of link item',
-      'hierarchy' => 0,
-      'module' => 'taxonomy',
-      'weight' => 0,
-      'rdf_mapping' => array(
-        'rdftype' => array(
-          0 => 'skos:ConceptScheme',
-        ),
-        'name' => array(
-          'predicates' => array(
-            0 => 'dc:title',
-          ),
-        ),
-        'description' => array(
-          'predicates' => array(
-            0 => 'rdfs:comment',
-          ),
-        ),
-      ),
-    ),
     'packagelayout' => array(
       'name' => 'Package Layout',
       'machine_name' => 'packagelayout',
@@ -177,29 +154,6 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
       'hierarchy' => 0,
       'module' => 'taxonomy',
       'weight' => 0,
-      'rdf_mapping' => array(
-        'rdftype' => array(
-          0 => 'skos:ConceptScheme',
-        ),
-        'name' => array(
-          'predicates' => array(
-            0 => 'dc:title',
-          ),
-        ),
-        'description' => array(
-          'predicates' => array(
-            0 => 'rdfs:comment',
-          ),
-        ),
-      ),
-    ),
-    'scald_authors' => array(
-      'name' => 'Authors',
-      'machine_name' => 'scald_authors',
-      'description' => 'Scald authors vocabulary',
-      'hierarchy' => 0,
-      'module' => 'scald',
-      'weight' => -5,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',

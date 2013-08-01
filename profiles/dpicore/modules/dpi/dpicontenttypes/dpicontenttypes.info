@@ -3,12 +3,6 @@ description = Create set of content types related to the dpi247 distribution.
 core = 7.x
 package = DPI
 php = 5.2.4
-
- 
-
-
-
-
 dependencies[] = ctools
 dependencies[] = date
 dependencies[] = entity
@@ -19,14 +13,9 @@ dependencies[] = link
 dependencies[] = list
 dependencies[] = options
 dependencies[] = scald
+dependencies[] = scald_image
 dependencies[] = taxonomy
 dependencies[] = text
-
-; Entity API controllers
-files[] = dpicontenttypes.controller.class.inc
-files[] = dpicontenttypes.entity.class.inc
-
-
 explanation = Field type(s) in use - see <a href="/admin/reports/fields">Field list</a>
 features[ctools][] = scald:context_config:1
 features[ctools][] = views:views_default:3.0
@@ -48,7 +37,6 @@ features[field_base][] = field_linkedobjects
 features[field_base][] = field_linkitem
 features[field_base][] = field_links_list
 features[field_base][] = field_locations
-features[field_base][] = field_mediatype
 features[field_base][] = field_packagelayout
 features[field_base][] = field_perpsonbirthdate
 features[field_base][] = field_perpsonnickname
@@ -94,11 +82,6 @@ features[field_instance][] = node-article_package-field_textsubtitle
 features[field_instance][] = scald_atom-image-field_byline
 features[field_instance][] = scald_atom-image-field_caption
 features[field_instance][] = scald_atom-image-scald_authors
-features[field_instance][] = scald_atom-image-scald_tags
-features[field_instance][] = scald_atom-image-scald_thumbnail
-features[field_instance][] = scald_atom-video-scald_authors
-features[field_instance][] = scald_atom-video-scald_tags
-features[field_instance][] = scald_atom-video-scald_thumbnail
 features[field_instance][] = taxonomy_term-persons-field_perpsonbirthdate
 features[field_instance][] = taxonomy_term-persons-field_perpsonnickname
 features[field_instance][] = taxonomy_term-persons-field_person_phonenumber
@@ -109,17 +92,13 @@ features[field_instance][] = taxonomy_term-persons-field_personisauthor
 features[field_instance][] = taxonomy_term-persons-field_personlastname
 features[field_instance][] = taxonomy_term-persons-field_personpicture
 features[field_instance][] = taxonomy_term-persons-field_personwebsite
-features[field_instance][] = taxonomy_term-scald_authors-scald_author_url
-features[scald_context_config][] = sdl_library_item
 features[taxonomy][] = concepts
 features[taxonomy][] = entities
 features[taxonomy][] = freetags
 features[taxonomy][] = iptc
 features[taxonomy][] = locations
-features[taxonomy][] = media_type
 features[taxonomy][] = packagelayout
 features[taxonomy][] = persons
-features[taxonomy][] = scald_authors
 features_exclude[dependencies][dpicontenttypes] = dpicontenttypes
 features_exclude[dependencies][scald_dnd_library] = scald_dnd_library
 features_exclude[dependencies][views] = views
@@ -141,6 +120,8 @@ features_exclude[field][taxonomy_term-persons-field_personisauthor] = taxonomy_t
 features_exclude[field][taxonomy_term-scald_authors-scald_author_url] = taxonomy_term-scald_authors-scald_author_url
 features_exclude[taxonomy][scald_tags] = scald_tags
 features_exclude[taxonomy][tags] = tags
+features_exclude[taxonomy][scald_authors] = scald_authors
+features_exclude[field_instance][taxonomy_term-scald_authors-scald_author_url] = taxonomy_term-scald_authors-scald_author_url
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc
 required = 1

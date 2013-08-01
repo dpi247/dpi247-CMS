@@ -167,6 +167,8 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
  *   The behavior handler name.
  */
 function _entityreference_get_behavior_handler($behavior) {
+  module_load_include('inc', 'entityreference', 'plugins/behavior/abstract');
+  
   $object_cache = drupal_static(__FUNCTION__);
 
   if (!isset($object_cache[$behavior])) {
