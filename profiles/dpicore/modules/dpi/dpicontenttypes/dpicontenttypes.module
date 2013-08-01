@@ -3,6 +3,8 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
 
+include_once 'dpicontenttypes.features.inc';
+
 
 /**
 * Implementation of hook_menu()
@@ -80,6 +82,7 @@ function dpicontenttypes_permission(){
  *
  * We use hook_node_info() to define our node content type.
  */
+/*
 function dpicontenttypes_node_info(){
   return array(
     'article_package' => array(
@@ -105,6 +108,7 @@ function dpicontenttypes_node_info(){
     ),
   );
 }
+*/
 /**
  * Implementation of hook_node_presave
  * @param object $node
@@ -213,5 +217,4 @@ function dpicontenttypes_library() {
 
   return $libraries;
 }
-
 
