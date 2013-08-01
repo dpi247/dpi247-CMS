@@ -41,11 +41,6 @@ function _dpidestinations_variable_del( $name){
 }
 
 
-function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
-  return $form['view_display'];
-  
-}
-
 function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
   
   $vid = dpidestinations_api_get_destinations_vocabulary_vid();

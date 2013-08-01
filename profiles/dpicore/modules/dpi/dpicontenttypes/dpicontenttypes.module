@@ -193,6 +193,9 @@ function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
   if ($module == 'entityreference' && $plugin == "behavior") {
 	return 'plugins/entityreference/' . $plugin;
   }
+  if ($module == 'dpimport' && $plugin == 'importer') {
+    return 'plugins/dpimport/' . $plugin;
+  }
 }
 
 

@@ -259,7 +259,10 @@ function target_form_submit($form, &$form_state) {
 
 
 
+function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
+  return $form['view_display'];
 
+}
 
 
 
