@@ -5,6 +5,40 @@
  * Install, update and uninstall functions for the node module.
  */
 
+
+
+/**
+ * Implements hook_field_schema().
+ */
+function dpicontenttypes_field_schema($field) {
+  return array(
+    'columns' => array(
+      'sid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'not null' => FALSE,
+        'length' => '255',
+      ),
+      'provider' => array(
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'inline' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'sid' => array('sid'),
+    ),
+  );
+}
+
 /**
  * Implements hook_schema().
  */

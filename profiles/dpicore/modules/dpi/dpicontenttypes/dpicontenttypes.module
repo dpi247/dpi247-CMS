@@ -1,5 +1,6 @@
 <?php
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
 
 
@@ -189,3 +190,28 @@ function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
 	return 'plugins/entityreference/' . $plugin;
   }
 }
+
+
+
+/**
+ * Implements hook_library().
+ */
+function dpicontenttypes_library() {
+  $path = drupal_get_path('module', 'dpicontenttypes');
+  $libraries['library'] = array(
+    'title' => 'Atom reference library',
+    'website' => 'http://drupal.org/project/scald',
+    'version' => '1.x',
+    'js' => array(
+      $path . '/js/dpiatom_reference.js' => array(),
+    ),
+    'css' => array(
+      $path . '/css/dpiatom_reference.css' => array(),
+    ),
+  );
+  dsm($libraries);
+
+  return $libraries;
+}
+
+
