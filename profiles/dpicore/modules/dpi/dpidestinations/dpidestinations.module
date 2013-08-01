@@ -3,7 +3,7 @@
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
-module_load_include('inc', 'dpidestinations','dpidestinations.field');
+module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 
 
@@ -19,7 +19,7 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
   );
-  $theme['dpidestinations_targetview_page_reorder_form'] = array(
+  $theme['dpidestinations_page_targetview_reorder_form'] = array(
     'template' => 'dpidestinations-targetview-page-reorder-form',
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
     'file' => 'theme.inc',
@@ -35,18 +35,18 @@ function dpidestinations_menu(){
   $items['destination/%destinationterm'] = array(
     'title callback' => 'destination_view',
     'title arguments' => array(1),
-    'page callback' => 'dpidestination_page_destination_view',
+    'page callback' => 'dpidestinations_page_destination_view',
     'page arguments' => array(1),
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
-    'page callback' => 'dpidestinations_targetview_page_reorder',
+    'page callback' => 'dpidestinations_page_targetview_page_reorder',
     'page arguments' => array(2,3),
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.pages.reorder.inc'
+    'file' => 'dpidestinations.reorder.page.inc'
   );
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
@@ -232,7 +232,7 @@ function destinationterm_load($destination_id){
   return taxonomy_term_load($destination_id);
 
 }
-function dpidestination_page_destination_view($destination){
+function dpidestinations_page_destination_view($destination){
   return 'You need to activate the page manager';
 }
 

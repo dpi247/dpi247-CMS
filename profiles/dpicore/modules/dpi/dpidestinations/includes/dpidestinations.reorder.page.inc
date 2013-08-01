@@ -7,7 +7,7 @@
  * 
  */
 
-function dpidestinations_targetview_page_reorder($term,$targetblock){
+function dpidestinations_page_targetview_reorder($term,$targetblock){
 
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
   
@@ -17,12 +17,12 @@ function dpidestinations_targetview_page_reorder($term,$targetblock){
   
   $nodes=$targetview->result;
 
-  return drupal_get_form('dpidestinations_targetview_page_reorder_form',$nodes,$term->tid ,$targetblock->target);
+  return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }
 
 
-function dpidestinations_targetview_page_reorder_form($form, &$form_state, $nodes, $destination_tid, $destination_target){
+function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $destination_tid, $destination_target){
   $form['#tree'] = TRUE;
   
   
@@ -82,7 +82,7 @@ function dpidestinations_targetview_page_reorder_form($form, &$form_state, $node
 }
 
 
-function dpidestinations_targetview_page_reorder_form_submit(& $form, &$form_state){
+function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   
   $old_values=array();
  
@@ -156,7 +156,7 @@ function dpidestinations_targetview_page_reorder_form_submit(& $form, &$form_sta
  * @see block-admin-display.tpl.php
  * @see theme_block_admin_display()
  */
-function template_preprocess_dpidestinations_targetview_page_reorder_form(&$variables) {
+function template_preprocess_dpidestinations_page_targetview_reorder_form(&$variables) {
 
   // Add each block in the form to the appropriate place in the block listing.
   foreach (element_children($variables['form']['nodes']) as $i) {
