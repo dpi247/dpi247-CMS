@@ -7,9 +7,6 @@ php = 5.2.4
  
 
 
-; Entity API controllers
-files[] = dpicontenttypes.controller.class.inc
-files[] = dpicontenttypes.entity.class.inc
 
 
 dependencies[] = ctools
@@ -24,6 +21,12 @@ dependencies[] = options
 dependencies[] = scald
 dependencies[] = taxonomy
 dependencies[] = text
+
+; Entity API controllers
+files[] = dpicontenttypes.controller.class.inc
+files[] = dpicontenttypes.entity.class.inc
+
+
 explanation = Field type(s) in use - see <a href="/admin/reports/fields">Field list</a>
 features[ctools][] = scald:context_config:1
 features[ctools][] = views:views_default:3.0
