@@ -6,6 +6,7 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
 include_once 'dpicontenttypes.features.inc';
 
 
+
 /**
 * Implementation of hook_menu()
 */
@@ -76,38 +77,6 @@ function dpicontenttypes_permission(){
   );
 }
 
-
-/**
- * Implements hook_node_info().
- *
- * We use hook_node_info() to define our node content type.
- */
-
-function dpicontenttypes_node_info(){
-  return array(
-    'article_package' => array(
-      'name' => t("Article Package"),
-      'base' => 'article_package',
-      'description' => t('Article package from DPI'),
-      'has_title' => TRUE,
-      'locked' => TRUE,
-    ),
-    'gallery_package' => array(
-      'name' => t("Gallery Package"),
-      'base' => 'article_package',
-      'description' => t('Article package from DPI'),
-      'has_title' => TRUE,
-      'locked' => TRUE,      
-    ),
-    'poll_package' => array(
-      'name' => t("Poll Package"),
-      'base' => 'article_package',
-      'description' => t('Article package from DPI'),
-      'has_title' => TRUE,
-      'locked' => TRUE,
-    ),
-  );
-}
 
 /**
  * Implementation of hook_node_presave

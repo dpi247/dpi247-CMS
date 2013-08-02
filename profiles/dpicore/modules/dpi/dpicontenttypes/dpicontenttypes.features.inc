@@ -1,22 +1,44 @@
 <?php
 /**
  * @file
- * dpicontenttypes.features.inc
+ * etest.features.inc
  */
 
-/**
- * Implements hook_ctools_plugin_api().
- */
-function dpicontenttypes_ctools_plugin_api() {
-  list($module, $api) = func_get_args();
-  if ($module == "scald" && $api == "context_config") {
-    return array("version" => "1");
-  }
-}
+
 
 /**
- * Implements hook_views_api().
+ * Implements hook_node_info().
+ *
+ * We use hook_node_info() to define our node content type.
  */
-function dpicontenttypes_views_api() {
-  return array("api" => "3.0");
+
+function dpicontenttypes_node_info(){
+  return array(
+    'article_package' => array(
+      'name' => t("Article Package"),
+      'base' => 'article_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => 1,
+      'title_label' => 'Title',      
+      'help'=>""
+    ),
+    'gallery_package' => array(
+      'name' => t("Gallery Package"),
+      'base' => 'galery_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => 1,
+      'title_label' => 'Title',      
+      'help'=>""
+    ),
+    'poll_package' => array(
+      'name' => t("Poll Package"),
+      'base' => 'poll_package',
+      'description' => t('Article package from DPI'),
+      'has_title' => 1,
+      'title_label' => 'Title',      
+      'help'=>""
+    ),
+   
+  );
 }
+

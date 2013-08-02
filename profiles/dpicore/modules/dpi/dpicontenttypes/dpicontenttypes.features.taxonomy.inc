@@ -9,6 +9,29 @@
  */
 function dpicontenttypes_taxonomy_default_vocabularies() {
   return array(
+    'authors' => array(
+      'name' => 'DPI Authors',
+      'machine_name' => 'authors',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
     'concepts' => array(
       'name' => 'Concepts',
       'machine_name' => 'concepts',

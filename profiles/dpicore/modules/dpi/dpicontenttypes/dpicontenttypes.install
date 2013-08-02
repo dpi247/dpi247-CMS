@@ -168,6 +168,10 @@ function dpicontenttypes_install(){
   );
   $dpipropertiestype = new DPIPropertiesTypeEntity($values);
   dpiproperties_type_save($dpipropertiestype);
+  
+  scald_add_type('link_list', 'Link List', 'Link List');
+  
+  
 }
 /**
  * Creation of the table dpi_properties
@@ -189,3 +193,13 @@ function dpicontenttypes_update_7000(){
   $dpipropertiestype = new DPIPropertiesTypeEntity($values);
   dpiproperties_type_save($dpipropertiestype);
 }
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function dpicontenttypes_uninstall() {
+  drupal_load('module', 'scald');
+  scald_remove_type('link_list');
+}
+

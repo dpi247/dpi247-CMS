@@ -10,6 +10,143 @@
 function dpicontenttypes_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'node-article_package-field_authors'
+  $field_instances['node-article_package-field_authors'] = array(
+    'bundle' => 'article_package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_authors',
+    'label' => 'Authors',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 25,
+    ),
+  );
+
+  // Exported field_instance: 'node-article_package-field_autopublish'
+  $field_instances['node-article_package-field_autopublish'] = array(
+    'bundle' => 'article_package',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 25,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_autopublish',
+    'label' => 'Use embargo and Pubish Date',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 0,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 11,
+    ),
+  );
+
+  // Exported field_instance: 'node-article_package-field_autopublishdate'
+  $field_instances['node-article_package-field_autopublishdate'] = array(
+    'bundle' => 'article_package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+        ),
+        'type' => 'date_default',
+        'weight' => 29,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_autopublishdate',
+    'label' => 'Auto publish date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'now',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'm/d/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_select',
+      'weight' => 12,
+    ),
+  );
+
   // Exported field_instance: 'node-article_package-field_byline'
   $field_instances['node-article_package-field_byline'] = array(
     'bundle' => 'article_package',
@@ -86,7 +223,7 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 17,
+      'weight' => 19,
     ),
   );
 
@@ -126,7 +263,7 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 9,
+      'weight' => 10,
     ),
   );
 
@@ -156,7 +293,7 @@ function dpicontenttypes_field_default_field_instances() {
     'label' => 'Display Title',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
+      'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
@@ -170,9 +307,64 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-article_package-field_editorialpublicationdate'
+  $field_instances['node-article_package-field_editorialpublicationdate'] = array(
+    'bundle' => 'article_package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+        ),
+        'type' => 'date_default',
+        'weight' => 24,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_editorialpublicationdate',
+    'label' => 'Editorial publication date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'now',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'm/d/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_select',
+      'weight' => 14,
+    ),
+  );
+
   // Exported field_instance: 'node-article_package-field_editorialupdatedate'
   $field_instances['node-article_package-field_editorialupdatedate'] = array(
     'bundle' => 'article_package',
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -218,61 +410,8 @@ function dpicontenttypes_field_default_field_instances() {
         'text_parts' => array(),
         'year_range' => '-3:+3',
       ),
-      'type' => 'date_popup',
-      'weight' => 12,
-    ),
-  );
-
-  // Exported field_instance: 'node-article_package-field_embargo'
-  $field_instances['node-article_package-field_embargo'] = array(
-    'bundle' => 'article_package',
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'date',
-        'settings' => array(
-          'format_type' => 'long',
-          'fromto' => 'both',
-          'multiple_from' => '',
-          'multiple_number' => '',
-          'multiple_to' => '',
-        ),
-        'type' => 'date_default',
-        'weight' => 8,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_embargo',
-    'label' => 'Embargo',
-    'required' => 0,
-    'settings' => array(
-      'default_value' => 'now',
-      'default_value2' => 'same',
-      'default_value_code' => '',
-      'default_value_code2' => '',
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'date',
-      'settings' => array(
-        'increment' => 15,
-        'input_format' => 'm/d/Y - H:i:s',
-        'input_format_custom' => '',
-        'label_position' => 'above',
-        'text_parts' => array(),
-        'year_range' => '-3:+3',
-      ),
-      'type' => 'date_popup',
-      'weight' => 10,
+      'type' => 'date_select',
+      'weight' => 13,
     ),
   );
 
@@ -354,7 +493,7 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 19,
+      'weight' => 21,
     ),
   );
 
@@ -408,7 +547,7 @@ function dpicontenttypes_field_default_field_instances() {
       'module' => 'link',
       'settings' => array(),
       'type' => 'link_field',
-      'weight' => 14,
+      'weight' => 16,
     ),
   );
 
@@ -448,7 +587,7 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 20,
+      'weight' => 22,
     ),
   );
 
@@ -488,12 +627,12 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 16,
+      'weight' => 18,
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_linkedobjects'
-  $field_instances['node-article_package-field_linkedobjects'] = array(
+  // Exported field_instance: 'node-article_package-field_linklists'
+  $field_instances['node-article_package-field_linklists'] = array(
     'bundle' => 'article_package',
     'default_value' => NULL,
     'deleted' => 0,
@@ -501,12 +640,10 @@ function dpicontenttypes_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'entityreference',
-        'settings' => array(
-          'link' => FALSE,
-        ),
-        'type' => 'entityreference_label',
-        'weight' => 21,
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 30,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -516,22 +653,24 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_linkedobjects',
-    'label' => 'Linked Objects',
+    'field_name' => 'field_linklists',
+    'label' => 'Links lists',
     'required' => 0,
     'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'image' => 0,
+        'link_list' => 'link_list',
+        'video' => 0,
+      ),
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'entityreference',
-      'settings' => array(
-        'match_operator' => 'CONTAINS',
-        'path' => '',
-        'size' => 60,
-      ),
-      'type' => 'entityreference_autocomplete',
-      'weight' => 21,
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 7,
     ),
   );
 
@@ -571,7 +710,7 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 18,
+      'weight' => 20,
     ),
   );
 
@@ -611,28 +750,23 @@ function dpicontenttypes_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'taxonomy_autocomplete',
-      'weight' => 15,
+      'weight' => 17,
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_publicationdate'
-  $field_instances['node-article_package-field_publicationdate'] = array(
+  // Exported field_instance: 'node-article_package-field_persons'
+  $field_instances['node-article_package-field_persons'] = array(
     'bundle' => 'article_package',
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'date',
-        'settings' => array(
-          'format_type' => 'long',
-          'fromto' => 'both',
-          'multiple_from' => '',
-          'multiple_number' => '',
-          'multiple_to' => '',
-        ),
-        'type' => 'date_default',
-        'weight' => 9,
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 27,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -642,29 +776,21 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_publicationdate',
-    'label' => 'Publication Date',
+    'field_name' => 'field_persons',
+    'label' => 'Persons',
     'required' => 0,
     'settings' => array(
-      'default_value' => 'now',
-      'default_value2' => 'same',
-      'default_value_code' => '',
-      'default_value_code2' => '',
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'date',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
-        'increment' => 15,
-        'input_format' => 'm/d/Y - H:i:s',
-        'input_format_custom' => '',
-        'label_position' => 'above',
-        'text_parts' => array(),
-        'year_range' => '-3:+3',
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
       ),
-      'type' => 'date_popup',
-      'weight' => 11,
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 24,
     ),
   );
 
@@ -707,7 +833,7 @@ function dpicontenttypes_field_default_field_instances() {
         'display_label' => 0,
       ),
       'type' => 'options_onoff',
-      'weight' => 13,
+      'weight' => 15,
     ),
   );
 
@@ -872,7 +998,7 @@ function dpicontenttypes_field_default_field_instances() {
         'rows' => 3,
       ),
       'type' => 'text_textarea',
-      'weight' => 7,
+      'weight' => 8,
     ),
   );
 
@@ -912,7 +1038,7 @@ function dpicontenttypes_field_default_field_instances() {
         'rows' => 3,
       ),
       'type' => 'text_textarea',
-      'weight' => 8,
+      'weight' => 9,
     ),
   );
 
@@ -984,42 +1110,92 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-image-scald_authors'
-  $field_instances['scald_atom-image-scald_authors'] = array(
-    'bundle' => 'image',
+  // Exported field_instance: 'scald_atom-link_list-field_displaytitle'
+  $field_instances['scald_atom-link_list-field_displaytitle'] = array(
+    'bundle' => 'link_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
+        'module' => 'text',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 1,
+        'type' => 'text_default',
+        'weight' => 4,
       ),
     ),
     'entity_type' => 'scald_atom',
-    'field_name' => 'scald_authors',
-    'label' => 'Authors',
-    'required' => FALSE,
+    'field_name' => 'field_displaytitle',
+    'label' => 'Display Title',
+    'required' => 0,
     'settings' => array(
+      'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'module' => 'taxonomy',
+      'active' => 1,
+      'module' => 'text',
       'settings' => array(
-        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'taxonomy_autocomplete',
-      'weight' => -3,
+      'type' => 'text_textfield',
+      'weight' => 1,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_linkitems'
+  $field_instances['scald_atom-link_list-field_linkitems'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'link',
+        'settings' => array(),
+        'type' => 'link_default',
+        'weight' => 5,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_linkitems',
+    'label' => 'Link Items',
+    'required' => 0,
+    'settings' => array(
+      'attributes' => array(
+        'class' => '',
+        'configurable_title' => 0,
+        'rel' => 'nofollow',
+        'target' => 'default',
+        'title' => '',
+      ),
+      'display' => array(
+        'url_cutoff' => 80,
+      ),
+      'enable_tokens' => 1,
+      'rel_remove' => 'default',
+      'title' => 'optional',
+      'title_maxlength' => 254,
+      'title_value' => '',
+      'url' => 0,
+      'user_register_form' => FALSE,
+      'validate_url' => 1,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'link',
+      'settings' => array(),
+      'type' => 'link_field',
+      'weight' => 2,
     ),
   );
 
   // Exported field_instance: 'taxonomy_term-persons-field_perpsonbirthdate'
   $field_instances['taxonomy_term-persons-field_perpsonbirthdate'] = array(
     'bundle' => 'persons',
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -1059,7 +1235,7 @@ function dpicontenttypes_field_default_field_instances() {
         'text_parts' => array(),
         'year_range' => '1000:+0',
       ),
-      'type' => 'date_popup',
+      'type' => 'date_select',
       'weight' => 4,
     ),
   );
@@ -1392,6 +1568,7 @@ function dpicontenttypes_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Authors');
+  t('Auto publish date');
   t('Barette');
   t('Birth date');
   t('Body');
@@ -1402,8 +1579,8 @@ function dpicontenttypes_field_default_field_instances() {
   t('Copyright');
   t('Display Title');
   t('Editorial Update Date');
+  t('Editorial publication date');
   t('Email');
-  t('Embargo');
   t('EmbededObjects');
   t('Entities');
   t('External URL');
@@ -1413,16 +1590,18 @@ function dpicontenttypes_field_default_field_instances() {
   t('Gender');
   t('IPTC');
   t('Lastname');
-  t('Linked Objects');
+  t('Link Items');
+  t('Links lists');
   t('List as author');
   t('Locations');
   t('Nickname');
   t('Package Layout');
+  t('Persons');
   t('Phone number');
   t('Picture');
-  t('Publication Date');
   t('Restricted Access');
   t('Sub Title');
+  t('Use embargo and Pubish Date');
   t('Website');
 
   return $field_instances;
