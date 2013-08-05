@@ -62,12 +62,10 @@ function dpimport_getallimportersettings(){
  */
 function dpimport_process_import($importer){
   $dispatcher = $importer->getDispatcher();
-  
   $sources = $dispatcher->extractSources();
   foreach ($sources as $source){
     $dispatcher->process($source);
   }
-  
 }
 
 

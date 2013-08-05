@@ -144,10 +144,9 @@ abstract class Dispatcher{
     // Unzip input file to the temp directory
     $zip = new ZipArchive;
     
-    $res = $zip->open($file->filename);
+    $res = $zip->open($file->uri);
     if ($res === TRUE) {
-      $file_name = strstr($file->name, '.zip') ? str_replace('.zip', '', $file->name) : $file->name;
-      $temp_subdir = $this->getTempFolder().'/'.$file_name;
+      $temp_subdir = $this->getTempFolder().'/'.$file->name;
       $this->checkDirectoryRecursive($temp_subdir, 1);
       if (is_dir($temp_subdir)) {
         $this->temp_subdir = $temp_subdir;
@@ -250,9 +249,9 @@ abstract class Dispatcher{
    */
   protected function createFileObject($file_name, $file_path){
     $file = new stdClass();
-    $file->name = $file_name;
-    $file->filename = $file_path;
-    $file->basename = $file_name;
+    $file->uri = $file_path;
+    $file->filename = $file_name;
+    $file->name = str_replace('.'.$this->getExtention(), '', $file_name);
     return $file;
   }
   

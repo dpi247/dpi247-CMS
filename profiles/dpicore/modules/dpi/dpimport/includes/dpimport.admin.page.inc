@@ -338,7 +338,7 @@ function _dpimport_ajaxcallback_page_form_importer($form, $form_state) {
 function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
   
-  if (!preg_match('/^[a-zA-Z0-9]+$/' , $form_state['values']['name'])){
+  if (!preg_match('/^[a-z0-9]+$/' , $form_state['values']['name'])){
     form_set_error('name', t('Name must be alphanumeric only.'));
   }
   

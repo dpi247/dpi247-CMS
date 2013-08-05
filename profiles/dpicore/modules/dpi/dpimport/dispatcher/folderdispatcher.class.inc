@@ -89,7 +89,22 @@ class FolderDispatcher extends Dispatcher{
    * @return Array
    */
   protected function getAllFiles(){
-    return array();
+    $source_folder = $this->getSourceFolder();
+    $mask = '/.*\.'.$this->getExtention().'$/';
+    $options = array(
+      'recurse' => FALSE,
+      'key' => 'name',
+    ); 
+    $files = file_scan_directory($source_folder, $mask, $options);
+    
+    foreach ($files as $file){
+      if ($this->isZip()){
+        $file_paths[] = $this->getFilePathFromZip($file, 'xml');
+      } else {
+        $file_paths[] = $file->uri;     
+      }
+    }
+    return $file_paths;
   }
   
   /**
