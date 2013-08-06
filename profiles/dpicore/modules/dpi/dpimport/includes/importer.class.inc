@@ -129,5 +129,31 @@ abstract class Importer{
   public function initializeForm(){
     return array();
   }
+  
+  /**
+   * 
+   * Determine the next callback function from the Dom element
+   * @param DOM $dom
+   * @return String $callback
+   */
+  public function getCallback($dom){
+    $callback = strtolower($dom->nodeName);
+    return $callback;
+  }
+  
+  /**
+   * 
+   * Call the create_or_load_node function based on the callback
+   * @param DOM $dom
+   * @return Object $node
+   */
+  protected function createOrLoadEntity($dom){
+    $callback = $this->getCallback($dom);
+    $create_or_load_function = 'createOrLoadEntity'.$callback;
+    $entity = $this->{$create_or_load_function}($dom);
+    return $entity;
+  }
+    
+    
 }
 

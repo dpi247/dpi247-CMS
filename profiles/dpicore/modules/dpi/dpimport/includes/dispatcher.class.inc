@@ -98,7 +98,7 @@ abstract class Dispatcher{
       $importer = $this->getImporter();
       if ($importer->checkXml($dom)){
         //process file
-        $this->exploreDom($dom);
+        $this->processDom($dom);
       }
     }
   }
@@ -107,15 +107,15 @@ abstract class Dispatcher{
    * Explore the DOM and call a function for each element
    * @param DOM $dom
    */
-  function exploreDom($dom){
+  function processDom($dom){
     $importer = $this->getImporter();
     if ($dom->hasChildNodes()){
       //For each child of the dom
       foreach ($dom->childNodes as $child){
-        $name = $child->nodeName;
-        if ($name != '#text'){
+        if ($child->nodeName != '#text'){
           $explore_child = TRUE;
-          $method_name = 'process_'.$name;
+          $callback = $importer->getCallback($child);
+          $method_name = 'build_'.$callback;
           //Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists($importer, $method_name)){
             $explore_child = $importer->$method_name($child);
@@ -123,7 +123,7 @@ abstract class Dispatcher{
           }
           
           if ($explore_child){
-            $this->exploreDom($child);
+            $this->processDom($child);
           }
         }
       }
