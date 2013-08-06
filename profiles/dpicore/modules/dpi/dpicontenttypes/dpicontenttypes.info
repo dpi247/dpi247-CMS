@@ -127,3 +127,7 @@ features_exclude[field][taxonomy_term-persons-field_personisauthor] = taxonomy_t
 
 term-persons-field_personpicture] = taxonomy_term-persons-field_personpicture
 features_exclude[field][taxonomy_term-persons-field_personisauthor] = taxonomy_term-persons-field_personisauthor
+
+
+files[] = plugins/dpimport/importer/dpixmlv1.class.inc
+files[] = plugins/dpimport/importer/wallyxmlv1.class.inc
