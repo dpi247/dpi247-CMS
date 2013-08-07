@@ -19,10 +19,10 @@ function dpimport_page_process_import($importer_name){
       dpimport_process_import($importer);
       $return = $importer->render();
     } else {
-      Logger::logError('Importer', 001, 2, t('There is no plugin for this importer.'));
+      Logger::logError('importer', 0, 'importer_001', t('There is no plugin for this importer.'));
     }
   } else {
-    Logger::logError('Importer', 002, 1, t('There is no importer with these name.'));
+    Logger::logError('importer', 0, 'importer_002', t('There is no importer with these name.'));
   }
   if ($return == NULL){
     $return = Logger::printLog();
@@ -63,8 +63,10 @@ function dpimport_getallimportersettings(){
 function dpimport_process_import($importer){
   $dispatcher = $importer->getDispatcher();
   $sources = $dispatcher->extractSources();
-  foreach ($sources as $source){
-    $dispatcher->process($source);
+  if (!Logger::error()){
+    foreach ($sources as $source){
+      $dispatcher->process($source);
+    }
   }
 }
 

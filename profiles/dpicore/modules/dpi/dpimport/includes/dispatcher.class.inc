@@ -86,7 +86,7 @@ abstract class Dispatcher{
     $handle = fopen($source, "r");
     
     if (!$handle) {
-      Logger::logError('Dispatcher', 0, 105, t('The XML file (!xml_file) isn\'t readable', array('!xml_file' => $source)));
+      Logger::logError('dispatcher', 0, 'dispatcher_005', t('The XML file (!xml_file) isn\'t readable', array('!xml_file' => $source)));
     } else { 
       $contents = fread($handle, filesize($source));
       //$contents = wallymport_convertEntities($contents);
@@ -155,19 +155,19 @@ abstract class Dispatcher{
         $import_files = file_scan_directory($temp_subdir, '/.*\.'.$extension.'$/', array('nomask' => '/(\.\.?|CVS)$/', 'recurse' => FALSE, 'key' => 'name'));
         if (count($import_files) == 0) {
           $zip_error = TRUE;
-          Logger::logError('Dispatcher', 0, 101, t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_001', t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->basename)));
         } elseif (count($import_files) > 1) {
-          Logger::logError('Dispatcher', 0, 102, t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_002', t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->basename)));
         } else {
           $import_file = reset($import_files);
           $xml_file = $import_file->uri;
         }
         $zip->close();
       } else {
-        Logger::logError('Dispatcher', 0, 103, t('Input file !file could not be unzipped to !subdir. Error code !res', array('!file' => $file->filename, '!subdir' => $temp_subdir, '!res' => $res)));
+        Logger::logError('dispatcher', 0, 'dispatcher_003', t('Input file !file could not be unzipped to !subdir. Error code !res', array('!file' => $file->filename, '!subdir' => $temp_subdir, '!res' => $res)));
       }
     } else {
-      Logger::logError('Dispatcher', 0, 104, t('Cant UnZip file: !file', array('!file' => $file->filename)));
+      Logger::logError('dispatcher', 0, 'dispatcher_004', t('Cant UnZip file: !file', array('!file' => $file->filename)));
     }    
     return $xml_file;
   }

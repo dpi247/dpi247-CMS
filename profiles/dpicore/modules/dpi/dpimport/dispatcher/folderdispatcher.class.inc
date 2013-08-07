@@ -72,13 +72,16 @@ class FolderDispatcher extends Dispatcher{
    */
   protected function getFile($file_name){
     $file_path = NULL;
-    if ($this->isZip()){
-      $file = $this->createFileObject($file_name, $this->getSourceFolder()."/".$file_name);
-      $file_path = $this->getFilePathFromZip($file, 'xml');
-    } else {
-      if (file_exists($this->getSourceFolder()."/".$file_name)){
+    
+    if (file_exists($this->getSourceFolder()."/".$file_name)){
+      if ($this->isZip()){
+        $file = $this->createFileObject($file_name, $this->getSourceFolder()."/".$file_name);
+        $file_path = $this->getFilePathFromZip($file, 'xml');
+      } else {
         $file_path = $this->getSourceFolder()."/".$file_name;
       }
+    } else {
+      Logger::logError('dispatcher', 0, 'dispatcher_009', t('The file specified does not exists : !filepath', array('!filepath' => $this->getSourceFolder()."/".$file_name, )));
     }
     return $file_path;
   }
@@ -96,13 +99,18 @@ class FolderDispatcher extends Dispatcher{
       'key' => 'name',
     ); 
     $files = file_scan_directory($source_folder, $mask, $options);
+    $file_paths = NULL;
     
-    foreach ($files as $file){
-      if ($this->isZip()){
-        $file_paths[] = $this->getFilePathFromZip($file, 'xml');
-      } else {
-        $file_paths[] = $file->uri;     
+    if (!empty($files)){
+      foreach ($files as $file){
+        if ($this->isZip()){
+          $file_paths[] = $this->getFilePathFromZip($file, 'xml');
+        } else {
+          $file_paths[] = $file->uri;     
+        }
       }
+    } else {
+      Logger::logError('dispatcher', 0, 'dispatcher_008', t('There is no file in this folder : !folder', array('!folder' => $source_folder, )));
     }
     return $file_paths;
   }

@@ -153,7 +153,22 @@ abstract class Importer{
     $entity = $this->{$create_or_load_function}($dom);
     return $entity;
   }
-    
-    
+  
+  /**
+   * 
+   * Return a boolean form the xml value (int, string or boolean)
+   * @param unknown_type $xmlboolean
+   */
+  protected function xmlbooleantophpboolean($xmlboolean){
+    $phpboolean = NULL;
+    if ($xmlboolean === FALSE) $phpboolean = FALSE;
+    if ($xmlboolean === TRUE) $phpboolean = TRUE;
+    if (strtolower($xmlboolean) == "true") $phpboolean = TRUE;
+    if (strtolower($xmlboolean) == "false") $phpboolean = FALSE;
+    if ($xmlboolean == 0) $phpboolean = FALSE;
+    if ($xmlboolean == 1) $phpboolean = TRUE;
+    return $phpboolean;
+  }
+  
 }
 
