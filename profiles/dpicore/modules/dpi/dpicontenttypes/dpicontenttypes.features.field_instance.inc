@@ -77,7 +77,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'field_name' => 'field_autopublish',
-    'label' => 'Use embargo and Pubish Date',
+    'label' => 'Use embargo and Publish Date',
     'required' => 0,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -336,7 +336,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'field_name' => 'field_editorialpublicationdate',
-    'label' => 'Editorial publication date',
+    'label' => 'Editorial Publication date',
     'required' => 0,
     'settings' => array(
       'default_value' => 'now',
