@@ -7,8 +7,17 @@ class WallyXmlV1 extends Importer{
    * @param DOM $dom
    */
   function build_package($dom){
+    Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
     dsm($package);
+    if (!Logger::error()){
+      //$package->save();
+      //save node
+      $package->save();
+    }
+    
+    //Set the CurrentLog to the previous one to stop children growing.
+    Logger::setCurrentToPreviousExecution();
     
     //Indicates that the dispatcher must not process the children
     return FALSE;
@@ -21,8 +30,15 @@ class WallyXmlV1 extends Importer{
    */
   protected function constructPackage($dom){
     $package = $this->createOrLoadEntity($dom);
-    //setfields
-    return $package;
+    $package_wrapper = entity_metadata_wrapper('node', $package);
+    dsm($package_wrapper);
+    dpm($package_wrapper->getPropertyInfo());
+    if (!Logger::error()){
+      $this->setPackageAttributes($dom, $package_wrapper);
+      //setfields
+    }
+    
+    return $package_wrapper;
   }
   /**
   *
@@ -41,14 +57,16 @@ class WallyXmlV1 extends Importer{
   
   /**
    * 
-   * Enter description here ...
+   * Create or load an entity based on it's exeternal reference
+   * @param DOM $dom
+   * @return Object $node
    */
   protected function createOrLoadEntityPackage($dom){
     $node = new stdClass();
-    $node->type = 'article-package';
+    $node->type = 'article_package';
     node_object_prepare($node);
     
-    // @TODO Demander à dimitri pourquoi dans wallymport 6 on filtre l'external reference par filter_xss 
+    //@todo Demander à dimitri pourquoi dans wallymport 6 on filtre l'external reference par filter_xss 
     $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     
@@ -61,9 +79,9 @@ class WallyXmlV1 extends Importer{
     switch($action){
       case 'Delete':
         if ($temp_node != NULL){
-          //delete node
+          //@todo delete node
         } else {
-          //indiquer erreur
+          Logger::logError('importer', 0, 'xmldelete', t('The package doesn\'t exist. It can\'t be deleted. Package rejected.'));
         }
         break;
       case 'CreateReplace':
@@ -75,21 +93,78 @@ class WallyXmlV1 extends Importer{
       case 'CreateUpdate':
         if ($temp_node != NULL){
           $node = $temp_node;
-          //cckdestinations_force_dnc($node);
+          //@todo cckdestinations_force_dnc($node);
         }
         break;
       case 'Update':
         if ($temp_node != NULL){
           $node = $temp_node;
-          //cckdestinations_force_dnc($node);
+          //@todo cckdestinations_force_dnc($node);
         } else {
-          //error
-          $error_msg = t('The package doesn\'t exist. It can ben updated. Package rejected.');
-          
+          Logger::logError('importer', 0, 'xmlupdate', t('The package doesn\'t exist. It can\'t ben updated. Package rejected.'));
         }
         break;
     }
     
     return $node;
   }
+  
+  /**
+   * 
+   * Get attributes of current DOM and set its to the package
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  function setPackageAttributes($dom, $package){
+    //Language
+    $package->language->set($dom->getAttributeNode('Language')->value);
+    //@todo path_autho check alias
+    
+    //Set Editorial Publication Date
+    $this->buildPublicationDate($dom, $package);
+    $this->buildLastUpdateDate($dom, $package);
+    
+  }
+  
+  /**
+   * 
+   * Return the timestamp of the datetime
+   * Ceci retourne le timestamp en UTC
+   * Exemple avec la date 2013-06-14T09:20:41+02:00 il retourne 1371194441 
+   * qui donne pour date('d/m/Y H:i:s e', 1371194441) -> 14/06/2013 09:20:41 Europe/Brussels (e = timezone)
+   * ou 14/06/2013 07:20:41 UTC Ce qui est correct donc merci de vérifier vos timezone avant de modifier cette fonction.
+   * @param String $datetime
+   */
+  function getDateStampFromDateTime($date){
+    $datetime = new DateTime($date);
+    return $datetime->getTimestamp();
+  }
+  
+  /**
+   * 
+   * Set field_editorialpublicationdate
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  function buildPublicationDate($dom, $package){
+    if ($dom->hasAttribute("PublicationDate")) {
+      $editorialpublicationdate = $this->getDateStampFromDateTime($dom->getAttributeNode("PublicationDate")->value);
+    } else {
+      $editorialpublicationdate = time();
+    }
+    $package->field_editorialpublicationdate->set($editorialpublicationdate);
+  }
+  
+  function buildLastUpdateDate($dom, $package){
+    dsm($dom->getAttributeNode("ForceLastUpdate")->value);
+    if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
+      if ($dom->hasAttributeNode("LastUpdateDate")){
+        $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+      } else {
+        $editorialupdatedate = time();
+      }
+      $package->field_editorialupdatedate->set($editorialpublicationdate);
+    }
+  }
+  
 }
