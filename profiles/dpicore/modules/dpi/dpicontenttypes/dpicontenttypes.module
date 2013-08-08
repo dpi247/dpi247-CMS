@@ -92,8 +92,7 @@ function dpicontenttypes_node_insert($node){
         'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
         'description' => '',
         'source' => 'dpi247',
-        'product_id' => dpi_variable_get('dpicommons_product', ''),
-        
+        'product_id' => dpi_variable_get('dpicommons_product', ''),       
       );
       $dpiproperties = new DPIPropertiesEntity($values, 'dpiproperties');
       $dpiproperties->type = 'default';
@@ -107,6 +106,12 @@ function dpicontenttypes_node_insert($node){
     }
   }
 }
+
+function dpicontenttypes_entity_property_info_alter(&$info){
+  dsm($info);
+}
+
+
 /**
  * Implement hook_form().
  *

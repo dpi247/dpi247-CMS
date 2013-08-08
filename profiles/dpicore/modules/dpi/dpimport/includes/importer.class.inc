@@ -162,13 +162,25 @@ abstract class Importer{
   protected function xmlbooleantophpboolean($xmlboolean){
     $phpboolean = NULL;
     if ($xmlboolean === FALSE) $phpboolean = FALSE;
-    if ($xmlboolean === TRUE) $phpboolean = TRUE;
-    if (strtolower($xmlboolean) == "true") $phpboolean = TRUE;
-    if (strtolower($xmlboolean) == "false") $phpboolean = FALSE;
-    if ($xmlboolean == 0) $phpboolean = FALSE;
-    if ($xmlboolean == 1) $phpboolean = TRUE;
+    elseif ($xmlboolean === TRUE) $phpboolean = TRUE;
+    elseif (strtolower($xmlboolean) == "true") $phpboolean = TRUE;
+    elseif (strtolower($xmlboolean) == "false") $phpboolean = FALSE;
+    elseif ($xmlboolean == 0) $phpboolean = FALSE;
+    elseif ($xmlboolean == 1) $phpboolean = TRUE;
     return $phpboolean;
   }
-  
+  /**
+   * 
+   * Filter xss if the module filter is enabled else, use php function strip_tags
+   * @param unknown_type $text
+   */
+  protected function filterHtmlTags($text){
+    if (module_exists('filter')) {
+      $filtered_text = filter_xss($text, array());
+    } else {
+      $filtered_text = strip_tags($text);
+    }
+    return $filtered_text;
+  }
 }
 

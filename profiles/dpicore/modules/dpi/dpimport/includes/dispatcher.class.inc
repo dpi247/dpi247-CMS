@@ -115,7 +115,7 @@ abstract class Dispatcher{
         if ($child->nodeName != '#text'){
           $explore_child = TRUE;
           $callback = $importer->getCallback($child);
-          $method_name = 'build_'.$callback;
+          $method_name = 'build'.$callback;
           //Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists($importer, $method_name)){
             $explore_child = $importer->$method_name($child);
@@ -130,6 +130,21 @@ abstract class Dispatcher{
     }
   }
   
+  
+  function processChildren($dom, $object){
+    $importer = $this->getImporter();
+    foreach($dom->childNodes as $child){
+      $name = strtolower($child->nodeName);
+      if ($name != '#text'){
+        $callback = $importer->getCallback($child);
+        $method_name = 'build'.$callback;
+        dsm($method_name);
+        if (method_exists($importer, $method_name)){
+          $importer->$method_name($child, $object);
+        }
+      }
+    }
+  }
   /**
    * 
    * Extract file from zip

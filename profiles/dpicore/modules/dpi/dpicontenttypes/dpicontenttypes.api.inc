@@ -4,9 +4,9 @@
  */
 function dpicontenttypes_api_getdpicontenttypes(){
   return array(
-    'article-package',
-    'gallery-package',
-    'poll-package',
+    'article_package',
+    'gallery_package',
+    'poll_package',
     'link',
     'link-list',
     'photo',
@@ -19,5 +19,6 @@ function dpicontenttypes_api_getdpicontenttypes(){
  */
 function dpicontenttypes_api_getnodebyexternalreference($external_reference){
   $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
-  return $dpiproperties;
+  $node = node_load($dpiproperties->nid);
+  return $node;
 }

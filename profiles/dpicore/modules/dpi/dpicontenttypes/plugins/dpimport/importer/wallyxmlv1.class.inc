@@ -6,14 +6,14 @@ class WallyXmlV1 extends Importer{
    * Intercept dom at element <Package>
    * @param DOM $dom
    */
-  function build_package($dom){
+  public function buildPackage($dom){
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
     dsm($package);
     if (!Logger::error()){
-      //$package->save();
-      //save node
       $package->save();
+      //save node
+      
     }
     
     //Set the CurrentLog to the previous one to stop children growing.
@@ -29,13 +29,17 @@ class WallyXmlV1 extends Importer{
    * @param DOM $dom
    */
   protected function constructPackage($dom){
+    $disatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
+    dsm($package);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    dsm($package_wrapper);
     dpm($package_wrapper->getPropertyInfo());
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper);
-      //setfields
+      if (!Logger::error()){
+        dsm($package_wrapper);
+        //$disatcher->processChildren($dom, $package_wrapper);
+      }
     }
     
     return $package_wrapper;
@@ -49,7 +53,7 @@ class WallyXmlV1 extends Importer{
   */
   public function getCallback($dom){
     $callback = strtolower($dom->nodeName);
-    if (get_class($dom) == 'DOMElement' && $dom->hasAttribute('xsi:type') && $dom->nodeName != 'Package'){
+    if (get_class($dom) == 'DOMElement' && $dom->hasAttribute('xsi:type') && $dom->nodeName != 'Package' && $dom->getAttribute('xsi:type') != 'xs:string'){
       $callback = strtolower($dom->getAttributeNode('xsi:type')->value);
     }
     return $callback;
@@ -105,7 +109,8 @@ class WallyXmlV1 extends Importer{
         }
         break;
     }
-    
+
+    $node->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
     return $node;
   }
   
@@ -115,15 +120,14 @@ class WallyXmlV1 extends Importer{
    * @param DOM $dom
    * @param EntityDrupalWrapper $package
    */
-  function setPackageAttributes($dom, $package){
+  protected function setPackageAttributes($dom, $package){
     //Language
     $package->language->set($dom->getAttributeNode('Language')->value);
     //@todo path_autho check alias
     
-    //Set Editorial Publication Date
-    $this->buildPublicationDate($dom, $package);
-    $this->buildLastUpdateDate($dom, $package);
-    
+    $this->buildEditorialPublicationDate($dom, $package);
+    $this->buildEditorialUpdateDate($dom, $package);
+    $this->buildAutopublishDate($dom, $package);
   }
   
   /**
@@ -135,7 +139,7 @@ class WallyXmlV1 extends Importer{
    * ou 14/06/2013 07:20:41 UTC Ce qui est correct donc merci de vérifier vos timezone avant de modifier cette fonction.
    * @param String $datetime
    */
-  function getDateStampFromDateTime($date){
+  protected function getDateStampFromDateTime($date){
     $datetime = new DateTime($date);
     return $datetime->getTimestamp();
   }
@@ -146,7 +150,7 @@ class WallyXmlV1 extends Importer{
    * @param DOM $dom
    * @param EntityDrupalWrapper $package
    */
-  function buildPublicationDate($dom, $package){
+  protected function buildEditorialPublicationDate($dom, $package){
     if ($dom->hasAttribute("PublicationDate")) {
       $editorialpublicationdate = $this->getDateStampFromDateTime($dom->getAttributeNode("PublicationDate")->value);
     } else {
@@ -155,16 +159,121 @@ class WallyXmlV1 extends Importer{
     $package->field_editorialpublicationdate->set($editorialpublicationdate);
   }
   
-  function buildLastUpdateDate($dom, $package){
-    dsm($dom->getAttributeNode("ForceLastUpdate")->value);
+  /**
+   * 
+   * Set field editorialupdatedate
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  protected function buildEditorialUpdateDate($dom, $package){
     if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
-      if ($dom->hasAttributeNode("LastUpdateDate")){
+      if ($dom->hasAttribute("LastUpdateDate")){
         $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
       } else {
         $editorialupdatedate = time();
       }
-      $package->field_editorialupdatedate->set($editorialpublicationdate);
+      $package->field_editorialupdatedate->set($editorialupdatedate);
     }
   }
+  /**
+   * 
+   * Set field autopublishdate
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  protected function buildAutopublishDate($dom, $package){
+    $embargodate = NULL;
+    $unpublishdate = NULL;
+    if ($dom->hasAttribute("EmbargoDate")) {
+      $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
+    }
+    if ($dom->hasAttribute("UnPublishDate")) {
+      $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+    }
+    $package->field_autopublishdate->set(array('value' => $embargodate, 'value2' => $unpublishdate));
+  }
   
+  /**
+   * 
+   * Set field productID
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  public function buildProductID($dom, $package){
+    $value = $dom->nodeValue;
+    $package->dpiproperties->product_id = $value;
+  }
+  
+  /**
+  *
+  * Set field ExternalReference
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package
+  */
+  public function buildExternalReference($dom, $package){
+    $value = $dom->nodeValue;
+    $package->dpiproperties->external_reference = $value;
+  }
+  
+  /**
+  *
+  * Set field Source
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package
+  */
+  public function buildSource($dom, $package){
+    $value = $dom->nodeValue;
+    $package->dpiproperties->source = $value;
+  }
+  
+  /**
+   * 
+   * Set field Package to title and display title. If a mainstory or an embed textboject exists, it will be erased by it
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  public function buildPackageTitle($dom, $package){
+    $value = $dom->nodeValue;
+    dsm($package);
+    $package->title->set($this->filterHtmlTags($value));
+    $package->field_displaytitle->set($value);
+  }
+  /**
+   * 
+   * Set field Destination
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package
+   */
+  public function buildDestinations($dom, $package){
+    //@todo
+  }
+  /**
+  *
+  * Set field CommentsAllowed
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package
+  */
+  public function buildCommentsAllowed($dom, $package){
+    //@todo
+  }
+  /**
+  *
+  * Set field FreeAccess
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package
+  */
+  public function buildFreeAccess($dom, $package){
+    //@todo
+  }
+  /**
+  *
+  * Set field AutoPublish
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package
+  */
+  public function buildAutoPublish($dom, $package){
+    //@todo
+    $value = $this->xmlbooleantophpboolean($dom->nodeValue);
+    $package->field_autopublish->set($value);
+  }
 }
