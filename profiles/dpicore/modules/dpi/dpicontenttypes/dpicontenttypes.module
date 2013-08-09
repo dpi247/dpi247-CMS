@@ -106,9 +106,30 @@ function dpicontenttypes_node_insert($node){
     }
   }
 }
-
+/**
+ * 
+ * Implementation of hook_entity_property_info_alter
+ * Add Dpiproperties setter to add dpiproperties on a node
+ * @param Array $info
+ */
 function dpicontenttypes_entity_property_info_alter(&$info){
-  dsm($info);
+  $properties = &$info['node']['bundles']['article_package']['properties'];
+  
+  $properties['field_productid'] = array(
+    'label' => t("ProductID"),  
+    'type' => 'text',
+    'setter callback' => 'entity_property_dpiproperties_node_set_properties',
+  );
+  $properties['field_external_reference'] = array(
+    'label' => t("External Reference"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_node_set_properties',
+  );
+  $properties['field_source'] = array(
+    'label' => t("Source"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_node_set_properties',
+  );
 }
 
 

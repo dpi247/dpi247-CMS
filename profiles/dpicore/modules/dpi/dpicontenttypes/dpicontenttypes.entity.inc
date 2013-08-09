@@ -335,12 +335,6 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#title' => t('External reference'),
     '#default_value' => $dpiproperties->external_reference,
   );
-
-  $form['description'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Description'),
-    '#default_value' => $dpiproperties->description,
-  );
   
   $form['source'] = array(
     '#type' => 'textfield',
@@ -404,7 +398,7 @@ function dpiproperties_form_submit($form, &$form_state) {
   $dpiproperties = $form_state['dpiproperties'];
 
   entity_form_submit_build_entity('dpiproperties', $dpiproperties, $form, $form_state);
-dsm($dpiproperties);
+
   dpiproperties_save($dpiproperties);
 
   $dpiproperties_uri = entity_uri('dpiproperties', $dpiproperties);
@@ -448,4 +442,18 @@ function dpiproperties_delete_form_submit($form, &$form_state) {
   drupal_set_message(t('dpiproperties %title deleted.', array('%title' => entity_label('dpiproperties', $dpiproperties))));
 
   $form_state['redirect'] = '<front>';
+}
+/**
+ * 
+ * Set DPI Properties on a node object
+ * @param Object $object
+ * @param String $property_name
+ * @param String $wrapper
+ */
+function entity_property_dpiproperties_node_set_properties($object, $property_name, $wrapper){
+  $name = str_replace('field_', '', $property_name);
+  if (!isset($object->dpiproperties)){
+    $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
+  }
+  $object->dpiproperties->$name = $wrapper; 
 }

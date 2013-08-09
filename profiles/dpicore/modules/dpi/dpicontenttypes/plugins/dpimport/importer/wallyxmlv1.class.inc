@@ -38,7 +38,7 @@ class WallyXmlV1 extends Importer{
       $this->setPackageAttributes($dom, $package_wrapper);
       if (!Logger::error()){
         dsm($package_wrapper);
-        //$disatcher->processChildren($dom, $package_wrapper);
+        $disatcher->processChildren($dom, $package_wrapper);
       }
     }
     
@@ -201,7 +201,7 @@ class WallyXmlV1 extends Importer{
    */
   public function buildProductID($dom, $package){
     $value = $dom->nodeValue;
-    $package->dpiproperties->product_id = $value;
+    $package->field_productid->set($value);
   }
   
   /**
@@ -212,7 +212,7 @@ class WallyXmlV1 extends Importer{
   */
   public function buildExternalReference($dom, $package){
     $value = $dom->nodeValue;
-    $package->dpiproperties->external_reference = $value;
+    $package->field_external_reference->set($value);
   }
   
   /**
@@ -223,7 +223,7 @@ class WallyXmlV1 extends Importer{
   */
   public function buildSource($dom, $package){
     $value = $dom->nodeValue;
-    $package->dpiproperties->source = $value;
+    $package->field_source->set($value);
   }
   
   /**
@@ -234,9 +234,8 @@ class WallyXmlV1 extends Importer{
    */
   public function buildPackageTitle($dom, $package){
     $value = $dom->nodeValue;
-    dsm($package);
     $package->title->set($this->filterHtmlTags($value));
-    $package->field_displaytitle->set($value);
+    $package->field_displaytitle->set(array('value' => $value));
   }
   /**
    * 

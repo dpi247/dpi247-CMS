@@ -33,23 +33,6 @@ class DPIPropertiesController extends EntityAPIController{
       0 => array('#markup' => check_plain($entity->external_reference))
     );
     
-    $content['description'] = array(
-      '#theme' => 'field',
-      '#weight' => 0,
-      '#title' =>t('Description'),
-      '#access' => TRUE,
-      '#label_display' => 'above',
-      '#view_mode' => 'full',
-      '#language' => LANGUAGE_NONE,
-      '#field_name' => 'field_description',
-      '#field_type' => 'text',
-      '#entity_type' => 'dpiproperties',
-      '#bundle' => $entity->type,
-      '#items' => array(array('value' => $entity->description)),
-      '#formatter' => 'text_default',
-      0 => array('#markup' => check_plain($entity->description))
-    );
-    
     $content['source'] = array(
       '#theme' => 'field',
       '#weight' => 0,

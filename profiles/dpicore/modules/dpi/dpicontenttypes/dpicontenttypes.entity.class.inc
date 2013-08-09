@@ -4,7 +4,6 @@ class DPIPropertiesEntity extends Entity{
   public $dpid;
   public $nid;
   public $external_reference;
-  public $description;
   public $source;
   public $product_id;
   
