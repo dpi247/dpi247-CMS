@@ -138,7 +138,6 @@ abstract class Dispatcher{
       if ($name != '#text'){
         $callback = $importer->getCallback($child);
         $method_name = 'build'.$callback;
-        dsm($method_name);
         if (method_exists($importer, $method_name)){
           $importer->$method_name($child, $object);
         }

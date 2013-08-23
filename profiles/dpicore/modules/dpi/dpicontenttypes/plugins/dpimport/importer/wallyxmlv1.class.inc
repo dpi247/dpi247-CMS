@@ -9,7 +9,6 @@ class WallyXmlV1 extends Importer{
   public function buildPackage($dom){
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
-    dsm($package);
     if (!Logger::error()){
       $package->save();
       //save node
@@ -37,7 +36,6 @@ class WallyXmlV1 extends Importer{
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper);
       if (!Logger::error()){
-        dsm($package_wrapper);
         $disatcher->processChildren($dom, $package_wrapper);
       }
     }
@@ -69,12 +67,16 @@ class WallyXmlV1 extends Importer{
     $node = new stdClass();
     $node->type = 'article_package';
     node_object_prepare($node);
+    $node->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
     
     //@todo Demander à dimitri pourquoi dans wallymport 6 on filtre l'external reference par filter_xss 
     $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
+    $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
+    if ($dpiproperties !== FALSE){
+      $temp_node->dpiproperties = $dpiproperties;
+    }
     
-
     $action = 'CreateReplace';
     if ($dom->hasAttribute('Action')){
       $action = $dom->getAttribute('Action');
@@ -110,7 +112,6 @@ class WallyXmlV1 extends Importer{
         break;
     }
 
-    $node->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
     return $node;
   }
   
@@ -118,16 +119,16 @@ class WallyXmlV1 extends Importer{
    * 
    * Get attributes of current DOM and set its to the package
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  protected function setPackageAttributes($dom, $package){
+  protected function setPackageAttributes($dom, $wrapper){
     //Language
-    $package->language->set($dom->getAttributeNode('Language')->value);
+    $wrapper->language->set($dom->getAttributeNode('Language')->value);
     //@todo path_autho check alias
     
-    $this->buildEditorialPublicationDate($dom, $package);
-    $this->buildEditorialUpdateDate($dom, $package);
-    $this->buildAutopublishDate($dom, $package);
+    $this->buildEditorialPublicationDate($dom, $wrapper);
+    $this->buildEditorialUpdateDate($dom, $wrapper);
+    $this->buildAutopublishDate($dom, $wrapper);
   }
   
   /**
@@ -148,40 +149,40 @@ class WallyXmlV1 extends Importer{
    * 
    * Set field_editorialpublicationdate
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  protected function buildEditorialPublicationDate($dom, $package){
+  protected function buildEditorialPublicationDate($dom, $wrapper){
     if ($dom->hasAttribute("PublicationDate")) {
       $editorialpublicationdate = $this->getDateStampFromDateTime($dom->getAttributeNode("PublicationDate")->value);
     } else {
       $editorialpublicationdate = time();
     }
-    $package->field_editorialpublicationdate->set($editorialpublicationdate);
+    $wrapper->field_editorialpublicationdate->set($editorialpublicationdate);
   }
   
   /**
    * 
    * Set field editorialupdatedate
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  protected function buildEditorialUpdateDate($dom, $package){
+  protected function buildEditorialUpdateDate($dom, $wrapper){
     if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
       if ($dom->hasAttribute("LastUpdateDate")){
         $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
       } else {
         $editorialupdatedate = time();
       }
-      $package->field_editorialupdatedate->set($editorialupdatedate);
+      $wrapper->field_editorialupdatedate->set($editorialupdatedate);
     }
   }
   /**
    * 
    * Set field autopublishdate
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  protected function buildAutopublishDate($dom, $package){
+  protected function buildAutopublishDate($dom, $wrapper){
     $embargodate = NULL;
     $unpublishdate = NULL;
     if ($dom->hasAttribute("EmbargoDate")) {
@@ -190,89 +191,263 @@ class WallyXmlV1 extends Importer{
     if ($dom->hasAttribute("UnPublishDate")) {
       $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
     }
-    $package->field_autopublishdate->set(array('value' => $embargodate, 'value2' => $unpublishdate));
+    $wrapper->field_autopublishdate->set(array('value' => $embargodate, 'value2' => $unpublishdate));
   }
   
   /**
    * 
    * Set field productID
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  public function buildProductID($dom, $package){
+  public function buildProductID($dom, $wrapper){
     $value = $dom->nodeValue;
-    $package->field_productid->set($value);
+    $wrapper->field_product_id->set($value);
   }
   
   /**
   *
   * Set field ExternalReference
   * @param DOM $dom
-  * @param EntityDrupalWrapper $package
+  * @param EntityDrupalWrapper $wrapper
   */
-  public function buildExternalReference($dom, $package){
+  public function buildExternalReference($dom, $wrapper){
     $value = $dom->nodeValue;
-    $package->field_external_reference->set($value);
+    
+    //Astuce pour empecher que l'external reference du textobject remplace celle du package
+    if ($wrapper->field_external_reference->value() == NULL){
+      $wrapper->field_external_reference->set($value);
+    }
   }
   
   /**
   *
   * Set field Source
   * @param DOM $dom
-  * @param EntityDrupalWrapper $package
+  * @param EntityDrupalWrapper $wrapper
   */
-  public function buildSource($dom, $package){
+  public function buildSource($dom, $wrapper){
     $value = $dom->nodeValue;
-    $package->field_source->set($value);
+    $wrapper->field_source->set($value);
   }
   
   /**
    * 
    * Set field Package to title and display title. If a mainstory or an embed textboject exists, it will be erased by it
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  public function buildPackageTitle($dom, $package){
+  public function buildPackageTitle($dom, $wrapper){
     $value = $dom->nodeValue;
-    $package->title->set($this->filterHtmlTags($value));
-    $package->field_displaytitle->set(array('value' => $value));
+    $format = $this->getDefaultTextFormat();
+    $wrapper->title->set($this->filterHtmlTags($value));
+    $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
   }
+  
   /**
    * 
    * Set field Destination
    * @param DOM $dom
-   * @param EntityDrupalWrapper $package
+   * @param EntityDrupalWrapper $wrapper
    */
-  public function buildDestinations($dom, $package){
+  public function buildDestinations($dom, $wrapper){
     //@todo
   }
+  
   /**
   *
   * Set field CommentsAllowed
   * @param DOM $dom
-  * @param EntityDrupalWrapper $package
+  * @param EntityDrupalWrapper $wrapper
   */
-  public function buildCommentsAllowed($dom, $package){
+  public function buildCommentsAllowed($dom, $wrapper){
     //@todo
   }
+  
   /**
   *
   * Set field FreeAccess
   * @param DOM $dom
-  * @param EntityDrupalWrapper $package
+  * @param EntityDrupalWrapper $wrapper
   */
-  public function buildFreeAccess($dom, $package){
+  public function buildFreeAccess($dom, $wrapper){
     //@todo
   }
+  
   /**
   *
   * Set field AutoPublish
   * @param DOM $dom
-  * @param EntityDrupalWrapper $package
+  * @param EntityDrupalWrapper $wrapper
   */
-  public function buildAutoPublish($dom, $package){
+  public function buildAutoPublish($dom, $wrapper){
     //@todo
     $value = $this->xmlbooleantophpboolean($dom->nodeValue);
-    $package->field_autopublish->set($value);
+    $wrapper->field_autopublish->set($value);
+  }
+  
+  /**
+  *
+  * Set field Package Layout
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildPackageLayout($dom, $wrapper){
+    //@todo
+  }
+  
+  /**
+  *
+  * Set field ExternalURI
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildExternalURI($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $wrapper->field_externalurl->set(array('url' => $value));
+  }
+  
+  /**
+  *
+  * Set field LastUrlAlias
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildLastURLAlias($dom, $wrapper){
+    //@todo
+  }
+  
+  /**
+  *
+  * Set field MainStory
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildMainStory($dom, $wrapper){
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $wrapper);
+  }
+ 
+  /**
+  *
+  * Set field Copyright
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildCopyright($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $wrapper->field_copyright->set($value);
+  }
+  /**
+  *
+  * Set field Marker
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildMarker($dom, $wrapper){
+    //@todo
+  }
+  
+  /**
+  *
+  * Set field TextBarette
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextBarette($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textbarette->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field TextForeTitle
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextForeTitle($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textforetitle->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field TextSubTitle
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextSubTitle($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textsubtitle->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field TextTitle
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextTitle($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->title->set($this->filterHtmlTags($value));
+    $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field TextChapo
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextChapo($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textchapo->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field TextBody
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTextBody($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textbody->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field ByLine
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildByLine($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_byline->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+   * 
+   * Get the default text format
+   */
+  protected function getDefaultTextFormat(){
+    return filter_default_format();
+  }
+  
+  /**
+  *
+  * Set Embedded Content
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildEmbeddedContent($dom, $wrapper){
+    
   }
 }

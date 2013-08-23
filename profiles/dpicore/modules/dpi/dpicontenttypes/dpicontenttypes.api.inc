@@ -18,7 +18,10 @@ function dpicontenttypes_api_getdpicontenttypes(){
  * Return a node by its external reference. If no node exists for this external reference return NULL
  */
 function dpicontenttypes_api_getnodebyexternalreference($external_reference){
+  $node = NULL;
   $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
-  $node = node_load($dpiproperties->nid);
+  if ($dpiproperties != NULL && $dpiproperties->nid != NULL){
+    $node = node_load($dpiproperties->nid);
+  }
   return $node;
 }

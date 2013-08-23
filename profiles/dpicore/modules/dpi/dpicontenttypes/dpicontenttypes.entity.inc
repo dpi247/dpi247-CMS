@@ -457,3 +457,17 @@ function entity_property_dpiproperties_node_set_properties($object, $property_na
   }
   $object->dpiproperties->$name = $wrapper; 
 }
+/**
+*
+* Set DPI Properties on a node object
+* @param Object $object
+* @param String $property_name
+* @param String $wrapper
+*/
+function entity_property_dpiproperties_node_get_properties($object, $options, $property_name, $type, $info){
+  $name = str_replace('field_', '', $property_name);
+  if (!isset($object->dpiproperties)){
+    $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
+  }
+  return $object->dpiproperties->$name;
+}
