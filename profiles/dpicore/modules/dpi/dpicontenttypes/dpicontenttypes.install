@@ -59,26 +59,32 @@ function dpicontenttypes_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'nid' => array(
-        'description' => 'The nid of the node attatch to this properties.',
+      'entity' => array(
+        'description' => 'The entity.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'id' => array(
+        'description' => 'The id of the entity attatch to this properties.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'external_reference' => array(
-        'description' => 'The external reference of the node.',
+        'description' => 'The external reference of the entity.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
       ),
       'source' => array(
-        'description' => 'The source of the node.',
+        'description' => 'The source of the entity.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
       ),
       'product_id' => array(
-        'description' => 'The product ID.',
+        'description' => 'The product ID of the entity.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
@@ -86,14 +92,8 @@ function dpicontenttypes_schema() {
       ),
     ),
     'indexes' => array(
-      'nid'                => array('nid'),
+      'id'                => array('id'),
       'external_reference' => array('external_reference'),
-    ),
-    'foreign keys' => array(
-      'nid' => array(
-        'table' => 'node',
-        'columns' => array('nid' => 'nid'),
-      ),
     ),
     'primary key' => array('dpid'),
   );
@@ -206,4 +206,13 @@ function dpicontenttypes_update_7001(){
   
   db_drop_field('dpicontenttypes_properties', 'description');
 }
-
+/**
+ * 
+ * Reinstallation de la table dpiproporties
+ */
+function dpicontenttypes_update_7002(){
+  
+  $schema = drupal_get_schema('dpicontenttypes_properties', TRUE);
+  db_drop_table('dpicontenttypes_properties');
+  db_create_table('dpicontenttypes_properties', $schema);
+}

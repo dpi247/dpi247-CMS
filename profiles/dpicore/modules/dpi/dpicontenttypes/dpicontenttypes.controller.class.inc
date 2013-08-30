@@ -3,7 +3,8 @@ class DPIPropertiesController extends EntityAPIController{
   
   public function create(array $values = array()) {
     $values += array(
-      'nid' => '',
+      'entity' => '',
+      'id' => '',
       'external_reference' => '',
       'description' => '',
       'source' => '',
@@ -67,7 +68,8 @@ class DPIPropertiesController extends EntityAPIController{
     );
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
-  public function load_dpiproperties_by_nid($nid){
+  /*
+  public function load_dpiproperties_by_id($id){
   
     $conditions = array('nid' => $nid);
     $result = dpiproperties_load_multiple(FALSE, $conditions);
@@ -76,7 +78,7 @@ class DPIPropertiesController extends EntityAPIController{
     }
     return current($result);
      
-  }
+  }*/
 
 }
 /**

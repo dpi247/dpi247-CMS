@@ -2,7 +2,7 @@
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
-
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 include_once 'dpicontenttypes.features.inc';
 
 
@@ -79,42 +79,34 @@ function dpicontenttypes_permission(){
 
 
 /**
- * Implementation of hook_node_presave
+ * Implementation of hook_node_insert
  * @param object $node
  */
 function dpicontenttypes_node_insert($node){
-
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())){
-    //Create the dpiproperties entry corresponding to the node
-    if (!isset($node->dpiproperties)){
-      //If no dpiproperties are defined, set default values
-      $values = array(
-        'nid' => $node->nid,
-        'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
-        'description' => '',
-        'source' => 'dpi247',
-        'product_id' => dpi_variable_get('dpicommons_product', ''),       
-      );
-      $dpiproperties = new DPIPropertiesEntity($values, 'dpiproperties');
-      $dpiproperties->type = 'default';
-      dpiproperties_save($dpiproperties);
-    } else {
-      //if dpiproperties are defined, save it
-      $dpiproperties = $node->dpiproperties;
-      $dpiproperties->nid = $node->nid;
-      $dpiproperties->type = 'default';
-      dpiproperties_save($dpiproperties);
-    }
+    _dpicontenttypes_insertdpiproperties($node, 'node', $node->nid);
   }
 }
 /**
- * 
- * Implementation of hook_delete
- * @param unknown_type $node
- */
+*
+* Implementation of hook_delete
+* @param Object $node
+*/
 function dpicontenttypes_node_delete($node) {
   //Delete the dpiproperties entry corresponding to the node
-  db_delete('dpicontenttypes_properties')->condition('nid', $node->nid)->execute();
+  _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
+}
+
+/**
+ * 
+ * Implementation of hook_scald_atom_insert
+ * @param Object $atom
+ */
+function dpicontenttypes_scald_atom_insert($atom){
+  _dpicontenttypes_entityinsertdpiproperties($atom, 'scald_atom', $atom->sid);
+}
+function dpicontenttypes_scald_atom_delete($atom){
+  _dpicontenttypes_entitydeletedpiproperties($atom, 'scald_atom', $atom->sid);
 }
 /**
  * 
@@ -123,26 +115,39 @@ function dpicontenttypes_node_delete($node) {
  * @param Array $info
  */
 function dpicontenttypes_entity_property_info_alter(&$info){
-  $properties = &$info['node']['bundles']['article_package']['properties'];
-  
-  $properties['field_product_id'] = array(
+
+  $product_id = array(
     'label' => t("ProductID"),  
     'type' => 'text',
     'setter callback' => 'entity_property_dpiproperties_node_set_properties',
     'getter callback' => 'entity_property_dpiproperties_node_get_properties',
   );
-  $properties['field_external_reference'] = array(
+  $external_reference = array(
     'label' => t("External Reference"), 
     'type' => 'text', 
     'setter callback' => 'entity_property_dpiproperties_node_set_properties',
     'getter callback' => 'entity_property_dpiproperties_node_get_properties',
   );
-  $properties['field_source'] = array(
+  $source = array(
     'label' => t("Source"), 
     'type' => 'text', 
     'setter callback' => 'entity_property_dpiproperties_node_set_properties',
     'getter callback' => 'entity_property_dpiproperties_node_get_properties',
   );
+  
+  //Set to the article_package
+  $info['node']['bundles']['article_package']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['article_package']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['article_package']['properties']['field_source'] = $source;
+  
+  //Set to the atoms image
+  $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
+  $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
+  //Set to the atoms linklist
+  $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
 }
 
 
@@ -227,4 +232,12 @@ function dpicontenttypes_library() {
 
   return $libraries;
 }
-
+/**
+ * 
+ * Implementation of hook_entity_presave
+ * @param Object $entity
+ * @param String $type
+ */
+function wallycontenttypes_entity_presave($entity, $type) {
+  //@todo Pour tous les objets de type field, vérifier si l'ancien fichier = le nouveau, si non, mettre un timeout sur l'ancien pour qu'il soit supprimer dans x temps (voir nodeapi de wallymport en drupal 6)
+}

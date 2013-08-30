@@ -5,7 +5,6 @@ package = DPI
 php = 5.2.4
 dependencies[] = ctools
 dependencies[] = date
-dependencies[] = dpicontenttypes
 dependencies[] = entity
 dependencies[] = entityreference
 dependencies[] = features
@@ -17,6 +16,7 @@ dependencies[] = scald
 dependencies[] = scald_image
 dependencies[] = taxonomy
 dependencies[] = text
+dependencies[] = dpicache
 
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc

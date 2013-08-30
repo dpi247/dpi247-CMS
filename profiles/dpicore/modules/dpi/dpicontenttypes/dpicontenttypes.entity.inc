@@ -349,9 +349,13 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#title' => t('Product ID'),
     '#default_value' => $dpiproperties->product_id,
   );
-  $form['nid'] = array(
+  $form['entity'] = array(
     '#type' => 'value',
-    '#value' => $dpiproperties->nid,
+    '#value' => $dpiproperties->entity,
+  );
+  $form['id'] = array(
+    '#type' => 'value',
+    '#value' => $dpiproperties->id,
   );
 
   field_attach_form('dpiproperties', $dpiproperties, $form, $form_state);

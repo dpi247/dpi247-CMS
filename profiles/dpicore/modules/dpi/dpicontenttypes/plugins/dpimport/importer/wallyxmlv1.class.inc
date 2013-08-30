@@ -28,7 +28,7 @@ class WallyXmlV1 extends Importer{
    * @param DOM $dom
    */
   protected function constructPackage($dom){
-    $disatcher = $this->getDispatcher();
+    $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     dsm($package);
     $package_wrapper = entity_metadata_wrapper('node', $package);
@@ -36,7 +36,7 @@ class WallyXmlV1 extends Importer{
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper);
       if (!Logger::error()){
-        $disatcher->processChildren($dom, $package_wrapper);
+        $dispatcher->processChildren($dom, $package_wrapper);
       }
     }
     
@@ -448,6 +448,114 @@ class WallyXmlV1 extends Importer{
   * @param EntityDrupalWrapper $wrapper
   */
   public function buildEmbeddedContent($dom, $wrapper){
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $wrapper);
+  }
+  /**
+  *
+  * Set Embedded Objects and add it to the wrapper
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildEmbeddedObjects($dom, $wrapper){
+    $dispatcher = $this->getDispatcher();
+    $embeds = $dispatcher->processList($dom, $wrapper);
+  }
+  /**
+  *
+  * Set LinkLists and add it to the wrapper
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildLinksLists($dom, $wrapper){
+    //@todo
+    $dispatcher = $this->getDispatcher();
+    $linkslist = $dispatcher->processList($dom, $wrapper);
+  }
+  /**
+   * 
+   * Set PhotoObjectType
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $package_wrapper
+   */
+  public function buildPhotoObjectType($dom, $package_wrapper){
+    $dispatcher = $this->getDispatcher();
+    $atom = $this->createOrLoadEntityImage($dom);
+    dsm($atom);
+    $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+    dpm($atom_wrapper->getPropertyInfo());
+    if (!Logger::error()){
+      $dispatcher->processChildren($dom, $atom_wrapper);
+      if (!Logger::error()){
+        scald_atom_save($atom);
+        //save atom
+      
+      }
+    }
     
+    return NULL;
+  }
+  /**
+  *
+  * Create Atom Image
+  * @param DOM $dom
+  */
+  protected function createOrLoadEntityImage($dom){
+    $atom = scald_atom_defaults('image');
+    $atom->provider = 'scald_image';
+    $atom->type = 'image';
+    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+      $atom = $temp_atom;
+    }
+    return $atom;
+  }
+  
+  /**
+  *
+  * Set field Title
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildTitle($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->title->set($this->filterHtmlTags($value));
+    $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field Caption
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildCaption($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_caption->set(array('value' => $value, 'format' => $format));
+  }
+  
+  /**
+  *
+  * Set field URI
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildURI($dom, $wrapper){
+    $value = $dom->nodeValue;
+    $file = $this->createFile($value, scald_atom_thumbnail_path('image'));
+    $wrapper->scald_thumbnail->set((array) $file);
+  }
+  /**
+  *
+  * Set field Rating
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildRating($dom, $wrapper){
+    $value = $dom->nodeValue;
+    //dsm($value);
+    //@todo
   }
 }
