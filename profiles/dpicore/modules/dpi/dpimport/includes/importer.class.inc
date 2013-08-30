@@ -182,5 +182,36 @@ abstract class Importer{
     }
     return $filtered_text;
   }
+  
+  /**
+   * 
+   * Enter description here ...
+   * @param String $uri
+   */
+  protected function createFile($file_uri, $destination){
+    $dispatcher = $this->getDispatcher();
+    $uri = parse_url($file_uri);
+    $file = NULL;
+    switch ($uri['scheme']){
+      case 'embed':
+        $source = $dispatcher->getTempSubdir().'/'.$uri['host'];
+        if ($data = file_get_contents($source)){
+          $file = file_save_data($data, $destination.'/'.$uri['host']);
+        } else {
+          Logger::logWarning('importer', 2, 'fileupload', t('The file (!file) can not be uploaded', array('!file' => $uri['host'])));
+        }
+        break;
+      case 'http':
+        if ($data = drupal_http_request($file_uri, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)))){
+          list($file_type, $file_ext) = explode('/', $data->headers['content-type']);
+          $file_name = 'http'.rand().'.'.$file_ext;
+          $file = file_save_data($data->data, $destination.'/'.$file_name);
+        } else {
+          Logger::logWarning('importer', 2, 'fileupload', t('The file (!file) can not be uploaded', array('!file' => $uri['host'])));
+        }
+        break;
+    }
+    return $file;
+  }
 }
 

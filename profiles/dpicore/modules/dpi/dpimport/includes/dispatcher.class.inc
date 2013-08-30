@@ -130,7 +130,12 @@ abstract class Dispatcher{
     }
   }
   
-  
+  /**
+   * 
+   * Process the children of the currant dom and call a function for each one.
+   * @param DOM $dom
+   * @param Object $object
+   */
   function processChildren($dom, $object){
     $importer = $this->getImporter();
     foreach($dom->childNodes as $child){
@@ -143,6 +148,30 @@ abstract class Dispatcher{
         }
       }
     }
+  }
+  
+  /**
+  *
+  * Process the children of the currant dom and call a function for each one. 
+  * Return an array with the return of each function
+  * @param DOM $dom
+  * @param Object $object
+  */
+  function processList($dom, $object){
+    $list = array();
+    $importer = $this->getImporter();
+    foreach($dom->childNodes as $child){
+      $name = strtolower($child->nodeName);
+      if ($name != '#text'){
+        $callback = $importer->getCallback($child);
+        $method_name = 'build'.$callback;
+        dsm($method_name);
+        if (method_exists($importer, $method_name)){
+          $list[] = $importer->$method_name($child, $object);
+        }
+      }
+    }
+    return $list;
   }
   /**
    * 
