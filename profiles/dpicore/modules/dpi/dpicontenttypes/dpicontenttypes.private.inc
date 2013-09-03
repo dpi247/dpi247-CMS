@@ -7,29 +7,20 @@
  * @param Interger $eid
  */
 function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid){
-  //Create the dpiproperties entry corresponding to the node
+  //Create the dpiproperties entry corresponding to the node  
   if (!isset($object->dpiproperties)){
- 
-    //If no dpiproperties are defined, set default values
-    $values = array(
-      'entity' => $entity,
-      'id' => $eid,
-      'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
-      'external_reference_2' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
-      'source' => 'dpi247',
-      'product_id' => dpi_variable_get('dpicommons_product', ''),       
-    );
-    $dpiproperties = new DPIPropertiesEntity($values, 'dpiproperties');
-    $dpiproperties->type = 'default';
-    dpiproperties_save($dpiproperties);
+    $dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
   } else {
-    //if dpiproperties are defined, save it
     $dpiproperties = $object->dpiproperties;
-    $dpiproperties->entity = $entity;
-    $dpiproperties->id = $eid;
-    $dpiproperties->type = 'default';
-    dpiproperties_save($dpiproperties);
   }
+  $dpiproperties->type = 'default';
+  $dpiproperties->id = $eid;
+  $dpiproperties->entity = $entity;
+  $dpiproperties->external_reference = $dpiproperties->external_reference ? $dpiproperties->external_reference : dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand();
+  $dpiproperties->external_reference_2 = $dpiproperties->external_reference_2 ? $dpiproperties->external_reference_2 : dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand();
+  $dpiproperties->source = $dpiproperties->source ? $dpiproperties->source : 'dpi247';
+  $dpiproperties->product_id = $dpiproperties->product_id ? $dpiproperties->product_id : dpi_variable_get('dpicommons_product', '');
+  dpiproperties_save($dpiproperties);
 }
 /**
  * 

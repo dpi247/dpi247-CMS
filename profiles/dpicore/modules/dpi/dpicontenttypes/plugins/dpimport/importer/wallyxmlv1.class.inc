@@ -167,13 +167,16 @@ class WallyXmlV1 extends Importer{
    * @param EntityDrupalWrapper $wrapper
    */
   protected function buildEditorialUpdateDate($dom, $wrapper){
-    if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
-      if ($dom->hasAttribute("LastUpdateDate")){
-        $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
-      } else {
-        $editorialupdatedate = time();
+    //We don't save the editorial update date on new node.
+    if ($wrapper->nid->value() != NULL){
+      if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
+        if ($dom->hasAttribute("LastUpdateDate")){
+          $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+        } else {
+          $editorialupdatedate = time();
+        }
+        $wrapper->field_editorialupdatedate->set($editorialupdatedate);
       }
-      $wrapper->field_editorialupdatedate->set($editorialupdatedate);
     }
   }
   /**
@@ -263,7 +266,21 @@ class WallyXmlV1 extends Importer{
   * @param EntityDrupalWrapper $wrapper
   */
   public function buildCommentsAllowed($dom, $wrapper){
-    //@todo
+    switch ($dom->nodeValue) {
+      case "Disabled":
+        $status = 0;
+        break;
+      case "Read Only":
+        $status = 1;
+        break;
+      case "Read-Write":
+        $status = 2;
+        break;
+      default:
+        $status = 0;
+      break;
+    }
+    $wrapper->comment->set($status);
   }
   
   /**
@@ -562,4 +579,14 @@ class WallyXmlV1 extends Importer{
     //We take the first match even is there are more.
     $wrapper->field_rating->set($item[0]);
   }
+  /**
+  *
+  * Set field Crops
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  */
+  public function buildCrops($dom, $wrapper){
+    //@todo
+  }
+  
 }
