@@ -116,7 +116,7 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
 
 
   }
-
+  $add_items=array();
   //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
   $field_to_analyse='field_textbody';
   $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
