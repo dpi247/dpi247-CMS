@@ -21,7 +21,7 @@ function dpicore_form_install_configure_form_alter(&$form, $form_state) {
 function dpicore_install_tasks($install_state) {
   
   
-  $tasks = array;
+  $tasks = array();
   
   //Set the taxonomy vid into dpi_variable
   $tasks['set_taxonomy_variable'] = array(
