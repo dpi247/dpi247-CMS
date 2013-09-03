@@ -555,7 +555,9 @@ class WallyXmlV1 extends Importer{
   */
   public function buildRating($dom, $wrapper){
     $value = $dom->nodeValue;
-    //dsm($value);
-    //@todo
+    $vid = dpi_variable_get('dpi_rating', NULL);
+    $item = dpicontenttypes_api_taxonomy_get_term_by_path($value, $vid);
+    //We take the first match even is there are more.
+    $wrapper->field_rating->set($item[0]);
   }
 }
