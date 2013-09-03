@@ -336,6 +336,13 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#default_value' => $dpiproperties->external_reference,
   );
   
+  $form['external_reference_2'] = array(
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#title' => t('External reference 2'),
+      '#default_value' => $dpiproperties->external_reference_2,
+  );
+  
   $form['source'] = array(
     '#type' => 'textfield',
     '#required' => TRUE,

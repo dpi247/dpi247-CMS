@@ -84,7 +84,7 @@ function dpicontenttypes_permission(){
  */
 function dpicontenttypes_node_insert($node){
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())){
-    _dpicontenttypes_insertdpiproperties($node, 'node', $node->nid);
+    _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
   }
 }
 /**
@@ -128,6 +128,12 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     'setter callback' => 'entity_property_dpiproperties_node_set_properties',
     'getter callback' => 'entity_property_dpiproperties_node_get_properties',
   );
+  $external_reference_2 = array(
+    'label' => t("External Reference 2"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_node_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_node_get_properties',
+  );
   $source = array(
     'label' => t("Source"), 
     'type' => 'text', 
@@ -138,15 +144,18 @@ function dpicontenttypes_entity_property_info_alter(&$info){
   //Set to the article_package
   $info['node']['bundles']['article_package']['properties']['field_product_id'] = $product_id;
   $info['node']['bundles']['article_package']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['article_package']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['node']['bundles']['article_package']['properties']['field_source'] = $source;
   
   //Set to the atoms image
   $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
   $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
   //Set to the atoms linklist
   $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
   $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
 }
 

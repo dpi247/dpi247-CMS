@@ -77,6 +77,12 @@ function dpicontenttypes_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'external_reference_2' => array(
+        'description' => 'The second external reference of the entity.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
       'source' => array(
         'description' => 'The source of the entity.',
         'type' => 'varchar',

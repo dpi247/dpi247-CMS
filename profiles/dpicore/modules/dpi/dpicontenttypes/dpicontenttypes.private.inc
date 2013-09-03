@@ -15,6 +15,7 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid){
       'entity' => $entity,
       'id' => $eid,
       'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
+      'external_reference_2' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
       'source' => 'dpi247',
       'product_id' => dpi_variable_get('dpicommons_product', ''),       
     );

@@ -6,7 +6,7 @@ class DPIPropertiesController extends EntityAPIController{
       'entity' => '',
       'id' => '',
       'external_reference' => '',
-      'description' => '',
+      'external_reference_2' => '',
       'source' => '',
       'product_id' => '',
     );
@@ -32,6 +32,23 @@ class DPIPropertiesController extends EntityAPIController{
       '#items' => array(array('value' => $entity->external_reference)),
       '#formatter' => 'text_default',
       0 => array('#markup' => check_plain($entity->external_reference))
+    );
+    
+    $content['external_reference_2'] = array(
+      '#theme' => 'field',
+      '#weight' => 0,
+      '#title' =>t('Exeternal Reference 2'),
+      '#access' => TRUE,
+      '#label_display' => 'above',
+      '#view_mode' => 'full',
+      '#language' => LANGUAGE_NONE,
+      '#field_name' => 'field_external_reference_2',
+      '#field_type' => 'text',
+      '#entity_type' => 'dpiproperties',
+      '#bundle' => $entity->type,
+      '#items' => array(array('value' => $entity->external_reference_2)),
+      '#formatter' => 'text_default',
+      0 => array('#markup' => check_plain($entity->external_reference_2))
     );
     
     $content['source'] = array(

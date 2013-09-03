@@ -214,9 +214,11 @@ class WallyXmlV1 extends Importer{
   public function buildExternalReference($dom, $wrapper){
     $value = $dom->nodeValue;
     
-    //Astuce pour empecher que l'external reference du textobject remplace celle du package
+    //Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
     if ($wrapper->field_external_reference->value() == NULL){
       $wrapper->field_external_reference->set($value);
+    } else {
+      $wrapper->field_external_reference_2->set($value);
     }
   }
   
