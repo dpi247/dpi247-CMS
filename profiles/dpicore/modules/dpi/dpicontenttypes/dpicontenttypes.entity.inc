@@ -32,7 +32,7 @@ function dpicontenttypes_entity_info(){
       ),
     ),
     //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-    'module'=> 'dpicontenttypes',
+    'module' => 'dpicontenttypes',
     'access callback' => 'dpiproperties_access_admin_callback',
 
   );
@@ -43,7 +43,7 @@ function dpicontenttypes_entity_info(){
     'base table' => 'dpicontenttypes_properties_type',
     'fieldable' => TRUE,
     'bundle of' => 'dpiproperties',
-    'exportable' => TRUE,
+    'exportable' => FALSE,
     'entity keys' => array(
       'id' => 'id',
       'name' => 'type',
