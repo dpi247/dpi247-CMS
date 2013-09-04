@@ -30,7 +30,6 @@ class WallyXmlV1 extends Importer{
   protected function constructPackage($dom){
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
-    dsm($package);
     $package_wrapper = entity_metadata_wrapper('node', $package);
     dpm($package_wrapper->getPropertyInfo());
     if (!Logger::error()){
@@ -479,6 +478,15 @@ class WallyXmlV1 extends Importer{
   public function buildEmbeddedObjects($dom, $wrapper){
     $dispatcher = $this->getDispatcher();
     $embeds = $dispatcher->processList($dom, $wrapper);
+    foreach ($embeds as $atom){
+      $embededobject = array(
+        'sid' => $atom->sid,
+        'type' => $atom->type,
+        'provider' => $atom->provider,
+        'inline' => '0', //@todo
+      );
+      //$wrapper->field_embededobjects[$atom->sid]->set($embededobject);
+    }
   }
   /**
   *
@@ -498,21 +506,21 @@ class WallyXmlV1 extends Importer{
    * @param EntityDrupalWrapper $package_wrapper
    */
   public function buildPhotoObjectType($dom, $package_wrapper){
+    $object = NULL;
     $dispatcher = $this->getDispatcher();
     $atom = $this->createOrLoadEntityImage($dom);
-    dsm($atom);
     $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
-    dpm($atom_wrapper->getPropertyInfo());
     if (!Logger::error()){
       $dispatcher->processChildren($dom, $atom_wrapper);
       if (!Logger::error()){
         scald_atom_save($atom);
-        //save atom
-      
-      }
+      } else {
+        $atom = NULL;
+      } 
+    } else {
+      $atom = NULL;
     }
-    
-    return NULL;
+    return $atom;
   }
   /**
   *

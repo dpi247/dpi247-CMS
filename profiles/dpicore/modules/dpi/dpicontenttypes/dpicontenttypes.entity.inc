@@ -60,6 +60,94 @@ function dpicontenttypes_entity_info(){
   );
   return $entities;
 }
+
+//@todo: documenter cette partie on fait l'alter uniquement pour fournir un build mode suplémentaire...
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * We need to modify the default node entity info by adding a new view mode to
+ * be used in functions like node_view() or node_build_content().
+ */
+function dpicontenttypes_entity_info_alter(&$entity_info) {
+  // Add our new view mode to the list of view modes...
+  $entity_info['node']['view modes']['article_package'] = array(
+    'label' => t('Target default'),
+    'custom settings' => FALSE,
+  );
+  
+  //Define bundle path of dpiproperties
+  foreach (dpiproperties_types() as $type => $info) {
+    $entity_info['dpiproperties']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/dpiproperties-types/manage/%dpiproperties_type',
+        'real path' => 'admin/structure/dpiproperties-types/manage/' . $type,
+        'bundle argument' => 4,
+      ),
+    );
+  }
+}
+/**
+*
+* Implementation of hook_entity_property_info_alter
+* Add Dpiproperties setter to add dpiproperties on a node
+* @param Array $info
+*/
+function dpicontenttypes_entity_property_info_alter(&$info){
+
+  $product_id = array(
+    'label' => t("ProductID"),  
+    'type' => 'text',
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
+  $external_reference = array(
+    'label' => t("External Reference"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
+  $external_reference_2 = array(
+    'label' => t("External Reference 2"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
+  $source = array(
+    'label' => t("Source"), 
+    'type' => 'text', 
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
+
+  //Set to the article_package
+  $info['node']['bundles']['article_package']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['article_package']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['article_package']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['node']['bundles']['article_package']['properties']['field_source'] = $source;
+
+  //Set to the atoms image
+  $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
+  $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
+  
+  //Set to the atoms linklist
+  $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
+}
+
+/**
+*
+* Implementation of hook_entity_presave
+* @param Object $entity
+* @param String $type
+*/
+function dpicontenttypes_entity_presave($entity, $type) {
+  //@todo Pour tous les objets de type field, vérifier si l'ancien fichier = le nouveau, si non, mettre un timeout sur l'ancien pour qu'il soit supprimer dans x temps (voir nodeapi de wallymport en drupal 6)
+}
 /**
  * 
  * Load a DPI properties
@@ -118,7 +206,14 @@ function dpiproperties_delete_multiple($dpiproperties_ids) {
 }
 
 
-
+/**
+ * 
+ * Access callback to manage DPIProperties
+ * @param String $op
+ * @param unknown_type $task
+ * @param Object $account
+ * @param String $entity_type
+ */
 function dpiproperties_access_admin_callback($op, $task, $account = NULL, $entity_type = NULL){
   global $user;
   
@@ -138,11 +233,20 @@ function dpiproperties_access_admin_callback($op, $task, $account = NULL, $entit
   }
   return TRUE;
 }
-
+/**
+ * 
+ * Return the title of a DPIProperties page
+ * @param Object $target
+ */
 function dpiproperties_page_title($target){
   return $target->external_reference;
 }
-
+/**
+ * 
+ * Callback to view a dpiproperties
+ * @param DPIProperties $dpiproperties
+ * @param String $view_mode
+ */
 function dpiproperties_view($dpiproperties, $view_mode = 'full'){
   return $dpiproperties->view();
 }
@@ -185,15 +289,13 @@ function dpiproperties_type_delete($dpiproperties_type) {
 function dpiproperties_type_delete_multiple($dpiproperties_ids) {
   entity_delete_multiple('dpiproperties_type', $dpiproperties_ids);
 }
-
+/**
+ * 
+ * Access callback
+ */
 function dpiproperties_type_access_admin_callback(){
   return TRUE;
 }
-
-
-
-
-
 
 
 /**
@@ -456,12 +558,12 @@ function dpiproperties_delete_form_submit($form, &$form_state) {
 }
 /**
  * 
- * Set DPI Properties on a node object
+ * Set DPI Properties on an object
  * @param Object $object
  * @param String $property_name
  * @param String $wrapper
  */
-function entity_property_dpiproperties_node_set_properties($object, $property_name, $wrapper){
+function entity_property_dpiproperties_set_properties($object, $property_name, $wrapper){
   $name = str_replace('field_', '', $property_name);
   if (!isset($object->dpiproperties)){
     $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
@@ -470,12 +572,12 @@ function entity_property_dpiproperties_node_set_properties($object, $property_na
 }
 /**
 *
-* Set DPI Properties on a node object
+* Set DPI Properties on a object
 * @param Object $object
 * @param String $property_name
 * @param String $wrapper
 */
-function entity_property_dpiproperties_node_get_properties($object, $options, $property_name, $type, $info){
+function entity_property_dpiproperties_get_properties($object, $options, $property_name, $type, $info){
   $name = str_replace('field_', '', $property_name);
   if (!isset($object->dpiproperties)){
     $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');

@@ -19,6 +19,7 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
   );
+  
   $theme['dpidestinations_page_targetview_reorder_form'] = array(
     'template' => 'dpidestinations-targetview-page-reorder-form',
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
@@ -26,7 +27,7 @@ function dpidestinations_theme() {
     'render element' => 'form',
   );
 
-    return $theme;
+  return $theme;
 }
 /**
  * Implementation of hook_menu()
@@ -40,6 +41,7 @@ function dpidestinations_menu(){
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
+  
   $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
     'page callback' => 'dpidestinations_page_targetview_page_reorder',
     'page arguments' => array(2,3),
@@ -48,6 +50,7 @@ function dpidestinations_menu(){
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
     'file' => 'dpidestinations.reorder.page.inc'
   );
+  
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
     'title arguments' => array(1),
@@ -56,6 +59,7 @@ function dpidestinations_menu(){
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
+  
   $items['target/add'] = array(
     'title' => 'Add Target!',
     'page callback' => 'target_add',
@@ -87,51 +91,47 @@ function dpidestinations_permission(){
 function dpidestinations_panels_display_save($display){
   
   //STEP 1: First delete all targetblock that doesn't exist anymore.
-  $targetController=new TargetBlockController('targetblock');
-  $existing_targetblocks= $targetController->load_targetblocks_by_panels_display($display->did);
+  $targetController = new TargetBlockController('targetblock');
+  $existing_targetblocks = $targetController->load_targetblocks_by_panels_display($display->did);
   
-  $targetblock_by_pid=array();
-  foreach($existing_targetblocks as $targetblockid  => $targetblock){
-    $targetblock_by_pid[$targetblock->pid]=$targetblock;
+  $targetblock_by_pid = array();
+  foreach ($existing_targetblocks as $targetblockid  => $targetblock){
+    $targetblock_by_pid[$targetblock->pid] = $targetblock;
   }
-  foreach($display->content as $id => $pane){
-    if($pane->type =='targetblock'){
-      if(!strstr($id, 'new')){
-        $panels_in_display_by_pid[$pane->pid]=$pane;
+  foreach ($display->content as $id => $pane){
+    if ($pane->type == 'targetblock'){
+      if (!strstr($id, 'new')){
+        $panels_in_display_by_pid[$pane->pid] = $pane;
       }
     }
   }
   
-  $targetblocks_to_delete_temp=array_diff_key($targetblock_by_pid, $panels_in_display_by_pid);
+  $targetblocks_to_delete_temp = array_diff_key($targetblock_by_pid, $panels_in_display_by_pid);
   
-  $targetblocks_to_delete=array();
-  foreach($targetblocks_to_delete_temp as $targetblock_to_delete_temp){
-    if(isset($existing_targetblocks[$targetblock_to_delete_temp->targetblockid ])){
-      $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ]=$targetblock_to_delete_temp->targetblockid ;
+  $targetblocks_to_delete = array();
+  foreach ($targetblocks_to_delete_temp as $targetblock_to_delete_temp){
+    if (isset($existing_targetblocks[$targetblock_to_delete_temp->targetblockid ])){
+      $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ] = $targetblock_to_delete_temp->targetblockid ;
     }
   }
   targetblock_delete_multiple($targetblocks_to_delete);
   
   //STEP 2: Create or update other redacblock
-  foreach($display->content as $id => &$pane){
-    if($pane->type =='targetblock'){
-      if(!strstr($id, 'new')){
-        
-        
-        $targetblock=(object)$pane->configuration;
-        $targetblock->did=$pane->did;
-        $targetblock->pid=$pane->pid;
-        $targetblock->target=$pane->subtype;
+  foreach ($display->content as $id => &$pane){
+    if ($pane->type == 'targetblock'){
+      if (!strstr($id, 'new')){
+        $targetblock = (object)$pane->configuration;
+        $targetblock->did = $pane->did;
+        $targetblock->pid = $pane->pid;
+        $targetblock->target = $pane->subtype;
 
-        if(isset($targetblock_by_pid[$pane->pid])){
-          $targetblock->targetblockid=$targetblock_by_pid[$pane->pid]->targetblockid;
+        if (isset($targetblock_by_pid[$pane->pid])){
+          $targetblock->targetblockid = $targetblock_by_pid[$pane->pid]->targetblockid;
         }
         targetblock_save($targetblock);
         unset($targetblock);
-        
       }
     }
-    
   }
 }
 
@@ -148,7 +148,6 @@ function dpidestinations_default_panels_renderer_pipeline() {
   $pipeline->weight = 0;
   //This is add to know that this a print pipeline
   $pipeline->settings = array(
-
     'renderers' => array(
       0 => array(
         'access' => array(),
@@ -183,60 +182,43 @@ function dpidestinations_ctools_plugin_api($owner, $api) {
   }
 }
 
-
-
 /**
  * Implementation of hook_ctools_plugin_directory()
  */
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
-if ($module == 'ctools' && $plugin == 'arguments') {
+  if ($module == 'ctools' && $plugin == 'arguments') {
     return 'plugins/ctools/arguments';
   }
   if ($module == 'ctools' && $plugin == 'contexts') {
-      return 'plugins/ctools/contexts';
-    }
+    return 'plugins/ctools/contexts';
+  }
   if ($module == 'ctools' && $plugin == 'content_types') {
-      return 'plugins/ctools/content_types';
-    }
-    if ($module == 'page_manager' && $plugin == 'tasks') {
+    return 'plugins/ctools/content_types';
+  }
+  if ($module == 'page_manager' && $plugin == 'tasks') {
     return 'plugins/page_manager/tasks';
   }
-
   if ($module == 'page_manager' && $plugin == 'task_handlers') {
     return 'plugins/page_manager/task_handlers';
   }
   if ($module == 'panels' && $plugin == 'display_renderers') {
     return 'plugins/panels/display_renderers';
   }
- 
-  
-}
-
-function dpidestinations_entity_info_alter(&$entity_info){
-  //@todo: ne pas coder en dur le nom du vocabulaire
-  $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
-  
 }
 
 function dpidestinations_term_uri($term){
   return array(
-      'path' => 'destination/' . $term->tid,
+    'path' => 'destination/' . $term->tid,
   );
 }
 
-
-
-
-
 function destinationterm_load($destination_id){
   return taxonomy_term_load($destination_id);
-
 }
+
 function dpidestinations_page_destination_view($destination){
-  return 'You need to activate the page manager';
+  return t('You need to activate the page manager');
 }
-
-
 
 /**
  * Implementation of hook_views_plugins
@@ -247,24 +229,23 @@ function dpidestinations_views_plugins() {
   //require_once "./$path/theme/theme.inc";
 
   return array(
-      'display' => array(
-          'targetview' => array(
-              'title' => t('Target block'),
-              'help' => t('View display used for the default target, use this as a basis for custom destination views and targetss.'),
-              'handler' => 'dpidestinations_plugin_display_targetview',
-              'path' => drupal_get_path('module', 'dpidestinations') . '/plugins/views',
-              'theme path' => drupal_get_path('module', 'views') . '/theme',
-              'theme' => 'views_view',
-              'use ajax' => FALSE,
-              'use pager' => FALSE,
-              'use more' => FALSE,
-              'accept attachments' => TRUE,
-              'help topic' => 'targetview',
-              'admin' => t('Target View'),
-              //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
-
-          ),
+    'display' => array(
+      'targetview' => array(
+        'title' => t('Target block'),
+        'help' => t('View display used for the default target, use this as a basis for custom destination views and targetss.'),
+        'handler' => 'dpidestinations_plugin_display_targetview',
+        'path' => drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+        'theme path' => drupal_get_path('module', 'views') . '/theme',
+        'theme' => 'views_view',
+        'use ajax' => FALSE,
+        'use pager' => FALSE,
+        'use more' => FALSE,
+        'accept attachments' => TRUE,
+        'help topic' => 'targetview',
+        'admin' => t('Target View'),
+        //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
       ),
+    ),
       /*
        'style' => array( //declare the style plugin
   'target_style' => array(
@@ -297,8 +278,7 @@ function dpidestinations_views_plugins() {
   )
   )
   */
-  )
-  ;
+  );
 
 }
 
@@ -322,16 +302,15 @@ function dpidestinations_views_pre_render(&$view) {
 function dpidestinations_dpilog_register(){
 
   return array(
-    "dpidestinations_process"=>array(
-      "actions"=>array("fetch","build","cache_set","cache_clear"),
+    "dpidestinations_process" => array(
+      "actions" => array("fetch", "build", "cache_set", "cache_clear"),
     ),
-    "dpidestinations_extract"=>array(
-      "actions"=>array("create","update","delete"),
+    "dpidestinations_extract" => array(
+      "actions" => array("create", "update", "delete"),
     ),
-    "dpidestinations_toto"=>array(
-      "actions"=>array("zaza"),
+    "dpidestinations_toto" => array(
+      "actions" => array("zaza"),
     ),
-
   );
 }
 
