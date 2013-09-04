@@ -485,7 +485,7 @@ class WallyXmlV1 extends Importer{
         'provider' => $atom->provider,
         'inline' => '0', //@todo
       );
-      //$wrapper->field_embededobjects[$atom->sid]->set($embededobject);
+      $wrapper->field_embededobjects->set($embededobject);
     }
   }
   /**

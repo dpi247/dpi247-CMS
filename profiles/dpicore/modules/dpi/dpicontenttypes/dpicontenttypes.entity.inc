@@ -87,10 +87,11 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     );
   }
 }
+
 /**
 *
 * Implementation of hook_entity_property_info_alter
-* Add Dpiproperties setter to add dpiproperties on a node
+* Add Dpiproperties setter/getter to set/get dpiproperties on an object
 * @param Array $info
 */
 function dpicontenttypes_entity_property_info_alter(&$info){
