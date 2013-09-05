@@ -37,15 +37,12 @@ function dpicontenttypes_field_scald_atom_callback(&$info, $entity_type, $field,
 * Callback for validating scald_atom field $items.
 */
 function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
-  // Disallow NULL values.
-  if (!isset($items)) {
-    return FALSE;
-  }
+  
   // Stream-line $items for multiple vs non-multiple fields.
   $items = !entity_property_list_extract_type($context['type']) ? array($items) : (array) $items;
 
-  // File-field items require a valid file.
-  if (!isset($items['sid']) || !scald_atom_load($items['sid'])) {
+  // Check if the atom does exist
+  if (isset($items['sid']) && !scald_atom_load($items['sid'])) {
     return FALSE;
   }
   return TRUE;
@@ -61,7 +58,13 @@ function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
  * @param Array $info
  */
 function dpiproperties_field_scald_atom_set($object, $name, $value, $langcode, $entity_type, $info){
-  $object->{$name}[$langcode][] = $value;
+  
+  //If a null value is receive empty the field
+  if ($value == NULL){
+    $object->{$name}[$langcode] = NULL;
+  } else {
+    $object->{$name}[$langcode][] = $value;
+  }
 }
 
 /**

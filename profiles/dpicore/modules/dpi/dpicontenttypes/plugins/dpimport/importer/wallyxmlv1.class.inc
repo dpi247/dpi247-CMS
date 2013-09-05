@@ -32,13 +32,13 @@ class WallyXmlV1 extends Importer{
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
     dpm($package_wrapper->getPropertyInfo());
+   
     if (!Logger::error()){
-      $this->setPackageAttributes($dom, $package_wrapper);
+      $this->setPackageAttributes($dom, $package_wrapper, $package);
       if (!Logger::error()){
-        $dispatcher->processChildren($dom, $package_wrapper);
+        $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
     }
-    
     return $package_wrapper;
   }
   /**
@@ -116,20 +116,34 @@ class WallyXmlV1 extends Importer{
   
   /**
    * 
-   * Get attributes of current DOM and set its to the package
+   * Get attributes of current DOM and set it to the package
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  protected function setPackageAttributes($dom, $wrapper){
+  protected function setPackageAttributes($dom, $wrapper, $entity){
     //Language
     $wrapper->language->set($dom->getAttributeNode('Language')->value);
     //@todo path_autho check alias
     
-    $this->buildEditorialPublicationDate($dom, $wrapper);
-    $this->buildEditorialUpdateDate($dom, $wrapper);
-    $this->buildAutopublishDate($dom, $wrapper);
+    $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
+    $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
+    $this->buildAutopublishDate($dom, $wrapper, $entity);
   }
   
+  /**
+   * 
+   * Get attributes of current DOM and set it to the package
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
+  protected function setObjectAttributes($dom, $wrapper, $entity){
+    
+    if ($dom->hasAttribute('EmbeddedObjectsOrder')){
+      $entity->embeddedobjectsorder = $dom->getAttribute('EmbeddedObjectsOrder');
+    }
+  }
   /**
    * 
    * Return the timestamp of the datetime
@@ -149,8 +163,9 @@ class WallyXmlV1 extends Importer{
    * Set field_editorialpublicationdate
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  protected function buildEditorialPublicationDate($dom, $wrapper){
+  protected function buildEditorialPublicationDate($dom, $wrapper, $entity){
     if ($dom->hasAttribute("PublicationDate")) {
       $editorialpublicationdate = $this->getDateStampFromDateTime($dom->getAttributeNode("PublicationDate")->value);
     } else {
@@ -164,8 +179,9 @@ class WallyXmlV1 extends Importer{
    * Set field editorialupdatedate
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  protected function buildEditorialUpdateDate($dom, $wrapper){
+  protected function buildEditorialUpdateDate($dom, $wrapper, $entity){
     //We don't save the editorial update date on new node.
     if ($wrapper->nid->value() != NULL){
       if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
@@ -183,8 +199,9 @@ class WallyXmlV1 extends Importer{
    * Set field autopublishdate
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  protected function buildAutopublishDate($dom, $wrapper){
+  protected function buildAutopublishDate($dom, $wrapper, $entity){
     $embargodate = NULL;
     $unpublishdate = NULL;
     if ($dom->hasAttribute("EmbargoDate")) {
@@ -201,8 +218,9 @@ class WallyXmlV1 extends Importer{
    * Set field productID
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  public function buildProductID($dom, $wrapper){
+  public function buildProductID($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $wrapper->field_product_id->set($value);
   }
@@ -212,8 +230,9 @@ class WallyXmlV1 extends Importer{
   * Set field ExternalReference
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildExternalReference($dom, $wrapper){
+  public function buildExternalReference($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     
     //Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
@@ -229,8 +248,9 @@ class WallyXmlV1 extends Importer{
   * Set field Source
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildSource($dom, $wrapper){
+  public function buildSource($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $wrapper->field_source->set($value);
   }
@@ -240,8 +260,9 @@ class WallyXmlV1 extends Importer{
    * Set field Package to title and display title. If a mainstory or an embed textboject exists, it will be erased by it
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  public function buildPackageTitle($dom, $wrapper){
+  public function buildPackageTitle($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->title->set($this->filterHtmlTags($value));
@@ -253,8 +274,9 @@ class WallyXmlV1 extends Importer{
    * Set field Destination
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
    */
-  public function buildDestinations($dom, $wrapper){
+  public function buildDestinations($dom, $wrapper, $entity){
     //@todo
   }
   
@@ -263,8 +285,9 @@ class WallyXmlV1 extends Importer{
   * Set field CommentsAllowed
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildCommentsAllowed($dom, $wrapper){
+  public function buildCommentsAllowed($dom, $wrapper, $entity){
     switch ($dom->nodeValue) {
       case "Disabled":
         $status = 0;
@@ -287,8 +310,9 @@ class WallyXmlV1 extends Importer{
   * Set field FreeAccess
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildFreeAccess($dom, $wrapper){
+  public function buildFreeAccess($dom, $wrapper, $entity){
     //@todo
   }
   
@@ -297,8 +321,9 @@ class WallyXmlV1 extends Importer{
   * Set field AutoPublish
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildAutoPublish($dom, $wrapper){
+  public function buildAutoPublish($dom, $wrapper, $entity){
     //@todo
     $value = $this->xmlbooleantophpboolean($dom->nodeValue);
     $wrapper->field_autopublish->set($value);
@@ -309,8 +334,9 @@ class WallyXmlV1 extends Importer{
   * Set field Package Layout
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildPackageLayout($dom, $wrapper){
+  public function buildPackageLayout($dom, $wrapper, $entity){
     //@todo
   }
   
@@ -319,8 +345,9 @@ class WallyXmlV1 extends Importer{
   * Set field ExternalURI
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildExternalURI($dom, $wrapper){
+  public function buildExternalURI($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $wrapper->field_externalurl->set(array('url' => $value));
   }
@@ -330,8 +357,9 @@ class WallyXmlV1 extends Importer{
   * Set field LastUrlAlias
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildLastURLAlias($dom, $wrapper){
+  public function buildLastURLAlias($dom, $wrapper, $entity){
     //@todo
   }
   
@@ -340,10 +368,11 @@ class WallyXmlV1 extends Importer{
   * Set field MainStory
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildMainStory($dom, $wrapper){
+  public function buildMainStory($dom, $wrapper, $entity){
     $dispatcher = $this->getDispatcher();
-    $dispatcher->processChildren($dom, $wrapper);
+    $dispatcher->processChildren($dom, $wrapper, $entity);
   }
  
   /**
@@ -351,8 +380,9 @@ class WallyXmlV1 extends Importer{
   * Set field Copyright
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildCopyright($dom, $wrapper){
+  public function buildCopyright($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $wrapper->field_copyright->set($value);
   }
@@ -361,8 +391,9 @@ class WallyXmlV1 extends Importer{
   * Set field Marker
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildMarker($dom, $wrapper){
+  public function buildMarker($dom, $wrapper, $entity){
     //@todo
   }
   
@@ -371,8 +402,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextBarette
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextBarette($dom, $wrapper){
+  public function buildTextBarette($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_textbarette->set(array('value' => $value, 'format' => $format));
@@ -383,8 +415,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextForeTitle
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextForeTitle($dom, $wrapper){
+  public function buildTextForeTitle($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_textforetitle->set(array('value' => $value, 'format' => $format));
@@ -395,8 +428,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextSubTitle
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextSubTitle($dom, $wrapper){
+  public function buildTextSubTitle($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_textsubtitle->set(array('value' => $value, 'format' => $format));
@@ -407,8 +441,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextTitle
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextTitle($dom, $wrapper){
+  public function buildTextTitle($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->title->set($this->filterHtmlTags($value));
@@ -420,8 +455,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextChapo
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextChapo($dom, $wrapper){
+  public function buildTextChapo($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_textchapo->set(array('value' => $value, 'format' => $format));
@@ -432,8 +468,9 @@ class WallyXmlV1 extends Importer{
   * Set field TextBody
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTextBody($dom, $wrapper){
+  public function buildTextBody($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_textbody->set(array('value' => $value, 'format' => $format));
@@ -444,8 +481,9 @@ class WallyXmlV1 extends Importer{
   * Set field ByLine
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildByLine($dom, $wrapper){
+  public function buildByLine($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_byline->set(array('value' => $value, 'format' => $format));
@@ -464,21 +502,37 @@ class WallyXmlV1 extends Importer{
   * Set Embedded Content
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildEmbeddedContent($dom, $wrapper){
+  public function buildEmbeddedContent($dom, $wrapper, $entity){
     $dispatcher = $this->getDispatcher();
-    $dispatcher->processChildren($dom, $wrapper);
+    $dispatcher->processChildren($dom, $wrapper, $entity);
   }
   /**
   *
   * Set Embedded Objects and add it to the wrapper
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildEmbeddedObjects($dom, $wrapper){
+  public function buildEmbeddedObjects($dom, $wrapper, $entity){
+    //Empty the embededobjects field
+    $wrapper->field_embededobjects->set(NULL);
     $dispatcher = $this->getDispatcher();
-    $embeds = $dispatcher->processList($dom, $wrapper);
+    $embeds = $dispatcher->processList($dom, $wrapper, $entity);
+    $embeds_list = array();
+    $i = 100;
     foreach ($embeds as $atom){
+      if (isset($atom->embeddedobjectsorder)){
+        $order = $atom->embeddedobjectsorder;
+      } else {
+        $order = $i++; 
+      }
+      $embeds_list[$order] = $atom;
+    }
+    //Sort the embeds
+    ksort($embeds_list);
+    foreach ($embeds_list as $atom){
       $embededobject = array(
         'sid' => $atom->sid,
         'type' => $atom->type,
@@ -493,25 +547,28 @@ class WallyXmlV1 extends Importer{
   * Set LinkLists and add it to the wrapper
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildLinksLists($dom, $wrapper){
+  public function buildLinksLists($dom, $wrapper, $entity){
     //@todo
     $dispatcher = $this->getDispatcher();
-    $linkslist = $dispatcher->processList($dom, $wrapper);
+    $linkslist = $dispatcher->processList($dom, $wrapper, $entity);
   }
   /**
    * 
    * Set PhotoObjectType
    * @param DOM $dom
    * @param EntityDrupalWrapper $package_wrapper
+   * @param Object $entity
    */
-  public function buildPhotoObjectType($dom, $package_wrapper){
+  public function buildPhotoObjectType($dom, $package_wrapper, $entity){
     $object = NULL;
     $dispatcher = $this->getDispatcher();
     $atom = $this->createOrLoadEntityImage($dom);
     $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
     if (!Logger::error()){
-      $dispatcher->processChildren($dom, $atom_wrapper);
+      $this->setObjectAttributes($dom, $atom_wrapper, $atom);
+      $dispatcher->processChildren($dom, $atom_wrapper, $atom);
       if (!Logger::error()){
         scald_atom_save($atom);
       } else {
@@ -543,8 +600,9 @@ class WallyXmlV1 extends Importer{
   * Set field Title
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildTitle($dom, $wrapper){
+  public function buildTitle($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->title->set($this->filterHtmlTags($value));
@@ -556,8 +614,9 @@ class WallyXmlV1 extends Importer{
   * Set field Caption
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildCaption($dom, $wrapper){
+  public function buildCaption($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_caption->set(array('value' => $value, 'format' => $format));
@@ -568,8 +627,9 @@ class WallyXmlV1 extends Importer{
   * Set field URI
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildURI($dom, $wrapper){
+  public function buildURI($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $file = $this->createFile($value, scald_atom_thumbnail_path('image'));
     $wrapper->scald_thumbnail->set((array) $file);
@@ -579,8 +639,9 @@ class WallyXmlV1 extends Importer{
   * Set field Rating
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildRating($dom, $wrapper){
+  public function buildRating($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     $vid = dpi_variable_get('dpi_rating', NULL);
     $item = dpicontenttypes_api_taxonomy_get_term_by_path($value, $vid);
@@ -592,8 +653,9 @@ class WallyXmlV1 extends Importer{
   * Set field Crops
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
   */
-  public function buildCrops($dom, $wrapper){
+  public function buildCrops($dom, $wrapper, $entity){
     //@todo
   }
   
