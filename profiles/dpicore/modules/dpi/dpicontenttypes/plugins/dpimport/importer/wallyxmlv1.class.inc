@@ -132,8 +132,19 @@ class WallyXmlV1 extends Importer{
   }
   
   /**
+  *
+  * Get attributes of current DOM and set it to the Photoojbecttype
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
+  */
+  protected function setPhotoObjectTypeAttributes($dom, $wrapper, $entity){
+  
+    $this->setObjectAttributes($dom, $wrapper, $entity);
+  }
+  /**
    * 
-   * Get attributes of current DOM and set it to the package
+   * Get attributes of current DOM and set it to the object
    * @param DOM $dom
    * @param EntityDrupalWrapper $wrapper
    * @param Object $entity
@@ -522,24 +533,28 @@ class WallyXmlV1 extends Importer{
     $embeds = $dispatcher->processList($dom, $wrapper, $entity);
     $embeds_list = array();
     $i = 100;
-    foreach ($embeds as $atom){
-      if (isset($atom->embeddedobjectsorder)){
-        $order = $atom->embeddedobjectsorder;
-      } else {
-        $order = $i++; 
+    if (!Logger::error()){
+      foreach ($embeds as $atom){
+        if ($atom != NULL){
+          if (isset($atom->embeddedobjectsorder)){
+            $order = $atom->embeddedobjectsorder;
+          } else {
+            $order = $i++; 
+          }
+        }
+        $embeds_list[$order] = $atom;
       }
-      $embeds_list[$order] = $atom;
-    }
-    //Sort the embeds
-    ksort($embeds_list);
-    foreach ($embeds_list as $atom){
-      $embededobject = array(
-        'sid' => $atom->sid,
-        'type' => $atom->type,
-        'provider' => $atom->provider,
-        'inline' => '0', //@todo
-      );
-      $wrapper->field_embededobjects->set($embededobject);
+      //Sort the embeds
+      ksort($embeds_list);
+      foreach ($embeds_list as $atom){
+        $embededobject = array(
+          'sid' => $atom->sid,
+          'type' => $atom->type,
+          'provider' => $atom->provider,
+          'inline' => '0', //@todo
+        );
+        $wrapper->field_embededobjects->set($embededobject);
+      }
     }
   }
   /**
@@ -562,21 +577,7 @@ class WallyXmlV1 extends Importer{
    * @param Object $entity
    */
   public function buildPhotoObjectType($dom, $package_wrapper, $entity){
-    $object = NULL;
-    $dispatcher = $this->getDispatcher();
-    $atom = $this->createOrLoadEntityImage($dom);
-    $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
-    if (!Logger::error()){
-      $this->setObjectAttributes($dom, $atom_wrapper, $atom);
-      $dispatcher->processChildren($dom, $atom_wrapper, $atom);
-      if (!Logger::error()){
-        scald_atom_save($atom);
-      } else {
-        $atom = NULL;
-      } 
-    } else {
-      $atom = NULL;
-    }
+    $atom = $this->contructEntity($dom, 'scald_atom');
     return $atom;
   }
   /**
@@ -584,7 +585,7 @@ class WallyXmlV1 extends Importer{
   * Create Atom Image
   * @param DOM $dom
   */
-  protected function createOrLoadEntityImage($dom){
+  protected function createOrLoadEntityPhotoObjectType($dom){
     $atom = scald_atom_defaults('image');
     $atom->provider = 'scald_image';
     $atom->type = 'image';

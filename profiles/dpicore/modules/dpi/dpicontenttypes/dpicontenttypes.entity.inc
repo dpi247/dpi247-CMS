@@ -86,6 +86,8 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
       ),
     );
   }
+  dsm($entity_info);
+  $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
 }
 
 /**
