@@ -17,6 +17,7 @@ class WallyXmlV1 extends Importer{
     
     //Set the CurrentLog to the previous one to stop children growing.
     Logger::setCurrentToPreviousExecution();
+    dsm(Logger::getLogExecution());
     
     //Indicates that the dispatcher must not process the children
     return FALSE;
@@ -31,8 +32,7 @@ class WallyXmlV1 extends Importer{
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    dpm($package_wrapper->getPropertyInfo());
-   
+    
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper, $package);
       if (!Logger::error()){
@@ -245,12 +245,13 @@ class WallyXmlV1 extends Importer{
   */
   public function buildExternalReference($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
-    
     //Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
     if ($wrapper->field_external_reference->value() == NULL){
       $wrapper->field_external_reference->set($value);
+      Logger::logExecution('external_reference', FALSE, 1, '000', $value);
     } else {
       $wrapper->field_external_reference_2->set($value);
+      Logger::logExecution('external_reference_2', FALSE, 1, '000', $value);
     }
   }
   
@@ -577,7 +578,9 @@ class WallyXmlV1 extends Importer{
    * @param Object $entity
    */
   public function buildPhotoObjectType($dom, $package_wrapper, $entity){
+    Logger::logExecution('photobojecttype', TRUE);
     $atom = $this->contructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
     return $atom;
   }
   /**

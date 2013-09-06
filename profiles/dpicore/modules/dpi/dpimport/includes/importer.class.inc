@@ -149,8 +149,13 @@ abstract class Importer{
    */
   protected function createOrLoadEntity($dom){
     $callback = $this->getCallback($dom);
-    $create_or_load_function = 'createOrLoadEntity'.$callback;
-    $entity = $this->{$create_or_load_function}($dom);
+    $create_or_load_method = 'createOrLoadEntity'.$callback;
+    if (method_exists($this, $create_or_load_method)){
+      $entity = $this->$create_or_load_method($dom);
+    } else {
+      $entity = NULL;
+      Logger::logError('importer', 0, 'unknowmethod_001', t('The method !method doesn\'t exist.', array('!method' => $create_or_load_method)));
+    }
     return $entity;
   }
   
@@ -223,10 +228,10 @@ abstract class Importer{
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
     
-    $create_or_load_method = 'createOrLoadEntity'.$callback;
-    if (method_exists($this, $create_or_load_method)){
+    $entity = $this->createOrLoadEntity($dom);
+    if (!Logger::error()){
       //Initialize the entity
-      $entity = $this->$create_or_load_method($dom);
+      //$entity = $this->$create_or_load_method($dom);
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
       
       if (!Logger::error()){
@@ -249,10 +254,7 @@ abstract class Importer{
       } else {
         $entity = NULL;
       }
-    } else {
-      $entity = NULL;
-      Logger::logError('importer', 0, 'unknowmethod_001', t('The method !method doesn\'t exist.', array('!method' => $create_or_load_method)));
-    }
+    } 
     
     return $entity;
   }

@@ -8,8 +8,8 @@
 class Logger{
   private static $error = array();
   private static $warning = array();
-  private static $execution = NULL;
-  private static $currentexecution = NULL;
+  public static $execution = NULL;
+  public static $currentexecution = NULL;
   
   /**
    * 
@@ -21,6 +21,7 @@ class Logger{
    */
   public static function logWarning($type, $status, $code, $message){
     self::$warning[] = new LoggerLog($type, $status, $code, $message);
+    self::logExecution($type, FALSE, $status, $code, $message);
   }
   
   /**
@@ -32,7 +33,8 @@ class Logger{
    * @param String $message
    */
   public static function logError($type, $status, $code, $message){
-    self::$error[] = new LoggerLog($type, $status, $code, $message);;
+    self::$error[] = new LoggerLog($type, $status, $code, $message);
+    self::logExecution($type, FALSE, $status, $code, $message);
   }
   
   /**
@@ -49,7 +51,7 @@ class Logger{
       self::initializeExecution();
     }
     $executionlog = new LoggerLog($type, $status, $code, $message);
-    self::$execution->addChildren($executionlog);
+    self::$currentexecution->addChildren($executionlog);
     if ($current){
       self::$currentexecution = $executionlog;
     }
@@ -112,12 +114,12 @@ class Logger{
  */
 class LoggerLog{
   
-  private $type;
-  private $status;
-  private $code;
-  private $message;
-  private $children = NULL;
-  private $parent = NULL;
+  public $type;
+  public $status;
+  public $code;
+  public $message;
+  public $children = NULL;
+  public $parent = NULL;
   /**
    * 
    * Constructor
