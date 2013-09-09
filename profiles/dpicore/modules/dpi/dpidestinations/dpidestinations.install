@@ -251,11 +251,25 @@ function dpidestinations_schema() {
    _dpidestinations_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
    _dpidestinations_variable_set("dpidestinations_virtualrank_delta",30);
    
+   $edit = array(
+      "name" => "Destinations",
+      "machine_name" =>"destiantions",
+      "description" => t("Destinations represent the structure of your editorial content."),
+      "module" => "taxonomy",
+    );
+    $vocabulary = (object) $edit;
+    taxonomy_vocabulary_save($vocabulary);
+    _dpidestinations_variable_set('dpidestinations_destination_vid', $vocabulary->vid);
+   
  }
  function dpidestinations_uninstall(){
+   taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
    _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
    _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
    _dpidestinations_variable_del("dpidestinations_available_targetlayouts");
+   _dpidestinations_variable_del("dpidestinations_destination_vid");
+   
+   
  }
 /**
  * Implements hook_field_schema().

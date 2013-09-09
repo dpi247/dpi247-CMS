@@ -1,7 +1,7 @@
 <?php
 
 function dpidestinations_api_get_destinations_vocabulary_vid(){
-  return 2;
+  return _dpidestinations_variable_get('dpidestinations_destination_vid',2);
 }
 
 function dpidestinations_api_get_all_destinations_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){
