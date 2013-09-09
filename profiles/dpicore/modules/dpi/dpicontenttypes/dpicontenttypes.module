@@ -134,31 +134,6 @@ function package_form($node, $form_state) {
 
 
 
-//@todo: documenter cette partie on fait l'alter uniquement pour fournir un build mode suplémentaire...
-/**
- * Implements hook_entity_info_alter().
- *
- * We need to modify the default node entity info by adding a new view mode to
- * be used in functions like node_view() or node_build_content().
- */
-function dpicontenttypes_entity_info_alter(&$entity_info) {
-  // Add our new view mode to the list of view modes...
-  $entity_info['node']['view modes']['package'] = array(
-    'label' => t('Target default'),
-    'custom settings' => FALSE,
-  );
-  foreach (dpiproperties_types() as $type => $info) {
-    $entity_info['dpiproperties']['bundles'][$type] = array(
-      'label' => $info->label,
-      'admin' => array(
-        'path' => 'admin/structure/dpiproperties-types/manage/%dpiproperties_type',
-        'real path' => 'admin/structure/dpiproperties-types/manage/' . $type,
-        'bundle argument' => 4,
-      ),
-    );
-  }
-}
-
 
 /**
  * Implements hook_ctools_plugin_directory().

@@ -1,5 +1,9 @@
 <?php
 
+
+
+
+
 /**
  * Implements hook_entity_info().
  */
@@ -61,6 +65,7 @@ function dpicontenttypes_entity_info(){
   return $entities;
 }
 
+
 //@todo: documenter cette partie on fait l'alter uniquement pour fournir un build mode suplémentaire...
 /**
  * Implements hook_entity_info_alter().
@@ -70,12 +75,10 @@ function dpicontenttypes_entity_info(){
  */
 function dpicontenttypes_entity_info_alter(&$entity_info) {
   // Add our new view mode to the list of view modes...
-  $entity_info['node']['view modes']['article_package'] = array(
+  $entity_info['node']['view modes']['package'] = array(
     'label' => t('Target default'),
     'custom settings' => FALSE,
   );
-  
-  //Define bundle path of dpiproperties
   foreach (dpiproperties_types() as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,
@@ -86,8 +89,9 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
       ),
     );
   }
-  dsm($entity_info);
+  
   $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
+  
 }
 
 /**
