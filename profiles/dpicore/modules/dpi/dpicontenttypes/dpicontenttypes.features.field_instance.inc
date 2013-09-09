@@ -290,7 +290,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'field_name' => 'field_displaytitle',
-    'label' => 'Display Titlee',
+    'label' => 'Display Title',
     'required' => 0,
     'settings' => array(
       'text_processing' => 1,
@@ -1233,7 +1233,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'scald_atom',
     'field_name' => 'field_displaytitle',
-    'label' => 'Display Titlee',
+    'label' => 'Display Title',
     'required' => 0,
     'settings' => array(
       'text_processing' => 1,
@@ -2426,7 +2426,7 @@ function dpicontenttypes_field_default_field_instances() {
   t('Concepts');
   t('Copyright');
   t('Display Title');
-  t('Display Titlee');
+  t('Display Title');
   t('Editorial Update Date');
   t('Editorial publication date');
   t('Email');

@@ -4,12 +4,7 @@
  */
 function dpicontenttypes_api_getdpicontenttypes(){
   return array(
-    'article_package',
-    'gallery_package',
-    'poll_package',
-    'link',
-    'link-list',
-    'photo',
+    'package',
   );
 
 }

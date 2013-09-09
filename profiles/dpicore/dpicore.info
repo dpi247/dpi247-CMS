@@ -31,6 +31,7 @@ dependencies[] = overlay
 dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
+dependencies[] = comment
 
 ; Third Party
 dependencies[] = features
@@ -39,8 +40,12 @@ dependencies[] = scald
 dependencies[] = mee
 dependencies[] = dnd
 dependencies[] = scald_dnd_library
+dependencies[] = views
+dependencies[] = views_ui
+dependencies[] = page_manager
 
 ; Dpi-Core
 dependencies[] = dpicontenttypes
 dependencies[] = dpicache
 dependencies[] = dpidestinations
+dependencies[] = dpicommons

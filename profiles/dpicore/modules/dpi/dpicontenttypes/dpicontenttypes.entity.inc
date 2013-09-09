@@ -127,11 +127,11 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
 
-  //Set to the article_package
-  $info['node']['bundles']['article_package']['properties']['field_product_id'] = $product_id;
-  $info['node']['bundles']['article_package']['properties']['field_external_reference'] = $external_reference;
-  $info['node']['bundles']['article_package']['properties']['field_external_reference_2'] = $external_reference_2;
-  $info['node']['bundles']['article_package']['properties']['field_source'] = $source;
+  //Set to the package
+  $info['node']['bundles']['package']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['package']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['package']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
   //Set to the atoms image
   $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
