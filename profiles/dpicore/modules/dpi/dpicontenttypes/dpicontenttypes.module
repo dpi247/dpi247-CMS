@@ -117,13 +117,7 @@ function dpicontenttypes_node_insert($node){
  * You can get fancy with this form, or you can just punt
  * and return the default form that node_content will provide.
  */
-function article_package_form($node, $form_state) {
-  return node_content_form($node, $form_state);
-}
-function gallery_package_form($node, $form_state) {
-  return node_content_form($node, $form_state);
-}
-function poll_package_form($node, $form_state) {
+function package_form($node, $form_state) {
   return node_content_form($node, $form_state);
 }
 
@@ -138,7 +132,7 @@ function poll_package_form($node, $form_state) {
  */
 function dpicontenttypes_entity_info_alter(&$entity_info) {
   // Add our new view mode to the list of view modes...
-  $entity_info['node']['view modes']['article_package'] = array(
+  $entity_info['node']['view modes']['package'] = array(
     'label' => t('Target default'),
     'custom settings' => FALSE,
   );

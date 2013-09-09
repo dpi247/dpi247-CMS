@@ -10,9 +10,9 @@
 function dpicontenttypes_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'node-article_package-field_authors'
-  $field_instances['node-article_package-field_authors'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_authors'
+  $field_instances['node-package-field_authors'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -50,9 +50,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_autopublish'
-  $field_instances['node-article_package-field_autopublish'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_autopublish'
+  $field_instances['node-package-field_autopublish'] = array(
+    'bundle' => 'package',
     'default_value' => array(
       0 => array(
         'value' => 0,
@@ -93,9 +93,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_autopublishdate'
-  $field_instances['node-article_package-field_autopublishdate'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_autopublishdate'
+  $field_instances['node-package-field_autopublishdate'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -135,7 +135,7 @@ function dpicontenttypes_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
-        'increment' => 15,
+        'increment' => 1,
         'input_format' => 'm/d/Y - H:i:s',
         'input_format_custom' => '',
         'label_position' => 'above',
@@ -147,9 +147,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_byline'
-  $field_instances['node-article_package-field_byline'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_byline'
+  $field_instances['node-package-field_byline'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -187,9 +187,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_concepts'
-  $field_instances['node-article_package-field_concepts'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_concepts'
+  $field_instances['node-package-field_concepts'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -227,9 +227,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_copyright'
-  $field_instances['node-article_package-field_copyright'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_copyright'
+  $field_instances['node-package-field_copyright'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -267,9 +267,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_displaytitle'
-  $field_instances['node-article_package-field_displaytitle'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_displaytitle'
+  $field_instances['node-package-field_displaytitle'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -290,7 +290,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'field_name' => 'field_displaytitle',
-    'label' => 'Display Title',
+    'label' => 'Display Titlee',
     'required' => 0,
     'settings' => array(
       'text_processing' => 1,
@@ -307,9 +307,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_editorialpublicationdate'
-  $field_instances['node-article_package-field_editorialpublicationdate'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_editorialpublicationdate'
+  $field_instances['node-package-field_editorialpublicationdate'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -349,7 +349,7 @@ function dpicontenttypes_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
-        'increment' => 15,
+        'increment' => 1,
         'input_format' => 'm/d/Y - H:i:s',
         'input_format_custom' => '',
         'label_position' => 'above',
@@ -361,9 +361,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_editorialupdatedate'
-  $field_instances['node-article_package-field_editorialupdatedate'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_editorialupdatedate'
+  $field_instances['node-package-field_editorialupdatedate'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -403,7 +403,7 @@ function dpicontenttypes_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
-        'increment' => 15,
+        'increment' => 1,
         'input_format' => 'm/d/Y - H:i:s',
         'input_format_custom' => '',
         'label_position' => 'above',
@@ -415,9 +415,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_embededobjects'
-  $field_instances['node-article_package-field_embededobjects'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_embededobjects'
+  $field_instances['node-package-field_embededobjects'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -457,9 +457,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_entities'
-  $field_instances['node-article_package-field_entities'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_entities'
+  $field_instances['node-package-field_entities'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -497,9 +497,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_externalurl'
-  $field_instances['node-article_package-field_externalurl'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_externalurl'
+  $field_instances['node-package-field_externalurl'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -551,9 +551,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_freetags'
-  $field_instances['node-article_package-field_freetags'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_freetags'
+  $field_instances['node-package-field_freetags'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -591,9 +591,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_iptc'
-  $field_instances['node-article_package-field_iptc'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_iptc'
+  $field_instances['node-package-field_iptc'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -631,9 +631,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_linklists'
-  $field_instances['node-article_package-field_linklists'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_linklists'
+  $field_instances['node-package-field_linklists'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -674,9 +674,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_locations'
-  $field_instances['node-article_package-field_locations'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_locations'
+  $field_instances['node-package-field_locations'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -714,9 +714,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_packagelayout'
-  $field_instances['node-article_package-field_packagelayout'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_packagelayout'
+  $field_instances['node-package-field_packagelayout'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -753,10 +753,50 @@ function dpicontenttypes_field_default_field_instances() {
       'weight' => 17,
     ),
   );
+  $field_instances['node-package-field_packagetype'] = array(
+    'bundle' => 'package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 34,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_packagetype',
+    'label' => 'Package Type',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_buttons',
+      'weight' => 25,
+    ),
+  );
+  
+  // Translatables
+  // Included for use with string extractors like potx.
+  t('Package Type');
+  
 
-  // Exported field_instance: 'node-article_package-field_persons'
-  $field_instances['node-article_package-field_persons'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_persons'
+  $field_instances['node-package-field_persons'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -794,9 +834,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_restrictedaccess'
-  $field_instances['node-article_package-field_restrictedaccess'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_restrictedaccess'
+  $field_instances['node-package-field_restrictedaccess'] = array(
+    'bundle' => 'package',
     'default_value' => array(
       0 => array(
         'value' => 0,
@@ -810,7 +850,7 @@ function dpicontenttypes_field_default_field_instances() {
         'module' => 'list',
         'settings' => array(),
         'type' => 'list_default',
-        'weight' => 11,
+        'weight' => 33,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -822,24 +862,22 @@ function dpicontenttypes_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_restrictedaccess',
     'label' => 'Restricted Access',
-    'required' => 0,
+    'required' => 1,
     'settings' => array(
       'user_register_form' => FALSE,
     ),
     'widget' => array(
       'active' => 1,
       'module' => 'options',
-      'settings' => array(
-        'display_label' => 0,
-      ),
-      'type' => 'options_onoff',
-      'weight' => 15,
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 27,
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_textbarette'
-  $field_instances['node-article_package-field_textbarette'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_textbarette'
+  $field_instances['node-package-field_textbarette'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -877,9 +915,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_textbody'
-  $field_instances['node-article_package-field_textbody'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_textbody'
+  $field_instances['node-package-field_textbody'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -922,9 +960,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_textchapo'
-  $field_instances['node-article_package-field_textchapo'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_textchapo'
+  $field_instances['node-package-field_textchapo'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -948,7 +986,7 @@ function dpicontenttypes_field_default_field_instances() {
     'label' => 'Chapo',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
+      'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
@@ -962,9 +1000,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_textforetitle'
-  $field_instances['node-article_package-field_textforetitle'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_textforetitle'
+  $field_instances['node-package-field_textforetitle'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1002,9 +1040,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-article_package-field_textsubtitle'
-  $field_instances['node-article_package-field_textsubtitle'] = array(
-    'bundle' => 'article_package',
+  // Exported field_instance: 'node-package-field_textsubtitle'
+  $field_instances['node-package-field_textsubtitle'] = array(
+    'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1110,6 +1148,377 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'scald_atom-image-field_concepts'
+  $field_instances['scald_atom-image-field_concepts'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 8,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_concepts',
+    'label' => 'Concepts',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 9,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_copyright'
+  $field_instances['scald_atom-image-field_copyright'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 5,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_copyright',
+    'label' => 'Copyright',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 4,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_displaytitle'
+  $field_instances['scald_atom-image-field_displaytitle'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 6,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_displaytitle',
+    'label' => 'Display Titlee',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 6,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_entities'
+  $field_instances['scald_atom-image-field_entities'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 9,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_entities',
+    'label' => 'Entities',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 11,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_freetags'
+  $field_instances['scald_atom-image-field_freetags'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 10,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_freetags',
+    'label' => 'Free Tags',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 13,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_iptc'
+  $field_instances['scald_atom-image-field_iptc'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 11,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_iptc',
+    'label' => 'IPTC',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 15,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_locations'
+  $field_instances['scald_atom-image-field_locations'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 12,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_locations',
+    'label' => 'Locations',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 17,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_persons'
+  $field_instances['scald_atom-image-field_persons'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 13,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_persons',
+    'label' => 'Persons',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 19,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-image-field_rating'
+  $field_instances['scald_atom-image-field_rating'] = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 7,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_rating',
+    'label' => 'Rating',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_concepts'
+  $field_instances['scald_atom-link_list-field_concepts'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 6,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_concepts',
+    'label' => 'Concepts',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 7,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_copyright'
+  $field_instances['scald_atom-link_list-field_copyright'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 7,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_copyright',
+    'label' => 'Copyright',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 9,
+    ),
+  );
+
   // Exported field_instance: 'scald_atom-link_list-field_displaytitle'
   $field_instances['scald_atom-link_list-field_displaytitle'] = array(
     'bundle' => 'link_list',
@@ -1141,6 +1550,108 @@ function dpicontenttypes_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 1,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_entities'
+  $field_instances['scald_atom-link_list-field_entities'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 8,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_entities',
+    'label' => 'Entities',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 11,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_freetags'
+  $field_instances['scald_atom-link_list-field_freetags'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 9,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_freetags',
+    'label' => 'Free Tags',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 13,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-link_list-field_iptc'
+  $field_instances['scald_atom-link_list-field_iptc'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 10,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_iptc',
+    'label' => 'IPTC',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 15,
     ),
   );
 
@@ -1192,8 +1703,345 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-persons-field_perpsonbirthdate'
-  $field_instances['taxonomy_term-persons-field_perpsonbirthdate'] = array(
+  // Exported field_instance: 'scald_atom-link_list-field_persons'
+  $field_instances['scald_atom-link_list-field_persons'] = array(
+    'bundle' => 'link_list',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 11,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_persons',
+    'label' => 'Persons',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 17,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_concepts'
+  $field_instances['scald_atom-video-field_concepts'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 5,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_concepts',
+    'label' => 'Concepts',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 4,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_copyright'
+  $field_instances['scald_atom-video-field_copyright'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_copyright',
+    'label' => 'Copyright',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 2,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_displaytitle'
+  $field_instances['scald_atom-video-field_displaytitle'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_displaytitle',
+    'label' => 'Display Title',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 0,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_entities'
+  $field_instances['scald_atom-video-field_entities'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 6,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_entities',
+    'label' => 'Entities',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 6,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_freetags'
+  $field_instances['scald_atom-video-field_freetags'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 7,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_freetags',
+    'label' => 'Free Tags',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 8,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_iptc'
+  $field_instances['scald_atom-video-field_iptc'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 8,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_iptc',
+    'label' => 'IPTC',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 10,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_locations'
+  $field_instances['scald_atom-video-field_locations'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 11,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_locations',
+    'label' => 'Locations',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 16,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_persons'
+  $field_instances['scald_atom-video-field_persons'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 9,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_persons',
+    'label' => 'Persons',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'taxonomy',
+      'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 12,
+    ),
+  );
+
+  // Exported field_instance: 'scald_atom-video-field_rating'
+  $field_instances['scald_atom-video-field_rating'] = array(
+    'bundle' => 'video',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 10,
+      ),
+    ),
+    'entity_type' => 'scald_atom',
+    'field_name' => 'field_rating',
+    'label' => 'Rating',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 14,
+    ),
+  );
+
+  // Exported field_instance: 'taxonomy_term-persons-field_personbirthdate'
+  $field_instances['taxonomy_term-persons-field_personbirthdate'] = array(
     'bundle' => 'persons',
     'default_value' => NULL,
     'deleted' => 0,
@@ -1214,7 +2062,7 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'taxonomy_term',
-    'field_name' => 'field_perpsonbirthdate',
+    'field_name' => 'field_personbirthdate',
     'label' => 'Birth date',
     'required' => 0,
     'settings' => array(
@@ -1240,8 +2088,8 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'taxonomy_term-persons-field_perpsonnickname'
-  $field_instances['taxonomy_term-persons-field_perpsonnickname'] = array(
+  // Exported field_instance: 'taxonomy_term-persons-field_personnickname'
+  $field_instances['taxonomy_term-persons-field_personnickname'] = array(
     'bundle' => 'persons',
     'default_value' => NULL,
     'deleted' => 0,
@@ -1256,7 +2104,7 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'taxonomy_term',
-    'field_name' => 'field_perpsonnickname',
+    'field_name' => 'field_personnickname',
     'label' => 'Nickname',
     'required' => 0,
     'settings' => array(
@@ -1578,6 +2426,7 @@ function dpicontenttypes_field_default_field_instances() {
   t('Concepts');
   t('Copyright');
   t('Display Title');
+  t('Display Titlee');
   t('Editorial Update Date');
   t('Editorial publication date');
   t('Email');
@@ -1599,6 +2448,7 @@ function dpicontenttypes_field_default_field_instances() {
   t('Persons');
   t('Phone number');
   t('Picture');
+  t('Rating');
   t('Restricted Access');
   t('Sub Title');
   t('Use embargo and Pubish Date');

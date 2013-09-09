@@ -55,6 +55,29 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
         ),
       ),
     ),
+    'destinations' => array(
+      'name' => 'destinations',
+      'machine_name' => 'destinations',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
     'entities' => array(
       'name' => 'Entities',
       'machine_name' => 'entities',
@@ -170,9 +193,56 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
         ),
       ),
     ),
+    'package_type' => array(
+      'name' => 'Package Type',
+      'machine_name' => 'package_type',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+
     'persons' => array(
       'name' => 'Persons',
       'machine_name' => 'persons',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+    'rating' => array(
+      'name' => 'Rating',
+      'machine_name' => 'rating',
       'description' => '',
       'hierarchy' => 0,
       'module' => 'taxonomy',
