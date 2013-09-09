@@ -62,14 +62,14 @@ function dpimport_menu(){
   );
   
   $items['admin/config/dpi247/import/delete/%'] = array(
-      'title'            => t('Delete Import'),
-      'description'      => t('Deleting an import.'),
-      'page callback'    => 'drupal_get_form',
-      'page arguments'   => array('dpimport_page_form_importer_delete_form', 5),
-      'access arguments' => array('administer dpimport'),
-      'file'             => 'dpimport.admin.page.inc',
-      'file path'        => drupal_get_path('module', 'dpimport').'/includes',
-      'weight'           => 1,
+    'title'            => t('Delete Import'),
+    'description'      => t('Deleting an import.'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpimport_page_form_importer_delete_form', 5),
+    'access arguments' => array('administer dpimport'),
+    'file'             => 'dpimport.admin.page.inc',
+    'file path'        => drupal_get_path('module', 'dpimport').'/includes',
+    'weight'           => 1,
   );
   
   $items['dpimport/test/%'] = array(

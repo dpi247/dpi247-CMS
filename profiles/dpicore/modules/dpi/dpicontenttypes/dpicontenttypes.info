@@ -16,6 +16,7 @@ dependencies[] = scald
 dependencies[] = scald_image
 dependencies[] = taxonomy
 dependencies[] = text
+dependencies[] = dpicache
 
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc
@@ -152,3 +153,10 @@ features_exclude[field][taxonomy_term-persons-field_personpicture] = taxonomy_te
 features_exclude[field][taxonomy_term-persons-field_personisauthor] = taxonomy_term-persons-field_personisauthor
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc
+
+term-persons-field_personpicture] = taxonomy_term-persons-field_personpicture
+features_exclude[field][taxonomy_term-persons-field_personisauthor] = taxonomy_term-persons-field_personisauthor
+
+
+files[] = plugins/dpimport/importer/dpixmlv1.class.inc
+files[] = plugins/dpimport/importer/wallyxmlv1.class.inc

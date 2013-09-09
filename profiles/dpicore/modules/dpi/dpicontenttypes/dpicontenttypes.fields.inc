@@ -15,8 +15,56 @@ function dpicontenttypes_field_info() {
       'default_widget' => 'textfield',
       'default_formatter' => 'title',
       'property_type' => 'scald_atom',
-    )
+      'property_callbacks' => array('dpicontenttypes_field_scald_atom_callback'),
+    ),
   );
+}
+/**
+* Additional callback to adapt the property info for scald_atom fields.
+* @see entity_metadata_field_entity_property_info().
+*/
+function dpicontenttypes_field_scald_atom_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+  // Update the property info with the info for image fields.
+ 
+  $property['auto creation'] = 'entity_property_create_array';
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'dpiproperties_field_scald_atom_set';
+  $property['validation callback'] = 'dpicontenttypes_field_scald_atom_validate_item';
+ 
+}
+/**
+* Callback for validating scald_atom field $items.
+*/
+function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
+  
+  // Stream-line $items for multiple vs non-multiple fields.
+  $items = !entity_property_list_extract_type($context['type']) ? array($items) : (array) $items;
+
+  // Check if the atom does exist
+  if (isset($items['sid']) && !scald_atom_load($items['sid'])) {
+    return FALSE;
+  }
+  return TRUE;
+}
+/**
+ * 
+ * Setter callback for scald_atom
+ * @param Object $object
+ * @param String $name
+ * @param Array $value
+ * @param String $langcode
+ * @param String $entity_type
+ * @param Array $info
+ */
+function dpiproperties_field_scald_atom_set($object, $name, $value, $langcode, $entity_type, $info){
+  
+  //If a null value is receive empty the field
+  if ($value == NULL){
+    $object->{$name}[$langcode] = NULL;
+  } else {
+    $object->{$name}[$langcode][] = $value;
+  }
 }
 
 /**
@@ -98,7 +146,7 @@ function dpicontenttypes_field_validate($entity_type, $entity, $field, $instance
 
 
 /**
- * Implements hook_field_info().
+ * Implements hook_field_presave().
  */
 function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach($items as $delta=>$item){

@@ -42,3 +42,5 @@ dependencies[] = scald_dnd_library
 
 ; Dpi-Core
 dependencies[] = dpicontenttypes
+dependencies[] = dpicache
+dependencies[] = dpidestinations

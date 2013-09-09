@@ -2,7 +2,7 @@
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
-
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 include_once 'dpicontenttypes.features.inc';
 
 
@@ -79,34 +79,45 @@ function dpicontenttypes_permission(){
 
 
 /**
- * Implementation of hook_node_presave
+ * Implementation of hook_node_insert
  * @param object $node
  */
 function dpicontenttypes_node_insert($node){
-
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())){
-    if (!isset($node->dpiproperties)){
-      //If no dpiproperties are defined, set default values
-      $values = array(
-        'nid' => $node->nid,
-        'external_reference' => dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand(),
-        'description' => '',
-        'source' => 'dpi247',
-        'product_id' => dpi_variable_get('dpicommons_product', ''),
-        
-      );
-      $dpiproperties = new DPIPropertiesEntity($values, 'dpiproperties');
-      $dpiproperties->type = 'default';
-      dpiproperties_save($dpiproperties);
-    } else {
-      //if dpiproperties are defined, save it
-      $dpiproperties = $node->dpiproperties;
-      $dpiproperties->nid = $node->nid;
-      $dpiproperties->type = 'default';
-      dpiproperties_save($dpiproperties);
-    }
+    _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
   }
 }
+/**
+*
+* Implementation of hook_delete
+* @param Object $node
+*/
+function dpicontenttypes_node_delete($node) {
+  //Delete the dpiproperties entry corresponding to the node
+  _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
+}
+
+/**
+ * 
+ * Implementation of hook_scald_atom_insert
+ * Create a dpi properties linked to the new atom
+ * @param Object $atom
+ */
+function dpicontenttypes_scald_atom_insert($atom){
+  _dpicontenttypes_entityinsertdpiproperties($atom, 'scald_atom', $atom->sid);
+}
+/**
+ * 
+ * Implementation of hook_scald_atom_delete
+ * Delete the dpiproperties linked to the atom
+ * @param Object $atom
+ */
+function dpicontenttypes_scald_atom_delete($atom){
+  _dpicontenttypes_entitydeletedpiproperties($atom, 'scald_atom', $atom->sid);
+}
+
+
+
 /**
  * Implement hook_form().
  *

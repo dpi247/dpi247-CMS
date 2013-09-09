@@ -142,7 +142,7 @@ function dpimport_form_importer_save($form, $form_state){
   $settings = array();
   $dispatcher = $dispatcher_class::$dispatcher_function($importer, $settings);
   
-  //imporer
+  //importer
   $importer_plugin = ctools_get_plugins('dpimport', 'importer', $default_values['type']);
   $importer_class = $importer_plugin['versions'][$default_values['version']]['class'];
   $importer_settings = array();
@@ -338,7 +338,7 @@ function _dpimport_ajaxcallback_page_form_importer($form, $form_state) {
 function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
   
-  if (!preg_match('/^[a-zA-Z0-9]+$/' , $form_state['values']['name'])){
+  if (!preg_match('/^[a-z0-9]+$/' , $form_state['values']['name'])){
     form_set_error('name', t('Name must be alphanumeric only.'));
   }
   
@@ -356,7 +356,6 @@ function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
 function dpimport_form_importer_stageimporter_form(&$form, &$form_state){
   
   $values = isset($form_state['multistep_values']['importer']) ? $form_state['multistep_values']['importer'] : array();
-  
   
   $importer_plugin = ctools_get_plugins('dpimport', 'importer', $form_state['multistep_values']['default']['type']);
   

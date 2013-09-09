@@ -4,12 +4,12 @@
  * Implements hook_entity_info().
  */
 function dpidestinations_entity_info(){
-  $entities=array();
+  $entities = array();
 
-  $entities['target']=array(
+  $entities['target'] = array(
     'label' => t('Target'),
     // seulement si on utilise le module entity API
-    'exportable'=>TRUE,
+    'exportable' => TRUE,
     'entity class' => 'TargetEntity',
     'controller class' => 'TargetController',
     'base table' => 'dpidestinations_target',
@@ -22,9 +22,8 @@ function dpidestinations_entity_info(){
       'name' => 'machine_name',
       'label' => 'label',
     ),
-
-    'bundles'=>array(
-      'target'=>array(
+    'bundles' => array(
+      'target' => array(
       ),
     ),
     'view modes' => array(
@@ -38,9 +37,8 @@ function dpidestinations_entity_info(){
       ),
     ),
     //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-    'module'=> 'dpidestinations',
+    'module' => 'dpidestinations',
     'access callback' => 'target_access_admin_callback',
-
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'label' => 'ti',
@@ -50,15 +48,12 @@ function dpidestinations_entity_info(){
       //'controller class' => 'EntityDefaultUIController',
     ),
     'metadata controller class' => 'DpiDestinationsTargetMetadataController',
-    
   );
 
-
-
-  $entities['targetblock']=array(
+  $entities['targetblock'] = array(
     'label' => t('Target Block'),
     // seulement si on utilise le module entity API
-    'exportable'=>TRUE,
+    'exportable' => TRUE,
     'entity class' => 'TargetBlockEntity',
     'controller class' => 'TargetBlockController',
     'base table' => 'dpidestinations_targetblock',
@@ -66,15 +61,13 @@ function dpidestinations_entity_info(){
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
-
     'entity keys' => array(
       'id' => 'targetblockid',
       // 'name' => 'machine_name',
       'label' => 'label',
     ),
-
-    'bundles'=>array(
-      'targetblock'=>array(
+    'bundles' => array(
+      'targetblock' => array(
       ),
     ),
     'view modes' => array(
@@ -88,23 +81,28 @@ function dpidestinations_entity_info(){
       ),
     ),
     //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
-    'module'=> 'dpidestinations',
+    'module' => 'dpidestinations',
     'access callback' => 'targetblock_access_admin_callback',
-
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'label' => 'ti',
-
       'path' => 'admin/structure/targetblock',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       //'file' => 'target.admin.inc',
       //'controller class' => 'EntityDefaultUIController',
     ),
     'metadata controller class' => 'DpiDestinationsTargetblockMetadataController',
-    
   );
   return $entities;
-
+}
+/**
+ * 
+ * Implementation of hook_entity_info_alter
+ * @param Array $entity_info
+ */
+function dpidestinations_entity_info_alter(&$entity_info){
+  //@todo: ne pas coder en dur le nom du vocabulaire
+  $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
 }
 
 function target_load($tid = NULL, $reset = FALSE){
@@ -140,7 +138,6 @@ function target_delete_multiple($target_ids) {
 }
 
 
-
 function target_access_admin_callback(){
   return TRUE;
 }
@@ -153,85 +150,83 @@ function target_view($target, $view_mode = 'full'){
   return $target->view();
 }
 
-
-
-
-
 function target_form($form, &$form_state, $target) {
-  $view_name_options= __dpidestinations_dependant_target_viewname_and_display_options_for_view_name();
+  $view_name_options = __dpidestinations_dependant_target_viewname_and_display_options_for_view_name();
   
   $selected_view_name = isset($form_state['values']['view_name']) ? $form_state['values']['view_name'] : $target->view_name;
-  if($selected_view_name=="" or $selected_view_name==NULL){
-    $selected_view_name=key($view_name_options);
+  if ($selected_view_name == "" or $selected_view_name == NULL){
+    $selected_view_name = key($view_name_options);
   }
+  
   $selected_view_display = isset($form_state['values']['view_display']) ? $form_state['values']['view_display'] : $target->view_display;
   
   $form['targetid'] = array(
     '#type' => 'value',
-    '#value'=> $target->targetid,
+    '#value' => $target->targetid,
   );
+  
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#default_value'=> $target->label,
+    '#default_value' => $target->label,
     '#required' => TRUE,
   );
+  
   $form['machine_name'] = array(
     '#type' => 'machine_name',
-    '#default_value'=> $target->machine_name,
-    '#machine_name'=> array(
-      'source'=>array('label'),
+    '#default_value' => $target->machine_name,
+    '#machine_name' => array(
+      'source' => array('label'),
       'label' => t('Target Machine name'),
       'exists' => '_dpidestinations_target_machine_name_exists',
-
-
     ),
     '#disabled' => !empty($target->machine_name),
-
   );
 
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
-    '#default_value'=> $target->description,
+    '#default_value' => $target->description,
     '#required' => TRUE,
   );
+  
   $form['view_name'] = array(
     '#type' => 'select',
     '#title' => t('View Name'),
     '#options' => $view_name_options,
-    '#default_value'=> $selected_view_name,
+    '#default_value' => $selected_view_name,
     '#required' => TRUE,
     '#ajax' => array(
       // When 'event' occurs, Drupal will perform an ajax request in the
       // background. Usually the default value is sufficient (eg. change for
       // select elements), but valid values include any jQuery event,
-          // most notably 'mousedown', 'blur', and 'submit'.
-          // 'event' => 'change',
-          'callback' => '_dpidestinations_ajaxcallback_viewname_viewdisplay',
-          'wrapper' => 'dropdown-view-display',
-      ),
+      // most notably 'mousedown', 'blur', and 'submit'.
+      // 'event' => 'change',
+      'callback' => '_dpidestinations_ajaxcallback_viewname_viewdisplay',
+      'wrapper' => 'dropdown-view-display',
+    ),
   );
   $form['view_display'] = array(
     '#type' => 'select',
     '#title' => t('View Display'),
     '#options' => __dpidestinations_dependant_target_viewname_and_display_options_for_view_display($selected_view_name),
-    '#default_value'=> $selected_view_display,
+    '#default_value' => $selected_view_display,
     '#required' => TRUE,
     '#prefix' => '<div id="dropdown-view-display">',
     '#suffix' => '</div>',
-    
   );
+  
   $form['available_targetlayouts'] = array(
     '#type' => 'checkboxes',
     '#options' => _dpidestinations_variable_get('dpidestinations_available_targetlayouts'),
-    '#default_value'=> unserialize($target->available_targetlayouts),
+    '#default_value' => unserialize($target->available_targetlayouts),
     '#title' => t('Available target\'s layout'),
   );
+  
   $form['available_templateoverrides'] = array(
     '#type' => 'textarea',
     '#title' => t('Template override'),
-    '#default_value'=> $target->available_templateoverrides,
+    '#default_value' => $target->available_templateoverrides,
     '#required' => False,
     '#description'=> t('One template override per line in the following format: machine_name|label')
   );
@@ -249,23 +244,14 @@ function target_form($form, &$form_state, $target) {
 
 function target_form_submit($form, &$form_state) {
   $target = entity_ui_form_submit_build_entity($form, $form_state);
-  $target->available_targetlayouts=serialize($target->available_targetlayouts);
+  $target->available_targetlayouts = serialize($target->available_targetlayouts);
   $target->save();
   $form_state['redirect'] = "target/".$target_submission->tid;
 }
 
-
-
-
-
-
 function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
   return $form['view_display'];
-
 }
-
-
-
 
 function targetblock_load($tid = NULL, $reset = FALSE){
   $tids = (isset ($tid) ? array($tid) : array());
@@ -278,7 +264,6 @@ function targetblock_load_multiple($tids = array(), $conditions = array(), $rese
   return entity_load('targetblock', $tids, $conditions, $reset);
 }
 
-
 /**
  * Save target.
  */
@@ -290,7 +275,7 @@ function targetblock_save($targetblock) {
  * Delete single target.
  */
 function targetblock_delete($targetblock) {
-  entity_delete('targetblock', entity_id('targetblock' ,$targetblock));
+  entity_delete('targetblock', entity_id('targetblock', $targetblock));
 }
 
 /**
@@ -313,8 +298,6 @@ function targetblock_view($targetblock, $view_mode = 'full'){
   return $targetblock->view();
 }
 
-
-
 function targetblock_form($form, &$form_state, $targetblock) {
 
   $form['pager_settings'] = array(
@@ -322,8 +305,6 @@ function targetblock_form($form, &$form_state, $targetblock) {
     '#collapsible' => FALSE,
     '#title' => t('Custom pager settings'),
   );
-
-  
 
   $form['pager_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
@@ -333,6 +314,7 @@ function targetblock_form($form, &$form_state, $targetblock) {
     '#description' => t('The total number of nodes on the page.'),
     '#dependency' => array('override-pager-checkbox' => array(1)),
   );
+  
   $form['pager_settings']['use_pager'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use pager'),
@@ -355,7 +337,6 @@ function targetblock_form($form, &$form_state, $targetblock) {
         => array('checked' => TRUE),  // condition
       ),
     ),
-
   );
   $form['pager_settings']['node_count_per_target'] = array(
     '#type' => 'textfield',
@@ -383,7 +364,6 @@ function targetblock_form($form, &$form_state, $targetblock) {
       ),
     ),
   );
-
 
   $form['pager_settings']['split_delta'] = array(
     '#type' => 'textfield',
@@ -427,16 +407,14 @@ function targetblock_form($form, &$form_state, $targetblock) {
     ),
 
   );
- if($target){
+ 
+  if ($target){
     $form['template'] = array(
       '#type' => 'select',
       '#default_value' => $targetblock->template,
       '#title' => t('Template'),
-      '#options'=>array('default'=>'Use templates rules')+$target->available_templateoverrides,
-  
-  
+      '#options' => array('default' => 'Use templates rules') + $target->available_templateoverrides,
     );
- }
+  }
   return $form;
-
 }

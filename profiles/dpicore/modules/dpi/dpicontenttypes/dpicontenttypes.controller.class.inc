@@ -3,9 +3,10 @@ class DPIPropertiesController extends EntityAPIController{
   
   public function create(array $values = array()) {
     $values += array(
-      'nid' => '',
+      'entity' => '',
+      'id' => '',
       'external_reference' => '',
-      'description' => '',
+      'external_reference_2' => '',
       'source' => '',
       'product_id' => '',
     );
@@ -33,21 +34,21 @@ class DPIPropertiesController extends EntityAPIController{
       0 => array('#markup' => check_plain($entity->external_reference))
     );
     
-    $content['description'] = array(
+    $content['external_reference_2'] = array(
       '#theme' => 'field',
       '#weight' => 0,
-      '#title' =>t('Description'),
+      '#title' =>t('Exeternal Reference 2'),
       '#access' => TRUE,
       '#label_display' => 'above',
       '#view_mode' => 'full',
       '#language' => LANGUAGE_NONE,
-      '#field_name' => 'field_description',
+      '#field_name' => 'field_external_reference_2',
       '#field_type' => 'text',
       '#entity_type' => 'dpiproperties',
       '#bundle' => $entity->type,
-      '#items' => array(array('value' => $entity->description)),
+      '#items' => array(array('value' => $entity->external_reference_2)),
       '#formatter' => 'text_default',
-      0 => array('#markup' => check_plain($entity->description))
+      0 => array('#markup' => check_plain($entity->external_reference_2))
     );
     
     $content['source'] = array(
@@ -84,7 +85,8 @@ class DPIPropertiesController extends EntityAPIController{
     );
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
-  public function load_dpiproperties_by_nid($nid){
+  /*
+  public function load_dpiproperties_by_id($id){
   
     $conditions = array('nid' => $nid);
     $result = dpiproperties_load_multiple(FALSE, $conditions);
@@ -93,7 +95,7 @@ class DPIPropertiesController extends EntityAPIController{
     }
     return current($result);
      
-  }
+  }*/
 
 }
 /**

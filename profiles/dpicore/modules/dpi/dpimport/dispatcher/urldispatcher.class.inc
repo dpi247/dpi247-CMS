@@ -73,7 +73,7 @@ class UrlDispatcher extends Dispatcher{
       
       //Save data into temp folder
       if (file_put_contents ($file_path, $request->data) === FALSE){
-        Logger::logError('Dispatcher', 0, 106, t('Can\'t copy source: !source into file', array('!source' => $this->getSourceUrl())));
+        Logger::logError('dispatcher', 0, 'dispatcher_006', t('Can\'t copy source: !source into file', array('!source' => $this->getSourceUrl())));
       }
       
       if ($this->isZip()){
@@ -81,7 +81,7 @@ class UrlDispatcher extends Dispatcher{
         $file_path = $this->getFilePathFromZip($file, 'xml');
       }
     } else {
-      Logger::logError('Dispatcher', 0, 107, t('Can\'t get source : !source error : !error', array('!source' => $this->getSourceUrl(), '!error' => $request->error)));
+      Logger::logError('dispatcher', 0, 'dispatcher_007', t('Can\'t get source : !source error : !error', array('!source' => $this->getSourceUrl(), '!error' => $request->error)));
     }
     return $file_path;
   }

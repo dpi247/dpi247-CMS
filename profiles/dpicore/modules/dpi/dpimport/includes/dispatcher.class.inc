@@ -86,7 +86,7 @@ abstract class Dispatcher{
     $handle = fopen($source, "r");
     
     if (!$handle) {
-      Logger::logError('Dispatcher', 0, 105, t('The XML file (!xml_file) isn\'t readable', array('!xml_file' => $source)));
+      Logger::logError('dispatcher', 0, 'dispatcher_005', t('The XML file (!xml_file) isn\'t readable', array('!xml_file' => $source)));
     } else { 
       $contents = fread($handle, filesize($source));
       //$contents = wallymport_convertEntities($contents);
@@ -98,7 +98,7 @@ abstract class Dispatcher{
       $importer = $this->getImporter();
       if ($importer->checkXml($dom)){
         //process file
-        $this->exploreDom($dom);
+        $this->processDom($dom);
       }
     }
   }
@@ -107,15 +107,15 @@ abstract class Dispatcher{
    * Explore the DOM and call a function for each element
    * @param DOM $dom
    */
-  function exploreDom($dom){
+  function processDom($dom){
     $importer = $this->getImporter();
     if ($dom->hasChildNodes()){
       //For each child of the dom
       foreach ($dom->childNodes as $child){
-        $name = $child->nodeName;
-        if ($name != '#text'){
+        if ($child->nodeName != '#text'){
           $explore_child = TRUE;
-          $method_name = 'process_'.$name;
+          $callback = $importer->getCallback($child);
+          $method_name = 'build'.$callback;
           //Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists($importer, $method_name)){
             $explore_child = $importer->$method_name($child);
@@ -123,13 +123,56 @@ abstract class Dispatcher{
           }
           
           if ($explore_child){
-            $this->exploreDom($child);
+            $this->processDom($child);
           }
         }
       }
     }
   }
   
+  /**
+   * 
+   * Process the children of the currant dom and call a function for each one.
+   * @param DOM $dom
+   * @param Object $object
+   * @param Object $object2
+   */
+  function processChildren($dom, $object, $object2){
+    $importer = $this->getImporter();
+    foreach($dom->childNodes as $child){
+      $name = strtolower($child->nodeName);
+      if ($name != '#text'){
+        $callback = $importer->getCallback($child);
+        $method_name = 'build'.$callback;
+        if (method_exists($importer, $method_name)){
+          $importer->$method_name($child, $object, $object2);
+        }
+      }
+    }
+  }
+  
+  /**
+  *
+  * Process the children of the currant dom and call a function for each one. 
+  * Return an array with the return of each function
+  * @param DOM $dom
+  * @param Object $object
+  */
+  function processList($dom, $object, $object2){
+    $list = array();
+    $importer = $this->getImporter();
+    foreach($dom->childNodes as $child){
+      $name = strtolower($child->nodeName);
+      if ($name != '#text'){
+        $callback = $importer->getCallback($child);
+        $method_name = 'build'.$callback;
+        if (method_exists($importer, $method_name)){
+          $list[] = $importer->$method_name($child, $object, $object2);
+        }
+      }
+    }
+    return $list;
+  }
   /**
    * 
    * Extract file from zip
@@ -144,10 +187,9 @@ abstract class Dispatcher{
     // Unzip input file to the temp directory
     $zip = new ZipArchive;
     
-    $res = $zip->open($file->filename);
+    $res = $zip->open($file->uri);
     if ($res === TRUE) {
-      $file_name = strstr($file->name, '.zip') ? str_replace('.zip', '', $file->name) : $file->name;
-      $temp_subdir = $this->getTempFolder().'/'.$file_name;
+      $temp_subdir = $this->getTempFolder().'/'.$file->name;
       $this->checkDirectoryRecursive($temp_subdir, 1);
       if (is_dir($temp_subdir)) {
         $this->temp_subdir = $temp_subdir;
@@ -156,19 +198,19 @@ abstract class Dispatcher{
         $import_files = file_scan_directory($temp_subdir, '/.*\.'.$extension.'$/', array('nomask' => '/(\.\.?|CVS)$/', 'recurse' => FALSE, 'key' => 'name'));
         if (count($import_files) == 0) {
           $zip_error = TRUE;
-          Logger::logError('Dispatcher', 0, 101, t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_001', t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->basename)));
         } elseif (count($import_files) > 1) {
-          Logger::logError('Dispatcher', 0, 102, t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_002', t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->basename)));
         } else {
           $import_file = reset($import_files);
           $xml_file = $import_file->uri;
         }
         $zip->close();
       } else {
-        Logger::logError('Dispatcher', 0, 103, t('Input file !file could not be unzipped to !subdir. Error code !res', array('!file' => $file->filename, '!subdir' => $temp_subdir, '!res' => $res)));
+        Logger::logError('dispatcher', 0, 'dispatcher_003', t('Input file !file could not be unzipped to !subdir. Error code !res', array('!file' => $file->filename, '!subdir' => $temp_subdir, '!res' => $res)));
       }
     } else {
-      Logger::logError('Dispatcher', 0, 104, t('Cant UnZip file: !file', array('!file' => $file->filename)));
+      Logger::logError('dispatcher', 0, 'dispatcher_004', t('Cant UnZip file: !file', array('!file' => $file->filename)));
     }    
     return $xml_file;
   }
@@ -250,9 +292,9 @@ abstract class Dispatcher{
    */
   protected function createFileObject($file_name, $file_path){
     $file = new stdClass();
-    $file->name = $file_name;
-    $file->filename = $file_path;
-    $file->basename = $file_name;
+    $file->uri = $file_path;
+    $file->filename = $file_name;
+    $file->name = str_replace('.'.$this->getExtention(), '', $file_name);
     return $file;
   }
   
