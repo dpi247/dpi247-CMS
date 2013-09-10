@@ -64,7 +64,7 @@ class WallyXmlV1 extends Importer{
    */
   protected function createOrLoadEntityPackage($dom){
     $node = new stdClass();
-    $node->type = 'article_package';
+    $node->type = 'package';
     node_object_prepare($node);
     $node->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
     

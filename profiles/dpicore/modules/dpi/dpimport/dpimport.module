@@ -23,7 +23,17 @@ function dpimport_menu(){
     'type'             => MENU_LOCAL_TASK,
   );
   
-  $items['admin/config/dpi247/import'] = array(
+  $items['admin/config/dpimport'] = array(
+    'title' => 'DPImport',
+    'description' => 'Parent item import',
+    'position' => 'left',
+    'weight' => -100,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/config/dpimport/import'] = array(
     'title'            => t('Import'),
     'description'      => t('Import settings'),
     'page callback'    => 'dpimport_page_importer_list',
@@ -32,13 +42,13 @@ function dpimport_menu(){
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
   );
   
-  $items['admin/config/dpi247/import/list'] = array(
+  $items['admin/config/dpimport/import/list'] = array(
     'title'            => t('List'),
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
   );
   
-  $items['admin/config/dpi247/import/add'] = array(
+  $items['admin/config/dpimport/import/add'] = array(
     'title'            => t('Add Import'),
     'description'      => t('Adding an import.'),
     'page callback'    => 'drupal_get_form',
@@ -50,7 +60,7 @@ function dpimport_menu(){
     'weight'           => 1,
   );
   
-  $items['admin/config/dpi247/import/edit/%'] = array(
+  $items['admin/config/dpimport/import/edit/%'] = array(
     'title'            => t('Edit Import'),
     'description'      => t('Editing an import.'),
     'page callback'    => 'drupal_get_form',
@@ -61,7 +71,7 @@ function dpimport_menu(){
     'weight'           => 1,
   );
   
-  $items['admin/config/dpi247/import/delete/%'] = array(
+  $items['admin/config/dpimport/import/delete/%'] = array(
     'title'            => t('Delete Import'),
     'description'      => t('Deleting an import.'),
     'page callback'    => 'drupal_get_form',

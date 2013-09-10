@@ -10,8 +10,8 @@ function dpimport_page_importer_list(){
   $vars['header'] = array('Name', 'Type', 'Version', 'Dispatcher', 'Action');
   $vars['rows'] = array();
   foreach ($importers as $imp){
-    $edit = '<a href="/admin/config/dpi247/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
-    $delete = ' <a href="/admin/config/dpi247/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
+    $edit = '<a href="/admin/config/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
+    $delete = ' <a href="/admin/config/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
     $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete);
   }
   return theme('table', $vars);
@@ -106,7 +106,7 @@ function dpimport_page_form_importer_form_submit($form, &$form_state){
   }
   
   if (isset($form_state['complete'])){
-    drupal_goto('admin/config/dpi247/import');
+    drupal_goto('admin/config/dpimport/import');
   }
    
   if ($form_state['triggering_element']['#value'] == 'Back') {
@@ -505,5 +505,5 @@ function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
     drupal_set_message(t('The importer instance could not been deleted'), 'error');
   }
   
-  drupal_goto('admin/config/dpi247/import');
+  drupal_goto('admin/config/dpimport/import');
 }

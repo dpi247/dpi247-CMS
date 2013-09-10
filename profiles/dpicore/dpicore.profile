@@ -48,7 +48,7 @@ function dpicore_install_set_taxonomy_variables(){
   dpicore_install_set_a_taxonomy_variable("locations");
   dpicore_install_set_a_taxonomy_variable("packagelayout");
   dpicore_install_set_a_taxonomy_variable("persons");
-  //dpicore_install_set_a_taxonomy_variable("rating");
+  dpicore_install_set_a_taxonomy_variable("rating");
 
 }
 
