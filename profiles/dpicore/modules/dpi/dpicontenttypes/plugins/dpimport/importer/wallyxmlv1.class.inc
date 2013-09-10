@@ -17,7 +17,7 @@ class WallyXmlV1 extends Importer{
     
     //Set the CurrentLog to the previous one to stop children growing.
     Logger::setCurrentToPreviousExecution();
-    dsm(Logger::getLogExecution());
+    
     
     //Indicates that the dispatcher must not process the children
     return FALSE;
@@ -32,7 +32,7 @@ class WallyXmlV1 extends Importer{
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    
+    d//pm($package_wrapper->getPropertyInfo());
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper, $package);
       if (!Logger::error()){
@@ -246,9 +246,10 @@ class WallyXmlV1 extends Importer{
   public function buildExternalReference($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
     //Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
-    if ($wrapper->field_external_reference->value() == NULL){
+    if (!isset($entity->external_reference_set)){
       $wrapper->field_external_reference->set($value);
       Logger::logExecution('external_reference', FALSE, 1, '000', $value);
+      $entity->external_reference_set = TRUE;
     } else {
       $wrapper->field_external_reference_2->set($value);
       Logger::logExecution('external_reference_2', FALSE, 1, '000', $value);
@@ -336,7 +337,6 @@ class WallyXmlV1 extends Importer{
   * @param Object $entity
   */
   public function buildAutoPublish($dom, $wrapper, $entity){
-    //@todo
     $value = $this->xmlbooleantophpboolean($dom->nodeValue);
     $wrapper->field_autopublish->set($value);
   }
@@ -349,7 +349,16 @@ class WallyXmlV1 extends Importer{
   * @param Object $entity
   */
   public function buildPackageLayout($dom, $wrapper, $entity){
-    //@todo
+    $value = $dom->nodeValue;
+    $vid = dpi_variable_get('dpi_packagelayout', NULL);
+    $vocabulary = taxonomy_vocabulary_load($vid);
+    $vocabulary_name = $vocabulary->machine_name;
+    $item = taxonomy_get_term_by_name($value, $vocabulary_name);
+    if (!empty($item)){
+      $wrapper->field_packagelayout->set(array_shift($item));
+    } else {
+      Logger::logWarning('importer', 2, 'packagelayout', t('The package layout !package_layout can not be found', array('!package_layout' => $value)));
+    }
   }
   
   /**
@@ -662,5 +671,26 @@ class WallyXmlV1 extends Importer{
   public function buildCrops($dom, $wrapper, $entity){
     //@todo
   }
-  
+  /**
+   * 
+   * Return a render in json
+   */
+  public function render(){
+    //Set header to json
+    drupal_add_http_header('Content-Type', 'application/json');
+    
+    if (Logger::error()){
+      //If an error appears during the import, the global status is set to 0
+      $base = new LoggerLog('dpimport', 0, 'dpimport_error', t('There was an error during the import'));
+    } else {
+      //If no error appears during the import, the global status is set to 1
+      $base = new LoggerLog('dpimport', 1, 'dpimport_success', t('The import was proceded with success'));
+    }
+    //The execution log is attached to the base log.
+    $execution = Logger::getLogExecution();
+    $base->addChildren($execution);
+    
+    $json = json_encode($base);
+    return $json;
+  }
 }

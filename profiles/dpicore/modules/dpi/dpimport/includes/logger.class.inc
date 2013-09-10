@@ -9,7 +9,7 @@ class Logger{
   private static $error = array();
   private static $warning = array();
   public static $execution = NULL;
-  public static $currentexecution = NULL;
+  private static $currentexecution = NULL;
   
   /**
    * 
@@ -83,7 +83,10 @@ class Logger{
   public static function getLogExecution(){
     return self::$execution;
   }
-  
+  /**
+   * 
+   * Return the array of errors
+   */
   public static function getLogError(){
     return self::$error;
   }
@@ -159,6 +162,11 @@ class LoggerLog{
   public function getParent(){
     return $this->parent;
   }
+  /**
+   * 
+   * Return status
+   * @return number
+   */
   public function getStatus(){
     return $this->status;
   }

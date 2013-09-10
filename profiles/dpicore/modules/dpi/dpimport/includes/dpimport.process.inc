@@ -27,8 +27,8 @@ function dpimport_page_process_import($importer_name){
   if ($return == NULL){
     $return = Logger::printLog();
   }
-  dsm(Logger::getLogError());
-  return $return;
+  
+  print $return;
 }
 
 /**
