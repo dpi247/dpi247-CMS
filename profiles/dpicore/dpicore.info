@@ -2,8 +2,6 @@ name = dpicore
 description = Start with only a few modules enabled.
 version = VERSION
 core = 7.x
-dependencies[] = block
-dependencies[] = dblog
 
 ; Information added by drupal.org packaging script on 2013-04-03
 version = "7.22"
@@ -31,6 +29,9 @@ dependencies[] = overlay
 dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
+dependencies[] = views_ui
+dependencies[] = page_manager
+
 
 ; Third Party
 dependencies[] = features
