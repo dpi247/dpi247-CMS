@@ -313,5 +313,7 @@ function dpidestinations_dpilog_register(){
     ),
   );
 }
-
-
+function dpidestinations_views_api() {
+  return array('api' => 2
+    );
+}

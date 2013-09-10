@@ -41,14 +41,14 @@ function dpidestinations_destinations_menu_alter(&$items, $task) {
   
   
   // Override the node edit handler for our purpose.
-  if ($callback == 'dpidestination_page_destination_view') {
+  if ($callback == 'dpidestinations_page_destination_view') {
     $items['destination/%destinationterm']['page callback'] = 'dpidestinations_destination_view_page';
     $items['destination/%destinationterm']['file path'] = $task['path'];
     $items['destination/%destinationterm']['file'] = $task['file'];
   }
   else {
       variable_set('dpidestinations_destinations_disabled', TRUE);
-      drupal_set_message(t('Page manager module is unable to enable contact because some other module already has overridden with %callback.', array('%callback' => $callback)), 'warning');
+      drupal_set_message(t('Page manager module is unable to enable destinations page because some other module already has overridden with %callback.', array('%callback' => $callback)), 'warning');
     return;
   }
 

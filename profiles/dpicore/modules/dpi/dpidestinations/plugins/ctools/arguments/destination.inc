@@ -11,7 +11,7 @@
  * by the system that includes this file.
  */
 $plugin = array(
-  'title' => t("DEstination term: ID"),
+  'title' => t("Destination term: ID"),
   // keyword to use for %substitution
   'keyword' => 'destination',
   'description' => t('Creates a single taxonomy term from a taxonomy ID or taxonomy term name.'),
