@@ -17,6 +17,7 @@ dependencies[] = scald_image
 dependencies[] = taxonomy
 dependencies[] = text
 dependencies[] = dpicache
+dependencies[] = dpidestinations
 
 files[] = dpicontenttypes.controller.class.inc
 files[] = dpicontenttypes.entity.class.inc
