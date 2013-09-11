@@ -676,8 +676,7 @@ class WallyXmlV1 extends Importer{
    * Return a render in json
    */
   public function render(){
-    
-    //@todo stripper le champs parent pour eviter la récursion
+
     //Set header to json
     drupal_add_http_header('Content-Type', 'application/json');
     

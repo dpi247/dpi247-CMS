@@ -136,7 +136,7 @@ class LoggerLog{
   public $code;
   public $message;
   public $children = NULL;
-  public $parent = NULL;
+  private $parent = NULL;
   /**
    * 
    * Constructor
