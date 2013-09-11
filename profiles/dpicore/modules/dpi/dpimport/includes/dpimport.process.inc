@@ -28,7 +28,8 @@ function dpimport_page_process_import($importer_name){
     $return = Logger::printLog();
   }
   
-  print $return;
+  //print $return;
+  return $return;
 }
 
 /**

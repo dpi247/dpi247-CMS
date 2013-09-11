@@ -32,7 +32,7 @@ class WallyXmlV1 extends Importer{
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    d//pm($package_wrapper->getPropertyInfo());
+    //dpm($package_wrapper->getPropertyInfo());
     if (!Logger::error()){
       $this->setPackageAttributes($dom, $package_wrapper, $package);
       if (!Logger::error()){
@@ -676,6 +676,8 @@ class WallyXmlV1 extends Importer{
    * Return a render in json
    */
   public function render(){
+    
+    //@todo stripper le champs parent pour eviter la récursion
     //Set header to json
     drupal_add_http_header('Content-Type', 'application/json');
     

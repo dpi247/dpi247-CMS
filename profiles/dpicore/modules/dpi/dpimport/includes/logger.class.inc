@@ -105,8 +105,22 @@ class Logger{
     }
     return $error_exists;
   }
+  /**
+   * 
+   * Return the log themed in html
+   */
   public static function printLog(){
-    return 'print log render';
+    if (Logger::error()){
+      //If an error appears during the import, the global status is set to 0
+      $base = new LoggerLog('dpimport', 0, 'dpimport_error', t('There was an error during the import'));
+    } else {
+      //If no error appears during the import, the global status is set to 1
+      $base = new LoggerLog('dpimport', 1, 'dpimport_success', t('The import was proceded with success'));
+    }
+    //The execution log is attached to the base log.
+    $execution = Logger::getLogExecution();
+    $base->addChildren($execution);
+    return theme('dpimport_log_recursif', array('children' => array($base)));
   }
 }
 /**

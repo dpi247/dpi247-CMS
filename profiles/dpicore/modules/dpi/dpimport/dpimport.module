@@ -123,6 +123,18 @@ function dpimport_ctools_plugin_type() {
  * A modifier, donner la main à l'importer
  * */
 function dpimport_access($importer_name){
+  //@todo
   return TRUE;
 }
-
+/**
+ * 
+ * Implementation of hook_theme
+ */
+function dpimport_theme(){
+  $theme['dpimport_log_recursif'] = array(
+    'file' => 'templates/theme.inc',
+    'variables' => array('children' => NULL),
+  );
+  
+  return $theme;
+}
