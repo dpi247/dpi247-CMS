@@ -137,7 +137,20 @@ function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
   return $handlers[$term_id];
 }
 
-
+function _dpidestinations_get_available_targetlayouts(){
+  $entites_info = entity_get_info('node');
+  $available_targetlayouts=$entites_info['view modes'];
+  unset($available_targetlayouts["rss"]);
+  unset($available_targetlayouts["search_index"]);
+  unset($available_targetlayouts["search_result"]);
+  $return=array();
+  foreach ($available_targetlayouts as $key=>$value){
+    $return[$key]=$value["label"];
+    
+  }
+  return $return;
+  
+}
 function _dpidestinations_get_targets_for_destinationterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
   if (!isset($targets[$term_id])) {
@@ -646,11 +659,13 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 
 
 function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($target_id,$target_name){
+  
   if($target_id='' OR $target_name==NULL)
     return array(""=>"");
   $controller=new TargetController('target');
   $target=$controller->load_target_by_name($target_name);
   $wrapper = entity_metadata_wrapper('target', $target);
+  
   return $wrapper->available_targetlayouts->value();
   
 }

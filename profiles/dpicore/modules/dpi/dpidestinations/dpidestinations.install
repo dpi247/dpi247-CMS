@@ -266,7 +266,6 @@ function dpidestinations_schema() {
    taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
    _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
    _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
-   _dpidestinations_variable_del("dpidestinations_available_targetlayouts");
    _dpidestinations_variable_del("dpidestinations_destination_vid");
    
    
