@@ -155,15 +155,18 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   
   // STEP 2:
   //Determine available options and change destination if need it
+  
   $tids_options=dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update);
-  if(!$is_update){
+  if(FALSE &  !$is_update){
     $destinations['tid']='';
   }
+  
   $target_options=__dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])){
     $destinations['target']=current($target_options);
   }
-  $layout_options= __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'],$destinations['target']);
+  
+  $layout_options= __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['target'],$destinations['target']);
   if(!isset($layout_options[$destinations['layout']])){
     $destinations['layout']=current($layout_options);
   }
@@ -232,7 +235,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         $widget['layout'] = array(
           '#type' => 'select',
           '#options' =>$layout_options,
-        //  '#default_value'=> $destinations['layout'],
+          '#default_value'=> $destinations['layout'],
           '#title' => t("Destination's layout"),
           '#attributes' => array('class' => array('field-destinations-widget-tid')),
           '#description' => t('The way your article will be render in the target'),

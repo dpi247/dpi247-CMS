@@ -158,7 +158,7 @@ function _target_metadata_getter($object, array $options, $property_name){
   if($property_name=="available_targetlayouts"){
     foreach(unserialize($object->available_targetlayouts) as $key=>$layout){
       if($layout!=FALSE){
-        $layouts[]=$layout;
+        $layouts[$key]=$layout;
       }
     }
     return $layouts;
@@ -645,9 +645,9 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 }
 
 
-function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($term_id,$target_name){
-  if($target_name='' OR $target_name==NULL)
-    return array(''=>'');
+function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($target_id,$target_name){
+  if($target_id='' OR $target_name==NULL)
+    return array(""=>"");
   $controller=new TargetController('target');
   $target=$controller->load_target_by_name($target_name);
   $wrapper = entity_metadata_wrapper('target', $target);

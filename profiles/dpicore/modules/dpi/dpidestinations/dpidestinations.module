@@ -143,8 +143,8 @@ function dpidestinations_default_panels_renderer_pipeline() {
   $pipeline->disabled = FALSE; /* Edit this to true to make a default pipeline disabled initially */
   $pipeline->api_version = 1;
   $pipeline->name = 'dpidestinations_viewer';
-  $pipeline->admin_title = t('CPS Print');
-  $pipeline->admin_description = t('To print cps.');
+  $pipeline->admin_title = t('Destinations viewer');
+  $pipeline->admin_description = t('Destination viewer.');
   $pipeline->weight = 0;
   //This is add to know that this a print pipeline
   $pipeline->settings = array(

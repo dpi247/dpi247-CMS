@@ -18,12 +18,13 @@ $plugin = array(
  * Implementation of hook_typeofcontent_content_type_content_types
  * Return all custom content types available.
  */
-function dpidestinations_targetblock_content_type_content_types() {
+function dpidestinations_targetblock_content_type_content_types($plugin) {
   $types = array();
   $targets=target_load_multiple(FALSE);
   foreach($targets as $target){
     $types[$target->machine_name]= array(
-      'title' => check_plain($target->label),
+      'title' => check_plain($target->machine_name),
+      'subtype'=> $target->machine_name,
       'description' =>check_plain($target->description),
       //'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t('Target'),
@@ -80,6 +81,7 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
  */
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
   $conf = $form_state['conf'];
+
   $targetController=new TargetBlockController('targetblock');
   
   $target_block= $targetController->load_targetblock_by_panels_panelpid($form_state['pane']->pid);
@@ -245,6 +247,7 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   foreach (array_keys($form_state['plugin']['defaults']) as $key) {
     $form_state['conf'][$key] = $form_state['values'][$key];
   }
+ 
 }
 
 

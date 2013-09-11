@@ -237,7 +237,6 @@ function target_form($form, &$form_state, $target) {
   );
  
   field_attach_form('target', $target, $form, $form_state);
-
   return $form;
 }
 
