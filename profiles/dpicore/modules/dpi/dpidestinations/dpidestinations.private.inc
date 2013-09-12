@@ -480,7 +480,9 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   
 }
 function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){
-
+  //@todo: documenter ces arguments dans la doc technique
+  $targetview->targetview_tid=$term_value;
+  $targetview->targetview_target=$target_value;
    
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);

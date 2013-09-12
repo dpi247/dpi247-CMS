@@ -246,6 +246,19 @@ function dpidestinations_views_plugins() {
         //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
       ),
     ),
+    'row' => array( 
+      'targetblock_node_row' => array(
+        'title' => t('Target block Row'),
+        'help' => t('(Displays the node according to the layout of his destination.'),
+        'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+        'handler' => 'dpidestinations_plugin_row_node_targetview',
+        'base' => array('node'), // only works with 'node' as base.
+        'uses options' => TRUE,
+        'type' => 'normal',
+        'help topic' => 'style-node',
+        
+      )
+    )
       /*
        'style' => array( //declare the style plugin
   'target_style' => array(
