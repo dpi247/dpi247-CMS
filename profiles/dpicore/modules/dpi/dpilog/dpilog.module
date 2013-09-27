@@ -13,17 +13,16 @@ function dpilog_menu(){
   $items['admin/dpilog'] = array(
     'title'=>'Logs',
     'page callback' => 'drupal_get_form',
-    'access arguments'=>array('view dpilog'),
-    'page callback' => 'drupal_get_form',
     'page arguments' => array('dpilog_form_page_view_list_form'),
+    'access arguments'=>array('view dpilog'),
+    'file'=>'includes/dpilog.admin.page.inc',
     'weight'=>1,
 
   );
   $items['admin/dpilog/log/%'] = array(
     'title'=> 'Logs',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpilog_form_page_log'),
-    'access arguments'=>array(3),
+    'page callback' => 'dpilog_page_view_list',
+    'access arguments'=>array('view dpilog'),
     'file'=>'includes/dpilog.admin.page.inc',
     'weight'=>2,
   );
@@ -33,7 +32,7 @@ function dpilog_menu(){
     //'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
     'file'=>'includes/dpilog.admin.page.inc',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK,
     'weight'=>2,
   );
 
@@ -84,6 +83,7 @@ function dpilog_menu(){
 
   $items['admin/dpilog/configure'] = array(
     'title'=> 'configure',
+    'page_callback'=>'drupal_det_form',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
 
     'access arguments'=>array('configure dpilog'),
@@ -94,6 +94,7 @@ function dpilog_menu(){
   );
   $items['admin/dpilog/configure/granularity'] = array(
     'title'=> 'granularity',
+    'page_callback'=>'drupal_det_form',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
 
     'access arguments'=>array('configure dpilog'),
