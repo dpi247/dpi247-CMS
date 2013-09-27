@@ -1,0 +1,6 @@
+name = Unfold Companion
+description = Companion module for the theunfold theme.
+package = DPI Demo-content
+core = 7.x
+
+
