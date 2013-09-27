@@ -2,8 +2,111 @@
 
 function dpicache_schema() {
   $schemas = array();
-  
   $schemas['dpi_variables'] = drupal_get_schema_unprocessed('system', 'variable');
   $schemas['dpi_variables']['description'] = t('Named variable/value pairs created by any other module or theme. These variables are cached but not systematically processed.');
+  
+  $schemas['dpicache_cache_entry']=array(
+    'description' => 'CAche entry for the dpicache module.',
+    'fields' => array(
+      'hash' => array(
+        'description' => 'The hash of the cache',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'cache_prefix' => array(
+        'description' => 'The Type of cache flowMix_render dpidestiantions_target,...',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data_type' => array(
+        'description' => 'Is the data a string an array ?',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'ttl' => array(
+        'description' => 'The id of the entity attatch to this properties.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'type' => 'text', 
+        'not null' => TRUE
+      ),
+      
+    ),
+    'indexes' => array(
+      'hash'                => array('hash'),
+      'cache_prefix' => array('cache_prefix'),
+      'hash_cache_prefix' => array('hash','cache_prefix'),
+    ),
+    'primary key' => array('hash'),
+    
+    );
+  $schemas['dpicache_cache_cold']=array(
+    'description' => 'Each entry represent a cache entry that need to be regenerage during cron.',
+    'fields' => array(
+      'hash' => array(
+        'description' => 'The hash of the cache',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'cache_name' => array(
+        'description' => 'The Type of cache name flowMix_render dpidestiantions_target,...',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'cache_prefix' => array(
+        'description' => 'The Type of cache flowMix_render dpidestiantions_target,...',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data_type' => array(
+        'description' => 'Is the data a string an array ?',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'ttl' => array(
+        'description' => 'The id of the entity attatch to this properties.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'update_freq' => array(
+        'description' => 'Update Freq',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'next_run' => array(
+        'description' => 'timestamp of next run.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'parameters' => array(
+        'type' => 'text',
+        'not null' => TRUE
+      ),
+  
+    ),
+    'indexes' => array(
+      'hash'                => array('hash'),
+      'cache_prefix' => array('cache_prefix'),
+      'hash_cache_prefix' => array('hash','cache_prefix'),
+    ),
+    'primary key' => array('hash'),
+  
+  );
+  
   return $schemas;
 }

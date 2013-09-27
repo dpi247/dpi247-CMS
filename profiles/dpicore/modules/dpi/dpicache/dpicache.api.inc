@@ -1,5 +1,61 @@
 <?php 
 
+function hook_dpicache_cache_entry_register(){
+  return array(
+    'flowmix_render'=>array(
+      'callback'=> 'flowmix_get_render',
+      'plugin'=> 'dpicache_memcache',
+      'cache_prefix'=> 'flowmix_render',
+      "data_type" => "string",
+      'time_window' => 24,
+      'default_ttl'=> 5
+    )
+  );
+}
+
+
+
+function dpicache_get_cache_entry($cache_name){
+  $infos=_dpicache_get_cache_entry_definition($cache_name);
+  if($infos==FALSE){
+    //@todo: Trow an error
+    return FALSE;
+  }
+  
+  
+  $args=func_get_args();
+  array_shift($args);
+  $hash=_dpicache_get_hash($cache_name,$args);
+    
+    if(  $cache=_dpicache_fetch_cache_entry($hash,$infos)){
+      //@todo:Remplacer par des dpilogs
+      dpi_log('cache_entry', "cache_hit", t("Cache hit !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
+      
+     return $cache;
+    }
+    else{
+      //@todo:Remplacer par des dpilogs
+      dpi_log('cache_entry', "cache_miss", t("Cache miss !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
+      dpi_log('cache_entry', "cache_hot", t("Cache hot generation !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
+      
+      $cache = _dpicache_regenerate_cache_entry($hash,$infos,$args);
+      
+      //@todo: créer une entrée dans la table de génération à froid.
+      // Si j'ai du regénérer la cache manuellement alors
+      // => je dois sauver également une entrée dans la table de géneration à froid
+      
+      // A priori je ne rafraichis ma cache a chaud que une fois sur une période de "time_window".
+      // En fait: je rafraichis la cache à froid d'un nombre [division entier de time_window/freq] avant de rafraichir le cache à chaud
+      _dpicache_save_cache_cold($cache_name,$hash,$infos,$args);
+      return $cache;
+      
+    }
+    return FALSE;
+  
+  
+}
+
+
 /**
  * Returns a persistent variable.
  *

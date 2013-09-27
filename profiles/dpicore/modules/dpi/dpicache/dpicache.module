@@ -1,2 +1,30 @@
 <?php 
 module_load_include('inc', 'dpicache','dpicache.api');
+module_load_include('inc', 'dpicache','dpicache.private');
+
+
+function dpicache_cron(){
+  //We need to ensure everybody is sync
+  $time=time();
+  
+  _dpicache_cron_regenerate_old_ttl_cache_entry($time);
+  _dpicache_cron_cleanup_old_ttl_cache_entry($time);
+  _dpicache_cron_cleanup_old_ttl_cold($time);
+  
+}
+
+
+
+function dpicache_dpilog_register(){
+
+  return array(
+    "cache_entry"=>array(
+      "actions"=>array("cache_hit","cache_miss",'regenerate_hot','regenerate_cold','regenerate'),
+    ),
+    "cache_error"=>array(
+      "actions"=>array("cache_error_callback"),
+    ),
+    
+
+  );
+}
