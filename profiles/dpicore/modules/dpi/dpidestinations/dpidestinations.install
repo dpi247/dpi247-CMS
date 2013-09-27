@@ -43,8 +43,8 @@ function dpidestinations_schema() {
       ),
       'available_targetlayouts' => array(
         'description' => 'Wich target layout are available for this target.',
-        'type' => 'varchar',
-        'length' => 255,
+        'type' => 'text',
+        'size' => 'big',
         'not null' => FALSE,
       ),
       'available_templateoverrides' => array(
@@ -308,4 +308,6 @@ function dpidestinations_field_schema($field) {
       'unique keys'=>$unique_keys,
   );
 }
+
+
 
