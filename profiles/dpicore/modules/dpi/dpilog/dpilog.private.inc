@@ -49,7 +49,7 @@ function dpilog_get_logs_query_based_on_filters( $filters){
 
 // We dont plan to use Mysql delayed because of: https://drupal.org/node/772554
 
-function _dpilog_log($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAULT,$uid=NULL, $id=NULL,$variables=array(),$keep_backtrace=FALSE){
+function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$severity=WATCHDOG_NOTICE,$uid=NULL,$keep_backtrace=FALSE){
 
   $granularity=dpi_variable_get('dpilog_configuration_granularity',array());
   $registrations=$granularity['registrations'];
@@ -60,7 +60,6 @@ function _dpilog_log($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAUL
 
 
     $dpilog_structure=NULL;
-
     if($dpilog_method>0){
       $dpilog_structure=_dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
       if($dpilog_method==1){
