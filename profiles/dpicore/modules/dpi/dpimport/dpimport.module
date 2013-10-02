@@ -138,3 +138,24 @@ function dpimport_theme(){
   
   return $theme;
 }
+/**
+* Implements hook_stream_wrappers().
+*/
+function dpimport_stream_wrappers() {
+  return array(
+    'importer' => array(
+      'name' => t('Importer folders'),
+      'class' => 'ImporterStreamWrapper',
+      'description' => t('Provides read-only paths to importer folder.'),
+      'type' => STREAM_WRAPPERS_READ_VISIBLE,
+    ),
+  );
+}
+/**
+ * 
+ * Implementation of hook_cron
+ */
+function dpimport_cron(){
+  module_load_include('inc', 'dpimport', 'includes/dpimport.process');
+  dpimport_deleteoldfiles();
+}

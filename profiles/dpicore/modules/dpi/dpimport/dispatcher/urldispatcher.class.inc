@@ -2,8 +2,6 @@
 
 class UrlDispatcher extends Dispatcher{
   
-  private static $urldispatcher = NULL;
-  
   protected $source_url;
   
   /**
@@ -12,23 +10,9 @@ class UrlDispatcher extends Dispatcher{
    * @param Importer $importer
    * @param Array $settings
    */
-  protected function UrlDispatcher($importer, $settings){
+  public function UrlDispatcher($importer, $settings){
     parent::Dispatcher($importer, $settings);
     $this->source_url = isset($settings['source_url']) ? $settings['source_url'] : NULL;
-  }
-  
-  /**
-   * Return UrlDispatcher Singloton
-   *
-   * @param Importer $importer
-   * @param Array $settings
-   * @return UrlDispatcher
-   */
-  public static function getUrlDispatcher($importer, $settings) {
-    if (is_null(self::$urldispatcher)) {
-      self::$urldispatcher = new UrlDispatcher($importer, $settings);
-    }
-    return self::$urldispatcher;
   }
   
   /**
@@ -69,16 +53,18 @@ class UrlDispatcher extends Dispatcher{
       $extention = $this->getExtention();
       
       $file_name = 'urldispatcher_'.rand().'.'.$extention;
-      $file_path = $this->getTempFolder().'/'.$file_name;
       
+      $file_uri = $this->getTempFolder().'/'.$file_name;
+      $file = $this->createFileObject($file_name, $file_uri);
       //Save data into temp folder
-      if (file_put_contents ($file_path, $request->data) === FALSE){
+      if (file_put_contents ($file_uri, $request->data) === FALSE){
         Logger::logError('dispatcher', 0, 'dispatcher_006', t('Can\'t copy source: !source into file', array('!source' => $this->getSourceUrl())));
       }
       
       if ($this->isZip()){
-        $file = $this->createFileObject($file_name, $file_path);
-        $file_path = $this->getFilePathFromZip($file, 'xml');
+        $file_path = array('temp_source' => $this->getFilePathFromZip($file, 'xml'), 'source' => $file);
+      } else {
+        $file_path = array('temp_source' => $file_uri, 'source' => $file);
       }
     } else {
       Logger::logError('dispatcher', 0, 'dispatcher_007', t('Can\'t get source : !source error : !error', array('!source' => $this->getSourceUrl(), '!error' => $request->error)));
@@ -139,4 +125,6 @@ class UrlDispatcher extends Dispatcher{
     $settings['source_url'] = $this->getSourceUrl();
     return $settings;
   }
+  
+ 
 }

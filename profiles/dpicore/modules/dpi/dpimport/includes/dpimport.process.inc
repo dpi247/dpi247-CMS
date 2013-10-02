@@ -16,7 +16,8 @@ function dpimport_page_process_import($importer_name){
       $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
       //Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
-      dpimport_process_import($importer);
+      $dispatcher = $importer->getDispatcher();
+      dpimport_process_import($importer, $dispatcher);
       $return = $importer->render();
     } else {
       Logger::logError('importer', 0, 'importer_001', t('There is no plugin for this importer.'));
@@ -29,7 +30,7 @@ function dpimport_page_process_import($importer_name){
   }
   
   print $return;
-  
+  //return $return;
 }
 
 /**
@@ -61,17 +62,37 @@ function dpimport_getallimportersettings(){
  * Process import
  * @param Importer $importer
  */
-function dpimport_process_import($importer){
-  $dispatcher = $importer->getDispatcher();
+function dpimport_process_import($importer, $dispatcher){
+  
   $sources = $dispatcher->extractSources();
-  if (!Logger::error()){
+  if ($sources != NULL){
     foreach ($sources as $source){
-      $dispatcher->process($source);
+      if ($source['temp_source'] != NULL){
+        $dispatcher->process($source['temp_source']);
+      }
+      $dispatcher->moveSource($source);
     }
   }
 }
-
-
+/**
+ * 
+ * Delete old files
+ */
+function dpimport_deleteoldfiles(){
+  ctools_include('plugins');
+  $importers = dpimport_getallimportersettings();
+  foreach ($importers as $importer_settings){
+    $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+    if ($importer_plugin != NULL){
+      //Get importer class from settings and plugin
+      $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
+      //Importer Instance
+      $importer = new $importer_class($importer_settings, $importer_plugin);
+      $dispatcher = $importer->getDispatcher();
+      $dispatcher->cleanDirectories();
+    }
+  }
+}
 /**
  * 
  * Helping function to process an import with the postdispatcher via a form

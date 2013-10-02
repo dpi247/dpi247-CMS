@@ -11,13 +11,10 @@ class WallyXmlV1 extends Importer{
     $package = $this->constructPackage($dom);
     if (!Logger::error()){
       $package->save();
-      //save node
-      
     }
     
     //Set the CurrentLog to the previous one to stop children growing.
     Logger::setCurrentToPreviousExecution();
-    
     
     //Indicates that the dispatcher must not process the children
     return FALSE;
@@ -290,7 +287,79 @@ class WallyXmlV1 extends Importer{
    * @param Object $entity
    */
   public function buildDestinations($dom, $wrapper, $entity){
-    //@todo
+    //@todo s'occuper des destinations multiples
+    //@todo terminer avec le wrapper
+    $term = array();
+    $result = array();
+    $vid = dpi_variable_get('dpidestinations_destination_vid', NULL);
+    
+    if ($vid) {
+    /*  
+      $temp_results = $temp_result = array();
+
+      //$hierarchies = wallyctools_get_hierarchies();
+      foreach ($dom->getElementsByTagName('Destination') as $destination) {
+        dsm($destination->nodeName);
+        $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
+        $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
+        
+        if ($terms) {
+          if ($destination->hasAttribute("Position")) {
+            $temp_result['target'] = $destination->getAttributeNode("Position")->value;
+            $temp_result['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
+            $temp_result['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
+          } else {
+            $temp_result['target'] = 'none';
+            $temp_result['layout'] = 'none';
+            $temp_result['rank'] = 0;
+          }
+    
+          // As we check the taxonomy full path and specify a vocabulary
+          // we can only have one result.
+          $temp_result['tid'] = $terms[0]->tid;
+          $temp_results[] = $temp_result;
+          
+        } else {
+          drupal_set_message(t('Path "@path" not found in vocabulary (@vid). Destination rejected.', array('@path' => $path, '@vid' => $vid)), 'notice');
+        }
+      }
+    /*
+      $check_double = array();
+      $i = 0;
+      foreach ($temp_results as $temp_result) {
+        if (!in_array($temp_result['tid'].':'.$temp_result['target'], $check_double)) {
+          $check_double[] = $temp_result['tid'].':'.$temp_result['target'];
+    
+          if ($actual_dest = _wallyimportpackageV18_find_destination($node->field_destinations, $temp_result)) {
+            $temp_result['rank'] = ($temp_result['rank'] == 'DNC') ? 'DNC'.$actual_dest['rank'] : $temp_result['rank'];
+            $temp_result['time_rank'] = $actual_dest['time_rank'];
+          }
+    
+          if ($temp_result['rank'] == 'DNC') {
+            $temp_result['rank'] = 0;
+          }
+    
+          $result[$i] = $temp_result;
+          $i++;
+        }
+      }
+    
+      // If no destinations at all > Package can't be created.
+      if (count($result)) {
+        $node->field_destinations = $result;
+      } else {
+        // @TODO: FATAL ERROR - PACKAGE DONE - NEED CHECK
+        $node->rejected = '';
+        $error_msg = t('No destination AT ALL for current package. Package rejected.');
+        drupal_set_message($error_msg,'error');
+        $log['error'] = TRUE;
+        $log['error_msg'] = $error_msg;
+        return '';
+      }*/
+    } else {
+      drupal_set_message(t('Destination Path vocabulary not set. See settings.'),'error');
+      return '';
+    }
   }
   
   /**
@@ -671,12 +740,12 @@ class WallyXmlV1 extends Importer{
   public function buildCrops($dom, $wrapper, $entity){
     //@todo
   }
+  
   /**
    * 
    * Return a render in json
    */
   public function render(){
-
     //Set header to json
     drupal_add_http_header('Content-Type', 'application/json');
     

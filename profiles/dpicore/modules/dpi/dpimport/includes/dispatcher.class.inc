@@ -6,11 +6,13 @@ abstract class Dispatcher{
   * @access private
   * @static
   */
-  private static $dispatcher = NULL;
   
   protected $zip;
   protected $temp_folder;
   protected $temp_subdir;
+  protected $done_folder;
+  protected $error_folder;
+  protected $ttl_folder;
   protected $importer;
   /**
    * 
@@ -19,10 +21,13 @@ abstract class Dispatcher{
    * @param array $settings
    */
   
-  protected function Dispatcher($importer, $settings) {
+  public function Dispatcher($importer, $settings) {
     $this->importer = $importer;
     $this->zip = isset($settings['zip']) ? $settings['zip'] : NULL;
     $this->temp_folder = isset($settings['temp_folder']) ? $settings['temp_folder'] : NULL;
+    $this->done_folder = isset($settings['temp_folder']) ? $settings['done_folder'] : NULL;
+    $this->error_folder = isset($settings['temp_folder']) ? $settings['error_folder'] : NULL;
+    $this->ttl_folder = isset($settings['ttl_folder']) ? $settings['ttl_folder'] : 30;
   }
   
   /**
@@ -32,19 +37,6 @@ abstract class Dispatcher{
    */
   abstract public function extractSources();
   
-  /**
-   * 
-   * Return the singleton dispatcher
-   * @param Importer $importer
-   * @param array $settings
-   * @return Dispatcher
-   */
-  public static function getDispatcher($importer, $settings) {
-    if (is_null(self::$dispatcher)) {
-      self::$dispatcher = new Dispatcher($importer, $settings);
-    }
-    return self::$dispatcher;
-  }
   
   /**
    * 
@@ -61,11 +53,43 @@ abstract class Dispatcher{
    * @return string
    */
   public function getTempFolder(){
-    return $this->temp_folder;
+    return 'importer://'.$this->temp_folder;
   }
   
+  /**
+   * 
+   * Return the path to the temp subdir folder
+   * @return string
+   */
   public function getTempSubdir(){
     return $this->temp_subdir;
+  }
+  
+  /**
+  *
+  * Return the path to the done folder
+  * @return string
+  */
+  public function getDoneFolder(){
+    return 'importer://'.$this->done_folder;
+  }
+  
+  /**
+  *
+  * Return the path to the error folder
+  * @return string
+  */
+  public function getErrorFolder(){
+    return 'importer://'.$this->error_folder;
+  }
+  
+  /**
+  *
+  * Return the value of the TTL folder (in days)
+  * @return string
+  */
+  public function getTTLFolder(){
+    return $this->ttl_folder;
   }
   
   /**
@@ -83,7 +107,8 @@ abstract class Dispatcher{
    * @param string $source
    */
   public function process($source){
-    $handle = fopen($source, "r");
+    
+    $handle = fopen(drupal_realpath($source), "r");
     
     if (!$handle) {
       Logger::logError('dispatcher', 0, 'dispatcher_005', t('The XML file (!xml_file) isn\'t readable', array('!xml_file' => $source)));
@@ -139,7 +164,7 @@ abstract class Dispatcher{
    */
   function processChildren($dom, $object, $object2){
     $importer = $this->getImporter();
-    foreach($dom->childNodes as $child){
+    foreach ($dom->childNodes as $child){
       $name = strtolower($child->nodeName);
       if ($name != '#text'){
         $callback = $importer->getCallback($child);
@@ -161,7 +186,7 @@ abstract class Dispatcher{
   function processList($dom, $object, $object2){
     $list = array();
     $importer = $this->getImporter();
-    foreach($dom->childNodes as $child){
+    foreach ($dom->childNodes as $child){
       $name = strtolower($child->nodeName);
       if ($name != '#text'){
         $callback = $importer->getCallback($child);
@@ -186,8 +211,7 @@ abstract class Dispatcher{
     $error_msg = FALSE;
     // Unzip input file to the temp directory
     $zip = new ZipArchive;
-    
-    $res = $zip->open($file->uri);
+    $res = $zip->open(drupal_realpath($file->uri));
     if ($res === TRUE) {
       $temp_subdir = $this->getTempFolder().'/'.$file->name;
       $this->checkDirectoryRecursive($temp_subdir, 1);
@@ -198,9 +222,9 @@ abstract class Dispatcher{
         $import_files = file_scan_directory($temp_subdir, '/.*\.'.$extension.'$/', array('nomask' => '/(\.\.?|CVS)$/', 'recurse' => FALSE, 'key' => 'name'));
         if (count($import_files) == 0) {
           $zip_error = TRUE;
-          Logger::logError('dispatcher', 0, 'dispatcher_001', t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_001', t('No XML file found in the import: !file. The ZIP must contains only files, no folder.', array('!file' => $file->name)));
         } elseif (count($import_files) > 1) {
-          Logger::logError('dispatcher', 0, 'dispatcher_002', t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->basename)));
+          Logger::logError('dispatcher', 0, 'dispatcher_002', t('There is more than one !extension file found in the import: !file', array('!extention' => $extension, '!file' => $file->name)));
         } else {
           $import_file = reset($import_files);
           $xml_file = $import_file->uri;
@@ -330,8 +354,29 @@ abstract class Dispatcher{
     $form['dispatcher']['temp_folder'] = array(
       '#type' => 'textfield',
       '#title' => t('Temporary directory path'),
-      '#description' => t('This must be an existing and writable path.'),
+      '#description' => t('This must be an existing and writable path. The Stream Wrapper is importer://'),
       '#default_value' => isset($values['temp_folder']) ? $values['temp_folder'] : NULL,
+      '#required' => TRUE,
+    );
+    $form['dispatcher']['done_folder'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Done directory path'),
+      '#description' => t('This must be an existing and writable path. The Stream Wrapper is importer://'),
+      '#default_value' => isset($values['done_folder']) ? $values['done_folder'] : NULL,
+      '#required' => TRUE,
+    );
+    $form['dispatcher']['error_folder'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Error directory path'),
+      '#description' => t('This must be an existing and writable path. The Stream Wrapper is importer://'),
+      '#default_value' => isset($values['error_folder']) ? $values['error_folder'] : NULL,
+      '#required' => TRUE,
+    );
+    $form['dispatcher']['ttl_folder'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Time to live of the files in day'),
+      '#description' => t('The files older than this period will be deleted.'),
+      '#default_value' => isset($values['ttl_folder']) ? $values['ttl_folder'] : 30,
       '#required' => TRUE,
     );
     return $form;
@@ -343,10 +388,21 @@ abstract class Dispatcher{
    * @param Array $form_state
    */
   public function validateSettingsForm(&$form_state){
-    $path = $form_state['values']['temp_folder'];
-    $dir_exist = file_prepare_directory($path);
-    if (!$dir_exist) {
+    
+    $path = 'importer://'.$form_state['values']['temp_folder'];
+    if (!file_prepare_directory($path)) {
       form_set_error('temp_folder', t('Temporary directory path : The path provided is not an existing writable directory.'));
+    }
+    $path = 'importer://'.$form_state['values']['done_folder'];
+    if (!file_prepare_directory($path)) {
+      form_set_error('done_folder', t('Done directory path : The path provided is not an existing writable directory.'));
+    }
+    $path = 'importer://'.$form_state['values']['error_folder'];
+    if (!file_prepare_directory($path)) {
+      form_set_error('error_folder', t('Error directory path : The path provided is not an existing writable directory.'));
+    }
+    if (!is_numeric($form_state['values']['ttl_folder'])){
+      form_set_error('ttl_folder', t('The time to live must be numeric only.'));
     }
   }
   
@@ -360,6 +416,9 @@ abstract class Dispatcher{
     $dispatcher_settings = array(
       'zip' => $values['zip'],
       'temp_folder' => $values['temp_folder'],
+      'done_folder' => $values['done_folder'],
+      'error_folder' => $values['error_folder'],
+      'ttl_folder' => $values['ttl_folder'],
     );
     return $dispatcher_settings;
   }
@@ -372,8 +431,71 @@ abstract class Dispatcher{
   public function initializeForm(){
     return array(
       'zip' => $this->isZip(),
-      'temp_folder' => $this->getTempFolder(),
+      'temp_folder' => $this->temp_folder,
+      'done_folder' => $this->done_folder,
+      'error_folder' => $this->error_folder,
+      'ttl_folder' => $this->ttl_folder,
     );
+  }
+  
+  /**
+   * 
+   * Move source to the done/error folder
+   * @param Array $source
+   */
+  public function moveSource($source){
+    if (Logger::getStatusOfLastLogExecution() == 0){
+      $destination_folder = $this->getErrorFolder();
+    } else {
+      $destination_folder = $this->getDoneFolder();
+    }
+
+    //Move file to done/error repository
+    if ($file = file_move($source['source'], $destination_folder, FILE_EXISTS_RENAME)) {
+      //set the file as permanent
+      $file->status = 1;
+      file_save($file);
+    } else {
+      Logger::logError('importer', 2, 'filemove', t('The file !file can not be moved.', array('!file' => $source['source']->uri)));
+    }
+    
+    //Delete temp folder
+    if ($this->isZip()){
+      $temp_folder = $this->getTempFolder().'/'.$source['source']->name;
+      file_unmanaged_delete_recursive($temp_folder);
+    }
+  }
+  
+  /**
+   * 
+   * Delete the files older than ttl
+   */
+  public function cleanDirectories(){
+   
+    //ttl in second
+    $ttl = $this->getTTLFolder() * 24 * 60 * 60;
+    
+    //Select the files from the error and done folder that are older than the ttl
+    $folder_or = db_or();
+    $folder_or->condition('uri', '%'.$this->getDoneFolder().'%', 'LIKE');
+    $folder_or->condition('uri', '%'.$this->getErrorFolder().'%', 'LIKE');
+    
+    $result = db_select('file_managed', 'f')
+    ->fields('f', array('fid'))
+    ->condition($folder_or)
+    ->condition('timestamp', time() - $ttl, '<')
+    ->execute()
+    ->fetchAssoc();
+    
+    //Delete the files
+    if ($result != NULL){
+      foreach ($result as $fid){
+        $file = file_load($fid);
+        if (!file_delete($file)){
+          //@todo mettre un watchdog? pas de log error car on est en cron
+        }
+      }
+    }
   }
 }
   

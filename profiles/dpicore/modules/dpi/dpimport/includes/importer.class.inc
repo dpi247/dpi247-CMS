@@ -7,6 +7,7 @@ abstract class Importer{
   protected $name;
   protected $dispatcher_class;
   protected $dispatcher_settings;
+  protected $dispatcher;
   
   function Importer($settings, $plugin){
     $this->type = isset($settings->type) ? $settings->type : NULL;
@@ -14,6 +15,13 @@ abstract class Importer{
     $this->name = isset($settings->name) ? $settings->name : NULL;
     $this->dispatcher_class = isset($settings->dispatcher) ? $settings->dispatcher : NULL;
     $this->dispatcher_settings = isset($settings->dispatcher_settings) ? unserialize($settings->dispatcher_settings) : array();
+    
+    if ($this->getDispatcherClass() != NULL){
+      $dispatcher_class = $this->getDispatcherClass();
+      $dispatcher = new $dispatcher_class($this, $this->getDispatcherSettings());
+      $this->dispatcher = $dispatcher;
+    }
+    
   }
   //fonction que la class enfant est obligée d'implémenter
   // abstract protected function getValue();
@@ -31,9 +39,7 @@ abstract class Importer{
     return $this->dispatcher_settings;
   }
   public function getDispatcher(){
-    $dispatcher_class = $this->getDispatcherClass();
-    $dispatcher_function = 'get'.$dispatcher_class;
-    $dispatcher = $dispatcher_class::$dispatcher_function($this, $this->getDispatcherSettings());
+    $dispatcher = $this->dispatcher;
     return $dispatcher;
   }
   /**
