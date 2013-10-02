@@ -7,7 +7,6 @@ module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 
 
-
 /**
  * Implementation of hook_theme()
  */
@@ -246,6 +245,19 @@ function dpidestinations_views_plugins() {
         //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
       ),
     ),
+    'row' => array( 
+      'targetblock_node_row' => array(
+        'title' => t('Target block Row'),
+        'help' => t('(Displays the node according to the layout of his destination.'),
+        'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+        'handler' => 'dpidestinations_plugin_row_node_targetview',
+        'base' => array('node'), // only works with 'node' as base.
+        'uses options' => TRUE,
+        'type' => 'normal',
+        'help topic' => 'style-node',
+        
+      )
+    )
       /*
        'style' => array( //declare the style plugin
   'target_style' => array(
@@ -299,21 +311,40 @@ function dpidestinations_views_pre_render(&$view) {
 }
 
 
-function dpidestinations_dpilog_register(){
-
-  return array(
-    "dpidestinations_process" => array(
-      "actions" => array("fetch", "build", "cache_set", "cache_clear"),
-    ),
-    "dpidestinations_extract" => array(
-      "actions" => array("create", "update", "delete"),
-    ),
-    "dpidestinations_toto" => array(
-      "actions" => array("zaza"),
-    ),
-  );
-}
 function dpidestinations_views_api() {
   return array('api' => 2
     );
+}
+
+function dpidestinations_preprocess_node(& $vars){
+
+  //Remove this suggestion... useless
+  unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
+  
+  //Add suggestion regarding view_mode
+  $vars['theme_hook_suggestions'][]='node__'.$vars['view_mode'];
+  $vars['theme_hook_suggestions'][]='node__'.$vars['node']->type.'__'.$vars['view_mode'];
+  
+  // The 'view' attribute of the node is added in views_preprocess_node()
+  
+ 
+  /*
+   * Still Need to provide some overiding patterns
+  if (!empty($vars['node']->view) && !empty($vars['node']->view->display_handler->plugin_name) && $vars['node']->view->display_handler->plugin_name=="targetview") {
+    dsm(($vars['node']->view));
+    $vars['view'] = $vars['node']->view;
+    
+    $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
+    if (!empty($vars['node']->view->current_display)) {
+      $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
+  
+      // If a node is being rendered in a view, and the view does not have a path,
+      // prevent drupal from accidentally setting the $page variable:
+      if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
+        $vars['page'] = FALSE;
+      }
+    }
+  }
+  */
+  
 }

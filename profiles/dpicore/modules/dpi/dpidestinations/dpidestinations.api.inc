@@ -1,5 +1,16 @@
 <?php
 
+function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
+  $destinations_val = field_get_items('node', $node, 'field_destinations');
+  foreach($destinations_val as $index=>$destination){
+    if($destination['tid']==$tid){
+      return $destination;
+    }
+  }
+  return FALSE;
+  
+}
+
 function dpidestinations_api_get_destinations_vocabulary_vid(){
   return _dpidestinations_variable_get('dpidestinations_destination_vid',2);
 }

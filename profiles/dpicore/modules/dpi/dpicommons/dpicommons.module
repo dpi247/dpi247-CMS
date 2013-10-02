@@ -35,9 +35,9 @@ function dpicommons_menu(){
 }
 
 
-function dpi_log($log_name, $action, $message, $severity=DPILOG_SEVERITY_DEFAULT, $uid=NULL, $id=NULL, $variables=array(), $keep_backtrace=FALSE){
+function dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
   if (module_exists('dpilog')){
-    _dpilog_log($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
+    _dpilog_log($log_name, $action, $message,$variables,$id, $severity, $uid,$keep_backtrace);
   }
 }
 /**

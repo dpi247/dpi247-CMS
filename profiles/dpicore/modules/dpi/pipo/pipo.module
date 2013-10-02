@@ -1,1 +1,50 @@
 <?php
+
+
+function pipo_dpicache_cache_entry_register(){
+  return array(
+    'pipo_render'=>array(
+      'callback'=> 'pipo_get_render',
+      'cache_mechanism'=> 'database',
+      'cache_prefix'=> 'pipo_render',
+      "data_type" => "string",
+      'time_window' => 3,
+      'default_ttl'=> 1
+    ),
+    'pipo_array'=>array(
+      'callback'=> 'pipo_get_array',
+      'cache_mechanism'=> 'memcache',
+      'cache_prefix'=> 'pipo_array',
+      "data_type" => "array",
+      'time_window' => 24,
+      'default_ttl'=> 5
+    )
+    
+    );
+  
+  
+}
+
+function pipo_get_render($param1,$param2,$param3){
+  dsm('hello je passe par pipo_get_render');
+  dsm($param2);
+  return $param1." - ".$param2." - ".$param3."   date de generation: ".date("Y-m-d H:i:s");
+}
+function pipo_get_array($param1,$param2){
+  dsm('hello je passe par pipo_get_array');
+  return  array($param1,$param2,date("Y-m-d H:i:s")); 
+}
+
+
+
+
+function pipo_random_fonction(){
+  $param1=(string) rand();
+  $param2="toto";
+  $param3=(string) rand();
+  
+  //dpicache_get_cache_entry('pipo_render',$param1,$param2,$param3);
+  dpicache_get_cache_entry('pipo_render','fixe1','fixe2','fix3');
+ // dpicache_get_cache_entry('pipo_array',$param1,$param2);
+  
+}

@@ -3,7 +3,7 @@
 
 function theme_dpilog_form_page_configure_granularity_form(&$variables){
 
-  $header = array('Action', 'WArning', 'Developer', 'Fatal', 'Notice', 'Notice', 'Notice', 'Notice', 'Notice');
+  $header = array('Action', 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG');
 
   foreach(element_children($variables["form"]['registrations']) as $registration_name){
     $vertical_tab_id=$registration_name.'-vertical_tab';

@@ -43,8 +43,8 @@ function dpidestinations_schema() {
       ),
       'available_targetlayouts' => array(
         'description' => 'Wich target layout are available for this target.',
-        'type' => 'varchar',
-        'length' => 255,
+        'type' => 'text',
+        'size' => 'big',
         'not null' => FALSE,
       ),
       'available_templateoverrides' => array(
@@ -266,7 +266,6 @@ function dpidestinations_schema() {
    taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
    _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
    _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
-   _dpidestinations_variable_del("dpidestinations_available_targetlayouts");
    _dpidestinations_variable_del("dpidestinations_destination_vid");
    
    
@@ -309,4 +308,6 @@ function dpidestinations_field_schema($field) {
       'unique keys'=>$unique_keys,
   );
 }
+
+
 

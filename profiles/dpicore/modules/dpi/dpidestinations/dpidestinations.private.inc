@@ -137,7 +137,20 @@ function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
   return $handlers[$term_id];
 }
 
-
+function _dpidestinations_get_available_targetlayouts(){
+  $entites_info = entity_get_info('node');
+  $available_targetlayouts=$entites_info['view modes'];
+  unset($available_targetlayouts["rss"]);
+  unset($available_targetlayouts["search_index"]);
+  unset($available_targetlayouts["search_result"]);
+  $return=array();
+  foreach ($available_targetlayouts as $key=>$value){
+    $return[$key]=$value["label"];
+    
+  }
+  return $return;
+  
+}
 function _dpidestinations_get_targets_for_destinationterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
   if (!isset($targets[$term_id])) {
@@ -467,7 +480,9 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   
 }
 function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){
-
+  //@todo: documenter ces arguments dans la doc technique
+  $targetview->targetview_tid=$term_value;
+  $targetview->targetview_target=$target_value;
    
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
@@ -646,11 +661,13 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 
 
 function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($target_id,$target_name){
+  
   if($target_id='' OR $target_name==NULL)
     return array(""=>"");
   $controller=new TargetController('target');
   $target=$controller->load_target_by_name($target_name);
   $wrapper = entity_metadata_wrapper('target', $target);
+  
   return $wrapper->available_targetlayouts->value();
   
 }

@@ -103,6 +103,22 @@ function dpidestinations_entity_info(){
 function dpidestinations_entity_info_alter(&$entity_info){
   //@todo: ne pas coder en dur le nom du vocabulaire
   $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
+  $entity_info['node']['view modes'] += array(
+    'targetblock_small'=>array(
+      'label'=> 'TargetBlock Small',
+      'custom settings'=> TRUE,
+    ),
+    'targetblock_medium'=>array(
+      'label'=> 'TargetBlock Medium',
+      'custom settings'=> TRUE,
+    ),
+    'targetblock_big'=>array(
+      'label'=> 'TargetBlock Big',
+      'custom settings'=> TRUE,
+    ),
+    
+  );
+  
 }
 
 function target_load($tid = NULL, $reset = FALSE){
@@ -216,9 +232,10 @@ function target_form($form, &$form_state, $target) {
     '#suffix' => '</div>',
   );
   
+  
   $form['available_targetlayouts'] = array(
     '#type' => 'checkboxes',
-    '#options' => _dpidestinations_variable_get('dpidestinations_available_targetlayouts'),
+    '#options' => _dpidestinations_get_available_targetlayouts(),
     '#default_value' => unserialize($target->available_targetlayouts),
     '#title' => t('Available target\'s layout'),
   );

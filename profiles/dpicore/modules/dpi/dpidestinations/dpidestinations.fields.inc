@@ -163,10 +163,9 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   
   $target_options=__dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])){
-    $destinations['target']=current($target_options);
+    $destinations['target']=current(array_keys($target_options));
   }
-  
-  $layout_options= __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['target'],$destinations['target']);
+  $layout_options= __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'],$destinations['target']);
   if(!isset($layout_options[$destinations['layout']])){
     $destinations['layout']=current($layout_options);
   }

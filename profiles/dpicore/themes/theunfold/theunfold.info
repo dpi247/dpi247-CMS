@@ -1,0 +1,15 @@
+name = The Unfold
+description = DPI 247 demo theme.
+core = 7.x
+engine = phptemplate
+
+dependencies[] = unfoldcompanion
+
+stylesheets[screen][] = css/screen.css
+stylesheets[screen][] = css/block-slidepic.css
+
+regions[content] = 'content'
+regions[toolbarRight] = ToolbarRight
+regions[toolbarLeft] = ToolbarLeft
+regions[bottom] = Bottom
+regions[top] = Top

@@ -29,14 +29,16 @@ $plugin = array(
  * 
  */
 function dpidestinations_destination_context($arg = NULL, $conf = NULL, $empty = FALSE) {
+  
   // Use term context code.
   module_load_include('inc', 'ctools','plugins/arguments/term');
   $context = ctools_term_context($arg , $conf , $empty);
-  
+
   $task=$conf['task'];
   $handlers = page_manager_load_sorted_handlers($task, '', TRUE);
-  $id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array( $context), array());
   
+  //@todo: we shouldn't hard code the argument_destination_1 name 
+  $id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array("argument_destination_1"=> $context), array());
   
   $context->data->handler=$handlers[$id];
   
@@ -117,7 +119,7 @@ function dpidestinations_destination_breadcrumb($conf, $context) {
   $current->tid = $context->data->tid;
   while ($parents = taxonomy_get_parents($current->tid)) {
     $current = array_shift($parents);
-    $breadcrumb[] = l($current->name, 'taxonomy/term/' . $current->tid);
+    $breadcrumb[] = l($current->name, 'destination/' . $current->tid);
   }
 
   $breadcrumb = array_merge(drupal_get_breadcrumb(), array_reverse($breadcrumb));
