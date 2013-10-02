@@ -17,8 +17,13 @@ function dpimport_page_process_import($importer_name){
       //Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
       $dispatcher = $importer->getDispatcher();
-      dpimport_process_import($importer, $dispatcher);
-      $return = $importer->render();
+      if (lock_acquire('dpimport_'.$importer->getName(), $dispatcher->getLockTimeout())) {
+        dpimport_process_import($importer, $dispatcher);
+        $return = $importer->render();
+        lock_release('dpimport_'.$importer->getName());
+      } else {
+        Logger::logError('importer', 0, 'semaphore', t('This importer is currently working. Please try again later'));
+      }
     } else {
       Logger::logError('importer', 0, 'importer_001', t('There is no plugin for this importer.'));
     }

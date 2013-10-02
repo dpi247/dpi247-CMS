@@ -23,25 +23,63 @@ abstract class Importer{
     }
     
   }
-  //fonction que la class enfant est obligée d'implémenter
-  // abstract protected function getValue();
-  //fonction commune
+  
+  /**
+   * 
+   * Return the type of the importer
+   * @return String $type
+   */
   public function getType(){
     return $this->type;
   }
+  
+  /**
+  *
+  * Return the version of the importer
+  * @return Integer $version
+  */
   public function getVersion(){
     return $this->version;
   }
+  
+  /**
+  *
+  * Return the dispatcher class of the importer
+  * @return String $dispatcher_class
+  */
   public function getDispatcherClass(){
     return $this->dispatcher_class;
   }
+  
+  /**
+  *
+  * Return the dispatcher settings of the importer
+  * @return Array $dispatcher_settings
+  */
   public function getDispatcherSettings(){
     return $this->dispatcher_settings;
   }
+  
+  /**
+  *
+  * Return the dispatcher of the importer
+  * @return Dispatcher $dispatcher
+  */
   public function getDispatcher(){
     $dispatcher = $this->dispatcher;
     return $dispatcher;
   }
+  
+  /**
+  *
+  * Return the name of the importer
+  * @return String $name
+  */
+  public function getName(){
+    $name = $this->name;
+    return $name;
+  }
+  
   /**
    * 
    * Check if the XML is valid

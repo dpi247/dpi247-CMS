@@ -152,4 +152,20 @@ class FolderDispatcher extends Dispatcher{
     return $settings;
   }
   
+  /**
+  *
+  * Return the log timeout in second
+  * @return Interger $lock_timeout
+  */
+  public function getLockTimeout(){
+    $lock_timeout = $this->lock_timeout;
+    $file_name = arg(3);
+    
+    //in case of proceeding a folder, the lock timeout is bigger
+    if ($file_name == NULL){
+      $lock_timeout = 60 * 5; //5minutes
+    }
+    return $lock_timeout;
+  }
+  
 }

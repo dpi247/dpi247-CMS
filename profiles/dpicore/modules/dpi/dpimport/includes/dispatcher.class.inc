@@ -14,6 +14,7 @@ abstract class Dispatcher{
   protected $error_folder;
   protected $ttl_folder;
   protected $importer;
+  protected $lock_timeout;
   /**
    * 
    * Class Constructor
@@ -28,6 +29,7 @@ abstract class Dispatcher{
     $this->done_folder = isset($settings['temp_folder']) ? $settings['done_folder'] : NULL;
     $this->error_folder = isset($settings['temp_folder']) ? $settings['error_folder'] : NULL;
     $this->ttl_folder = isset($settings['ttl_folder']) ? $settings['ttl_folder'] : 30;
+    $this->lock_timeout = 30;
   }
   
   /**
@@ -496,6 +498,15 @@ abstract class Dispatcher{
         }
       }
     }
+  }
+  
+  /**
+   * 
+   * Return the log timeout in second
+   * @return Interger $lock_timeout
+   */
+  public function getLockTimeout(){
+    return $this->lock_timeout;
   }
 }
   
