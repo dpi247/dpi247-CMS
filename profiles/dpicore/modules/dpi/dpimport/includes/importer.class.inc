@@ -234,7 +234,7 @@ abstract class Importer{
   
   /**
    * 
-   * Create a file form uri
+   * Create a file from uri
    * @param String $uri
    * @return Object $file
    */
@@ -264,7 +264,7 @@ abstract class Importer{
     return $file;
   }
   /**
-   * return an saved entity created by a create or load function, a setAttribute function and a process children
+   * return an save entity created by a create or load function, a setAttribute function and a process children
    * @param DOM $dom
    * @param String $entity_type
    */
@@ -275,26 +275,18 @@ abstract class Importer{
     $entity = $this->createOrLoadEntity($dom);
     if (!Logger::error()){
       //Initialize the entity
-      //$entity = $this->$create_or_load_method($dom);
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
       
+      //Set attributes
+      $attributes_method = 'set'.$callback.'Attributes';
+      if (method_exists($this, $attributes_method)){
+        $this->$attributes_method($dom, $entity_wrapper, $entity);
+      }
+      
+      //Process children
+      $dispatcher->processChildren($dom, $entity_wrapper, $entity);
       if (!Logger::error()){
-        //Set attributes
-        $attributes_method = 'set'.$callback.'Attributes';
-        if (method_exists($this, $attributes_method)){
-          $this->$attributes_method($dom, $entity_wrapper, $entity);
-          
-          //Process children
-          $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-          if (!Logger::error()){
-            entity_save($entity_type, $entity);
-          } else {
-            $entity = NULL;
-          }
-        } else {
-          $entity = NULL;
-          Logger::logError('importer', 0, 'unknowmethod_002', t('The method !method doesn\'t exist.', array('!method' => $attributes_method)));
-        }
+        entity_save($entity_type, $entity);
       } else {
         $entity = NULL;
       }

@@ -168,4 +168,26 @@ function dpicontenttypes_library() {
 
   return $libraries;
 }
-
+/**
+ * 
+ * Implementation of the hook_dpicontenttypes_provider
+ * 
+ * @param String $uri
+ * @return Array $provider
+ */
+function dpicontenttypes_dpicontenttypes_provider($uri){
+  $provider = NULL;
+  
+  if (scald_youtube_parse_id($uri, FALSE)){
+    //Youtube
+    $provider = array('name' => 'scald_youtube', 'type' => 'video');
+  } elseif (scald_vimeo_parse_id($uri, FALSE)){
+    //Vimeo
+    $provider = array('name' => 'scald_vimeo', 'type' => 'video');
+  } elseif (scald_dailymotion_parse_id($uri, FALSE)){
+    //Dailymotion
+    $provider = array('name' => 'scald_dailymotion', 'type' => 'video');
+  }
+  
+  return array('dpicontenttypes' => $provider);
+}

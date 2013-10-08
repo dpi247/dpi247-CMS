@@ -620,8 +620,8 @@ class WallyXmlV1 extends Importer{
           } else {
             $order = $i++; 
           }
+          $embeds_list[$order] = $atom;
         }
-        $embeds_list[$order] = $atom;
       }
       //Sort the embeds
       ksort($embeds_list);
@@ -661,6 +661,7 @@ class WallyXmlV1 extends Importer{
     Logger::setCurrentToPreviousExecution();
     return $atom;
   }
+  
   /**
   *
   * Create Atom Image
@@ -713,8 +714,30 @@ class WallyXmlV1 extends Importer{
   */
   public function buildURI($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
-    $file = $this->createFile($value, scald_atom_thumbnail_path('image'));
-    $wrapper->scald_thumbnail->set((array) $file);
+    $parsedurl = parse_url($value);
+    switch ($parsedurl['scheme']){
+      case 'embed':
+        $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
+        $wrapper->scald_thumbnail->set((array) $file);
+        break;
+      case 'http' :
+        $function_parse_id = $entity->provider.'_parse_id';
+        if (function_exists($function_parse_id)){
+          $id = $function_parse_id($value, FALSE);
+          $wrapper->base_id->set($id);
+          $function_info = $entity->provider.'_'.$entity->type;
+          if (function_exists($function_info)){
+            $info = $function_info($id);
+            $file = $this->createFile($info->thumbnail['src'], scald_atom_thumbnail_path($entity->type));
+            $wrapper->scald_thumbnail->set((array) $file);
+          } else {
+            Logger::logWarning('importer', 2, 'thumbnail', t('The thumbnail can not be loaded !uri', array('!uri' => $value)));
+          }
+        } else {
+          Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array('!uri' => $value)));
+        }
+        break;
+    }
   }
   /**
   *
@@ -762,5 +785,54 @@ class WallyXmlV1 extends Importer{
     
     $json = json_encode($base);
     return $json;
+  }
+  
+  /**
+  *
+  * Set Link
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package_wrapper
+  * @param Object $entity
+  */
+  public function buildLink($dom, $package_wrapper, $entity){
+ 
+    Logger::logExecution('linkbojecttype', TRUE);
+    $atom = $this->contructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
+    return $atom;
+  }
+  
+  /**
+  *
+  * Create Atom Image
+  * @param DOM $dom
+  */
+  protected function createOrLoadEntityLink($dom){
+    $atom = NULL;
+    $uri = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
+    $provider = dpicontenttypes_api_getprovider($uri);
+    if ($provider == NULL){
+      Logger::logWarning('importer', 2, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
+    } else {
+      $atom = scald_atom_defaults($provider['type']);
+      $atom->provider = $provider['name'];
+      $atom->type = $provider['type'];
+      $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+      if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+        $atom = $temp_atom;
+      }
+    }
+    return $atom;
+  }
+  
+  /**
+  *
+  * Get attributes of current DOM and set it to the Photoojbecttype
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
+  */
+  protected function setLinkAttributes($dom, $wrapper, $entity){
+    $this->setObjectAttributes($dom, $wrapper, $entity);
   }
 }

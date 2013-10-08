@@ -78,3 +78,37 @@ function dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid = NULL) {
   }
   return $result;
 }
+
+/**
+* Determine if a provider exists for this uri and in this case, return the provider (otherwise set provider to null)
+*
+* @return
+*   An array with the provider informations.
+*   following items:
+*   - "name": The machine name of the provider.
+*   - "type": The type of the provider (photo/video/audio/etc)
+*/
+function hook_dpicontenttypes_provider($uri) {
+  return array(
+    'module_name' => array('name' => 'provider_name', 'type' => 'provider_type'),
+  );
+}
+
+/**
+ * 
+ * Return the provider of the uri
+ * @param String $uri
+ * @return Array $provider
+ */
+function dpicontenttypes_api_getprovider($uri){
+  $uri_provider = NULL;
+  $providers = module_invoke_all('dpicontenttypes_provider', $uri);
+  foreach ($providers as $pro){
+    if ($pro != NULL){
+      $uri_provider = $pro;
+      break;
+    }
+  }
+  
+  return $uri_provider;
+}
