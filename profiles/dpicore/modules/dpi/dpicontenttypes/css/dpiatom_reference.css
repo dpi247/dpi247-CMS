@@ -1,9 +1,10 @@
-/**
- * @file
- *   Provides some basic style to make the drag & drop more usable.
- */
-
-.atom_reference_drop_zone {
-  border: #ccc 2px dashed;
-  padding: 2px;
+.dnd-library-wrapper .editor-item .meta.type-link_list {
+  background-image: url('../icons/link_list.png');
 }
+.scald-menu .add-buttons .add-link_list {
+  background: url('../icons/link_list-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-link_list:hover {
+  background-image: url('../icons/link_list-large-color.png');
+}
+

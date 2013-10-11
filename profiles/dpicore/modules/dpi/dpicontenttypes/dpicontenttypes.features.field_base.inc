@@ -490,13 +490,13 @@ function dpicontenttypes_field_default_field_bases() {
     'type' => 'link_field',
   );
 
-  // Exported field_base: 'field_linklists'
-  $field_bases['field_linklists'] = array(
+  // Exported field_base: 'field_linkslists'
+  $field_bases['field_linkslists'] = array(
     'active' => 1,
     'cardinality' => -1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_linklists',
+    'field_name' => 'field_linkslists',
     'foreign keys' => array(),
     'indexes' => array(
       'sid' => array(

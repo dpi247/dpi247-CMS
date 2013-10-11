@@ -149,14 +149,21 @@ function dpicontenttypes_field_validate($entity_type, $entity, $field, $instance
  * Implements hook_field_presave().
  */
 function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  dsm($items,$items);
+  dsm($instance);
+  if($field['field_name']=='field_embededobjects'){
   foreach($items as $delta=>$item){
 
+    $continue=FALSE;
     //First remove all items that come from the inline
     if(isset($item['inline']) and $item['inline']==1){
+      dsm('je supprime embed');
       unset($items[$delta]);
+      $continue=TRUE;
+      
     }
     //Add extra meta
-    if($atom=scald_atom_load($items[$delta]['sid'])){
+    if($continue===FALSE && $atom=scald_atom_load($items[$delta]['sid'])){
       $items[$delta]['type']=$atom->type;
       $items[$delta]['provider']=$atom->provider;
       $items[$delta]['inline']=0;
@@ -187,6 +194,7 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
   }
   foreach ($add_items as $add_item){
     $items[]=$add_item;
+  }
   }
 }
 /**
@@ -276,10 +284,11 @@ function dpicontenttypes_field_widget_form(&$form, &$form_state, $field, $instan
   $path = drupal_get_path('module', 'dpiatom_reference');
   $element['#attached'] = array('library' => array(array('dpicontenttypes', 'library')));
 
-
-  
   return array(
     'sid' => $element,
+    'provider'=>array('#type'=>'value','#value'=>$items[$delta]['provider']),
+    'type'=>array('#type'=>'value','#value'=>$items[$delta]['type']),
+    'inline'=>array('#type'=>'value','#value'=>$items[$delta]['inline']),
   );
   
 }

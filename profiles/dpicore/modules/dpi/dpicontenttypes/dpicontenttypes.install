@@ -170,7 +170,7 @@ function dpicontenttypes_install(){
   $dpipropertiestype = new DPIPropertiesTypeEntity($values);
   dpiproperties_type_save($dpipropertiestype);
   
-  scald_add_type('link_list', 'Link List', 'Link List');
+  scald_add_type('links_list', 'Links List', 'Links List');
   
   
 }
@@ -180,7 +180,7 @@ function dpicontenttypes_install(){
  */
 function dpicontenttypes_uninstall() {
   drupal_load('module', 'scald');
-  scald_remove_type('link_list');
+  scald_remove_type('links_list');
   drupal_uninstall_schema('dpicontenttypes');
 }
 

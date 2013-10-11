@@ -97,6 +97,62 @@ function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
 }
 
+
+function dpicontenttypes_theme(){
+  return array(
+    'links_lists'=>array(
+      'variables'=>array(
+        'atom',
+        ),
+      'template' => 'links-list'
+      ),
+    );
+}
+
+/**
+ * Implements hook_scald_atom_providers.
+ * Tell Scald that we'll be providing some twitter atoms.
+ */
+function dpicontenttypes_scald_atom_providers() {
+  return array(
+    'links_list' => 'Links lists'
+  );
+}
+function dpicontenttypes_scald_add_form(&$form, &$form_state) {
+ return array();
+}
+function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
+  dsm($atom);
+}
+/**
+ * Implements hook_scald_prerender.
+ */
+function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
+  dsm($atom,$mode);
+  dsm($options,$options);
+  
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      dsm('coou');
+      // we are not in the library display view, so we need more than the title and thumbnail
+      
+      // Tell scald core what he should display
+      $view_mode="full";
+      entity_view('atom', $atom, $context);
+      
+      dsm($atom);
+      $content=entity_view('atom', $atom, $context);
+      dsm($content,content);
+      $atom->rendered->player = theme('links_lists', array('path' => $path) + $attributes);
+      
+      dsm($content,content);
+      
+      //Don't show title, not needed
+      $atom->rendered->title = '';
+    }
+  }
+}
+
 /**
  * 
  * Implementation of hook_scald_atom_insert

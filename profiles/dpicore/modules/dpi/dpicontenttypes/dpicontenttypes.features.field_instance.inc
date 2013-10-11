@@ -631,8 +631,8 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-package-field_linklists'
-  $field_instances['node-package-field_linklists'] = array(
+  // Exported field_instance: 'node-package-field_linkslists'
+  $field_instances['node-package-field_linkslists'] = array(
     'bundle' => 'package',
     'default_value' => NULL,
     'deleted' => 0,
@@ -653,14 +653,14 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_linklists',
+    'field_name' => 'field_linkslists',
     'label' => 'Links lists',
     'required' => 0,
     'settings' => array(
       'field_to_analyse' => 'field_textbody',
       'referencable_types' => array(
         'image' => 0,
-        'link_list' => 'link_list',
+        'links_list' => 'links_list',
         'video' => 0,
       ),
       'user_register_form' => FALSE,
@@ -1100,7 +1100,7 @@ function dpicontenttypes_field_default_field_instances() {
     'label' => 'Byline',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
+      'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
@@ -1451,9 +1451,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_concepts'
-  $field_instances['scald_atom-link_list-field_concepts'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_concepts'
+  $field_instances['scald_atom-links_list-field_concepts'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1485,9 +1485,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_copyright'
-  $field_instances['scald_atom-link_list-field_copyright'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_copyright'
+  $field_instances['scald_atom-links_list-field_copyright'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1519,9 +1519,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_displaytitle'
-  $field_instances['scald_atom-link_list-field_displaytitle'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_displaytitle'
+  $field_instances['scald_atom-links_list-field_displaytitle'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1553,9 +1553,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_entities'
-  $field_instances['scald_atom-link_list-field_entities'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_entities'
+  $field_instances['scald_atom-links_list-field_entities'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1587,9 +1587,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_freetags'
-  $field_instances['scald_atom-link_list-field_freetags'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_freetags'
+  $field_instances['scald_atom-links_list-field_freetags'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1621,9 +1621,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_iptc'
-  $field_instances['scald_atom-link_list-field_iptc'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_iptc'
+  $field_instances['scald_atom-links_list-field_iptc'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1655,9 +1655,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_linkitems'
-  $field_instances['scald_atom-link_list-field_linkitems'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_linkitems'
+  $field_instances['scald_atom-links_list-field_linkitems'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -1703,9 +1703,9 @@ function dpicontenttypes_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'scald_atom-link_list-field_persons'
-  $field_instances['scald_atom-link_list-field_persons'] = array(
-    'bundle' => 'link_list',
+  // Exported field_instance: 'scald_atom-links_list-field_persons'
+  $field_instances['scald_atom-links_list-field_persons'] = array(
+    'bundle' => 'links_list',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
