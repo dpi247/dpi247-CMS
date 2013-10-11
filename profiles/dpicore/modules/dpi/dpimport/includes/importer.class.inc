@@ -7,6 +7,7 @@ abstract class Importer{
   protected $name;
   protected $dispatcher_class;
   protected $dispatcher_settings;
+  protected $dispatcher;
   
   function Importer($settings, $plugin){
     $this->type = isset($settings->type) ? $settings->type : NULL;
@@ -14,28 +15,71 @@ abstract class Importer{
     $this->name = isset($settings->name) ? $settings->name : NULL;
     $this->dispatcher_class = isset($settings->dispatcher) ? $settings->dispatcher : NULL;
     $this->dispatcher_settings = isset($settings->dispatcher_settings) ? unserialize($settings->dispatcher_settings) : array();
+    
+    if ($this->getDispatcherClass() != NULL){
+      $dispatcher_class = $this->getDispatcherClass();
+      $dispatcher = new $dispatcher_class($this, $this->getDispatcherSettings());
+      $this->dispatcher = $dispatcher;
+    }
+    
   }
-  //fonction que la class enfant est obligée d'implémenter
-  // abstract protected function getValue();
-  //fonction commune
+  
+  /**
+   * 
+   * Return the type of the importer
+   * @return String $type
+   */
   public function getType(){
     return $this->type;
   }
+  
+  /**
+  *
+  * Return the version of the importer
+  * @return Integer $version
+  */
   public function getVersion(){
     return $this->version;
   }
+  
+  /**
+  *
+  * Return the dispatcher class of the importer
+  * @return String $dispatcher_class
+  */
   public function getDispatcherClass(){
     return $this->dispatcher_class;
   }
+  
+  /**
+  *
+  * Return the dispatcher settings of the importer
+  * @return Array $dispatcher_settings
+  */
   public function getDispatcherSettings(){
     return $this->dispatcher_settings;
   }
+  
+  /**
+  *
+  * Return the dispatcher of the importer
+  * @return Dispatcher $dispatcher
+  */
   public function getDispatcher(){
-    $dispatcher_class = $this->getDispatcherClass();
-    $dispatcher_function = 'get'.$dispatcher_class;
-    $dispatcher = $dispatcher_class::$dispatcher_function($this, $this->getDispatcherSettings());
+    $dispatcher = $this->dispatcher;
     return $dispatcher;
   }
+  
+  /**
+  *
+  * Return the name of the importer
+  * @return String $name
+  */
+  public function getName(){
+    $name = $this->name;
+    return $name;
+  }
+  
   /**
    * 
    * Check if the XML is valid
@@ -190,7 +234,7 @@ abstract class Importer{
   
   /**
    * 
-   * Create a file form uri
+   * Create a file from uri
    * @param String $uri
    * @return Object $file
    */
@@ -220,7 +264,7 @@ abstract class Importer{
     return $file;
   }
   /**
-   * return an saved entity created by a create or load function, a setAttribute function and a process children
+   * return an save entity created by a create or load function, a setAttribute function and a process children
    * @param DOM $dom
    * @param String $entity_type
    */
@@ -231,26 +275,18 @@ abstract class Importer{
     $entity = $this->createOrLoadEntity($dom);
     if (!Logger::error()){
       //Initialize the entity
-      //$entity = $this->$create_or_load_method($dom);
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
       
+      //Set attributes
+      $attributes_method = 'set'.$callback.'Attributes';
+      if (method_exists($this, $attributes_method)){
+        $this->$attributes_method($dom, $entity_wrapper, $entity);
+      }
+      
+      //Process children
+      $dispatcher->processChildren($dom, $entity_wrapper, $entity);
       if (!Logger::error()){
-        //Set attributes
-        $attributes_method = 'set'.$callback.'Attributes';
-        if (method_exists($this, $attributes_method)){
-          $this->$attributes_method($dom, $entity_wrapper, $entity);
-          
-          //Process children
-          $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-          if (!Logger::error()){
-            entity_save($entity_type, $entity);
-          } else {
-            $entity = NULL;
-          }
-        } else {
-          $entity = NULL;
-          Logger::logError('importer', 0, 'unknowmethod_002', t('The method !method doesn\'t exist.', array('!method' => $attributes_method)));
-        }
+        entity_save($entity_type, $entity);
       } else {
         $entity = NULL;
       }

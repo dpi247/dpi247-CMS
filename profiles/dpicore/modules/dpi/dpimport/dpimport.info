@@ -3,6 +3,7 @@ description = Import.
 package = DPI
 core = 7.x
 
+files[] = includes/importerstreamwrapper.class.inc
 files[] = includes/dispatcher.class.inc
 files[] = includes/importer.class.inc
 files[] = includes/logger.class.inc

@@ -81,8 +81,24 @@ class Logger{
    * Return execution
    */
   public static function getLogExecution(){
+    if (self::$execution == NULL){
+      self::initializeExecution();
+    }
     return self::$execution;
   }
+  
+  public static function getStatusOfLastLogExecution(){
+    $status = 1;
+    if (self::error()){
+      $logexecution = self::getLogExecution();
+      $last_element = end($logexecution->children);
+      
+      $status = $last_element->globalStatus();
+      
+    }
+    return $status;
+  }
+  
   /**
    * 
    * Return the array of errors
@@ -98,7 +114,7 @@ class Logger{
   public static function error(){
     $error_exists = FALSE;
     foreach (self::$error as $loggerlog){
-      if ($loggerlog->getStatus == 0){
+      if ($loggerlog->getStatus() == 0){
         $error_exists = TRUE;
         break;
       }
@@ -115,7 +131,7 @@ class Logger{
       $base = new LoggerLog('dpimport', 0, 'dpimport_error', t('There was an error during the import'));
     } else {
       //If no error appears during the import, the global status is set to 1
-      $base = new LoggerLog('dpimport', 1, 'dpimport_success', t('The import was proceded with success'));
+      $base = new LoggerLog('dpimport', 1, 'dpimport_success', t('The import was proceeded with success'));
     }
     //The execution log is attached to the base log.
     $execution = Logger::getLogExecution();
@@ -183,5 +199,33 @@ class LoggerLog{
    */
   public function getStatus(){
     return $this->status;
+  }
+  
+  /**
+   * 
+   * Return global status of a LoggerLog
+   * @return Integer $status
+   */
+  public function globalStatus(){
+    if ($this->status == 0){
+      $status = 0;
+    } else {
+      $status = $this->getChildrenStatus();
+    }
+    return $status;
+  }
+  
+  public function getChildrenStatus(){
+    $status = 1;
+    foreach ($this->children as $logger){
+      if ($logger->status == 0){
+        $status = 0;
+      } else {
+        if ($logger->children != NULL){
+          $status = $logger->getChildrenStatus();
+        }
+      }
+    }
+    return $status;
   }
 }

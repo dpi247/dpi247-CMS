@@ -11,13 +11,10 @@ class WallyXmlV1 extends Importer{
     $package = $this->constructPackage($dom);
     if (!Logger::error()){
       $package->save();
-      //save node
-      
     }
     
     //Set the CurrentLog to the previous one to stop children growing.
     Logger::setCurrentToPreviousExecution();
-    
     
     //Indicates that the dispatcher must not process the children
     return FALSE;
@@ -290,7 +287,79 @@ class WallyXmlV1 extends Importer{
    * @param Object $entity
    */
   public function buildDestinations($dom, $wrapper, $entity){
-    //@todo
+    //@todo s'occuper des destinations multiples
+    //@todo terminer avec le wrapper
+    $term = array();
+    $result = array();
+    $vid = dpi_variable_get('dpidestinations_destination_vid', NULL);
+    
+    if ($vid) {
+    /*  
+      $temp_results = $temp_result = array();
+
+      //$hierarchies = wallyctools_get_hierarchies();
+      foreach ($dom->getElementsByTagName('Destination') as $destination) {
+        dsm($destination->nodeName);
+        $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
+        $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
+        
+        if ($terms) {
+          if ($destination->hasAttribute("Position")) {
+            $temp_result['target'] = $destination->getAttributeNode("Position")->value;
+            $temp_result['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
+            $temp_result['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
+          } else {
+            $temp_result['target'] = 'none';
+            $temp_result['layout'] = 'none';
+            $temp_result['rank'] = 0;
+          }
+    
+          // As we check the taxonomy full path and specify a vocabulary
+          // we can only have one result.
+          $temp_result['tid'] = $terms[0]->tid;
+          $temp_results[] = $temp_result;
+          
+        } else {
+          drupal_set_message(t('Path "@path" not found in vocabulary (@vid). Destination rejected.', array('@path' => $path, '@vid' => $vid)), 'notice');
+        }
+      }
+    /*
+      $check_double = array();
+      $i = 0;
+      foreach ($temp_results as $temp_result) {
+        if (!in_array($temp_result['tid'].':'.$temp_result['target'], $check_double)) {
+          $check_double[] = $temp_result['tid'].':'.$temp_result['target'];
+    
+          if ($actual_dest = _wallyimportpackageV18_find_destination($node->field_destinations, $temp_result)) {
+            $temp_result['rank'] = ($temp_result['rank'] == 'DNC') ? 'DNC'.$actual_dest['rank'] : $temp_result['rank'];
+            $temp_result['time_rank'] = $actual_dest['time_rank'];
+          }
+    
+          if ($temp_result['rank'] == 'DNC') {
+            $temp_result['rank'] = 0;
+          }
+    
+          $result[$i] = $temp_result;
+          $i++;
+        }
+      }
+    
+      // If no destinations at all > Package can't be created.
+      if (count($result)) {
+        $node->field_destinations = $result;
+      } else {
+        // @TODO: FATAL ERROR - PACKAGE DONE - NEED CHECK
+        $node->rejected = '';
+        $error_msg = t('No destination AT ALL for current package. Package rejected.');
+        drupal_set_message($error_msg,'error');
+        $log['error'] = TRUE;
+        $log['error_msg'] = $error_msg;
+        return '';
+      }*/
+    } else {
+      drupal_set_message(t('Destination Path vocabulary not set. See settings.'),'error');
+      return '';
+    }
   }
   
   /**
@@ -551,8 +620,8 @@ class WallyXmlV1 extends Importer{
           } else {
             $order = $i++; 
           }
+          $embeds_list[$order] = $atom;
         }
-        $embeds_list[$order] = $atom;
       }
       //Sort the embeds
       ksort($embeds_list);
@@ -592,6 +661,7 @@ class WallyXmlV1 extends Importer{
     Logger::setCurrentToPreviousExecution();
     return $atom;
   }
+  
   /**
   *
   * Create Atom Image
@@ -644,8 +714,30 @@ class WallyXmlV1 extends Importer{
   */
   public function buildURI($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
-    $file = $this->createFile($value, scald_atom_thumbnail_path('image'));
-    $wrapper->scald_thumbnail->set((array) $file);
+    $parsedurl = parse_url($value);
+    switch ($parsedurl['scheme']){
+      case 'embed':
+        $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
+        $wrapper->scald_thumbnail->set((array) $file);
+        break;
+      case 'http' :
+        $function_parse_id = $entity->provider.'_parse_id';
+        if (function_exists($function_parse_id)){
+          $id = $function_parse_id($value, FALSE);
+          $wrapper->base_id->set($id);
+          $function_info = $entity->provider.'_'.$entity->type;
+          if (function_exists($function_info)){
+            $info = $function_info($id);
+            $file = $this->createFile($info->thumbnail['src'], scald_atom_thumbnail_path($entity->type));
+            $wrapper->scald_thumbnail->set((array) $file);
+          } else {
+            Logger::logWarning('importer', 2, 'thumbnail', t('The thumbnail can not be loaded !uri', array('!uri' => $value)));
+          }
+        } else {
+          Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array('!uri' => $value)));
+        }
+        break;
+    }
   }
   /**
   *
@@ -671,12 +763,12 @@ class WallyXmlV1 extends Importer{
   public function buildCrops($dom, $wrapper, $entity){
     //@todo
   }
+  
   /**
    * 
    * Return a render in json
    */
   public function render(){
-
     //Set header to json
     drupal_add_http_header('Content-Type', 'application/json');
     
@@ -693,5 +785,54 @@ class WallyXmlV1 extends Importer{
     
     $json = json_encode($base);
     return $json;
+  }
+  
+  /**
+  *
+  * Set Link
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package_wrapper
+  * @param Object $entity
+  */
+  public function buildLink($dom, $package_wrapper, $entity){
+ 
+    Logger::logExecution('linkbojecttype', TRUE);
+    $atom = $this->contructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
+    return $atom;
+  }
+  
+  /**
+  *
+  * Create Atom Image
+  * @param DOM $dom
+  */
+  protected function createOrLoadEntityLink($dom){
+    $atom = NULL;
+    $uri = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
+    $provider = dpicontenttypes_api_getprovider($uri);
+    if ($provider == NULL){
+      Logger::logWarning('importer', 2, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
+    } else {
+      $atom = scald_atom_defaults($provider['type']);
+      $atom->provider = $provider['name'];
+      $atom->type = $provider['type'];
+      $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+      if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+        $atom = $temp_atom;
+      }
+    }
+    return $atom;
+  }
+  
+  /**
+  *
+  * Get attributes of current DOM and set it to the Photoojbecttype
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
+  */
+  protected function setLinkAttributes($dom, $wrapper, $entity){
+    $this->setObjectAttributes($dom, $wrapper, $entity);
   }
 }

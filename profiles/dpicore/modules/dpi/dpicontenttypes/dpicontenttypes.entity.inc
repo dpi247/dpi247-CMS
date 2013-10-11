@@ -134,16 +134,43 @@ function dpicontenttypes_entity_property_info_alter(&$info){
   $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
   //Set to the atoms image
-  $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
-  $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
-  $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
-  $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
+  if (isset($info['scald_atom']['bundles']['image'])){
+    $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
+  }
   
+  //Set to the atoms video
+  if (isset($info['scald_atom']['bundles']['video'])){
+    $info['scald_atom']['bundles']['video']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['video']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['video']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['video']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms audio
+  if (isset($info['scald_atom']['bundles']['audio'])){
+    $info['scald_atom']['bundles']['audio']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['audio']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms flash
+  if (isset($info['scald_atom']['bundles']['flash'])){
+    $info['scald_atom']['bundles']['flash']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['flash']['properties']['field_source'] = $source;
+  }
   //Set to the atoms linklist
-  $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
-  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
-  $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference_2'] = $external_reference_2;
-  $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
+  if (isset($info['scald_atom']['bundles']['link_list'])){
+    $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
+  }
 }
 
 /**

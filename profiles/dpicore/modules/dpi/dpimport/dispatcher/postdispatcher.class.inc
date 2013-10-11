@@ -1,8 +1,6 @@
 <?php 
 
 class PostDispatcher extends Dispatcher{
-  private static $postdispatcher = NULL;
-  
   
   /**
   *
@@ -10,23 +8,9 @@ class PostDispatcher extends Dispatcher{
   * @param Importer $importer
   * @param Array $settings
   */
-  protected function PostDispatcher($importer, $settings){
+  public function PostDispatcher($importer, $settings){
     parent::Dispatcher($importer, $settings);
     
-  }
-  
-  /**
-   * Return PostDispatcher Singloton
-   *
-   * @param Importer $importer
-   * @param Array $settings
-   * @return PostDispatcher
-   */
-  public static function getPostDispatcher($importer, $settings) {
-    if (is_null(self::$postdispatcher)) {
-      self::$postdispatcher = new PostDispatcher($importer, $settings);
-    }
-    return self::$postdispatcher;
   }
   
   /**
@@ -48,14 +32,12 @@ class PostDispatcher extends Dispatcher{
   protected function getFormFiles(){
     $files = array();
     foreach ($_FILES as $key => $input) {
+      $file = $this->createFileObject($input['name'], $input['tmp_name']);
       if ($this->isZip()){
-        $file = $this->createFileObject($input['name'], $input['tmp_name']);
         $file_path = $this->getFilePathFromZip($file, 'xml');
-        if ($file_path != NULL){
-          $files[] = $file_path;
-        }
+        $files[] = array('temp_source' => $file_path, 'source' => $file);
       } else {
-        $files[] = $input['tmp_name'];
+        $files[] = array('temp_source' => $input['tmp_name'], 'source' => $file);
       }
     }
     return $files;
@@ -75,25 +57,34 @@ class PostDispatcher extends Dispatcher{
     //Write the file in the temp folder
     $input = fopen('php://input', 'r');
     $handle = fopen($temp_file_path, 'w');
-    while (!feof($input)) {
-      $fwrite = fwrite($handle, fread($input, 1024));
-      if (!$fwrite)
-      break;
-    }
-    fclose($input);
-    fclose($handle);
     
-    //Add the file path to the array of files 
-    if ($this->isZip()){
+    //if input is not empty we write it into handle and add the file
+    if (fwrite($handle, fread($input, 1024))){
+      while (!feof($input)) {
+        $fwrite = fwrite($handle, fread($input, 1024));
+        if (!$fwrite)
+        break;
+      }
+      
+      fclose($input);
+      fclose($handle);
+      
+      //Add the file path to the array of files 
       $file = $this->createFileObject($temp_file_name, $temp_file_path);
-      $file_path = $this->getFilePathFromZip($file, 'xml');
-      if ($file_path != NULL){
-        $files[] = $file_path;
+      if ($this->isZip()){
+        $file_path = $this->getFilePathFromZip($file, 'xml');
+        $files[] = array('temp_source' => $file_path, 'source' => $file);
+      } else {
+        $files[] = array('temp_source' => $temp_file_path, 'source' => $file);
       }
     } else {
-      $files[] = $temp_file_path;
+      //if input is empty, we delete the temp_file_path
+      fclose($input);
+      fclose($handle);
+      file_unmanaged_delete_recursive($temp_file_path);
     }
-        
+    
+    
     return $files;
   }
 }

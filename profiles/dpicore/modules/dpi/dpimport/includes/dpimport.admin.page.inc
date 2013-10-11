@@ -137,10 +137,9 @@ function dpimport_form_importer_save($form, $form_state){
   
   //dispatcher
   $dispatcher_class = $importer_values['dispatcher'];
-  $dispatcher_function = 'get'.$dispatcher_class;
   $importer = NULL;
   $settings = array();
-  $dispatcher = $dispatcher_class::$dispatcher_function($importer, $settings);
+  $dispatcher = new $dispatcher_class($importer, $settings);
   
   //importer
   $importer_plugin = ctools_get_plugins('dpimport', 'importer', $default_values['type']);
@@ -406,10 +405,9 @@ function dpimport_form_importer_stageimporter_form_validate($form, &$form_state)
 function dpimport_form_importer_stagedispatcher_form(&$form, &$form_state){
   $values = isset($form_state['multistep_values']['dispatcher']) ? $form_state['multistep_values']['dispatcher'] : array();
   $dispatcher_class = $form_state['multistep_values']['importer']['dispatcher'];
-  $dispatcher_function = 'get'.$dispatcher_class;
   $importer = NULL;
   $settings = array();
-  $dispatcher = $dispatcher_class::$dispatcher_function($importer, $settings);
+  $dispatcher = new $dispatcher_class($importer, $settings);
   //Get the specific form elements for this dispatcher
   $form = $dispatcher->getSettingsForm($form_state, $values);
 }
@@ -421,10 +419,9 @@ function dpimport_form_importer_stagedispatcher_form(&$form, &$form_state){
  */
 function dpimport_form_importer_stagedispatcher_form_validate($form, &$form_state){
   $dispatcher_class = $form_state['multistep_values']['importer']['dispatcher'];
-  $dispatcher_function = 'get'.$dispatcher_class;
   $importer = NULL;
   $settings = array();
-  $dispatcher = $dispatcher_class::$dispatcher_function($importer, $settings);
+  $dispatcher = new $dispatcher_class($importer, $settings);
   //Get the validation for the specific form elements of this dispatcher
   $dispatcher->validateSettingsForm($form_state);
 }
