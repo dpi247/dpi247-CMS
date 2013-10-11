@@ -236,7 +236,7 @@ function mee_field_attach_view_alter(&$output, $context) {
     foreach ($fields as $name => $field) {
       if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
         foreach (element_children($output[$name]) as $key) {
-          $output[$name][$key]['#markup'] = 'rrrrr'.scald_sas_to_rendered($output[$name][$key]['#markup'], $field['settings']['context']);
+          $output[$name][$key]['#markup'] = scald_sas_to_rendered($output[$name][$key]['#markup'], $field['settings']['context']);
         }
       }
     }
@@ -303,7 +303,9 @@ function mee_field_widget_form_alter(&$element, &$form_state, $context) {
     if (!is_object($atom)) {
       continue;
     }
-    $title = $atom->title;
+
+    // Render the atom to get sanitized values.
+    $title = scald_render($atom, 'title');
 
     $element['mee']['resource_manager'][$sid] = array(
       'title' => array(

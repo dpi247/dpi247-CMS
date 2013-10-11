@@ -135,6 +135,13 @@ function scald_twitter_scald_fetch($atom, $type) {
 /**
  * Implements hook_scald_prerender().
  */
+
+
+//  https://drupal.org/node/1925698
+//To make your own player, simply implement hook_scald_player, 
+//configure the context to use your player, then in hook_scald_prerender($mode = 'player') //
+//prepare your markup with the transcoded file at $atom->file_transcoded.
+
 function scald_twitter_scald_prerender($atom, $context, $options, $mode) {
   if ($mode == 'atom') {
     if ($context != 'sdl_library_item') {

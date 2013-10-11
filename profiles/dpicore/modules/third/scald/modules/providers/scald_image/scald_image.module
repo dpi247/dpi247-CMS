@@ -163,6 +163,8 @@ function scald_image_scald_prerender($atom, $context, $options, $mode) {
   }
 
   if ($mode == 'transcoder') {
+    dsm($atom,render_transcoder);
+    
     // Scald Image can only do 1:1 transcoding. For Picture integration, it is
     // done in the Atom mode to avoid duplicate code from Picture module.
     if (empty($style_name)) {
@@ -177,17 +179,20 @@ function scald_image_scald_prerender($atom, $context, $options, $mode) {
     }
   }
   elseif ($mode == 'player') {
+    dsm($atom,render_player);
+    
     $settings = $config->player[$atom->type]['settings'];
     $classes = array_merge(array('scald-atom', 'scald-atom-image'), explode(' ', check_plain($settings['classes'])));
     $caption = token_replace($settings['caption'], array('atom' => $atom));
     $atom->rendered->player = '
       <figure class="' . implode(' ', $classes) . '">
         ' . $atom->rendered->player . '
-        <figcaption>' . $caption . '</figcaption>
+        <figcaption>' . filter_xss_admin($caption) . '</figcaption>
       </figure>
     ';
   }
   elseif ($mode == 'atom') {
+    dsm($atom,render_atom);
     $attributes = array();
     $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
     foreach (array('alt', 'title', 'width', 'height') as $attribute_name) {
