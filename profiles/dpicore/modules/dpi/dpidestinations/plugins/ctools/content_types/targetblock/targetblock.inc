@@ -286,19 +286,25 @@ function _dpidestinations_targetblock_content_type_helper_get_content($subtype, 
 
 
 function _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+
   return array(
     array(
-      'title'=>t('Reorder TargetView'),
-      'href'=> "admin/targetview_reorder/%term/%targetblock",
+      'title'=>t('Reorder TargetBlock'),
+      'href'=> "admin/targetview_reorder/".$args[0]."/".$subtype,
       'query' => drupal_get_destination(),
       
       ),
     array(
-      'title' => t('Configure target block'),
+      'title' => t('Refresh Cache'),
       'href' => "admin/structure/block/manage/configure",
       'query' => drupal_get_destination(),
     ),
-   
+    array(
+      'title' => t('Configure TargetBlock'),
+      'href' => "admin/structure/block/manage/configure",
+      'query' => drupal_get_destination(),
+    ),
+    
   );
 }
 

@@ -120,6 +120,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   // Get the default destinations used to build the widget form elements, looking
   // first in the form state, then in the stored value for the field, and then
   // in the default values of the instance.
+  
   $destinations = array();
   if (!empty($form_state['destinationsfield'][$element_key])) {
     // Use the value from the form_state if available.
@@ -201,7 +202,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         '#type' => 'select',
         '#options' => $tids_options,
         '#default_value'=>$destinations['tid'],
-        '#title' => t("Destination's term"),
+        '#title' => t("Term"),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The destination page where the node will appear'),
         '#limit_validation_errors'=>array(),
@@ -220,7 +221,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           '#type' => 'select',
           '#options' => $target_options,
           '#default_value'=> $destinations['target'],
-          '#title' => t("Destination's target"),
+          '#title' => t("Target"),
           '#attributes' => array('class' => array('field-destinations-widget-tid')),
           '#description' => t('Define the target where the node will appear in the page'),
           '#limit_validation_errors'=>array(),
@@ -231,28 +232,29 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
             'method'=>'replace',
           ),
         );
-        $widget['layout'] = array(
-          '#type' => 'select',
-          '#options' =>$layout_options,
-          '#default_value'=> $destinations['layout'],
-          '#title' => t("Destination's layout"),
-          '#attributes' => array('class' => array('field-destinations-widget-tid')),
-          '#description' => t('The way your article will be render in the target'),
-          '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-         '#limit_validation_errors'=>array(),
-          
-         
-        );
+       
         $widget['rank'] = array(
           '#type' => 'select',
           '#options' =>$rank_options,
          // '#default_value'=> $destinations['rank'],
-          '#title' => t("Destination's rank"),
+          '#title' => t("Rank"),
           '#attributes' => array('class' => array('field-destinations-widget-tid')),
           '#description' => t('The position of the article in the target'),
           '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
           '#limit_validation_errors'=>array(),
           
+        );
+        $widget['layout'] = array(
+          '#type' => 'select',
+          '#options' =>$layout_options,
+          '#default_value'=> $destinations['layout'],
+          '#title' => t("Layout"),
+          '#attributes' => array('class' => array('field-destinations-widget-tid')),
+          '#description' => t('The way your article will be render in the target'),
+          '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
+          '#limit_validation_errors'=>array(),
+        
+           
         );
         if($is_update){
           $widget['rank']['#default_value']="DNC";

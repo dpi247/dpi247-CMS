@@ -18,7 +18,6 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
   );
-  
   $theme['dpidestinations_page_targetview_reorder_form'] = array(
     'template' => 'dpidestinations-targetview-page-reorder-form',
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
@@ -42,7 +41,7 @@ function dpidestinations_menu(){
   );
   
   $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
-    'page callback' => 'dpidestinations_page_targetview_page_reorder',
+    'page callback' => 'dpidestinations_page_targetview_reorder',
     'page arguments' => array(2,3),
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,

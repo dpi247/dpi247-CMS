@@ -28,7 +28,6 @@ function dpidestinations_api_get_all_destinations_terms_hierachical_struct($vid,
 }
 function dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update){
   $terms=dpidestinations_api_get_all_destinations_terms_flat_struct();
-  
   if($is_update)
     $options=array(''=>'Remove this destination');
   else

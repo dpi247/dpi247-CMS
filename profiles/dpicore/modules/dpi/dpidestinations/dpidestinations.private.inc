@@ -44,7 +44,6 @@ function _dpidestinations_variable_del( $name){
 function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
   
   $vid = dpidestinations_api_get_destinations_vocabulary_vid();
-  
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
   //->addTag('translatable')
@@ -464,7 +463,6 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $target_wrapper = entity_metadata_wrapper('target', $target);
   
   //We use the targetview_reorder view to ensure we got the proper information.
-  
   $targetview=$target_wrapper->targetview->value();
   
   
@@ -486,9 +484,7 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
    
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
-
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
-
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 
 }
