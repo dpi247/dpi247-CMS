@@ -33,3 +33,5 @@ function _dpicontenttypes_entitydeletedpiproperties($object, $entity, $eid){
   $condition = db_and()->condition('id', $eid)->condition('entity', $entity);
   db_delete('dpicontenttypes_properties')->condition($condition)->execute();
 }
+
+

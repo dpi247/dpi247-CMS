@@ -100,15 +100,21 @@ function dpicontenttypes_node_delete($node) {
 
 function dpicontenttypes_theme(){
   return array(
-    'links_lists'=>array(
+    'atom_links_lists'=>array(
       'variables'=>array(
-        'atom',
+        'content'=>NULL,
         ),
-      'template' => 'links-list'
-      ),
+      'template' => 'atom-links-list',
+      'path' => drupal_get_path('module', 'dpicontenttypes') . '/templates',
+      'file' => 'theme.inc',
+    ),
     );
 }
 
+
+function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
+  
+}
 /**
  * Implements hook_scald_atom_providers.
  * Tell Scald that we'll be providing some twitter atoms.
@@ -128,24 +134,25 @@ function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
  * Implements hook_scald_prerender.
  */
 function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
-  dsm($atom,$mode);
-  dsm($options,$options);
   
   if ($mode == 'atom') {
     if ($context != 'sdl_library_item') {
-      dsm('coou');
       // we are not in the library display view, so we need more than the title and thumbnail
       
       // Tell scald core what he should display
       $view_mode="full";
-      entity_view('atom', $atom, $context);
       
-      dsm($atom);
-      $content=entity_view('atom', $atom, $context);
-      dsm($content,content);
-      $atom->rendered->player = theme('links_lists', array('path' => $path) + $attributes);
+      //load content
+      links_list_view($atom,'default');
       
-      dsm($content,content);
+      
+      $temporary_content=scald_atom_view($atom, $context );
+
+      
+      $atom->rendered->player = theme('atom_links_lists',array('content'=>$temporary_content) );
+      //$atom->rendered->player='d';
+      //$atom->rendered->player = 'r';
+      
       
       //Don't show title, not needed
       $atom->rendered->title = '';
