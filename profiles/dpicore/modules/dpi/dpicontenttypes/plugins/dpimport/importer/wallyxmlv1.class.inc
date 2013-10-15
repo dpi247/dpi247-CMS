@@ -812,7 +812,7 @@ class WallyXmlV1 extends Importer{
     $uri = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
     $provider = dpicontenttypes_api_getprovider($uri);
     if ($provider == NULL){
-      Logger::logWarning('importer', 2, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
+      Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
     } else {
       $atom = scald_atom_defaults($provider['type']);
       $atom->provider = $provider['name'];

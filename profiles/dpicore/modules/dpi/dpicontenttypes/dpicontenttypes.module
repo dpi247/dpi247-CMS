@@ -234,13 +234,13 @@ function dpicontenttypes_library() {
 function dpicontenttypes_dpicontenttypes_provider($uri){
   $provider = NULL;
   
-  if (scald_youtube_parse_id($uri, FALSE)){
+  if (module_exists('scald_youtube') && scald_youtube_parse_id($uri, FALSE)){
     //Youtube
     $provider = array('name' => 'scald_youtube', 'type' => 'video');
-  } elseif (scald_vimeo_parse_id($uri, FALSE)){
+  } elseif (module_exists('scald_vimeo') && scald_vimeo_parse_id($uri, FALSE)){
     //Vimeo
     $provider = array('name' => 'scald_vimeo', 'type' => 'video');
-  } elseif (scald_dailymotion_parse_id($uri, FALSE)){
+  } elseif (module_exists('scald_dailymotion') &&scald_dailymotion_parse_id($uri, FALSE)){
     //Dailymotion
     $provider = array('name' => 'scald_dailymotion', 'type' => 'video');
   }
