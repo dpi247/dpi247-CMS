@@ -112,3 +112,33 @@ function dpicontenttypes_api_getprovider($uri){
   
   return $uri_provider;
 }
+
+
+function links_list_view($atom, $view_mode = 'full', $langcode = NULL) {
+
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->language;
+  }
+  
+  // Remove previously built content, if exists.
+  $atom->content = array();
+  
+  // Allow modules to change the view mode.
+  $context = array(
+    'entity_type' => 'scald_atom',
+    'entity' => $atom,
+    'langcode' => $langcode,
+  );
+  drupal_alter('entity_view_mode', $view_mode, $context);
+  
+ 
+  // Build fields content.
+  // In case of a multiple view, node_view_multiple() already ran the
+  // 'prepare_view' step. An internal flag prevents the operation from running
+  // twice.
+  field_attach_prepare_view('scald_atom', array($atom->sid => $atom), $view_mode, $langcode);
+  entity_prepare_view('scald_atom', array($atom->sid => $atom), $langcode);
+  $atom->content += field_attach_view('scald_atom', $atom, $view_mode, $langcode);
+  
+  
+}

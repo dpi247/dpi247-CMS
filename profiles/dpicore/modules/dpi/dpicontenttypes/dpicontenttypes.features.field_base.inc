@@ -610,7 +610,7 @@ function dpicontenttypes_field_default_field_bases() {
     'translatable' => 0,
     'type' => 'taxonomy_term_reference',
   );
-  
+
 
   // Exported field_base: 'field_personbirthdate'
   $field_bases['field_personbirthdate'] = array(
