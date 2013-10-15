@@ -72,20 +72,20 @@
 		</div>
 		<!-- /main -->
 		<div id="bottom">
-			<?php print $bottom;?>
+			<?php  // print $bottom;?>
 		</div>
 		
-		<?php  if ($mission || $footer_message ) {?>
+		<?php //  if ($mission || $footer_message ) {?>
 		<footer>
-			<?php if ($mission): print "<p class=\"mission\">".$mission."</p>"; endif; ?>
-			<?php if ($footer_message): print "<p class=\"footer-message\">".$footer_message."</p>"; endif; ?>
+			<?php  // if ($mission): print "<p class=\"mission\">".$mission."</p>"; endif; ?>
+			<?php // if ($footer_message): print "<p class=\"footer-message\">".$footer_message."</p>"; endif; ?>
 		</footer>
-		<?php } ?>
+		<?php // } ?>
 	</div>
 	<!-- /page -->
 
 
 	<!-- Put Scripts at the Bottom  -->
-	<?php print $closure; ?>
+	<?php //print $closure; ?>
 </body>
 </html>

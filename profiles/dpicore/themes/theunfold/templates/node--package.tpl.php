@@ -1,3 +1,5 @@
+<?php dsm($content)?>
+<?php dsm($vars)?>
 <?php if(isset($content['field_textbarette'])):?>
 <span class="cat"><?php print drupal_render($content['field_textbarette'])?></span>
 <?php endif;?>
@@ -15,18 +17,22 @@
 	</p>
 </div>
 
-<h2 class="heading"><?php print drupal_render(['field_textchapo']);?></h2>
+<h2 class="heading"><?php //print drupal_render($content['field_textchapo']);?></h2>
+
+
 
 <?php print $top_html;?>
 
 <div class="article-body">
+
+    <?php print drupal_render($content['field_linkslists']);?>
 	<?php if ($related_html != NULL){?>
 	<aside class="hidden-phone" role="complementary">
 		<?php print $related_html;?>
 	</aside>
 	<?php }?>
 	<div class="article-description">
-	<?php print drupal_render(['field_textbody']);?>
+	<?php //print drupal_render(['field_textbody']);?>
 	</div>
 </div>
 

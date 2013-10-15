@@ -1,1 +1,0 @@
-<?php print theme('widget_linkslist', $widget);?>
