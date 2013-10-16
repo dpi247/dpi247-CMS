@@ -285,6 +285,8 @@ abstract class Importer{
       
       //Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
+      
+      //Save entity
       if (!Logger::error()){
         entity_save($entity_type, $entity);
       } else {

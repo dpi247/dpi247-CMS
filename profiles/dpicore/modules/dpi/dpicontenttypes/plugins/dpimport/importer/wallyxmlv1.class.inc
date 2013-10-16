@@ -147,7 +147,6 @@ class WallyXmlV1 extends Importer{
    * @param Object $entity
    */
   protected function setObjectAttributes($dom, $wrapper, $entity){
-    
     if ($dom->hasAttribute('EmbeddedObjectsOrder')){
       $entity->embeddedobjectsorder = $dom->getAttribute('EmbeddedObjectsOrder');
     }
@@ -618,7 +617,10 @@ class WallyXmlV1 extends Importer{
           if (isset($atom->embeddedobjectsorder)){
             $order = $atom->embeddedobjectsorder;
           } else {
-            $order = $i++; 
+            $order = $i++;
+            while (array_key_exists($order, $embeds_list)){
+              $order = $i++;
+            }
           }
           $embeds_list[$order] = $atom;
         }
@@ -638,16 +640,112 @@ class WallyXmlV1 extends Importer{
   }
   /**
   *
-  * Set LinkLists and add it to the wrapper
+  * Process LinksLists element
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
   * @param Object $entity
   */
   public function buildLinksLists($dom, $wrapper, $entity){
-    //@todo
+    
+    //Empty the linkslist field
+    $wrapper->field_linkslists->set(NULL);
+    
     $dispatcher = $this->getDispatcher();
-    $linkslist = $dispatcher->processList($dom, $wrapper, $entity);
+    $linkslists = $dispatcher->processList($dom, $wrapper, $entity);
+    
+    $linkslist_list = array();
+    $i = 100;
+    if (!Logger::error()){
+      foreach ($linkslists as $atom){
+        if ($atom != NULL){
+          if (isset($atom->embeddedobjectsorder)){
+            $order = $atom->embeddedobjectsorder;
+          } else {
+            $order = $i++;
+            while (array_key_exists($order, $linkslist_list)){
+              $order = $i++;
+            }
+          }
+          $linkslist_list[$order] = $atom;
+        }
+      }
+      //Sort the embeds
+      ksort($linkslist_list);
+      foreach ($linkslist_list as $atom){
+        $linkslistobject = array(
+          'sid' => $atom->sid,
+          'type' => $atom->type,
+          'provider' => $atom->provider,
+          'inline' => '0', //@todo
+        );
+        $wrapper->field_linkslists->set($linkslistobject);
+      }
+    }
   }
+  
+  /**
+   * 
+   * Set LinksList and add it to wrapper
+   * @param Dom $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
+  public function buildLinksList($dom, $wrapper, $entity){
+    Logger::logExecution('linkslist', TRUE);
+    $atom = $this->contructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
+    return $atom;
+  }
+  
+  /**
+   * 
+   * Set links to the linkslist
+   * @param Dom $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
+  public function buildLinks($dom, $wrapper, $entity){
+    $wrapper->field_linkitems->set(NULL);
+    $i = 100;
+    $links_list = array();
+    foreach ($dom->getElementsByTagName('Link') as $link){
+      if ($link->hasAttribute('EmbeddedObjectsOrder')){
+        $order = $link->getAttribute('EmbeddedObjectsOrder');
+      } else {
+        $order = $i++;
+        while (array_key_exists($order, $links_list)){
+          $order = $i++;
+        }
+      }
+      $links_list[$order] = array(
+        'url' => $link->getElementsByTagName('URI')->item(0)->nodeValue,
+        'title' => $link->getElementsByTagName('Title')->item(0)->nodeValue,
+      );
+      
+    }
+    //Sort the embeds
+    ksort($links_list);
+    foreach ($links_list as $link){
+      $wrapper->field_linkitems->set(array($link));
+    }
+  }
+  
+  /**
+  *
+  * Create Atom Image
+  * @param DOM $dom
+  */
+  protected function createOrLoadEntityLinksList($dom){
+    $atom = scald_atom_defaults('links_list');
+    $atom->provider = 'dpicontenttypes';
+    $atom->type = 'links_list';
+    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+      $atom = $temp_atom;
+    }
+    return $atom;
+  }
+  
   /**
    * 
    * Set PhotoObjectType
@@ -827,12 +925,23 @@ class WallyXmlV1 extends Importer{
   
   /**
   *
-  * Get attributes of current DOM and set it to the Photoojbecttype
+  * Get attributes of current DOM and set it to the Link
   * @param DOM $dom
   * @param EntityDrupalWrapper $wrapper
   * @param Object $entity
   */
   protected function setLinkAttributes($dom, $wrapper, $entity){
+    $this->setObjectAttributes($dom, $wrapper, $entity);
+  }
+  
+  /**
+  *
+  * Get attributes of current DOM and set it to the linkslist
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
+  */
+  protected function setLinksListAttributes($dom, $wrapper, $entity){
     $this->setObjectAttributes($dom, $wrapper, $entity);
   }
 }
