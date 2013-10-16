@@ -115,6 +115,60 @@ function dpicontenttypes_theme(){
 function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
   
 }
+
+
+/**
+ * Implements hook_scald_contexts().
+ */
+function dpicontenttypes_scald_contexts() {
+  return array(
+    'inline'      => array(
+      'title'           => t('DPI Inline'),
+      'description'     => t('When atom is embedded within  a textarea.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
+    'mediabox'      => array(
+      'title'           => t('DPI MediaBox'),
+      'description'     => t('When atom is embedded within  a field.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
+    );
+  
+}
+
+
+
+/**
+ * Implements hook_scald_render().
+ */
+function dpidestinations_scald_render($atom, $context, $options = array()) {
+  
+  switch ($context) {
+    case 'inline':
+    case 'mediabox':
+      // If this is a custom context created through the UI, we use a special
+      // render.
+      $system = _scald_system_contexts();
+      if ($context == 'inline' || $context == 'mediabox' || empty($system[$context])) {
+        $content = scald_atom_view($atom, $context);
+        dsm($output,dpicontentypes_scald_render);
+        $output = drupal_render($content);
+      }
+      // Else, returns the title as we don't know what to render.
+      else {
+        $output = $atom->rendered->title;
+      }
+    break;
+  }
+  $output="<p>Rien! </p>";
+  
+  return $output;
+}
+
 /**
  * Implements hook_scald_atom_providers.
  * Tell Scald that we'll be providing some twitter atoms.
