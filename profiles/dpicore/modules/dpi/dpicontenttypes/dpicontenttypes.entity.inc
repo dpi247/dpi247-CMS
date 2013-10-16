@@ -209,14 +209,25 @@ function dpiproperties_load_multiple($dpids = array(), $conditions = array(), $r
 * Load a DPI properties by external reference
 * @param String $external_reference
 * @param boolean $reset
-* @return boolean
+* @return DPIProperties
 */
 function dpiproperties_load_by_external_reference($external_reference, $reset = FALSE){
   $dpiproperties = entity_load('dpiproperties', FALSE, array('external_reference' => $external_reference), $reset);
   return reset($dpiproperties);
 }
 
-
+/**
+*
+* Load a DPI properties by entity type and entity id
+* @param String $type
+* @param Integer $id
+* @param boolean $reset
+* @return DPIProperties
+*/
+function dpiproperties_load_by_type_and_id($type, $id, $reset = FALSE){
+  $dpiproperties = entity_load('dpiproperties', FALSE, array('entity' => $type, 'id' => $id), $reset);
+  return reset($dpiproperties);
+}
 
 /**
  * Save dpiproperties.
