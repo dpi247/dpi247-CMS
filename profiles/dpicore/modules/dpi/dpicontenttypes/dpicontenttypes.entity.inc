@@ -165,11 +165,11 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     $info['scald_atom']['bundles']['flash']['properties']['field_source'] = $source;
   }
   //Set to the atoms linklist
-  if (isset($info['scald_atom']['bundles']['link_list'])){
-    $info['scald_atom']['bundles']['link_list']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['link_list']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['link_list']['properties']['field_source'] = $source;
+  if (isset($info['scald_atom']['bundles']['links_list'])){
+    $info['scald_atom']['bundles']['links_list']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['links_list']['properties']['field_source'] = $source;
   }
 }
 
