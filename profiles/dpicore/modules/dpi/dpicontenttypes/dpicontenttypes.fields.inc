@@ -156,6 +156,7 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
 
     $continue=FALSE;
     //First remove all items that come from the inline
+    
     if(isset($item['inline']) and $item['inline']==1){
       dsm('je supprime embed');
       unset($items[$delta]);
@@ -173,6 +174,12 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
   }
   
   $add_items=array();
+  
+  
+  //@todo: je devrais  aller lire dans les settings du field,
+  // quel type d atome de mon inline, j'accepte de mettre dans mon embedd
+  //dsm($field);
+  
   
   //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
   $field_to_analyse='field_textbody';
