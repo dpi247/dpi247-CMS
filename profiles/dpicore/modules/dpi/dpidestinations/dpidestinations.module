@@ -46,7 +46,7 @@ function dpidestinations_menu(){
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.reorder.page.inc'
+    'file' => 'dpidestinations.reorder.pages.inc'
   );
   
   $items['target/%target'] = array(

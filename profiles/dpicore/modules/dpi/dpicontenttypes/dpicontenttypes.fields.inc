@@ -149,8 +149,7 @@ function dpicontenttypes_field_validate($entity_type, $entity, $field, $instance
  * Implements hook_field_presave().
  */
 function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  dsm($items,$items);
-  dsm($instance);
+  
   if($field['field_name']=='field_embededobjects'){
   foreach($items as $delta=>$item){
 
@@ -158,7 +157,6 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
     //First remove all items that come from the inline
     
     if(isset($item['inline']) and $item['inline']==1){
-      dsm('je supprime embed');
       unset($items[$delta]);
       $continue=TRUE;
       

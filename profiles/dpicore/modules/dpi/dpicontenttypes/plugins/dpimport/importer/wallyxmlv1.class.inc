@@ -816,9 +816,19 @@ class WallyXmlV1 extends Importer{
     switch ($parsedurl['scheme']){
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
-        $wrapper->scald_thumbnail->set((array) $file);
+        switch ($entity->type){
+          case 'photo':
+            $wrapper->scald_thumbnail->set((array) $file);
+            break;
+          case 'audio':
+            //no wrapper exists for audio so the file is directly set on the entity
+            $entity->data['audio_file'] = $file->uri;
+            $entity->data['audio_id'] = $file->fid;
+            break;
+        }
         break;
       case 'http' :
+        //Look for a provider for url
         $function_parse_id = $entity->provider.'_parse_id';
         if (function_exists($function_parse_id)){
           $id = $function_parse_id($value, FALSE);
@@ -942,6 +952,47 @@ class WallyXmlV1 extends Importer{
   * @param Object $entity
   */
   protected function setLinksListAttributes($dom, $wrapper, $entity){
+    $this->setObjectAttributes($dom, $wrapper, $entity);
+  }
+  
+  /**
+  *
+  * Set AudioObjectType
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $package_wrapper
+  * @param Object $entity
+  */
+  public function buildAudioObjectType($dom, $package_wrapper, $entity){
+    Logger::logExecution('photobojecttype', TRUE);
+    $atom = $this->contructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
+    //return $atom;
+  }
+  
+  /**
+   *
+   * Create Atom Audio
+   * @param DOM $dom
+   */
+  protected function createOrLoadEntityAudioObjectType($dom){
+    $atom = scald_atom_defaults('audio');
+    $atom->provider = 'scald_audio';
+    $atom->type = 'audio';
+    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+      $atom = $temp_atom;
+    }
+    return $atom;
+  }
+  /**
+  *
+  * Get attributes of current DOM and set it to the Audioojbecttype
+  * @param DOM $dom
+  * @param EntityDrupalWrapper $wrapper
+  * @param Object $entity
+  */
+  protected function setAudioObjectTypeAttributes($dom, $wrapper, $entity){
+  
     $this->setObjectAttributes($dom, $wrapper, $entity);
   }
 }

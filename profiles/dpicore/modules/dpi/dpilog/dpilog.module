@@ -15,7 +15,7 @@ function dpilog_menu(){
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>1,
 
   );
@@ -23,7 +23,7 @@ function dpilog_menu(){
     'title'=> 'Logs',
     'page callback' => 'dpilog_page_view_list',
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>2,
   );
   $items['admin/dpilog/view'] = array(
@@ -31,7 +31,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_list',
     //'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'type' => MENU_LOCAL_TASK,
     'weight'=>2,
   );
@@ -47,7 +47,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_timeline',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'type' => MENU_LOCAL_TASK,
     'weight'=>3,
 
@@ -57,7 +57,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_timeline_json',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>3,
   
   );
@@ -67,7 +67,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_log_message',
     'page arguments' => array('3'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>2,
   );
 */
@@ -77,7 +77,7 @@ function dpilog_menu(){
 
     'access arguments'=>array('flush dpilog'),
     'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>4,
   );
 
@@ -88,7 +88,7 @@ function dpilog_menu(){
 
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>5,
 
   );
@@ -99,7 +99,7 @@ function dpilog_menu(){
 
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>5,
 
   );
@@ -109,7 +109,7 @@ function dpilog_menu(){
 
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.page.inc',
+    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>6,
 
   );

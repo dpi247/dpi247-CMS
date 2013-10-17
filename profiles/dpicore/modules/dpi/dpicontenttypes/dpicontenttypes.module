@@ -53,6 +53,26 @@ function dpicontenttypes_menu(){
     'file' => 'dpicontenttypes.entity.inc',
   );
 
+  
+  $items['node/%node/dpiproperties'] = array(
+    'title' => 'DPIProperties',
+    'page callback' => 'dpicontenttypes_entity_properties',
+    'page arguments' => array('node', 1),
+    'access arguments' => array('view dpiproperties'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'dpicontenttypes.pages.inc',
+    'weight' => 50,
+  );
+  
+  $items['atom/%scald_atom/dpiproperties'] = array(
+    'title' => 'DPIProperties',
+    'page callback' => 'dpicontenttypes_entity_properties',
+    'page arguments' => array('scald_atom', 1),
+    'access arguments' => array('view dpiproperties'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'dpicontenttypes.pages.inc',
+    'weight' => 50,
+  );
   return $items;
 }
 
