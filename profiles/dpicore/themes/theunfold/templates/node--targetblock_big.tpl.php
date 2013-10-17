@@ -1,4 +1,3 @@
-<?php dsm($variables);?>
 <ul class="article-group">
   <li class="">
     <a href="/<?php print drupal_get_path_alias("node/".$nid)?>">
