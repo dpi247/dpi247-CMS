@@ -1409,6 +1409,10 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
     return scald_render($atom, _scald_context_fallback($atom->type, $context), $options, $rebuild);
   }
 
+  
+  
+  //dsm($atom,"YOCOCO $context");
+  
   // Check the cache unless explicitly rebuilding the rendering of the Atom.
   $action_bitstream = 0;
   foreach (scald_atom_actions_available($atom) as $action) {
@@ -1722,6 +1726,7 @@ function scald_scald_render($atom, $context, $options = array()) {
       $system = _scald_system_contexts();
       if ($context == 'full' || empty($system[$context])) {
         $content = scald_atom_view($atom, $context);
+        
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.
