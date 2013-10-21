@@ -1,5 +1,5 @@
-name = dpicore
-description = Start with only a few modules enabled.
+name = "DPI247"
+description = "Start with only a few modules enabled."
 version = VERSION
 core = 7.x
 
@@ -7,7 +7,6 @@ core = 7.x
 version = "7.22"
 project = "drupal"
 datestamp = "1365027012"
-
 
 ; Drupal Core
 dependencies[] = block
@@ -49,7 +48,6 @@ dependencies[] = scald_audio
 dependencies[] = scald_vimeo
 dependencies[] = scald_youtube
 dependencies[] = scald_dailymotion
-
 
 ; Dpi-Core
 dependencies[] = dpicontenttypes

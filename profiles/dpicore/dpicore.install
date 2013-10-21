@@ -12,7 +12,7 @@
  * @see system_install()
  */
 function dpicore_install() {
-   // Add text formats.
+  // Add text formats.
   $filtered_html_format = array(
     'format' => 'filtered_html',
     'name' => 'Filtered HTML',
@@ -82,7 +82,6 @@ function dpicore_install() {
       'pages' => '',
       'cache' => -1,
     ),
-    
     array(
       'module' => 'node',
       'delta' => 'recent',
@@ -163,14 +162,12 @@ function dpicore_install() {
       'pages' => '',
       'cache' => -1,
     ),
-    
   );
   $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'cache'));
   foreach ($blocks as $block) {
     $query->values($block);
   }
   $query->execute();
-
 
   // Default "Basic page" to not be promoted and have comments disabled.
   variable_set('node_options_page', array('status'));
@@ -188,35 +185,29 @@ function dpicore_install() {
   // Allow visitor account creation with administrative approval.
   variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 
-  
-
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', $filtered_html_permission));
   user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', $filtered_html_permission));
 
-  
-  
   // Create a default role for site contributorss.
   $contributor_role = new stdClass();
   $contributor_role ->name = 'contributor';
   $contributor_role->weight = 2;
   user_role_save($contributor_role);
-  
+
   // Create a default role for site journalists.
   $journalist_role = new stdClass();
   $journalist_role ->name = 'journalist';
   $journalist_role->weight = 3;
   user_role_save($journalist_role);
-  
+
   // Create a default role for site webmasters.
   $webmaster_role = new stdClass();
   $webmaster_role ->name = 'webmaster';
   $webmaster_role->weight = 2;
   user_role_save($webmaster_role);
-  
-  
-  
+
   // Create a default role for site administrators, with all available permissions assigned.
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
@@ -226,10 +217,6 @@ function dpicore_install() {
   // Set this as the administrator role.
   variable_set('user_admin_role', $admin_role->rid);
 
-  
-  
-  
-  
   // Assign user 1 the "administrator" role.
   db_insert('users_roles')
     ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
@@ -254,6 +241,4 @@ function dpicore_install() {
     ->execute();
   variable_set('admin_theme', 'seven');
   variable_set('node_admin_theme', '1');
-
 }
-
