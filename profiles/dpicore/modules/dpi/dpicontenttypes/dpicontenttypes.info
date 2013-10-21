@@ -134,7 +134,6 @@ features[field_instance][] = taxonomy_term-persons-field_personpicture
 features[field_instance][] = taxonomy_term-persons-field_personwebsite
 features[taxonomy][] = authors
 features[taxonomy][] = concepts
-features[taxonomy][] = destinations
 features[taxonomy][] = entities
 features[taxonomy][] = freetags
 features[taxonomy][] = iptc
