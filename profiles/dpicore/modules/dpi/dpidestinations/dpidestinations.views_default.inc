@@ -33,11 +33,6 @@ $handler->display->display_options['sorts']['field_destinations_virtual_rank']['
 $handler->display->display_options['sorts']['field_destinations_virtual_rank']['table'] = 'field_data_field_destinations';
 $handler->display->display_options['sorts']['field_destinations_virtual_rank']['field'] = 'field_destinations_virtual_rank';
 $handler->display->display_options['sorts']['field_destinations_virtual_rank']['order'] = 'DESC';
-/* Filter criterion: Content: Destinations (field_destinations:tid) */
-$handler->display->display_options['filters']['field_destinations_tid']['id'] = 'field_destinations_tid';
-$handler->display->display_options['filters']['field_destinations_tid']['table'] = 'field_data_field_destinations';
-$handler->display->display_options['filters']['field_destinations_tid']['field'] = 'field_destinations_tid';
-$handler->display->display_options['filters']['field_destinations_tid']['value']['value'] = '3';
 
 /* Display: Target block */
 $handler = $view->new_display('targetview', 'Target block', 'targetview_1');
