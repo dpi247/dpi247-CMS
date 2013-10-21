@@ -262,7 +262,7 @@ function target_form_submit($form, &$form_state) {
   $target = entity_ui_form_submit_build_entity($form, $form_state);
   $target->available_targetlayouts = serialize($target->available_targetlayouts);
   $target->save();
-  $form_state['redirect'] = "target/".$target_submission->tid;
+  $form_state['redirect'] = "admin/structure/target";
 }
 
 function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
