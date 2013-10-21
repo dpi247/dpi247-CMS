@@ -64,7 +64,7 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $targetview=$target_wrapper->targetview->value();
   
   _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
-  
+  dsm($targetview);
   $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
   $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
@@ -277,10 +277,10 @@ function _dpidestinations_targetblock_content_type_helper_get_title($subtype, $c
 function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
   $content="";
   
-  //see:https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s 
+  //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s 
   $targetview->dom_id=uniqid();
   $targetview->execute();
-  
+  dsm($targetview);
   return $targetview->render();
 }
 
