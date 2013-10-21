@@ -15,6 +15,8 @@ function dpidestinations_field_info() {
       'description' => t('A destination is a quadruplet of four information that define Where and how a node will be displayed.'),
       'default_widget' => 'field_destinations_default_widget',
       'default_formatter' => 'field_destinations_default_formatter',
+      'property_type' => 'destinations',
+      'property_callbacks' => array('entity_metadata_field_destinations_property_callback') 
     ),
   );
 }
