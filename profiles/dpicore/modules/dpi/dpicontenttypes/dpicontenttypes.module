@@ -249,9 +249,6 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
 
 
       $atom->rendered->player = theme('atom_links_lists',array('content'=>$temporary_content) );
-      //$atom->rendered->player='d';
-      //$atom->rendered->player = 'r';
-
 
       //Don't show title, not needed
       $atom->rendered->title = '';
