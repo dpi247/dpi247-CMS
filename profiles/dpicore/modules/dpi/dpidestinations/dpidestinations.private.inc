@@ -683,3 +683,226 @@ function __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_t
   $options=dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update);
   return $rank_options+$options;
 }
+
+
+/**
+ *  Return the info for destination field
+ *
+ *  This is used when we need to add destinations 's features to a bundle.
+ *
+ *  @see dpidestination_install()
+ *  @see _dpidestination_get_field_info_for_destination()
+ *  @see _dpidestination_get_instance_field_info_for_destination()
+ *
+ */
+function _dpidestination_attach_field_destination_to_bundle($entity_type,$bundle){
+  $field_info_instance=_dpidestination_get_instance_field_info_for_destination($entity_type,$bundle);
+  field_create_instance($field_info_instance);
+
+}
+/**
+ *  Return the info for destination field
+ *
+ *  This is used when we need to add destinations 's features to a bundle.
+ *
+ *  @see dpidestination_install()
+ *  @see _dpidestination_get_field_info_for_destination()
+ *  @see _dpidestination_get_instance_field_info_for_destination()
+ *
+ */
+function _dpidestination_get_field_info_for_destination(){
+  return array(
+    'translatable' => '0',
+    'entity_types' =>
+    array (
+    ),
+    'settings' =>
+    array (
+    ),
+    'storage' =>
+    array (
+      'type' => 'field_sql_storage',
+      'settings' =>
+      array (
+      ),
+      'module' => 'field_sql_storage',
+      'active' => '1',
+      'details' =>
+      array (
+        'sql' =>
+        array (
+          'FIELD_LOAD_CURRENT' =>
+          array (
+            'field_data_field_destinations' =>
+            array (
+              'tid' => 'field_destinations_tid',
+              'target' => 'field_destinations_target',
+              'layout' => 'field_destinations_layout',
+              'rank' => 'field_destinations_rank',
+              'virtual_rank' => 'field_destinations_virtual_rank',
+            ),
+          ),
+          'FIELD_LOAD_REVISION' =>
+          array (
+            'field_revision_field_destinations' =>
+            array (
+              'tid' => 'field_destinations_tid',
+              'target' => 'field_destinations_target',
+              'layout' => 'field_destinations_layout',
+              'rank' => 'field_destinations_rank',
+              'virtual_rank' => 'field_destinations_virtual_rank',
+            ),
+          ),
+        ),
+      ),
+    ),
+    'foreign keys' =>
+    array (
+    ),
+    'indexes' =>
+    array (
+      'tid' =>
+      array (
+        0 => 'tid',
+      ),
+      'virtual_rank' =>
+      array (
+        0 => 'virtual_rank',
+      ),
+    ),
+    'field_name' => 'field_destinations',
+    'type' => 'destination',
+    'module' => 'dpidestinations',
+    'active' => '1',
+    'locked' => '0',
+    'cardinality' => '-1',
+    'deleted' => '0',
+    'columns' =>
+    array (
+      'tid' =>
+      array (
+        'type' => 'int',
+        'size' => 'medium',
+        'not null' => true,
+      ),
+      'target' =>
+      array (
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => false,
+      ),
+      'layout' =>
+      array (
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => false,
+      ),
+      'rank' =>
+      array (
+        'type' => 'int',
+        'size' => 'medium',
+        'not null' => false,
+      ),
+      'virtual_rank' =>
+      array (
+        'type' => 'int',
+        'size' => 'big',
+        'not null' => false,
+      ),
+    ),
+    'bundles' =>
+    array (
+      'node' =>
+      array (
+        0 => 'package',
+      ),
+    ),
+  );
+
+}
+
+/**
+ *  Return the info for destination field
+ *
+ *  This is used when we need to add destinations 's features to a bundle.
+ *
+ *  @see dpidestination_install()
+ *  @see _dpidestination_get_field_info_for_destination()
+ *  @see _dpidestination_get_instance_field_info_for_destination()
+ *
+ */
+function _dpidestination_get_instance_field_info_for_destination($entity_type,$bundle){
+  return array('label' => 'Destinations',
+  'widget' => 
+  array (
+    'weight' => '28',
+    'type' => 'destination_default_widget',
+    'module' => 'dpidestinations',
+    'active' => 0,
+    'settings' => 
+    array (
+    ),
+  ),
+  'settings' => 
+  array (
+    'user_register_form' => false,
+  ),
+  'display' => 
+  array (
+    'default' => 
+    array (
+      'label' => 'above',
+      'type' => 'destination_default_formatter',
+      'settings' => 
+      array (
+      ),
+      'module' => 'dpidestinations',
+      'weight' => 35,
+    ),
+    'teaser' => 
+    array (
+      'type' => 'hidden',
+      'label' => 'above',
+      'settings' => 
+      array (
+      ),
+      'weight' => 0,
+    ),
+    'targetblock_small' => 
+    array (
+      'type' => 'hidden',
+      'label' => 'above',
+      'settings' => 
+      array (
+      ),
+      'weight' => 0,
+    ),
+    'targetblock_medium' => 
+    array (
+      'type' => 'hidden',
+      'label' => 'above',
+      'settings' => 
+      array (
+      ),
+      'weight' => 0,
+    ),
+    'targetblock_big' => 
+    array (
+      'type' => 'hidden',
+      'label' => 'above',
+      'settings' => 
+      array (
+      ),
+      'weight' => 0,
+    ),
+  ),
+  'required' => 0,
+  'description' => '',
+  'default_value' => NULL,
+  'field_name' => 'field_destinations',
+  'entity_type' => $entity_type,
+  'bundle' => $bundle,
+  'deleted' => '0',
+  );
+
+}

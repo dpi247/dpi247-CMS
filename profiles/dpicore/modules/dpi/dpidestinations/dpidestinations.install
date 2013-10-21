@@ -260,6 +260,10 @@ function dpidestinations_schema() {
     $vocabulary = (object) $edit;
     taxonomy_vocabulary_save($vocabulary);
     _dpidestinations_variable_set('dpidestinations_destination_vid', $vocabulary->vid);
+    
+    $field_info=_dpidestination_get_field_info_for_destination();
+    field_create_field($field_info);
+    _dpidestination_attach_field_destination_to_bundle('node','package');
    
  }
  function dpidestinations_uninstall(){
