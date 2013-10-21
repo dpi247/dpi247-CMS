@@ -10,13 +10,13 @@
 function dpidestinations_field_info() {
   return array(
     // We name our field as the associative name of the array.
-    'field_destinations' => array(
+    'destination' => array(
       'label' => t('Destinations'),
       'description' => t('A destination is a quadruplet of four information that define Where and how a node will be displayed.'),
-      'default_widget' => 'field_destinations_default_widget',
-      'default_formatter' => 'field_destinations_default_formatter',
+      'default_widget' => 'destination_default_widget',
+      'default_formatter' => 'destination_default_formatter',
       'property_type' => 'destinations',
-      'property_callbacks' => array('entity_metadata_field_destinations_property_callback') 
+      'property_callbacks' => array('entity_metadata_destination_property_callback') 
     ),
   );
 }
@@ -41,7 +41,7 @@ function dpidestinations_field_validate($entity_type, $entity, $field, $instance
   foreach ($items as $delta => $item) {
   if (!empty($item['tid'])) {
   $errors[$field['field_name']][$langcode][$delta][] = array(
-    'error' => 'field_destinations_tid',
+    'error' => 'destination_tid',
     'message' => t('You must select at least a destination term.'),
   );
   }
@@ -85,9 +85,9 @@ function dpidestinations_field_presave($entity_type, $entity, $field, $instance,
  */
 function dpidestinations_field_widget_info() {
   return array(
-    'field_destinations_default_widget' => array(
+    'destination_default_widget' => array(
       'label' => t('Destination default widget'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
   );
 }
@@ -98,10 +98,10 @@ function dpidestinations_field_widget_info() {
  * hook_widget_form() is where Drupal tells us to create form elements for
  * our field's widget.
  *
- * We provide one form for the moment: field_destinations_default_widget.
+ * We provide one form for the moment: destination_default_widget.
  *
  *
- * 'field_destinations_default_widget' define four form element that are simple selectbox
+ * 'destination_default_widget' define four form element that are simple selectbox
  *
  */
 function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
@@ -192,7 +192,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   
   switch ($instance['widget']['type']) {
 
-    case 'field_destinations_default_widget':
+    case 'destination_default_widget':
       // Make this a fieldset with the four fields.
       $widget += array(
       '#type' => 'fieldset',
@@ -384,29 +384,29 @@ function dpidestinations_field_extra_fields() {
 function dpidestinations_field_formatter_info() {
   return array(
     // This formatter just displays the hex value in the color indicated.
-    'field_destinations_default_formatter' => array(
+    'destination_default_formatter' => array(
       'label' => t('Simple text-based formatter of the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
-    'field_destinations_tid_formatter' => array(
+    'destination_tid_formatter' => array(
       'label' => t('Simple text-based formatter of the term of the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
-    'field_destinations_tid_name_formatter' => array(
+    'destination_tid_name_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
-    'field_destinations_tid_name_linked_formatter' => array(
+    'destination_tid_name_linked_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name  of the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
-    'field_destinations_main_tid_name_formatter' => array(
+    'destination_main_tid_name_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
-    'field_destinations_main_tid_name_linked_formatter' => array(
+    'destination_main_tid_name_linked_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('field_destinations'),
+      'field types' => array('destination'),
     ),
     //@todo: http://drupal.stackexchange.com/questions/34823/what-does-the-property-type-key-do-in-hook-field-info/34826#34826
   );
@@ -430,7 +430,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
   switch ($display['type']) {
     // This formatter simply outputs the field as text and with a color.
 
-    case 'field_destinations_default_formatter':
+    case 'destination_default_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
           '#type' => 'html_tag',
@@ -439,7 +439,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'field_destinations_tid_formatter':
+    case 'destination_tid_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
           '#type' => 'html_tag',
@@ -448,7 +448,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'field_destinations_tid_name_formatter':
+    case 'destination_tid_name_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
         $element[$delta] = array(
@@ -458,7 +458,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'field_destinations_tid_name_linked_formatter':
+    case 'destination_tid_name_linked_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
         $element[$delta] = array(
@@ -469,7 +469,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
       }
 
       break;
-    case 'field_destinations_main_tid_name_formatter':
+    case 'destination_main_tid_name_formatter':
       $term=taxonomy_term_load($item['tid']);
       $element[0] = array(
         '#type' => 'html_tag',
@@ -477,7 +477,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         '#value' => taxonomy_term_title($term),
       );
       break;
-    case 'field_destinations_main_tid_name__linked_formatter':
+    case 'destination_main_tid_name__linked_formatter':
       $term=taxonomy_term_load($item['tid']);
       $element[0] = array(
         '#type' => 'html_tag',

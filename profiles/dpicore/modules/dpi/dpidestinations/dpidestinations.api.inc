@@ -1,7 +1,7 @@
 <?php
 
 function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
-  $destinations_val = field_get_items('node', $node, 'field_destinations');
+  $destinations_val = field_get_items('node', $node, 'destinations');
   foreach($destinations_val as $index=>$destination){
     if($destination['tid']==$tid){
       return $destination;

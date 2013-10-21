@@ -20,8 +20,8 @@
  *  USe better definition for layout with proper option_list
  * 
  */
-function entity_metadata_field_destinations_property_callback(&$info, $entity_type, $field, $instance, $field_type){
-  if ( $field['type'] == 'field_destinations') {
+function entity_metadata_destination_property_callback(&$info, $entity_type, $field, $instance, $field_type){
+  if ( $field['type'] == 'destination') {
     // Define a data structure for dealing with text that is formatted or has
     // a summary.
     $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
