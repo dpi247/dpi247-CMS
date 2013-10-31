@@ -114,7 +114,9 @@ function dpidestinations_panels_display_save($display){
       $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ] = $targetblock_to_delete_temp->targetblockid ;
     }
   }
-  targetblock_delete_multiple($targetblocks_to_delete);
+  if(count($targetblocks_to_delete)){
+    targetblock_delete_multiple($targetblocks_to_delete);
+  }
 
 
 
