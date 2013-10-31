@@ -96,7 +96,7 @@ function dpidestinations_entity_info(){
   return $entities;
 }
 /**
- * 
+ *
  * Implementation of hook_entity_info_alter
  * @param Array $entity_info
  */
@@ -116,11 +116,10 @@ function dpidestinations_entity_info_alter(&$entity_info){
       'label'=> 'TargetBlock Big',
       'custom settings'=> TRUE,
     ),
-    
-  );
-  
-}
 
+  );
+
+}
 function target_load($tid = NULL, $reset = FALSE){
   $tids = (isset ($tid) ? array($tid) : array());
   $target = target_load_multiple($tids, $reset);
@@ -168,26 +167,26 @@ function target_view($target, $view_mode = 'full'){
 
 function target_form($form, &$form_state, $target) {
   $view_name_options = __dpidestinations_dependant_target_viewname_and_display_options_for_view_name();
-  
+
   $selected_view_name = isset($form_state['values']['view_name']) ? $form_state['values']['view_name'] : $target->view_name;
   if ($selected_view_name == "" or $selected_view_name == NULL){
     $selected_view_name = key($view_name_options);
   }
-  
+
   $selected_view_display = isset($form_state['values']['view_display']) ? $form_state['values']['view_display'] : $target->view_display;
-  
+
   $form['targetid'] = array(
     '#type' => 'value',
     '#value' => $target->targetid,
   );
-  
+
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#default_value' => $target->label,
     '#required' => TRUE,
   );
-  
+
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#default_value' => $target->machine_name,
@@ -205,7 +204,7 @@ function target_form($form, &$form_state, $target) {
     '#default_value' => $target->description,
     '#required' => TRUE,
   );
-  
+
   $form['view_name'] = array(
     '#type' => 'select',
     '#title' => t('View Name'),
@@ -231,15 +230,15 @@ function target_form($form, &$form_state, $target) {
     '#prefix' => '<div id="dropdown-view-display">',
     '#suffix' => '</div>',
   );
-  
-  
+
+
   $form['available_targetlayouts'] = array(
     '#type' => 'checkboxes',
     '#options' => _dpidestinations_get_available_targetlayouts(),
     '#default_value' => unserialize($target->available_targetlayouts),
     '#title' => t('Available target\'s layout'),
   );
-  
+
   $form['available_templateoverrides'] = array(
     '#type' => 'textarea',
     '#title' => t('Template override'),
@@ -252,7 +251,7 @@ function target_form($form, &$form_state, $target) {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
- 
+
   field_attach_form('target', $target, $form, $form_state);
   return $form;
 }
@@ -330,7 +329,7 @@ function targetblock_form($form, &$form_state, $targetblock) {
     '#description' => t('The total number of nodes on the page.'),
     '#dependency' => array('override-pager-checkbox' => array(1)),
   );
-  
+
   $form['pager_settings']['use_pager'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use pager'),
@@ -423,7 +422,7 @@ function targetblock_form($form, &$form_state, $targetblock) {
     ),
 
   );
- 
+
   if ($target){
     $form['template'] = array(
       '#type' => 'select',

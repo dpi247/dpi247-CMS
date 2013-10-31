@@ -107,6 +107,19 @@ function dpidestinations_schema() {
         'type' => 'int',
         'not null' => TRUE
       ),
+      'template_rule'=> array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE
+      ),
+
+      'hide_pager' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE
+      ),
       'node_count_for_targetblock' => array(
         'description' => 'The machine name of the target',
         'type' => 'int',
@@ -118,20 +131,31 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => FALSE
       ),
+      'pager_type' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE
+      ),
+      'rank_max_value'=>array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The maximum rank value.'
+      ),
 
-      'offset' => array(
-        'description' => 'The machine name of the target',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => FALSE
-      ),
-      'hide_pager' => array(
-        'description' => 'The machine name of the target',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => FALSE
-      ),
+
+
       'use_split' => array(
+        'description' => 'The machine name of the target',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE
+      ),
+      'offset' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
@@ -143,28 +167,8 @@ function dpidestinations_schema() {
         'default' => 0,
         'not null' => TRUE
       ),
-      'rank_max_value'=>array(
-        'type' => 'int',
-        'not null' => TRUE,
-        // Set the default to ENTITY_CUSTOM without using the constant as it is
-        // not safe to use it at this point.
-        'default' => 0,
-        'size' => 'tiny',
-        'description' => 'The maximum rank value.'
-      ),
-      'rank_behavior'=> array(
-        'description' => 'The machine name of the target',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => FALSE
-      ),
-      'template_rule'=> array(
-        'description' => 'The machine name of the target',
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => FALSE
-      ),
 
+       
       'status' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -247,33 +251,35 @@ function dpidestinations_schema() {
 }
 
 
- function dpidestinations_install(){
-   _dpidestinations_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
-   _dpidestinations_variable_set("dpidestinations_virtualrank_delta",30);
+function dpidestinations_install(){
+  _dpidestinations_variable_set("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview_1"));
+  _dpidestinations_variable_set("dpidestinations_virtualrank_delta",30);
    
-   $edit = array(
-      "name" => "Destinations",
-      "machine_name" =>"destiantions",
-      "description" => t("Destinations represent the structure of your editorial content."),
-      "module" => "taxonomy",
-    );
-    $vocabulary = (object) $edit;
-    taxonomy_vocabulary_save($vocabulary);
-    _dpidestinations_variable_set('dpidestinations_destination_vid', $vocabulary->vid);
-    
-    $field_info=_dpidestination_get_field_info_for_destination();
-    field_create_field($field_info);
-    _dpidestination_attach_field_destination_to_bundle('node','package');
+  $edit = array(
+    "name" => "Destinations",
+    "machine_name" =>"destiantions",
+    "description" => t("Destinations represent the structure of your editorial content."),
+    "module" => "taxonomy",
+  );
+  $vocabulary = (object) $edit;
+  taxonomy_vocabulary_save($vocabulary);
+  _dpidestinations_variable_set('dpidestinations_destination_vid', $vocabulary->vid);
+
+  $field_info=_dpidestination_get_field_info_for_destination();
+  field_create_field($field_info);
+  _dpidestination_attach_field_destination_to_bundle('node','package');
    
- }
- function dpidestinations_uninstall(){
-   taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
-   _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
-   _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
-   _dpidestinations_variable_del("dpidestinations_destination_vid");
+}
+function dpidestinations_uninstall(){
+  taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
+  _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
+  _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
+  _dpidestinations_variable_del("dpidestinations_destination_vid");
+  _dpidestinations_variable_del("dpidestination_max_reserved_position");
+  _dpidestinations_variable_del("dpidestination_default_max_reserved_position");
+
    
-   
- }
+}
 /**
  * Implements hook_field_schema().
  *
@@ -293,23 +299,23 @@ function dpidestinations_schema() {
  */
 function dpidestinations_field_schema($field) {
   $columns = array(
-      'tid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
-      'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
-      'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
-      'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
-      'virtual_rank' => array('type' => 'int',  'size' => 'big','not null' => FALSE),
-      
+    'tid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+    'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+    'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
+    'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
+    'virtual_rank' => array('type' => 'int',  'size' => 'big','not null' => FALSE),
+
   );
   $indexes = array(
-      'tid' => array('tid'),
-      'virtual_rank' => array('virtual_rank'),
+    'tid' => array('tid'),
+    'virtual_rank' => array('virtual_rank'),
   );
   $unique_keys=array('unique'=>array('tid','target'));
-  
+
   return array(
-      'columns' => $columns,
-      'indexes' => $indexes,
-      'unique keys'=>$unique_keys,
+    'columns' => $columns,
+    'indexes' => $indexes,
+    'unique keys'=>$unique_keys,
   );
 }
 

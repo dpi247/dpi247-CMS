@@ -7,10 +7,24 @@
  * 
  */
 
-function dpidestinations_page_targetview_reorder($term,$targetblock){
+function dpidestinations_page_targetview_reorder($term,$target){
+
+  $targetblock=NULL;
+  $targetblocks=dpidestinations_api_get_all_targetblocks_from_target_for_destination($target->machine_name,$term->tid);
+  
+  
+  // We can take the first targetblock because his node_count_for_targetblock 
+  // is synchronised between all targetblock_instance for this target and destiantion 
+  //
+  // in case of splitted targetblock we always sum the node_count_for_targetblockinstance 
+  // to deduce the node_count_for_targetblock)
+  $targetblock=current($targetblocks);
+  
+  //We jute need to fake the node_count_for_targetblockinstance and the offset
+  $targetblock->node_count_for_targetblockinstance=$targetblock->node_count_for_targetblock;
+  $targetblock->offset=0;
 
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
-  
   $targetview->pre_execute();
   $targetview->execute();
   

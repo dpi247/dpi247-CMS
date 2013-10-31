@@ -177,9 +177,12 @@ function _target_metadata_getter($object, array $options, $property_name){
   }
   if($property_name=="available_templateoverrides"){
     $result=array();
-    foreach(explode("\n",$object->available_templateoverrides) as $line){
-      list($key,$value)=explode("|",$line);
-      $result[$key]=$value;
+    return $result;
+    if($object->available_templateoverrides!="" && $object->available_templateoverrides!="\n"){
+      foreach(explode("\n",$object->available_templateoverrides) as $line){
+        list($key,$value)=explode("|",$line);
+        $result[$key]=$value;
+      }
     }
     return $object->available_templateoverrides=$result;
   }
@@ -213,7 +216,10 @@ function _target_metadata_setter($object, $property_name, $wrapper){
 
 
 function _targetblock_metadata_getter($object, array $options, $property_name){
-  if($property_name=="target"){
+if($property_name=="target"){
+    return $object->target;
+  }
+  if($property_name=="target_object"){
     return $object->target;
   }
   if($property_name=="other_splitted_targetblocks"){
@@ -477,6 +483,20 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   return $targetview;
   
 }
+/**
+ * initialize a targetview
+ * 
+ * Set tid and target filter and define 
+ * 
+ *   offest
+ *   items_per_page 
+ *   the use of a pager
+ * 
+ * @param unknown $targetview
+ * @param unknown $term_value
+ * @param unknown $target_value
+ * @param unknown $targetblock
+ */
 function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){
   //@todo: documenter ces arguments dans la doc technique
   $targetview->targetview_tid=$term_value;
@@ -484,6 +504,23 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
    
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
+  
+  
+  $pager =  $targetview->display_handler->get_option('pager');
+  //$pager['type'] = 'none';
+  //$pager['options']['items_per_page']=$targetblock->node_count_for_targetblockinstance;
+  //$pager['options']['offset']=$targetblock->offset;
+  //$targetview->display_handler->set_option('pager', $pager);
+  
+  dsm($pager);
+  dsm($targetblock);
+  
+   
+  $targetview->set_items_per_page($targetblock->node_count_for_targetblockinstance);
+  $targetview->set_offset($targetblock->offset);
+  
+  
+  
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 
@@ -492,6 +529,15 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
 
 
 
+/**
+ * Return the structure of the filter to filter results within a targetview for a specific destination
+ * This return the filter structure of the target
+ *
+ * @param String $target_value
+ * the target machine_name 
+ * 
+ * @return multitype:string boolean multitype:string boolean number multitype:  multitype:string unknown  multitype:boolean string multitype:number
+ */
 function   _dpidestinations_targetview_initialize_view_get_target_filter($target_value){
   return array (
     'id' => 'field_destinations_target',
@@ -540,6 +586,14 @@ function   _dpidestinations_targetview_initialize_view_get_target_filter($target
     ),
   );
 }
+
+/**
+ * Return the structure of the filter to filter results within a targetview for a specific destination
+   * 
+ * @param Integer $term_value
+ * the tid of the destination term
+ * @return multitype:string boolean multitype:string boolean number multitype:  multitype:string unknown  multitype:boolean string multitype:number
+ */
 function   _dpidestinations_targetview_initialize_view_get_term_filter($term_value){
   return array (
     'id' => 'field_destinations_tid',

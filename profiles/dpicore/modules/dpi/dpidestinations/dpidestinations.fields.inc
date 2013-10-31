@@ -15,12 +15,11 @@ function dpidestinations_field_info() {
       'description' => t('A destination is a quadruplet of four information that define Where and how a node will be displayed.'),
       'default_widget' => 'destination_default_widget',
       'default_formatter' => 'destination_default_formatter',
-      'property_type' => 'destinations',
-      'property_callbacks' => array('entity_metadata_destination_property_callback') 
+      'property_type' => 'destination',
+      'property_callbacks' => array('entity_metadata_destination_property_callback')
     ),
   );
 }
-
 
 /**
  * Implements hook_field_validate().
@@ -105,8 +104,8 @@ function dpidestinations_field_widget_info() {
  *
  */
 function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  
-  // STEP 0: 
+
+  // STEP 0:
   //Generate a specific key used to identify this element to restore a default
   // value upon AJAX submission regardless of where this element is in the
   // $form array.
@@ -117,12 +116,12 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     '#type' => 'value',
     '#value' => $element_key,
   );
-  
+
   // STEP 1:
   // Get the default destinations used to build the widget form elements, looking
   // first in the form state, then in the stored value for the field, and then
   // in the default values of the instance.
-  
+
   $destinations = array();
   if (!empty($form_state['destinationsfield'][$element_key])) {
     // Use the value from the form_state if available.
@@ -143,27 +142,27 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
       '#value' => array('tid'=>$items[$delta]['tid'],'target'=>$items[$delta]['target']),
     );
     $destinations['temp_db_value']=$widget['temp_db_value']["#value"];
-    
+
   }
   else {
     // Otherwise use the instance default.
     $destinations = (array) $instance['default_value'][0];
     $destinations['item_already_exist']=FALSE;
   }
-  
+
   $is_update=FALSE;
   if(isset($destinations['temp_db_value']) and $destinations['temp_db_value']['tid']==$destinations['tid'] and $destinations['temp_db_value']['target']==$destinations['target']){
     $is_update=TRUE;
   }
-  
+
   // STEP 2:
   //Determine available options and change destination if need it
-  
+
   $tids_options=dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update);
   if(FALSE &  !$is_update){
     $destinations['tid']='';
   }
-  
+
   $target_options=__dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])){
     $destinations['target']=current(array_keys($target_options));
@@ -179,17 +178,17 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   if(!isset($rankt_options[$destinations['rank']])){
     $destinations['rank']=current($rank_options);
   }
- 
-  
-  
-  
+
+
+
+
   // STEP 3:
   // buid the form
   $widget['#delta'] = $delta;
   $widget['#prefix']= '<div id="dropdown-target-replace_'.$delta.'">';
   $widget['#suffix']= '</div>';
   $widget['#dpidestinationsfield'] = TRUE;
-  
+
   switch ($instance['widget']['type']) {
 
     case 'destination_default_widget':
@@ -212,64 +211,64 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           // When 'event' occurs, Drupal will perform an ajax request in the
           // background. Usually the default value is sufficient (eg. change for
           // select elements), but valid values include any jQuery event,
-              // most notably 'mousedown', 'blur', and 'submit'.
-              // 'event' => 'change',
-              'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-              'wrapper' => 'dropdown-target-replace_'.$delta,
-              'method'=>'replace',
-          ),
-        );
-        $widget['target'] = array(
-          '#type' => 'select',
-          '#options' => $target_options,
-          '#default_value'=> $destinations['target'],
-          '#title' => t("Target"),
-          '#attributes' => array('class' => array('field-destinations-widget-tid')),
-          '#description' => t('Define the target where the node will appear in the page'),
-          '#limit_validation_errors'=>array(),
-          '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-          '#ajax' => array(
-            'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-            'wrapper' => 'dropdown-target-replace_'.$delta,
-            'method'=>'replace',
-          ),
-        );
+          // most notably 'mousedown', 'blur', and 'submit'.
+          // 'event' => 'change',
+          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+          'wrapper' => 'dropdown-target-replace_'.$delta,
+          'method'=>'replace',
+        ),
+      );
+      $widget['target'] = array(
+        '#type' => 'select',
+        '#options' => $target_options,
+        '#default_value'=> $destinations['target'],
+        '#title' => t("Target"),
+        '#attributes' => array('class' => array('field-destinations-widget-tid')),
+        '#description' => t('Define the target where the node will appear in the page'),
+        '#limit_validation_errors'=>array(),
+        '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
+        '#ajax' => array(
+          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+          'wrapper' => 'dropdown-target-replace_'.$delta,
+          'method'=>'replace',
+        ),
+      );
        
-        $widget['rank'] = array(
-          '#type' => 'select',
-          '#options' =>$rank_options,
-         // '#default_value'=> $destinations['rank'],
-          '#title' => t("Rank"),
-          '#attributes' => array('class' => array('field-destinations-widget-tid')),
-          '#description' => t('The position of the article in the target'),
-          '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-          '#limit_validation_errors'=>array(),
-          
-        );
-        $widget['layout'] = array(
-          '#type' => 'select',
-          '#options' =>$layout_options,
-          '#default_value'=> $destinations['layout'],
-          '#title' => t("Layout"),
-          '#attributes' => array('class' => array('field-destinations-widget-tid')),
-          '#description' => t('The way your article will be render in the target'),
-          '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-          '#limit_validation_errors'=>array(),
-        
-           
-        );
-        if($is_update){
-          $widget['rank']['#default_value']="DNC";
-        }
-        $widget['virtual_rank'] = array(
-          '#type' => 'value',
-          "#value"=> $destinations['virtual_rank'],
-        );
+      $widget['rank'] = array(
+        '#type' => 'select',
+        '#options' =>$rank_options,
+        // '#default_value'=> $destinations['rank'],
+        '#title' => t("Rank"),
+        '#attributes' => array('class' => array('field-destinations-widget-tid')),
+        '#description' => t('The position of the article in the target'),
+        '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
+        '#limit_validation_errors'=>array(),
 
-        break;
+      );
+      $widget['layout'] = array(
+        '#type' => 'select',
+        '#options' =>$layout_options,
+        '#default_value'=> $destinations['layout'],
+        '#title' => t("Layout"),
+        '#attributes' => array('class' => array('field-destinations-widget-tid')),
+        '#description' => t('The way your article will be render in the target'),
+        '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
+        '#limit_validation_errors'=>array(),
+
+         
+      );
+      if($is_update){
+        $widget['rank']['#default_value']="DNC";
+      }
+      $widget['virtual_rank'] = array(
+        '#type' => 'value',
+        "#value"=> $destinations['virtual_rank'],
+      );
+
+      break;
   }
   $element = $widget;
-  
+
 
   return $element;
 }
@@ -280,19 +279,19 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
  */
 function dpidestinations_rebuildonchange_validate($element, &$form_state) {
   if($form_state["triggering_element"]["#type"]=='select'){
-  // If the country was changed, rebuild the form.
-  if ($element['#default_value'] != $element['#value']) {
-    $form_state['rebuild'] = TRUE;
-  }
+    // If the country was changed, rebuild the form.
+    if ($element['#default_value'] != $element['#value']) {
+      $form_state['rebuild'] = TRUE;
+    }
 
-  $parents = $element['#parents'];
-  array_pop($parents);
+    $parents = $element['#parents'];
+    array_pop($parents);
 
-  //Search through the form values to find the current address.
-  $destination = drupal_array_get_nested_value($form_state['values'], $parents);
-  // Store the present address values in the form state for retrieval by the
-  // widget form regardless of where the widget sits in the $form array.
-  $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
+    //Search through the form values to find the current address.
+    $destination = drupal_array_get_nested_value($form_state['values'], $parents);
+    // Store the present address values in the form state for retrieval by the
+    // widget form regardless of where the widget sits in the $form array.
+    $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
 
   }
 }
