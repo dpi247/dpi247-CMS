@@ -122,14 +122,12 @@ class TargetBlockController extends EntityAPIControllerExportable{
 
     $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
 
-    //_dpidestinatons_targetblock_calculate_node_count_for_targetblock($entity);
     $result=parent::save($entity);
-    //_dpidestinatons_targetblock_sync_node_count_for_targetblock($entity);
     return $result;
 
   }
   public function syncrohize_global_settings_of_targetblocks($entity,$operation){
-    if(!isset($entity->save_prevent_recurssion)){
+    if(!isset($entity->prevent_sync_recurssion)){
       $original_entity_id=$entity->targetblockid;
 
       if($entity->targetblockid==NULL){
@@ -160,7 +158,7 @@ class TargetBlockController extends EntityAPIControllerExportable{
           $targetblocks[$targetblockid]->use_split=TRUE;
           $targetblocks[$targetblockid]->split_delta=$split_delta;
           $targetblocks[$targetblockid]->offset=$offset;
-          $targetblocks[$targetblockid]->save_prevent_recurssion=TRUE;
+          $targetblocks[$targetblockid]->prevent_sync_recurssion=TRUE;
           $split_delta=$split_delta+1;
           $offset+=$targetblocks[$targetblockid]->node_count_for_targetblockinstance;
 
