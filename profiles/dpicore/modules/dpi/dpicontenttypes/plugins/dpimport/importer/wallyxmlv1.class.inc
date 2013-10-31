@@ -277,7 +277,69 @@ class WallyXmlV1 extends Importer{
     $wrapper->title->set($this->filterHtmlTags($value));
     $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
   }
+  /**
+  *
+  * Get the destinations from DOM and set it into an array
+  * @param DOM $dom
+  * @param Integer $vid
+  * @param EntityDrupalWrapper $wrapper
+  * @return Array $destination_list
+  */
+  protected function getdestinationsfromdom($dom, $vid, $wrapper){
+    $destination_list = array();
+    $keys = array();
+    foreach ($dom->getElementsByTagName('Destination') as $destination) {
+      $dest = array();
+      $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
+      $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
+      if ($terms) {
+        $dest['tid'] = $terms[0]->tid;
+        if ($destination->hasAttribute("Position")) {
+          $dest['target'] = $destination->getAttributeNode("Position")->value;
+          $dest['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
+          if ($wrapper->nid->value() != NULL && $this->destinationexists($wrapper, $dest)){
+            //If destination already exists and no rank -> DNC
+            $dest['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
+          } else {
+            //If destination does not exists and no rank -> default
+            $dest['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'default';
+          }
+        } else {
+          $dest['target'] = 'none';
+          $dest['layout'] = 'none';
+          $dest['rank'] = 0;
+        }
+        //Add destination only once. If a destinations with the same tid and target exists, the destination is not readded
+        if (!array_key_exists($dest['tid'].'-'.$dest['target'], $keys)){
+          $keys[$dest['tid'].'-'.$dest['target']] = $dest['tid'].'-'.$dest['target'];
+          $destination_list[] = $dest;
+        }
+      } else {
+        Logger::logWarning('importer', 2, 'pathnotfound', t('Path "!path" not found. Destination rejected', array('!path' => $path)));
+      }
+    }
+    return $destination_list;
+  }
   
+  /**
+   * 
+   * Check if destination already exists on the node
+   * @param EntityDrupalWrapper $entity
+   * @param Array $dest
+   * @return boolean
+   */
+  protected function destinationexists($wrapper, $new_destination){
+    $destination_exists = FALSE;
+    $destinations = $wrapper->field_destinations->value();
+    
+    foreach ($destinations as $destination){
+      if ($destination['tid'] == $new_destination['tid'] && $destination['target'] == $new_destination['target']){
+        $destination_exists = TRUE;
+        break;
+      }
+    }
+    return $destination_exists;
+  }
   /**
    * 
    * Set field Destination
@@ -287,79 +349,24 @@ class WallyXmlV1 extends Importer{
    */
   public function buildDestinations($dom, $wrapper, $entity){
     //@todo s'occuper des destinations multiples
-    //@todo terminer avec le wrapper
     $term = array();
     $result = array();
     $vid = dpi_variable_get('dpidestinations_destination_vid', NULL);
-    
-    if ($vid) {
-    /*  
-      $temp_results = $temp_result = array();
+    if ($vid) {    
+      $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
 
-      //$hierarchies = wallyctools_get_hierarchies();
-      foreach ($dom->getElementsByTagName('Destination') as $destination) {
-        dsm($destination->nodeName);
-        $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
-        $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
-        
-        if ($terms) {
-          if ($destination->hasAttribute("Position")) {
-            $temp_result['target'] = $destination->getAttributeNode("Position")->value;
-            $temp_result['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
-            $temp_result['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
-          } else {
-            $temp_result['target'] = 'none';
-            $temp_result['layout'] = 'none';
-            $temp_result['rank'] = 0;
-          }
-    
-          // As we check the taxonomy full path and specify a vocabulary
-          // we can only have one result.
-          $temp_result['tid'] = $terms[0]->tid;
-          $temp_results[] = $temp_result;
-          
-        } else {
-          drupal_set_message(t('Path "@path" not found in vocabulary (@vid). Destination rejected.', array('@path' => $path, '@vid' => $vid)), 'notice');
-        }
-      }
-    /*
-      $check_double = array();
-      $i = 0;
-      foreach ($temp_results as $temp_result) {
-        if (!in_array($temp_result['tid'].':'.$temp_result['target'], $check_double)) {
-          $check_double[] = $temp_result['tid'].':'.$temp_result['target'];
-    
-          if ($actual_dest = _wallyimportpackageV18_find_destination($node->field_destinations, $temp_result)) {
-            $temp_result['rank'] = ($temp_result['rank'] == 'DNC') ? 'DNC'.$actual_dest['rank'] : $temp_result['rank'];
-            $temp_result['time_rank'] = $actual_dest['time_rank'];
-          }
-    
-          if ($temp_result['rank'] == 'DNC') {
-            $temp_result['rank'] = 0;
-          }
-    
-          $result[$i] = $temp_result;
-          $i++;
-        }
-      }
-    
-      // If no destinations at all > Package can't be created.
-      if (count($result)) {
-        $node->field_destinations = $result;
+      if (count($destination_list)) {
+        //Add destinations to the package
+        $wrapper->field_destinations->set($destination_list);
       } else {
-        // @TODO: FATAL ERROR - PACKAGE DONE - NEED CHECK
-        $node->rejected = '';
-        $error_msg = t('No destination AT ALL for current package. Package rejected.');
-        drupal_set_message($error_msg,'error');
-        $log['error'] = TRUE;
-        $log['error_msg'] = $error_msg;
-        return '';
-      }*/
+        // If no destinations at all > Package can't be created
+        Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+      }
     } else {
-      drupal_set_message(t('Destination Path vocabulary not set. See settings.'),'error');
-      return '';
+      Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
     }
   }
+  
   
   /**
   *
@@ -817,7 +824,7 @@ class WallyXmlV1 extends Importer{
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
         switch ($entity->type){
-          case 'photo':
+          case 'image':
             $wrapper->scald_thumbnail->set((array) $file);
             break;
           case 'audio':

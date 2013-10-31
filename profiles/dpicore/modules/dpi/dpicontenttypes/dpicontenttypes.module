@@ -239,16 +239,12 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
       // we are not in the library display view, so we need more than the title and thumbnail
 
       // Tell scald core what he should display
-      $view_mode="full";
+      $view_mode = "full";
 
-      //load content
-      links_list_view($atom,'default');
-
-
-      $temporary_content=scald_atom_view($atom, $context );
+      $temporary_content = scald_atom_view($atom, $context );
 
 
-      $atom->rendered->player = theme('atom_links_lists',array('content'=>$temporary_content) );
+      $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
 
       //Don't show title, not needed
       $atom->rendered->title = '';
