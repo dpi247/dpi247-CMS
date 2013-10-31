@@ -63,13 +63,12 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $targetview=$target_wrapper->targetview->value();
 
 
-
   _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
 
   $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
   $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
-
+  
 
   return $block;
 
@@ -233,7 +232,6 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
     'pager_id',
     'pager_type',
     'rank_max_value',
-    'rank_behavior',
     'template_rule'
   );
   foreach($confs as $conf){
