@@ -3,6 +3,7 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
 
 
@@ -184,6 +185,7 @@ function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
  * This should be used only for dpi inline and dpi mediabox scald's context
  */
 function dpicontenttypes_scald_render($atom, $context, $options, $mode) {
+  dsm(func_get_args(), 'args');
   switch ($context) {
     case 'debug':
       $output = '<pre class="debug">' . print_r($atom, TRUE) . '</pre>';
@@ -275,7 +277,28 @@ function dpicontenttypes_scald_atom_delete($atom){
   _dpicontenttypes_entitydeletedpiproperties($atom, 'scald_atom', $atom->sid);
 }
 
-
+/**
+ * Implementation of hook_field_attach_view_alter
+ * Add package nid to scald tag to get it as an option
+ */
+function dpicontenttypes_field_attach_view_alter(&$output, $context) {
+  list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+  if ($bundle == 'package') {
+    $fields = field_info_instances($context['entity_type'], $bundle);
+    foreach ($fields as $name => $field) {
+      if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
+        foreach (element_children($output[$name]) as $key) {
+          $matches = array();
+          preg_match_all(SCALD_SAS_MATCH_PATTERN, $output[$name][$key]['#markup'], $matches);
+          foreach ($matches[0] as $match_id => $old_tag) {
+            $new_tag = str_replace(']', ' package='.$id.']', $old_tag);
+            $output[$name][$key]['#markup'] = str_replace($old_tag, $new_tag, $output[$name][$key]['#markup']);
+          }
+        }
+      }
+    }
+  }
+}
 
 /**
  * Implement hook_form().
