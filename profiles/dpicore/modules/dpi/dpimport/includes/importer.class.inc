@@ -288,13 +288,24 @@ abstract class Importer{
       
       //Save entity
       if (!Logger::error()){
-        entity_save($entity_type, $entity);
+        $this->saveEntity($dom, $entity_type, $entity);
       } else {
         $entity = NULL;
       }
     } 
     
     return $entity;
+  }
+  
+  /**
+   * 
+   * Save entity
+   * @param DOM $dom
+   * @param String $entity_type
+   * @param Object $entity
+   */
+  protected function saveEntity($dom, $entity_type, $entity){
+    entity_save($entity_type, $entity);
   }
 }
 
