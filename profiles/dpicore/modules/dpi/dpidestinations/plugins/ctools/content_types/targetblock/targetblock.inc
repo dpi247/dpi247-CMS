@@ -118,6 +118,7 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
 
   
   $targetview_clone->display_handler->view->result=$result;
+  $targetview_clone->result=$result;
   //$targetview_clone->style_plugin->view->result=$result;
   //$targetview_clone->style_plugin->row_plugin->view->result=$result;
   
