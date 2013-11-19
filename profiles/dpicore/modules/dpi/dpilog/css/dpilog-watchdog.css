@@ -1,0 +1,101 @@
+#edit-type-wrapper, #edit-severity-wrapper, #edit-user-wrapper {
+  float: left; /* LTR */
+  padding-right: .8em; /* LTR */
+  margin: 0.1em;
+  /**
+   * In Opera 9, DOM elements with the property of "overflow: auto"
+   * will partially hide its contents with unnecessary scrollbars when
+   * its immediate child is floated without an explicit width set.
+   */
+  width: 15em;
+}
+#dpiwatchdog-filter-form .form-item select.form-select {
+  width: 100%;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-user {
+  background: #ffd;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-user .active {
+  background: #eed;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-content {
+  background: #ddf;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-content .active {
+  background: #cce;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-page-not-found, tr.dpiwatchdog-access-denied {
+  background: #dfd;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-page-not-found .active, #admin-dpiwatchdog  tr.dpiwatchdog-access-denied .active {
+  background: #cec;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-error {
+  background: #FFE0E0;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-error .active {
+  background: #eeb9b9;
+}
+#admin-dpiwatchdog  tr.dpiwatchdog-highlight {
+  background: #88E05E;
+}
+.dpiwatchdog-otherprocesses tbody tr td {
+  padding:1px 10px;
+}
+
+
+/** In settings table **/
+.fixedtable {table-layout:fixed;}
+
+/*
+.fixedtable thead {
+  background: #CCCCCC;
+  background: -moz-linear-gradient(left,  #ffffff 20%, #d3ef00 19%, #fc9700 56%, #dd3e3e 100%);
+  background: -webkit-gradient(linear, left top, right top, color-stop(20%,#ffffff), color-stop(19%,#d3ef00), color-stop(56%,#fc9700), color-stop(100%,#dd3e3e));
+  background: -webkit-linear-gradient(left,  #ffffff 20%,#d3ef00 19%,#fc9700 56%,#dd3e3e 100%);
+  background: -o-linear-gradient(left,  #ffffff 20%,#d3ef00 19%,#fc9700 56%,#dd3e3e 100%);
+  background: -ms-linear-gradient(left,  #ffffff 20%,#d3ef00 19%,#fc9700 56%,#dd3e3e 100%);
+  background: linear-gradient(to right,  #ffffff 20%,#d3ef00 19%,#fc9700 56%,#dd3e3e 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#dd3e3e',GradientType=1 );
+}
+*/
+
+#dpilog-watchdog-configure-page table td {
+  padding:0;
+  text-align:center;
+  vertical-align: middle;
+}
+#dpilog-watchdog-configure-page table th {
+  text-align:center;
+  vertical-align: middle;
+  color: #000000;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-align: center;
+  background:transparent;
+  text-shadow:0 0 0 transparent;
+  text-transform: none
+}
+#dpilog-watchdog-configure-page table.fixedtable label {
+  display:none;
+}
+.buttonToggle {font-size:0.9em;cursor:pointer;padding:7px;line-height:1.4em; width:100%; display:block;outline:0 none !important;}
+.buttonToggle:focus, .buttonToggle:active {outline:0 none !important;}
+.buttonToggle::-moz-focus-inner {outline:0 none !important;border:0;}
+.save_simple input { background-color:rgba(135, 206, 250, .7); cursor:pointer;}
+.save_backtrace input {background-color:rgba(205, 0, 0, 0.7); cursor:pointer;}
+.ignore input {background-color:rgba(240, 230, 140, .7); cursor:pointer;}
+.save_simple input:hover { background-color:rgba(135, 206, 250, 1); cursor:pointer;}
+.save_backtrace input:hover {background-color:rgba(205, 0, 0, 1); cursor:pointer;}
+.ignore input:hover {background-color:rgba(240, 230, 140, 1); cursor:pointer;}
+
+.save_backtrace input {color:#FFF;}
+
+.dpiwatchdogdelete {padding-left:20px;background-position:center left;background-repeat:no-repeat; background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAALHRFWHRDcmVhdGlvbiBUaW1lAHNhbS4gNSBtYWkgMjAwNyAxMDoyMTo0NSArMDEwMI5DjFAAAAAHdElNRQfYAgEUJCbID28QAAAACXBIWXMAAArwAAAK8AFCrDSYAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF/wAA9/f3jIyc5+fn////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4XkuAAAAAF0Uk5TAEDm2GYAAAA8SURBVHjajY5JDgAwCAJB+/8316Ril0PjcGKCiUAXu4pQH8KegSbUxFg3GXwFI4egeaSEZ7ZYlGB+QbSYkK8BEc7Zpd0AAAAASUVORK5CYII=);}
+.dpiwatchdogdelete:hover {text-decoration:underline;}
+
+#dpilog-watchdog-filter-form div.form-item {float:left;margin-right: 30px;}
+.dpiwatchdog-event .help {color:#C0C0C0;}
+.dpiwatchdog-event .help:hover {color:#696969;}
+.dpiwatchdog-event .help a {color:#C0C0C0;}
+.dpiwatchdog-event .help a:hover {color:#696969;}

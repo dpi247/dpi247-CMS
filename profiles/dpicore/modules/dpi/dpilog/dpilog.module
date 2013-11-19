@@ -1,11 +1,27 @@
 <?php 
 module_load_include('inc', 'dpilog', 'dpilog.private');
+module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
 
 
 function dpilog_boot(){
   global $dpilog_thread_id;
-  $dpilog_thread_id = uniqid();
+  $dpilog_thread_id = mt_rand(1000, mt_getrandmax()); // faster than uniqid()
+  // hook_exit() is not always called
+  // register_shutdown_function() too rude?
+  drupal_register_shutdown_function('_dpilog_shutdown');
+}
 
+
+/**
+ * Implements hook_init().
+ */
+function dpilog_init() {
+  $dpilog_path = drupal_get_path('module', 'dpilog');
+  if (arg(0) == 'admin' && arg(1) == 'reports') {
+    // Add the CSS for this module
+    drupal_add_css($dpilog_path.'/css/dpilog-watchdog.css','module', 'all', FALSE);
+    drupal_add_js($dpilog_path .'/js/dpilog-watchdog.js',array('scope' => 'header', 'weight' => 5));
+  }
 }
 
 
@@ -114,7 +130,77 @@ function dpilog_menu(){
 
   );
 
+  /*---- smart watchdog ----*/
+  
+  $items['admin/reports/dblog'] = array(
+    'title' => 'Watchdogs',
+    'description' => 'View events that have recently been logged.',
+    'page callback' => 'dpilog_watchdog_overview',
+    'access arguments' => array('access site reports'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -1,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
+  $items['admin/reports/dblog/listing'] = array(
+    'title' => 'Recent watchdogs',
+    'description' => 'Listing of recent log messages.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['admin/reports/dblog/configure'] = array(
+    'title' => 'Configure',
+    'description' => 'Configure watchdog.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpilog_watchdog_configure_page'),
+    'access arguments' => array('access site reports'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
+  $items['admin/reports/dblog/configure/configure'] = array(
+    'title' => 'Configure',
+    'description' => 'Configure watchdog.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
 
+  $items['admin/reports/dblog/configure/export'] = array(
+    'title' => 'Import/Export configuration',
+    'description' => 'Export watchdog configuration.',
+    //'page callback' => 'dpilog_watchdog_configure_export_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpilog_watchdog_configure_export_page'),
+    'access arguments' => array('access site reports'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
+  $items['admin/reports/dblog/configure/purge'] = array(
+    'title' => 'Purge',
+    'description' => 'Purge configuration.',
+    //'page callback' => 'dpilog_watchdog_configure_export_page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpilog_watchdog_configure_purge_form'),
+    'access arguments' => array('access site reports'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 4,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
+  $items['admin/reports/dblog/configure/delete/%'] = array(
+    'title' => 'Delete module configuration for wallylog',
+    'page callback' => 'dpilog_watchdog_delete_rule',
+    'page arguments' => array(5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
+  $items['admin/reports/event/%'] = array(
+    'title' => 'Details',
+    'page callback' => 'dpilog_watchdog_event',
+    'page arguments' => array(3),
+    'access arguments' => array('access site reports'),
+    'file' => 'includes/dpilog.watchdog.pages.inc',
+  );
   return $items;
 }
 
@@ -128,6 +214,22 @@ function dpilog_theme(){
     'dpilog_form_page_configure_display_form'=>array(
       'render element' => 'form',
       'file'=>'templates/theme.inc',
+    ),
+    'dpilog_watchdog_message' => array(
+      'variables' => array('event' => NULL, 'as_link' => FALSE, 'length' => 56),
+      'file' => 'templates/theme-watchdog.inc',
+    ),
+    'dpilog_watchdog_rules_settings_form' => array(
+      'render element' => 'form',
+      'file'=>'templates/theme-watchdog.inc',
+    ),
+    'dpilog_watchdog_rules_settings_selectbox' => array(
+      'render element' => 'element',
+      'file'=>'templates/theme-watchdog.inc',
+    ),
+    'dpilog_wathchog_backtrace' => array(
+      'variables' => array('backtrace' => NULL),
+      'file' => 'templates/theme-watchdog.inc',
     ),
   );
 }
@@ -160,6 +262,130 @@ function dpilog_exit(){
     }
     $querry->execute();
   }
+}
 
 
+/**
+ * Implements hook_cron().
+ *
+ * Controls the size of the log table, paring it to 'dpilog_watchdog_row_limit' messages.
+ */
+function dpilog_cron() {
+  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  // Cleanup the watchdog table.
+  $row_limit = dpi_variable_get('dpilog_watchdog_row_limit', 1000);
+
+  // For row limit n, get the wid of the nth row in descending wid order.
+  // Counting the most recent n rows avoids issues with wid number sequences,
+  // e.g. auto_increment value > 1 or rows deleted directly from the table.
+  if ($row_limit > 0) {
+    $min_row = db_select($watchdog_table_name, 'w')
+      ->fields('w', array('wid'))
+      ->orderBy('wid', 'DESC')
+      ->range($row_limit - 1, 1)
+      ->execute()->fetchField();
+
+    // Delete all table entries older than the nth row, if nth row was found.
+    if ($min_row) {
+      db_delete($watchdog_table_name)
+        ->condition('wid', $min_row, '<')
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Implements hook_watchdog().
+ *
+ * Note: Some values may be truncated to meet database column size restrictions.
+ */
+function dpilog_watchdog(array $log_entry) {
+  global $dpilog_thread_id;
+  module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
+  if(!$log_entry || !is_array($log_entry) || empty($log_entry))
+    return FALSE;
+  switch (_dpilog_watchdog_get_action($log_entry)) {
+    case "ignore": // Don't record the event
+      return FALSE;
+      break;
+    case "save_backtrace": // Save with trace
+      try {
+        $backtrace = gzcompress(json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)),4);
+        //'backtrace' => gzcompress(serialize(debug_backtrace()),4) /// PDOException: You cannot serialize or unserialize PDOStatement instances
+      }
+      catch (Exception $e) {
+        $backtrace = null; // FAIL
+      } 
+      break;
+    case "save_simple": // Simple watchdog
+    default:
+      $backtrace = null;
+      break;
+  }
+  $watchdogs = &_dpilog_static('watchdogs');
+  $log = array(
+    'uid' => $log_entry['uid'],
+    'type' => substr($log_entry['type'], 0, 64),
+    'message' => $log_entry['message'],
+    'variables' => serialize($log_entry['variables']),
+    'severity' => $log_entry['severity'],
+    'location' => $log_entry['request_uri'],
+    'referer' => $log_entry['referer'],
+    'hostname' => substr($log_entry['ip'], 0, 128),
+    'timestamp' => $log_entry['timestamp'],
+    'processid' => $dpilog_thread_id,
+    'backtrace' => $backtrace
+  );
+  $watchdogs[] = $log;
+}
+
+
+/**
+ * Initialize and get the static list of logs
+ * @param the key you want to retrieve. Default "watchdogs", "dpilogs", also "processid"
+ * @return {void} The value associated to the key
+ */
+function &_dpilog_static($key = "watchdogs") {
+  static $dpilog_static = array();
+  global $dpilog_thread_id;
+  if(!trim($key))
+    return FALSE;
+  if(empty($dpilog_static)){
+    $dpilog_static['processid'] = $dpilog_thread_id;
+    $dpilog_static['watchdogs'] = array();
+    $dpilog_static['dpilogs'] = array();
+  }
+  if(!isset($dpilog_static[$key]))
+    $dpilog_static[$key] = array();
+  return $dpilog_static[$key];
+}
+
+/**
+ * Called by register_shutdown_function
+ * in hook_boot(), it is used to
+ * save non-ignored watchdogs.
+ * @return void
+ */
+function _dpilog_shutdown(){
+  $watchdogs = &_dpilog_static('watchdogs');
+  if(!$watchdogs)
+    return FALSE;
+  return _dpilog_watchdog_save($watchdogs);
+}
+
+/**
+ * Inserts watchdogs into the database.
+ * @param  Array $watchdogs Watchdogs to save
+ * @return void
+ */
+function _dpilog_watchdog_save($watchdogs){
+  module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
+  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+
+  $insert = Database::getConnection('default', 'default')->insert($watchdog_table_name);
+  foreach($watchdogs as $watchdog){
+    $insert->fields(array_keys($watchdog));
+    $insert->values(array_values($watchdog));
+  }
+  $insert->execute();
 }
