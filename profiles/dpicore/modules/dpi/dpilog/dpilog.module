@@ -1,6 +1,5 @@
 <?php 
 module_load_include('inc', 'dpilog', 'dpilog.private');
-module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
 
 
 function dpilog_boot(){
@@ -308,7 +307,7 @@ function dpilog_cron() {
  */
 function dpilog_watchdog(array $log_entry) {
   global $dpilog_thread_id;
-  module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
+  module_load_include('inc', 'dpilog', 'dpilog.private');
   if(!$log_entry || !is_array($log_entry) || empty($log_entry))
     return FALSE;
   switch (_dpilog_watchdog_get_action($log_entry)) {
@@ -386,7 +385,7 @@ function _dpilog_shutdown(){
  * @return void
  */
 function _dpilog_watchdog_save($watchdogs){
-  module_load_include('inc', 'dpilog', 'dpilog.watchdog.private');
+  module_load_include('inc', 'dpilog', 'dpilog.private');
   $watchdog_table_name = _dpilog_watchdog_get_table_name();
 
   $insert = Database::getConnection('default', 'default')->insert($watchdog_table_name);

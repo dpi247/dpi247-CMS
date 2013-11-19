@@ -1,6 +1,6 @@
 <?php
 
-module_load_include('inc', 'dpilog','dpilog.watchdog.private');
+module_load_include('inc', 'dpilog','dpilog.private');
 
 // --------------------------------------------------------------
 // ------------- Listing de tous les watchdogs ------------------
