@@ -274,7 +274,7 @@ function dpilog_watchdog_filter_form_submit($form, &$form_state) {
       $_SESSION['dpilog_watchdog_overview_filter'] = array();
       break;
   }
-  return 'admin/reports/dblog';
+  return 'admin/dpilog/watchdogs';
 }
 
 /**
@@ -626,7 +626,7 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
  * @param $module {String} Module name
  */
 function dpilog_watchdog_delete_rule($module=""){
-  $url_config_page = 'admin/reports/dblog/configure';
+  $url_config_page = 'admin/dpilog/watchdogs/configure';
   if(trim($module) == '' || $module == "DEFAULT")
     drupal_goto($url_config_page);
   $mapping = _dpilog_watchdog_get_rules();

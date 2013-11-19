@@ -17,7 +17,7 @@ function dpilog_boot(){
  */
 function dpilog_init() {
   $dpilog_path = drupal_get_path('module', 'dpilog');
-  if (arg(0) == 'admin' && arg(1) == 'reports') {
+  if (arg(0) == 'admin' && arg(1) == 'dpilog') {
     // Add the CSS for this module
     drupal_add_css($dpilog_path.'/css/dpilog-watchdog.css','module', 'all', FALSE);
     drupal_add_js($dpilog_path .'/js/dpilog-watchdog.js',array('scope' => 'header', 'weight' => 5));
@@ -131,8 +131,15 @@ function dpilog_menu(){
   );
 
   /*---- smart watchdog ----*/
-  
   $items['admin/reports/dblog'] = array(
+    'title' => 'Watchdogs',
+    'description' => 'View events that have recently been logged.',
+    'page callback' => 'drupal_goto',
+    'page arguments' => array('admin/dpilog/watchdogs'),
+    'access arguments' => array('access site reports'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/dpilog/watchdogs'] = array(
     'title' => 'Watchdogs',
     'description' => 'View events that have recently been logged.',
     'page callback' => 'dpilog_watchdog_overview',
@@ -141,13 +148,13 @@ function dpilog_menu(){
     'weight' => -1,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/reports/dblog/listing'] = array(
+  $items['admin/dpilog/watchdogs/listing'] = array(
     'title' => 'Recent watchdogs',
     'description' => 'Listing of recent log messages.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['admin/reports/dblog/configure'] = array(
+  $items['admin/dpilog/watchdogs/configure'] = array(
     'title' => 'Configure',
     'description' => 'Configure watchdog.',
     'page callback' => 'drupal_get_form',
@@ -157,14 +164,14 @@ function dpilog_menu(){
     'weight' => 2,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/reports/dblog/configure/configure'] = array(
+  $items['admin/dpilog/watchdogs/configure/configure'] = array(
     'title' => 'Configure',
     'description' => 'Configure watchdog.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
 
-  $items['admin/reports/dblog/configure/export'] = array(
+  $items['admin/dpilog/watchdogs/configure/export'] = array(
     'title' => 'Import/Export configuration',
     'description' => 'Export watchdog configuration.',
     //'page callback' => 'dpilog_watchdog_configure_export_page',
@@ -175,7 +182,7 @@ function dpilog_menu(){
     'weight' => 3,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/reports/dblog/configure/purge'] = array(
+  $items['admin/dpilog/watchdogs/configure/purge'] = array(
     'title' => 'Purge',
     'description' => 'Purge configuration.',
     //'page callback' => 'dpilog_watchdog_configure_export_page',
@@ -186,7 +193,7 @@ function dpilog_menu(){
     'weight' => 4,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/reports/dblog/configure/delete/%'] = array(
+  $items['admin/dpilog/watchdogs/configure/delete/%'] = array(
     'title' => 'Delete module configuration for wallylog',
     'page callback' => 'dpilog_watchdog_delete_rule',
     'page arguments' => array(5),
@@ -194,10 +201,10 @@ function dpilog_menu(){
     'type' => MENU_CALLBACK,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/reports/event/%'] = array(
+  $items['admin/dpilog/watchdogs/event/%'] = array(
     'title' => 'Details',
     'page callback' => 'dpilog_watchdog_event',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'access arguments' => array('access site reports'),
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
