@@ -36,7 +36,7 @@ class TargetController extends EntityAPIControllerExportable{
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
   public function load_target_by_name($target_name){
-  
+
     $conditions=array('machine_name'=>$target_name);
     $result=target_load_multiple(FALSE, $conditions);
     if(!$result){
@@ -52,7 +52,12 @@ class TargetBlockController extends EntityAPIControllerExportable{
     global $user;
     $values += array(
       'use_pager' => FALSE,
+      'use_split' => FALSE,
+      'split_delta' => 0,
+      'offset' => 0,
+
     );
+
     return parent::create($values);
   }
   //return an array keyed with tid of targetblocks that belongs to a display id
@@ -68,7 +73,8 @@ class TargetBlockController extends EntityAPIControllerExportable{
     $conditions=array('pid'=>$pid);
     $result=current(targetblock_load_multiple(FALSE, $conditions));
     if(!$result){
-      $result=new TargetBlockEntity(array(),'TargetBlock');
+      $result=FALSE;
+      //$result=new TargetBlockEntity(array(),'TargetBlock');
     }
     return $result;
      
@@ -88,10 +94,10 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   public function load_targetblock_by_termid_and_target($term_id,$target_name){
-     $did=dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id);
-     return $this->load_targetblock_by_did_and_target($did,$target_name);
+    $did=dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id);
+    return $this->load_targetblock_by_did_and_target($did,$target_name);
   }
-  
+
   public function load_targetblocks_by_did_and_target($did,$target_name){
     $conditions=array('did'=>$did,'target'=>$target_name);
     $results=targetblock_load_multiple(FALSE, $conditions);
@@ -101,11 +107,79 @@ class TargetBlockController extends EntityAPIControllerExportable{
     return $results;
   }
 
-  public function save($entity, DatabaseTransaction $transaction = NULL){
-    _dpidestinatons_targetblock_calculate_node_count_for_targetblock($entity);
-    $result=parent::save($entity);
-    _dpidestinatons_targetblock_sync_node_count_for_targetblock($entity);
+  public function delete($entity, DatabaseTransaction $transaction = NULL){
+
+    $this->syncrohize_global_settings_of_targetblocks($entity, 'delete');
+
+    $result=parent::delete($entity);
+    //_dpidestinatons_targetblock_sync_node_count_for_targetblock($entity);
     return $result;
+
+  }
+  public function save($entity, DatabaseTransaction $transaction = NULL){
+
+
+
+    $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
+
+    $result=parent::save($entity);
+    return $result;
+
+  }
+  public function syncrohize_global_settings_of_targetblocks($entity,$operation){
+    if(!isset($entity->prevent_sync_recurssion)){
+      $original_entity_id=$entity->targetblockid;
+
+      if($entity->targetblockid==NULL){
+        $entity->targetblockid="new";
+      }
+      $targetblocks=$this->load_targetblocks_by_did_and_target($entity->did, $entity->target);
+
+      if($operation=='save'){
+        //We replace the existing $entity in DB by the new one
+        unset($targetblocks[$entity->targetblockid]);
+        $targetblocks[$entity->targetblockid]=$entity;
+      }elseif($operation=="delete"){
+        unset($targetblocks[$entity->targetblockid]);
+
+      }
+      if(count($targetblocks)>1){
+
+        $total_node_count=0;
+        foreach ($targetblocks as $targetblok){
+          $total_node_count+=$targetblok->node_count_for_targetblockinstance;
+          $order[$targetblok->targetblockid]=$targetblok->split_delta;
+        }
+        asort($order);
+        $split_delta=0;
+        $offset=0;
+        foreach($order as $targetblockid=>$order){
+          $targetblocks[$targetblockid]->node_count_for_targetblock=$total_node_count;
+          $targetblocks[$targetblockid]->use_split=TRUE;
+          $targetblocks[$targetblockid]->split_delta=$split_delta;
+          $targetblocks[$targetblockid]->offset=$offset;
+          $targetblocks[$targetblockid]->prevent_sync_recurssion=TRUE;
+          $split_delta=$split_delta+1;
+          $offset+=$targetblocks[$targetblockid]->node_count_for_targetblockinstance;
+
+          //no need to save the acutal entity object cause il will be saved right after the if method
+          if($targetblockid!=$original_entity_id){
+            targetblock_save($targetblocks[$targetblockid]);
+          }
+        }
+      }
+      else{
+        $entity->use_split=FALSE;
+        $entity->node_count_for_targetblock=$entity->node_count_for_targetblockinstance;
+        $entity->split_delta=0;
+        $entity->offset=0;
+      }
+      if($entity->targetblockid=="new"){
+        unset($entity->targetblockid);
+      }
+    }
+
+
 
   }
 }

@@ -1,4 +1,5 @@
-  <?php
+
+<?php
 
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
@@ -9,9 +10,9 @@ module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 
 /**
  * Implementation of hook_theme()
- */
+*/
 function dpidestinations_theme() {
- 
+
   $theme['dpidestinations_add_content_modal'] = array(
     'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL,'group' => NULL, 'categories'=> array(), 'column_count' => 2),
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
@@ -39,8 +40,8 @@ function dpidestinations_menu(){
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
-  
-  $items['admin/targetview_reorder/%taxonomy_term/%targetblock'] = array(
+  //secondary parameter should be a target machine_name
+  $items['admin/targetview_reorder/%taxonomy_term/%dpidestinations_api_target_machinename'] = array(
     'page callback' => 'dpidestinations_page_targetview_reorder',
     'page arguments' => array(2,3),
     'access arguments' => array('reorder target'),
@@ -48,7 +49,7 @@ function dpidestinations_menu(){
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
     'file' => 'dpidestinations.reorder.pages.inc'
   );
-  
+
   $items['target/%target'] = array(
     'title callback' => 'target_page_title',
     'title arguments' => array(1),
@@ -57,7 +58,7 @@ function dpidestinations_menu(){
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['target/add'] = array(
     'title' => 'Add Target!',
     'page callback' => 'target_add',
@@ -87,11 +88,12 @@ function dpidestinations_permission(){
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
-  
+
+
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController = new TargetBlockController('targetblock');
   $existing_targetblocks = $targetController->load_targetblocks_by_panels_display($display->did);
-  
+
   $targetblock_by_pid = array();
   foreach ($existing_targetblocks as $targetblockid  => $targetblock){
     $targetblock_by_pid[$targetblock->pid] = $targetblock;
@@ -103,18 +105,23 @@ function dpidestinations_panels_display_save($display){
       }
     }
   }
-  
+
   $targetblocks_to_delete_temp = array_diff_key($targetblock_by_pid, $panels_in_display_by_pid);
-  
+
   $targetblocks_to_delete = array();
   foreach ($targetblocks_to_delete_temp as $targetblock_to_delete_temp){
     if (isset($existing_targetblocks[$targetblock_to_delete_temp->targetblockid ])){
       $targetblocks_to_delete[$targetblock_to_delete_temp->targetblockid ] = $targetblock_to_delete_temp->targetblockid ;
     }
   }
-  targetblock_delete_multiple($targetblocks_to_delete);
-  
-  //STEP 2: Create or update other redacblock
+  if(count($targetblocks_to_delete)){
+    targetblock_delete_multiple($targetblocks_to_delete);
+  }
+
+
+
+
+  //STEP 2: Create new targetblock
   foreach ($display->content as $id => &$pane){
     if ($pane->type == 'targetblock'){
       if (!strstr($id, 'new')){
@@ -131,6 +138,8 @@ function dpidestinations_panels_display_save($display){
       }
     }
   }
+
+
 }
 
 
@@ -236,7 +245,7 @@ function dpidestinations_views_plugins() {
         'theme path' => drupal_get_path('module', 'views') . '/theme',
         'theme' => 'views_view',
         'use ajax' => FALSE,
-        'use pager' => FALSE,
+        'use pager' => TRUE,
         'use more' => FALSE,
         'accept attachments' => TRUE,
         'help topic' => 'targetview',
@@ -244,7 +253,7 @@ function dpidestinations_views_plugins() {
         //'base' => array('TargetBlock'), // only works with 'TargetBlock' as base.
       ),
     ),
-    'row' => array( 
+    'row' => array(
       'targetblock_node_row' => array(
         'title' => t('Target block Row'),
         'help' => t('(Displays the node according to the layout of his destination.'),
@@ -254,41 +263,41 @@ function dpidestinations_views_plugins() {
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-node',
-        
+
       )
     )
-      /*
-       'style' => array( //declare the style plugin
-  'target_style' => array(
-  'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
-  'title' => t('Target Style'),
-  'help' => t('Used for WallyEdit previews'),
-  'handler' => 'dpidestinations_views_plugin_style_targetblock',
-  'theme' => 'dpidestinations_style_targetblock',
-  'theme file' => 'theme.inc',
-  'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
-  'uses row plugin' => TRUE,
-  'uses fields' => FALSE,
-  'uses options' => TRUE,
-  'type' => 'normal',
-  ),
-  ),
+    /*
+     'style' => array( //declare the style plugin
+     'target_style' => array(
+     'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+     'title' => t('Target Style'),
+     'help' => t('Used for WallyEdit previews'),
+     'handler' => 'dpidestinations_views_plugin_style_targetblock',
+     'theme' => 'dpidestinations_style_targetblock',
+     'theme file' => 'theme.inc',
+     'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
+     'uses row plugin' => TRUE,
+     'uses fields' => FALSE,
+     'uses options' => TRUE,
+     'type' => 'normal',
+     ),
+     ),
 
-  'row' => array( //declare the unformatted row plugin
-  'targetblock_row' => array(
-  'title' => t('Target block Row'),
-  'help' => t('(Displays the node according to the layout of his destination.'),
-  'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
-  'handler' => 'dpidestinations_views_plugin_row_targetblock',
-  'theme' => 'dpidestinations_row_targetblock',
-  'theme file' => 'theme.inc',
-  'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
-  'uses row plugin' => TRUE,
-  'uses options' => TRUE,
-  'type' => 'normal',
-  )
-  )
-  */
+     'row' => array( //declare the unformatted row plugin
+     'targetblock_row' => array(
+     'title' => t('Target block Row'),
+     'help' => t('(Displays the node according to the layout of his destination.'),
+     'path' =>  drupal_get_path('module', 'dpidestinations') . '/plugins/views',
+     'handler' => 'dpidestinations_views_plugin_row_targetblock',
+     'theme' => 'dpidestinations_row_targetblock',
+     'theme file' => 'theme.inc',
+     'theme path' => drupal_get_path('module', 'dpidestinations') . "/theme",
+     'uses row plugin' => TRUE,
+     'uses options' => TRUE,
+     'type' => 'normal',
+     )
+     )
+    */
   );
 
 }
@@ -306,44 +315,44 @@ function dpidestinations_views_pre_render(&$view) {
   // Scramble the order of the rows shown on this result page.
   // Note that this could be done earlier, but not later in the view execution
   // process.
-  
+
 }
 
 
 function dpidestinations_views_api() {
   return array('api' => 2
-    );
+  );
 }
 
 function dpidestinations_preprocess_node(& $vars){
 
   //Remove this suggestion... useless
   unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
-  
+
   //Add suggestion regarding view_mode
   $vars['theme_hook_suggestions'][]='node__'.$vars['view_mode'];
   $vars['theme_hook_suggestions'][]='node__'.$vars['node']->type.'__'.$vars['view_mode'];
-  
+
   // The 'view' attribute of the node is added in views_preprocess_node()
-  
- 
+
+
   /*
    * Still Need to provide some overiding patterns
   if (!empty($vars['node']->view) && !empty($vars['node']->view->display_handler->plugin_name) && $vars['node']->view->display_handler->plugin_name=="targetview") {
-    dsm(($vars['node']->view));
-    $vars['view'] = $vars['node']->view;
-    
-    $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
-    if (!empty($vars['node']->view->current_display)) {
-      $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
-  
-      // If a node is being rendered in a view, and the view does not have a path,
-      // prevent drupal from accidentally setting the $page variable:
-      if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
-        $vars['page'] = FALSE;
-      }
-    }
+  dsm(($vars['node']->view));
+  $vars['view'] = $vars['node']->view;
+
+  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
+  if (!empty($vars['node']->view->current_display)) {
+  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
+
+  // If a node is being rendered in a view, and the view does not have a path,
+  // prevent drupal from accidentally setting the $page variable:
+  if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
+  $vars['page'] = FALSE;
+  }
+  }
   }
   */
-  
+
 }

@@ -21,7 +21,7 @@ function _dpidestinations_variable_set( $name, $default_value){
   if(function_exists('dpi_variable_set')){
     return dpi_variable_set($name,$default_value);
   }
-  else{
+  else{  
     return variable_set($name,$default_value);
   }
 
@@ -42,7 +42,7 @@ function _dpidestinations_variable_del( $name){
 
 
 function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
-  
+
   $vid = dpidestinations_api_get_destinations_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
@@ -52,7 +52,7 @@ function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = 
   ->orderBy('t.weight')
   ->orderBy('t.name')
   ->execute();
-  
+
   foreach ($result as $term) {
     $terms[$term->tid] = $term;
   }
@@ -68,7 +68,7 @@ function _dpidestinations_target_machine_name_exists($value){
   if(is_array($result)){
     return TRUE;
   }
-  return FALSE;  
+  return FALSE;
 }
 
 
@@ -103,11 +103,11 @@ function _dpidestinations_get_panels_display_for_destinationterm($term_id){
     ctools_include('context');
     ctools_include('context-task-handler');
     ctools_include('plugins');
-  
+
     $handler=_dpidestinations_get_panels_handler_for_destinationterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
     $display = panels_panel_context_get_display($handler);
-  
+
     $displays[$term_id] = $display;
   }
   return  $displays[$term_id];
@@ -123,10 +123,10 @@ function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
     $data['tid']=$term_id;
 
     $destination=destinationterm_load($term_id);
-    
+
     $task= page_manager_get_task('destinations');
     $contexts = ctools_context_handler_get_task_contexts($task, '', array($destination));
-    
+
     $sorted_handlers = page_manager_load_sorted_handlers($task, '', TRUE);
     $id = ctools_context_handler_get_render_handler($task, NULL, $sorted_handlers,$contexts, array());
 
@@ -145,10 +145,10 @@ function _dpidestinations_get_available_targetlayouts(){
   $return=array();
   foreach ($available_targetlayouts as $key=>$value){
     $return[$key]=$value["label"];
-    
+
   }
   return $return;
-  
+
 }
 function _dpidestinations_get_targets_for_destinationterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
@@ -177,9 +177,12 @@ function _target_metadata_getter($object, array $options, $property_name){
   }
   if($property_name=="available_templateoverrides"){
     $result=array();
-    foreach(explode("\n",$object->available_templateoverrides) as $line){
-      list($key,$value)=explode("|",$line);
-      $result[$key]=$value;
+    return $result;
+    if($object->available_templateoverrides!="" && $object->available_templateoverrides!="\n"){
+      foreach(explode("\n",$object->available_templateoverrides) as $line){
+        list($key,$value)=explode("|",$line);
+        $result[$key]=$value;
+      }
     }
     return $object->available_templateoverrides=$result;
   }
@@ -216,60 +219,57 @@ function _targetblock_metadata_getter($object, array $options, $property_name){
   if($property_name=="target"){
     return $object->target;
   }
+  if($property_name=="target_object"){
+    return $object->target;
+  }
   if($property_name=="other_splitted_targetblocks"){
     $targetblockController=new TargetBlockController('targetblock');
-    
+
     $other_splitted_targetblocks=$targetblockController->load_targetblocks_by_did_and_target($object->did, $object->target, $object->delta);
-    
+
     //We remove the current targetblock from the set
     unset($other_splitted_targetblocks[$object->targetblockid]);
     return $other_splitted_targetblocks;
   }
-  
+
 }
 
-/* 
+/*
  * UPDATE the virtualtrank of each items of a node
- * 
- */
+*
+*/
 function _dpidestinations_virtualrank_update_items( & $items){
   foreach($items as & $item){
     _dpidestinations_virtualrank_update_item( $item);
   }
 }
 /*
- * Update the virtualrank of an item 
- */
+ * Update the virtualrank of an item
+*/
 function _dpidestinations_virtualrank_update_item( & $item){
   if($item['rank']=='default'){
     $controller=new TargetBlockController('targetblock');
     $targetblock=$controller->load_targetblock_by_termid_and_target($item['tid'],$item['target']);
     if($targetblock){
       $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-    
+
       $rank_max_value= $wrapper->rank_max_value->value();
-      $rank_behavior=$wrapper->rank_behavior->value();;
-   
-      if($rank_behavior=='top'){
-          $item['rank']=1;
-      }
-      if($rank_behavior=='bottom'){
-          $item['rank']=$rank_max_value+1;
-      }
+      $item['rank']=1;
+      
     }
     else{
       //We need a fallback if the targetblock is not found
-      watchdog("dpidestinations",t("No targetblock found for tid %tid, target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));  
-      drupal_set_message(t("An error occured during rank calculation for tid %tid and target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));  
-      
+      watchdog("dpidestinations",t("No targetblock found for tid %tid, target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));
+      drupal_set_message(t("An error occured during rank calculation for tid %tid and target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));
+
       if($item['rank']=='default'){
         $item['rank']=1;
       }
       elseif($item['rank']=='DNC'){
         $item['rank']=0;
-        
+
       }
-      
+
     }
   }
   if($item['rank']!='DNC'){
@@ -279,7 +279,7 @@ function _dpidestinations_virtualrank_update_item( & $item){
   else{
     $item['rank']=0;
   }
-  
+
 }
 
 /*
@@ -288,26 +288,26 @@ function _dpidestinations_virtualrank_update_item( & $item){
 function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position){
   //@todo: avoid hard coding of the table...
   $destination_table='field_data_field_destinations';
-  
+
   //USING OFFEST for efficency
   if($position==1 or $position ==2)
     $offset=0;
-  else 
+  else
     $offset=  $position-2;
-  
+
   $query = db_select($destination_table, 'd');
   //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
   $query->condition('d.field_destinations_tid', $tid, '=');
   $query->condition('d.field_destinations_target', $target, '=');
   $query->fields('d', array('field_destinations_virtual_rank'));
   $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
-  $query->range($offset,2 ); //offset is the first argument, second argument is 
+  $query->range($offset,2 ); //offset is the first argument, second argument is
   $results = $query->execute();
   foreach($results as$result){
     $array_results[]=$result;
-    
+
   }
-  
+
   if(count($array_results)==0){
     //this is the first package in the destination
     //set the value regarding the number of reserved position in the destiantion
@@ -315,8 +315,8 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $targetblock=$controller->load_targetblock_by_termid_and_target($tid,$target);
     $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
     $rank_max_value = $wrapper->rank_max_value->value();
-    
-    
+
+
     $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   }
   else{
@@ -327,24 +327,24 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
       if(count($array_results)>1){
         // we do (1+A+B)/2 to be sure that if there is a saturation the saturation is for the upper element
         $virtual_rank =  (1 + $array_results[0]->field_destinations_virtual_rank +$array_results[1]->field_destinations_virtual_rank )/2;
-        
+
       }
       else{
         $virtual_rank =  $array_results[0]->field_destinations_virtual_rank/2;
       }
-      
+
     }
-  }  
+  }
   $virtual_rank=(int) $virtual_rank;
-  
+
   if(  $virtual_rank==$array_results[0]->field_destinations_virtual_rank){
-    
+
     watchdog('dpidestinations','Virtual_rank saturation for term %tid and target %target at position %position',array('%tid'=>$tid,'%target'=>$target,'%position'=>$position));
     drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team',array('%tid'=>$tid,'%target'=>$target,'%position'=>$position)));
-    
-     //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
-  
-    
+
+    //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
+
+
     $query2 = db_select($destination_table, 'd');
     //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
     $query2->condition('d.field_destinations_tid', $tid, '=');
@@ -353,42 +353,42 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $query2->orderBy('d.field_destinations_virtual_rank', 'DESC');
     $query2->range(0,$position -1); //offset is the first argument, second argument is
     $results2 = $query2->execute();
-    
+
     $nids=array();
     foreach($results2 as $index => $row_result){
       $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*_dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000));
       $nids[]=array('nid'=>$row_result->entity_id,'virtual_rank'=>$new_virtual_rank);
       $keyed_nids[$index]=$row_result->entity_id;
       $keyed_virtualranks[$index]=$new_virtual_rank;
-      
+
       db_update($destination_table) // Table name no longer needs {}
       ->fields(array(
-        'field_destinations_virtual_rank' => $new_virtual_rank,
+      'field_destinations_virtual_rank' => $new_virtual_rank,
       ))
       ->condition('entity_id',$row_result->entity_id)
       ->condition('field_destinations_tid',$tid)
       ->condition('field_destinations_target',$target)
       ->condition('delta',$row_result->delta)
       ->execute();
-      
+
     }
-    
+
     entity_get_controller('node')->resetCache($keyed_nids);
-    
+
     module_invoke_all('dpidestinations_virtualrank_dispersion',$tid,$target,$keyed_nids);
-    
+
   }
-  
+
   return $virtual_rank;
 
 
 }
 
 function _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $new_virtual_rank){
-  
+
   //@todo: avoid hard coding of the table...
   $destination_table='field_data_field_destinations';
-  
+
   db_update($destination_table) // Table name no longer needs {}
   ->fields(array(
   'field_destinations_virtual_rank' => $new_virtual_rank,
@@ -397,11 +397,11 @@ function _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target
   ->condition('field_destinations_tid',$term_id)
   ->condition('field_destinations_target',$target_name)
   ->execute();
-  
+
   entity_get_controller('node')->resetCache(array($nid));
-  
-  
-  
+
+
+
 }
 
 function _dpidestinatons_targetblock_calculate_node_count_for_targetblock(& $targetblock){
@@ -409,14 +409,14 @@ function _dpidestinatons_targetblock_calculate_node_count_for_targetblock(& $tar
   if($targetblock->use_split and $targetblock->total_count_do_not_propagate!=TRUE){
     $targetblock_wrapper=entity_metadata_wrapper('targetblock', $targetblock);
     $targetblockController=new TargetBlockController("targetblock");
-    
+
     $node_count_for_targetblock=0;
     $all_splitted_targetblocks=$targetblockController->load_targetblocks_by_did_and_target($targetblock->did, $targetblock->target);
     foreach($all_splitted_targetblocks as $splitted){
       $node_count_for_targetblock+=$splitted->node_count_for_targetblockinstance;
     }
     $targetblock->node_count_for_targetblock=$node_count_for_targetblock;
-  
+
   }
   elseif($targetblock->use_split==FALSE){
     $targetblock->node_count_for_targetblock=$targetblock->node_count_for_targetblockinstance;
@@ -426,13 +426,13 @@ function _dpidestinatons_targetblock_sync_node_count_for_targetblock(& $targetbl
   if($targetblock->use_split and $targetblock->total_count_do_not_propagate!=TRUE){
     $targetblock_wrapper=entity_metadata_wrapper('targetblock', $targetblock);
     $targetblockController=new TargetBlockController("targetblock");
-    
+
     $node_count_for_targetblock=0;
     $other_splitted_targetblocks=$targetblockController->load_targetblocks_by_did_and_target($targetblock->did, $targetblock->target);
     foreach($other_splitted_targetblocks as $splitted){
       $node_count_for_targetblock+=$splitted->node_count_for_targetblockinstance;
     }
-  
+
     $other_splitted_targetblocks=$targetblock_wrapper->other_splitted_targetblocks->value();
     foreach($other_splitted_targetblocks as $other_splitted_targetblock){
       //Set total_count_do_not_propagate to avoid recursive calls
@@ -440,43 +440,57 @@ function _dpidestinatons_targetblock_sync_node_count_for_targetblock(& $targetbl
       $other_splitted_targetblock->node_count_for_targetblock=$node_count_for_targetblock;
       targetblock_save( $other_splitted_targetblock);
     }
-  
+
   }
-  
+
 }
 
 /*
  * Initialize a reorder targetview
- * 
- * You still need to execute 
- * $targetview->pre_execute();
- * $targetview->execute();
- */
+*
+* You still need to execute
+* $targetview->pre_execute();
+* $targetview->execute();
+*/
 function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-  
+
   $target=$targetblock_wrapper->target->value();
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   $target->view_name=$targetview_reorder_view_name;
   $target->view_display=$targetview_reorder_display;
-  
+
   $target_wrapper = entity_metadata_wrapper('target', $target);
-  
+
   //We use the targetview_reorder view to ensure we got the proper information.
   $targetview=$target_wrapper->targetview->value();
-  
-  
+
+
   //We double the number of rows and force the use of pager
   $targetblock->node_count_for_targetblockinstance=2*$targetblock->node_count_for_targetblockinstance;
   $targetblock->use_pager=TRUE;
-  
+
   $term_value=$term->tid;
   $target_value=$target->machine_name;
-  
+
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
   return $targetview;
-  
+
 }
+/**
+ * initialize a targetview
+ *
+ * Set tid and target filter and define
+ *
+ *   offest
+ *   items_per_page
+ *   the use of a pager
+ *
+ * @param unknown $targetview
+ * @param unknown $term_value
+ * @param unknown $target_value
+ * @param unknown $targetblock
+ */
 function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){
   //@todo: documenter ces arguments dans la doc technique
   $targetview->targetview_tid=$term_value;
@@ -484,6 +498,20 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
    
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
+
+
+  //$pager =  $targetview->display_handler->get_option('pager');
+  //$pager['type'] = 'none';
+  //$pager['options']['items_per_page']=$targetblock->node_count_for_targetblockinstance;
+  //$pager['options']['offset']=$targetblock->offset;
+  //$targetview->display_handler->set_option('pager', $pager);
+
+   
+  $targetview->set_items_per_page($targetblock->node_count_for_targetblockinstance);
+  $targetview->set_offset($targetblock->offset);
+
+
+
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 
@@ -492,6 +520,15 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
 
 
 
+/**
+ * Return the structure of the filter to filter results within a targetview for a specific destination
+ * This return the filter structure of the target
+ *
+ * @param String $target_value
+ * the target machine_name
+ *
+ * @return multitype:string boolean multitype:string boolean number multitype:  multitype:string unknown  multitype:boolean string multitype:number
+ */
 function   _dpidestinations_targetview_initialize_view_get_target_filter($target_value){
   return array (
     'id' => 'field_destinations_target',
@@ -540,6 +577,14 @@ function   _dpidestinations_targetview_initialize_view_get_target_filter($target
     ),
   );
 }
+
+/**
+ * Return the structure of the filter to filter results within a targetview for a specific destination
+ *
+ * @param Integer $term_value
+ * the tid of the destination term
+ * @return multitype:string boolean multitype:string boolean number multitype:  multitype:string unknown  multitype:boolean string multitype:number
+ */
 function   _dpidestinations_targetview_initialize_view_get_term_filter($term_value){
   return array (
     'id' => 'field_destinations_tid',
@@ -607,7 +652,7 @@ function __dpidestinations_get_selectoption_get_targets_for_destinationterm($ter
   if($term_id==''){
     return array(''=>'');
   }
-  
+
   $options=array();
   $targets= _dpidestinations_get_targets_for_destinationterm($term_id);
   foreach($targets as $subtype=>$target){
@@ -657,15 +702,15 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 
 
 function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($target_id,$target_name){
-  
+
   if($target_id='' OR $target_name==NULL)
     return array(""=>"");
   $controller=new TargetController('target');
   $target=$controller->load_target_by_name($target_name);
   $wrapper = entity_metadata_wrapper('target', $target);
-  
+
   return $wrapper->available_targetlayouts->value();
-  
+
 }
 
 
@@ -674,12 +719,12 @@ function __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_t
     return array(''=>'');
   }
   $rank_options=array();
-  
+
   if($is_update){
     $rank_options['DNC']=t('Dont change the rank');
   }
   $rank_options['default']=t('Default behavior');
-  
+
   $options=dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update);
   return $rank_options+$options;
 }
@@ -833,76 +878,76 @@ function _dpidestination_get_field_info_for_destination(){
  */
 function _dpidestination_get_instance_field_info_for_destination($entity_type,$bundle){
   return array('label' => 'Destinations',
-  'widget' => 
-  array (
-    'weight' => '28',
-    'type' => 'destination_default_widget',
-    'module' => 'dpidestinations',
-    'active' => 0,
-    'settings' => 
+    'widget' =>
     array (
-    ),
-  ),
-  'settings' => 
-  array (
-    'user_register_form' => false,
-  ),
-  'display' => 
-  array (
-    'default' => 
-    array (
-      'label' => 'above',
-      'type' => 'destination_default_formatter',
-      'settings' => 
-      array (
-      ),
+      'weight' => '28',
+      'type' => 'destination_default_widget',
       'module' => 'dpidestinations',
-      'weight' => 35,
-    ),
-    'teaser' => 
-    array (
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => 
+      'active' => 0,
+      'settings' =>
       array (
       ),
-      'weight' => 0,
     ),
-    'targetblock_small' => 
+    'settings' =>
     array (
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => 
-      array (
-      ),
-      'weight' => 0,
+      'user_register_form' => false,
     ),
-    'targetblock_medium' => 
+    'display' =>
     array (
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => 
+      'default' =>
       array (
+        'label' => 'above',
+        'type' => 'destination_default_formatter',
+        'settings' =>
+        array (
+        ),
+        'module' => 'dpidestinations',
+        'weight' => 35,
       ),
-      'weight' => 0,
-    ),
-    'targetblock_big' => 
-    array (
-      'type' => 'hidden',
-      'label' => 'above',
-      'settings' => 
+      'teaser' =>
       array (
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' =>
+        array (
+        ),
+        'weight' => 0,
       ),
-      'weight' => 0,
+      'targetblock_small' =>
+      array (
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' =>
+        array (
+        ),
+        'weight' => 0,
+      ),
+      'targetblock_medium' =>
+      array (
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' =>
+        array (
+        ),
+        'weight' => 0,
+      ),
+      'targetblock_big' =>
+      array (
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' =>
+        array (
+        ),
+        'weight' => 0,
+      ),
     ),
-  ),
-  'required' => 0,
-  'description' => '',
-  'default_value' => NULL,
-  'field_name' => 'field_destinations',
-  'entity_type' => $entity_type,
-  'bundle' => $bundle,
-  'deleted' => '0',
+    'required' => 0,
+    'description' => '',
+    'default_value' => NULL,
+    'field_name' => 'field_destinations',
+    'entity_type' => $entity_type,
+    'bundle' => $bundle,
+    'deleted' => '0',
   );
 
 }
