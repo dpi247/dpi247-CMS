@@ -112,6 +112,3 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
   $variables['form_submit'] = drupal_render_children($variables['form']);
 }
 
-
-
-

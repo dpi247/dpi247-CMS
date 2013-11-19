@@ -500,18 +500,29 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
 
 
-  //$pager =  $targetview->display_handler->get_option('pager');
-  //$pager['type'] = 'none';
-  //$pager['options']['items_per_page']=$targetblock->node_count_for_targetblockinstance;
-  //$pager['options']['offset']=$targetblock->offset;
-  //$targetview->display_handler->set_option('pager', $pager);
+  if($targetblock->use_pager){
+    $pager =  $targetview->display_handler->get_option('pager');
+    $pager['type'] = $targetblock->pager_type;
+    $pager['options']['items_per_page']=$targetblock->node_count_for_targetblock;
+    //We dont need offset since we execute the view only once
+    //$pager['options']['offset']=$targetblock->offset;
+    $targetview->display_handler->set_option('pager', $pager);
+    
+  }else{
+    $pager =  $targetview->display_handler->get_option('pager');
+    $pager['type'] = 'some';
+    $pager['options']['items_per_page']=$targetblock->node_count_for_targetblock;
+    //We dont need offset sinc we execute the view only once
+    //$pager['options']['offset']=$targetblock->offset;
+    $targetview->display_handler->set_option('pager', $pager);
 
-   
-  $targetview->set_items_per_page($targetblock->node_count_for_targetblockinstance);
-  $targetview->set_offset($targetblock->offset);
-
-
-
+    $targetview->set_items_per_page($targetblock->node_count_for_targetblock);
+    //$targetview->set_offset($targetblock->offset);
+      
+  }
+  $targetview->dpidestinations['destination']->tid=$term_value;
+  $targetview->dpidestinations['target']->machine_name=$target_value;
+  
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 
