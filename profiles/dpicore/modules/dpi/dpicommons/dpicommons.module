@@ -1,14 +1,13 @@
 <?php 
 
-module_load_include('inc', 'dpilog','dpilog.private');
-
+module_load_include('inc', 'dpilog', 'dpilog.private');
 
 /**
  * Implementation of hook_menu
- */
-function dpicommons_menu(){
+*/
+function dpicommons_menu() {
   $items = array();
- 
+
   $items['admin/config/dpi247'] = array(
     'title' => 'DPI247',
     'description' => 'Parent item for DPI247',
@@ -19,7 +18,7 @@ function dpicommons_menu(){
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  
+
   $items['admin/config/dpi247/settings'] = array(
     'title' => 'DPI247 Settings',
     'description' => 'General settings for DPI247',
@@ -29,33 +28,54 @@ function dpicommons_menu(){
     'file' => 'dpicommons.admin.pages.inc',
     'file path' => drupal_get_path('module', 'dpicommons').'/includes',
   );
-  
+
   return $items;
- 
 }
 
-
-function dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
-  if (module_exists('dpilog')){
-    _dpilog_log($log_name, $action, $message,$variables,$id, $severity, $uid,$keep_backtrace);
+function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
+  if (module_exists('dpilog')) {
+    _dpilog_log($log_name, $action, $message,$variables,$id, $severity, $uid, $keep_backtrace);
   }
 }
+
 /**
- * 
  * Check if an URL is valid and return a 200
  * Return TRUE if so False if not.
+ *
  * @param String $url
+ *
  * @return Boolean $response
  */
-function dpicommons_checkurlresponse($url){
+function dpicommons_checkurlresponse($url) {
   $response = TRUE;
-  if (!valid_url($url)){
+  if (!valid_url($url)) {
     $response = FALSE;
   } else {
+    // @todo : ajouter la possibilité de limiter les retries sur la requête http
     $request = drupal_http_request($url, array('timeout' => dpi_variable_get('dpicommons_http_request_timeout', 3)));
-    if ($request->code != '200'){
+    if ($request->code != '200') {
       $response = FALSE;
     }
   }
   return $response;
+}
+
+/**
+ * Get numeric keys of a structured array tree element.
+ *
+ * @param Array $element
+ *   The array to process
+ *
+ * @return Array
+ *   An array containing the numeric keys of the given array
+ */
+function dpicommons_element_children_numeric($element) {
+  return array_filter(array_keys((array) $element), 'dpicommons_element_child_numeric');
+}
+
+/**
+ * Check if the key is a numeric child.
+ */
+function dpicommons_element_child_numeric($key) {
+  return is_numeric($key);
 }
