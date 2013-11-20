@@ -160,7 +160,7 @@ function _dpilog_format_watchdog_structure($log_name, $action, $message, $severi
   $watchdog->severity=$severity;
   $watchdog->link=NULL;
   if(isset($dpilog_structure->lid)){
-    $watchdog->link=l('dpilog','admin/dpilog/log_message/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpilog/log_message/'.$dpilog_structure->lid);
+    $watchdog->link=l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid);
   }
   return $watchdog;
 }

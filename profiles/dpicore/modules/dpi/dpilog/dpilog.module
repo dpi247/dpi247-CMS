@@ -16,7 +16,7 @@ function dpilog_boot(){
  */
 function dpilog_init() {
   $dpilog_path = drupal_get_path('module', 'dpilog');
-  if (arg(0) == 'admin' && arg(1) == 'dpilog') {
+  if (arg(0) == 'admin' && arg(1) == 'dpi' && arg(2) == 'dpilogs') {
     // Add the CSS for this module
     drupal_add_css($dpilog_path.'/css/dpilog-watchdog.css','module', 'all', FALSE);
     drupal_add_js($dpilog_path .'/js/dpilog-watchdog.js',array('scope' => 'header', 'weight' => 5));
@@ -25,8 +25,8 @@ function dpilog_init() {
 
 
 function dpilog_menu(){
-  $items['admin/dpilog'] = array(
-    'title'=>'Logs',
+  $items['admin/dpi/dpilogs'] = array(
+    'title'=>'DPI Logs and Watchdogs',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
@@ -34,15 +34,15 @@ function dpilog_menu(){
     'weight'=>1,
 
   );
-  $items['admin/dpilog/log/%'] = array(
+  $items['admin/dpi/dpilogs/dpilog/log/%'] = array(
     'title'=> 'Logs',
     'page callback' => 'dpilog_page_view_list',
     'access arguments'=>array('view dpilog'),
     'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>2,
   );
-  $items['admin/dpilog/view'] = array(
-    'title'=> 'Logs',
+  $items['admin/dpi/dpilogs/dpilog'] = array(
+    'title'=> 'DPI Logs',
     'page callback' => 'dpilog_page_view_list',
     //'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
@@ -51,13 +51,13 @@ function dpilog_menu(){
     'weight'=>2,
   );
 
-  $items['admin/dpilog/view/list'] = array(
+  $items['admin/dpi/dpilogs/dpilog/list'] = array(
     'title'=> 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight'=>2,
   );
   
-  $items['admin/dpilog/view/timeline'] = array(
+  $items['admin/dpi/dpilogs/dpilog/timeline'] = array(
     'title'=> 'TimeLine',
     'page callback' => 'dpilog_page_view_timeline',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
@@ -67,7 +67,7 @@ function dpilog_menu(){
     'weight'=>3,
 
   );
-  $items['admin/dpilog/view/timeline/json'] = array(
+  $items['admin/dpi/dpilogs/dpilog/timeline/json'] = array(
     'title'=> 'TimeLine',
     'page callback' => 'dpilog_page_view_timeline_json',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
@@ -76,17 +76,7 @@ function dpilog_menu(){
     'weight'=>3,
   
   );
-/*
-  $items['admin/dpilog/log_message/%'] = array(
-    'title'=> 'Logs',
-    'page callback' => 'dpilog_log_message',
-    'page arguments' => array('3'),
-    'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
-    'weight'=>2,
-  );
-*/
-  $items['admin/dpilog/flush'] = array(
+  $items['admin/dpi/dpilogs/configure/dpilog/flush'] = array(
     'title'=> 'Flush',
     'page arguments' => array('dpilog_form_page_flush_form'),
 
@@ -96,32 +86,29 @@ function dpilog_menu(){
     'weight'=>4,
   );
 
-  $items['admin/dpilog/configure'] = array(
-    'title'=> 'configure',
+  $items['admin/dpi/dpilogs/configure/dpilog'] = array(
+    'title'=> 'Configure DPI Logs',
     'page_callback'=>'drupal_det_form',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
-
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
-    'weight'=>5,
+    'weight'=>4,
 
   );
-  $items['admin/dpilog/configure/granularity'] = array(
+  $items['admin/dpi/dpilogs/configure/dpilog/granularity'] = array(
     'title'=> 'granularity',
     'page_callback'=>'drupal_det_form',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
-
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>5,
 
   );
-  $items['admin/dpilog/configure/display'] = array(
+  $items['admin/dpi/dpilogs/configure/dpilog/display'] = array(
     'title'=> 'display',
     'page arguments' => array('dpilog_form_page_configure_display_form'),
-
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
@@ -131,46 +118,46 @@ function dpilog_menu(){
 
   /*---- smart watchdog ----*/
   $items['admin/reports/dblog'] = array(
-    'title' => 'Watchdogs',
+    'title' => 'DPI Watchdogs',
     'description' => 'View events that have recently been logged.',
     'page callback' => 'drupal_goto',
-    'page arguments' => array('admin/dpilog/watchdogs'),
+    'page arguments' => array('admin/dpi/dpilogs/watchdog'),
     'access arguments' => array('access site reports'),
     'type' => MENU_CALLBACK,
   );
-  $items['admin/dpilog/watchdogs'] = array(
-    'title' => 'Watchdogs',
+  $items['admin/dpi/dpilogs/watchdog'] = array(
+    'title' => 'DPI Watchdogs',
     'description' => 'View events that have recently been logged.',
     'page callback' => 'dpilog_watchdog_overview',
     'access arguments' => array('access site reports'),
-    'type' => MENU_NORMAL_ITEM,
-    'weight' => -1,
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/dpilog/watchdogs/listing'] = array(
+  $items['admin/dpi/dpilogs/watchdog/listing'] = array(
     'title' => 'Recent watchdogs',
     'description' => 'Listing of recent log messages.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['admin/dpilog/watchdogs/configure'] = array(
-    'title' => 'Configure',
+  $items['admin/dpi/dpilogs/configure/watchdog'] = array(
+    'title' => 'Configure DPI watchdogs',
     'description' => 'Configure watchdog.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpilog_watchdog_configure_page'),
     'access arguments' => array('access site reports'),
     'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
+    'weight' => 3,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/dpilog/watchdogs/configure/configure'] = array(
+  $items['admin/dpi/dpilogs/configure/watchdog/configure'] = array(
     'title' => 'Configure',
     'description' => 'Configure watchdog.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
 
-  $items['admin/dpilog/watchdogs/configure/export'] = array(
+  $items['admin/dpi/dpilogs/configure/watchdog/export'] = array(
     'title' => 'Import/Export configuration',
     'description' => 'Export watchdog configuration.',
     //'page callback' => 'dpilog_watchdog_configure_export_page',
@@ -181,7 +168,7 @@ function dpilog_menu(){
     'weight' => 3,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/dpilog/watchdogs/configure/purge'] = array(
+  $items['admin/dpi/dpilogs/configure/watchdog/purge'] = array(
     'title' => 'Purge',
     'description' => 'Purge configuration.',
     //'page callback' => 'dpilog_watchdog_configure_export_page',
@@ -192,18 +179,18 @@ function dpilog_menu(){
     'weight' => 4,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/dpilog/watchdogs/configure/delete/%'] = array(
+  $items['admin/dpi/dpilogs/configure/watchdog/delete/%'] = array(
     'title' => 'Delete module configuration for wallylog',
     'page callback' => 'dpilog_watchdog_delete_rule',
-    'page arguments' => array(5),
+    'page arguments' => array(6),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );
-  $items['admin/dpilog/watchdogs/event/%'] = array(
+  $items['admin/dpi/dpilogs/watchdog/event/%'] = array(
     'title' => 'Details',
     'page callback' => 'dpilog_watchdog_event',
-    'page arguments' => array(4),
+    'page arguments' => array(5),
     'access arguments' => array('access site reports'),
     'file' => 'includes/dpilog.watchdog.pages.inc',
   );

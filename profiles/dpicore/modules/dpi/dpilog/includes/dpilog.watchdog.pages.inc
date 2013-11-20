@@ -626,7 +626,7 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
  * @param $module {String} Module name
  */
 function dpilog_watchdog_delete_rule($module=""){
-  $url_config_page = 'admin/dpilog/watchdogs/configure';
+  $url_config_page = 'admin/dpi/dpilogs/configure/watchdog';
   if(trim($module) == '' || $module == "DEFAULT")
     drupal_goto($url_config_page);
   $mapping = _dpilog_watchdog_get_rules();
