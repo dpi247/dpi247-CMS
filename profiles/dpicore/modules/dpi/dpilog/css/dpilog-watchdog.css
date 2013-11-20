@@ -54,7 +54,7 @@
 .dpiwatchdog-critical .icon { background-image: url("/misc/message-24-error.png"); }
 .dpiwatchdog-emerg .icon { background-image: url("/misc/message-24-error.png"); }
 .dpiwatchdog-info .icon { background-image: url("/misc/message-24-info.png"); }
-.dpiwatchdog-notice .icon { background-image: url("/misc/message-24-info.png"); }
+.dpiwatchdog-notice .icon { background-image: url("/misc/message-24-info.png"); opacity: 0.4; }
 .dpiwatchdog-cron .icon { background-image: url("/misc/message-24-ok.png"); }
 
 /** In settings table **/
