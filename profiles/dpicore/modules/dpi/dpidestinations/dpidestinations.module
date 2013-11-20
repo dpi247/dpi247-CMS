@@ -302,27 +302,16 @@ function dpidestinations_views_plugins() {
 
 }
 
-/**
- * We use the hook_views_pre_render when we have a splitted targetblock.
- * We will use this technique to  avoid execute the sql querry multiple times
- *
- *
- * This hook can be utilized by themes.
- * @param $view
- *   The view object about to be processed.
- */
-function dpidestinations_views_pre_render(&$view) {
-  // Scramble the order of the rows shown on this result page.
-  // Note that this could be done earlier, but not later in the view execution
-  // process.
-
-}
 
 
 function dpidestinations_views_api() {
   return array('api' => 2
   );
 }
+
+
+
+
 
 function dpidestinations_preprocess_node(& $vars){
 

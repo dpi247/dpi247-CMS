@@ -47,6 +47,7 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $block = new stdClass();
   $block->module = $module;
 
+
   $did=$context['argument_destination_1']->data->handler->did;
 
   $targetBlockController=new TargetBlockController('targetblock');
@@ -60,20 +61,76 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   $target=$targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
-  $targetview=$target_wrapper->targetview->value();
 
-
-  _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
-
-  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
-  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
-  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview);
+  $targetview=_dpidestinations_targetblock_content_type_helper_get_global_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock);
   
+  $targetview_clone=_dpidestinations_targetblock_content_type_helper_get_local_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
+
+  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
+  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
+  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
+
 
   return $block;
 
 }
 
+function _dpidestinations_targetblock_content_type_helper_get_global_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock){
+
+  $targetviews = & drupal_static('dpidestinations_targetviews');
+  $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
+  
+  $term_value=$context['argument_destination_1']->data->tid;
+  $target_value=$target_wrapper->machine_name->value();
+
+  if (!isset($targetviews[$term_value][$target_value])) {
+    $targetview=$target_wrapper->targetview->value();
+    
+    _dpidestinations_targetview_initialize_view( $targetview, $term_value,$target_value,$targetblock);
+
+    //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
+    $targetview->dom_id=uniqid();
+    $targetview->execute();
+    
+    $targetviews_values[$term_value][$target_value]=$targetview->result;
+    $targetviews[$term_value][$target_value]=$targetview;
+  }
+
+  return $targetviews[$term_value][$target_value]  ;
+
+}
+
+
+function _dpidestinations_targetblock_content_type_helper_get_local_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview){
+  
+  $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
+  
+  $targetview_clone= clone($targetview) ;
+  $targetview_clone->dpidestinations['targetblock']=$targetblock;
+  
+  
+  $term_value=$targetview_clone->dpidestinations['destination']->tid;
+  $target_value=$targetview_clone->dpidestinations['target']->machine_name;
+  $result_save=$targetviews_values[$term_value][$target_value];
+  
+  $result=$result_save;
+  $result=array_slice($result, $targetblock->offset,$targetblock->node_count_for_targetblockinstance);
+
+  
+  $targetview_clone->display_handler->view->result=$result;
+  $targetview_clone->result=$result;
+  //$targetview_clone->style_plugin->view->result=$result;
+  //$targetview_clone->style_plugin->row_plugin->view->result=$result;
+  
+  //We absolutly need this since the style will use cache rendering if exist
+  // see $view->style_plugin->get_field($index, $field);
+  // see template_preprocess_views_view_fields
+  unset($targetview_clone->style_plugin->rendered_fields);
+   
+    
+  return $targetview_clone;
+  
+}
 
 /**
  * Edit form.
@@ -256,18 +313,13 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
         $property_value=$form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values']=$form_state['pane']->configuration[$property];
         $form_state['display']->content[$pane->pid]->configuration[$property]=$property_value;
       }
-
     }
-
   }
-
-
 }
 
 
 function _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings($form_state,$targetblock){
   $override=FALSE;
-
 
   $properties_to_override=_dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override();
   $max_split_delta=0;
@@ -335,28 +387,6 @@ function _dpidestinations_targetblock_content_type_helper_initialize_targetblock
 }
 
 
-/**
- * Helper fonction to set a targetview from a targetblock ctools content type
- *
- * This function just call the generic _dpidestinations_targetview_initialize_view
- * with the right arguments
- *
- * @param unknown $subtype
- * @param unknown $conf
- * @param unknown $args
- * @param unknown $context
- * @param unknown $target_wrapper
- * @param unknown $targetblock
- * @param unknown $targetview
- */
-function   _dpidestinations_targetblock_content_type_helper_initialize_targetview($subtype, $conf,$args,$context,$target_wrapper,$targetblock,& $targetview){
-
-  $term_value=$context['argument_destination_1']->data->tid;
-  $target_value=$target_wrapper->machine_name->value();
-  _dpidestinations_targetview_initialize_view( $targetview, $term_value,$target_value,$targetblock);
-
-}
-
 
 
 
@@ -372,11 +402,9 @@ function _dpidestinations_targetblock_content_type_helper_get_title($subtype, $c
 function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
   $content="";
 
-  //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
-  $targetview->dom_id=uniqid();
-  $targetview->execute();
-
-  return $targetview->render();
+  
+  $content=$targetview->render();
+  return $content;
 }
 
 

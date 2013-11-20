@@ -4,8 +4,7 @@
  * The plugin that handles a panel_pane.
  */
 class dpidestinations_plugin_display_targetview extends views_plugin_display {
-
-
+ 
   /**
    * Get the instance of a plugin, for example style or row.
    *
