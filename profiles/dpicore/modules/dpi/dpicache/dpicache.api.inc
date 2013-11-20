@@ -158,3 +158,50 @@ function dpi_variable_del($name) {
   ->execute();
   drupal_static_reset($name);
 }
+
+/**
+ * Sets up a form to save information automatically
+ * into dpi_variable structure.
+ *
+ * @param $form
+ * An associative array containing the structure of the form.
+ *
+ * @return
+ * The form structure.
+ *
+ * @see system_settings_form()
+ *
+ */
+function dpi_system_settings_form($form){
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+  if (!empty($_POST) && form_get_errors()) {
+    drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
+  }
+  $form['#submit'][] = 'dpi_system_settings_form_submit';
+  // By default, render the form using theme_system_settings_form().
+  if (!isset($form['#theme'])) {
+    $form['#theme'] = 'system_settings_form';
+  }
+  return $form;
+}
+
+/**
+ * Form submission handler for dpi_system_settings_form().
+ *
+ * @see system_settings_form_submit()
+ */ 
+function dpi_system_settings_form_submit($form, &$form_state) {
+  // Exclude unnecessary elements.
+  form_state_values_clean($form_state);
+  foreach ($form_state['values'] as $key => $value) {
+    if (is_array($value) && isset($form_state['values']['array_filter'])) {
+      $value = array_keys(array_filter($value));
+    }
+    dpi_variable_set($key, $value);
+  }
+  drupal_set_message(t('The configuration options have been saved.'));
+}

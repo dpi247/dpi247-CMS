@@ -10,7 +10,7 @@ class WallyXmlV1 extends Importer{
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
     if (!Logger::error()){
-      $package->save();
+      $this->savePackage($dom, $package);
     }
     
     //Set the CurrentLog to the previous one to stop children growing.
@@ -20,6 +20,15 @@ class WallyXmlV1 extends Importer{
     return FALSE;
   }
   
+  /**
+   * 
+   * Save a package
+   * @param Dom $dom
+   * @param Object $package
+   */
+  protected function savePackage($dom, $package){
+    node_save($package);
+  }
   /**
    * 
    * Construct the node base on the DOM element
@@ -36,7 +45,7 @@ class WallyXmlV1 extends Importer{
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
     }
-    return $package_wrapper;
+    return $package;
   }
   /**
   *
