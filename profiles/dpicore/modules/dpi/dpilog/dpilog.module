@@ -27,11 +27,11 @@ function dpilog_init() {
 function dpilog_menu(){
   $items['admin/dpi/dpilogs'] = array(
     'title'=>'DPI Logs and Watchdogs',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpilog_form_page_view_list_form'),
-    'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
-    'weight'=>1,
+    'description' => 'View events that have recently been logged.',
+    'page callback' => 'dpilog_watchdog_overview',
+    'access arguments' => array('access site reports'),
+    'weight' => 1,
+    'file' => 'includes/dpilog.watchdog.pages.inc',
 
   );
   $items['admin/dpi/dpilogs/dpilog/log/%'] = array(
@@ -79,7 +79,6 @@ function dpilog_menu(){
   $items['admin/dpi/dpilogs/configure/dpilog/flush'] = array(
     'title'=> 'Flush',
     'page arguments' => array('dpilog_form_page_flush_form'),
-
     'access arguments'=>array('flush dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
@@ -88,23 +87,18 @@ function dpilog_menu(){
 
   $items['admin/dpi/dpilogs/configure/dpilog'] = array(
     'title'=> 'Configure DPI Logs',
-    'page_callback'=>'drupal_det_form',
+    'page callback'=>'drupal_get_form',
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>4,
-
   );
   $items['admin/dpi/dpilogs/configure/dpilog/granularity'] = array(
     'title'=> 'granularity',
-    'page_callback'=>'drupal_det_form',
-    'page arguments' => array('dpilog_form_page_configure_granularity_form'),
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>5,
-
   );
   $items['admin/dpi/dpilogs/configure/dpilog/display'] = array(
     'title'=> 'display',
@@ -113,7 +107,6 @@ function dpilog_menu(){
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
     'weight'=>6,
-
   );
 
   /*---- smart watchdog ----*/
@@ -128,11 +121,8 @@ function dpilog_menu(){
   $items['admin/dpi/dpilogs/watchdog'] = array(
     'title' => 'DPI Watchdogs',
     'description' => 'View events that have recently been logged.',
-    'page callback' => 'dpilog_watchdog_overview',
-    'access arguments' => array('access site reports'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
   );
   $items['admin/dpi/dpilogs/watchdog/listing'] = array(
     'title' => 'Recent watchdogs',
