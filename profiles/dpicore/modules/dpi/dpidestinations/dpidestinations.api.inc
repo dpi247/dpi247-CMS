@@ -64,9 +64,11 @@ function dpidestinations_api_get_all_targetblocks_from_target_for_destination($t
 
 function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
   $destinations_val = field_get_items('node', $node, 'destinations');
-  foreach($destinations_val as $index=>$destination){
-    if($destination['tid']==$tid){
-      return $destination;
+  if(isset($destinations_val) and $destinations_val!=FALSE){
+    foreach($destinations_val as $index=>$destination){
+      if($destination['tid']==$tid){
+        return $destination;
+      }
     }
   }
   return FALSE;
