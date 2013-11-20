@@ -12,37 +12,50 @@
 #dpiwatchdog-filter-form .form-item select.form-select {
   width: 100%;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-user {
-  background: #ffd;
+#admin-dpiwatchdog  tr.dpiwatchdog-warning, #admin-dpiwatchdog  tr.dpiwatchdog-warning .active {
+  background: #FFCC6F;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-user .active {
-  background: #eed;
+#admin-dpiwatchdog  tr.dpiwatchdog-info, #admin-dpiwatchdog  tr.dpiwatchdog-info .active {
+  background: #D2FFA5;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-content {
-  background: #ddf;
+#admin-dpiwatchdog  tr.dpiwatchdog-error, #admin-dpiwatchdog  tr.dpiwatchdog-error .active {
+  background: #FF8C76;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-content .active {
-  background: #cce;
+#admin-dpiwatchdog  tr.dpiwatchdog-error a {
+  color:#00245D;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-page-not-found, tr.dpiwatchdog-access-denied {
-  background: #dfd;
+#admin-dpiwatchdog tr.dpiwatchdog-critical, #admin-dpiwatchdog tr.dpiwatchdog-critical .active,
+#admin-dpiwatchdog tr.dpiwatchdog-alert, #admin-dpiwatchdog tr.dpiwatchdog-alert .active,
+#admin-dpiwatchdog tr.dpiwatchdog-emerg, #admin-dpiwatchdog tr.dpiwatchdog-emerg .active {
+  background: #EF4040;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-page-not-found .active, #admin-dpiwatchdog  tr.dpiwatchdog-access-denied .active {
-  background: #cec;
+#admin-dpiwatchdog tr.dpiwatchdog-critical a,
+#admin-dpiwatchdog tr.dpiwatchdog-alert a,
+#admin-dpiwatchdog tr.dpiwatchdog-emerg a {
+  color:#00245D;
 }
-#admin-dpiwatchdog  tr.dpiwatchdog-error {
-  background: #FFE0E0;
-}
-#admin-dpiwatchdog  tr.dpiwatchdog-error .active {
-  background: #eeb9b9;
-}
+
 #admin-dpiwatchdog  tr.dpiwatchdog-highlight {
   background: #88E05E;
 }
 .dpiwatchdog-otherprocesses tbody tr td {
   padding:1px 10px;
 }
-
+#admin-dpiwatchdog .icon {
+    background-repeat: no-repeat;
+    width: 24px;
+    background-position: center;
+    margin: 0;
+    padding: 1;
+}
+.dpiwatchdog-warning .icon { background-image: url("/misc/message-24-warning.png"); }
+.dpiwatchdog-error .icon { background-image: url("/misc/message-24-error.png"); }
+.dpiwatchdog-alert .icon { background-image: url("/misc/message-24-error.png"); }
+.dpiwatchdog-critical .icon { background-image: url("/misc/message-24-error.png"); }
+.dpiwatchdog-emerg .icon { background-image: url("/misc/message-24-error.png"); }
+.dpiwatchdog-info .icon { background-image: url("/misc/message-24-info.png"); }
+.dpiwatchdog-notice .icon { background-image: url("/misc/message-24-info.png"); }
+.dpiwatchdog-cron .icon { background-image: url("/misc/message-24-ok.png"); }
 
 /** In settings table **/
 .fixedtable {table-layout:fixed;}
