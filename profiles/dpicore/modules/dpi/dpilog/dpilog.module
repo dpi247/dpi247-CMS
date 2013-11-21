@@ -190,6 +190,10 @@ function dpilog_menu(){
 function dpilog_theme(){
 
   return array(
+    'colorselect' => array(
+      'render element' => 'element',
+      'file'=>'templates/theme.inc',
+    ),
     'dpilog_form_page_configure_granularity_form'=>array(
       'render element' => 'form',
       'file'=>'templates/theme.inc',

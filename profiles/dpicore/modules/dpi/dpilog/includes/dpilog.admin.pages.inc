@@ -439,63 +439,49 @@ function dpilog_form_page_configure_granularity_form($form, &$form_state){
   $config_registrations=dpi_variable_get("dpilog_configuration_granularity",array());
   $config_registrations=$config_registrations['registrations'];
   $registrations=_dpilog_get_modules_registration();
-  foreach($registrations as $registration_name => $registration){
+
+  foreach($registrations as $registration_name => $registration){ // cache_entry, cache_error
     
-    $vertical_tab_id=$registration_name.'-vertical_tab';
-    
+
     $form['registrations'][$registration_name ]=array(
       '#type'=>'fieldset',
       '#title'=>$registration_name,
-      );
-    $form['registrations'][$registration_name ][$vertical_tab_id]=array(
-      '#type'=>'vertical_tabs',
-      '#title'=>'Options',
-    
-    );
-    $form['registrations'][$registration_name ][ $vertical_tab_id]['dpilog'] = array(
-      '#type' => 'fieldset',
-      '#title'=>'dpilog',
-    
-    );
-    $form['registrations'][$registration_name ][ $vertical_tab_id]['watchdog'] = array(
-      '#type' => 'fieldset',
-      '#title'=>'watchdog',
-    
     );
   
-    foreach($registration["actions"] as $action_name){
-      foreach(array_keys(_dpilog_get_log_levels()) as $level){
-        $form['registrations'][$registration_name ][ $vertical_tab_id]['dpilog']['actions'][$action_name][$level]=array(
+    foreach($registration["actions"] as $action_name){ // cache_hit, cache_miss...
+      // DPI Logs
+      $form['registrations'][$registration_name]['dpilog']['actions'][$action_name]=array(
           '#type'=>'select',
           '#options'=>_dpilog_get_log_methods(),
-          '#group'=> $vertical_tab_id,
-          '#default_value'=>$config_registrations[$registration_name][$action_name]['dpilog'][$level],
-          
-          );
-        $watchdog_options=_dpilog_get_log_methods();
-        //We skip the delayed process untill we implement a custom a dpi watchdog replacement module
-        unset($watchdog_options[1]);
-        $form['registrations'][$registration_name ][ $vertical_tab_id]['watchdog']['actions'][$action_name][$level]=array(
+          '#group'=> $action_name,
+          '#default_value'=>$config_registrations[$registration_name][$action_name]['dpilog'],
+      );
+      // DPI Watchdogs
+      $form['registrations'][$registration_name]['watchdog']['actions'][$action_name]=array(
           '#type'=>'select',
-          '#options'=>$watchdog_options,
-          '#group'=> $vertical_tab_id,
-          '#default_value'=>$config_registrations[$registration_name][$action_name]['watchdog'][$level],
-          
-        );
-        
-        
-      }
-      
+          '#options'=>_dpilog_get_log_methods(),
+          '#group'=> $action_name,
+          '#default_value'=>$config_registrations[$registration_name][$action_name]['watchdog'],
+      );
+      // DPI Logs
+      $form['registrations'][$registration_name]['color']['actions'][$action_name]=array(
+          '#type'=>'textfield',
+          '#size'=>7,
+          '#maxlength' => 7,
+          '#group'=> $action_name,
+          '#theme'=> 'colorselect',
+          '#attributes' => array("class"=>array('colorselect')),
+          '#default_value'=>_dpilog_random_color(),//$config_registrations[$registration_name][$action_name]['color'],
+      );  
     }
   }
   
   $form['#attached'] = array(
     'css' => array(
       'type' => 'file',
-      'data' => drupal_get_path('module', 'dpilog') . '/css/dpilog.css',
-    ),
-    
-  );
+      'data' => drupal_get_path('module', 'dpilog') . '/css/dpilog.css'
+      )
+    );
   $form["#tree"]=TRUE;
   $form['submit'] = array(
     '#type' => 'submit',
@@ -510,11 +496,14 @@ function dpilog_form_page_configure_granularity_form_submit($form, &$form_state)
   $values=$form_state['values'];
   foreach($values['registrations'] as $registration_name =>$registration){
 
-    foreach($values['registrations'][$registration_name][$registration_name.'-vertical_tab']['dpilog']['actions'] as $action_name =>$action){
+    foreach($values['registrations'][$registration_name][$registration_name]['dpilog']['actions'] as $action_name =>$action){
       $actions[$action_name]['dpilog']=$action;
     }
-    foreach($values['registrations'][$registration_name][$registration_name.'-vertical_tab']['watchdog']['actions'] as $action_name =>$action){
+    foreach($values['registrations'][$registration_name][$registration_name]['watchdog']['actions'] as $action_name =>$action){
       $actions[$action_name]['watchdog']=$action;
+    }
+    foreach($values['registrations'][$registration_name][$registration_name]['watchdog']['color'] as $action_name =>$color){
+      $actions[$action_name]['color']=$color;
     }
     $conf['registrations'][$registration_name]=$actions;
     $actions=array();
