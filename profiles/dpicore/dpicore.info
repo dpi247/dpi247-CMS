@@ -54,3 +54,4 @@ dependencies[] = dpicontenttypes
 dependencies[] = dpicache
 dependencies[] = dpidestinations
 dependencies[] = dpicommons
+dependencies[] = dpilog
