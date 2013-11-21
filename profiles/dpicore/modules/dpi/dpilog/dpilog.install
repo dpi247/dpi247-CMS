@@ -9,9 +9,6 @@ function dpilog_install(){
   catch(Exception $e){
     drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.','error');
   }
-
-  // Create tables.
-  drupal_install_schema('dpilog');
 }
 
 /**
@@ -50,7 +47,7 @@ function dpilog_schema() {
    // 'compound' => array('log_name','action','lid'),
   );
   
-  $schema['dpilog_logs'] = array (
+  $schema['dpilog_logs'] = array(
      'description'=>"de",
      'fields' => array(
         'lid' => array('type' => 'serial','unsigned' => TRUE, 'not null' => TRUE),
