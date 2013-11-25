@@ -25,6 +25,17 @@ function pipo_dpicache_cache_entry_register(){
   
 }
 
+function pipo_dpilog_register(){
+  return array(
+    "cache_entry"=>array(
+      "actions"=>array("pipo_log"),
+    ),
+    "cache_error"=>array(
+      "actions"=>array("pipo_error"),
+    ),
+  );
+}
+
 function pipo_get_render($param1,$param2,$param3){
   dsm('hello je passe par pipo_get_render');
   dsm($param2);
@@ -47,4 +58,13 @@ function pipo_random_fonction(){
   dpicache_get_cache_entry('pipo_render','fixe1','fixe2','fix3');
  // dpicache_get_cache_entry('pipo_array',$param1,$param2);
   
+}
+
+function pipo_test_generate_dpilogs(){
+  global $user;
+  //dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
+  dpi_log('cache_entry', "pipo_log", "1) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_entry', "pipo_log", "2) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_entry', "pipo_log", "3) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_error', "pipo_error", "This is a bad test ".time(), array(), NULL, WATCHDOG_ERROR, $user->uid, FALSE);
 }

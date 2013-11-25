@@ -35,12 +35,13 @@ function dpilog_page_view_list(){
   return $render_array;
 }
 function dpilog_page_view_list_build_logs_table($filters){
-  
-  $registrations=dpi_variable_get("dpilog_configuration_granularity",array());
-  $config_display=dpi_variable_get("dpilog_configuration_display",array());;
-  $config_display=$config_display['registrations'];
-  
-  $log_levels=_dpilog_get_log_levels();
+  $granularity=dpi_variable_get('dpilog_configuration_granularity',array());
+  if(isset($granularity['registrations']))
+    $registrations=$granularity['registrations'];
+  else
+    $registrations = array();
+
+  $log_levels=watchdog_severity_levels();
   $header_row = array(
     array('data' => ''),
     array('data' => 'Log Name', 'field' => 'l.log_name'),
@@ -64,7 +65,7 @@ function dpilog_page_view_list_build_logs_table($filters){
   $table_rows = array();
   
   foreach($results as $result){
-    $bck_color=$config_display[$result->log_name]["display"][$result->action]['display']['color'];
+    $bck_color=$registrations[$result->log_name][$result->action]['color'];
   
     $message=truncate_utf8(filter_xss($result->message, array()), 150, TRUE, TRUE);
     $message=' '.l($message,'admin/dpilog/log/'.$result->lid);
@@ -292,7 +293,7 @@ function dpilog_page_view_list_filter_form(){
   );
   $form['default']['severity']=array(
     '#type'=>'select',
-    "#options"=>_dpilog_get_log_levels(),
+    "#options"=>array("TEST TAT"),
     '#title'=>t('Severity'),
     '#default_value'=>isset($filters['severity'])?$filters['severity']:'',
     '#size'=>8,
@@ -437,12 +438,11 @@ function dpilog_form_page_view_timeline($form,$form_state){
 
 function dpilog_form_page_configure_granularity_form($form, &$form_state){
   $config_registrations=dpi_variable_get("dpilog_configuration_granularity",array());
-  $config_registrations=$config_registrations['registrations'];
+  if(!empty($config_registrations))
+    $config_registrations=$config_registrations['registrations'];
   $registrations=_dpilog_get_modules_registration();
 
   foreach($registrations as $registration_name => $registration){ // cache_entry, cache_error
-    
-
     $form['registrations'][$registration_name ]=array(
       '#type'=>'fieldset',
       '#title'=>$registration_name,
@@ -452,16 +452,16 @@ function dpilog_form_page_configure_granularity_form($form, &$form_state){
       // DPI Logs
       $form['registrations'][$registration_name]['dpilog']['actions'][$action_name]=array(
           '#type'=>'select',
-          '#options'=>_dpilog_get_log_methods(),
+          '#options'=>_dpilog_get_dpilogs_actions(),
           '#group'=> $action_name,
-          '#default_value'=>$config_registrations[$registration_name][$action_name]['dpilog'],
+          '#default_value'=>@$config_registrations[$registration_name][$action_name]['dpilog'] ?: 'ignore',
       );
       // DPI Watchdogs
       $form['registrations'][$registration_name]['watchdog']['actions'][$action_name]=array(
           '#type'=>'select',
-          '#options'=>_dpilog_get_log_methods(),
+          '#options'=>_dpilog_get_watchdogs_actions(),
           '#group'=> $action_name,
-          '#default_value'=>$config_registrations[$registration_name][$action_name]['watchdog'],
+          '#default_value'=>@$config_registrations[$registration_name][$action_name]['watchdog'] ?: 'ignore',
       );
       // DPI Logs
       $form['registrations'][$registration_name]['color']['actions'][$action_name]=array(
@@ -471,7 +471,7 @@ function dpilog_form_page_configure_granularity_form($form, &$form_state){
           '#group'=> $action_name,
           '#theme'=> 'colorselect',
           '#attributes' => array("class"=>array('colorselect')),
-          '#default_value'=>_dpilog_random_color(),//$config_registrations[$registration_name][$action_name]['color'],
+          '#default_value'=>@$config_registrations[$registration_name][$action_name]['color'] ?: '', //_dpilog_random_color(),
       );  
     }
   }
@@ -490,116 +490,37 @@ function dpilog_form_page_configure_granularity_form($form, &$form_state){
   return $form;
 }
 
-function dpilog_form_page_configure_granularity_form_submit($form, &$form_state){
+function dpilog_form_page_configure_granularity_form_validate(&$form, &$form_state) {
+  foreach($form_state['values']['registrations'] as $registration_name => $registration){
+    $colors = $registration["color"]["actions"];
+    foreach($colors as $cat => $color_value){
+      if($color_value != '' && !preg_match('/^#[0-9A-F]{3}([0-9A-F]{3})*$/i', $color_value)){
+        form_set_error('registrations]['.$registration_name.'][color][actions]['.$cat, t('Color value must be a hexadecimal value, or empty.'));
+      }
+    }
+  }
+}
 
+
+function dpilog_form_page_configure_granularity_form_submit($form, &$form_state){
   $conf['registrations']=array();
   $values=$form_state['values'];
   foreach($values['registrations'] as $registration_name =>$registration){
-
-    foreach($values['registrations'][$registration_name][$registration_name]['dpilog']['actions'] as $action_name =>$action){
+    foreach($values['registrations'][$registration_name]['dpilog']['actions'] as $action_name =>$action){
       $actions[$action_name]['dpilog']=$action;
     }
-    foreach($values['registrations'][$registration_name][$registration_name]['watchdog']['actions'] as $action_name =>$action){
+    foreach($values['registrations'][$registration_name]['watchdog']['actions'] as $action_name =>$action){
       $actions[$action_name]['watchdog']=$action;
     }
-    foreach($values['registrations'][$registration_name][$registration_name]['watchdog']['color'] as $action_name =>$color){
+    foreach($values['registrations'][$registration_name]['color']['actions'] as $action_name =>$color){
       $actions[$action_name]['color']=$color;
     }
     $conf['registrations'][$registration_name]=$actions;
     $actions=array();
   }
   dpi_variable_set('dpilog_configuration_granularity',$conf);
-
 }
 
-
-
-function dpilog_form_page_configure_display_form($form, &$form_state){
-  $config_display=dpi_variable_get("dpilog_configuration_display",array());
-  $config_display= $config_display['registrations'];
-  
-  $registrations=_dpilog_get_modules_registration();
-  foreach($registrations as $registration_name => $registration){
-
-    $vertical_tab_id=$registration_name.'-vertical_tab';
-
-    $form['registrations'][$registration_name ]=array(
-      '#type'=>'fieldset',
-      '#title'=>$registration_name,
-    );
-    $form['registrations'][$registration_name ][$vertical_tab_id]=array(
-      '#type'=>'vertical_tabs',
-      '#title'=>'Options',
-
-    );
-    
-    $form['registrations'][$registration_name ][ $vertical_tab_id]['display'] = array(
-      '#type' => 'fieldset',
-      '#title'=>'Display',
-
-    );
-    
-    $default_color=_dpilog_random_color();
-    
-    foreach($registration["actions"] as $action_name){
-       if(isset($config_display[$registration_name]["display"][$action_name]['display']['color']) and $config_display[$registration_name]["display"][$action_name]['display']['color']!=""){
-         $default_color=$config_display[$registration_name]["display"][$action_name]['display']['color'];
-       }
-
-        $form['registrations'][$registration_name ][ $vertical_tab_id]['display']['actions'][$action_name]['display']['tag']=array(
-          '#type'=>'select',
-          '#title' => t('Timeline Tag'),
-          "#description"=>t('Define the row in the timeline view'),
-          '#options'=>array(1,2,3,4,5,6),
-          '#group'=> $vertical_tab_id,
-          "#weight"=>3,
-
-        );
-
-        $form['registrations'][$registration_name ][ $vertical_tab_id]['display']['actions'][$action_name]['display']['color']=array(
-          '#type'=>'textfield',
-          '#title' => t('Timeline Color'),
-          "#description"=>t('Define the color of the log in the timeline view'),
-          '#group'=> $vertical_tab_id,
-          '#default_value'=>$default_color,
-          "#weight"=>3,
-          "#size"=>5,
-        );
-      
-
-    }
-  }
-
-  $form['#attached'] = array(
-    'css' => array(
-      'type' => 'file',
-      'data' => drupal_get_path('module', 'dpilog') . '/css/dpilog.css',
-    ),
-
-  );
-  $form["#tree"]=TRUE;
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'save',
-  );
-  return $form;
-}
-
-
-function dpilog_form_page_configure_display_form_submit($form, &$form_state){
-
-  $conf['registrations']=array();
-  $values=$form_state['values'];
-  foreach($values['registrations'] as $registration_name =>$registration){
-
-    foreach($values['registrations'][$registration_name][$registration_name.'-vertical_tab']['display']['actions'] as $action_name =>$action){
-      $display_actions[$action_name]=$action;
-    }
-    $conf['registrations'][$registration_name]['display']=$display_actions;
-  }
-  dpi_variable_set('dpilog_configuration_display',$conf);
-
-}
 
 
 function dpilog_form_page_flush($form,$form_state){

@@ -50,41 +50,50 @@ function dpilog_get_logs_query_based_on_filters( $filters){
 // We dont plan to use Mysql delayed because of: https://drupal.org/node/772554
 
 function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$severity=WATCHDOG_NOTICE,$uid=NULL,$keep_backtrace=FALSE){
-
   $granularity=dpi_variable_get('dpilog_configuration_granularity',array());
-  $registrations=$granularity['registrations'];
-  if(isset($registrations[$log_name]) and isset($registrations[$log_name][$action])){
+  if(isset($granularity['registrations']))
+    $registrations=$granularity['registrations'];
+  else
+    $registrations = array();
 
-    $dpilog_method=$registrations[$log_name][$action]['dpilog'][$severity];
-    $watchdog_method=$registrations[$log_name][$action]['watchdog'][$severity];
+  // defaut case
+  if(!isset($registrations[$log_name][$action])){
+    $registrations[$log_name][$action]['dpilog'] = 'ignore';
+    $registrations[$log_name][$action]['watchdog'] = 'ignore';
+    $registrations[$log_name][$action]['color'] = '';
+  }
+  $dpilog_method=$registrations[$log_name][$action]['dpilog'];
+  $watchdog_method=$registrations[$log_name][$action]['watchdog'];
 
-
-    $dpilog_structure=NULL;
-    if($dpilog_method>0){
-      $dpilog_structure=_dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
-      if($dpilog_method==1){
-        _dpilog_delayed_save($dpilog_structure,'dpilog');
-      }
-      elseif($dpilog_method==2){
-
-        drupal_write_record('dpilog_logs', $dpilog_structure);
-      }
-    }
-     
-    if($watchdog_method>0){
-      $watchdog_structure=_dpilog_format_watchdog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace,$dpilog_structure);
-      if($watchdog_method==1){
-        //NOT implemented
-      }
-      elseif($watchdog_method=2){
-        watchdog($watchdog_structure->type,$watchdog_structure->message,$watchdog_structure->variables,$watchdog_structure->severity,$watchdog_structure->link);
-      }
-    }
-
+  // DPI Log
+  if($dpilog_method == "save"){
+    $dpilog_structure=_dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
+    _dpilog_delayed_save($dpilog_structure,'dpilog');
+    //drupal_write_record('dpilog_logs', $dpilog_structure);
   }
 
-
+  // DPI Watchdog
+  switch ($watchdog_method) {
+    case 'save_debug':
+      watchdog($log_name.'_'.$action, $message, $variables, WATCHDOG_DEBUG);
+      break;
+    case 'save_info':
+      watchdog($log_name.'_'.$action, $message, $variables, WATCHDOG_INFO);
+      break;
+    case 'save_warning':
+      watchdog($log_name.'_'.$action, $message, $variables, WATCHDOG_WARNING);
+      break;
+    case 'save_error':
+      watchdog($log_name.'_'.$action, $message, $variables, WATCHDOG_ERROR);
+      break;
+    case 'ignore':
+    default:
+      break;
+  }
 }
+
+
+
 function _dpilog_format_dpilog_structure($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAULT,$uid=NULL, $id=NULL,$variables=array(),$keep_backtrace=FALSE){
   global $dpilog_thread_id;
   global $user;
@@ -108,7 +117,12 @@ function _dpilog_format_dpilog_structure($log_name,$action,$message,$severity=DP
   $dpilog_log->severity= $severity;
   $dpilog_log->timestamp=$timestamp;
   if($keep_backtrace){
-    $dpilog_log->trace=serialize(debug_backtrace());
+    try {
+      $dpilog_log->trace=serialize(debug_backtrace());
+    }
+    catch(Exception $e){
+      $dpilog_log->trace=NULL;
+    }
   }
   else{
     $dpilog_log->trace=NULL;
@@ -128,30 +142,23 @@ function _dpilog_get_modules_registration(){
 }
 
 
-function _dpilog_get_log_levels(){
-
+function _dpilog_get_watchdogs_actions(){
   return array(
-    WATCHDOG_DEBUG     => 'dblog-debug',
-    WATCHDOG_INFO      => 'dblog-info',
-    WATCHDOG_NOTICE    => 'dblog-notice',
-    WATCHDOG_WARNING   => 'dblog-warning',
-    WATCHDOG_ERROR     => 'dblog-error',
-    WATCHDOG_CRITICAL  => 'dblog-critical',
-    WATCHDOG_ALERT     => 'dblog-alert',
-    WATCHDOG_EMERGENCY => 'dblog-emerg',
-    );
-
-}
-
-function _dpilog_get_log_methods(){
-
-  return array(
-    0=>t("Do nothing"),
-    1=>t("Delayed Save"),
-    2=>t("Direct Save"),
+    'ignore' => t('Ignore'),
+    'save_debug' => t('Save as debug'),
+    'save_info' => t('Save as info'),
+    'save_warning' => t('Save as warning'),
+    'save_error' => t('Save as error')
   );
-
 }
+
+function _dpilog_get_dpilogs_actions(){
+  return array(
+    'ignore' => t("Ignore"),
+    'save'   => t("Save"),
+  );
+}
+
 function _dpilog_format_watchdog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace,$dpilog_structure){
 
   $watchdog->type=$log_name.'-'.$action;
