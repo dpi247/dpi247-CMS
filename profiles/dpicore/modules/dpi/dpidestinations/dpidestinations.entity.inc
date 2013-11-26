@@ -24,6 +24,12 @@ function dpidestinations_entity_info(){
     ),
     'bundles' => array(
       'target' => array(
+        'label' => 't',
+        'admin' => array(
+          'path' => 'admin/structure/target/manage/target',
+          'real path' => 'admin/structure/target/manage/target',
+        ),
+
       ),
     ),
     'view modes' => array(
@@ -41,14 +47,22 @@ function dpidestinations_entity_info(){
     'access callback' => 'target_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'label' => 'ti',
-      'path' => 'admin/structure/target',
+      'label' => 'Manage Targets & Targetblocks',
+      'path' => 'admin/dpi247/dpidestinations/target',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       //'file' => 'target.admin.inc',
       //'controller class' => 'EntityDefaultUIController',
     ),
     'metadata controller class' => 'DpiDestinationsTargetMetadataController',
   );
+  if (class_exists('DpidestinationsTargetUIController')) {
+    $entities['target']['admin ui'] = array(
+      // Enable the entity API's admin UI.
+      'path' => 'admin/dpi247/dpidestinations/target',
+      'file' => 'includes/dpidestinations.pages.admin.inc',
+      'controller class' => 'DpidestinationsTargetUIController',
+    );
+  }
 
   $entities['targetblock'] = array(
     'label' => t('Target Block'),
@@ -85,14 +99,20 @@ function dpidestinations_entity_info(){
     'access callback' => 'targetblock_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'label' => 'ti',
-      'path' => 'admin/structure/targetblock',
-      // OPTIONAL- See "Customize the User Interface" below if you set.
-      //'file' => 'target.admin.inc',
-      //'controller class' => 'EntityDefaultUIController',
+      'label' => 'Manage Targets & Targetblocks',
+      'path' => 'admin/dpi247/dpidestinations/targetblock',
+
     ),
     'metadata controller class' => 'DpiDestinationsTargetblockMetadataController',
   );
+  if (class_exists('DpidestinationsTargetUIController')) {
+    $entities['targetblock']['admin ui'] = array(
+      // Enable the entity API's admin UI.
+      'path' => 'admin/dpi247/dpidestinations/targetblock',
+      'file' => 'includes/dpidestinations.pages.admin.inc',
+      'controller class' => 'DpidestinationsTargetUIController',
+    );
+  }
   return $entities;
 }
 /**

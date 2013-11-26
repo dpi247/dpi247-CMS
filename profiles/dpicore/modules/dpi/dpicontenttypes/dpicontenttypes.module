@@ -61,6 +61,8 @@ function dpicontenttypes_menu(){
     'access arguments' => array('view dpiproperties'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'dpicontenttypes.pages.inc',
+    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
+    
     'weight' => 50,
   );
   
@@ -71,6 +73,8 @@ function dpicontenttypes_menu(){
     'access arguments' => array('view dpiproperties'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'dpicontenttypes.pages.inc',
+    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
+    
     'weight' => 50,
   );
   return $items;

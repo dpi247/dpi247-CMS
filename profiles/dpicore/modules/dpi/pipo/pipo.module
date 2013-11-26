@@ -1,6 +1,92 @@
 <?php
 
 
+function pipo_entity_info(){
+
+  $entities=array();
+  $entities['pipo_entity']=array(
+    'label' => t('PipoEntity'),
+    // seulement si on utilise le module entity API
+    //'entity class' => 'DpidestinationsTarget',
+    //'controller class' => 'TargetController',
+    'base table' => 'pipo_entity',
+    'fieldable' => TRUE,
+    'uri callback' => 'dpidestinations_target_uri',
+    'label callback' => 'dpidestinations_target_label',
+
+    'entity keys' => array(
+      'id' => 'pid',
+    ),
+    'bundles'=>array(
+      'pipo_entity2'=>array(
+        
+      'label' => 't',
+        'admin' => array(
+          'path' => 'admin/structure/pipo_entity/manage/pipo_entity2',
+        'real path' => 'admin/structure/pipo_entity/manage/pipo_entity2',
+        'bundle argument' => "pipo_entity2",
+       ),
+        'pipo_entity1'=>array(
+        
+          'label' => 't',
+          'admin' => array(
+            'path' => 'admin/structure/pipo_entity/manage/pipo_entity1',
+            'real path' => 'admin/structure/pipo_entity/manage/pipo_entity1',
+            'bundle argument' => "pipo_entity1",
+          ),
+        
+      
+      ),
+      ),
+    ),
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    'access callback' => 'pipo_access',
+    
+    'admin ui' => array(
+      'label' => 'ti',
+      'path' => 'admin/structure/pipo',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      //'file' => 'target.admin.inc',
+      'controller class' => 'EntityDefaultUIController',
+    ),
+  );
+  return $entities;
+
+
+}
+
+function pipo_access(){
+  return TRUE;
+}
+function pipo_entity_form($form, &$form_state, $remotehtml,$op = 'edit'){
+  return array();
+}
+
+function pipo_pipo_entity_uri($pipoentity){
+  return array(
+    'path' => 'pipo/'.$pipoentity->pid,
+  );
+  return array(
+
+  );
+}
+
+
+function pipo_pipo_entity_label($pipo_entity){
+
+  return "pipo entity".$pipo_entity->pid;
+}
+
+
 function pipo_dpicache_cache_entry_register(){
   return array(
     'pipo_render'=>array(

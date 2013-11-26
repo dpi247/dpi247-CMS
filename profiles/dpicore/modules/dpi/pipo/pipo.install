@@ -50,3 +50,27 @@ function   pipo_remove_field_to_target_entity(){
   
   field_delete_field($field_name);
 }
+
+
+
+function pipo_schema() {
+  $schema['pipo_entity'] = array (
+    'description' => 'Pipo entity Example',
+    'fields' => array(
+      'pid' => array(
+        'description' => 'Primary key for our table of pipo',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The machine name of the pipo',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+    ),
+    'primary key' => array('pid'),
+  );
+  return $schema;
+}

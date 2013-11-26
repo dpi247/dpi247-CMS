@@ -47,7 +47,7 @@ function dpidestinations_menu(){
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.reorder.pages.inc'
+    'file' => 'dpidestinations.pages.reorder.inc'
   );
 
   $items['target/%target'] = array(
@@ -64,7 +64,76 @@ function dpidestinations_menu(){
     'page callback' => 'target_add',
     'access arguments' => array('create target'),
   );
+
+  $items['admin/structure/target'] = array(
+    'title' => 'Manage Targets',
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_administration_targets',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+    'file' => 'dpidestinations.pages.admin.inc'
+  );
+
+  $items['admin/structure/targetblocks'] = array(
+    'title' => 'Manage Targetblocks',
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_administration_targetblocks',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+    'file' => 'dpidestinations.pages.admin.inc'
+
+
+  );
+  $items['admin/dpi247/dpidestinations'] = array(
+    'title' => 'DPIDestinations',
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_administration_targetblocks',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+
+
+  );
+  $items['admin/dpi247/dpidestinations/destinations'] = array(
+    'title' => 'Destinations',
+    'description' => 'View existing destinations.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+
+
+  );
+  $items['admin/dpi247/dpidestinations/configuration'] = array(
+    'title' => 'Configuration',
+    'description' => 'Configure dpidestinations.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+
+    'page callback' => 'target_add',
+    'access arguments' => array('administer dpidestinations'),
+
+
+  );
+
   return $items;
+}
+
+
+function dpidestinations_menu_alter(& $items){
+
+  //Cause dpidestinations can be used as standalone module outside the distribution
+  if(!isset($items['admin/dpi247'])){
+
+    $items['admin/dpi247'] = array(
+      'title' => 'dpi247',
+      'description' => 'Administer dpi247 settings.',
+      'position' => 'right',
+      'weight' => -8,
+      'page callback' => 'system_admin_menu_block_page',
+      'access arguments' => array('access administration pages'),
+      'file' => 'system.admin.inc',
+      'file path'=> drupal_get_path('module', 'system'),
+    );
+  }
+
 }
 /**
  * Implementation of hook_permission()
@@ -75,6 +144,7 @@ function dpidestinations_permission(){
       'title' => t('Administer targets'),
       'restrict access' => TRUE,
     ),
+
     'view targets' => array(
       'title' => t('View targets'),
     ),

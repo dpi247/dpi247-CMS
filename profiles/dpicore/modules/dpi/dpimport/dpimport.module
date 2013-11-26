@@ -38,7 +38,7 @@ function dpimport_menu(){
     'description'      => t('Import settings'),
     'page callback'    => 'dpimport_page_importer_list',
     'access arguments' => array('administer dpimport'),
-    'file'             => 'dpimport.admin.pages.inc',
+    'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
   );
   
@@ -54,7 +54,7 @@ function dpimport_menu(){
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpimport_page_form_importer_form'),
     'access arguments' => array('administer dpimport'),
-    'file'             => 'dpimport.admin.pages.inc',
+    'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'type'             => MENU_LOCAL_TASK,
     'weight'           => 1,
@@ -66,7 +66,7 @@ function dpimport_menu(){
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpimport_page_form_importer_form', 5),
     'access arguments' => array('administer dpimport'),
-    'file'             => 'dpimport.admin.pages.inc',
+    'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'weight'           => 1,
   );
@@ -77,7 +77,7 @@ function dpimport_menu(){
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpimport_page_form_importer_delete_form', 5),
     'access arguments' => array('administer dpimport'),
-    'file'             => 'dpimport.admin.pages.inc',
+    'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'weight'           => 1,
   );
