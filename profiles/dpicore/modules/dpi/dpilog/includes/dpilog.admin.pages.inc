@@ -155,70 +155,77 @@ function dpilog_page_view_timeline_json(){
 }
 
 function dpilog_page_view_timeline(){
-
-  $filters=dpilog_page_view_list_build_filters();
-  $filters_form=drupal_get_form("dpilog_page_view_list_filter_form");
-  $logs_table=dpilog_page_view_list_build_logs_timeline($filters);
-
-  
-  $render_array['filters_form'] = array(
-    '#type' => 'form',
-    "form"=>$filters_form,
-  );
-  $render_array['content'] = array(
-    '#type' => 'markup',
-    "#markup"=> $logs_table,
-  );
-  $render_array['pager'] = array(
-    '#type' => 'markup',
-    "#markup"=>theme('pager', array('tags' => array())),
-  );
-  $render_array['#attached'] = array(
-    'css' => array(
-      'type' => 'file',
-      'data' => drupal_get_path('module', 'dpilog') . '/css/dpilog-table.css',
-    ),
-  );
-
-  return $render_array;
-}
-
-function dpilog_page_view_list_build_logs_timeline($filters){
-  $filters=dpilog_page_view_list_build_filters();
-  dsm($filters);
-  dsm('fff');
-  $query=dpilog_get_logs_query_based_on_filters($filters);
+  global $language;
+  // Données pour la timeline
+  $query = db_select('dpilog_logs', 'l');
+  $query->fields('l', array('log_name', 'action','timestamp'));
+  $query->orderBy('timestamp', 'DESC');
+  $query->range(0,1000);
   $results = $query->execute();
-  
+  $data = "";
   foreach($results as $result){
-    dsm($result,re);
+    $data .= "[new Date(".($result->timestamp*1000)."),, '".$result->log_name."', '".$result->action."', 'maclasse'],\n";
   }
-  
-  
-  $timeline_source=drupal_get_path('module','dpilog').'/timelinejs/compiled/js/storyjs-embed.js';
-  $timeline_source='/sites/default/files/timelinejs/js/storyjs-embed.js';
-  drupal_add_js($timeline_source);
-  
-  
-  $content='
-        
-      <script type="text/javascript">
-      jQuery(document).ready(function() {
-            
-         createStoryJS({
-        type:       "timeline",
-        width:      "100%",
-        height:     "600",
-        source:     "/admin/dpilog/view/timeline/json",
-        embed_id:   "my-timeline"           // ID of the DIV you want to load the timeline into
-    });
-       });
-      </script>
-            <div id="my-timeline"></div>
-        <script type="text/javascript" src="'.$timeline_source.'"></script>';
-     return $content;
-  
+  if($data == '')
+    return t("No data available");
+
+  // Ressources requises
+  $dpilog_path = drupal_get_path('module','dpilog');
+  drupal_add_css($dpilog_path.'/css/timeline.css','module', 'all', FALSE);
+  drupal_add_js('http://www.google.com/jsapi',array('type'=>'external','scope' => 'header', 'weight' => 1));
+  drupal_add_js($dpilog_path .'/js/timeline-min.js',array('scope' => 'header', 'weight' => 15));
+  if($language->language && $language->language != 'en')
+    drupal_add_js($dpilog_path .'/js/timeline-locales.js',array('scope' => 'header', 'weight' => 16));
+
+  // Javascript pour générer la timeline
+  // http://almende.github.io/chap-links-library/timeline.html
+  $output = " <script type='text/javascript'>
+        var timeline;
+        google.load('visualization', '1');
+
+        // Set callback to run when API is loaded
+        google.setOnLoadCallback(drawVisualization);
+
+        // Called when the Visualization API is loaded.
+        function drawVisualization() {
+            // Create and populate a data table.
+            var data = new google.visualization.DataTable();
+            data.addColumn('datetime', 'start');
+            data.addColumn('datetime', 'end');
+            data.addColumn('string', 'content');
+            data.addColumn('string', 'group');
+            data.addColumn('string', 'className');
+
+            data.addRows([".$data."]);
+
+            // specify options
+            var options = {
+                width: '100%',
+                height: '300px',
+                style: 'box',
+                eventMargin: 5,  // minimal margin between events
+                //eventMarginAxis: 0, // minimal margin beteen events and the axis
+                showMajorLabels: true,
+                axisOnTop: false,
+                groupsChangeable : true,
+                groupsOnRight: false,
+                cluster: true,
+                locale: '".($language->language ?: 'en')."'
+            };
+
+            // Instantiate our timeline object.
+            timeline = new links.Timeline(document.getElementById('mytimeline'));
+
+            // Draw our timeline with the created data and options
+            timeline.draw(data, options);
+        }
+    </script>
+    <div id='mytimeline'></div>";
+
+  return $output;
 }
+
+
 function dpilog_page_view_list_build_filters($form,$form_state){
   $filters = isset($_SESSION['dpilog_filters']) ? $_SESSION['dpilog_filters'] : array();
   
@@ -293,7 +300,7 @@ function dpilog_page_view_list_filter_form(){
   );
   $form['default']['severity']=array(
     '#type'=>'select',
-    "#options"=>array("TEST TAT"),
+    "#options"=>watchdog_severity_levels(),
     '#title'=>t('Severity'),
     '#default_value'=>isset($filters['severity'])?$filters['severity']:'',
     '#size'=>8,
