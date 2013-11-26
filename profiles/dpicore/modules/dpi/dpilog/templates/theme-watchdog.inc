@@ -22,7 +22,7 @@ function theme_dpilog_watchdog_message($variables) {
     }
     // Message to translate with injected variables.
     else {
-      $output = t($event->message, unserialize($event->variables));
+      $output = format_string($event->message, unserialize($event->variables));
     }
     if ($variables['as_link'] && isset($event->wid)) {
       // Truncate message to 56 chars.

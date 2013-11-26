@@ -1,55 +1,30 @@
 <?php
 
+function theme_colorselect(&$variables){
+  $id = $variables['element']['#id'];
+  $variables["element"]["#attributes"]["onchange"] = "document.getElementById('".$id."_colorzone').style.backgroundColor = this.value;";
+  $variables["element"]["#attributes"]["onkeypress"] = "document.getElementById('".$id."_colorzone').style.backgroundColor = this.value;";
+  return theme_textfield($variables)."<div style='background-color:".$variables['element']['#value']."' id='".$id."_colorzone' class='colorselect_zone'></div>";
+}
 
 function theme_dpilog_form_page_configure_granularity_form(&$variables){
-
-  $header = array('Action', 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO', 'DEBUG');
+  $header = array('Action', 'DPI Log', 'Watchdog', 'Color');
 
   foreach(element_children($variables["form"]['registrations']) as $registration_name){
-    $vertical_tab_id=$registration_name.'-vertical_tab';
-    $dpilog_table=array();
-    $watchdog_table=array();
-    $dpilog_table['header']=$header;
-    $watchdog_table['header']=$header;
-    $display_table['header']=$display_header;
-    foreach(element_children($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions']) as $action_name ){
-      $dpilog_table['rows'][$action_name] = array(
+    $main_table=array();
+    $main_table['header']=$header;
+    foreach(element_children($variables["form"]['registrations'][$registration_name]['dpilog']['actions']) as $action_name ){
+      $main_table['rows'][$action_name] = array(
         $action_name,
-
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][0]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][1]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][2]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][3]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][4]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][5]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][6]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['actions'][$action_name][7]),
-      );
-      $watchdog_table['rows'][$action_name] = array(
-        $action_name,
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][0]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][1]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][2]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][3]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][4]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][5]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][6]),
-        drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['actions'][$action_name][7]),
-
+        drupal_render($variables["form"]['registrations'][$registration_name]['dpilog']['actions'][$action_name]),
+        drupal_render($variables["form"]['registrations'][$registration_name]['watchdog']['actions'][$action_name]),
+        drupal_render($variables["form"]['registrations'][$registration_name]['color']['actions'][$action_name]),
       );
 
 
-      $variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['dpilog']['table']=array(
-        "#markup"=>theme('table',$dpilog_table),
+      $variables["form"]['registrations'][$registration_name]['table']=array(
+        "#markup"=>theme('table',$main_table),
         "#weight"=>-1,
-
-      );
-
-       
-      $variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['watchdog']['table']=array(
-        "#markup"=>theme('table',$watchdog_table),
-        "#weight"=>-1,
-
       );
 
 
@@ -58,10 +33,6 @@ function theme_dpilog_form_page_configure_granularity_form(&$variables){
   }
 
   return drupal_render_children($variables["form"]);
-
-
-
-
 }
 
 

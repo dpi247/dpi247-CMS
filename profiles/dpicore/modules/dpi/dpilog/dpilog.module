@@ -82,7 +82,7 @@ function dpilog_menu(){
     'access arguments'=>array('flush dpilog'),
     'type' => MENU_LOCAL_TASK,
     'file'=>'includes/dpilog.admin.pages.inc',
-    'weight'=>4,
+    'weight'=>3,
   );
 
   $items['admin/dpi/dpilogs/configure/dpilog'] = array(
@@ -95,18 +95,10 @@ function dpilog_menu(){
     'weight'=>4,
   );
   $items['admin/dpi/dpilogs/configure/dpilog/granularity'] = array(
-    'title'=> 'granularity',
+    'title'=> 'Configuration',
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight'=>5,
-  );
-  $items['admin/dpi/dpilogs/configure/dpilog/display'] = array(
-    'title'=> 'display',
-    'page arguments' => array('dpilog_form_page_configure_display_form'),
-    'access arguments'=>array('configure dpilog'),
-    'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.pages.inc',
-    'weight'=>6,
+    'weight'=>1,
   );
 
   /*---- smart watchdog ----*/
@@ -190,6 +182,10 @@ function dpilog_menu(){
 function dpilog_theme(){
 
   return array(
+    'colorselect' => array(
+      'render element' => 'element',
+      'file'=>'templates/theme.inc',
+    ),
     'dpilog_form_page_configure_granularity_form'=>array(
       'render element' => 'form',
       'file'=>'templates/theme.inc',

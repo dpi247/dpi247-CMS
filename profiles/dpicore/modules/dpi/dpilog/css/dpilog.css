@@ -16,3 +16,16 @@ select option[value="2"]{
 .vertical-tabs .form-type-textfield input {
 width: auto;
 }
+
+.colorselect {
+  float:left;
+  margin-right:5px;
+}
+.colorselect_zone {
+  width:2em;
+  height: 2em;
+  color:#000;
+  border:1px solid gray;
+  float:left;
+  padding:2px;
+}
