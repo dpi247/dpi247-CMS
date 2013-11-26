@@ -31,14 +31,14 @@ function dpilog_menu(){
     'page callback' => 'dpilog_watchdog_overview',
     'access arguments' => array('access site reports'),
     'weight' => 1,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
 
   );
   $items['admin/dpi/dpilogs/dpilog/log/%'] = array(
     'title'=> 'Logs',
     'page callback' => 'dpilog_page_view_list',
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'weight'=>2,
   );
   $items['admin/dpi/dpilogs/dpilog'] = array(
@@ -46,7 +46,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_list',
     //'page arguments' => array('dpilog_form_page_view_list_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight'=>2,
   );
@@ -62,7 +62,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_timeline',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight'=>3,
 
@@ -72,7 +72,7 @@ function dpilog_menu(){
     'page callback' => 'dpilog_page_view_timeline_json',
     //'page arguments' => array('dpilog_form_page_view_timeline_form'),
     'access arguments'=>array('view dpilog'),
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'weight'=>3,
   
   );
@@ -81,7 +81,7 @@ function dpilog_menu(){
     'page arguments' => array('dpilog_form_page_flush_form'),
     'access arguments'=>array('flush dpilog'),
     'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'weight'=>3,
   );
 
@@ -91,7 +91,7 @@ function dpilog_menu(){
     'page arguments' => array('dpilog_form_page_configure_granularity_form'),
     'access arguments'=>array('configure dpilog'),
     'type' => MENU_LOCAL_TASK,
-    'file'=>'includes/dpilog.admin.pages.inc',
+    'file'=>'includes/dpilog.pages.admin.inc',
     'weight'=>4,
   );
   $items['admin/dpi/dpilogs/configure/dpilog/granularity'] = array(
@@ -130,7 +130,7 @@ function dpilog_menu(){
     'access arguments' => array('access site reports'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
   );
   $items['admin/dpi/dpilogs/configure/watchdog/configure'] = array(
     'title' => 'Configure',
@@ -148,7 +148,7 @@ function dpilog_menu(){
     'access arguments' => array('access site reports'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
   );
   $items['admin/dpi/dpilogs/configure/watchdog/purge'] = array(
     'title' => 'Purge',
@@ -159,7 +159,7 @@ function dpilog_menu(){
     'access arguments' => array('access site reports'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 4,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
   );
   $items['admin/dpi/dpilogs/configure/watchdog/delete/%'] = array(
     'title' => 'Delete module configuration for wallylog',
@@ -167,14 +167,14 @@ function dpilog_menu(){
     'page arguments' => array(6),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
   );
   $items['admin/dpi/dpilogs/watchdog/event/%'] = array(
     'title' => 'Details',
     'page callback' => 'dpilog_watchdog_event',
     'page arguments' => array(5),
     'access arguments' => array('access site reports'),
-    'file' => 'includes/dpilog.watchdog.pages.inc',
+    'file' => 'includes/dpilog.pages.watchdog.inc',
   );
   return $items;
 }
