@@ -47,7 +47,7 @@ function dpidestinations_menu(){
     'access arguments' => array('reorder target'),
     'type' => MENU_CALLBACK,
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.reorder.pages.inc'
+    'file' => 'dpidestinations.pages.reorder.inc'
   );
 
   $items['target/%target'] = array(
@@ -70,7 +70,7 @@ function dpidestinations_menu(){
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_targets',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.page.admin.inc'
+    'file' => 'dpidestinations.pages.admin.inc'
   );
 
   $items['admin/structure/targetblocks'] = array(
@@ -80,7 +80,7 @@ function dpidestinations_menu(){
     'type' => MENU_DEFAULT_LOCAL_TASK,
 
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.page.admin.inc'
+    'file' => 'dpidestinations.pages.admin.inc'
 
 
   );
@@ -88,7 +88,7 @@ function dpidestinations_menu(){
     'title' => 'DPIDestinations',
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_targetblocks',
-    'file' => 'dpidestinations.page.admin.inc',
+    'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
 
 

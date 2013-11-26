@@ -26,7 +26,7 @@ function dpicommons_menu(){
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpicommons_admin_settings_form'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'dpicommons.admin.pages.inc',
+    'file' => 'dpicommons.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpicommons').'/includes',
   );
   // Menu items that are basically just menu blocks.

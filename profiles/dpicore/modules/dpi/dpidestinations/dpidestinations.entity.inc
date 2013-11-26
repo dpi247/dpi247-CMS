@@ -59,7 +59,7 @@ function dpidestinations_entity_info(){
     $entities['target']['admin ui'] = array(
       // Enable the entity API's admin UI.
       'path' => 'admin/dpi247/dpidestinations/target',
-      'file' => 'includes/dpidestinations.page.admin.inc',
+      'file' => 'includes/dpidestinations.pages.admin.inc',
       'controller class' => 'DpidestinationsTargetUIController',
     );
   }
@@ -109,7 +109,7 @@ function dpidestinations_entity_info(){
     $entities['targetblock']['admin ui'] = array(
       // Enable the entity API's admin UI.
       'path' => 'admin/dpi247/dpidestinations/targetblock',
-      'file' => 'includes/dpidestinations.page.admin.inc',
+      'file' => 'includes/dpidestinations.pages.admin.inc',
       'controller class' => 'DpidestinationsTargetUIController',
     );
   }
