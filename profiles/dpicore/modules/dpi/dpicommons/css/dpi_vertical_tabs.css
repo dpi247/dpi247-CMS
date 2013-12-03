@@ -1,0 +1,60 @@
+.dpi_vertical_tabs {
+  background: url("/themes/seven/images/fc.png") repeat-y scroll 0 0 #FFFFFF;
+  border: 1px solid #CCC;
+  margin: 10px 0;
+  position: relative;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_menu {
+  border-bottom: 1px solid #CCC;
+  float: left;
+  font-size: 1em;
+  line-height: 1;
+  margin: 0 -100% -1px 0;
+  padding: 0;
+  width: 240px;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option {
+  list-style: none outside none;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-top: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0; /* IE7 */
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option.dpi_vertical_tabs_active {
+  border-right-width: 0;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option a {
+  border-top: 1px solid #CCC;
+  display: block;
+  padding: 10px;
+  outline: 0 none;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option a:focus {
+  background: #FFF;
+  padding-left:20px;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option a:hover {
+  text-decoration: none;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option a:hover strong {
+  text-decoration: underline;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option.dpi_vertical_tabs_active a
+{
+  background: none repeat scroll 0 0 #FFF;
+  border-right-color: #FFF;
+  border-top: 1px solid #CCC;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_option a .dpi_vertical_tabs_subtitle {
+  color: #666;
+  display: block;
+  font-size: 0.846em;
+  padding-top: 0.4em;
+  text-decoration: none;
+}
+.dpi_vertical_tabs .dpi_vertical_tabs_main_content {
+  margin: 0 0 0 265px;
+  padding: 10px 15px 10px 0;
+}

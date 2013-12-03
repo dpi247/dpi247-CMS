@@ -40,12 +40,19 @@ function dpicommons_menu(){
     'file' => 'system.admin.inc',
     'file path'=> drupal_get_path('module', 'system'),
     
-  );
-  
+  );  
   return $items;
- 
 }
 
+
+function dpicommons_theme(){
+  return array(
+    'dpi_vertical_tabs' => array(
+      'variables' => array('data' => null),
+      'file'=>'templates/theme.inc',
+    )
+  );
+}
 
 function dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
   if (module_exists('dpilog')){
