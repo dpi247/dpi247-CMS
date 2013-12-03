@@ -160,10 +160,5 @@ function theme_dpilog_wathchog_backtrace($variables){
     $backtracel .= "</li>\n";
   }
   $backtracel .= "</ol><br/>\n";
-  // Add very complete information
-  if(function_exists("kprint_r")){
-    $backtracel .= "<h3>Full trace</h3>\n";
-    $backtracel .= kprint_r($variables['backtrace'], true);
-  }
   return $backtracel;
 }

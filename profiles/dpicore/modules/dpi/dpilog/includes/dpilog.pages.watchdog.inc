@@ -334,21 +334,46 @@ function dpilog_watchdog_event($id) {
   $result = db_query('SELECT w.*, u.name, u.uid FROM {'.$watchdog_table_name.'} w INNER JOIN {users} u ON w.uid = u.uid WHERE w.wid = :id', array(':id' => $id))->fetchObject();
   $build = array();
   if ($dpiwatchdog = $result) {
-    $out  = "";
-    $out .= "<h2>Watchdog details</h2>\n";
-    $out .= _dpilog_watchdog_event_main_details($dpiwatchdog);
-    $out .= "<h2>Trace</h2>\n";
+    $vtab_data = array();
+    // basic details
+    $vtab_data[] = array(
+      "title"    => "Watchdog details",
+      "subtitle" => "Basic information",
+      "content"  => _dpilog_watchdog_event_main_details($dpiwatchdog)
+      );
+
+    // backtrace(s)
     if($dpiwatchdog->backtrace){
       $backtrace = json_decode(gzuncompress($dpiwatchdog->backtrace),true);
-      $out .= theme('dpilog_wathchog_backtrace', array('backtrace'=>$backtrace));
+      $vtab_data[] = array(
+        "title"   => "Trace",
+        "subtitle"=> "Simplied functions call tree",
+        "content" => theme('dpilog_wathchog_backtrace', array('backtrace'=>$backtrace))
+      );
+      if(function_exists("kprint_r")){
+        $vtab_data[] = array(
+          "title"   => "Full trace",
+          "subtitle"=> "Complete PHP backtrace",
+          "content" => kprint_r($backtrace, true)
+        );
+      }
       unset($backtrace);
     }
     else {
-      $out .= 'No trace available';
+      $vtab_data[] = array(
+        "title"    => "Trace",
+        "subtitle" => "PHP backtrace",
+        "content"  => "No trace available"
+      );
     }
-    $out .= "<h2>Other watchdogs for the same process</h2>";
-    $out .= _dpilog_watchdog_other_events($dpiwatchdog->processid, $dpiwatchdog->wid);
-    return $out;
+
+    // Other watchdogs
+    $vtab_data[] = array(
+      "title"    => "Other watchdogs",
+      "subtitle" => "for the same process",
+      "content"  => _dpilog_watchdog_other_events($dpiwatchdog->processid, $dpiwatchdog->wid)
+      );
+    return theme('dpi_vertical_tabs', $vtab_data);
   }
   else { // No event with this ID
     return t('No data available for this watchdog.');
@@ -385,7 +410,7 @@ function _dpilog_watchdog_event_main_details($dpiwatchdog){
       l($dpiwatchdog->location, $dpiwatchdog->location, array('attributes'=>array('target'=>'_blank'))),
     ),
     array(
-      array('data' => t('Process ID'), 'header' => TRUE),
+      array('data' => t('Process&nbsp;ID'), 'header' => TRUE),
       $dpiwatchdog->processid,
     ),
     array(
