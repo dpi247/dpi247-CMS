@@ -60,11 +60,16 @@ function scald_twitter_admin_form_validate($form, &$form_state) {
     ->performRequest() ;
   $tweet = json_decode($json);
 
-  if (count($tweet->statuses) > 0 and is_array($tweet->statuses) ) {
-    drupal_set_message(t('Authentification with twitter verified.'), 'status');
+  if ( isset($tweet->statuses)) {
+    if (count($tweet->statuses) > 0 and is_array($tweet->statuses) ) {
+      drupal_set_message(t('Authentification with twitter verified.'), 'status');
+    }
+    else {
+      form_set_error('scald_twitter_oauth', 'Your API key are probably incorrect, we cannot authenticate with twitter.');
+    }
   }
   else {
-    form_set_error('scald_twitter_oauth', 'Your API key are probably incorrect, we cannot authenticate with twitter.');
+      form_set_error('scald_twitter_oauth', 'Your API key are probably incorrect, we cannot authenticate with twitter.');
   }
 
 }

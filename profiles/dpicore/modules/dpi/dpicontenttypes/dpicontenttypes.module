@@ -1,11 +1,11 @@
 <?php
+
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.api');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.fields');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.entity');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
+module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
-
-
 
 /**
  * Implementation of hook_menu()
@@ -53,7 +53,6 @@ function dpicontenttypes_menu(){
     'file' => 'dpicontenttypes.entity.inc',
   );
 
-  
   $items['node/%node/dpiproperties'] = array(
     'title' => 'DPIProperties',
     'page callback' => 'dpicontenttypes_entity_properties',
@@ -62,10 +61,9 @@ function dpicontenttypes_menu(){
     'type' => MENU_LOCAL_TASK,
     'file' => 'dpicontenttypes.pages.inc',
     'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    
     'weight' => 50,
   );
-  
+
   $items['atom/%scald_atom/dpiproperties'] = array(
     'title' => 'DPIProperties',
     'page callback' => 'dpicontenttypes_entity_properties',
@@ -74,9 +72,29 @@ function dpicontenttypes_menu(){
     'type' => MENU_LOCAL_TASK,
     'file' => 'dpicontenttypes.pages.inc',
     'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    
     'weight' => 50,
   );
+
+  $directory_path = file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath();
+  $directory_path_count = count(explode('/', $directory_path));
+  $items[$directory_path . '/dpistyles/%image_style/%typed_entity/%scald_atom'] = array(
+    'title' => t('Generate image style with an entity context'),
+    'page callback' => 'dpicontenttypes_image_style_deliver',
+    'page arguments' => array($directory_path_count + 1, $directory_path_count + 2, $directory_path_count + 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/dpicontenttypes.pages.inc',
+  );
+
+  $items['admin/editdpicrop/%ctools_js/%/%/%'] = array(
+    'title' => t('Edit croping'),
+    'page callback' => 'dpicontenttypes_ajax_editcrop',
+    'page arguments' => array(2, 3, 4, 5),
+    'access arguments' => array('administer nodes'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/dpicontenttypes.pages.inc',
+  );
+
   return $items;
 }
 
@@ -101,19 +119,51 @@ function dpicontenttypes_permission(){
   );
 }
 
+/**
+ * Implementation of hook_entity_insert
+ * 
+ * Flag cropings as permanent and delete unused cropings
+ */
+function dpicontenttypes_entity_insert($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
+}
+
+/**
+ * Implementation of hook_entity_update
+ * 
+ * Flag cropings as permanent and delete unused cropings
+ */
+function dpicontenttypes_entity_update($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
+}
+
+/**
+ * Implementation of hook_entity_delete
+ * 
+ * Delete cropings related to this entity
+ */
+function dpicontenttypes_entity_delete($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+  _dpicontenttypes_cropings_delete_cropings(NULL, $entity_type, $eid);
+}
 
 /**
  * Implementation of hook_node_insert
+ *
  * @param object $node
  */
-function dpicontenttypes_node_insert($node){
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())){
+function dpicontenttypes_node_insert($node) {
+  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
   }
 }
+
 /**
- *
  * Implementation of hook_delete
+ *
  * @param Object $node
  */
 function dpicontenttypes_node_delete($node) {
@@ -121,32 +171,117 @@ function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
 }
 
-
-function dpicontenttypes_theme(){
+/**
+ * Implementation of hook_theme
+ */
+function dpicontenttypes_theme() {
+  $base = array(
+    'path' => drupal_get_path('module', 'dpicontenttypes') . '/templates',
+    'file' => 'theme.inc',
+  );
   return array(
-    'atom_links_lists'=>array(
-      'variables'=>array(
-        'content'=>NULL,
+    'atom_links_lists' => $base + array(
+      'variables' => array(
+        'content' => NULL,
       ),
       'template' => 'atom-links-list',
-      'path' => drupal_get_path('module', 'dpicontenttypes') . '/templates',
-      'file' => 'theme.inc',
+    ),
+    'dpicontenttypes_image_style' => $base + array(
+      'variables' => array(
+        'style_name' => NULL,
+        'path' => NULL,
+        'entity' => array(),
+        'atom' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+      ),
+    ),
+    'dpicontenttypes_dpicrop_summary' => array(
+      'variables' => array('data' => NULL),
+      'path' => drupal_get_path('module', 'dpicontenttypes'),
+      'file' => 'dpicontenttypes.effects.inc',
     ),
   );
 }
 
-
-function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
-
+/**
+ * Implementation of hook_form_alter
+ *
+ * Alter the entities edition forms to add an "edit crop" link to atom fields
+ */
+function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
+  if (isset($form['#entity_type']) && isset($form['#bundle'])) { // This is an entity edition form
+    module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+    _dpicontenttypes_cropings_entity_form_add_cropings_alter($form, $form_alter, $form_id);
+  }
 }
 
+/**
+ * Implementation of hook_form_FROM-ID_alter
+ *
+ * Add a validation function to the image effects edition form
+ */
+function dpicontenttypes_form_image_effect_form_alter(&$form, $form_alter) {
+  $form['#validate'][] = 'dpicontenttypes_form_image_effect_form_alter_validate';
+}
+
+/**
+ * Validate an image effects edition form
+ */
+function dpicontenttypes_form_image_effect_form_alter_validate($form, $form_state) {
+  $effect = $form_state['image_effect'];
+  if (function_exists($effect['form callback'].'_validate')) {
+    call_user_func($effect['form callback'].'_validate', $form, $form_state, $form_state['values']['data']);
+  }
+}
+
+/**
+ * Implementation of hook_image_style_flush
+ *
+ * Flushes cached dpi media for a style.
+ *
+ * @param $style
+ *   An image style array.
+ */
+function dpicontenttypes_image_style_flush($style) {
+  $style_directory = drupal_realpath(file_default_scheme() . '://dpistyles/' . $style['name']);
+  if (is_dir($style_directory)) {
+    file_unmanaged_delete_recursive($style_directory);
+  }
+}
+
+/**
+ * Implements hook_file_move()
+ *
+ * Flush the dpistyles images paths
+ */
+function dpicontenttypes_file_move($file, $source) {
+  // Delete any image derivatives at the original image path.
+  dpicontenttypes_api_image_path_flush($source->uri);
+}
+
+/**
+ * Implements hook_file_delete()
+ *
+ * Flush the dpistyles images paths
+ */
+function dpicontenttypes_file_delete($file) {
+  // Delete any image derivatives of this image.
+  dpicontenttypes_api_image_path_flush($file->uri);
+}
+
+function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
+}
 
 /**
  * Implements hook_scald_contexts().
  */
 function dpicontenttypes_scald_contexts() {
   return array(
-    'dpi_inline'      => array(
+    'dpi_inline'        => array(
       'title'           => t('DPI Inline'),
       'description'     => t('When atom is embedded within  a textarea.'),
       'render_language' => 'XHTML',
@@ -161,14 +296,24 @@ function dpicontenttypes_scald_contexts() {
       'formats'         => array(),
     ),
   );
-
 }
 
-
-
+/**
+ * Implementation of hook_scald_transcoders_alter
+ *
+ * Add the style name in the scald_image transcoders attributes
+ */
+function dpicontenttypes_scald_transcoders_alter(&$transcoders) {
+  foreach ($transcoders as $name => $transcoder) {
+    if ($transcoder['provider'] == 'scald_image' && strstr($name, 'style-')) {
+      $transcoders[$name]['style'] = str_replace('style-', '', $name);
+    }
+  }
+}
 
 /**
- * Implements hook_scald_atom_providers.
+ * Implements hook_scald_atom_providers
+ *
  * Tell Scald that we'll be providing some twitter atoms.
  */
 function dpicontenttypes_scald_atom_providers() {
@@ -176,18 +321,41 @@ function dpicontenttypes_scald_atom_providers() {
     'links_list' => 'Links lists'
   );
 }
+
 function dpicontenttypes_scald_add_form(&$form, &$form_state) {
   return array();
 }
+
 function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
 }
 
+/**
+ * Implements hook_scald_prerender
+ */
+function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      // we are not in the library display view, so we need more than the title and thumbnail
+
+      // Tell scald core what he should display
+      $view_mode = "full";
+
+      $temporary_content = scald_atom_view($atom, $context);
+
+      $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
+
+      //Don't show title, not needed
+      $atom->rendered->title = '';
+    }
+  }
+}
 
 /**
- * Implements hook_scald_prerender.
+ * Implements hook_scald_render
+ * 
  * This should be used only for dpi inline and dpi mediabox scald's context
  */
-function dpicontenttypes_scald_render($atom, $context, $options, $mode) {
+function dpicontenttypes_scald_render($atom, $context, $options) {
   switch ($context) {
     case 'debug':
       $output = '<pre class="debug">' . print_r($atom, TRUE) . '</pre>';
@@ -209,17 +377,29 @@ function dpicontenttypes_scald_render($atom, $context, $options, $mode) {
       // If this is a custom context created through the UI, we use a special
       // render.
 
-      if($context == 'dpi_mediabox' || $context == 'dpi_inline'){
-        $content = scald_atom_view($atom, $context);
-        
-        //:We only use the render of the atom
-        // no need of the field_links_list field rendering
-        if($atom->type=='links_list'){
-          unset($content['field_linkitems  ']);
-        }
-        else{
+      if($context == 'dpi_mediabox' || $context == 'dpi_inline') {
+        if (isset($options['entity'])) {
+          // Replace the image style rendered image with our own
 
+          $transcoders = scald_transcoders();
+          $contexts = scald_contexts();
+          $context_config = $contexts[$context];
+          $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
+
+          if ($transcoder['provider'] == 'scald_image') {
+            $style_name = $transcoder['style'];
+            $atom->rendered->player = theme('dpicontenttypes_image_style', array('path' => $atom->file_source, 'style_name' => $style_name, 'entity' => $options['entity'], 'atom' => $atom));
+          }
         }
+
+        $content = scald_atom_view($atom, $context);
+
+        // We only use the render of the atom
+        // no need of the field_links_list field rendering
+        if ($atom->type == 'links_list') {
+          unset($content['field_linkitems']);
+        }
+
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.
@@ -229,53 +409,56 @@ function dpicontenttypes_scald_render($atom, $context, $options, $mode) {
       break;
   }
 
-
   return $output;
-
-}
-/**
- * Implements hook_scald_prerender.
- */
-function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
-
-  if ($mode == 'atom') {
-    if ($context != 'sdl_library_item') {
-      // we are not in the library display view, so we need more than the title and thumbnail
-
-      // Tell scald core what he should display
-      $view_mode = "full";
-
-      $temporary_content = scald_atom_view($atom, $context );
-
-
-      $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
-
-      //Don't show title, not needed
-      $atom->rendered->title = '';
-    }
-  }
 }
 
 /**
- *
  * Implementation of hook_scald_atom_insert
+ * 
  * Create a dpi properties linked to the new atom
+ *
  * @param Object $atom
  */
-function dpicontenttypes_scald_atom_insert($atom){
+function dpicontenttypes_scald_atom_insert($atom) {
   _dpicontenttypes_entityinsertdpiproperties($atom, 'scald_atom', $atom->sid);
 }
+
 /**
- *
  * Implementation of hook_scald_atom_delete
+ * 
  * Delete the dpiproperties linked to the atom
+ *
  * @param Object $atom
  */
-function dpicontenttypes_scald_atom_delete($atom){
+function dpicontenttypes_scald_atom_delete($atom) {
   _dpicontenttypes_entitydeletedpiproperties($atom, 'scald_atom', $atom->sid);
 }
 
-
+/**
+ * Implementation of hook_field_attach_view_alter
+ * 
+ * Add package nid to scald tag to get it as an option
+ */
+function dpicontenttypes_field_attach_view_alter(&$output, $context) {
+  list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+  if ($bundle == 'package') {
+    $fields = field_info_instances($context['entity_type'], $bundle);
+    foreach ($fields as $name => $field) {
+      if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
+        foreach (element_children($output[$name]) as $key) {
+          $matches = array();
+          preg_match_all(SCALD_SAS_MATCH_PATTERN, $output[$name][$key]['#markup'], $matches);
+          foreach ($matches[0] as $match_id => $old_tag) {
+            $options = array('entity' => array('type' => $context['entity_type'], 'bundle' => $bundle, 'id' => $id, 'vid' => $revision_id));
+            // @todo: insérer nos options dans les options existantes si il y en a
+            $new_tag = str_replace(']', ' '.json_encode($options).']', $old_tag);
+            $output[$name][$key]['#markup'] = str_replace($old_tag, $new_tag, $output[$name][$key]['#markup']);
+          }
+        }
+      }
+    }
+  }
+}
 
 /**
  * Implement hook_form().
@@ -291,9 +474,6 @@ function package_form($node, $form_state) {
   return node_content_form($node, $form_state);
 }
 
-
-
-
 /**
  * Implements hook_ctools_plugin_directory().
  */
@@ -305,8 +485,6 @@ function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
     return 'plugins/dpimport/' . $plugin;
   }
 }
-
-
 
 /**
  * Implements hook_library().
@@ -327,11 +505,12 @@ function dpicontenttypes_library() {
 
   return $libraries;
 }
+
 /**
- *
  * Implementation of the hook_dpicontenttypes_provider
  *
  * @param String $uri
+ *
  * @return Array $provider
  */
 function dpicontenttypes_dpicontenttypes_provider($uri){
@@ -349,4 +528,21 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
   }
 
   return array('dpicontenttypes' => $provider);
+}
+
+/**
+ * Load function for a typed id, like "node_123" or "user_17" for example
+ */
+function typed_entity_load($typed_id) {
+  list($entity_type, $entity_id) = explode('_', $typed_id);
+  if (is_string($entity_type) && is_numeric($entity_id)) {
+    $entities = entity_load($entity_type, array($entity_id));
+    if (isset($entities[$entity_id])) {
+      $entity = $entities[$entity_id];
+      $entity->entity_type = $entity_type;
+      $entity->entity_id = $typed_id;
+      return $entity;
+    }
+  }
+  return NULL;
 }

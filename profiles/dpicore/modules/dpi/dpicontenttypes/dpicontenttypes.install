@@ -5,7 +5,32 @@
  * Install, update and uninstall functions for the node module.
  */
 
+/**
+ * Implementation of hook_install
+ */
+function dpicontenttypes_install() {
+  //Create a dpiproperties bundle
+  $values = array(
+    'type' => 'default',
+    'label' => 'default',
+    'description' => 'Default DPIPropertiesType',
+    'status' => 1,
+    'module' => 'dpicontenttypes',
+  );
+  $dpipropertiestype = new DPIPropertiesTypeEntity($values);
+  dpiproperties_type_save($dpipropertiestype);
 
+  scald_add_type('links_list', 'Links List', 'Links List');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dpicontenttypes_uninstall() {
+  drupal_load('module', 'scald');
+  scald_remove_type('links_list');
+  drupal_uninstall_schema('dpicontenttypes');
+}
 
 /**
  * Implements hook_field_schema().
@@ -52,7 +77,7 @@ function dpicontenttypes_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-  	  'type' => array(
+      'type' => array(
         'description' => 'The type (bundle) of this DPI properties.',
         'type' => 'varchar',
         'length' => 255,
@@ -132,27 +157,28 @@ function dpicontenttypes_schema() {
         'size' => 'medium',
         'translatable' => TRUE,
       ),
-    ),'status' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        // Set the default to ENTITY_CUSTOM without using the constant as it is
-        // not safe to use it at this point.
-        'default' => 0x01,
-        'size' => 'tiny',
-        'description' => 'The exportable status of the entity.',
-      ),
-      'module' => array(
-        'description' => 'The name of the providing module if the entity has been defined in code.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-      ),
+    ),
+    'status' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      // Set the default to ENTITY_CUSTOM without using the constant as it is
+      // not safe to use it at this point.
+      'default' => 0x01,
+      'size' => 'tiny',
+      'description' => 'The exportable status of the entity.',
+    ),
+    'module' => array(
+      'description' => 'The name of the providing module if the entity has been defined in code.',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    ),
     'primary key' => array('id'),
     'unique keys' => array(
       'type' => array('type'),
     ),
   );
-  
+
   //Prenode list
   $schema['dpicontenttypes_prenode'] = array(
     'description' => 'List of the prenodes',
@@ -177,7 +203,7 @@ function dpicontenttypes_schema() {
     ),
     'primary key' => array('id'),
   );
-  
+
   //Prenode object
   $schema['dpicontenttypes_prenode_object_cache'] = array(
     'description' => t('A special cache used to store prenodes that are being edited.'),
@@ -227,48 +253,74 @@ function dpicontenttypes_schema() {
     ),
     'primary key' => array('id'),
   );
-  return $schema;
-}
-/**
- * 
- * Implementation of hook_install
- */
-function dpicontenttypes_install(){
-  //Create a dpiproperties bundle
-  $values = array(
-    'type' => 'default',
-    'label' => 'default',
-    'description' => 'Default DPIPropertiesType',
-    'status' => 1,
-    'module' => 'dpicontenttypes',
-  );
-  $dpipropertiestype = new DPIPropertiesTypeEntity($values);
-  dpiproperties_type_save($dpipropertiestype);
-  
-  scald_add_type('links_list', 'Links List', 'Links List');
-  
-  
-}
 
-/**
- * Implements hook_uninstall().
- */
-function dpicontenttypes_uninstall() {
-  drupal_load('module', 'scald');
-  scald_remove_type('links_list');
-  drupal_uninstall_schema('dpicontenttypes');
+  $schema['dpicontenttypes_cropings'] = array(
+    'description' => 'Contains the cropings informations for the couples entities/atoms',
+    'fields' => array(
+      'cid' => array(
+        'description' => 'The primary identifier for a croping',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'etype' => array(
+        'description' => 'Entity type',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'eid' => array(
+        'description' => 'The id of the entity attached to this croping',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'aid' => array(
+        'description' => 'The id of the atom attached to this croping',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'cropings' => array(
+        'description' => 'Serialized cropings values',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'temp' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'form_token' => array(
+        'description' => 'The token of the form of the entity being created',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'small',
+      ),
+    ),
+    'primary key' => array('cid'),
+    'indexes' => array(
+      'entity' => array('etype', 'eid'),
+      'croping_entry' => array('etype', 'eid', 'aid'),
+    ),
+  );
+
+  return $schema;
 }
 
 /**
  * Creation of the table dpi_properties
  */
-function dpicontenttypes_update_7000(){
+function dpicontenttypes_update_7000() {
   //Creation of table dpi_properties
   $schema = drupal_get_schema('dpicontenttypes_properties', TRUE);
   db_create_table('dpicontenttypes_properties', $schema);
   $schema = drupal_get_schema('dpicontenttypes_properties_type', TRUE);
   db_create_table('dpicontenttypes_properties_type', $schema);
-  
+
   $values = array(
     'type' => 'default',
     'label' => 'default',
@@ -281,33 +333,37 @@ function dpicontenttypes_update_7000(){
 }
 
 /**
-* Suppression du champs description de dpiproperties
-*/
-function dpicontenttypes_update_7001(){
-  
+ * Suppression du champs description de dpiproperties
+ */
+function dpicontenttypes_update_7001() {
   db_drop_field('dpicontenttypes_properties', 'description');
 }
+
 /**
- * 
  * Reinstallation de la table dpiproporties
  */
-function dpicontenttypes_update_7002(){
-  
+function dpicontenttypes_update_7002() {
   $schema = drupal_get_schema('dpicontenttypes_properties', TRUE);
   db_drop_table('dpicontenttypes_properties');
   db_create_table('dpicontenttypes_properties', $schema);
 }
 
 /**
- * 
  * Install prenode tables
  */
-function dpicontenttypes_update_7003(){
-  
+function dpicontenttypes_update_7003() {
   $schema = drupal_get_schema('dpicontenttypes_prenode', TRUE);
   db_create_table('dpicontenttypes_prenode', $schema);
   $schema = drupal_get_schema('dpicontenttypes_prenode_object_cache', TRUE);
   db_create_table('dpicontenttypes_prenode_object_cache', $schema);
   $schema = drupal_get_schema('dpicontenttypes_prenode_html_cache', TRUE);
   db_create_table('dpicontenttypes_prenode_html_cache', $schema);
+}
+
+/**
+ * Install the dpicontenttypes_cropings table
+ */
+function dpicontenttypes_update_7004() {
+  $schema = drupal_get_schema('dpicontenttypes_cropings', TRUE);
+  db_create_table('dpicontenttypes_cropings', $schema);
 }

@@ -57,11 +57,28 @@ function scald_twitter_scald_atom_providers() {
  * Implements hook_scald_add_form().
  */
 function scald_twitter_scald_add_form(&$form, &$form_state) {
+  $consumer_key = variable_get('scald_twitter_consumer_key');
+  $consumer_secret = variable_get('scald_twitter_consumer_secret');
+  $oauth_token = variable_get('scald_twitter_oauth_token');
+  $oauth_token_secret = variable_get('scald_twitter_oauth_token_secret');
+  $disabled = false;
+  if (!isset($oauth_token)
+      || !isset($oauth_token_secret)
+      || !isset($consumer_key)
+      || !isset($consumer_secret)) {
+      $form['item'] = array(
+        '#type' => 'item',
+        '#title' => t('No twitter API credential:'),
+        '#markup' => l('Please fill the form here','admin/config/services/scald_twitter') ,
+        );
+      $disabled = true;
+      }
   $form['identifier'] = array(
     '#type' => 'textfield',
     '#title' => t('twitter identifier or URL'),
     '#element_validate' => array('scald_twitter_validate_id'),
     '#default_value' => '',
+    '#disabled' => $disabled,
   );
 }
 
@@ -135,13 +152,6 @@ function scald_twitter_scald_fetch($atom, $type) {
 /**
  * Implements hook_scald_prerender().
  */
-
-
-//  https://drupal.org/node/1925698
-//To make your own player, simply implement hook_scald_player, 
-//configure the context to use your player, then in hook_scald_prerender($mode = 'player') //
-//prepare your markup with the transcoded file at $atom->file_transcoded.
-
 function scald_twitter_scald_prerender($atom, $context, $options, $mode) {
   if ($mode == 'atom') {
     if ($context != 'sdl_library_item') {
