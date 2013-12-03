@@ -1409,10 +1409,6 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
     return scald_render($atom, _scald_context_fallback($atom->type, $context), $options, $rebuild);
   }
 
-  
-  
-  //dsm($atom,"YOCOCO $context");
-  
   // Check the cache unless explicitly rebuilding the rendering of the Atom.
   $action_bitstream = 0;
   foreach (scald_atom_actions_available($atom) as $action) {
@@ -1456,13 +1452,12 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
       $options = $decoded;
     }
   }
-  
 
   scald_prerender($atom, $context, $options);
 
   // Context Provider does the final rendering.
-
   $rendered = module_invoke($contexts[$context]['provider'], 'scald_render', $atom, $context, $options);
+
   // The Context exists but rendering is failing hard for some reason.  Output
   // still needs to be ensured, however.  Also note that an empty string is
   // valid output.  However, hook_scald_render() should return FALSE upon
@@ -1726,7 +1721,6 @@ function scald_scald_render($atom, $context, $options = array()) {
       $system = _scald_system_contexts();
       if ($context == 'full' || empty($system[$context])) {
         $content = scald_atom_view($atom, $context);
-        
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.

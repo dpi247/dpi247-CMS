@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Implements hook_field_info().
  */
@@ -19,25 +18,26 @@ function dpicontenttypes_field_info() {
     ),
   );
 }
+
 /**
-* Additional callback to adapt the property info for scald_atom fields.
-* @see entity_metadata_field_entity_property_info().
-*/
+ * Additional callback to adapt the property info for scald_atom fields.
+ *
+ * @see entity_metadata_field_entity_property_info().
+ */
 function dpicontenttypes_field_scald_atom_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
   // Update the property info with the info for image fields.
- 
+
   $property['auto creation'] = 'entity_property_create_array';
   $property['getter callback'] = 'entity_metadata_field_verbatim_get';
   $property['setter callback'] = 'dpiproperties_field_scald_atom_set';
   $property['validation callback'] = 'dpicontenttypes_field_scald_atom_validate_item';
- 
 }
+
 /**
-* Callback for validating scald_atom field $items.
-*/
+ * Callback for validating scald_atom field $items.
+ */
 function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
-  
   // Stream-line $items for multiple vs non-multiple fields.
   $items = !entity_property_list_extract_type($context['type']) ? array($items) : (array) $items;
 
@@ -47,9 +47,10 @@ function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
   }
   return TRUE;
 }
+
 /**
- * 
  * Setter callback for scald_atom
+ *
  * @param Object $object
  * @param String $name
  * @param Array $value
@@ -58,7 +59,6 @@ function dpicontenttypes_field_scald_atom_validate_item($items, $context) {
  * @param Array $info
  */
 function dpiproperties_field_scald_atom_set($object, $name, $value, $langcode, $entity_type, $info){
-  
   //If a null value is receive empty the field
   if ($value == NULL){
     $object->{$name}[$langcode] = NULL;
@@ -143,65 +143,57 @@ function dpicontenttypes_field_validate($entity_type, $entity, $field, $instance
   }
 }
 
-
-
 /**
  * Implements hook_field_presave().
  */
 function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  
   if($field['field_name']=='field_embededobjects'){
-  foreach($items as $delta=>$item){
+    foreach($items as $delta=>$item){
 
-    $continue=FALSE;
-    //First remove all items that come from the inline
-    
-    if(isset($item['inline']) and $item['inline']==1){
-      unset($items[$delta]);
-      $continue=TRUE;
-      
-    }
-    //Add extra meta
-    if($continue===FALSE && $atom=scald_atom_load($items[$delta]['sid'])){
-      $items[$delta]['type']=$atom->type;
-      $items[$delta]['provider']=$atom->provider;
-      $items[$delta]['inline']=0;
-    }
+      $continue=FALSE;
+      //First remove all items that come from the inline
 
-
-  }
-  
-  $add_items=array();
-  
-  
-  //@todo: je devrais  aller lire dans les settings du field,
-  // quel type d atome de mon inline, j'accepte de mettre dans mon embedd
-  //dsm($field);
-  
-  
-  //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
-  $field_to_analyse='field_textbody';
-  $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
-  foreach($field_to_analyse_items as $field_to_analyse_item ){
-    foreach($field_to_analyse_item['mee']['resource_manager'] as $sid=>$mee){
-
-      if($atom=scald_atom_load($sid)){
-        $values=array(
-          'sid'=>$atom->sid,
-          'type'=>$atom->type,
-          'provider'=>$atom->provider,
-          'inline'=>1,
-        );
-        $add_items[]=$values;
+      if(isset($item['inline']) and $item['inline']==1){
+        unset($items[$delta]);
+        $continue=TRUE;
       }
-
+      //Add extra meta
+      if($continue===FALSE && $atom=scald_atom_load($items[$delta]['sid'])){
+        $items[$delta]['type']=$atom->type;
+        $items[$delta]['provider']=$atom->provider;
+        $items[$delta]['inline']=0;
+      }
     }
-  }
-  foreach ($add_items as $add_item){
-    $items[]=$add_item;
-  }
+
+    $add_items=array();
+
+    //@todo: je devrais  aller lire dans les settings du field,
+    // quel type d atome de mon inline, j'accepte de mettre dans mon embedd
+    //dsm($field);
+
+    //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
+    $field_to_analyse='field_textbody';
+    $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
+    foreach($field_to_analyse_items as $field_to_analyse_item ){
+      foreach($field_to_analyse_item['mee']['resource_manager'] as $sid=>$mee){
+
+        if($atom=scald_atom_load($sid)){
+          $values=array(
+            'sid'=>$atom->sid,
+            'type'=>$atom->type,
+            'provider'=>$atom->provider,
+            'inline'=>1,
+          );
+          $add_items[]=$values;
+        }
+      }
+    }
+    foreach ($add_items as $add_item){
+      $items[]=$add_item;
+    }
   }
 }
+
 /**
  * Implements hook_field_is_empty().
  */
@@ -239,7 +231,9 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
   if (!empty($contexts[$render_context])) {
     foreach ($items as $delta => $item) {
       $sid = $item['sid'];
-      $element[$delta] = array('#markup' => scald_render($sid, $render_context));
+      $entity_ids = entity_extract_ids($entity_type, $entity);
+      $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
+      $element[$delta] = array('#markup' => scald_render($sid, $render_context, json_encode($options)));
     }
   }
 
@@ -295,7 +289,6 @@ function dpicontenttypes_field_widget_form(&$form, &$form_state, $field, $instan
     'type'=>array('#type'=>'value','#value'=>$items[$delta]['type']),
     'inline'=>array('#type'=>'value','#value'=>$items[$delta]['inline']),
   );
-  
 }
 
 /**
@@ -331,10 +324,7 @@ function dpicontenttypes_field_widget_form_process(&$element) {
   }
   $element['#field_prefix'] = $prefix;
   return $element;
-
 }
-
-
 
 /**
  * Implements hook_field_widget_error.
