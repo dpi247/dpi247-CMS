@@ -13,7 +13,7 @@
 class Scald_Twitter_Oauth_connector_Exception extends Exception {
 
   public function __construct($message) {  
-    watchdog('scald_twitter', $message, '', WATCHDOG_WARNING ); 
+    watchdog('scald_twitter', $message, array(), WATCHDOG_WARNING );
   }
   
 }
