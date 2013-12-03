@@ -18,7 +18,12 @@ Drupal.behaviors.dpiatom_reference = {
             .end()
             .find('div.dpiatom_reference_drop_zone')
             .empty()
-            .append(Drupal.t('Drop a resource here'))
+            .append(Drupal.t('Drop a resource here'));
+          // Remove the "edit croping" link
+          $(this)
+            .closest('td')
+            .find('a.ctools-use-modal')
+            .empty();
         });
       // If the element doesn't have a value yet, hide the Delete button
       // by default
@@ -43,6 +48,18 @@ Drupal.behaviors.dpiatom_reference = {
               .end()
               .find('input:button')
               .show();
+            // Add the "edit croping" link
+            var entityType = Drupal.settings.dpicontenttypesCropingsLinks.entityType;
+            var eid = Drupal.settings.dpicontenttypesCropingsLinks.eid;
+            var aid_regex_matches = e.originalEvent.dataTransfer.getData('Text').match(/^\[scald=(\d+).*$/);
+            var aid = aid_regex_matches[1];
+            var editCropLink = '/admin/editdpicrop/ajax/' + entityType + '/' + eid + '/' + aid;
+            var editCropLabel = Drupal.t('Click here to edit croping informations');
+            $this
+              .closest('div.form-item')
+              .after('<a href="' + editCropLink + '" class="ctools-use-modal" title="">' + editCropLabel + '</a>');
+            // Bind the modal behavior
+            Drupal.behaviors.ZZCToolsModal.attach(document);
           }
           else {
             var placeholder = Drupal.t("You can't drop a resource of type %type in this field", {'%type': ret.type});
