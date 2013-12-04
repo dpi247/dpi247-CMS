@@ -213,7 +213,7 @@ function dpicontenttypes_theme() {
  * Alter the entities edition forms to add an "edit crop" link to atom fields
  */
 function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
-  if (isset($form['#entity_type']) && isset($form['#bundle'])) { // This is an entity edition form
+  if (isset($form['#entity_type']) && isset($form['#bundle']) && isset($form['#entity']) && is_object($form['#entity'])) { // This is an entity edition form
     module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
     _dpicontenttypes_cropings_entity_form_add_cropings_alter($form, $form_alter, $form_id);
   }
@@ -283,14 +283,14 @@ function dpicontenttypes_scald_contexts() {
   return array(
     'dpi_inline'        => array(
       'title'           => t('DPI Inline'),
-      'description'     => t('When atom is embedded within  a textarea.'),
+      'description'     => t('When atom is embedded within a textarea.'),
       'render_language' => 'XHTML',
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
     'dpi_mediabox'      => array(
       'title'           => t('DPI MediaBox'),
-      'description'     => t('When atom is embedded within  a field.'),
+      'description'     => t('When atom is embedded within a field.'),
       'render_language' => 'XHTML',
       'parseable'       => TRUE,
       'formats'         => array(),
