@@ -1,59 +1,118 @@
 <?php 
 
-function hook_dpicache_cache_entry_register(){
-  return array(
-    'flowmix_render'=>array(
-      'callback'=> 'flowmix_get_render',
-      'plugin'=> 'dpicache_memcache',
-      'cache_prefix'=> 'flowmix_render',
-      "data_type" => "string",
-      'time_window' => 24,
-      'default_ttl'=> 5
-    )
-  );
+/**
+ * Fetch cache content from ad hoc storage
+ * 
+ * @param  String $entry_name    Name of the dpicache
+ * @param  String $entry_hash    Hash of called parameters
+ * @return void                  Content stored, FALSE otherwise.
+ */
+function dpicache_fetch_cache($entry_name, $entry_hash){
+  // @TODO fetch from database, or memcache, or elsewhere
+  $default_cache_table = 'cache_dpicache';
+  $c = cache_get($entry_name.'_'.$entry_hash, $default_cache_table);
+  if(!$c)
+    return FALSE;
+  return $c->data;
+}
+
+/**
+ * Save cache content in ad hoc storage
+ * 
+ * @param  String $entry_name       Name of the dpicache
+ * @param  String $entry_hash       Hash of called parameters
+ * @param  void   $content          Content to store
+ * @param  Array  $cache_definition Registered definition
+ * @return Boolean                  Save success, or not.
+ */
+function dpicache_save_cache($entry_name, $entry_hash, $content, $cache_definition){
+  // @TODO save in database, or memcache, or elsewhere
+  $default_cache_table = 'cache_dpicache';
+  cache_set($entry_name.'_'.$entry_hash, $content, $default_cache_table, CACHE_PERMANENT);
+  return TRUE;
+}
+
+/**
+ * Delete cache content in ad hoc storage
+ * 
+ * @param  String $entry_name    Name of the dpicache
+ * @param  String $entry_hash    Hash of called parameters
+ * @return Boolean               Deletion success, or not.
+ */
+function dpicache_delete_cache($entry_name, $entry_hash){
+  // @TODO delete in database, or memcache, or elsewhere
+  $default_cache_table = 'cache_dpicache';
+  cache_clear_all($entry_name.'_'.$entry_hash, $default_cache_table);
 }
 
 
-
+/**
+ * Get cache content throught DPIcache system.
+ * 
+ * @param  String $cache_name Cache name
+ * @param  void   ???         Add all your parameters for your callback function then.
+ * @return void               Your cache content, or FALSE.
+ */
 function dpicache_get_cache_entry($cache_name){
-  $infos=_dpicache_get_cache_entry_definition($cache_name);
-  if($infos==FALSE){
-    //@todo: Trow an error
+  $cache_definition = dpicache_get_cache_entry_definition($cache_name);
+  if(!$cache_definition){
+    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache",array("!cache_name"=>$cache_name)),array(),'',WATCHDOG_ERROR);
     return FALSE;
   }
-  
-  
-  $args=func_get_args();
-  array_shift($args);
-  $hash=_dpicache_get_hash($cache_name,$args);
-    
-    if(  $cache=_dpicache_fetch_cache_entry($hash,$infos)){
-      //@todo:Remplacer par des dpilogs
-      dpi_log('cache_entry', "cache_hit", t("Cache hit !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
-      
-     return $cache;
-    }
-    else{
-      //@todo:Remplacer par des dpilogs
-      dpi_log('cache_entry', "cache_miss", t("Cache miss !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
-      dpi_log('cache_entry', "cache_hot", t("Cache hot generation !cache_name for callback !callback",array("!cache_name"=>$cache_name,"!callback"=>$infos['callback'])),$infos,$hash,WATCHDOG_INFO);
-      
-      $cache = _dpicache_regenerate_cache_entry($hash,$infos,$args);
-      
-      //@todo: créer une entrée dans la table de génération à froid.
-      // Si j'ai du regénérer la cache manuellement alors
-      // => je dois sauver également une entrée dans la table de géneration à froid
-      
-      // A priori je ne rafraichis ma cache a chaud que une fois sur une période de "time_window".
-      // En fait: je rafraichis la cache à froid d'un nombre [division entier de time_window/freq] avant de rafraichir le cache à chaud
-      _dpicache_save_cache_cold($cache_name,$hash,$infos,$args);
-      return $cache;
-      
-    }
+  // Get arguments for callback
+  $parameters=func_get_args();
+  array_shift($parameters);
+  // Get hash
+  $hash = _dpicache_get_hash($cache_name,$parameters);
+  if(!$hash){
+    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : Unable to generate hash for !cache_name",array("!cache_name"=>$cache_name)),array(),'',WATCHDOG_ERROR);
     return FALSE;
-  
-  
+  }
+  // fetch cache from ad hoc storage
+  if($content = dpicache_fetch_cache($cache_name, $hash)){
+    // cache available
+    dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
+    return $content;
+  }
+  else {
+    // no cache available
+    dpi_log('dpicache', "cache_miss", t("Cache miss : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_NOTICE);
+    // Get fresh content
+    $fresh_content = _dpicache_cache_call_function($cache_definition, $parameters);
+    if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
+      return FALSE;
+    }
+    try {
+      $parameters_array = serialize($parameters);
+    } catch (Exception $e) {
+      // Unable to keep parameters for future use
+      dpi_log('dpicache', "error", t("dpicache_get_cache_entry : Unable to serialize parameters for name = !cache_name and hash = !hash",array("!cache_name"=>$cache_name,'!hash'=>$hash)),array(),'',WATCHDOG_ERROR);
+      return $fresh_content;
+    }
+
+    // Save content into adhoc cache
+    $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
+    dpi_log('dpicache', "regenerate_hot", t("Cache (re)generated for name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
+
+    // Add or update cache entry data
+    $entry_information = array(
+      "name" => $cache_name,
+      "hash" => $hash,
+      "category" => @$cache_definition["category"],
+      "data_type" => @$cache_definition["data_type"] ?: "string",
+      "creation_date" => time(),
+      "expiration_date" => intval(time() + $cache_definition["ttl"]),
+      "last_run" => time(),
+      "update_freq" => $cache_definition["refresh_interval"],
+      "parameters" => $parameters_array
+      );
+    dpicache_save_cache_entry($entry_information, false);
+    return $fresh_content;
+  }
 }
+
+
+
 
 
 /**

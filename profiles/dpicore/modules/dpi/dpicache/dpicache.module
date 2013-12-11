@@ -6,11 +6,22 @@ module_load_include('inc', 'dpicache','dpicache.private');
 function dpicache_cron(){
   //We need to ensure everybody is sync
   $time=time();
-  
-  _dpicache_cron_regenerate_old_ttl_cache_entry($time);
-  _dpicache_cron_cleanup_old_ttl_cache_entry($time);
-  _dpicache_cron_cleanup_old_ttl_cold($time);
-  
+  dpicache_regenerate_cache_entries($time);
+  dpicache_cron_cleanup($time);
+}
+
+
+function hook_dpicache_cache_entry_register(){
+  return array(
+    'flowmix_render'=>array(
+      'callback'=> 'flowmix_get_render', // function to call
+      'plugin'=> 'dpicache_memcache', // which storage?
+      'catagory'=> 'flowmix_render', // group
+      'data_type' => "string", // the callback returns a string
+      'ttl' => 7*24*60*60, //(in seconds) keep a cache for one week 
+      'refresh_interval'=> 5*60 //(in seconds) auto-refresh cache every 5 minutes
+    )
+  );
 }
 
 
@@ -18,13 +29,8 @@ function dpicache_cron(){
 function dpicache_dpilog_register(){
 
   return array(
-    "cache_entry"=>array(
-      "actions"=>array("cache_hit","cache_miss",'regenerate_hot','regenerate_cold','regenerate'),
-    ),
-    "cache_error"=>array(
-      "actions"=>array("cache_error_callback"),
-    ),
-    
-
+    "dpicache"=>array(
+      "actions"=>array("cache_hit","cache_miss",'regenerate_hot','regenerate_cold','error'),
+    )
   );
 }
