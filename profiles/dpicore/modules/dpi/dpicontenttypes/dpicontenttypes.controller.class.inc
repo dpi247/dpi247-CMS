@@ -83,6 +83,9 @@ class DPIPropertiesController extends EntityAPIController{
       '#formatter' => 'text_default',
       0 => array('#markup' => check_plain($entity->product_id))
     );
+    $content['edit_link'] = array(
+      '#markup' => l('Edit dpiproperties','dpiproperties/'.$entity->dpid.'/edit',array('query' => array('destination' => 'node/'.$entity->id.'/dpiproperties'))),
+    );
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
   /*
