@@ -8,9 +8,15 @@
  * @return void                  Content stored, FALSE otherwise.
  */
 function dpicache_fetch_cache($entry_name, $entry_hash){
-  // @TODO fetch from database, or memcache, or elsewhere
+  global $conf;
   $default_cache_table = 'cache_dpicache';
-  $c = cache_get($entry_name.'_'.$entry_hash, $default_cache_table);
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  $c = cache_get($entry_name.'_'.$entry_hash, $bin);
   if(!$c)
     return FALSE;
   return $c->data;
@@ -26,9 +32,15 @@ function dpicache_fetch_cache($entry_name, $entry_hash){
  * @return Boolean                  Save success, or not.
  */
 function dpicache_save_cache($entry_name, $entry_hash, $content, $cache_definition){
-  // @TODO save in database, or memcache, or elsewhere
+  global $conf;
   $default_cache_table = 'cache_dpicache';
-  cache_set($entry_name.'_'.$entry_hash, $content, $default_cache_table, CACHE_PERMANENT);
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  cache_set($entry_name.'_'.$entry_hash, $content, $bin, CACHE_PERMANENT);
   return TRUE;
 }
 
@@ -40,9 +52,15 @@ function dpicache_save_cache($entry_name, $entry_hash, $content, $cache_definiti
  * @return Boolean               Deletion success, or not.
  */
 function dpicache_delete_cache($entry_name, $entry_hash){
-  // @TODO delete in database, or memcache, or elsewhere
+  global $conf;
   $default_cache_table = 'cache_dpicache';
-  cache_clear_all($entry_name.'_'.$entry_hash, $default_cache_table);
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  cache_clear_all($entry_name.'_'.$entry_hash, $bin);
 }
 
 
