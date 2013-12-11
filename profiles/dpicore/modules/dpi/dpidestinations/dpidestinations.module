@@ -64,26 +64,35 @@ function dpidestinations_menu(){
     'page callback' => 'target_add',
     'access arguments' => array('create target'),
   );
-
-  $items['admin/structure/target'] = array(
-    'title' => 'Manage Targets',
-    'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_administration_targets',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.pages.admin.inc'
-  );
-
-  $items['admin/structure/targetblocks'] = array(
+  
+  $target_entity=entity_get_info('target');
+  if($target_entity['fieldable']){
+    //We present this menu item only if the target has been alter as fieldable
+    // you should rebuild menu twice to get it...
+    $items['admin/structure/target'] = array(
+      'title' => 'Manage Targets',
+      'access arguments' => array('administer targets'),
+      'page callback' => 'dpidestinations_page_administration_targets',
+      'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+      'file' => 'dpidestinations.pages.admin.inc'
+    );
+  }
+  
+  
+  $targetblock_entity=entity_get_info('targetblock');
+  if($targetblock_entity['fieldable']){
+    //We present this menu item only if the target has been alter as fieldable
+    // you should rebuild menu twice to get it...
+    
+  $items['admin/structure/targetblock'] = array(
     'title' => 'Manage Targetblocks',
-    'access arguments' => array('administer targets'),
+    'access arguments' => array('administer targetblocks'),
     'page callback' => 'dpidestinations_page_administration_targetblocks',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
     'file' => 'dpidestinations.pages.admin.inc'
-
-
   );
+  }
+  
   $items['admin/dpi247/dpidestinations'] = array(
     'title' => 'DPIDestinations',
     'access arguments' => array('administer targets'),
