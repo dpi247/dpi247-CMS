@@ -10,6 +10,11 @@
 function dpicache_fetch_cache($entry_name, $entry_hash){
   global $conf;
   $default_cache_table = 'cache_dpicache';
+  // Check if a specific storage has been defined for
+  // this type of DPIcache (MemCacheDrupal).
+  // By default all is stored in cache_dpicache table
+  // thanks to DrupalDatabaseCache PHP class.
+  // [ see /includes/cache.inc : _cache_get_object() ]
   if(isset($conf['cache_class_dpicache_'.$entry_name])){
     $bin = 'dpicache_'.$entry_name;
   }
