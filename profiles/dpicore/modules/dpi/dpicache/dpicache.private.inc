@@ -1,6 +1,75 @@
 <?php
 
 /**
+ * Fetch cache content from ad hoc storage
+ * 
+ * @param  String $entry_name    Name of the dpicache
+ * @param  String $entry_hash    Hash of called parameters
+ * @return void                  Content stored, FALSE otherwise.
+ */
+function dpicache_fetch_cache($entry_name, $entry_hash){
+  global $conf;
+  $default_cache_table = 'cache_dpicache';
+  // Check if a specific storage has been defined for
+  // this type of DPIcache (MemCacheDrupal).
+  // By default all is stored in cache_dpicache table
+  // thanks to DrupalDatabaseCache PHP class.
+  // [ see /includes/cache.inc : _cache_get_object() ]
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  $c = cache_get($entry_name.'_'.$entry_hash, $bin);
+  if(!$c)
+    return FALSE;
+  return $c->data;
+}
+
+/**
+ * Save cache content in ad hoc storage
+ * 
+ * @param  String $entry_name       Name of the dpicache
+ * @param  String $entry_hash       Hash of called parameters
+ * @param  void   $content          Content to store
+ * @param  Array  $cache_definition Registered definition
+ * @return Boolean                  Save success, or not.
+ */
+function dpicache_save_cache($entry_name, $entry_hash, $content, $cache_definition){
+  global $conf;
+  $default_cache_table = 'cache_dpicache';
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  cache_set($entry_name.'_'.$entry_hash, $content, $bin, CACHE_PERMANENT);
+  return TRUE;
+}
+
+/**
+ * Delete cache content in ad hoc storage
+ * 
+ * @param  String $entry_name    Name of the dpicache
+ * @param  String $entry_hash    Hash of called parameters
+ * @return Boolean               Deletion success, or not.
+ */
+function dpicache_delete_cache($entry_name, $entry_hash){
+  global $conf;
+  $default_cache_table = 'cache_dpicache';
+  if(isset($conf['cache_class_dpicache_'.$entry_name])){
+    $bin = 'dpicache_'.$entry_name;
+  }
+  else {
+    $bin = $default_cache_table;
+  }
+  cache_clear_all($entry_name.'_'.$entry_hash, $bin);
+}
+
+
+/**
  * Regenerate caches that need to be regenerated
  * @param  Integer $time Current timestamp
  * @return Boolean       Success of regenerations
