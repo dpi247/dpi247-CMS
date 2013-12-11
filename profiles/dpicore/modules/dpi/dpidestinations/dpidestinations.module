@@ -96,9 +96,10 @@ function dpidestinations_menu(){
   $items['admin/dpi247/dpidestinations'] = array(
     'title' => 'DPIDestinations',
     'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_administration_targetblocks',
+    'page callback' => 'dpidestinations_page_administration_destinations',
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+    
 
 
   );
