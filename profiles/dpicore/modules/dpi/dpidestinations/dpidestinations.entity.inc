@@ -49,7 +49,7 @@ function dpidestinations_entity_info(){
     'module' => 'dpidestinations',
     'access callback' => 'target_access_admin_callback',
     // Enable the entity API's admin UI.
-    
+
     'metadata controller class' => 'DpiDestinationsTargetMetadataController',
   );
   if (class_exists('DpidestinationsTargetUIController')) {
@@ -110,7 +110,7 @@ function dpidestinations_entity_info(){
       'controller class' => 'DpidestinationsTargetblockUIController',
     );
   }
-  
+
   return $entities;
 }
 /**

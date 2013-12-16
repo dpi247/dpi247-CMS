@@ -1,4 +1,3 @@
-
 <?php
 
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
@@ -116,10 +115,11 @@ function dpidestinations_menu(){
     'description' => 'Configure dpidestinations.',
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
-
-    'page callback' => 'target_add',
-    'access arguments' => array('administer dpidestinations'),
-
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_administration_configuration',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+    
 
   );
 

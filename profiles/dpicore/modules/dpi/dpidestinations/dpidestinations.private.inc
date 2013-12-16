@@ -112,7 +112,13 @@ function _dpidestinations_get_panels_display_for_destinationterm($term_id){
   }
   return  $displays[$term_id];
 }
-
+/*
+ * REturn the name form the page_manager_handlers table for a display_id
+ */
+function _dpidestinations_get_pagemanager_handler_name_for_displayid($did){
+  $name=db_query('SELECT p.name FROM {page_manager_handlers} p WHERE p.did = :did', array(':did' => $did))->fetchField();
+  return $name;
+}
 function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
   $handlers = &drupal_static(__FUNCTION__);
   if (!isset($handlers[$term_id])) {
