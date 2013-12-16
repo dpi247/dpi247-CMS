@@ -91,19 +91,19 @@ function pipo_dpicache_cache_entry_register(){
   return array(
     'pipo_render'=>array(
       'callback'=> 'pipo_get_render',
-      'cache_mechanism'=> 'database',
-      'cache_prefix'=> 'pipo_render',
+      'plugin'=> 'database',
+      'category'=> 'pipo_render',
       "data_type" => "string",
-      'time_window' => 3,
-      'default_ttl'=> 1
+      'ttl' => 3*24*60*60, // ttl in seconds (3 days)
+      'refresh_interval'=> 5*60 // refresh_interval in seconds (5 minutes)
     ),
     'pipo_array'=>array(
       'callback'=> 'pipo_get_array',
-      'cache_mechanism'=> 'memcache',
-      'cache_prefix'=> 'pipo_array',
+      'plugin'=> 'memcache',
+      'category'=> 'pipo_array',
       "data_type" => "array",
-      'time_window' => 24,
-      'default_ttl'=> 5
+      'ttl' => 3*24*60*60, // ttl in seconds (3 days)
+      'refresh_interval'=> 5*60 // refresh_interval in seconds (5 minutes)
     )
     
     );
@@ -140,10 +140,14 @@ function pipo_random_fonction(){
   $param2="toto";
   $param3=(string) rand();
   
-  //dpicache_get_cache_entry('pipo_render',$param1,$param2,$param3);
-  dpicache_get_cache_entry('pipo_render','fixe1','fixe2','fix3');
- // dpicache_get_cache_entry('pipo_array',$param1,$param2);
-  
+  $r1 = dpicache_get_cache_entry('pipo_render',$param1,$param2,$param3);
+  print "[R1] String with random parameters : $r1 <br/>\n";
+  $r2 = dpicache_get_cache_entry('pipo_render','fixe1','fixe2','fix3');
+  print "[R2] String with fixed parameters : $r2 <br/>\n";
+  $r3 = dpicache_get_cache_entry('pipo_array',$param1,$param2);
+  print "[R3] Array with random parameters : ".print_r($r3,1)." <br/>\n";
+  $r4 = dpicache_get_cache_entry('pipo_array','fixe1','fixe2');
+  print "[R4] Array with fixed parameters : ".print_r($r4,1)." <br/>\n";
 }
 
 function pipo_test_generate_dpilogs(){

@@ -58,9 +58,9 @@ function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$sev
 
   // defaut case
   if(!isset($registrations[$log_name][$action])){
-    $registrations[$log_name][$action]['dpilog'] = 'ignore';
+    $registrations[$log_name][$action]['dpilog'] = 'save';
     $registrations[$log_name][$action]['watchdog'] = 'ignore';
-    $registrations[$log_name][$action]['color'] = '';
+    $registrations[$log_name][$action]['color'] = '#FFFFFF';
   }
   $dpilog_method=$registrations[$log_name][$action]['dpilog'];
   $watchdog_method=$registrations[$log_name][$action]['watchdog'];
@@ -68,8 +68,8 @@ function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$sev
   // DPI Log
   if($dpilog_method == "save"){
     $dpilog_structure=_dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
-    _dpilog_delayed_save($dpilog_structure,'dpilog');
-    //drupal_write_record('dpilog_logs', $dpilog_structure);
+    //_dpilog_delayed_save($dpilog_structure,'dpilog');
+    drupal_write_record('dpilog_logs', $dpilog_structure);
   }
 
   // DPI Watchdog
