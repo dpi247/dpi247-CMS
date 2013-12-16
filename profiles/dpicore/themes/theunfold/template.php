@@ -32,10 +32,6 @@ function theunfold_theme(&$var) {
   );
 }
 
-function theunfold_node_load() {
-  dsm(func_get_args(), 'args');
-}
-
 function theunfold_preprocess_page(&$vars) {
   if (isset($vars['main_menu'])) {
     $vars['primary_nav'] = theme('links__system_main_menu', array(
@@ -85,7 +81,7 @@ function theunfold_preprocess_node(&$vars) {
     // build data for node page
     if ($node->nid == arg(1) || $node->preview) {
       $content = $vars['content'];
-dsm($content, 'content');
+
       $allItems = theunfold_preprocess_node_article_dispatch_embeds($node, $content);
 
       $vars['top_html'] = theme('theme_package_top_items', array('topItems' => $allItems['top']));
