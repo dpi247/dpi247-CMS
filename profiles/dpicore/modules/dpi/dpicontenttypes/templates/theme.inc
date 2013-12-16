@@ -40,3 +40,9 @@ function theme_dpicontenttypes_image_style($variables) {
   $variables['path'] = dpicontenttypes_api_image_style_url($variables['style_name'], $entity_id, $atom_id, $variables['path']);
   return theme('image', $variables);
 }
+
+function dpicontenttypes_preprocess_dpicontenttypes_image_render_context(&$variables, $base_theme) {
+  if (isset($variables['context'])) {
+    $variables['theme_hook_suggestions'][] = $base_theme.'__'.str_replace('-', '_', $variables['context']);
+  }
+}

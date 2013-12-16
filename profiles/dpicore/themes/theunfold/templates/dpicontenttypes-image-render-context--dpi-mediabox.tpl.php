@@ -1,0 +1,2 @@
+<?php print theme('dpicontenttypes_image_style', array('path' => $atom->file_source, 'style_name' => $style_name, 'entity' => $options['entity'], 'atom' => $atom)); ?>
+<figcaption><?php print $title; ?> | <?php print $summary; ?></figcaption>

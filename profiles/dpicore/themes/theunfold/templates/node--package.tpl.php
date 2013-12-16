@@ -17,7 +17,7 @@
 
 <h2 class="heading"><?php print drupal_render($content['field_textchapo']);?></h2>
 
-
+<?php print $top_html; ?>
 <?php print drupal_render($content['field_textbody']);?>
 
 <div class="article-body">
@@ -32,4 +32,4 @@
 	</div>
 </div>
 
-<?php print $bottom_html;?>
+<?php print $bottom_html; ?>

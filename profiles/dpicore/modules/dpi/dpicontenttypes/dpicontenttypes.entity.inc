@@ -1,13 +1,9 @@
 <?php
 
-
-
-
-
 /**
  * Implements hook_entity_info().
  */
-function dpicontenttypes_entity_info(){
+function dpicontenttypes_entity_info() {
   $entities = array();
 
   $entities['dpiproperties'] = array(
@@ -38,8 +34,8 @@ function dpicontenttypes_entity_info(){
     //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
     'module' => 'dpicontenttypes',
     'access callback' => 'dpiproperties_access_admin_callback',
-
   );
+
   $entities['dpiproperties_type'] = array(
     'label' => t('DPI properties Type'),
     'entity class' => 'DPIPropertiesTypeEntity',
@@ -54,7 +50,7 @@ function dpicontenttypes_entity_info(){
       'label' => 'label',
     ),
     'module' => 'dpicontenttypes',
-  // Enable the entity API's admin UI.
+    // Enable the entity API's admin UI.
     'admin ui' => array(
       'path' => 'admin/structure/dpiproperties-types',
       'file' => 'dpicontenttypes.entity.inc',
@@ -62,9 +58,9 @@ function dpicontenttypes_entity_info(){
     ),
     'access callback' => 'dpiproperties_type_access_admin_callback',
   );
+
   return $entities;
 }
-
 
 //@todo: documenter cette partie on fait l'alter uniquement pour fournir un build mode suplémentaire...
 /**
@@ -89,40 +85,41 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
       ),
     );
   }
-  
+
   $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
-  
 }
 
 /**
-*
-* Implementation of hook_entity_property_info_alter
-* Add Dpiproperties setter/getter to set/get dpiproperties on an object
-* @param Array $info
-*/
-function dpicontenttypes_entity_property_info_alter(&$info){
-
+ * Implementation of hook_entity_property_info_alter
+ * Add Dpiproperties setter/getter to set/get dpiproperties on an object
+ *
+ * @param Array $info
+ */
+function dpicontenttypes_entity_property_info_alter(&$info) {
   $product_id = array(
-    'label' => t("ProductID"),  
+    'label' => t("ProductID"),
     'type' => 'text',
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
+
   $external_reference = array(
-    'label' => t("External Reference"), 
-    'type' => 'text', 
+    'label' => t("External Reference"),
+    'type' => 'text',
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
+
   $external_reference_2 = array(
-    'label' => t("External Reference 2"), 
-    'type' => 'text', 
+    'label' => t("External Reference 2"),
+    'type' => 'text',
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
+
   $source = array(
-    'label' => t("Source"), 
-    'type' => 'text', 
+    'label' => t("Source"),
+    'type' => 'text',
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
@@ -140,7 +137,7 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
   }
-  
+
   //Set to the atoms video
   if (isset($info['scald_atom']['bundles']['video'])){
     $info['scald_atom']['bundles']['video']['properties']['field_product_id'] = $product_id;
@@ -148,7 +145,7 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     $info['scald_atom']['bundles']['video']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['video']['properties']['field_source'] = $source;
   }
-  
+
   //Set to the atoms audio
   if (isset($info['scald_atom']['bundles']['audio'])){
     $info['scald_atom']['bundles']['audio']['properties']['field_product_id'] = $product_id;
@@ -156,7 +153,7 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     $info['scald_atom']['bundles']['audio']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['audio']['properties']['field_source'] = $source;
   }
-  
+
   //Set to the atoms flash
   if (isset($info['scald_atom']['bundles']['flash'])){
     $info['scald_atom']['bundles']['flash']['properties']['field_product_id'] = $product_id;
@@ -164,6 +161,7 @@ function dpicontenttypes_entity_property_info_alter(&$info){
     $info['scald_atom']['bundles']['flash']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['flash']['properties']['field_source'] = $source;
   }
+
   //Set to the atoms linklist
   if (isset($info['scald_atom']['bundles']['links_list'])){
     $info['scald_atom']['bundles']['links_list']['properties']['field_product_id'] = $product_id;
@@ -174,57 +172,94 @@ function dpicontenttypes_entity_property_info_alter(&$info){
 }
 
 /**
-*
-* Implementation of hook_entity_presave
-* @param Object $entity
-* @param String $type
-*/
+ * Implementation of hook_entity_presave
+ *
+ * @param Object $entity
+ * @param String $type
+ */
 function dpicontenttypes_entity_presave($entity, $type) {
   //@todo Pour tous les objets de type field, vérifier si l'ancien fichier = le nouveau, si non, mettre un timeout sur l'ancien pour qu'il soit supprimer dans x temps (voir nodeapi de wallymport en drupal 6)
 }
+
 /**
- * 
+ * Implementation of hook_entity_insert
+ *
+ * Flag cropings as permanent and delete unused cropings
+ */
+function dpicontenttypes_entity_insert($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
+}
+
+/**
+ * Implementation of hook_entity_update
+ *
+ * Flag cropings as permanent and delete unused cropings
+ */
+function dpicontenttypes_entity_update($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
+}
+
+/**
+ * Implementation of hook_entity_delete
+ *
+ * Delete cropings related to this entity
+ */
+function dpicontenttypes_entity_delete($entity, $entity_type) {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
+  list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+  _dpicontenttypes_cropings_delete_cropings(NULL, $entity_type, $eid);
+}
+
+/**
  * Load a DPI properties
+ *
  * @param integer $tid
  * @param boolean $reset
+ *
  * @return boolean
  */
-function dpiproperties_load($dpid = NULL, $reset = FALSE){
+function dpiproperties_load($dpid = NULL, $reset = FALSE) {
   $dpiproperties = dpiproperties_load_multiple(array($dpid), array(), $reset);
   return reset($dpiproperties);
 }
+
 /**
- * 
  * Load multiple dpiproperties
+ *
  * @param array $dpids
  * @param array $conditions
+ *
  * @param boolean $reset
  */
-function dpiproperties_load_multiple($dpids = array(), $conditions = array(), $reset = FALSE){
+function dpiproperties_load_multiple($dpids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('dpiproperties', $dpids, $conditions, $reset);
 }
 
 /**
-*
-* Load a DPI properties by external reference
-* @param String $external_reference
-* @param boolean $reset
-* @return DPIProperties
-*/
-function dpiproperties_load_by_external_reference($external_reference, $reset = FALSE){
+ * Load a DPI properties by external reference
+ *
+ * @param String $external_reference
+ * @param boolean $reset
+ *
+ * @return DPIProperties
+ */
+function dpiproperties_load_by_external_reference($external_reference, $reset = FALSE) {
   $dpiproperties = entity_load('dpiproperties', FALSE, array('external_reference' => $external_reference), $reset);
   return reset($dpiproperties);
 }
 
 /**
-*
-* Load a DPI properties by entity type and entity id
-* @param String $type
-* @param Integer $id
-* @param boolean $reset
-* @return DPIProperties
-*/
-function dpiproperties_load_by_type_and_id($type, $id, $reset = FALSE){
+ * Load a DPI properties by entity type and entity id
+ *
+ * @param String $type
+ * @param Integer $id
+ * @param boolean $reset
+ *
+ * @return DPIProperties
+ */
+function dpiproperties_load_by_type_and_id($type, $id, $reset = FALSE) {
   $dpiproperties = entity_load('dpiproperties', FALSE, array('entity' => $type, 'id' => $id), $reset);
   return reset($dpiproperties);
 }
@@ -250,18 +285,17 @@ function dpiproperties_delete_multiple($dpiproperties_ids) {
   entity_delete_multiple('dpiproperties', $dpiproperties_ids);
 }
 
-
 /**
- * 
  * Access callback to manage DPIProperties
+ *
  * @param String $op
  * @param unknown_type $task
  * @param Object $account
  * @param String $entity_type
  */
-function dpiproperties_access_admin_callback($op, $task, $account = NULL, $entity_type = NULL){
+function dpiproperties_access_admin_callback($op, $task, $account = NULL, $entity_type = NULL) {
   global $user;
-  
+
   if (!isset($account)) {
     $account = $user;
   }
@@ -278,30 +312,29 @@ function dpiproperties_access_admin_callback($op, $task, $account = NULL, $entit
   }
   return TRUE;
 }
+
 /**
- * 
  * Return the title of a DPIProperties page
+ *
  * @param Object $target
  */
-function dpiproperties_page_title($target){
+function dpiproperties_page_title($target) {
   return $target->external_reference;
 }
+
 /**
- * 
  * Callback to view a dpiproperties
+ *
  * @param DPIProperties $dpiproperties
  * @param String $view_mode
  */
-function dpiproperties_view($dpiproperties, $view_mode = 'full'){
+function dpiproperties_view($dpiproperties, $view_mode = 'full') {
   return $dpiproperties->view();
 }
 
-
-
-
 /**
-* Load DPIProperties Type.
-*/
+ * Load DPIProperties Type.
+ */
 function dpiproperties_type_load($dpiproperties_type) {
   return dpiproperties_types($dpiproperties_type);
 }
@@ -334,20 +367,18 @@ function dpiproperties_type_delete($dpiproperties_type) {
 function dpiproperties_type_delete_multiple($dpiproperties_ids) {
   entity_delete_multiple('dpiproperties_type', $dpiproperties_ids);
 }
+
 /**
- * 
  * Access callback
  */
-function dpiproperties_type_access_admin_callback(){
+function dpiproperties_type_access_admin_callback() {
   return TRUE;
 }
-
 
 /**
  * Generates the dpiproperties type editing form.
  */
 function dpiproperties_type_form($form, &$form_state, $dpiproperties_type, $op = 'edit') {
-
   if ($op == 'clone') {
     $dpiproperties_type->label .= ' (cloned)';
     $dpiproperties_type->type = '';
@@ -396,7 +427,8 @@ function dpiproperties_type_form($form, &$form_state, $dpiproperties_type, $op =
       '#limit_validation_errors' => array(),
       '#submit' => array('dpiproperties_type_form_submit_delete')
     );
-  } 
+  }
+
   return $form;
 }
 
@@ -424,11 +456,11 @@ function dpiproperties_type_form_delete_confirm($form, &$form_state, $dpipropert
   // Always provide entity id in the same form key as in the entity edit form.
   $form['dpiproperties_type_id'] = array('#type' => 'value', '#value' => entity_id('dpiproperties_type' ,$dpiproperties_type));
   return confirm_form($form,
-    t('Are you sure you want to delete dpiproperties type %title?', array('%title' => entity_label('dpiproperties_type', $dpiproperties_type))),
-    'dpiproperties/' . entity_id('dpiproperties_type' ,$dpiproperties_type),
-    t('This action cannot be undone.'),
-    t('Delete'),
-    t('Cancel')
+      t('Are you sure you want to delete dpiproperties type %title?', array('%title' => entity_label('dpiproperties_type', $dpiproperties_type))),
+      'dpiproperties/' . entity_id('dpiproperties_type' ,$dpiproperties_type),
+      t('This action cannot be undone.'),
+      t('Delete'),
+      t('Cancel')
   );
 }
 
@@ -482,21 +514,21 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#title' => t('External reference'),
     '#default_value' => $dpiproperties->external_reference,
   );
-  
+
   $form['external_reference_2'] = array(
-      '#type' => 'textfield',
-      '#required' => TRUE,
-      '#title' => t('External reference 2'),
-      '#default_value' => $dpiproperties->external_reference_2,
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => t('External reference 2'),
+    '#default_value' => $dpiproperties->external_reference_2,
   );
-  
+
   $form['source'] = array(
     '#type' => 'textfield',
     '#required' => TRUE,
     '#title' => t('Source'),
     '#default_value' => $dpiproperties->source,
   );
-  
+
   $form['product_id'] = array(
     '#type' => 'textfield',
     '#required' => FALSE,
@@ -552,7 +584,6 @@ function dpiproperties_form_validate($form, &$form_state) {
  * dpiproperties submit handler.
  */
 function dpiproperties_form_submit($form, &$form_state) {
-  
   $dpiproperties = $form_state['dpiproperties'];
 
   entity_form_submit_build_entity('dpiproperties', $dpiproperties, $form, $form_state);
@@ -576,17 +607,16 @@ function dpiproperties_form_submit_delete($form, &$form_state) {
  * Delete confirmation form.
  */
 function dpiproperties_delete_form($form, &$form_state, $dpiproperties) {
-  
   $form_state['dpiproperties'] = $dpiproperties;
   // Always provide entity id in the same form key as in the entity edit form.
   $form['dpiproperties_type_id'] = array('#type' => 'value', '#value' => entity_id('dpiproperties' ,$dpiproperties));
   $dpiproperties_uri = entity_uri('dpiproperties', $dpiproperties);
   return confirm_form($form,
-    t('Are you sure you want to delete dpiproperties %title?', array('%title' => entity_label('dpiproperties', $dpiproperties))),
-    $dpiproperties_uri['path'],
-    t('This action cannot be undone.'),
-    t('Delete'),
-    t('Cancel')
+      t('Are you sure you want to delete dpiproperties %title?', array('%title' => entity_label('dpiproperties', $dpiproperties))),
+      $dpiproperties_uri['path'],
+      t('This action cannot be undone.'),
+      t('Delete'),
+      t('Cancel')
   );
 }
 
@@ -601,28 +631,30 @@ function dpiproperties_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = '<front>';
 }
+
 /**
- * 
  * Set DPI Properties on an object
+ *
  * @param Object $object
  * @param String $property_name
  * @param String $wrapper
  */
-function entity_property_dpiproperties_set_properties($object, $property_name, $wrapper){
+function entity_property_dpiproperties_set_properties($object, $property_name, $wrapper) {
   $name = str_replace('field_', '', $property_name);
   if (!isset($object->dpiproperties)){
     $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
   }
-  $object->dpiproperties->$name = $wrapper; 
+  $object->dpiproperties->$name = $wrapper;
 }
+
 /**
-*
-* Set DPI Properties on a object
-* @param Object $object
-* @param String $property_name
-* @param String $wrapper
-*/
-function entity_property_dpiproperties_get_properties($object, $options, $property_name, $type, $info){
+ * Set DPI Properties on a object
+ *
+ * @param Object $object
+ * @param String $property_name
+ * @param String $wrapper
+ */
+function entity_property_dpiproperties_get_properties($object, $options, $property_name, $type, $info) {
   $name = str_replace('field_', '', $property_name);
   if (!isset($object->dpiproperties)){
     $object->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');

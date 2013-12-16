@@ -1,5 +1,191 @@
 <?php
 
+function dpicontenttypes_api_truncate_text($text, $size, $nocut_words = NULL, $format = 'full_html', $add_ellipsis = TRUE) {
+  // If the size is zero the entire text is the substring.
+  if ($size == 0) {
+    return $text;
+  }
+
+  if (isset($format)) {
+    $filters = filter_list_format($format);
+  }
+
+  if (!$nocut_words) {
+    // We check for the presence of the PHP evaluator filter in the current
+    // format. If the body contains PHP code, we do not split it up to prevent
+    // parse errors.
+    if (isset($format) && isset($filters['php_code']) && $filters['php_code']->status && strpos($text, '<?') !== FALSE) {
+      return $text;
+    }
+
+    // If we have a short text, the entire text is the substring.
+    if (drupal_strlen($text) <= $size) {
+      return $text;
+    }
+
+    // If the delimiter has not been specified, try to split at paragraph or
+    // sentence boundaries.
+
+    // The substring may not be longer than maximum length specified. Initial slice.
+    $substring = truncate_utf8($text, $size);
+
+    // Store the actual length of the UTF8 string -- which might not be the same
+    // as $size.
+    $max_rpos = strlen($substring);
+
+    // How much to cut off the end of the substring so that it doesn't end in the
+    // middle of a paragraph, sentence, or word.
+    // Initialize it to maximum in order to find the minimum.
+    $min_rpos = $max_rpos;
+
+    // Store the reverse of the substring.  We use strpos on the reversed needle and
+    // haystack for speed and convenience.
+    $reversed = strrev($substring);
+
+    // Build an array of arrays of break points grouped by preference.
+    $break_points = array();
+
+    // A paragraph near the end of sliced substring is most preferable.
+    $break_points[] = array('</p>' => 0);
+
+    // If no complete paragraph then treat line breaks as paragraphs.
+    $break_points[] = array(
+      '<br />' => 6,
+      '<br>' => 4,
+    );
+    // Newline only indicates a line break if line break converter
+    // filter is present.
+    if (isset($filters['filter_autop'])) {
+      $line_breaks["\n"] = 1;
+    }
+
+    // If the first paragraph is too long, split at the end of a sentence.
+    $break_points[] = array(
+      '. ' => 1,
+      '! ' => 1,
+      '? ' => 1,
+      '。' => 0,
+      '؟ ' => 1,
+    );
+
+    // Iterate over the groups of break points until a break point is found.
+    foreach ($break_points as $points) {
+      // Look for each break point, starting at the end of the substring.
+      foreach ($points as $point => $offset) {
+        // The substring is already reversed, but the break point isn't.
+        $rpos = strpos($reversed, strrev($point));
+        if ($rpos !== FALSE) {
+          $min_rpos = min($rpos + $offset, $min_rpos);
+        }
+      }
+
+      // If a break point was found in this group, slice and return the substring.
+      if ($min_rpos !== $max_rpos) {
+        // Don't slice with length 0.  Length must be <0 to slice from RHS.
+        $substring = ($min_rpos === 0) ? $substring : substr($substring, 0, 0 - $min_rpos);
+      }
+    }
+  } else {
+    $substring = truncate_utf8($text, $size, " ");
+    $substring = wordwrap($substring, $size);
+  }
+
+  // If the htmlcorrector filter is present, apply it to the generated summary.
+  if (isset($format) && isset($filters['filter_htmlcorrector'])) {
+    $substring = _filter_htmlcorrector($substring);
+  }
+
+  // If a substring was not found, still return a teaser.
+  if ($add_ellipsis) {
+    $substring .=" [...]";
+  }
+
+  // If a break point was not found, still return a substring.
+  return $substring;
+}
+
+function dpicontenttypes_api_get_first_embed_view($node, $content, $type = FALSE, $provider = FALSE) {
+  $rendered_embeds = array();
+  if (isset($content['field_embededobjects'])) {
+    $embeds_content = $content['field_embededobjects'];
+    $embeds = dpicontenttypes_api_get_first_embed($node, $type, $provider);
+    foreach ($embeds as $delta => $embed) {
+      if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
+        $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+      }
+    }
+  }
+  return empty($rendered_embeds) ? FALSE : $rendered_embeds;
+}
+
+function dpicontenttypes_api_get_embeds_view($node, $content, $type = FALSE, $provider = FALSE, $inline = NULL) {
+  $rendered_embeds = array();
+  if (isset($content['field_embededobjects'])) {
+    $embeds_content = $content['field_embededobjects'];
+    $embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, FALSE, $inline);
+    foreach ($embeds as $delta => $embed) {
+      if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
+        $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+      }
+    }
+  }
+  return $rendered_embeds;
+}
+
+function dpicontenttypes_api_get_first_embed($node, $type = FALSE, $provider = FALSE, $load_atom = FALSE) {
+  $embed = FALSE;
+  if ($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, $load_atom)) {
+    $embed = array_shift($embeds);
+  }
+  return $embed;
+}
+
+function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE, $load_atom = FALSE, $inline = NULL) {
+  static $static_embeds = array();
+  if (isset($node->nid)) {
+    if(isset($static_embeds[$node->nid])) {
+      $embeds = $static_embeds[$node->nid];
+    } else {
+      $node_wrapper = entity_metadata_wrapper('node', $node);
+      $embeds = $node_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+      $static_embeds[$node->nid] = $embeds;
+    }
+  }
+
+  if ($type || $provider) {
+    if (is_string($type)) {
+      $type = array($type);
+    }
+    if (is_string($provider)) {
+      $provider = array($provider);
+    }
+
+    foreach ($embeds as $delta => $embed) {
+      if ($type && !in_array($embed['type'], $type)) {
+        unset($embeds[$delta]);
+        continue;
+      }
+      if ($provider && !in_array($embed['provider'], $provider)) {
+        unset($embeds[$delta]);
+        continue;
+      }
+      if (is_bool($inline) && (($inline && !$embed['inline']) || !$inline && $embed['inline'])) {
+        unset($embeds[$delta]);
+        continue;
+      }
+    }
+  }
+
+  foreach ($embeds as $delta => $embed) {
+    $embeds[$delta]['delta'] = $delta;
+    if ($load_atom) {
+      $embeds[$delta]['atom'] = scald_atom_load($embed['sid']);
+    }
+  }
+
+  return $embeds;
+}
+
 /**
  * Return an array with the content types of type dpi (like article-package, photo, etc)
  */

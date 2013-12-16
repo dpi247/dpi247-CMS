@@ -120,37 +120,6 @@ function dpicontenttypes_permission(){
 }
 
 /**
- * Implementation of hook_entity_insert
- * 
- * Flag cropings as permanent and delete unused cropings
- */
-function dpicontenttypes_entity_insert($entity, $entity_type) {
-  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
-  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
-}
-
-/**
- * Implementation of hook_entity_update
- * 
- * Flag cropings as permanent and delete unused cropings
- */
-function dpicontenttypes_entity_update($entity, $entity_type) {
-  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
-  _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $entity_type);
-}
-
-/**
- * Implementation of hook_entity_delete
- * 
- * Delete cropings related to this entity
- */
-function dpicontenttypes_entity_delete($entity, $entity_type) {
-  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
-  list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
-  _dpicontenttypes_cropings_delete_cropings(NULL, $entity_type, $eid);
-}
-
-/**
  * Implementation of hook_node_insert
  *
  * @param object $node
@@ -198,6 +167,16 @@ function dpicontenttypes_theme() {
         'title' => NULL,
         'attributes' => array(),
       ),
+    ),
+    'dpicontenttypes_image_render_context' => $base + array(
+      'variables' => array(
+        'context' => '',
+        'atom' => NULL,
+        'style_name' => '',
+        'options' => array(),
+      ),
+      'template' => 'dpicontenttypes-image-render-context',
+      'type' => 'module',
     ),
     'dpicontenttypes_dpicrop_summary' => array(
       'variables' => array('data' => NULL),
@@ -380,20 +359,23 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
       if($context == 'dpi_mediabox' || $context == 'dpi_inline') {
         if (isset($options['entity'])) {
           // Replace the image style rendered image with our own
-
           $transcoders = scald_transcoders();
           $contexts = scald_contexts();
           $context_config = $contexts[$context];
           $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
 
           if ($transcoder['provider'] == 'scald_image') {
-            $style_name = $transcoder['style'];
-            $atom->rendered->player = theme('dpicontenttypes_image_style', array('path' => $atom->file_source, 'style_name' => $style_name, 'entity' => $options['entity'], 'atom' => $atom));
+            $atom->rendered->player = theme('dpicontenttypes_image_render_context', array(
+              'context' => $context,
+              'atom' => $atom,
+              'style_name' => $transcoder['style'],
+              'options' => $options,
+            ));
           }
         }
 
         $content = scald_atom_view($atom, $context);
-
+dsm($content, 'atom content');
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
