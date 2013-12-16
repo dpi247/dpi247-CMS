@@ -104,7 +104,29 @@ function dpidestinations_api_get_all_destinations_term_available_as_select_optio
   return $options;
 }
 
+function dpidestinations_api_get_all_targets(){
+  $query = new EntityFieldQuery;
 
+  $result = $query
+  ->entityCondition('entity_type', 'target')
+  ->execute();
+
+  $targets = entity_load('target', array_keys($result['target']));
+  return $targets;
+
+}
+
+function dpidestinations_api_get_all_targetblocks(){
+  $query = new EntityFieldQuery;
+
+  $result = $query
+  ->entityCondition('entity_type', 'targetblock')
+  ->execute();
+
+  $targets = entity_load('targetblock', array_keys($result['targetblock']));
+  return $targets;
+
+}
 function dpidestinations_api_get_all_targets_available_for_destination_tid($tid){
   if($tid==2){
     return array('target1'=>"Default","target2"=>"BHV");

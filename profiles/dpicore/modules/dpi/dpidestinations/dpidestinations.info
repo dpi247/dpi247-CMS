@@ -16,7 +16,7 @@ files[] = dpidestinations.entity.class.inc
 
 
 
-files[] = includes/dpidestinations.page.admin.inc
+files[] = includes/dpidestinations.pages.admin.inc
 
 files[] = plugins/views/dpidestinations_plugin_display_targetview.inc
 files[] = plugins/views/dpidestinations_plugin_row_node_targetview.inc

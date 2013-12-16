@@ -13,7 +13,8 @@ function dpidestinations_entity_info(){
     'entity class' => 'TargetEntity',
     'controller class' => 'TargetController',
     'base table' => 'dpidestinations_target',
-    'fieldable' => TRUE,
+    'fieldable' => FALSE,
+    'module'=>"dpidestinations",
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
@@ -24,10 +25,12 @@ function dpidestinations_entity_info(){
     ),
     'bundles' => array(
       'target' => array(
-        'label' => 't',
+        'label' => 'target',
         'admin' => array(
           'path' => 'admin/structure/target/manage/target',
-          'real path' => 'admin/structure/target/manage/target',
+        ),
+        'admin ui' => array(
+          'path' => 'admin/structure/target',
         ),
 
       ),
@@ -46,13 +49,7 @@ function dpidestinations_entity_info(){
     'module' => 'dpidestinations',
     'access callback' => 'target_access_admin_callback',
     // Enable the entity API's admin UI.
-    'admin ui' => array(
-      'label' => 'Manage Targets & Targetblocks',
-      'path' => 'admin/dpi247/dpidestinations/target',
-      // OPTIONAL- See "Customize the User Interface" below if you set.
-      //'file' => 'target.admin.inc',
-      //'controller class' => 'EntityDefaultUIController',
-    ),
+
     'metadata controller class' => 'DpiDestinationsTargetMetadataController',
   );
   if (class_exists('DpidestinationsTargetUIController')) {
@@ -71,7 +68,7 @@ function dpidestinations_entity_info(){
     'entity class' => 'TargetBlockEntity',
     'controller class' => 'TargetBlockController',
     'base table' => 'dpidestinations_targetblock',
-    'fieldable' => TRUE,
+    'fieldable' => FALSE,
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
@@ -82,6 +79,11 @@ function dpidestinations_entity_info(){
     ),
     'bundles' => array(
       'targetblock' => array(
+        'label' => 'targetblock',
+        'admin' => array(
+          'path' => 'admin/structure/targetblock/manage/targetblock',
+          'bundle argument' => 4,
+        ),
       ),
     ),
     'view modes' => array(
@@ -98,11 +100,6 @@ function dpidestinations_entity_info(){
     'module' => 'dpidestinations',
     'access callback' => 'targetblock_access_admin_callback',
     // Enable the entity API's admin UI.
-    'admin ui' => array(
-      'label' => 'Manage Targets & Targetblocks',
-      'path' => 'admin/dpi247/dpidestinations/targetblock',
-
-    ),
     'metadata controller class' => 'DpiDestinationsTargetblockMetadataController',
   );
   if (class_exists('DpidestinationsTargetUIController')) {
@@ -110,9 +107,10 @@ function dpidestinations_entity_info(){
       // Enable the entity API's admin UI.
       'path' => 'admin/dpi247/dpidestinations/targetblock',
       'file' => 'includes/dpidestinations.pages.admin.inc',
-      'controller class' => 'DpidestinationsTargetUIController',
+      'controller class' => 'DpidestinationsTargetblockUIController',
     );
   }
+
   return $entities;
 }
 /**
