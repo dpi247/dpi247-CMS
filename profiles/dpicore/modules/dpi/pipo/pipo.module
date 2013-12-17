@@ -91,7 +91,6 @@ function pipo_dpicache_cache_entry_register(){
   return array(
     'pipo_render'=>array(
       'callback'=> 'pipo_get_render',
-      'plugin'=> 'database',
       'category'=> 'pipo_render',
       "data_type" => "string",
       'ttl' => 3*24*60*60, // ttl in seconds (3 days)
@@ -99,7 +98,6 @@ function pipo_dpicache_cache_entry_register(){
     ),
     'pipo_array'=>array(
       'callback'=> 'pipo_get_array',
-      'plugin'=> 'memcache',
       'category'=> 'pipo_array',
       "data_type" => "array",
       'ttl' => 3*24*60*60, // ttl in seconds (3 days)
