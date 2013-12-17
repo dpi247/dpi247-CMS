@@ -14,7 +14,7 @@ function hook_dpicache_cache_entry_register(){
 }
 /**
  * Get cache content throught DPIcache system.
- * 
+ *
  * @param  String $cache_name Cache name
  * @param  void   ???         Add all your parameters for your callback function then.
  * @return void               Your cache content, or FALSE.
@@ -71,7 +71,7 @@ function dpicache_get_cache_entry($cache_name){
       "last_run" => time(),
       "update_freq" => $cache_definition["refresh_interval"],
       "parameters" => $parameters_array
-      );
+    );
     dpicache_save_cache_entry($entry_information, false);
     return $fresh_content;
   }
@@ -101,7 +101,7 @@ function dpicache_get_regenerate_url($cache_name){
  * Case-sensitivity of the dpi_variable_* functions depends on the database
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
- * 
+ *
  * @param $name
  *   The name of the variable to return.
  * @param $default
@@ -124,7 +124,7 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
     }
   }
   return $dpivariables[$name];
-  
+
 }
 
 
@@ -138,7 +138,7 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
  */
 function dpi_variable_get_all() {
   $dpivariables = &drupal_static("dpivariables");
-  
+
   $result = db_query('SELECT * FROM {dpi_variables}');
   while($variable = db_fetch_array($result)) {
     $dpivariables[$name] = unserialize($variable['value']);
@@ -164,11 +164,11 @@ function dpi_variable_get_all() {
  */
 function dpi_variable_set($name, $value) {
   $dpivariables = &drupal_static("dpivariables");
-  
+
   $dpivariables[$name]=$value;
-  
+
   $serialized_value = serialize($value);
-  
+
   db_merge('dpi_variables')
   ->key(array('name' => $name))
   ->fields(array(
@@ -176,7 +176,7 @@ function dpi_variable_set($name, $value) {
   'value' => $serialized_value,
   ))
   ->execute();
-  
+
 }
 
 /**
@@ -232,7 +232,7 @@ function dpi_system_settings_form($form){
  * Form submission handler for dpi_system_settings_form().
  *
  * @see system_settings_form_submit()
- */ 
+ */
 function dpi_system_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   form_state_values_clean($form_state);

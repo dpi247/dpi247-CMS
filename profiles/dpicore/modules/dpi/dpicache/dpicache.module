@@ -17,7 +17,7 @@ function dpicache_menu(){
     'access arguments' => array('dpicache flush caches'),
     'type' => MENU_CALLBACK,
   );
-  
+
   return $items;
 }
 
