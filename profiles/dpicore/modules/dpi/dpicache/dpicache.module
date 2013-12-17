@@ -17,7 +17,7 @@ function hook_dpicache_cache_entry_register(){
       'callback'=> 'flowmix_get_render', // function to call
       'catagory'=> 'flowmix_render', // group
       'data_type' => "string", // the callback returns a string
-      'refresh_interval'=> 5*60 //(in seconds) auto-refresh cache every 5 minutes
+      'refresh_interval'=> 5*60, //(in seconds) auto-refresh cache every 5 minutes
       'ttl' => 7*24*60*60, //(in seconds) keep auto-refreshing for one week 
     )
   );
