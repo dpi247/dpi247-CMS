@@ -3,15 +3,30 @@ module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
 
 
+function dpicache_menu(){
+  $items=array();
+  $items['dpicache/regenerate/one_cache_entry/%'] = array(
+    'page callback' => '_dpicache_regenerate_one_cache_entry_callback',
+    'page arguments' => array(3),
+    'access arguments' => array('dpicache flush caches'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['dpicache/regenerate/all_cache_entry/%'] = array(
+    'page callback' => '_dpicache_regenerate_all_cache_entry_callback',
+    'page arguments' => array(3),
+    'access arguments' => array('dpicache flush caches'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
 function dpicache_cron(){
   //We need to ensure everybody is sync
   $time=time();
-  dpicache_regenerate_cache_entries($time);
+  dpicache_regenerate_cache_entries_since_time($time);
   dpicache_cron_cleanup($time);
 }
-
-
-
 
 
 function dpicache_dpilog_register(){

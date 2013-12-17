@@ -70,11 +70,11 @@ function dpicache_delete_cache($entry_name, $entry_hash){
 
 
 /**
- * Regenerate caches that need to be regenerated
+ * Regenerate caches that need to be regenerated based on the time
  * @param  Integer $time Current timestamp
  * @return Boolean       Success of regenerations
  */
-function dpicache_regenerate_cache_entries($time){
+function dpicache_regenerate_cache_entries_since_time($time){
   if(!$time)
     $time = date();
   // Get caches that need to be regenerated
@@ -82,39 +82,71 @@ function dpicache_regenerate_cache_entries($time){
   $query = db_select($table_cache_entries, 'dce');
   $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
   $query->where('dce.expiration_date > '.$time.' AND dce.last_run+dce.update_freq < '.$time);
-
-  foreach($query->execute() as $entry){
-    $cache_definition = dpicache_get_cache_entry_definition($entry->name);
-    if(!$cache_definition){
-      dpi_log('dpicache', "error", t("Cron : the entry name !cache_name has no definition",array("!cache_name"=>$entry->name)),array(),$entry->hash,WATCHDOG_WARNING);
-      // @TODO Modifier sa date d'expiration à '-1'
-      continue;
-    }
-    // Get fresh content
-    $fresh_content = _dpicache_cache_call_function($cache_definition, unserialize($entry->parameters));
-    if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
-      // fail to get cache
-      dpi_log('dpicache', "error", t("Error while calling callback function for name = !cache_name, hash = !hash : !error",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash,"!error"=>$fresh_content)),array(),$entry->hash,WATCHDOG_ERROR);
-      continue;
-    }
-    // Save content into cache
-    $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
-    $entry_information = array(
-      "name" => $entry->name,
-      "hash" => $entry->hash,
-      "category" => @$cache_definition["category"],
-      "data_type" => @$cache_definition["data_type"] ?: "string",
-      "expiration_date" => intval($entry->creation_date + $cache_definition["ttl"]),
-      "update_freq" => $cache_definition["refresh_interval"]
-      );
-    if($saved)
-      $entry_information['last_run'] = time();
-    // Update cache entry data
-    dpicache_save_cache_entry($entry_information, true);
-    dpi_log('dpicache', "regenerate_cold", t("Cache (re)generated for name = !cache_name, hash = !hash",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash)),array(),$entry->hash,WATCHDOG_DEBUG);
-  }
+  dpicache_regenerate_cache_entries_process($query);
   return TRUE;
+
 }
+/**
+ * Regenerate caches that need to be regenerated based on the time
+ * @param  Integer $time Current timestamp
+ * @return Boolean       Success of regenerations
+ */
+function dpicache_regenerate_cache_entries($cache_type,$category=NULL){
+  
+  $table_cache_entries = 'dpicache_cache_entries';
+  $query = db_select($table_cache_entries, 'dce');
+  $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
+  
+  $query->condition('dce.name', $cache_type);
+  
+  if($category!=NULL){
+    $query->condition('dce.category', $category);
+    
+  }
+  dpicache_regenerate_cache_entries_process($query);
+  
+  return TRUE;
+
+}
+
+/**
+ * Process the cache generation for each result of the querry object
+ *
+ * @param  Ressource A querry object htat should contains dpicache_cache_entries rows
+*/
+ function dpicache_regenerate_cache_entries_process($query){
+   foreach($query->execute() as $entry){
+     $cache_definition = dpicache_get_cache_entry_definition($entry->name);
+     if(!$cache_definition){
+       dpi_log('dpicache', "error", t("Cron : the entry name !cache_name has no definition",array("!cache_name"=>$entry->name)),array(),$entry->hash,WATCHDOG_WARNING);
+       // @TODO Modifier sa date d'expiration à '-1'
+       continue;
+     }
+     // Get fresh content
+     $fresh_content = _dpicache_cache_call_function($cache_definition, unserialize($entry->parameters));
+     if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
+       // fail to get cache
+       dpi_log('dpicache', "error", t("Error while calling callback function for name = !cache_name, hash = !hash : !error",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash,"!error"=>$fresh_content)),array(),$entry->hash,WATCHDOG_ERROR);
+       continue;
+     }
+     // Save content into cache
+     $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
+     $entry_information = array(
+       "name" => $entry->name,
+       "hash" => $entry->hash,
+       "category" => @$cache_definition["category"],
+       "data_type" => @$cache_definition["data_type"] ?: "string",
+       "expiration_date" => intval($entry->creation_date + $cache_definition["ttl"]),
+       "update_freq" => $cache_definition["refresh_interval"]
+     );
+     if($saved)
+       $entry_information['last_run'] = time();
+     // Update cache entry data
+     dpicache_save_cache_entry($entry_information, true);
+     dpi_log('dpicache', "regenerate_cold", t("Cache (re)generated for name = !cache_name, hash = !hash",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash)),array(),$entry->hash,WATCHDOG_DEBUG);
+   }
+   return TRUE;
+ }
 
 
 /**
@@ -285,4 +317,31 @@ function dpicache_cron_cleanup($time){
 function _dpicache_get_hash($cache_name, $args=array()){
   $hash=sha1($cache_name.'--'.implode('-',$args));
   return $hash;
+}
+
+
+
+function _dpicache_regenerate_one_cache_entry_callback($cache_name){
+
+  $args=func_get_args();
+  unset($args[0]);
+  $hash=_dpicache_get_hash($cache_name, $args);
+  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
+  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
+  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
+   
+  return "cache regenerated";
+}
+
+
+function _dpicache_regenerate_all_cache_entry_callback($cache_name){
+
+  $args=func_get_args();
+  unset($args[0]);
+  $hash=_dpicache_get_hash($cache_name, $args);
+  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
+  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
+  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
+   
+  return "cache regenerated";
 }
