@@ -375,7 +375,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
         }
 
         $content = scald_atom_view($atom, $context);
-dsm($content, 'atom content');
+
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
