@@ -99,12 +99,9 @@ function dpidestinations_field_widget_info() {
  *
  * We provide one form for the moment: destination_default_widget.
  *
- *
  * 'destination_default_widget' define four form element that are simple selectbox
- *
  */
 function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-
   // STEP 0:
   //Generate a specific key used to identify this element to restore a default
   // value upon AJAX submission regardless of where this element is in the
@@ -122,91 +119,96 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   // first in the form state, then in the stored value for the field, and then
   // in the default values of the instance.
 
-  $destinations = array();
+  $destinations = array(
+    'tid' => 0,
+    'target' => '',
+    'layout' => '',
+    'rank' => 0,
+    'virtual_rank' => 0,
+  );
   if (!empty($form_state['destinationsfield'][$element_key])) {
     // Use the value from the form_state if available.
     $destinations = $form_state['destinationsfield'][$element_key];
     $widget['temp_db_value'] = array(
       '#type' => 'value',
-      '#value' => array('tid'=>$destinations['temp_db_value']['tid'],'target'=>$destinations['temp_db_value']['target']),
+      '#value' => array(
+        'tid' => $destinations['temp_db_value']['tid'],
+        'target' => $destinations['temp_db_value']['target'],
+      ),
     );
-  }
-  elseif (!empty($items[$delta]['tid'])) {
-
+  } elseif (!empty($items[$delta]['tid'])) {
     // Else use the saved value for the field.
     $destinations = $items[$delta];
     //Use this to know if the file already exist on DB => display Do not change in the select option field for rank
-    $destinations['item_already_exist']=$items[$delta]['tid'];
+    $destinations['item_already_exist'] = $items[$delta]['tid'];
     $widget['temp_db_value'] = array(
       '#type' => 'value',
-      '#value' => array('tid'=>$items[$delta]['tid'],'target'=>$items[$delta]['target']),
+      '#value' => array(
+        'tid' => $items[$delta]['tid'],
+        'target' => $items[$delta]['target'],
+      ),
     );
-    $destinations['temp_db_value']=$widget['temp_db_value']["#value"];
-
-  }
-  else {
+    $destinations['temp_db_value'] = $widget['temp_db_value']["#value"];
+  } else {
     // Otherwise use the instance default.
-    $destinations = (array) $instance['default_value'][0];
-    $destinations['item_already_exist']=FALSE;
+    //$destinations = (array)$instance['default_value'][0];
+    $destinations['item_already_exist'] = FALSE;
   }
 
-  $is_update=FALSE;
-  if(isset($destinations['temp_db_value']) and $destinations['temp_db_value']['tid']==$destinations['tid'] and $destinations['temp_db_value']['target']==$destinations['target']){
-    $is_update=TRUE;
+  $is_update = FALSE;
+  if(isset($destinations['temp_db_value']) && is_array($destinations['temp_db_value']) &&
+      $destinations['temp_db_value']['tid'] == $destinations['tid'] &&
+      $destinations['temp_db_value']['target'] == $destinations['target']) {
+    $is_update = TRUE;
   }
 
   // STEP 2:
-  //Determine available options and change destination if need it
+  // Determine available options and change destination if need it
 
-  $tids_options=dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update);
-  if(FALSE &  !$is_update){
-    $destinations['tid']='';
+  $tids_options = dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update);
+  if(FALSE && !$is_update) {
+    $destinations['tid'] = '';
   }
 
-  $target_options=__dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
-  if(!isset($target_options[$destinations['target']])){
-    $destinations['target']=current(array_keys($target_options));
+  $target_options = __dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
+  if(!isset($target_options[$destinations['target']])) {
+    $destinations['target'] = current(array_keys($target_options));
   }
-  $layout_options= __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'],$destinations['target']);
-  if(!isset($layout_options[$destinations['layout']])){
-    $destinations['layout']=current($layout_options);
+  $layout_options = __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'], $destinations['target']);
+  if(!isset($layout_options[$destinations['layout']])) {
+    $destinations['layout'] = current($layout_options);
   }
-  if($is_update){
-    $destinations['rank']='DNC';
+  if($is_update) {
+    $destinations['rank'] = 'DNC';
   }
-  $rank_options= __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($destinations['tid'],$destinations['target'],$is_update);
-  if(!isset($rankt_options[$destinations['rank']])){
-    $destinations['rank']=current($rank_options);
+  $rank_options = __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($destinations['tid'], $destinations['target'], $is_update);
+  if(!isset($rankt_options[$destinations['rank']])) {
+    $destinations['rank'] = current($rank_options);
   }
-
-
-
 
   // STEP 3:
   // buid the form
   $widget['#delta'] = $delta;
-  $widget['#prefix']= '<div id="dropdown-target-replace_'.$delta.'">';
-  $widget['#suffix']= '</div>';
+  $widget['#prefix'] = '<div id="dropdown-target-replace_'.$delta.'">';
+  $widget['#suffix'] = '</div>';
   $widget['#dpidestinationsfield'] = TRUE;
 
   switch ($instance['widget']['type']) {
-
     case 'destination_default_widget':
       // Make this a fieldset with the four fields.
       $widget += array(
       '#type' => 'fieldset',
       '#attributes' => array('class' => array('field-destinations-widget')),
-
       );
 
       $widget['tid'] = array(
         '#type' => 'select',
         '#options' => $tids_options,
-        '#default_value'=>$destinations['tid'],
-        '#title' => t("Term"),
+        '#default_value' => $destinations['tid'],
+        '#title' => t('Term'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The destination page where the node will appear'),
-        '#limit_validation_errors'=>array(),
+        '#limit_validation_errors' => array(),
         '#ajax' => array(
           // When 'event' occurs, Drupal will perform an ajax request in the
           // background. Usually the default value is sufficient (eg. change for
@@ -215,17 +217,18 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           // 'event' => 'change',
           'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
           'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method'=>'replace',
+          'method' => 'replace',
         ),
       );
+
       $widget['target'] = array(
         '#type' => 'select',
         '#options' => $target_options,
         '#default_value'=> $destinations['target'],
-        '#title' => t("Target"),
+        '#title' => t('Target'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('Define the target where the node will appear in the page'),
-        '#limit_validation_errors'=>array(),
+        '#limit_validation_errors' => array(),
         '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
         '#ajax' => array(
           'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
@@ -236,49 +239,46 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
        
       $widget['rank'] = array(
         '#type' => 'select',
-        '#options' =>$rank_options,
-        // '#default_value'=> $destinations['rank'],
-        '#title' => t("Rank"),
+        '#options' => $rank_options,
+        // '#default_value' => $destinations['rank'],
+        '#title' => t('Rank'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The position of the article in the target'),
         '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-        '#limit_validation_errors'=>array(),
-
+        '#limit_validation_errors' => array(),
       );
+      if($is_update) {
+        $widget['rank']['#default_value'] = 'DNC';
+      }
+
       $widget['layout'] = array(
         '#type' => 'select',
-        '#options' =>$layout_options,
+        '#options' => $layout_options,
         '#default_value'=> $destinations['layout'],
-        '#title' => t("Layout"),
+        '#title' => t('Layout'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The way your article will be render in the target'),
         '#element_validate' => array('dpidestinations_rebuildonchange_validate'),
-        '#limit_validation_errors'=>array(),
-
-         
+        '#limit_validation_errors' => array(),
       );
-      if($is_update){
-        $widget['rank']['#default_value']="DNC";
-      }
+
       $widget['virtual_rank'] = array(
         '#type' => 'value',
-        "#value"=> $destinations['virtual_rank'],
+        '#value' => $destinations['virtual_rank'],
       );
 
       break;
   }
   $element = $widget;
 
-
   return $element;
 }
-
 
 /**
  * Element validate callback: rebuilds the form on country change and stores the current address value in the $form_state for retrieval on rebuild.
  */
 function dpidestinations_rebuildonchange_validate($element, &$form_state) {
-  if($form_state["triggering_element"]["#type"]=='select'){
+  if($form_state['triggering_element']['#type'] == 'select'){
     // If the country was changed, rebuild the form.
     if ($element['#default_value'] != $element['#value']) {
       $form_state['rebuild'] = TRUE;
@@ -292,7 +292,6 @@ function dpidestinations_rebuildonchange_validate($element, &$form_state) {
     // Store the present address values in the form state for retrieval by the
     // widget form regardless of where the widget sits in the $form array.
     $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
-
   }
 }
 

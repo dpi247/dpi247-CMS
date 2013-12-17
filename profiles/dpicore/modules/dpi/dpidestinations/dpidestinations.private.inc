@@ -53,6 +53,7 @@ function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = 
   ->orderBy('t.name')
   ->execute();
 
+  $terms = array();
   foreach ($result as $term) {
     $terms[$term->tid] = $term;
   }

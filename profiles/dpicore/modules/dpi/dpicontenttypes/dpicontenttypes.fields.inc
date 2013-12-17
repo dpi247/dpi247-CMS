@@ -285,9 +285,18 @@ function dpicontenttypes_field_widget_form(&$form, &$form_state, $field, $instan
 
   return array(
     'sid' => $element,
-    'provider'=>array('#type'=>'value','#value'=>$items[$delta]['provider']),
-    'type'=>array('#type'=>'value','#value'=>$items[$delta]['type']),
-    'inline'=>array('#type'=>'value','#value'=>$items[$delta]['inline']),
+    'provider' => array(
+      '#type' => 'value',
+      '#value' => isset($items[$delta]['provider']) ? $items[$delta]['provider'] : '',
+    ),
+    'type' => array(
+      '#type' => 'value',
+      '#value' => isset($items[$delta]['type']) ? $items[$delta]['type'] : '',
+    ),
+    'inline' => array(
+      '#type' => 'value',
+      '#value' => isset($items[$delta]['inline']) ? $items[$delta]['inline'] : 0,
+    ),
   );
 }
 
