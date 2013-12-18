@@ -68,7 +68,7 @@ function dpilog_page_view_list_build_logs_table($filters){
     $bck_color=$registrations[$result->log_name][$result->action]['color'];
   
     $message=truncate_utf8(filter_xss($result->message, array()), 150, TRUE, TRUE);
-    $message=' '.l($message,'admin/dpilog/log/'.$result->lid);
+    $message=' '.l($message,'admin/dpi247/dpilogs/dpilog/view/log/'.$result->lid);
   
     $table_rows[] = array(
       array('style'=>array("background-color:$bck_color") ,'class'=>array('dpilog-table-row','dpilog-table-row-color')),

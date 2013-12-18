@@ -274,7 +274,7 @@ function dpilog_watchdog_filter_form_submit($form, &$form_state) {
       $_SESSION['dpilog_watchdog_overview_filter'] = array();
       break;
   }
-  return 'admin/dpilog/watchdogs';
+  return 'admin/dpi247/dpilogs/watchdogs';
 }
 
 /**
