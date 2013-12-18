@@ -124,6 +124,6 @@ class TargetBlockEntity extends Entity{
     return $this->machine_name;
   }
   protected function defaultUri() {
-    return array('path' => 'targetblock/' . $this->targetid);
+    return array('path' => 'targetblock/' . $this->targetblockid);
   }
 }
