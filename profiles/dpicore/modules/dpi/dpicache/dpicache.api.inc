@@ -80,6 +80,7 @@ function dpicache_get_cache_entry($cache_name){
 
 /**
  * Get the url to invalidate a cache entry
+ * The url is returned without begin or trailling slash
  *
  * @param  String $cache_name Cache name
  * @return String  tur url to call
@@ -89,7 +90,7 @@ function dpicache_get_regenerate_url($cache_name){
   unset($args[0]);
   $args_url=implode('/', $args);
 
-  $url='/dpicache/regenerate/one_cache_entry/'.$cache_name.'/'.$args_url;
+  $url='dpicache/regenerate/one_cache_entry/'.$cache_name.'/'.$args_url;
   return $url;
 }
 

@@ -33,7 +33,7 @@ function dpicache_dpilog_register(){
 
   return array(
     "dpicache"=>array(
-      "actions"=>array("cache_hit","cache_miss",'regenerate_hot','regenerate_cold','error'),
+      "actions"=>array("manual_regeneration_of_cache_entry","manual_regeneration_of_cache_name","cache_hit","cache_miss",'regenerate_hot','regenerate_cold','error'),
     )
   );
 }

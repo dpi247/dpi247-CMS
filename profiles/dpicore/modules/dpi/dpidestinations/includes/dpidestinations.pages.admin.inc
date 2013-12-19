@@ -307,7 +307,7 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
 
     $targets=dpidestinations_api_get_all_targets();
     foreach($targets as $target){
-      $targets_options[$target->manchine_name]=$target->label;
+      $targets_options[$target->machine_name]=$target->label;
     }
 
     $info["target"]=array(

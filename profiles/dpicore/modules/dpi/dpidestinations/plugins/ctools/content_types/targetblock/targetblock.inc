@@ -49,59 +49,69 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
 
 
   $did=$context['argument_destination_1']->data->handler->did;
+  $destination_term_id=$context['argument_destination_1']->data->tid;
+  $target_name=$subtype;
+  $split_delta=$conf["split_delta"];
+  
+  
+  return dpicache_get_cache_entry('dpidestinations_targetblock_render',$did, $destination_term_id, $target_name, $split_delta);
+  
+
+}
+
+function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta) {
 
   $targetBlockController=new TargetBlockController('targetblock');
-  $targetblock=$targetBlockController->load_targetblock_by_did_target_and_splitdelta($did,$subtype,$conf["split_delta"]);
+  $targetblock=$targetBlockController->load_targetblock_by_did_target_and_splitdelta($did,$target_name,$split_delta);
+  
   //@todo: check si on a pas de targetblock
   //si on a pas  si le user est admin afficher un block d'erreur
   // Si user est anonyme=> block vide
   // et watchdog
+  
+  $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+  $target=$targetblock_wrapper->target->value();
+  $target_wrapper = entity_metadata_wrapper('target', $target);
+  
+      $targetview=_dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id,$target_name,$targetblock);
+  
+  $targetview_clone=_dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock,$targetview);
+  
+  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
+  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
+  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta);
+  
+  return $block;
+}
 
+function _dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id,$target_machine_name,$targetblock){
 
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   $target=$targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
-
-  $targetview=_dpidestinations_targetblock_content_type_helper_get_global_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock);
   
-  $targetview_clone=_dpidestinations_targetblock_content_type_helper_get_local_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview);
-
-  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
-  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
-  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
-
-
-  return $block;
-
-}
-
-function _dpidestinations_targetblock_content_type_helper_get_global_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock){
-
   $targetviews = & drupal_static('dpidestinations_targetviews');
   $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
   
-  $term_value=$context['argument_destination_1']->data->tid;
-  $target_value=$target_wrapper->machine_name->value();
-
-  if (!isset($targetviews[$term_value][$target_value])) {
+  if (!isset($targetviews[$destination_term_id][$target_machine_name])) {
     $targetview=$target_wrapper->targetview->value();
     
-    _dpidestinations_targetview_initialize_view( $targetview, $term_value,$target_value,$targetblock);
+    _dpidestinations_targetview_initialize_view( $targetview, $destination_term_id,$target_machine_name,$targetblock);
 
     //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
     $targetview->dom_id=uniqid();
     $targetview->execute();
     
-    $targetviews_values[$term_value][$target_value]=$targetview->result;
-    $targetviews[$term_value][$target_value]=$targetview;
+    $targetviews_values[$destination_term_id][$target_machine_name]=$targetview->result;
+    $targetviews[$destination_term_id][$target_machine_name]=$targetview;
   }
 
-  return $targetviews[$term_value][$target_value]  ;
+  return $targetviews[$destination_term_id][$target_machine_name]  ;
 
 }
 
 
-function _dpidestinations_targetblock_content_type_helper_get_local_targetview($subtype,$conf,$args,$context,$target_wrapper,$targetblock,$targetview){
+function _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock,$targetview){
   
   $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
   
@@ -119,8 +129,6 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
   
   $targetview_clone->display_handler->view->result=$result;
   $targetview_clone->result=$result;
-  //$targetview_clone->style_plugin->view->result=$result;
-  //$targetview_clone->style_plugin->row_plugin->view->result=$result;
   
   //We absolutly need this since the style will use cache rendering if exist
   // see $view->style_plugin->get_field($index, $field);
@@ -390,7 +398,7 @@ function _dpidestinations_targetblock_content_type_helper_initialize_targetblock
 
 
 
-function _dpidestinations_targetblock_content_type_helper_get_title($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+function _dpidestinations_targetblock_content_type_helper_get_title($conf){
   if($conf['override_title']){
     $title = $conf['override_title_text'];
   }
@@ -401,25 +409,23 @@ function _dpidestinations_targetblock_content_type_helper_get_title($subtype, $c
 }
 function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
   $content="";
-
-  
   $content=$targetview->render();
   return $content;
 }
 
 
-function _dpidestinations_targetblock_content_type_helper_get_admin_links($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
+function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta){
 
   return array(
     array(
       'title'=>t('Reorder TargetBlock'),
-      'href'=> "admin/targetview_reorder/".$args[0]."/".$subtype,
+      'href'=> "admin/targetview_reorder/".$destination_term_id."/".$target_name,
       'query' => drupal_get_destination(),
 
     ),
     array(
       'title' => t('Refresh Cache'),
-      'href' => "admin/structure/block/manage/configure",
+      'href' => dpicache_get_regenerate_url('dpidestinations_targetblock_render',$did, $destination_term_id, $target_name, $split_delta),
       'query' => drupal_get_destination(),
     ),
     array(

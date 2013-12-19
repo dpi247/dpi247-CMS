@@ -28,13 +28,13 @@ function dpilog_menu(){
   $items['admin/dpi247/dpilogs'] = array(
     'title'=>'DPI Logs and Watchdogs',
     'description' => 'View events that have recently been logged.',
-    'page callback' => 'dpilog_watchdog_overview',
+    'page callback' => 'dpilog_page_view_list',
     'access arguments' => array('access site reports'),
     'weight' => 1,
-    'file' => 'includes/dpilog.pages.watchdog.inc',
-
+    'file'=>'includes/dpilog.pages.admin.inc',
+    
   );
-  $items['admin/dpi247/dpilogs/dpilog/log/%'] = array(
+  $items['admin/dpi247/dpilogs/dpilog/view/log/%'] = array(
     'title'=> 'Logs',
     'page callback' => 'dpilog_page_view_list',
     'access arguments'=>array('view dpilog'),
