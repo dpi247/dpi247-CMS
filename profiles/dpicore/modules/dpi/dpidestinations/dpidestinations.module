@@ -168,8 +168,6 @@ function dpidestinations_permission(){
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
-
-
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController = new TargetBlockController('targetblock');
   $existing_targetblocks = $targetController->load_targetblocks_by_panels_display($display->did);
@@ -178,6 +176,7 @@ function dpidestinations_panels_display_save($display){
   foreach ($existing_targetblocks as $targetblockid  => $targetblock){
     $targetblock_by_pid[$targetblock->pid] = $targetblock;
   }
+  $panels_in_display_by_pid = array();
   foreach ($display->content as $id => $pane){
     if ($pane->type == 'targetblock'){
       if (!strstr($id, 'new')){
@@ -198,9 +197,6 @@ function dpidestinations_panels_display_save($display){
     targetblock_delete_multiple($targetblocks_to_delete);
   }
 
-
-
-
   //STEP 2: Create new targetblock
   foreach ($display->content as $id => &$pane){
     if ($pane->type == 'targetblock'){
@@ -218,11 +214,7 @@ function dpidestinations_panels_display_save($display){
       }
     }
   }
-
-
 }
-
-
 
 function dpidestinations_default_panels_renderer_pipeline() {
   $pipelines = array();
