@@ -113,31 +113,33 @@ function dpidestinations_entity_info(){
 
   return $entities;
 }
+
 /**
- *
  * Implementation of hook_entity_info_alter
+ * 
  * @param Array $entity_info
  */
-function dpidestinations_entity_info_alter(&$entity_info){
-  //@todo: ne pas coder en dur le nom du vocabulaire
-  $entity_info["taxonomy_term"]["bundles"]["destinations"]["uri callback"]='dpidestinations_term_uri';
+function dpidestinations_entity_info_alter(&$entity_info) {
+  // @todo: ne pas coder en dur le nom du vocabulaire
+  $entity_info['taxonomy_term']['bundles']['destinations']['uri callback'] = 'dpidestinations_term_uri';
+  $entity_info['taxonomy_term']['bundles']['destinations']['label'] = t('Destination term');
+  
   $entity_info['node']['view modes'] += array(
-    'targetblock_small'=>array(
-      'label'=> 'TargetBlock Small',
-      'custom settings'=> TRUE,
+    'targetblock_small' => array(
+      'label' => t('TargetBlock Small'),
+      'custom settings' => TRUE,
     ),
-    'targetblock_medium'=>array(
-      'label'=> 'TargetBlock Medium',
-      'custom settings'=> TRUE,
+    'targetblock_medium' => array(
+      'label' => t('TargetBlock Medium'),
+      'custom settings' => TRUE,
     ),
-    'targetblock_big'=>array(
-      'label'=> 'TargetBlock Big',
-      'custom settings'=> TRUE,
+    'targetblock_big' => array(
+      'label' => t('TargetBlock Big'),
+      'custom settings' => TRUE,
     ),
-
   );
-
 }
+
 function target_load($tid = NULL, $reset = FALSE){
   $tids = (isset ($tid) ? array($tid) : array());
   $target = target_load_multiple($tids, $reset);
