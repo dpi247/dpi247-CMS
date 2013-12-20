@@ -58,7 +58,7 @@ function unfoldcompanion_node_view($node, $view_mode, $langcode) {
     } else {
       $date = $node->content['field_editorialpublicationdate'];
     }
-    $node->content['field_publication_and_comments']['#markup'] = theme('theme_package_publication_date_and_comments_count', array('date' => $node->content['field_editorialpublicationdate'], 'comment_count' => $node->comment_count));
+    $node->content['field_publication_and_comments']['#markup'] = theme('theme_package_publication_date_and_comments_count', array('date' => $date, 'comment_count' => $node->comment_count));
     if (isset($node->content['field_editorialupdatedate'])) {
       unset($node->content['field_editorialupdatedate']);
     }
