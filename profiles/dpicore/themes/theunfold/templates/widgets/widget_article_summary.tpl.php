@@ -1,9 +1,3 @@
-<?php 
-/*
- * 
- * 
- */
-?>
   <a href="/<?php print $widget['url']; ?>">
 		<?php print $widget['figure'];?>
    <span class="cat"><?php print $widget['barette']; ?></span>

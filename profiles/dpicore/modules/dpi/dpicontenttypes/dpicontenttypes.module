@@ -379,6 +379,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
+          unset($content['field_displaytitle']);
           unset($content['field_linkitems']);
         }
 

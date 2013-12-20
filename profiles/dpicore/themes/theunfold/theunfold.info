@@ -1,5 +1,6 @@
 name = The Unfold
-description = DPI 247 demo theme.
+description = DPI 247 demo theme
+version = 1
 core = 7.x
 engine = phptemplate
 
@@ -13,3 +14,5 @@ regions[toolbarRight] = ToolbarRight
 regions[toolbarLeft] = ToolbarLeft
 regions[bottom] = Bottom
 regions[top] = Top
+
+plugins[panels][layouts] = plugins/layouts

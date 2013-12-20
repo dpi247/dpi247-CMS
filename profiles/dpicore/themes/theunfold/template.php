@@ -3,36 +3,28 @@
 /**
  * Implementation of hook_theme
  * */
-function theunfold_theme(&$var) {
+function theunfold_theme() {
+  $path = drupal_get_path('theme', 'theunfold');
+
   return array(
-    'theme_package_linkslists' => array(
-      'arguments' => array('vars' => NULL),
-    ),
-    'theme_package_bears_items' => array(
-      'arguments' => array('vars' => NULL),
-    ),
-    'theme_package_bottom_items' => array(
-      'arguments' => array('vars' => NULL),
-    ),
     'theme_package_top_items' => array(
-      'arguments' => array('vars' => NULL),
+      'arguments' => array('topItems' => array()),
     ),
-    'theme_package_related_items' => array(
-      'arguments' => array('vars' => NULL),
+    'theme_package_publication_date_and_comments_count' => array(
+      'arguments' => array('date' => array(), 'comment_count' => array())
     ),
-    'theme_package_by' => array(
-      'arguments' => array('vars' => NULL),
-    ),
-    'theme_package_freetags' => array(
-      'arguments' => array('vars' => NULL),
-    ),
-    'theme_package_persons' => array(
-      'arguments' => array('vars' => NULL),
+    'comment_form' => array(
+      'arguments' => array('form' => array()),
+      'render element' => 'form',
+      'template' => 'comment-form',
+      'path' => $path.'/templates/comment',
     ),
   );
 }
 
 function theunfold_preprocess_page(&$vars) {
+  _theunfold_set_js();
+
   if (isset($vars['main_menu'])) {
     $vars['primary_nav'] = theme('links__system_main_menu', array(
       'links' => $vars['main_menu'],
@@ -66,114 +58,38 @@ function theunfold_preprocess_page(&$vars) {
   }
 }
 
-function theunfold_process_page($vars) {
-  // dsm($variables);
+/**
+ * Hook preprocess_page
+ */
+function theunfold_process_page(&$vars) {
 }
 
 /**
- * Hook preprocess node
+ * Hook preprocess_node
  */
 function theunfold_preprocess_node(&$vars) {
-  $type = $vars['type'];
-
-  if ($type == 'package') {
-    $node = &$vars['node'];
-    // build data for node page
-    if ($node->nid == arg(1) || $node->preview) {
-      $content = $vars['content'];
-
-      $allItems = theunfold_preprocess_node_article_dispatch_embeds($node, $content);
-
-      $vars['top_html'] = theme('theme_package_top_items', array('topItems' => $allItems['top']));
-      $vars['bottom_html'] = theme('theme_package_bottom_items', array('bottomItems' => $allItems['bottom']));
-      $vars['related_html'] = theme('theme_package_related_items',
-        array(
-          'linkslist' => $allItems['linkslists'],
-          'bearItems' => $allItems['bears'],
-          'freeTags'  => $vars['field_free_tags'],
-          'persons'  => $vars['field_persons'],
-        )
-      );
-    }
-
-    return;
-  }
-
-
-
-
-      // build data for node page
-      if ($node->nid == arg(1) || $node->preview) {
-
-        // We unset the body, theunfold_preprocess_node_build will create a new one.
-        unset($vars["body"]);
-        $vars = array_merge($vars, theunfold_preprocess_node_build($node));
-
-        $merged_medias = array();
-        if (isset($node->field_embededobjects_nodes) && !empty($node->field_embededobjects_nodes)) {
-          if (module_exists('cciinlineobjects')) {
-            cciinlineobjects_flag_inline_embed_objects($node);
-          }
-
-          if ($node->preview) {
-            foreach ($node->field_embededobjects_nodes as $delta => $embed) {
-              // Fake nid in case of preview
-              $node->field_embededobjects_nodes[$delta]->nid = $delta;
-            }
-          }
-
-          foreach ($node->field_embededobjects_nodes as $embed) {
-            $merged_medias += theunfold_preprocess_node_build_embedded_photos($embed);
-            $merged_medias += theunfold_preprocess_node_build_embedded_videos($embed);
-            $merged_medias += theunfold_preprocess_node_build_embedded_audios($embed);
-            $merged_medias += theunfold_preprocess_node_build_embedded_links($embed);
-            $merged_medias += theunfold_preprocess_node_build_embedded_documents($embed);
-            $merged_medias += theunfold_preprocess_node_build_embedded_text($embed);
-          }
-        }
-
-        $topItems = array();
-        $bottomItems = array();
-        theunfold_preprocess_node_article_dispatch_top_bottom($node, $merged_medias, $topItems, $bottomItems, $bearItems);
-        $linkslist = theunfold_get_sorted_links($node);
-
-        $vars['top_html'] = theme('theme_package_top_items', array('topItems' => $topItems));
-        $vars['bottom_html'] = theme('theme_package_bottom_items', array('bottomItems' => $bottomItems));
-        $vars['related_html'] = theme('theme_package_related_items',
-            array('linkslist' => $linkslist,
-              'bearItems' => $bearItems,
-              'freeTags'  => $vars['field_free_tags'],
-              'persons'  => $vars['field_persons'],
-            )
-        );
-      }
-      
-      
-      return;
-      
-      // We build data for node template teaser mode
-      if ($node->teaser) {
-        $vars["widget"] = theunfold_widget_prepare_article_summary_node($node);
-      }
-      // We build data for redacblock views
-      if (isset($view)) {
-        $current_display = &$view->display[$view->current_display];
-        if ($current_display->display_options['row_plugin'] == 'redacblock_row') {
-          $vars["widget"] = theunfold_widget_prepare_article_summary_node($node);
-        }
-      }
-
 }
 
-function theunfold_preprocess_node_article_dispatch_embeds($node, $content) {
-  // @todo : Pour les embeds bottom, essayer d'avoir tout sauf 'image', 'video', 'links_list' et 'bears'
-  $allItems = array(
-    'top' => dpicontenttypes_api_get_embeds_view($node, $content, array('image', 'video'), FALSE, FALSE),
-    'bottom' => dpicontenttypes_api_get_embeds_view($node, $content, array('audio', 'twitter'), FALSE, FALSE),
-    'linkslists' => dpicontenttypes_api_get_embeds_view($node, $content, array('links_list'), FALSE, FALSE),
-    'bears' => dpicontenttypes_api_get_embeds_view($node, $content, array('bear'), FALSE, FALSE),
-  );
-  return $allItems;
+function theunfold_preprocess_field(&$variables) {
+  $element = $variables['element'];
+  switch ($element['#field_name']) {
+    case 'field_textchapo':
+      $variables['classes_array'][] = 'heading';
+      break;
+
+    case 'field_textbody':
+    case 'field_linkslists':
+      $variables['classes_array'][] = 'article-body';
+      break;
+
+    case 'field_textbarette':
+      $variables['classes_array'][] = 'cat';
+      break;
+
+    case 'field_copyright':
+      $variables['classes_array'][] = 'meta';
+      break;
+  }
 }
 
 function theunfold_preprocess_dpicontenttypes_image_render_context(&$variables, $base_theme) {
@@ -212,22 +128,61 @@ function theunfold_theme_package_top_items($vars) {
   return $content;
 }
 
-/**
- * Theme function to render the html of the bottom media
- */
-function theunfold_theme_package_bottom_items($vars) {
-  $bottom_html = '';
-  if (count($vars['bottomItems'])) {
-    $bottom_html .= '<div class="bottom-items">';
-    $bottom_html .= '<ul class="article-group">';
-    foreach ($vars['bottomItems'] as $id => $item) {
-      $bottom_html .= '<li class="article-inline small">';
-      $bottom_html .= $item;
-      $bottom_html .= '</li>';
-    }
-    $bottom_html .= '</ul>';
-    $bottom_html .= '</div>';
-  }
+function theunfold_theme_package_publication_date_and_comments_count($vars) {
+  $timestamp = $vars['date']['#items'][0]['value'];
+  $content = '<div class="meta">';
+  $content .= '<p class="date">';
+  $content .= t('Published') . '<time datetime="'.$timestamp.'">'.drupal_render($vars['date']).'</time> | ';
+  $content .= '<span id="comment-count"><a href="#comments-container" class="comment-count-link"><i class="lsf">comment</i>'.$vars['comment_count'].'</a></span>';
+  $content .= '</p>';
+  $content .= '</div>';
+  return $content;
+}
 
-  return $bottom_html;
+/**
+ * _theunfold_set_js : Set all necessary javascripts
+ */
+function _theunfold_set_js() {
+  $path = drupal_get_path('theme', 'theunfold');
+
+  // Put Scripts at the Bottom
+  // @info: Look at hook_closure
+  $js_options = array(
+    //'type' => 'theme',
+    'scope' => 'footer',
+  );
+  drupal_add_js('http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js', $js_options);
+  drupal_add_js($path.'/scripts/mylibs/script.js', $js_options);
+  drupal_add_js($path.'/scripts/mylibs/swipe.js', $js_options);
+  drupal_add_js($path.'/scripts/mylibs/ticker.js', $js_options);
+  drupal_add_js($path.'/scripts/mylibs/jquery.easing.1.3.js', $js_options);
+  drupal_add_js($path.'/scripts/mylibs/jquery.elastislide.js', $js_options);
+
+  // Add js to the header
+  drupal_add_js($path.'/scripts/vendor/modernizr-2.6.1.min.js');
+  drupal_add_js("
+    (function(doc) {
+    var addEvent = 'addEventListener',
+        type = 'gesturestart',
+        qsa = 'querySelectorAll',
+        scales = [1, 1],
+        meta = qsa in doc ? doc[qsa]('meta[name=viewport]') : [];
+
+      function fix() {
+        meta.content = 'width=device-width,minimum-scale=' + scales[0] + ',maximum-scale=' + scales[1];
+        doc.removeEventListener(type, fix, true);
+      }
+
+      if ((meta = meta[meta.length - 1]) && addEvent in doc) {
+        fix();
+        scales = [.25, 1.6];
+        doc[addEvent](type, fix, true);
+      }
+
+    }(document));
+", 'inline');
+/*
+  $vars['scripts'] = drupal_get_js(); // necessary in D7?
+  $vars['closure'] = theme('closure'); // necessary in D7?
+*/
 }
