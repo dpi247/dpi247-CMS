@@ -96,14 +96,15 @@ class DpiDestinationsTargetMetadataController extends EntityDefaultMetadataContr
       'field_name' => array('label' => ''),
       'language' => array('label' => ''),
     );
-    $properties['available_targetlayouts']['getter callback']='_target_metadata_getter';
-    $properties['available_targetlayouts']['setter callback']='_target_metadata_setter';
+    $properties['available_targetlayouts']['getter callback'] = '_target_metadata_getter';
+    $properties['available_targetlayouts']['setter callback'] = '_target_metadata_setter';
 
-    $properties['available_templateoverrides']['getter callback']='_target_metadata_getter';
-    $properties['available_templateoverrides']['setter callback']='_target_metadata_setter';
+    $properties['available_templateoverrides']['getter callback'] = '_target_metadata_getter';
+    $properties['available_templateoverrides']['setter callback'] = '_target_metadata_setter';
 
-    $properties['targetview']['getter callback']='_target_metadata_getter';
+    $properties['targetview']['getter callback'] = '_target_metadata_getter';
     //$properties['targetview']['setter callback']='_target_metadata_setter';
+    $properties['targetview']['label'] = '';
 
     return $info;
   }
@@ -138,7 +139,8 @@ class DpiDestinationsTargetblockMetadataController extends EntityDefaultMetadata
     );
 
     //differ when targetblockinstaance is splitted: sum of all splitted instance
-    $properties['other_splitted_targetblocks']['getter callback']='_targetblock_metadata_getter';
+    $properties['other_splitted_targetblocks']['getter callback'] = '_targetblock_metadata_getter';
+    $properties['other_splitted_targetblocks']['label'] = '';
 
     return $info;
   }
