@@ -71,11 +71,9 @@ function entity_metadata_destination_property_callback(&$info, $entity_type, $fi
       ),
     );
 
-
     // Enable auto-creation of the item
     $property['auto creation'] = 'entity_property_create_array';
   }
-
 }
 
 /**
@@ -87,17 +85,16 @@ function entity_metadata_destination_property_callback(&$info, $entity_type, $fi
  * Extend the default target metadata properties.
  */
 class DpiDestinationsTargetMetadataController extends EntityDefaultMetadataController {
-
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
     // Initialize values to prevent WSOD, no certain cases of clear cache.
     $properties = !empty($properties) ? $properties : array();
     $properties += array(
-      'entity_type' => array(),
-      'group_type' => array(),
-      'field_name' => array(),
-      'language' => array(),
+      'entity_type' => array('label' => ''),
+      'group_type' => array('label' => ''),
+      'field_name' => array('label' => ''),
+      'language' => array('label' => ''),
     );
     $properties['available_targetlayouts']['getter callback']='_target_metadata_getter';
     $properties['available_targetlayouts']['setter callback']='_target_metadata_setter';
@@ -112,12 +109,10 @@ class DpiDestinationsTargetMetadataController extends EntityDefaultMetadataContr
   }
 }
 
-
 /**
  * Extend the default targetblock metadata properties.
  */
 class DpiDestinationsTargetblockMetadataController extends EntityDefaultMetadataController {
-
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
@@ -125,10 +120,10 @@ class DpiDestinationsTargetblockMetadataController extends EntityDefaultMetadata
     // Initialize values to prevent WSOD, no certain cases of clear cache.
     $properties = !empty($properties) ? $properties : array();
     $properties += array(
-      'entity_type' => array(),
-      'group_type' => array(),
-      'field_name' => array(),
-      'language' => array(),
+      'entity_type' => array('label' => ''),
+      'group_type' => array('label' => ''),
+      'field_name' => array('label' => ''),
+      'language' => array('label' => ''),
     );
     //Handling entity references
 
@@ -145,8 +140,6 @@ class DpiDestinationsTargetblockMetadataController extends EntityDefaultMetadata
     //differ when targetblockinstaance is splitted: sum of all splitted instance
     $properties['other_splitted_targetblocks']['getter callback']='_targetblock_metadata_getter';
 
-
     return $info;
   }
 }
-
