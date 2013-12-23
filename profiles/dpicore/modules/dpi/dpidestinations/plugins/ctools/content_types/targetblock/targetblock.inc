@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin definition.
  */
@@ -7,37 +8,31 @@ $plugin = array(
   'description' => t('Crafted links to create content (nodes) for a given group.'),
   //'required context' => new ctools_context_required(t('Destination'), 'destination'),
   'category' => t('Target'),
-  'group'=>t('DPI Core'),
+  'group' => t('DPI Core'),
   'all contexts' => TRUE,
-
 );
-
-
 
 /**
  * Implementation of hook_typeofcontent_content_type_content_types
  * Return all custom content types available.
-*/
+ */
 function dpidestinations_targetblock_content_type_content_types($plugin) {
   $types = array();
-  $targets=target_load_multiple(FALSE);
-  foreach($targets as $target){
-    $types[$target->machine_name]= array(
+  $targets = target_load_multiple(FALSE);
+  foreach($targets as $target) {
+    $types[$target->machine_name] = array(
       'title' => check_plain($target->machine_name),
-      'subtype'=> $target->machine_name,
-      'description' =>check_plain($target->description),
+      'subtype' => $target->machine_name,
+      'description' => check_plain($target->description),
       //'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t('Target'),
-      'group'=>t('DPI Core'),
+      'group' => t('DPI Core'),
       //'all contexts' => TRUE,
-
     );
-
   }
 
   return $types;
 }
-
 
 /**
  * Render callback.
@@ -47,125 +42,111 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $block = new stdClass();
   $block->module = $module;
 
+  $did = $context['argument_destination_1']->data->handler->did;
+  $destination_term_id = $context['argument_destination_1']->data->tid;
+  $target_name = $subtype;
+  $split_delta = $conf["split_delta"];
 
-  $did=$context['argument_destination_1']->data->handler->did;
-  $destination_term_id=$context['argument_destination_1']->data->tid;
-  $target_name=$subtype;
-  $split_delta=$conf["split_delta"];
-  
-  
-  return dpicache_get_cache_entry('dpidestinations_targetblock_render',$did, $destination_term_id, $target_name, $split_delta);
-  
-
+  return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta);
 }
 
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta) {
+  $targetBlockController = new TargetBlockController('targetblock');
+  $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta($did, $target_name, $split_delta);
 
-  $targetBlockController=new TargetBlockController('targetblock');
-  $targetblock=$targetBlockController->load_targetblock_by_did_target_and_splitdelta($did,$target_name,$split_delta);
-  
-  //@todo: check si on a pas de targetblock
-  //si on a pas  si le user est admin afficher un block d'erreur
+  // @todo: check si on a pas de targetblock
+  // si on a pas  si le user est admin afficher un block d'erreur
   // Si user est anonyme=> block vide
   // et watchdog
-  
+
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-  $target=$targetblock_wrapper->target->value();
+  $target = $targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
-  
-      $targetview=_dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id,$target_name,$targetblock);
-  
-  $targetview_clone=_dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock,$targetview);
-  
+
+  $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id, $target_name, $targetblock);
+
+  $targetview_clone = _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock, $targetview);
+
   $block->title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
-  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype,$conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview_clone);
+  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf, $args, $context, $target_wrapper, $targetblock_wrapper, $targetview_clone);
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta);
-  
+
   return $block;
 }
 
-function _dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id,$target_machine_name,$targetblock){
-
+function _dpidestinations_targetblock_content_type_helper_get_global_targetview($destination_term_id, $target_machine_name, $targetblock) {
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   $target=$targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
-  
-  $targetviews = & drupal_static('dpidestinations_targetviews');
-  $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
-  
+
+  $targetviews = &drupal_static('dpidestinations_targetviews');
+  $targetviews_values = &drupal_static('dpidestinations_targetview_valuess');
+
   if (!isset($targetviews[$destination_term_id][$target_machine_name])) {
-    $targetview=$target_wrapper->targetview->value();
-    
-    _dpidestinations_targetview_initialize_view( $targetview, $destination_term_id,$target_machine_name,$targetblock);
+    $targetview = $target_wrapper->targetview->value();
+
+    _dpidestinations_targetview_initialize_view($targetview, $destination_term_id, $target_machine_name, $targetblock);
 
     //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
-    $targetview->dom_id=uniqid();
+    $targetview->dom_id = uniqid();
     $targetview->execute();
-    
-    $targetviews_values[$destination_term_id][$target_machine_name]=$targetview->result;
-    $targetviews[$destination_term_id][$target_machine_name]=$targetview;
+
+    $targetviews_values[$destination_term_id][$target_machine_name] = $targetview->result;
+    $targetviews[$destination_term_id][$target_machine_name] = $targetview;
   }
 
   return $targetviews[$destination_term_id][$target_machine_name]  ;
-
 }
 
+function _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock, $targetview) {
+  $targetviews_values = &drupal_static('dpidestinations_targetview_valuess');
 
-function _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock,$targetview){
-  
-  $targetviews_values = & drupal_static('dpidestinations_targetview_valuess');
-  
-  $targetview_clone= clone($targetview) ;
-  $targetview_clone->dpidestinations['targetblock']=$targetblock;
-  
-  
-  $term_value=$targetview_clone->dpidestinations['destination']->tid;
-  $target_value=$targetview_clone->dpidestinations['target']->machine_name;
-  $result_save=$targetviews_values[$term_value][$target_value];
-  
-  $result=$result_save;
-  $result=array_slice($result, $targetblock->offset,$targetblock->node_count_for_targetblockinstance);
+  $targetview_clone = clone($targetview) ;
+  $targetview_clone->dpidestinations['targetblock'] = $targetblock;
 
-  
-  $targetview_clone->display_handler->view->result=$result;
-  $targetview_clone->result=$result;
-  
+  $term_value = $targetview_clone->dpidestinations['destination']->tid;
+  $target_value = $targetview_clone->dpidestinations['target']->machine_name;
+  $result_save = $targetviews_values[$term_value][$target_value];
+
+  $result = $result_save;
+  $result = array_slice($result, $targetblock->offset, $targetblock->node_count_for_targetblockinstance);
+
+  $targetview_clone->display_handler->view->result = $result;
+  $targetview_clone->result = $result;
+
   //We absolutly need this since the style will use cache rendering if exist
   // see $view->style_plugin->get_field($index, $field);
   // see template_preprocess_views_view_fields
   unset($targetview_clone->style_plugin->rendered_fields);
    
-    
   return $targetview_clone;
-  
 }
 
 /**
  * Edit form.
  */
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
+  $targetblockController = new TargetBlockController('targetblock');
+  $targetController = new TargetController('target');
 
-  $targetblockController=new TargetBlockController('targetblock');
-  $targetController=new TargetController('target');
-
-  $targetblock= $targetblockController->load_targetblock_by_panels_panelpid($form_state['pane']->pid);
+  $targetblock = $targetblockController->load_targetblock_by_panels_panelpid($form_state['pane']->pid);
   //This is a new targetblock
-  if($targetblock==FALSE){
+  if($targetblock == FALSE) {
     $targetblock=_dpidestinations_targetblock_content_type_helper_initialize_targetblock($form_state);
   }
-  _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings($form_state,$targetblock);
+  _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings($form_state, $targetblock);
 
   $target=$targetController->load_target_by_name($targetblock->target);
 
   $target_wrapper = entity_metadata_wrapper('target', $target);
-  $available_templates_override= $target_wrapper->available_templateoverrides->value();
-
+  $available_templates_override = $target_wrapper->available_templateoverrides->value();
 
   $form['targetblok_instance_settings'] = array(
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
     '#title' => t('TargetBlock instance settings'),
   );
+
   $form['targetblok_instance_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
     '#default_value' => $targetblock->node_count_for_targetblockinstance,
@@ -201,7 +182,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form['targetblok_settings'] = array(
     '#type' => 'fieldset',
     '#description'=>t('Thoses settings will be shared across all the same targetblock instances on the page'),
-
     '#collapsible' => TRUE,
     "#collapsed"=>TRUE,
     '#title' => t('Global targetBlock settings (Advanced)'),
@@ -237,7 +217,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
         => array('checked' => TRUE),  // condition
       ),
     ),
-
   );
 
   $form['targetblok_settings']['split_settings'] = array(
@@ -251,10 +230,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#description' => t('Manually define the order across each targetblock instances.
         The default behavior is to use the date of creation of the targetblock instance to define the order.'),
     '#default_value' => $targetblock->use_split,
-
-
   );
-
 
   $form['targetblok_settings']['split_settings']['split_delta'] = array(
     '#type' => 'textfield',
@@ -275,7 +251,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     ),
   );
 
-
   return $form;
 }
 
@@ -285,7 +260,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
  */
 function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form_state) {
   //DEFAULT SAVE OVERRIDABLE VARIABLES:
-  $confs=array(
+  $confs = array(
     'override_title',
     'node_count_for_targetblockinstance',
     'use_pager',
@@ -299,7 +274,7 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
     'rank_max_value',
     'template_rule'
   );
-  foreach($confs as $conf){
+  foreach($confs as $conf) {
     $form_state['conf'][$conf] = $form_state['values'][$conf];
   }
   $form_state['conf'][$key] = $form_state['values'][$key];
@@ -307,125 +282,112 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
     $form_state['conf'][$key] = $form_state['values'][$key];
   }
 
-
   //We log the change to allow override when edit of another pane before page is saved
   // @see: dpidestinations_targetblock_content_type_edit_form()
   // @see: _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings()
-  $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_override']=TRUE;
-  $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values']=$form_state['pane']->configuration;
+  $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_override'] = TRUE;
+  $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'] = $form_state['pane']->configuration;
 
-  $properties_to_override= _dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override();
-  foreach($form_state['display']->content as $pane){
-    if($pane->type=="targetblock" &&  $pane->subtype==$form_state['subtype_name']){
-      foreach($properties_to_override as $property){
-        $property_value=$form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values']=$form_state['pane']->configuration[$property];
-        $form_state['display']->content[$pane->pid]->configuration[$property]=$property_value;
+  $properties_to_override = _dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override();
+  foreach($form_state['display']->content as $pane) {
+    if($pane->type == "targetblock" &&  $pane->subtype == $form_state['subtype_name']) {
+      foreach($properties_to_override as $property) {
+        $property_value = $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'] = $form_state['pane']->configuration[$property];
+        $form_state['display']->content[$pane->pid]->configuration[$property] = $property_value;
       }
     }
   }
 }
 
 
-function _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings($form_state,$targetblock){
-  $override=FALSE;
+function _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings($form_state,$targetblock) {
+  $override = FALSE;
 
-  $properties_to_override=_dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override();
-  $max_split_delta=0;
+  $properties_to_override = _dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override();
+  $max_split_delta = 0;
 
-  if($form_state["pane"]->pid=="new" ){
+  if($form_state["pane"]->pid == "new") {
     //Try to find an existing similar targetblock instance
-    foreach($form_state['display']->content as $pane){
+    foreach($form_state['display']->content as $pane) {
       // if we found one apply his settings
-      if($pane->type=="targetblock" &&  $pane->subtype==$form_state['subtype_name']){
-        foreach($properties_to_override as $property){
-          $values[$property]=$pane->configuration[$property];
-          $targetblock->{$property}=$pane->configuration[$property];
+      if($pane->type == "targetblock" &&  $pane->subtype == $form_state['subtype_name']) {
+        foreach($properties_to_override as $property) {
+          $values[$property] = $pane->configuration[$property];
+          $targetblock->{$property} = $pane->configuration[$property];
 
           //there is a special treatment for split_data and we need to do the entire loop :(
-          if($max_split_delta<=$pane->configuration['split_delta']){
-            $max_split_delta=$pane->configuration['split_delta']+1;
-            $values['split_delta']=$max_split_delta;
-            $targetblock->split_delta=$max_split_delta;
+          if($max_split_delta<=$pane->configuration['split_delta']) {
+            $max_split_delta = $pane->configuration['split_delta']+1;
+            $values['split_delta'] = $max_split_delta;
+            $targetblock->split_delta = $max_split_delta;
           }
-
         }
       }
-      $form_state["pane"]->configuration=$values;
-
+      $form_state["pane"]->configuration = $values;
     }
-  }
-  elseif( $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_override']){
+  } elseif( $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_override']) {
     $override=TRUE;
 
-    foreach($properties_to_override as $property){
-      $values[$property]=$form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'][$property];
-      $targetblock->{$property}=$form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'][$property];
+    foreach($properties_to_override as $property) {
+      $values[$property] = $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'][$property];
+      $targetblock->{$property} = $form_state['display cache']->target_block_conf[$form_state['subtype_name']]['targetblock_global_settings_values'][$property];
     }
-
-
   }
-  if($override){
-    null;
 
+  if($override) {
+    null;
   }
 }
 
-function _dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override(){
-  return  array("use_pager","node_count_for_targetblock","use_pager","pager_type","rank_max_value","use_split");
+function _dpidestinations_targetblock_content_type_helper_targetblock_properties_to_override() {
+  return array("use_pager", "node_count_for_targetblock", "use_pager", "pager_type", "rank_max_value", "use_split");
 }
 
 /**
  * Initialize a new targetblock if we are creating a new ctools content type
  *
  * @param unknown $form_state
+ *
  * @return TargetBlockEntity
  */
-function _dpidestinations_targetblock_content_type_helper_initialize_targetblock($form_state){
-  $targetblock= new TargetBlockEntity(array(),'TargetBlock');
-  $targetblock->target=$form_state["subtype_name"];
+function _dpidestinations_targetblock_content_type_helper_initialize_targetblock($form_state) {
+  $targetblock = new TargetBlockEntity(array(), 'TargetBlock');
+  $targetblock->target = $form_state["subtype_name"];
 
   //If the targetblock is not defined check if we have some info
   // on the conf (when adding a new block and edit the targetblock without
   //previously save the display)
-  if(!isset($targetblock->targetblockid)){
-    $targetblock=(object)  array_merge((array) $targetblock,$form_state['conf']);
-
+  if(!isset($targetblock->targetblockid)) {
+    $targetblock = (object)array_merge((array)$targetblock, $form_state['conf']);
   }
   return $targetblock;
 }
 
-
-
-
-
-function _dpidestinations_targetblock_content_type_helper_get_title($conf){
-  if($conf['override_title']){
+function _dpidestinations_targetblock_content_type_helper_get_title($conf) {
+  if($conf['override_title']) {
     $title = $conf['override_title_text'];
-  }
-  else{
+  } else {
     $title = t('Redacblock');
   }
   return $title;
 }
-function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf,$args,$context,$target_wrapper,$targetblock_wrapper,$targetview){
-  $content="";
-  $content=$targetview->render();
+
+function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf, $args, $context, $target_wrapper, $targetblock_wrapper, $targetview) {
+  $content = "";
+  $content = $targetview->render();
   return $content;
 }
 
-
-function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta){
-
+function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta) {
   return array(
     array(
-      'title'=>t('Reorder TargetBlock'),
-      'href'=> "admin/targetview_reorder/".$destination_term_id."/".$target_name,
+      'title' => t('Reorder TargetBlock'),
+      'href' => "admin/targetview_reorder/".$destination_term_id."/".$target_name,
       'query' => drupal_get_destination(),
-
     ),
     array(
       'title' => t('Refresh Cache'),
-      'href' => dpicache_get_regenerate_url('dpidestinations_targetblock_render',$did, $destination_term_id, $target_name, $split_delta),
+      'href' => dpicache_get_regenerate_url('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta),
       'query' => drupal_get_destination(),
     ),
     array(
@@ -433,9 +395,5 @@ function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, 
       'href' => "admin/structure/block/manage/configure",
       'query' => drupal_get_destination(),
     ),
-
   );
 }
-
-
-
