@@ -16,7 +16,8 @@ if ($comment->picture) {
 		  <?php print t(date('F', $comment->changed)).' '.date('j', $comment->changed).', '.date('Y', $comment->changed);?>
 		</time>
 	</div>
-	<?php print $content;?>
+	<?php hide($content['links']); ?>
+	<?php print drupal_render($content); ?>
 	<div class="actions">
 		<ul class="no-list">
 			<li><a title="" href="/comment/reply/<?php print $node->nid.'/'.$comment->cid;?>"><i class="lsf">comment</i><?php print t('Reply');?></a></li>
