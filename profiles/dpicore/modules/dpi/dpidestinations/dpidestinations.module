@@ -27,10 +27,11 @@ function dpidestinations_theme() {
 
   return $theme;
 }
+
 /**
  * Implementation of hook_menu()
  */
-function dpidestinations_menu(){
+function dpidestinations_menu() {
   $items['destination/%destinationterm'] = array(
     'title callback' => 'destination_view',
     'title arguments' => array(1),
@@ -39,6 +40,7 @@ function dpidestinations_menu(){
     'access arguments' => array('view targets'),
     'type' => MENU_CALLBACK,
   );
+
   //secondary parameter should be a target machine_name
   $items['admin/targetview_reorder/%taxonomy_term/%dpidestinations_api_target_machinename'] = array(
     'page callback' => 'dpidestinations_page_targetview_reorder',
@@ -59,59 +61,54 @@ function dpidestinations_menu(){
   );
 
   $items['target/add'] = array(
-    'title' => 'Add Target!',
+    'title' => t('Add Target!'),
     'page callback' => 'target_add',
     'access arguments' => array('create target'),
   );
-  
-  $target_entity=entity_get_info('target');
-  if($target_entity['fieldable']){
-    //We present this menu item only if the target has been alter as fieldable
-    // you should rebuild menu twice to get it...
+
+  $target_entity = entity_get_info('target');
+  if($target_entity['fieldable']) {
+    // We present this menu item only if the target has been altered as fieldable
+    // You should rebuild menu twice to get it...
     $items['admin/structure/target'] = array(
-      'title' => 'Manage Targets',
+      'title' => t('Manage Targets'),
       'access arguments' => array('administer targets'),
       'page callback' => 'dpidestinations_page_administration_targets',
       'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
       'file' => 'dpidestinations.pages.admin.inc'
     );
   }
-  
-  
-  $targetblock_entity=entity_get_info('targetblock');
-  if($targetblock_entity['fieldable']){
-    //We present this menu item only if the target has been alter as fieldable
+
+  $targetblock_entity = entity_get_info('targetblock');
+  if($targetblock_entity['fieldable']) {
+    // We present this menu item only if the target has been alter as fieldable
     // you should rebuild menu twice to get it...
-    
-  $items['admin/structure/targetblock'] = array(
-    'title' => 'Manage Targetblocks',
-    'access arguments' => array('administer targetblocks'),
-    'page callback' => 'dpidestinations_page_administration_targetblocks',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    'file' => 'dpidestinations.pages.admin.inc'
-  );
+    $items['admin/structure/targetblock'] = array(
+      'title' => t('Manage Targetblocks'),
+      'access arguments' => array('administer targetblocks'),
+      'page callback' => 'dpidestinations_page_administration_targetblocks',
+      'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+      'file' => 'dpidestinations.pages.admin.inc'
+    );
   }
-  
+
   $items['admin/dpi247/dpidestinations'] = array(
     'title' => 'DPIDestinations',
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_destinations',
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    
-
-
   );
+
   $items['admin/dpi247/dpidestinations/destinations'] = array(
-    'title' => 'Destinations',
+    'title' => t('Destinations'),
     'description' => 'View existing destinations.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
-
-
   );
+
   $items['admin/dpi247/dpidestinations/configuration'] = array(
-    'title' => 'Configuration',
+    'title' => t('Configuration'),
     'description' => 'Configure dpidestinations.',
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
@@ -119,19 +116,14 @@ function dpidestinations_menu(){
     'page callback' => 'dpidestinations_page_administration_configuration',
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-    
-
   );
 
   return $items;
 }
 
-
-function dpidestinations_menu_alter(& $items){
-
-  //Cause dpidestinations can be used as standalone module outside the distribution
-  if(!isset($items['admin/dpi247'])){
-
+function dpidestinations_menu_alter(&$items) {
+  // dpidestinations can be used as standalone module outside the distribution
+  if(!isset($items['admin/dpi247'])) {
     $items['admin/dpi247'] = array(
       'title' => 'dpi247',
       'description' => 'Administer dpi247 settings.',
@@ -140,11 +132,11 @@ function dpidestinations_menu_alter(& $items){
       'page callback' => 'system_admin_menu_block_page',
       'access arguments' => array('access administration pages'),
       'file' => 'system.admin.inc',
-      'file path'=> drupal_get_path('module', 'system'),
+      'file path' => drupal_get_path('module', 'system'),
     );
   }
-
 }
+
 /**
  * Implementation of hook_permission()
  */

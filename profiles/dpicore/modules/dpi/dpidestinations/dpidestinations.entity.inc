@@ -27,12 +27,11 @@ function dpidestinations_entity_info(){
       'target' => array(
         'label' => 'target',
         'admin' => array(
-          'path' => 'admin/structure/target/manage/target',
+          'path' => 'admin/dpi247/dpidestinations/target',
         ),
         'admin ui' => array(
-          'path' => 'admin/structure/target',
+          'path' => 'admin/dpi247/dpidestinations/target',
         ),
-
       ),
     ),
     'view modes' => array(
@@ -81,7 +80,7 @@ function dpidestinations_entity_info(){
       'targetblock' => array(
         'label' => 'targetblock',
         'admin' => array(
-          'path' => 'admin/structure/targetblock/manage/targetblock',
+          'path' => 'admin/dpi247/dpidestinations/targetblock',
           'bundle argument' => 4,
         ),
       ),
@@ -281,7 +280,7 @@ function target_form_submit($form, &$form_state) {
   $target = entity_ui_form_submit_build_entity($form, $form_state);
   $target->available_targetlayouts = serialize($target->available_targetlayouts);
   $target->save();
-  $form_state['redirect'] = "admin/structure/target";
+  $form_state['redirect'] = "admin/dpi247/dpidestinations/target";
 }
 
 function _dpidestinations_ajaxcallback_viewname_viewdisplay( $form, $form_state){
