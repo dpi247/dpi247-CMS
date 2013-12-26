@@ -26,6 +26,9 @@ class dpidestinations_renderer_editor extends panels_renderer_editor {
 
     $categories = $this->get_categories($this->cache->content_types);
     $groups = $this->get_groups($this->cache->content_types);
+    if (!isset($groups[$group])) {
+      $group = 'drupal-core';
+    }
     $categories = $groups[$group]['categories'];
 
     if (empty($groups)) {
