@@ -407,6 +407,7 @@ function dpidestinations_page_administration_destinations(){
 }
 
 function dpidestinations_page_administration_configuration(){
+  // @todo : quel est l'intérêt des 4 premières lignes?
   $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   _dpidestinations_variable_get('dpidestinations_destination_vid',2);
