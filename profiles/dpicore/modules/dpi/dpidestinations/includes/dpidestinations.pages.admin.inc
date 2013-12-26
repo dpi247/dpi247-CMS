@@ -1,7 +1,5 @@
 <?php
 
-
-
 /**
  * @file
  * Group membersihp type editing UI.
@@ -17,7 +15,6 @@ class DpidestinationsTargetUIController extends EntityDefaultUIController {
    */
   public function hook_menu() {
     $items = parent::hook_menu();
-
 
     //Since we use the same controller
     $items[$this->path]['description'] = 'Manage group memberships type, including fields.';
@@ -40,9 +37,7 @@ class DpidestinationsTargetUIController extends EntityDefaultUIController {
     $form = parent::overviewForm($form, &$form_state);
     return $form;
   }
-
 }
-
 
 /**
  * @file
@@ -59,7 +54,6 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
   public function hook_menu() {
     $items = parent::hook_menu();
 
-
     //Since we use the same controller
     $items[$this->path]['description'] = 'Manage group memberships type, including fields.';
     if(isset($items['admin/dpi247/dpidestinations/targetblock'])){
@@ -70,12 +64,10 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     return $items;
   }
 
-
   /**
    * Builds the entity overview form.
    */
   public function overviewForm($form, &$form_state) {
-
     //FAKE the exportable behavior cause it is confusing...
     $this->entityInfo['exportable']=FALSE;
 
@@ -87,18 +79,18 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     $form['pager'] = array('#theme' => 'pager');
     return $form;
   }
+
   /**
    * Generates the render array for the overview table for arbitrary entities
    * matching the given conditions.
    *
    * @param $conditions
    *   An array of conditions as needed by entity_load().
-
+   *
    * @return array
    *   A renderable array.
    */
   public function overviewTable($conditions = array()) {
-
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', $this->entityType);
 
@@ -128,44 +120,49 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     ctools_include('export');
     $handlers = ctools_export_load_object('page_manager_handlers');
 
-
+    $rows = array();
+    $additional_rows = array(
+      t('Variant') => '',
+      t('Target') => '',
+      t('# nodes') => 0,
+      t('Use Pager') => 'No',
+      t('# nodes in split') => 0,
+      t('Rank max value') => 0,
+    );
     foreach ($entities as $entity) {
-
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($entity->did);
 
-      $title=t('undifined');
-      if(isset($handlers[$page_manager_handler_name])){
-        $title_text=$handlers[$page_manager_handler_name]->conf['title'];
-        $title_link="admin/structure/pages/nojs/operation/destinations/handlers/".$page_manager_handler_name."/content";
-        $title=l($title_text,$title_link);
+      $title = t('undefined');
+      if(isset($handlers[$page_manager_handler_name])) {
+        $title_text = $handlers[$page_manager_handler_name]->conf['title'];
+        $title_link = "admin/structure/pages/nojs/operation/destinations/handlers/".$page_manager_handler_name."/content";
+        $title = l($title_text, $title_link);
       }
 
-      $target=$entity->target;
-      $nodes_in_split='-';
-      if($entity->use_split){
-        $split=$entity->split_delta + 1;
-        $target.=" ( split".$split .")";
-        $nodes_in_split=$entity->node_count_for_targetblockinstance;
+      $target = $entity->target;
+      $nodes_in_split = '-';
+      if($entity->use_split) {
+        $split = $entity->split_delta + 1;
+        $target .= " ( split ".$split .")";
+        $nodes_in_split = $entity->node_count_for_targetblockinstance;
       }
 
-      $additional_rows=array(
-        'Variant'=>$title,
-        'Target'=>$target,
-        '# nodes'=>$entity->node_count_for_targetblock,
-        'Use Pager'=> ($entity->use_pager)?t("No"):$entity->pager_type,
-        '# nodes in split'=>$nodes_in_split,
-        'Rank max value'=>$entity->rank_max_value,
-
+      $additional_rows = array(
+        t('Variant') => $title,
+        t('Target') => $target,
+        t('# nodes') => $entity->node_count_for_targetblock,
+        t('Use Pager') => ($entity->use_pager) ? t('No') : $entity->pager_type,
+        t('# nodes in split') => $nodes_in_split,
+        t('Rank max value') => $entity->rank_max_value,
       );
 
-      $row=$this->overviewTableRow($conditions, entity_id($this->entityType, $entity), $entity,$additional_rows);
+      $row = $this->overviewTableRow($conditions, entity_id($this->entityType, $entity), $entity, $additional_rows);
       //We unset the label cause it has no sence here.
       unset($row[0]);
       $rows[] = $row;
     }
 
-
-    $header=$this->overviewTableHeaders($conditions, $rows,array_keys($additional_rows));
+    $header = $this->overviewTableHeaders($conditions, $rows, array_keys($additional_rows));
     //We unset the label cause it has no sence here.
     unset($header[0]);
 
@@ -214,10 +211,12 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       '#attributes' => array('class' => array('clearfix')),
       '#prefix' => ($i ? '<div class="additional-filters">' . t('and where') . '</div>' : ''),
     );
+
     $form['status']['filters'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('filters')),
     );
+
     foreach ($filters as $key => $filter) {
       if(!$this->isFilterAlreadySet($key)){
         $form['status']['filters'][$key] = array(
@@ -233,17 +232,20 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       '#type' => 'actions',
       '#attributes' => array('class' => array('container-inline')),
     );
+
     $form['status']['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => count($session) ? t('Refine') : t('Filter'),
       '#submit' => array('entityadminui_filter_form_submit'),
     );
+
     if (count($session)) {
       $form['status']['actions']['undo'] = array(
         '#type' => 'submit',
         '#value' => t('Undo'),
         '#submit' => array('entityamdinui_filter_form_submit'),
       );
+
       $form['status']['actions']['reset'] = array(
         '#type' => 'submit',
         '#value' => t('Reset'),
@@ -255,6 +257,7 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
 
     return $form;
   }
+
   /**
    * Label to display above filters form on overview page.
    *
@@ -280,8 +283,8 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     $filters = array_filter($filters, 'is_array');
     return $filters;
   }
-  public function overviewPropertyList() {
 
+  public function overviewPropertyList() {
     $session = isset($_SESSION[$this->entityType . '_overview_filter']) ? $_SESSION[$this->entityType . '_overview_filter'] : array();
 
     $info = array();
@@ -289,7 +292,6 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     $info[$this->entityInfo['entity keys']['label']] = NULL;
     // Add the ID field.
     $info[$this->entityInfo['entity keys']['id']] = NULL;
-
 
     if (isset($this->entityInfo['bundle keys']['bundle']) && isset($this->entityInfo['bundles'])) {
       $bundles = array();
@@ -304,8 +306,8 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       );
     }
 
-
     $targets=dpidestinations_api_get_all_targets();
+    $targets_options = array();
     foreach($targets as $target){
       $targets_options[$target->machine_name]=$target->label;
     }
@@ -314,38 +316,36 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       'title' => t('Target'),
       'options' => array(
         '[any]' => t('any'),
-
-
       )+$targets_options,
     );
 
     ctools_include('export');
     $handlers = ctools_export_load_object('page_manager_handlers');
 
-    $targetblocks=dpidestinations_api_get_all_targetblocks();
+    $targetblocks = dpidestinations_api_get_all_targetblocks();
 
-    foreach($targetblocks as $targetblock){
+    $variants_options = array();
+    foreach($targetblocks as $targetblock) {
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($targetblock->did);
       $title_text=$handlers[$page_manager_handler_name]->conf['title'];
 
-      $variants_options[$targetblock->did]=$title_text;
+      $variants_options[$targetblock->did] = $title_text;
     }
 
-    $info["did"]=array(
+    $info["did"] = array(
       'title' => t('Variant'),
       'options' => array(
         '[any]' => t('any'),
-
-
-      )+$variants_options,
+      ) + $variants_options,
     );
     return $info;
   }
-  /*
+
+  /**
    * Check if a filter is already set in the session
-  *
-  * Return true if filter already set, FALSE otherwise
-  */
+   *
+   * Return true if filter already set, FALSE otherwise
+   */
   public function isFilterAlreadySet($filter_name) {
     $session = isset($_SESSION[$this->entityType . '_overview_filter']) ? $_SESSION[$this->entityType . '_overview_filter'] : array();
 
@@ -391,35 +391,29 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
   }
 }
 
-function     dpidestinations_page_administration_targets(){
+function dpidestinations_page_administration_targets(){
   return t('You can add/manage field for the target entity here. Do that only if you exactly know what you are doing :)');
 }
 
-function     dpidestinations_page_administration_targetblocks(){
+function dpidestinations_page_administration_targetblocks(){
   return t('You can add/manage field for the targetblock entity here. Do that only if you exactly know what you are doing :)');
 }
 
-
 function dpidestinations_page_administration_destinations(){
-
   module_load_include("inc", "taxonomy","taxonomy.admin");
   $destination_vid=dpidestinations_api_get_destinations_vocabulary_vid();
   $destination=entity_load_unchanged('taxonomy_vocabulary',$destination_vid);
   return drupal_get_form('taxonomy_overview_terms',$destination);
-
 }
 
 function dpidestinations_page_administration_configuration(){
-
   $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   _dpidestinations_variable_get('dpidestinations_destination_vid',2);
   _dpidestinations_variable_get('dpidestination_max_reserved_position',10);
 
   return drupal_get_form('dpidestinations_form_configuration_form');
-
 }
-
 
 function dpidestinations_form_configuration_form($form,& $form_state){
   $form=array();
@@ -427,6 +421,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
   $form["config_form"]=array(
     '#type'=>'vertical_tabs',
   );
+
   $form["default"]=array(
     '#type'=>'fieldset',
     '#title' => t('Default'),
@@ -434,6 +429,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#description' => t('Default config for destinations.'),
     '#group' => 'config_form'
   );
+
   $form["advanced"]=array(
     '#type'=>'fieldset',
     '#title' => t('Advanced'),
@@ -441,6 +437,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#description' => t('Advanced config for destinations.<br/> Edit thoses settings with care'),
     '#group' => 'config_form'
   );
+
   $vocabularies=taxonomy_get_vocabularies();
   foreach($vocabularies as $vocabulary){
     $options[$vocabulary->vid]=$vocabulary->name;
@@ -449,24 +446,18 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     "#type"=>'select',
     '#title' => t('Destination vocabulary'),
     '#description' => t('We do not recommend to change this settings in production.'),
-
     '#options'=>$options,
     '#default_value'=>_dpidestinations_variable_get('dpidestinations_destination_vid',2),
-
   );
+
   $form["default"]['dpidestination_max_reserved_position']=array(
     "#type"=>'textfield',
     "#required"=>TRUE,
     '#element_validate' => array('element_validate_integer_positive'),
-
     '#title' => t('Absoulte rank\'s max value'),
     '#description' => t('The rank mak value can be defined in each targetblock but cannot be bigger than the absolute rank max value'),
     '#default_value'=>_dpidestinations_variable_get('dpidestination_max_reserved_position',10),
   );
-
-
-
-
 
   $help="This value is used as a multiplicator in the timerank calculation when a package is placed on the first position of a destination<br/>";
 
@@ -476,15 +467,8 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#title' => t('Virtual rank delta'),
     '#description' => t($help),
     '#element_validate' => array('element_validate_integer_positive'),
-
     '#default_value'=>_dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000),
   );
-
-
-
-
-
-
 
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
 
@@ -516,6 +500,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
       'wrapper' => 'dropdown-view-display',
     ),
   );
+
   $form["advanced"]['reorder_view']['view_display'] = array(
     '#type' => 'select',
     '#title' => t('View Display'),
@@ -525,16 +510,14 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#prefix' => '<div id="dropdown-view-display">',
     '#suffix' => '</div>',
   );
+
   $form["submit"] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
-     
   );
 
   return $form;
 }
-
-
 
 function dpidestinations_form_configuration_form_submit($form, &$form_state){
   drupal_set_message("rrr");
@@ -547,8 +530,6 @@ function dpidestinations_form_configuration_form_submit($form, &$form_state){
   _dpidestinations_variable_set('dpidestinations_targetview_reorder_default',array($values['view_name'],$values['view_display']));
 }
 
-
 function _dpidestinations_ajaxcallback_viewname_viewdisplay_config( $form, $form_state){
   return $form["advanced"]['reorder_view']['view_display'];
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Load a target from his machine name
  *
@@ -11,13 +12,12 @@
  *
  */
 function dpidestinations_api_target_machinename_load($target_machine_name){
-
   $query = new EntityFieldQuery;
 
   $result = $query
-  ->entityCondition('entity_type', 'target')
-  ->propertyCondition('machine_name',$target_machine_name)
-  ->execute();
+    ->entityCondition('entity_type', 'target')
+    ->propertyCondition('machine_name',$target_machine_name)
+    ->execute();
 
   $result = $query->execute();
   if (!empty($result['target'])) {
@@ -29,7 +29,6 @@ function dpidestinations_api_target_machinename_load($target_machine_name){
       return NULL;
     }
   }
-
 }
 
 /**
@@ -39,8 +38,8 @@ function dpidestinations_api_target_machinename_load($target_machine_name){
  *
  * @param String $target_machinename
  * @param Integer $destination_tid
- * @return an array of targetblockEntity
  *
+ * @return an array of targetblockEntity
  */
 function dpidestinations_api_get_all_targetblocks_from_target_for_destination($target_machinename,$destination_tid){
   //$target=dpidestinations_api_target_machinename_load($target_machine_name);
@@ -50,10 +49,10 @@ function dpidestinations_api_get_all_targetblocks_from_target_for_destination($t
   $query = new EntityFieldQuery;
 
   $result = $query
-  ->entityCondition('entity_type', 'targetblock')
-  ->propertyCondition('target',$target_machinename)
-  ->propertyCondition('did',$panels_display_id)
-  ->execute();
+    ->entityCondition('entity_type', 'targetblock')
+    ->propertyCondition('target',$target_machinename)
+    ->propertyCondition('did',$panels_display_id)
+    ->execute();
 
   $result = $query->execute();
   if (!empty($result['targetblock'])) {
@@ -72,7 +71,6 @@ function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
     }
   }
   return FALSE;
-
 }
 
 function dpidestinations_api_get_destinations_vocabulary_vid(){
@@ -85,11 +83,10 @@ function dpidestinations_api_get_all_destinations_terms_flat_struct($reset_cache
 }
 
 function dpidestinations_api_get_all_destinations_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
-
   $vid=dpidestinations_api_get_destinations_vocabulary_vid();
   return taxonomy_get_tree($vid, $parent, NULL, $load_entities);
-
 }
+
 function dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update){
   $terms=dpidestinations_api_get_all_destinations_terms_flat_struct();
   if($is_update)
@@ -99,7 +96,6 @@ function dpidestinations_api_get_all_destinations_term_available_as_select_optio
 
   foreach ($terms as $term){
     $options[(int)  $term->tid]=$term->name;
-
   }
   return $options;
 }
@@ -108,41 +104,40 @@ function dpidestinations_api_get_all_targets(){
   $query = new EntityFieldQuery;
 
   $result = $query
-  ->entityCondition('entity_type', 'target')
-  ->execute();
+    ->entityCondition('entity_type', 'target')
+    ->execute();
 
   $targets = entity_load('target', array_keys($result['target']));
   return $targets;
-
 }
 
 function dpidestinations_api_get_all_targetblocks(){
   $query = new EntityFieldQuery;
 
   $result = $query
-  ->entityCondition('entity_type', 'targetblock')
-  ->execute();
+    ->entityCondition('entity_type', 'targetblock')
+    ->execute();
 
-  $targets = entity_load('targetblock', array_keys($result['targetblock']));
+  $targets = array();
+  if (!empty($result) && isset($result['targetblock'])) {
+    $targets = entity_load('targetblock', array_keys($result['targetblock']));
+  }
+
   return $targets;
-
 }
+
 function dpidestinations_api_get_all_targets_available_for_destination_tid($tid){
   if($tid==2){
     return array('target1'=>"Default","target2"=>"BHV");
   }
   return array("target1"=>"Default","target3"=>"Football");
-
 }
 
 function dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($tid,$target){
   return array(1=>"layout1",2=>"layout2");
-
 }
 
 function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update=FALSE){
-
-
   $controller=new TargetBlockController('targetblock');
   $targetblock=$controller->load_targetblock_by_termid_and_target($term_id,$target_name);
   $rank_options=array();
@@ -156,22 +151,18 @@ function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_tar
     }
   }
   return $rank_options;
-
 }
-
 
 function dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id){
   $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
   return $display->did;
 }
+
 function dpidestination_api_get_panelsdisplay_for_destinationterm($term_id){
   $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
   return $display;
 }
 
-
-
 function hook_dpidestinations_virtualrank_dispersion($term_id,$target_name,$nids){
   //Clear some cache for example
 }
-
