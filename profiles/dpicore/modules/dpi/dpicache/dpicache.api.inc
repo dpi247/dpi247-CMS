@@ -1,17 +1,18 @@
 <?php 
 
-function hook_dpicache_cache_entry_register(){
+function hook_dpicache_cache_entry_register() {
   return array(
-    'flowmix_render'=>array(
-      'callback'=> 'flowmix_get_render', // function to call
-      'plugin'=> 'dpicache_memcache', // which storage?
-      'catagory'=> 'flowmix_render', // group
+    'flowmix_render' => array(
+      'callback' => 'flowmix_get_render', // function to call
+      'plugin' => 'dpicache_memcache', // which storage?
+      'catagory' => 'flowmix_render', // group
       'data_type' => "string", // the callback returns a string
       'ttl' => 7*24*60*60, //(in seconds) keep a cache for one week
-      'refresh_interval'=> 5*60 //(in seconds) auto-refresh cache every 5 minutes
+      'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
     )
   );
 }
+
 /**
  * Get cache content throught DPIcache system.
  *
@@ -77,7 +78,6 @@ function dpicache_get_cache_entry($cache_name){
   }
 }
 
-
 /**
  * Get the url to invalidate a cache entry
  * The url is returned without begin or trailling slash
@@ -93,8 +93,6 @@ function dpicache_get_regenerate_url($cache_name){
   $url='dpicache/regenerate/one_cache_entry/'.$cache_name.'/'.$args_url;
   return $url;
 }
-
-
 
 /**
  * Returns a persistent variable.
@@ -125,9 +123,7 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
     }
   }
   return $dpivariables[$name];
-
 }
-
 
 /**
  * Returns all persistents variables.
@@ -171,13 +167,12 @@ function dpi_variable_set($name, $value) {
   $serialized_value = serialize($value);
 
   db_merge('dpi_variables')
-  ->key(array('name' => $name))
-  ->fields(array(
-  'name' => $name,
-  'value' => $serialized_value,
-  ))
-  ->execute();
-
+    ->key(array('name' => $name))
+    ->fields(array(
+      'name' => $name,
+      'value' => $serialized_value,
+    ))
+    ->execute();
 }
 
 /**

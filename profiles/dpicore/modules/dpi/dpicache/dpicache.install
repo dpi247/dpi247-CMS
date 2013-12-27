@@ -65,14 +65,12 @@ function dpicache_schema() {
         'type' => 'text',
         'not null' => TRUE
       ),
-  
     ),
     'indexes' => array(
       'name'                => array('name'),
       'expiration_date' => array('expiration_date'),
     ),
     'primary key' => array('name','hash'),
-  
   );
 
   /**

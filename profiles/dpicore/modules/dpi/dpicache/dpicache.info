@@ -2,5 +2,3 @@ name = DPI Cache
 description = Caching system for DPI.
 package = DPI
 core = 7.x
-
-
