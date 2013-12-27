@@ -8,6 +8,8 @@ class TargetController extends EntityAPIControllerExportable{
       'description' => '',
       'view_name' => '',
       'view_display' => '',
+      'available_targetlayouts' => serialize(array()),
+      'available_templateoverrides' => '',
     );
     return parent::create($values);
   }
