@@ -1,4 +1,5 @@
 <?php
+
 class TargetController extends EntityAPIControllerExportable{
   public function create(array $values = array()) {
     $values += array(
@@ -37,18 +38,17 @@ class TargetController extends EntityAPIControllerExportable{
 
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
-  public function load_target_by_name($target_name){
 
+  public function load_target_by_name($target_name){
     $conditions=array('machine_name'=>$target_name);
     $result=target_load_multiple(FALSE, $conditions);
     if(!$result){
       $result=NULL;
     }
     return current($result);
-     
   }
-
 }
+
 class TargetBlockController extends EntityAPIControllerExportable{
   public function create(array $values = array()) {
     global $user;
@@ -57,21 +57,18 @@ class TargetBlockController extends EntityAPIControllerExportable{
       'use_split' => FALSE,
       'split_delta' => 0,
       'offset' => 0,
-
     );
 
     return parent::create($values);
   }
+
   //return an array keyed with tid of targetblocks that belongs to a display id
   public function load_targetblocks_by_panels_display($did){
-
     $conditions=array('did'=>$did);
     return  targetblock_load_multiple(FALSE, $conditions);
-
-     
   }
-  public function load_targetblock_by_panels_panelpid($pid){
 
+  public function load_targetblock_by_panels_panelpid($pid){
     $conditions=array('pid'=>$pid);
     $result=current(targetblock_load_multiple(FALSE, $conditions));
     if(!$result){
@@ -79,12 +76,13 @@ class TargetBlockController extends EntityAPIControllerExportable{
       //$result=new TargetBlockEntity(array(),'TargetBlock');
     }
     return $result;
-     
   }
+
   public function load_targetblock_by_did_and_target($did, $target_name){
     $results=$this->load_targetblocks_by_did_and_target($did,$target_name);
     return current($results);
   }
+
   public function load_targetblock_by_did_target_and_splitdelta($did, $target_name,$split_delta){
     $conditions=array('did'=>$did,' target'=>$target_name,'split_delta'=> $split_delta);
     $results=targetblock_load_multiple(FALSE, $conditions);
@@ -110,31 +108,28 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   public function delete($entity, DatabaseTransaction $transaction = NULL){
-
     $this->syncrohize_global_settings_of_targetblocks($entity, 'delete');
 
     $result=parent::delete($entity);
     //_dpidestinatons_targetblock_sync_node_count_for_targetblock($entity);
     return $result;
-
   }
+
   public function save($entity, DatabaseTransaction $transaction = NULL){
-
-
-
     $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
 
     $result=parent::save($entity);
     return $result;
-
   }
+
   public function syncrohize_global_settings_of_targetblocks($entity,$operation){
     if(!isset($entity->prevent_sync_recurssion)){
-      $original_entity_id=$entity->targetblockid;
+      $original_entity_id = isset($entity->targetblockid) ? $entity->targetblockid : NULL;
 
-      if($entity->targetblockid==NULL){
+      if(!isset($entity->targetblockid) || !$entity->targetblockid) {
         $entity->targetblockid="new";
       }
+
       $targetblocks=$this->load_targetblocks_by_did_and_target($entity->did, $entity->target);
 
       if($operation=='save'){
@@ -143,10 +138,9 @@ class TargetBlockController extends EntityAPIControllerExportable{
         $targetblocks[$entity->targetblockid]=$entity;
       }elseif($operation=="delete"){
         unset($targetblocks[$entity->targetblockid]);
-
       }
-      if(count($targetblocks)>1){
 
+      if(count($targetblocks)>1){
         $total_node_count=0;
         foreach ($targetblocks as $targetblok){
           $total_node_count+=$targetblok->node_count_for_targetblockinstance;
@@ -176,12 +170,10 @@ class TargetBlockController extends EntityAPIControllerExportable{
         $entity->split_delta=0;
         $entity->offset=0;
       }
+
       if($entity->targetblockid=="new"){
         unset($entity->targetblockid);
       }
     }
-
-
-
   }
 }
