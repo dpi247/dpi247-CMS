@@ -24,9 +24,10 @@ function theme_dpilog_watchdog_message($variables) {
     else {
       $output = format_string($event->message, unserialize($event->variables));
     }
+    $output = filter_xss($output, array());
     if ($variables['as_link'] && isset($event->wid)) {
       // Truncate message to 56 chars.
-      $output = truncate_utf8(filter_xss($output, array()), $length, TRUE, TRUE);
+      $output = truncate_utf8($output, $length, TRUE, TRUE);
       $output = l($output, 'admin/dpi/dpilogs/watchdog/event/' . $event->wid, array('html' => TRUE));
     }
   }

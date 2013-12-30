@@ -39,10 +39,10 @@ function dpicommons_menu() {
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
     'file path'=> drupal_get_path('module', 'system'),
-  );  
+  );
+
   return $items;
 }
-
 
 function dpicommons_theme(){
   return array(
@@ -53,9 +53,9 @@ function dpicommons_theme(){
   );
 }
 
-function dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
-  if (module_exists('dpilog')){
-    _dpilog_log($log_name, $action, $message,$variables,$id, $severity, $uid,$keep_backtrace);
+function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
+  if (module_exists('dpilog')) {
+    _dpilog_log($log_name, $action, $message, $variables,$id, $severity, $uid, $keep_backtrace);
   }
 }
 
@@ -74,7 +74,11 @@ function dpicommons_checkurlresponse($url) {
   } else {
     // @todo : ajouter la possibilité de limiter les retries sur la requête http
     $request = drupal_http_request($url, array('timeout' => dpi_variable_get('dpicommons_http_request_timeout', 3)));
-    if ($request->code != '200') {
+    if (is_object($request) &&
+        ((isset($request->code) && $request->code == 200) || (isset($request->redirect_code) && $request->redirect_code == 200)) &&
+        isset($request->data) && !empty($request->data)) {
+      // Request OK
+    } else {
       $response = FALSE;
     }
   }

@@ -49,25 +49,27 @@ function dpilog_get_logs_query_based_on_filters( $filters){
 
 // We dont plan to use Mysql delayed because of: https://drupal.org/node/772554
 
-function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$severity=WATCHDOG_NOTICE,$uid=NULL,$keep_backtrace=FALSE){
-  $granularity=dpi_variable_get('dpilog_configuration_granularity',array());
-  if(isset($granularity['registrations']))
-    $registrations=$granularity['registrations'];
-  else
+function _dpilog_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE) {
+  $granularity = dpi_variable_get('dpilog_configuration_granularity', array());
+  if(isset($granularity['registrations'])) {
+    $registrations = $granularity['registrations'];
+  }
+  else {
     $registrations = array();
+  }
 
   // defaut case
-  if(!isset($registrations[$log_name][$action])){
+  if(!isset($registrations[$log_name][$action])) {
     $registrations[$log_name][$action]['dpilog'] = 'save';
     $registrations[$log_name][$action]['watchdog'] = 'ignore';
     $registrations[$log_name][$action]['color'] = '#FFFFFF';
   }
-  $dpilog_method=$registrations[$log_name][$action]['dpilog'];
-  $watchdog_method=$registrations[$log_name][$action]['watchdog'];
+  $dpilog_method = $registrations[$log_name][$action]['dpilog'];
+  $watchdog_method = $registrations[$log_name][$action]['watchdog'];
 
   // DPI Log
-  if($dpilog_method == "save"){
-    $dpilog_structure=_dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace);
+  if($dpilog_method == "save") {
+    $dpilog_structure = _dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid, $id, $variables, $keep_backtrace);
     //_dpilog_delayed_save($dpilog_structure,'dpilog');
     drupal_write_record('dpilog_logs', $dpilog_structure);
   }
@@ -92,55 +94,47 @@ function _dpilog_log($log_name,$action,$message,$variables=array(),$id=NULL,$sev
   }
 }
 
-
-
-function _dpilog_format_dpilog_structure($log_name,$action,$message,$severity=DPILOG_SEVERITY_DEFAULT,$uid=NULL, $id=NULL,$variables=array(),$keep_backtrace=FALSE){
+function _dpilog_format_dpilog_structure($log_name, $action, $message, $severity = DPILOG_SEVERITY_DEFAULT, $uid = NULL, $id = NULL, $variables = array(), $keep_backtrace = FALSE) {
   global $dpilog_thread_id;
   global $user;
 
-  if(!isset($uid)){
-    $uid=$user->uid;
+  if (!isset($uid)) {
+    $uid = $user->uid;
   }
-  if(!isset($dpilog_log->timestamp)){
-    $timestamp=time();
-
+  if(!isset($dpilog_log->timestamp)) {
+    $timestamp = time();
   }
 
-  $dpilog_log=new stdClass();
-  $dpilog_log->log_name=$log_name;
-  $dpilog_log->action=$action;
-
-  $dpilog_log->user=$uid;
-  $dpilog_log->message=$message;
-  $dpilog_log->id=$id;
-  $dpilog_log->variables=serialize($variables);
-  $dpilog_log->severity= $severity;
-  $dpilog_log->timestamp=$timestamp;
-  if($keep_backtrace){
+  $dpilog_log = new stdClass();
+  $dpilog_log->log_name = $log_name;
+  $dpilog_log->action = $action;
+  $dpilog_log->user = $uid;
+  $dpilog_log->message = $message;
+  $dpilog_log->id = $id;
+  $dpilog_log->variables = serialize($variables);
+  $dpilog_log->severity = $severity;
+  $dpilog_log->timestamp = $timestamp;
+  if ($keep_backtrace) {
     try {
-      $dpilog_log->trace=serialize(debug_backtrace());
+      $dpilog_log->trace = serialize(debug_backtrace());
     }
-    catch(Exception $e){
-      $dpilog_log->trace=NULL;
+    catch(Exception $e) {
+      $dpilog_log->trace = NULL;
     }
   }
-  else{
-    $dpilog_log->trace=NULL;
+  else {
+    $dpilog_log->trace = NULL;
   }
-  $dpilog_log->thread_id=$dpilog_thread_id;
+  $dpilog_log->thread_id = $dpilog_thread_id;
 
   return $dpilog_log;
-
 }
 
 function _dpilog_get_modules_registration(){
-
   $definitions=array();
   $registrations=module_invoke_all('dpilog_register');
   return $registrations;
-
 }
-
 
 function _dpilog_get_watchdogs_actions(){
   return array(
@@ -160,7 +154,6 @@ function _dpilog_get_dpilogs_actions(){
 }
 
 function _dpilog_format_watchdog_structure($log_name, $action, $message, $severity, $uid,$id,$variables,$keep_backtrace,$dpilog_structure){
-
   $watchdog->type=$log_name.'-'.$action;
   $watchdog->message=$message;
   $watchdog->variables=$variables;
@@ -173,15 +166,9 @@ function _dpilog_format_watchdog_structure($log_name, $action, $message, $severi
 }
 
 function _dpilog_delayed_save($dpilog_structure,$structure){
-
   global $dpilog_delayed_save;
-
   $dpilog_delayed_save[$structure][]=$dpilog_structure;
-
-
 }
-
-
 
 function _dpilog_random_color_part() {
   return str_pad( dechex( mt_rand( 0, 255 ) ), 2, '0', STR_PAD_LEFT);
@@ -194,7 +181,6 @@ function _dpilog_random_color() {
 // --------------------------------------------------------------
 // ------------------ Smart Watchdogs ---------------------------
 // --------------------------------------------------------------
-
 
 /**
  * Returns name of SQL table used for logs

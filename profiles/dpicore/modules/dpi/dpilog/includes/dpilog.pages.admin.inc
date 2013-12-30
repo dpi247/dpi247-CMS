@@ -36,27 +36,29 @@ function dpilog_page_view_list(){
   return $render_array;
 }
 
-function dpilog_page_view_list_build_logs_table($filters){
-  $granularity=dpi_variable_get('dpilog_configuration_granularity',array());
-  if(isset($granularity['registrations']))
-    $registrations=$granularity['registrations'];
-  else
+function dpilog_page_view_list_build_logs_table($filters) {
+  $granularity = dpi_variable_get('dpilog_configuration_granularity', array());
+  if(isset($granularity['registrations'])) {
+    $registrations = $granularity['registrations'];
+  }
+  else {
     $registrations = array();
+  }
 
-  $log_levels=watchdog_severity_levels();
+  $log_levels = watchdog_severity_levels();
   $header_row = array(
     array('data' => ''),
-    array('data' => 'Log Name', 'field' => 'l.log_name'),
-    array('data' => 'Action', 'field' => 'l.action'),
-    array('data' => 'Message', 'field' => 'l.message',  ),
-    array('data' => 'User', 'field' => 'u.name',  ),
-    array('data' => 'Severity', 'field' => 'l.severity',  ),
-    array('data' => 'Thread Id', 'field' => 'l.thread_id',  ),
-    array('data' => 'ID', 'field' => 'l.id',  ),
-    array('data' => 'Time', 'field' => 'l.timestamp',  'sort' => 'desc'),
+    array('data' => t('Log Name'), 'field' => 'l.log_name'),
+    array('data' => t('Action'), 'field' => 'l.action'),
+    array('data' => t('Message'), 'field' => 'l.message'),
+    array('data' => t('User'), 'field' => 'u.name'),
+    array('data' => t('Severity'), 'field' => 'l.severity'),
+    array('data' => t('Thread Id'), 'field' => 'l.thread_id'),
+    array('data' => t('ID'), 'field' => 'l.id'),
+    array('data' => t('Time'), 'field' => 'l.timestamp', 'sort' => 'desc'),
   );
 
-  $query=dpilog_get_logs_query_based_on_filters($filters);
+  $query = dpilog_get_logs_query_based_on_filters($filters);
   $query = $query
     ->extend('PagerDefault')->limit(30)
     ->extend('TableSort')
@@ -64,33 +66,59 @@ function dpilog_page_view_list_build_logs_table($filters){
 
   $results = $query->execute();
   $table_rows = array();
+  foreach($results as $result) {
+    $bck_color = $registrations[$result->log_name][$result->action]['color'];
 
-  foreach($results as $result){
-    $bck_color=$registrations[$result->log_name][$result->action]['color'];
-
-    $message=truncate_utf8(filter_xss($result->message, array()), 150, TRUE, TRUE);
-    $message=' '.l($message,'admin/dpi247/dpilogs/dpilog/view/log/'.$result->lid);
+    $message = truncate_utf8(filter_xss($result->message, array()), 150, TRUE, TRUE);
+    $message = ' '.l($message, 'admin/dpi247/dpilogs/dpilog/view/log/'.$result->lid);
 
     $table_rows[] = array(
-      array('style'=>array("background-color:$bck_color") ,'class'=>array('dpilog-table-row','dpilog-table-row-color')),
-      array('data' => $result->log_name,'class'=>array('dpilog-table-row','dpilog-table-row-logname')),
-      array('data' => $result->action,'class'=>array('dpilog-table-row','dpilog-table-row-action')),
-      array('data' => $message,'class'=>array('dpilog-table-row','dpilog-table-row-message')),
-      array('data' => $result->name,'class'=>array('dpilog-table-row','dpilog-table-row-user')),
-      array('data' => $log_levels[$result->severity],'class'=>array('dpilog-table-row','dpilog-table-row-severity')),
-      array('data' => $result->thread_id,'class'=>array('dpilog-table-row','dpilog-table-row-thread_id')),
-      array('data' => $result->id,'class'=>array('dpilog-table-row','dpilog-table-row-id')),
-      array('data' => date("Y-m-d H:i:s",$result->timestamp),'class'=>array('dpilog-table-row','dpilog-table-row-timestamp')),
+      array(
+        'style' => array("background-color:$bck_color"),
+        'class' => array('dpilog-table-row', 'dpilog-table-row-color'),
+      ),
+      array(
+        'data' => $result->log_name,
+        'class' => array('dpilog-table-row', 'dpilog-table-row-logname'),
+      ),
+      array(
+        'data' => $result->action,
+        'class' => array('dpilog-table-row', 'dpilog-table-row-action'),
+      ),
+      array(
+        'data' => $message,
+        'class' => array('dpilog-table-row', 'dpilog-table-row-message'),
+      ),
+      array(
+        'data' => $result->name,
+        'class'=>array('dpilog-table-row', 'dpilog-table-row-user'),
+      ),
+      array(
+        'data' => $log_levels[$result->severity],
+        'class' => array('dpilog-table-row', 'dpilog-table-row-severity'),
+      ),
+      array(
+        'data' => $result->thread_id,
+        'class' => array('dpilog-table-row', 'dpilog-table-row-thread_id'),
+      ),
+      array(
+        'data' => $result->id,
+        'class' => array('dpilog-table-row', 'dpilog-table-row-id'),
+      ),
+      array(
+        'data' => date("Y-m-d H:i:s", $result->timestamp),
+        'class' => array('dpilog-table-row', 'dpilog-table-row-timestamp'),
+      ),
     );
   }
 
-  $content=  theme_table(array('header' => $header_row,
+  $content = theme_table(array('header' => $header_row,
     'rows' => $table_rows,
     'attributes' => array('class' => 'table_dpilogs', 'width' => '100%'),
     'caption' => '',
     'colgroups' => array(),
     'sticky' => FALSE,
-    'empty' => 'No data is available',
+    'empty' => t('No data is available'),
   ));
 
   return $content;

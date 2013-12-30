@@ -21,23 +21,17 @@ function theme_dpilog_form_page_configure_granularity_form(&$variables){
         drupal_render($variables["form"]['registrations'][$registration_name]['color']['actions'][$action_name]),
       );
 
-
       $variables["form"]['registrations'][$registration_name]['table']=array(
         "#markup"=>theme('table',$main_table),
         "#weight"=>-1,
       );
-
-
     }
-
   }
 
   return drupal_render_children($variables["form"]);
 }
 
-
 function theme_dpilog_form_page_configure_display_form(&$variables){
-
   $display_header = array('Action', 'Tag', 'color');
 
   foreach(element_children($variables["form"]['registrations']) as $registration_name){
@@ -47,27 +41,18 @@ function theme_dpilog_form_page_configure_display_form(&$variables){
     $display_table['header']=$display_header;
 
     foreach(element_children($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions']) as $action_name ){
-       
       $display_table['rows'][$action_name] = array(
         $action_name,
         drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['display']['color']),
         drupal_render($variables["form"]['registrations'][$registration_name ][$vertical_tab_id]['display']['actions'][$action_name]['display']['tag']),
-         
       );
 
       $variables["form"]['registrations'][$registration_name][$vertical_tab_id]['display']['table']=array(
         "#markup"=>theme('table',$display_table),
         "#weight"=>-1,
-
       );
-
-
     }
-
   }
+
   return drupal_render_children($variables["form"]);
-
-
-
-
 }

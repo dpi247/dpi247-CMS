@@ -1,20 +1,21 @@
 <?php
+
 module_load_include('inc', 'simplefield','simplefield.api');
 
 /**
  * Implements hook_field_info().
  *
  * Provides the description of the field.
- */
+*/
 function simplefield_field_info() {
   return array(
-      // We name our field as the associative name of the array.
-      'licenceplate' => array(
-          'label' => t('Licence plate'),
-          'description' => t('A simple field  as example that represent  licene plates in the Belgian\'s Format XXX-XXX.'),
-          'default_widget' => 'field_simplefield_default_widget',
-          'default_formatter' => 'field_simplefield_default_formatter',
-      ),
+    // We name our field as the associative name of the array.
+    'licenceplate' => array(
+      'label' => t('Licence plate'),
+      'description' => t('A simple field  as example that represent  licene plates in the Belgian\'s Format XXX-XXX.'),
+      'default_widget' => 'field_simplefield_default_widget',
+      'default_formatter' => 'field_simplefield_default_formatter',
+    ),
   );
 }
 
@@ -28,24 +29,20 @@ function simplefield_field_validate($entity_type, $entity, $field, $instance, $l
     if (!empty($item['licenceplaternumberdb'])) {
       if (! preg_match('@([A-Z]|[0-9]){3}-([A-Z]|[0-9]){3}@', $item['licenceplaternumberdb'])) {
         $errors[$field['field_name']][$langcode][$delta][] = array(
-            'error' => 'field_example_invalid',
-            'message' => t('Liscence plate must be in the following format XXX-XXX Where X is from A To Z in uppercase or a number.'),
+          'error' => 'field_example_invalid',
+          'message' => t('Liscence plate must be in the following format XXX-XXX Where X is from A To Z in uppercase or a number.'),
         );
       }
     }
   }
- 
 }
-
 
 /**
  * Implements hook_field_field_is_empty().
- *
  */
 function simplefield_field_is_empty($item, $field) {
   return empty($item['licenceplaternumberdb']);
 }
-
 
 /**
  * Implements hook_field_formatter_info().
@@ -59,15 +56,13 @@ function simplefield_field_is_empty($item, $field) {
  */
 function simplefield_field_formatter_info() {
   return array(
-      // This formatter just displays the hex value in the color indicated.
-      'field_simplefield_default_formatter' => array(
-          'label' => t('Simple text-based formatter of the destination'),
-          'field types' => array('licenceplate'),
-      ),
-    
+    // This formatter just displays the hex value in the color indicated.
+    'field_simplefield_default_formatter' => array(
+      'label' => t('Simple text-based formatter of the destination'),
+      'field types' => array('licenceplate'),
+    ),
   );
 }
-
 
 /**
  * Implements hook_field_formatter_view().
@@ -82,30 +77,27 @@ function simplefield_field_formatter_info() {
  */
 function simplefield_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-dsm($element);dsm($field);dsm($instance);
+  dsm($element);dsm($field);dsm($instance);
   switch ($display['type']) {
     // This formatter simply outputs the field as text and with a color.
     case 'field_simplefield_default_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
-            // We create a render array (see REnder API) to produce the desired markup,
-            // See theme_html_tag().
-            '#type' => 'html_tag',
-            '#tag' => 'span',
-            '#attributes' => array(
-                'style' => 'color: ' . $item['tid'],
-            ),
-            '#value' => $item['licenceplate_formvalue'],
+          // We create a render array (see REnder API) to produce the desired markup,
+          // See theme_html_tag().
+          '#type' => 'html_tag',
+          '#tag' => 'span',
+          '#attributes' => array(
+            'style' => 'color: ' . $item['tid'],
+          ),
+          '#value' => $item['licenceplate_formvalue'],
         );
       }
       break;
-
   }
 
   return $element;
 }
-
-
 
 /**
  * Implements hook_field_widget_info().
@@ -118,14 +110,12 @@ dsm($element);dsm($field);dsm($instance);
  */
 function simplefield_field_widget_info() {
   return array(
-      'field_simplefield_default_widget' => array(
-          'label' => t('Simple Field default widget'),
-          'field types' => array('licenceplate'),
-      ),
+    'field_simplefield_default_widget' => array(
+      'label' => t('Simple Field default widget'),
+      'field types' => array('licenceplate'),
+    ),
   );
 }
-
-
 
 /**
  * Implements hook_field_widget_form().
@@ -135,31 +125,25 @@ function simplefield_field_widget_info() {
  *
  * We provide one form for the moment: field_simplefield_default_widget.
  *
- *
  * 'field_simplefield_default_widget' declare only a textfield.
  *
  */
 function simplefield_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  
-  
   $value = isset($items[$delta]['licenceplaternumberdb']) ? $items[$delta]['licenceplaternumberdb'] : '';
-  
+
   $widget = $element;
   $widget['#delta'] = $delta;
 
   switch ($instance['widget']['type']) {
-
     case 'field_simplefield_default_widget':
       $widget += array(
-          '#type' => 'textfield',
-          '#title' => t('Licence Plate'),
-          '#default_value' => $value,
-          
+        '#type' => 'textfield',
+        '#title' => t('Licence Plate'),
+        '#default_value' => $value,
       );
       break;
   }
   $element['licenceplaternumberdb'] = $widget;
-  
 
   return $element;
 }
