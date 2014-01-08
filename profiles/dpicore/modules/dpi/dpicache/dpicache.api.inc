@@ -10,6 +10,8 @@ function hook_dpicache_cache_entry_register() {
       'ttl' => 7*24*60*60, //(in seconds) keep a cache for one week
       'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
     )
+    // use bypass to bypass cache for debugging purpose.
+    //'bypass'=>TRUE,
   );
 }
 
@@ -36,7 +38,7 @@ function dpicache_get_cache_entry($cache_name){
     return FALSE;
   }
   // fetch cache from ad hoc storage
-  if($content = dpicache_fetch_cache($cache_name, $hash)){
+  if($content = dpicache_fetch_cache($cache_name, $hash) and $cache_definition['bypass']!=TRUE ){
     // cache available
     dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
     return $content;
