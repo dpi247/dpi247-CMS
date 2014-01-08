@@ -41,7 +41,7 @@ function _dpidestinations_variable_del( $name){
 }
 
 
-function _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache = FALSE){
+function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALSE){
 
   $vid = dpidestinations_api_get_destinations_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');

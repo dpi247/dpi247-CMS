@@ -73,22 +73,22 @@ function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
   return FALSE;
 }
 
-function dpidestinations_api_get_destinations_vocabulary_vid(){
+function dpidestinations_api_get_sections_vocabulary_vid(){
   return _dpidestinations_variable_get('dpidestinations_destination_vid',2);
 }
 
-function dpidestinations_api_get_all_destinations_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){
+function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){
 
-  return _dpidestinations_api_get_all_destinations_terms_from_db($reset_cache);
+  return _dpidestinations_api_get_all_sections_terms_from_db($reset_cache);
 }
 
-function dpidestinations_api_get_all_destinations_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
-  $vid=dpidestinations_api_get_destinations_vocabulary_vid();
+function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
+  $vid=dpidestinations_api_get_sections_vocabulary_vid();
   return taxonomy_get_tree($vid, $parent, NULL, $load_entities);
 }
 
-function dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update){
-  $terms=dpidestinations_api_get_all_destinations_terms_flat_struct();
+function dpidestinations_api_get_all_sections_term_available_as_select_options($is_update){
+  $terms=dpidestinations_api_get_all_sections_terms_flat_struct();
   if($is_update)
     $options=array(''=>'Remove this destination');
   else

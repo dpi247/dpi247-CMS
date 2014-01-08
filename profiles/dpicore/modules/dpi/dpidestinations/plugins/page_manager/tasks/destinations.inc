@@ -80,7 +80,7 @@ function dpidestinations_destination_view_page($destination) {
   
   $contexts = ctools_context_handler_get_task_contexts($task, '', array($destination));
   
-  if (empty($contexts) or $destination->vid!=dpidestinations_api_get_destinations_vocabulary_vid()) {
+  if (empty($contexts) or $destination->vid!=dpidestinations_api_get_sections_vocabulary_vid()) {
     return drupal_not_found();
   }
   

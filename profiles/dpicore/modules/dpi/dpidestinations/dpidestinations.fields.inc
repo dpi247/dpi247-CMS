@@ -205,9 +205,9 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         '#type' => 'select',
         '#options' => $tids_options,
         '#default_value' => $destinations['tid'],
-        '#title' => t('Term'),
+        '#title' => t('Section'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The destination page where the node will appear'),
+        '#description' => t('The section page where the node will be placed'),
         '#limit_validation_errors' => array(),
         '#ajax' => array(
           // When 'event' occurs, Drupal will perform an ajax request in the
@@ -225,7 +225,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
         '#type' => 'select',
         '#options' => $target_options,
         '#default_value'=> $destinations['target'],
-        '#title' => t('Target'),
+        '#title' => t('Target block'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('Define the target where the node will appear in the page'),
         '#limit_validation_errors' => array(),

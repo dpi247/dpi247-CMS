@@ -401,7 +401,7 @@ function dpidestinations_page_administration_targetblocks(){
 
 function dpidestinations_page_administration_destinations(){
   module_load_include("inc", "taxonomy","taxonomy.admin");
-  $destination_vid=dpidestinations_api_get_destinations_vocabulary_vid();
+  $destination_vid=dpidestinations_api_get_sections_vocabulary_vid();
   $destination=entity_load_unchanged('taxonomy_vocabulary',$destination_vid);
   return drupal_get_form('taxonomy_overview_terms',$destination);
 }
