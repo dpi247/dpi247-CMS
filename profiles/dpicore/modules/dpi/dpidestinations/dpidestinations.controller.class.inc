@@ -39,13 +39,35 @@ class TargetController extends EntityAPIControllerExportable{
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
 
-  public function load_target_by_name($target_name){
-    $conditions=array('machine_name'=>$target_name);
-    $result=target_load_multiple(FALSE, $conditions);
-    if(!$result){
-      $result=NULL;
+  public function load_target_by_name($target_name) {
+    $conditions = array('machine_name' => $target_name);
+    $result = target_load_multiple(FALSE, $conditions);
+    if (!$result) {
+      $result = NULL;
     }
     return current($result);
+  }
+
+  /**
+   * Implements EntityAPIControllerInterface.
+   *
+   * @param $transaction
+   *   Optionally a DatabaseTransaction object to use. Allows overrides to pass
+   *   in their transaction object.
+   */
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    // Delete related targetblocks
+    foreach ($ids as $id) {
+      $targetblock_controller = entity_get_controller('targetblock');
+      $targetblocks = $targetblock_controller->load_targetblocks_by_target($id);
+      $targetblocks_ids = array();
+      foreach ($targetblocks as $targetblock) {
+        $targetblocks_ids[] = $targetblock->targetblockid;
+      }
+      $targetblock_controller->delete($targetblocks_ids);
+    }
+
+    return parent::delete($ids, $transaction);
   }
 }
 
@@ -63,67 +85,82 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   //return an array keyed with tid of targetblocks that belongs to a display id
-  public function load_targetblocks_by_panels_display($did){
-    $conditions=array('did'=>$did);
-    return  targetblock_load_multiple(FALSE, $conditions);
+  public function load_targetblocks_by_panels_display($did) {
+    $conditions = array('did' => $did);
+    return targetblock_load_multiple(FALSE, $conditions);
   }
 
-  public function load_targetblock_by_panels_panelpid($pid){
-    $conditions=array('pid'=>$pid);
-    $result=current(targetblock_load_multiple(FALSE, $conditions));
-    if(!$result){
-      $result=FALSE;
+  public function load_targetblock_by_panels_panelpid($pid) {
+    $conditions = array('pid' => $pid);
+    $result = current(targetblock_load_multiple(FALSE, $conditions));
+    if (!$result) {
+      $result = FALSE;
       //$result=new TargetBlockEntity(array(),'TargetBlock');
     }
     return $result;
   }
 
-  public function load_targetblock_by_did_and_target($did, $target_name){
-    $results=$this->load_targetblocks_by_did_and_target($did,$target_name);
+  public function load_targetblock_by_did_and_target($did, $target_name) {
+    $results = $this->load_targetblocks_by_did_and_target($did, $target_name);
     return current($results);
   }
 
   public function load_targetblock_by_did_target_and_splitdelta($did, $target_name,$split_delta){
-    $conditions=array('did'=>$did,' target'=>$target_name,'split_delta'=> $split_delta);
-    $results=targetblock_load_multiple(FALSE, $conditions);
-    $result=current($results);
-    if(!$result){
-      $result=NULL;
+    $conditions = array('did' => $did,' target' => $target_name, 'split_delta' => $split_delta);
+    $results = targetblock_load_multiple(FALSE, $conditions);
+    $result = current($results);
+    if (!$result) {
+      $result = NULL;
     }
     return $result;
   }
 
-  public function load_targetblock_by_termid_and_target($term_id,$target_name){
-    $did=dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id);
-    return $this->load_targetblock_by_did_and_target($did,$target_name);
+  public function load_targetblock_by_termid_and_target($term_id,$target_name) {
+    $did = dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id);
+    return $this->load_targetblock_by_did_and_target($did, $target_name);
   }
 
-  public function load_targetblocks_by_did_and_target($did,$target_name){
-    $conditions=array('did'=>$did,'target'=>$target_name);
-    $results=targetblock_load_multiple(FALSE, $conditions);
-    if(!$results){
-      $results=array();
+  public function load_targetblocks_by_target($target_name) {
+    $conditions = array('target' => $target_name);
+    $results = targetblock_load_multiple(FALSE, $conditions);
+    if (!$results) {
+      $results = array();
     }
     return $results;
   }
 
-  public function delete($entity, DatabaseTransaction $transaction = NULL){
-    $this->syncrohize_global_settings_of_targetblocks($entity, 'delete');
+  public function load_targetblocks_by_did_and_target($did,$target_name) {
+    $conditions = array('did' => $did, 'target' => $target_name);
+    $results = targetblock_load_multiple(FALSE, $conditions);
+    if (!$results) {
+      $results = array();
+    }
+    return $results;
+  }
 
-    $result=parent::delete($entity);
+  public function delete($ids, DatabaseTransaction $transaction = NULL) {
+    $this->syncrohize_global_settings_of_targetblocks($ids, 'delete');
+
+    $targetblocks_entities = entity_load('targetblock', $ids);
+    // Delete related targetblocks instances
+    foreach ($targetblocks_entities as $targetblocks_entity) {
+      db_delete('panels_pane')->condition('pid', $targetblocks_entity->pid)->execute();
+    }
+
+    $result = parent::delete($ids, $transaction);
     //_dpidestinatons_targetblock_sync_node_count_for_targetblock($entity);
     return $result;
   }
 
-  public function save($entity, DatabaseTransaction $transaction = NULL){
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
 
     $result=parent::save($entity);
     return $result;
   }
 
-  public function syncrohize_global_settings_of_targetblocks($entity,$operation){
-    if(!isset($entity->prevent_sync_recurssion)){
+  public function syncrohize_global_settings_of_targetblocks($entity, $operation) {
+    if (!isset($entity->prevent_sync_recurssion)) {
       $original_entity_id = isset($entity->targetblockid) ? $entity->targetblockid : NULL;
 
       if(!isset($entity->targetblockid) || !$entity->targetblockid) {
