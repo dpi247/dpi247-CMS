@@ -10,6 +10,8 @@ function hook_dpicache_cache_entry_register() {
       'ttl' => 7*24*60*60, //(in seconds) keep a cache for one week
       'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
     )
+    // use bypass to bypass cache for debugging purpose.
+    //'bypass'=>TRUE,
   );
 }
 
