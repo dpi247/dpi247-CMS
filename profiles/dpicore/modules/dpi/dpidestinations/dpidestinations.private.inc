@@ -93,19 +93,19 @@ function _dpidestinations_get_all_targetviews(){
 
 
 
-function _dpidestinations_get_panels_displayid_for_destinationterm($term_id){
-  $handler=_dpidestinations_get_panels_handler_for_destinationterm($term_id);
+function _dpidestinations_get_panels_displayid_for_sectionterm($term_id){
+  $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
   return $handler->did;
 }
 
-function _dpidestinations_get_panels_display_for_destinationterm($term_id){
+function _dpidestinations_get_panels_display_for_sectionterm($term_id){
   $displays = &drupal_static(__FUNCTION__);
   if (!isset($displays[$term_id])) {
     ctools_include('context');
     ctools_include('context-task-handler');
     ctools_include('plugins');
 
-    $handler=_dpidestinations_get_panels_handler_for_destinationterm($term_id);
+    $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
     $display = panels_panel_context_get_display($handler);
 
@@ -120,7 +120,7 @@ function _dpidestinations_get_pagemanager_handler_name_for_displayid($did){
   $name=db_query('SELECT p.name FROM {page_manager_handlers} p WHERE p.did = :did', array(':did' => $did))->fetchField();
   return $name;
 }
-function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
+function _dpidestinations_get_panels_handler_for_sectionterm($term_id){
   $handlers = &drupal_static(__FUNCTION__);
   if (!isset($handlers[$term_id])) {
     ctools_include('context');
@@ -155,10 +155,10 @@ function _dpidestinations_get_available_targetlayouts(){
   return $return;
 
 }
-function _dpidestinations_get_targets_for_destinationterm($term_id){
+function _dpidestinations_get_targets_for_sectionterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
   if (!isset($targets[$term_id])) {
-    $display=_dpidestinations_get_panels_display_for_destinationterm($term_id);
+    $display=_dpidestinations_get_panels_display_for_sectionterm($term_id);
     $temp=array();
     foreach($display->content as $content){
       if($content->type=="targetblock"){
@@ -652,13 +652,13 @@ function   _dpidestinations_targetview_initialize_view_get_term_filter($term_val
 
 
 
-function __dpidestinations_get_selectoption_get_targets_for_destinationterm($term_id){
+function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id){
   if($term_id==''){
     return array(''=>'');
   }
 
   $options=array();
-  $targets= _dpidestinations_get_targets_for_destinationterm($term_id);
+  $targets= _dpidestinations_get_targets_for_sectionterm($term_id);
   foreach($targets as $subtype=>$target){
     $options[$subtype]=$target->label;
   }
@@ -705,7 +705,7 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 }
 
 
-function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($target_id,$target_name){
+function __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_id,$target_name){
 
   if($target_id='' OR $target_name==NULL)
     return array(""=>"");
@@ -718,7 +718,7 @@ function __dpidestinations_api_get_all_layouts_available_for_destination_tid_and
 }
 
 
-function __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update=FALSE){
+function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update=FALSE){
   if($term_id==""){
     return array(''=>'');
   }
@@ -729,7 +729,7 @@ function __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_t
   }
   $rank_options['default']=t('Default behavior');
 
-  $options=dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update);
+  $options=dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update);
   return $rank_options+$options;
 }
 

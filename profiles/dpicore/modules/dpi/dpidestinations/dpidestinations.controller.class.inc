@@ -116,7 +116,7 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   public function load_targetblock_by_termid_and_target($term_id,$target_name) {
-    $did = dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id);
+    $did = dpidestination_api_get_panelsdisplayid_for_sectionterm($term_id);
     return $this->load_targetblock_by_did_and_target($did, $target_name);
   }
 

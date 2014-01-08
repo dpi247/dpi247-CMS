@@ -35,7 +35,7 @@ function dpidestinations_page_targetview_reorder($term,$target){
 }
 
 
-function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $destination_tid, $destination_target){
+function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $sectiontid, $destination_target){
   $form['#tree'] = TRUE;
   
   
@@ -76,9 +76,9 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     );
   }
   
-  $form['destination_tid'] = array(
+  $form['sectiontid'] = array(
     '#type' => 'value',
-    '#value' =>  $destination_tid,
+    '#value' =>  $sectiontid,
   );
   $form['destination_targetname'] = array(
     '#type' => 'value',
@@ -149,7 +149,7 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   
   
   
-  $term_id= $form_state["values"]['destination_tid'];
+  $term_id= $form_state["values"]['sectiontid'];
   $target_name= $form_state["values"]['destination_targetname'];
   foreach($nodes_to_process as $new_rank=>$data){
     $position=$new_rank+1;

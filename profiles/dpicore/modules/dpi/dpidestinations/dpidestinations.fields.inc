@@ -40,7 +40,7 @@ function dpidestinations_field_validate($entity_type, $entity, $field, $instance
   foreach ($items as $delta => $item) {
   if (!empty($item['tid'])) {
   $errors[$field['field_name']][$langcode][$delta][] = array(
-    'error' => 'destination_tid',
+    'error' => 'sectiontid',
     'message' => t('You must select at least a destination term.'),
   );
   }
@@ -170,18 +170,18 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     $destinations['tid'] = '';
   }
 
-  $target_options = __dpidestinations_get_selectoption_get_targets_for_destinationterm($destinations['tid']);
+  $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])) {
     $destinations['target'] = current(array_keys($target_options));
   }
-  $layout_options = __dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($destinations['tid'], $destinations['target']);
+  $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
   if(!isset($layout_options[$destinations['layout']])) {
     $destinations['layout'] = current($layout_options);
   }
   if($is_update) {
     $destinations['rank'] = 'DNC';
   }
-  $rank_options = __dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($destinations['tid'], $destinations['target'], $is_update);
+  $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
   if(!isset($rankt_options[$destinations['rank']])) {
     $destinations['rank'] = current($rank_options);
   }
@@ -386,15 +386,15 @@ function dpidestinations_field_formatter_info() {
       'label' => t('Simple text-based formatter of the destination'),
       'field types' => array('destination'),
     ),
-    'destination_tid_formatter' => array(
+    'sectiontid_formatter' => array(
       'label' => t('Simple text-based formatter of the term of the destination'),
       'field types' => array('destination'),
     ),
-    'destination_tid_name_formatter' => array(
+    'sectiontid_name_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
       'field types' => array('destination'),
     ),
-    'destination_tid_name_linked_formatter' => array(
+    'sectiontid_name_linked_formatter' => array(
       'label' => t('Simple text-based formatter of the term\'s name  of the destination'),
       'field types' => array('destination'),
     ),
@@ -437,7 +437,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'destination_tid_formatter':
+    case 'sectiontid_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
           '#type' => 'html_tag',
@@ -446,7 +446,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'destination_tid_name_formatter':
+    case 'sectiontid_name_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
         $element[$delta] = array(
@@ -456,7 +456,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
-    case 'destination_tid_name_linked_formatter':
+    case 'sectiontid_name_linked_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
         $element[$delta] = array(

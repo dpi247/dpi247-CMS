@@ -37,14 +37,14 @@ function dpidestinations_api_target_machinename_load($target_machine_name){
  * We take in account all targetblockinstance related to splitted targetblocks
  *
  * @param String $target_machinename
- * @param Integer $destination_tid
+ * @param Integer $sectiontid
  *
  * @return an array of targetblockEntity
  */
-function dpidestinations_api_get_all_targetblocks_from_target_for_destination($target_machinename,$destination_tid){
+function dpidestinations_api_get_all_targetblocks_from_target_for_destination($target_machinename,$sectiontid){
   //$target=dpidestinations_api_target_machinename_load($target_machine_name);
   $targetblocks=array();
-  $panels_display_id=_dpidestinations_get_panels_displayid_for_destinationterm($destination_tid);
+  $panels_display_id=_dpidestinations_get_panels_displayid_for_sectionterm($sectiontid);
 
   $query = new EntityFieldQuery;
 
@@ -126,18 +126,18 @@ function dpidestinations_api_get_all_targetblocks(){
   return $targets;
 }
 
-function dpidestinations_api_get_all_targets_available_for_destination_tid($tid){
+function dpidestinations_api_get_all_targets_available_for_sectiontid($tid){
   if($tid==2){
     return array('target1'=>"Default","target2"=>"BHV");
   }
   return array("target1"=>"Default","target3"=>"Football");
 }
 
-function dpidestinations_api_get_all_layouts_available_for_destination_tid_and_target($tid,$target){
+function dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($tid,$target){
   return array(1=>"layout1",2=>"layout2");
 }
 
-function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_target($term_id,$target_name,$is_update=FALSE){
+function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update=FALSE){
   $controller=new TargetBlockController('targetblock');
   $targetblock=$controller->load_targetblock_by_termid_and_target($term_id,$target_name);
   $rank_options=array();
@@ -153,13 +153,13 @@ function dpidestinations_api_get_all_ranks_available_for_destination_tid_and_tar
   return $rank_options;
 }
 
-function dpidestination_api_get_panelsdisplayid_for_destinationterm($term_id){
-  $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
+function dpidestination_api_get_panelsdisplayid_for_sectionterm($term_id){
+  $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display->did;
 }
 
-function dpidestination_api_get_panelsdisplay_for_destinationterm($term_id){
-  $display= _dpidestinations_get_panels_display_for_destinationterm($term_id);
+function dpidestination_api_get_panelsdisplay_for_sectionterm($term_id){
+  $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display;
 }
 

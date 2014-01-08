@@ -443,12 +443,12 @@ function dpidestinations_form_configuration_form($form,& $form_state){
   foreach($vocabularies as $vocabulary){
     $options[$vocabulary->vid]=$vocabulary->name;
   }
-  $form["default"]['dpidestinations_destination_vid']=array(
+  $form["default"]['dpidestinations_section_vid']=array(
     "#type"=>'select',
-    '#title' => t('Destination vocabulary'),
+    '#title' => t('Section vocabulary'),
     '#description' => t('We do not recommend to change this settings in production.'),
     '#options'=>$options,
-    '#default_value'=>_dpidestinations_variable_get('dpidestinations_destination_vid',2),
+    '#default_value'=>_dpidestinations_variable_get('dpidestinations_section_vid',2),
   );
 
   $form["default"]['dpidestination_max_reserved_position']=array(
@@ -521,11 +521,10 @@ function dpidestinations_form_configuration_form($form,& $form_state){
 }
 
 function dpidestinations_form_configuration_form_submit($form, &$form_state){
-  drupal_set_message("rrr");
 
   $values=$form_state['values'];
 
-  _dpidestinations_variable_set('dpidestinations_destination_vid',$values['dpidestinations_destination_vid']);
+  _dpidestinations_variable_set('dpidestinations_section_vid',$values['dpidestinations_section_vid']);
   _dpidestinations_variable_set('dpidestinations_virtualrank_delta',$values['dpidestinations_virtualrank_delta']);
   _dpidestinations_variable_set('dpidestination_max_reserved_position',$values['dpidestination_max_reserved_position']);
   _dpidestinations_variable_set('dpidestinations_targetview_reorder_default',array($values['view_name'],$values['view_display']));

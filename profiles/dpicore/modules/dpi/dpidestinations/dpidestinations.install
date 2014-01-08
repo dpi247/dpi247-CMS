@@ -237,15 +237,15 @@ function dpidestinations_install(){
   _dpidestinations_variable_set("dpidestinations_virtualrank_delta", 1000);
    
   $edit = array(
-    "name" => "Destinations",
-    "machine_name" =>"destiantions",
-    "description" => t("Destinations represent the structure of your editorial content."),
+    "name" => "Sections",
+    "machine_name" =>"sections",
+    "description" => t("Sections represent the structure of your editorial content."),
     "module" => "taxonomy",
   );
 
   $vocabulary = (object)$edit;
   taxonomy_vocabulary_save($vocabulary);
-  _dpidestinations_variable_set('dpidestinations_destination_vid', $vocabulary->vid);
+  _dpidestinations_variable_set('dpidestinations_section_vid', $vocabulary->vid);
 
   $field_info=_dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
@@ -253,10 +253,10 @@ function dpidestinations_install(){
 }
 
 function dpidestinations_uninstall(){
-  taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_destination_vid', 2));
+  taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_section_vid', 2));
   _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
   _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
-  _dpidestinations_variable_del("dpidestinations_destination_vid");
+  _dpidestinations_variable_del("dpidestinations_section_vid");
   _dpidestinations_variable_del("dpidestination_max_reserved_position");
   _dpidestinations_variable_del("dpidestination_default_max_reserved_position");
 }
