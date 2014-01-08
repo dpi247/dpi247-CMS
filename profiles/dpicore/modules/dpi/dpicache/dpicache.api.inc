@@ -9,7 +9,13 @@ function hook_dpicache_cache_entry_register() {
       'data_type' => "string", // the callback returns a string
       'ttl' => 7*24*60*60, //(in seconds) keep a cache for one week
       'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
-    )
+    ),
+    // file key if your callback is not auto loaded (not in .module)
+    //'file'=>array(
+    //  "module"=>"dpidestinations",
+    //  "type"=>"inc",
+    //  "name"=>"plugins/ctools/content_types/targetblock/targetblock"
+    //),
     // use bypass to bypass cache for debugging purpose.
     //'bypass'=>TRUE,
   );
