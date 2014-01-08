@@ -36,7 +36,7 @@ function dpicache_get_cache_entry($cache_name){
     return FALSE;
   }
   // fetch cache from ad hoc storage
-  if($content = dpicache_fetch_cache($cache_name, $hash)){
+  if($content = dpicache_fetch_cache($cache_name, $hash) and $cache_definition['bypass']!=TRUE ){
     // cache available
     dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
     return $content;
