@@ -121,7 +121,7 @@ function dpidestinations_entity_info(){
 function dpidestinations_entity_info_alter(&$entity_info) {
   // @todo: ne pas coder en dur le nom du vocabulaire
   $entity_info['taxonomy_term']['bundles']['destinations']['uri callback'] = 'dpidestinations_term_uri';
-  $entity_info['taxonomy_term']['bundles']['destinations']['label'] = t('Destination term');
+  $entity_info['taxonomy_term']['bundles']['destinations']['label'] = t('Section term');
   
   $entity_info['node']['view modes'] += array(
     'targetblock_small' => array(

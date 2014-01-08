@@ -401,9 +401,9 @@ function dpidestinations_page_administration_targetblocks(){
 
 function dpidestinations_page_administration_destinations(){
   module_load_include("inc", "taxonomy","taxonomy.admin");
-  $destination_vid=dpidestinations_api_get_sections_vocabulary_vid();
-  $destination=entity_load_unchanged('taxonomy_vocabulary',$destination_vid);
-  return drupal_get_form('taxonomy_overview_terms',$destination);
+  $sections_vid=dpidestinations_api_get_sections_vocabulary_vid();
+  $sections=entity_load_unchanged('taxonomy_vocabulary',$sections_vid);
+  return drupal_get_form('taxonomy_overview_terms',$sections);
 }
 
 function dpidestinations_page_administration_configuration(){

@@ -165,7 +165,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   // STEP 2:
   // Determine available options and change destination if need it
 
-  $tids_options = dpidestinations_api_get_all_destinations_term_available_as_select_options($is_update);
+  $tids_options = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
   if(FALSE && !$is_update) {
     $destinations['tid'] = '';
   }

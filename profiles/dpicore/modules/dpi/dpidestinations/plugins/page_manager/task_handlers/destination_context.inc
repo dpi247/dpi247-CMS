@@ -119,8 +119,8 @@ $plugin = array(
     ),
 
     'destination' => array(
-      'title' => t('Destination'),
-      'description' => t('Set up some destination\'s settings parameter.'),
+      'title' => t('Section'),
+      'description' => t('Set up some section\'s settings parameter.'),
       'ajax' => FALSE,
       'form' => array(
         'order' => array(

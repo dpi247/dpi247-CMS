@@ -32,12 +32,12 @@ function dpidestinations_theme() {
  * Implementation of hook_menu()
  */
 function dpidestinations_menu() {
-  $items['destination/%destinationterm'] = array(
-    'title callback' => 'destination_view',
+  $items['section/%sectionterm'] = array(
+    'title callback' => 'section_view',
     'title arguments' => array(1),
-    'page callback' => 'dpidestinations_page_destination_view',
+    'page callback' => 'dpidestinations_page_section_view',
     'page arguments' => array(1),
-    'access arguments' => array('view targets'),
+    'access arguments' => array('view section'),
     'type' => MENU_CALLBACK,
   );
 
@@ -279,15 +279,15 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
 
 function dpidestinations_term_uri($term){
   return array(
-    'path' => 'destination/' . $term->tid,
+    'path' => 'section/' . $term->tid,
   );
 }
 
-function destinationterm_load($destination_id){
-  return taxonomy_term_load($destination_id);
+function sectionterm_load($section_tid){
+  return taxonomy_term_load($section_tid);
 }
 
-function dpidestinations_page_destination_view($destination){
+function dpidestinations_page_section_view($destination){
   return t('You need to activate the page manager');
 }
 

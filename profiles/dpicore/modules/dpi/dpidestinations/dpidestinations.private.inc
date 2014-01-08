@@ -21,7 +21,7 @@ function _dpidestinations_variable_set( $name, $default_value){
   if(function_exists('dpi_variable_set')){
     return dpi_variable_set($name,$default_value);
   }
-  else{  
+  else{
     return variable_set($name,$default_value);
   }
 
@@ -43,7 +43,7 @@ function _dpidestinations_variable_del( $name){
 
 function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALSE){
 
-  $vid = dpidestinations_api_get_destinations_vocabulary_vid();
+  $vid = dpidestinations_api_get_sections_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
   //->addTag('translatable')
@@ -115,7 +115,7 @@ function _dpidestinations_get_panels_display_for_destinationterm($term_id){
 }
 /*
  * REturn the name form the page_manager_handlers table for a display_id
- */
+*/
 function _dpidestinations_get_pagemanager_handler_name_for_displayid($did){
   $name=db_query('SELECT p.name FROM {page_manager_handlers} p WHERE p.did = :did', array(':did' => $did))->fetchField();
   return $name;
@@ -129,14 +129,12 @@ function _dpidestinations_get_panels_handler_for_destinationterm($term_id){
      
     $data['tid']=$term_id;
 
-    $destination=destinationterm_load($term_id);
+    $section=sectionterm_load($term_id);
 
-    $task= page_manager_get_task('destinations');
-    $contexts = ctools_context_handler_get_task_contexts($task, '', array($destination));
-
+    $task= page_manager_get_task('sections');
+    $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
     $sorted_handlers = page_manager_load_sorted_handlers($task, '', TRUE);
     $id = ctools_context_handler_get_render_handler($task, NULL, $sorted_handlers,$contexts, array());
-
     $handler=$sorted_handlers[$id];
     $handlers[$term_id] = $handler;
   }
@@ -262,7 +260,7 @@ function _dpidestinations_virtualrank_update_item( & $item){
 
       $rank_max_value= $wrapper->rank_max_value->value();
       $item['rank']=1;
-      
+
     }
     else{
       //We need a fallback if the targetblock is not found
@@ -363,12 +361,12 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
       $keyed_virtualranks[$index] = $new_virtual_rank;
 
       db_update($destination_table) // Table name no longer needs {}
-        ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
-        ->condition('entity_id', $row_result->entity_id)
-        ->condition('field_destinations_tid', $tid)
-        ->condition('field_destinations_target', $target)
-        ->condition('delta',$row_result->delta)
-        ->execute();
+      ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
+      ->condition('entity_id', $row_result->entity_id)
+      ->condition('field_destinations_tid', $tid)
+      ->condition('field_destinations_target', $target)
+      ->condition('delta',$row_result->delta)
+      ->execute();
     }
 
     entity_get_controller('node')->resetCache($keyed_nids);
@@ -502,7 +500,7 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
     //We dont need offset since we execute the view only once
     //$pager['options']['offset']=$targetblock->offset;
     $targetview->display_handler->set_option('pager', $pager);
-    
+
   }else{
     $pager =  $targetview->display_handler->get_option('pager');
     $pager['type'] = 'some';
@@ -513,11 +511,11 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
 
     $targetview->set_items_per_page($targetblock->node_count_for_targetblock);
     //$targetview->set_offset($targetblock->offset);
-      
+
   }
   $targetview->dpidestinations['destination']->tid=$term_value;
   $targetview->dpidestinations['target']->machine_name=$target_value;
-  
+
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 
