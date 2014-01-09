@@ -295,12 +295,10 @@ function dpicache_cron_cleanup($time){
  * @param  Array  $args       Array of callback function arguments.
  * @return String             The hash.
  */
-function _dpicache_get_hash($cache_name, $args=array()){
-  $hash=sha1($cache_name.'--'.implode('-',$args));
+function _dpicache_get_hash($cache_name, $args = array()) {
+  $hash = sha1($cache_name.'--'.implode('-', $args));
   return $hash;
 }
-
-
 
 function _dpicache_regenerate_one_cache_entry_callback($cache_name){
 
