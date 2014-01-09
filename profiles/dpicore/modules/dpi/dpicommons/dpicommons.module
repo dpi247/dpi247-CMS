@@ -60,6 +60,18 @@ function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL,
 }
 
 /**
+ * Use an entity wrapper to get a field value from an entity
+ */
+function dpicommons_get_field_from_entity($entity, $entity_type, $field_name, $info = array(), $options = array()) {
+  if ($entity_wrapper = entity_metadata_wrapper($entity_type, $entity, $info)) {
+    $value = $entity_wrapper->{$field_name}->value($options);
+    return $value;
+  }
+
+  return FALSE;
+}
+
+/**
  * Check if an URL is valid and return a 200
  * Return TRUE if so False if not.
  *
