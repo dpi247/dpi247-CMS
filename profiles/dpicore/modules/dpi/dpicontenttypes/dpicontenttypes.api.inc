@@ -248,8 +248,7 @@ function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE,
     if(isset($static_embeds[$node->nid])) {
       $embeds = $static_embeds[$node->nid];
     } else {
-      $node_wrapper = entity_metadata_wrapper('node', $node);
-      $embeds = $node_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+      $embeds = dpicommons_get_field_from_entity($node, 'node', 'field_embededobjects', array(), array('identifier' => TRUE));
       $static_embeds[$node->nid] = $embeds;
     }
   }
