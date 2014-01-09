@@ -53,6 +53,21 @@ function dpicommons_theme(){
   );
 }
 
+/**
+ * Implementation of hook_init()
+ */
+function dpicommons_init() {
+  if(variable_get('dpicommons_activated_error_handler', FALSE)) {
+    module_load_include('inc', 'dpicommons', 'includes/dpicommons.error_handler');
+    set_error_handler('_dpicommons_error_handler');
+  }
+
+  if(variable_get('dpicommons_activated_shutdown_function', FALSE)) {
+    module_load_include('inc', 'dpicommons', 'includes/dpicommons.error_handler');
+    register_shutdown_function('_dpicommons_shutdown_function');
+  }
+}
+
 function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
   if (module_exists('dpilog')) {
     _dpilog_log($log_name, $action, $message, $variables,$id, $severity, $uid, $keep_backtrace);
