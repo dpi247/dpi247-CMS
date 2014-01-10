@@ -1,22 +1,20 @@
 <?php
 
-
 /**
- * 
  * Implementation of hook_entity_info_alter
+ *
  * @param Array $entity_info
  */
 function unfoldcompanion_entity_info_alter(&$entity_info){
-  //@todo: ne pas coder en dur le nom du vocabulaire
+  // @todo: ne pas coder en dur le nom du vocabulaire
   $entity_info['node']['view modes'] += array(
-    'targetblock_red'=>array(
-      'label'=> 'TargetBlock Red',
-      'custom settings'=> TRUE,
+    'targetblock_red' => array(
+      'label' => 'TargetBlock Red',
+      'custom settings' => TRUE,
     ),
-    
+
     //unset( $entity_info['node']['view modes']['targetblock_medium']);
   );
-  
 }
 
 function unfoldcompanion_field_extra_fields() {
