@@ -1742,7 +1742,6 @@ class views_plugin_display extends views_plugin {
             '#tree' => TRUE,
           );
           $plugin->options_form($form[$form_state['section']], $form_state);
-          
         }
         break;
       case 'row_plugin':
@@ -1753,7 +1752,6 @@ class views_plugin_display extends views_plugin {
           '#options' => views_fetch_plugin_names('row', $this->get_style_type(), array($this->view->base_table)),
           '#default_value' => $this->get_option('row_plugin'),
         );
-        dsm($form);
 
         $row_plugin = views_fetch_plugin_data('row', $this->get_option('row_plugin'));
         if (!empty($row_plugin['uses options'])) {
