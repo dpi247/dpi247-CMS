@@ -18,7 +18,7 @@ $plugin = array(
   'visible' => TRUE, // may be added up front.
 
   // Administrative fields.
-  'title' => t('Destination'),
+  'title' => t('Section'),
   'admin summary' =>'panels_panel_context_admin_summary',
   'admin title' => 'panels_panel_context_title',
   'tab operation' => 'panels_panel_context_tab_operation',
@@ -111,14 +111,14 @@ $plugin = array(
             'include' => array(
               drupal_get_path('module', 'panels') . '/includes/display-edit.inc',
             ),
-            'form id' => 'dpidestinations_destinations_context_edit_content',
+            'form id' => 'dpidestinations_sections_context_edit_content',
             'no blocks' => TRUE,
           ),
         ),
       ),
     ),
 
-    'destination' => array(
+    'section' => array(
       'title' => t('Section'),
       'description' => t('Set up some section\'s settings parameter.'),
       'ajax' => FALSE,
@@ -131,7 +131,7 @@ $plugin = array(
             'include' => array(
               drupal_get_path('module', 'panels') . '/includes/display-edit.inc',
             ),
-            'form id' => 'dpidestinations_destinations_context_edit_destination',
+            'form id' => 'dpidestinations_sections_context_edit_section',
             'no blocks' => TRUE,
           ),
         ),
@@ -168,7 +168,7 @@ $plugin = array(
     'settings' => t('General'),
     'context' => t('Contexts'),
     'layout' => t('Change layout'),
-    'destination' => t('Destination'),
+    'section' => t('section'),
     'move' => '', // no title makes it a 'hidden' edit form.
   ),
   'forms' => array(
@@ -207,7 +207,7 @@ $plugin = array(
      ),
   ),
   'default conf' => array(
-    'title' => t('Destination'),
+    'title' => t('section'),
     'no_blocks' => FALSE,
     'pipeline' => 'dpidestinations_viewer',
     'body_classes_to_remove' => '',
@@ -224,7 +224,7 @@ $plugin = array(
  * Present the panels drag & drop editor to edit the display attached
  * to the task handler.
 */
-function dpidestinations_destinations_context_edit_content($form, &$form_state) {
+function dpidestinations_sections_context_edit_content($form, &$form_state) {
   ctools_include('ajax');
   ctools_include('plugins', 'panels');
   ctools_include('common', 'panels');
@@ -257,15 +257,15 @@ function dpidestinations_destinations_context_edit_content($form, &$form_state) 
 /**
  * Validate changes to the panel content form.
  */
-function dpidestinations_destinations_context_edit_content_validate(&$form, &$form_state) {
+function dpidestinations_sections_context_edit_content_validate(&$form, &$form_state) {
   panels_panel_context_edit_content_validate($form, $form_state);
 }
 
-function dpidestinations_destinations_context_edit_content_submit(&$form, &$form_state) {
+function dpidestinations_sections_context_edit_content_submit(&$form, &$form_state) {
   panels_panel_context_edit_content_submit($form, $form_state);
 }
 
-function dpidestinations_destination_renderer_editor($handler, $base_contexts, $args, $test = TRUE) {
+function dpidestinations_section_renderer_editor($handler, $base_contexts, $args, $test = TRUE) {
   // Go through arguments and see if they match.
   ctools_include('context');
   ctools_include('context-task-handler');
@@ -328,12 +328,12 @@ function dpidestinations_destination_renderer_editor($handler, $base_contexts, $
   return $info;
 
 }
-function dpidestinations_destinations_context_edit_destination($form, &$form_state){
+function dpidestinations_sections_context_edit_section($form, &$form_state){
   $conf = $form_state['handler']->conf;
 
-  $form['conf']['destination_default_target'] = array(
+  $form['conf']['section_default_target'] = array(
     '#type' => 'textfield',
-    '#default_value' => $conf['destination_default_target'],
+    '#default_value' => $conf['section_default_target'],
     '#title' => t('Administrative title'),
     '#description' => t('Administrative title of this variant.'),
   );
@@ -343,6 +343,6 @@ function dpidestinations_destinations_context_edit_destination($form, &$form_sta
 /**
  * Submit handler for general settings form.
  */
-function dpidestinations_destinations_context_edit_destination_submit(&$form, &$form_state) {
-  $form_state['handler']->conf['destination_default_target'] = $form_state['values']['destination_default_target'];
+function dpidestinations_sections_context_edit_section_submit(&$form, &$form_state) {
+  $form_state['handler']->conf['section_default_target'] = $form_state['values']['section_default_target'];
 }
