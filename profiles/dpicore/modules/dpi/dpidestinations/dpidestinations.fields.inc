@@ -370,6 +370,60 @@ function dpidestinations_field_extra_fields() {
 }
 
 /**
+ * Implementation of hook_field_attach_view_alter
+ *
+ * Use the formatter according to given layout for destinations views
+ */
+function dpidestinations_field_attach_view_alter(&$result, $context) {
+  $display = $context['display'];
+  if (!isset($display['already_altered']) &&
+      isset($display['views_view']) && isset($display['views_field'])) {
+    $view = $display['views_view'];
+    if (isset($view->targetview_tid) && isset($view->targetview_target)) {
+      // Get entity basic informations
+      $entity_type = $context['entity_type'];
+      $entity = $context['entity'];
+      list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+
+      // Get destinations from entity
+      static $static_destinations = array();
+      if (!isset($static_destinations[$eid])) {
+        $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
+        $static_destinations[$eid] = $destinations;
+      } else {
+        $destinations = $static_destinations[$eid];
+      }
+
+      if ($destinations) {
+        // Get view mode from destinations
+        $view_mode = FALSE;
+        $tid = $view->targetview_tid;
+        $target = $view->targetview_target;
+        foreach ($destinations as $destination) {
+          if ($destination['tid'] == $tid && $destination['target'] == $target) {
+            $view_mode = $destination['layout'];
+            break;
+          }
+        }
+
+        if ($view_mode) {
+          // Load field instance
+          $views_field = $display['views_field'];
+          $field_name = $views_field->field_info['field_name'];
+          $field_instance = field_info_instance($entity_type, $field_name, $bundle);
+
+          // Get correct display from the field instance, the view mode and the entity
+          $layout_display = field_get_display($field_instance, $view_mode, $entity);
+          $layout_display['already_altered'] = TRUE; // Avoid infinite loop
+          $langcode = $views_field->field_language($entity_type, $entity);
+          $result[$field_name] = field_view_field($entity_type, $entity, $field_name, $layout_display, $langcode);
+        }
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_field_formatter_info().
  *
  * We need to tell Drupal that we have one or more formatters

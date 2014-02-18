@@ -28,23 +28,25 @@ function hook_dpicache_cache_entry_register() {
  * @param  void   ???         Add all your parameters for your callback function then.
  * @return void               Your cache content, or FALSE.
  */
-function dpicache_get_cache_entry($cache_name){
+function dpicache_get_cache_entry($cache_name) {
   $cache_definition = dpicache_get_cache_entry_definition($cache_name);
-  if(!$cache_definition){
-    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache",array("!cache_name"=>$cache_name)),array(),'',WATCHDOG_ERROR);
+  if(!$cache_definition) {
+    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array("!cache_name" => $cache_name)), array(), '', WATCHDOG_ERROR);
     return FALSE;
   }
+
   // Get arguments for callback
-  $parameters=func_get_args();
+  $parameters = func_get_args();
   array_shift($parameters);
   // Get hash
-  $hash = _dpicache_get_hash($cache_name,$parameters);
-  if(!$hash){
+  $hash = _dpicache_get_hash($cache_name, $parameters);
+  if(!$hash) {
     dpi_log('dpicache', "error", t("dpicache_get_cache_entry : Unable to generate hash for !cache_name",array("!cache_name"=>$cache_name)),array(),'',WATCHDOG_ERROR);
     return FALSE;
   }
+
   // fetch cache from ad hoc storage
-  if($content = dpicache_fetch_cache($cache_name, $hash) and $cache_definition['bypass']!=TRUE ){
+  if(($content = dpicache_fetch_cache($cache_name, $hash)) && (!isset($cache_definition['bypass']) || $cache_definition['bypass'] !== TRUE)) {
     // cache available
     dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
     return $content;
@@ -52,11 +54,13 @@ function dpicache_get_cache_entry($cache_name){
   else {
     // no cache available
     dpi_log('dpicache', "cache_miss", t("Cache miss : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_NOTICE);
+
     // Get fresh content
     $fresh_content = _dpicache_cache_call_function($cache_definition, $parameters);
     if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
       return FALSE;
     }
+
     try {
       $parameters_array = serialize($parameters);
     } catch (Exception $e) {

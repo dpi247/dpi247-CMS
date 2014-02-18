@@ -46,11 +46,12 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $destination_term_id = $context['argument_destination_1']->data->tid;
   $target_name = $subtype;
   $split_delta = $conf["split_delta"];
+  $title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
 
-  return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta);
+  return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title);
 }
 
-function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta) {
+function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
   $targetBlockController = new TargetBlockController('targetblock');
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta($did, $target_name, $split_delta);
 
@@ -67,8 +68,8 @@ function _dpidestinations_targetblock_content_type_render_process($did, $destina
 
   $targetview_clone = _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock, $targetview);
 
-  $block->title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
-  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf, $args, $context, $target_wrapper, $targetblock_wrapper, $targetview_clone);
+  $block->title = $title;
+  $block->content = _dpidestinations_targetblock_content_type_helper_get_content($targetview_clone);
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta);
 
   return $block;
@@ -372,7 +373,7 @@ function _dpidestinations_targetblock_content_type_helper_get_title($conf) {
   return $title;
 }
 
-function _dpidestinations_targetblock_content_type_helper_get_content($subtype, $conf, $args, $context, $target_wrapper, $targetblock_wrapper, $targetview) {
+function _dpidestinations_targetblock_content_type_helper_get_content($targetview) {
   $content = "";
   $content = $targetview->render();
   return $content;

@@ -1,5 +1,28 @@
 <?php
 
+/**
+ * Truncate a text in a coherent way. Cut a the end of, in order :
+ *  - A paragraph
+ *  - A line break
+ *  - A sentence
+ *  - A word
+ *
+ * @param string $text
+ *   The text to truncate
+ * @param int $size
+ *   The maximum size of the truncated text
+ * @param bool $nocut_words = NULL
+ *   If TRUE, truncate the text to the closest to the given size without cutting any word
+ *   but with no concern for paragraphs, line breaks and sentences.
+ *   If FALSE, follow the full process and respect paragraphs, line breaks and sentences.
+ * @param string $format = 'full_html'
+ *   The format of the text, used to get informations about filters
+ * @param bool $add_ellipsis
+ *   Add '...' at the end of the resulting string or not
+ *
+ * @return string
+ *   The truncated string
+ */
 function dpicontenttypes_api_truncate_text($text, $size, $nocut_words = NULL, $format = 'full_html', $add_ellipsis = TRUE) {
   // If the size is zero the entire text is the substring.
   if ($size == 0) {
@@ -104,50 +127,128 @@ function dpicontenttypes_api_truncate_text($text, $size, $nocut_words = NULL, $f
   return $substring;
 }
 
+/**
+ * Get the HTML render of the first embedded object of a node
+ *
+ * @param object $node
+ *   The node
+ * @param array $content
+ *   The rendered contents of the node
+ * @param string $type = FALSE
+ *   A Scald media type, to get only this type of media, 'image' for example
+ * @param string $provider = FALSE
+ *   A Scald provider, to get only medias from this provider, 'scald_image' for example
+ *
+ * @return array | bool
+ *   A single entry array (the key is the delta of the object) containing the rendered object or FALSE in case of failure
+ */
 function dpicontenttypes_api_get_first_embed_view($node, $content, $type = FALSE, $provider = FALSE) {
   $rendered_embeds = array();
   if (isset($content['field_embededobjects'])) {
     $embeds_content = $content['field_embededobjects'];
-    $embeds = dpicontenttypes_api_get_first_embed($node, $type, $provider);
-    foreach ($embeds as $delta => $embed) {
-      if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
-        $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+    if ($embeds = dpicontenttypes_api_get_first_embed($node, $type, $provider)) {
+      foreach ($embeds as $delta => $embed) {
+        if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
+          $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+        }
       }
     }
   }
   return empty($rendered_embeds) ? FALSE : $rendered_embeds;
 }
 
+/**
+ * Get the HTML render of all embedded objects of a node
+ *
+ * @param object $node
+ *   The node
+ * @param array $content
+ *   The rendered contents of the node
+ * @param string $type = FALSE
+ *   A Scald media type, to get only this type of media, 'image' for example
+ * @param string $provider = FALSE
+ *   A Scald provider, to get only medias from this provider, 'scald_image' for example
+ * @param bool $inline = NULL
+ *   Three possibilities :
+ *     - TRUE : only return objects used as inline
+ *     - FALSE : do not return inline objects
+ *     - NULL : don't care if inline or not, return all objects
+ *
+ * @return array | bool
+ *   An array (the keys are the deltas of the objects) containing the rendered objects or FALSE in case of failure
+ */
 function dpicontenttypes_api_get_embeds_view($node, $content, $type = FALSE, $provider = FALSE, $inline = NULL) {
   $rendered_embeds = array();
   if (isset($content['field_embededobjects'])) {
     $embeds_content = $content['field_embededobjects'];
-    $embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, FALSE, $inline);
-    foreach ($embeds as $delta => $embed) {
-      if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
-        $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+    if($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, FALSE, $inline)) {
+      foreach ($embeds as $delta => $embed) {
+        if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
+          $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
+        }
       }
     }
   }
-  return $rendered_embeds;
+  return empty($rendered_embeds) ? FALSE : $rendered_embeds;
 }
 
+/**
+ * Get the first embedded object of a node
+ *
+ * @param object $node
+ *   The node
+ * @param string $type = FALSE
+ *   A Scald media type, to get only this type of media, 'image' for example
+ * @param string $provider = FALSE
+ *   A Scald provider, to get only medias from this provider, 'scald_image' for example
+ * @param bool $load_atom = FALSE
+ *   Add the full Scald atom to the returned object
+ *
+ * @return array | bool
+ *   An array (the key is the delta of the object) containing the first object or FALSE in case of failure
+ */
 function dpicontenttypes_api_get_first_embed($node, $type = FALSE, $provider = FALSE, $load_atom = FALSE) {
-  $embed = FALSE;
-  if ($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, $load_atom)) {
-    $embed = array_shift($embeds);
+  $embed = array();
+  if ($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider)) {
+    foreach ($embeds as $delta => $temp_embed) {
+      $embed[$delta] = $temp_embed;
+      $embed[$delta]['delta'] = $delta;
+      if ($load_atom) {
+        $embed[$delta]['atom'] = scald_atom_load($temp_embed['sid']);
+      }
+      break;
+    }
   }
-  return $embed;
+  return empty($embed) ? FALSE : $embed;
 }
 
+/**
+ * Get all embedded objects of a node
+ *
+ * @param object $node
+ *   The node
+ * @param string $type = FALSE
+ *   A Scald media type, to get only this type of media, 'image' for example
+ * @param string $provider = FALSE
+ *   A Scald provider, to get only medias from this provider, 'scald_image' for example
+ * @param bool $load_atom = FALSE
+ *   Add the full Scald atom to the returned objects
+ * @param bool $inline = NULL
+ *   Three possibilities :
+ *     - TRUE : only return objects used as inline
+ *     - FALSE : do not return inline objects
+ *     - NULL : don't care if inline or not, return all objects
+ *
+ * @return array | bool
+ *   An array (the keys are the deltas of the objects) containing the objects or FALSE in case of failure
+ */
 function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE, $load_atom = FALSE, $inline = NULL) {
   static $static_embeds = array();
   if (isset($node->nid)) {
     if(isset($static_embeds[$node->nid])) {
       $embeds = $static_embeds[$node->nid];
     } else {
-      $node_wrapper = entity_metadata_wrapper('node', $node);
-      $embeds = $node_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+      $embeds = dpicommons_get_field_from_entity($node, 'node', 'field_embededobjects', array(), array('identifier' => TRUE));
       $static_embeds[$node->nid] = $embeds;
     }
   }
@@ -183,7 +284,7 @@ function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE,
     }
   }
 
-  return $embeds;
+  return empty($embeds) ? FALSE : $embeds;
 }
 
 /**

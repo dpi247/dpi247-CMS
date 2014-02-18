@@ -34,7 +34,7 @@ class DpidestinationsTargetUIController extends EntityDefaultUIController {
    * Builds the entity overview form.
    */
   public function overviewForm($form, &$form_state) {
-    $form = parent::overviewForm($form, &$form_state);
+    $form = parent::overviewForm($form, $form_state);
     return $form;
   }
 }

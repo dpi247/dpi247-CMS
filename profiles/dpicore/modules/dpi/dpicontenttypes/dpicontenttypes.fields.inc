@@ -217,27 +217,97 @@ function dpicontenttypes_field_formatter_info() {
     }
   }
 
+  $formatters['simple_html_tag_formatter'] = array( // Machine name of the formatter
+    'label' => t('Simple HTML Tag'),
+    'field types' => array('text', 'text_long'), // This will only be available to fields of these types
+    'settings'  => array( // Array of the settings we'll create
+      'tag' => 'span', // Give a default value for when the form is first loaded
+      'class' => '', // Ditto
+    ),
+  );
+
   return $formatters;
+}
+
+/**
+ * Implementation of hook_field_formatter_prepare_view()
+ */
+function dpicontenttypes_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  switch($field['type']){
+    case 'text':
+    case 'long_text':
+      module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+      dpicontenttypes_field_formatter_prepare_view_simple_html_tag_formatter($entity_type, $entities, $field, $instances, $langcode, $items, $displays);
+      break;
+
+    default:
+      break;
+  }
 }
 
 /**
  * Implements hook_field_formatter_view.
  */
 function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $render_context = $display['type'];
-  $contexts = scald_contexts();
   $element = array();
 
-  if (!empty($contexts[$render_context])) {
-    foreach ($items as $delta => $item) {
-      $sid = $item['sid'];
-      $entity_ids = entity_extract_ids($entity_type, $entity);
-      $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
-      $element[$delta] = array('#markup' => scald_render($sid, $render_context, json_encode($options)));
-    }
+  switch($field['type']){
+    case 'text':
+    case 'long_text':
+      module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+      $element = dpicontenttypes_field_formatter_view_simple_html_tag_formatter($entity_type, $entity, $field, $instance, $langcode, $items, $display);
+      break;
+
+    case 'dpiatom_reference':
+      $render_context = $display['type'];
+      $contexts = scald_contexts();
+      $element = array();
+
+      if (!empty($contexts[$render_context])) {
+        module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+        $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
+      }
+      break;
+
+    default:
+      break;
   }
 
   return $element;
+}
+
+/**
+ * Implementation of hook_field_formatter_settings_form()
+ */
+function dpicontenttypes_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  switch($field['type']) {
+    case 'text':
+    case 'long_text':
+      module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+      return dpicontenttypes_field_formatter_settings_form_simple_html_tag_formatter($field, $instance, $view_mode, $form, $form_state);
+      break;
+
+    default:
+      return array();
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_field_formatter_settings_summary()
+ */
+function dpicontenttypes_field_formatter_settings_summary($field, $instance, $view_mode) {
+  switch($field['type']) {
+    case 'text':
+    case 'long_text':
+      module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+      return dpicontenttypes_field_formatter_settings_summary_simple_html_tag_formatter($field, $instance, $view_mode);
+      break;
+
+    default:
+      return '';
+      break;
+  }
 }
 
 /**

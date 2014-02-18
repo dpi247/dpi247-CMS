@@ -1,9 +1,8 @@
 <?php
 
-
-/*
+/**
  * Wrapper function to avoid dependancy of dpicache
-*/
+ */
 function _dpidestinations_variable_get( $name, $default_value){
   if(function_exists('dpi_variable_get')){
     return dpi_variable_get($name,$default_value);
@@ -11,12 +10,11 @@ function _dpidestinations_variable_get( $name, $default_value){
   else{
     return variable_get($name,$default_value);
   }
-
 }
 
-/*
+/**
  * Wrapper function to avoid dependancy of dpicache
-*/
+ */
 function _dpidestinations_variable_set( $name, $default_value){
   if(function_exists('dpi_variable_set')){
     return dpi_variable_set($name,$default_value);
@@ -24,12 +22,11 @@ function _dpidestinations_variable_set( $name, $default_value){
   else{
     return variable_set($name,$default_value);
   }
-
 }
 
-/*
+/**
  * Wrapper function to avoid dependancy of dpicache
-*/
+ */
 function _dpidestinations_variable_del( $name){
   if(function_exists('dpi_variable_del')){
     return dpi_variable_del($name);
@@ -37,7 +34,6 @@ function _dpidestinations_variable_del( $name){
   else{
     return variable_del($name);
   }
-
 }
 
 
@@ -46,12 +42,12 @@ function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALS
   $vid = dpidestinations_api_get_sections_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
-  //->addTag('translatable')
-  ->fields('t')
-  ->condition('t.vid', $vid)
-  ->orderBy('t.weight')
-  ->orderBy('t.name')
-  ->execute();
+    //->addTag('translatable')
+    ->fields('t')
+    ->condition('t.vid', $vid)
+    ->orderBy('t.weight')
+    ->orderBy('t.name')
+    ->execute();
 
   $terms = array();
   foreach ($result as $term) {
@@ -71,8 +67,6 @@ function _dpidestinations_target_machine_name_exists($value){
   }
   return FALSE;
 }
-
-
 
 function _dpidestinations_get_all_targetviews(){
   //@todo: Peut être interessant de mettre un cache statique ici pour performance (DDU)
@@ -113,6 +107,7 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id){
   }
   return  $displays[$term_id];
 }
+
 /*
  * REturn the name form the page_manager_handlers table for a display_id
 */
@@ -153,7 +148,6 @@ function _dpidestinations_get_available_targetlayouts(){
 
   }
   return $return;
-
 }
 function _dpidestinations_get_targets_for_sectionterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
@@ -170,7 +164,6 @@ function _dpidestinations_get_targets_for_sectionterm($term_id){
   return $targets[$term_id];
 }
 
-
 function _target_metadata_getter($object, array $options, $property_name){
   if($property_name=="available_targetlayouts"){
     foreach(unserialize($object->available_targetlayouts) as $key=>$layout){
@@ -180,6 +173,7 @@ function _target_metadata_getter($object, array $options, $property_name){
     }
     return $layouts;
   }
+
   if($property_name=="available_templateoverrides"){
     $result=array();
     return $result;
@@ -191,6 +185,7 @@ function _target_metadata_getter($object, array $options, $property_name){
     }
     return $object->available_templateoverrides=$result;
   }
+
   if($property_name=="targetview"){
     $view_name= $object->view_name;
     $view_display= $object->view_display;
@@ -207,6 +202,7 @@ function _target_metadata_setter($object, $property_name, $wrapper){
   if($property_name=="available_targetlayouts"){
     return $object->available_targetlayouts=serialize($wrapper);
   }
+
   if($property_name=="available_templateoverrides"){
     $db_value="";
     foreach($wrapper as $key => $value){
@@ -214,53 +210,49 @@ function _target_metadata_setter($object, $property_name, $wrapper){
     }
     return $object->available_templateoverrides=$db_value;
   }
-
-
 }
-
-
 
 function _targetblock_metadata_getter($object, array $options, $property_name){
   if($property_name=="target"){
     return $object->target;
   }
+
   if($property_name=="target_object"){
     return $object->target;
   }
+
   if($property_name=="other_splitted_targetblocks"){
     $targetblockController=new TargetBlockController('targetblock');
 
     $other_splitted_targetblocks=$targetblockController->load_targetblocks_by_did_and_target($object->did, $object->target, $object->delta);
 
-    //We remove the current targetblock from the set
+    // We remove the current targetblock from the set
     unset($other_splitted_targetblocks[$object->targetblockid]);
     return $other_splitted_targetblocks;
   }
-
 }
 
-/*
- * UPDATE the virtualtrank of each items of a node
-*
-*/
+/**
+ * Update the virtualtrank of each items of a node
+ */
 function _dpidestinations_virtualrank_update_items( & $items){
   foreach($items as & $item){
     _dpidestinations_virtualrank_update_item( $item);
   }
 }
-/*
+
+/**
  * Update the virtualrank of an item
-*/
+ */
 function _dpidestinations_virtualrank_update_item( & $item){
   if($item['rank']=='default'){
     $controller=new TargetBlockController('targetblock');
     $targetblock=$controller->load_targetblock_by_termid_and_target($item['tid'],$item['target']);
+
     if($targetblock){
       $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-
       $rank_max_value= $wrapper->rank_max_value->value();
       $item['rank']=1;
-
     }
     else{
       //We need a fallback if the targetblock is not found
@@ -274,9 +266,9 @@ function _dpidestinations_virtualrank_update_item( & $item){
         $item['rank']=0;
 
       }
-
     }
   }
+
   if($item['rank']!='DNC'){
     //Caclulate virtual_rank
     $item['virtual_rank']=_dpidestinations_virtualrank_give_virtual_rank_for_position( $item['tid'],$item['target'],$item['rank']);
@@ -284,7 +276,6 @@ function _dpidestinations_virtualrank_update_item( & $item){
   else{
     $item['rank']=0;
   }
-
 }
 
 /**
@@ -336,7 +327,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
       }
     }
   }
-  $virtual_rank=(int) $virtual_rank;
+  $virtual_rank= (int)$virtual_rank;
 
   if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
     watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
@@ -378,27 +369,20 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
 }
 
 function _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $new_virtual_rank){
-
   //@todo: avoid hard coding of the table...
   $destination_table='field_data_field_destinations';
 
   db_update($destination_table) // Table name no longer needs {}
-  ->fields(array(
-  'field_destinations_virtual_rank' => $new_virtual_rank,
-  ))
-  ->condition('entity_id',$nid)
-  ->condition('field_destinations_tid',$term_id)
-  ->condition('field_destinations_target',$target_name)
-  ->execute();
+    ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
+    ->condition('entity_id',$nid)
+    ->condition('field_destinations_tid',$term_id)
+    ->condition('field_destinations_target',$target_name)
+    ->execute();
 
   entity_get_controller('node')->resetCache(array($nid));
-
-
-
 }
 
 function _dpidestinatons_targetblock_calculate_node_count_for_targetblock(& $targetblock){
-
   if($targetblock->use_split and $targetblock->total_count_do_not_propagate!=TRUE){
     $targetblock_wrapper=entity_metadata_wrapper('targetblock', $targetblock);
     $targetblockController=new TargetBlockController("targetblock");
@@ -415,6 +399,7 @@ function _dpidestinatons_targetblock_calculate_node_count_for_targetblock(& $tar
     $targetblock->node_count_for_targetblock=$targetblock->node_count_for_targetblockinstance;
   }
 }
+
 function _dpidestinatons_targetblock_sync_node_count_for_targetblock(& $targetblock){
   if($targetblock->use_split and $targetblock->total_count_do_not_propagate!=TRUE){
     $targetblock_wrapper=entity_metadata_wrapper('targetblock', $targetblock);
@@ -433,18 +418,16 @@ function _dpidestinatons_targetblock_sync_node_count_for_targetblock(& $targetbl
       $other_splitted_targetblock->node_count_for_targetblock=$node_count_for_targetblock;
       targetblock_save( $other_splitted_targetblock);
     }
-
   }
-
 }
 
-/*
+/**
  * Initialize a reorder targetview
-*
-* You still need to execute
-* $targetview->pre_execute();
-* $targetview->execute();
-*/
+ *
+ * You still need to execute
+ * $targetview->pre_execute();
+ * $targetview->execute();
+ */
 function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
 
@@ -468,16 +451,15 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
   return $targetview;
-
 }
+
 /**
  * initialize a targetview
  *
  * Set tid and target filter and define
- *
- *   offest
- *   items_per_page
- *   the use of a pager
+ *  - offest
+ *  - items_per_page
+ *  - the use of a pager
  *
  * @param unknown $targetview
  * @param unknown $term_value
@@ -492,7 +474,6 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
 
-
   if($targetblock->use_pager){
     $pager =  $targetview->display_handler->get_option('pager');
     $pager['type'] = $targetblock->pager_type;
@@ -500,7 +481,6 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
     //We dont need offset since we execute the view only once
     //$pager['options']['offset']=$targetblock->offset;
     $targetview->display_handler->set_option('pager', $pager);
-
   }else{
     $pager =  $targetview->display_handler->get_option('pager');
     $pager['type'] = 'some';
@@ -511,18 +491,13 @@ function   _dpidestinations_targetview_initialize_view(& $targetview, $term_valu
 
     $targetview->set_items_per_page($targetblock->node_count_for_targetblock);
     //$targetview->set_offset($targetblock->offset);
-
   }
   $targetview->dpidestinations['destination']->tid=$term_value;
   $targetview->dpidestinations['target']->machine_name=$target_value;
 
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
-
 }
-
-
-
 
 /**
  * Return the structure of the filter to filter results within a targetview for a specific destination
@@ -545,8 +520,7 @@ function   _dpidestinations_targetview_initialize_view_get_target_filter($target
     'value' => $target_value,
     'group' => '1',
     'exposed' => false,
-    'expose' =>
-    array (
+    'expose' => array (
       'operator_id' => false,
       'label' => '',
       'description' => '',
@@ -556,14 +530,12 @@ function   _dpidestinations_targetview_initialize_view_get_target_filter($target
       'required' => false,
       'remember' => false,
       'multiple' => false,
-      'remember_roles' =>
-      array (
+      'remember_roles' => array (
         2 => 2,
       ),
     ),
     'is_grouped' => false,
-    'group_info' =>
-    array (
+    'group_info' => array (
       'label' => '',
       'description' => '',
       'identifier' => '',
@@ -572,12 +544,8 @@ function   _dpidestinations_targetview_initialize_view_get_target_filter($target
       'multiple' => false,
       'remember' => 0,
       'default_group' => 'All',
-      'default_group_multiple' =>
-      array (
-      ),
-      'group_items' =>
-      array (
-      ),
+      'default_group_multiple' => array (),
+      'group_items' => array (),
     ),
   );
 }
@@ -598,16 +566,14 @@ function   _dpidestinations_targetview_initialize_view_get_term_filter($term_val
     'group_type' => 'group',
     'ui_name' => '',
     'operator' => '=',
-    'value' =>
-    array (
+    'value' => array (
       'min' => '',
       'max' => '',
       'value' => $term_value,
     ),
     'group' => '1',
     'exposed' => false,
-    'expose' =>
-    array (
+    'expose' => array (
       'operator_id' => false,
       'label' => '',
       'description' => '',
@@ -617,14 +583,12 @@ function   _dpidestinations_targetview_initialize_view_get_term_filter($term_val
       'required' => false,
       'remember' => false,
       'multiple' => false,
-      'remember_roles' =>
-      array (
+      'remember_roles' => array (
         2 => 2,
       ),
     ),
     'is_grouped' => false,
-    'group_info' =>
-    array (
+    'group_info' => array (
       'label' => '',
       'description' => '',
       'identifier' => '',
@@ -633,25 +597,11 @@ function   _dpidestinations_targetview_initialize_view_get_term_filter($term_val
       'multiple' => false,
       'remember' => 0,
       'default_group' => 'All',
-      'default_group_multiple' =>
-      array (
-      ),
-      'group_items' =>
-      array (
-      ),
+      'default_group_multiple' => array (),
+      'group_items' => array (),
     ),
   );
-
 }
-
-
-
-
-
-
-
-
-
 function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id){
   if($term_id==''){
     return array(''=>'');
@@ -662,12 +612,13 @@ function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id
   foreach($targets as $subtype=>$target){
     $options[$subtype]=$target->label;
   }
+
   return $options;
 }
-/*
+
+/**
  * Helpers function to build select options from availlable target views
-*
-*/
+ */
 function __dpidestinations_dependant_target_viewname_and_display_options_for_view_name($include_blank=TRUE){
   $target_views=_dpidestinations_get_all_targetviews();
 
@@ -675,16 +626,17 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
   foreach($target_views as $target_view_name=> $target_view ){
     $options[$target_view_name]=$target_view['label'];
   }
+
   if($include_blank){
     $options=array_merge(array(NULL=>t('Choose a targetview')),$options);
   }
+
   return $options;
 }
 
-/*
+/**
  * Helpers function to build select options from availlable target display for a view
-*
-*/
+ */
 function __dpidestinations_dependant_target_viewname_and_display_options_for_view_display($view_name=NULL){
   $target_views=_dpidestinations_get_all_targetviews();
 
@@ -700,28 +652,28 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
     }
   }
 
-
   return $options;
 }
 
 
 function __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_id,$target_name){
 
-  if($target_id='' OR $target_name==NULL)
+  if($target_id='' || $target_name==NULL)
     return array(""=>"");
+  }
+
   $controller=new TargetController('target');
   $target=$controller->load_target_by_name($target_name);
   $wrapper = entity_metadata_wrapper('target', $target);
 
   return $wrapper->available_targetlayouts->value();
-
 }
-
 
 function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update=FALSE){
   if($term_id==""){
     return array(''=>'');
   }
+
   $rank_options=array();
 
   if($is_update){
@@ -733,7 +685,6 @@ function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target
   return $rank_options+$options;
 }
 
-
 /**
  *  Return the info for destination field
  *
@@ -742,13 +693,12 @@ function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target
  *  @see dpidestination_install()
  *  @see _dpidestination_get_field_info_for_destination()
  *  @see _dpidestination_get_instance_field_info_for_destination()
- *
  */
 function _dpidestination_attach_field_destination_to_bundle($entity_type,$bundle){
   $field_info_instance=_dpidestination_get_instance_field_info_for_destination($entity_type,$bundle);
   field_create_instance($field_info_instance);
-
 }
+
 /**
  *  Return the info for destination field
  *
@@ -757,33 +707,24 @@ function _dpidestination_attach_field_destination_to_bundle($entity_type,$bundle
  *  @see dpidestination_install()
  *  @see _dpidestination_get_field_info_for_destination()
  *  @see _dpidestination_get_instance_field_info_for_destination()
- *
  */
 function _dpidestination_get_field_info_for_destination(){
   return array(
     'translatable' => '0',
-    'entity_types' =>
-    array (
+    'entity_types' => array (
     ),
-    'settings' =>
-    array (
+    'settings' => array (
     ),
-    'storage' =>
-    array (
+    'storage' => array (
       'type' => 'field_sql_storage',
-      'settings' =>
-      array (
+      'settings' => array (
       ),
       'module' => 'field_sql_storage',
       'active' => '1',
-      'details' =>
-      array (
-        'sql' =>
-        array (
-          'FIELD_LOAD_CURRENT' =>
-          array (
-            'field_data_field_destinations' =>
-            array (
+      'details' => array (
+        'sql' => array (
+          'FIELD_LOAD_CURRENT' => array (
+            'field_data_field_destinations' => array (
               'tid' => 'field_destinations_tid',
               'target' => 'field_destinations_target',
               'layout' => 'field_destinations_layout',
@@ -791,10 +732,8 @@ function _dpidestination_get_field_info_for_destination(){
               'virtual_rank' => 'field_destinations_virtual_rank',
             ),
           ),
-          'FIELD_LOAD_REVISION' =>
-          array (
-            'field_revision_field_destinations' =>
-            array (
+          'FIELD_LOAD_REVISION' => array (
+            'field_revision_field_destinations' => array (
               'tid' => 'field_destinations_tid',
               'target' => 'field_destinations_target',
               'layout' => 'field_destinations_layout',
@@ -805,17 +744,13 @@ function _dpidestination_get_field_info_for_destination(){
         ),
       ),
     ),
-    'foreign keys' =>
-    array (
+    'foreign keys' => array (
     ),
-    'indexes' =>
-    array (
-      'tid' =>
-      array (
+    'indexes' => array (
+      'tid' => array (
         0 => 'tid',
       ),
-      'virtual_rank' =>
-      array (
+      'virtual_rank' => array (
         0 => 'virtual_rank',
       ),
     ),
@@ -826,48 +761,39 @@ function _dpidestination_get_field_info_for_destination(){
     'locked' => '0',
     'cardinality' => '-1',
     'deleted' => '0',
-    'columns' =>
-    array (
-      'tid' =>
-      array (
+    'columns' => array (
+      'tid' => array (
         'type' => 'int',
         'size' => 'medium',
         'not null' => true,
       ),
-      'target' =>
-      array (
+      'target' => array (
         'type' => 'varchar',
         'length' => 254,
         'not null' => false,
       ),
-      'layout' =>
-      array (
+      'layout' => array (
         'type' => 'varchar',
         'length' => 254,
         'not null' => false,
       ),
-      'rank' =>
-      array (
+      'rank' => array (
         'type' => 'int',
         'size' => 'medium',
         'not null' => false,
       ),
-      'virtual_rank' =>
-      array (
+      'virtual_rank' => array (
         'type' => 'int',
         'size' => 'big',
         'not null' => false,
       ),
     ),
-    'bundles' =>
-    array (
-      'node' =>
-      array (
+    'bundles' => array (
+      'node' => array (
         0 => 'package',
       ),
     ),
   );
-
 }
 
 /**
@@ -878,70 +804,49 @@ function _dpidestination_get_field_info_for_destination(){
  *  @see dpidestination_install()
  *  @see _dpidestination_get_field_info_for_destination()
  *  @see _dpidestination_get_instance_field_info_for_destination()
- *
  */
 function _dpidestination_get_instance_field_info_for_destination($entity_type,$bundle){
   return array('label' => 'Destinations',
-    'widget' =>
-    array (
+    'widget' => array (
       'weight' => '28',
       'type' => 'destination_default_widget',
       'module' => 'dpidestinations',
       'active' => 0,
-      'settings' =>
-      array (
-      ),
+      'settings' => array (),
     ),
-    'settings' =>
-    array (
+    'settings' => array (
       'user_register_form' => false,
     ),
-    'display' =>
-    array (
-      'default' =>
-      array (
+    'display' => array (
+      'default' => array (
         'label' => 'above',
         'type' => 'destination_default_formatter',
-        'settings' =>
-        array (
-        ),
+        'settings' => array (),
         'module' => 'dpidestinations',
         'weight' => 35,
       ),
-      'teaser' =>
-      array (
+      'teaser' => array (
         'type' => 'hidden',
         'label' => 'above',
-        'settings' =>
-        array (
-        ),
+        'settings' => array (),
         'weight' => 0,
       ),
-      'targetblock_small' =>
-      array (
+      'targetblock_small' => array (
         'type' => 'hidden',
         'label' => 'above',
-        'settings' =>
-        array (
-        ),
+        'settings' => array (),
         'weight' => 0,
       ),
-      'targetblock_medium' =>
-      array (
+      'targetblock_medium' => array (
         'type' => 'hidden',
         'label' => 'above',
-        'settings' =>
-        array (
-        ),
+        'settings' => array (),
         'weight' => 0,
       ),
-      'targetblock_big' =>
-      array (
+      'targetblock_big' => array (
         'type' => 'hidden',
         'label' => 'above',
-        'settings' =>
-        array (
-        ),
+        'settings' => array (),
         'weight' => 0,
       ),
     ),
@@ -953,5 +858,4 @@ function _dpidestination_get_instance_field_info_for_destination($entity_type,$b
     'bundle' => $bundle,
     'deleted' => '0',
   );
-
 }

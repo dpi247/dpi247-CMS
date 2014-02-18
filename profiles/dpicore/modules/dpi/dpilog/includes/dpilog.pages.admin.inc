@@ -67,7 +67,7 @@ function dpilog_page_view_list_build_logs_table($filters) {
   $results = $query->execute();
   $table_rows = array();
   foreach($results as $result) {
-    $bck_color = $registrations[$result->log_name][$result->action]['color'];
+    $bck_color = isset($registrations[$result->log_name][$result->action]['color']) ? $registrations[$result->log_name][$result->action]['color'] : 'transparent';
 
     $message = truncate_utf8(filter_xss($result->message, array()), 150, TRUE, TRUE);
     $message = ' '.l($message, 'admin/dpi247/dpilogs/dpilog/view/log/'.$result->lid);
@@ -249,7 +249,7 @@ function dpilog_page_view_timeline(){
   return $output;
 }
 
-function dpilog_page_view_list_build_filters($form,$form_state){
+function dpilog_page_view_list_build_filters(){
   $filters = isset($_SESSION['dpilog_filters']) ? $_SESSION['dpilog_filters'] : array();
 
   //$filters['log_name']=array('dpidestinations_extract');
@@ -258,11 +258,11 @@ function dpilog_page_view_list_build_filters($form,$form_state){
 }
 
 function dpilog_page_view_list_filter_form(){
-  $registrations=dpi_variable_get("dpilog_configuration_granularity",array());
-  $registrations=$registrations['registrations'];
+  $registrations = dpi_variable_get("dpilog_configuration_granularity", array());
+  $registrations = (isset($registrations['registrations']) && is_array($registrations['registrations'])) ? $registrations['registrations'] : array();
 
-  $filters=dpilog_page_view_list_build_filters($form,$form_state);
-  $actions_options=array();
+  $filters=dpilog_page_view_list_build_filters();
+  $actions_options = $log_name_options = array();
   foreach($registrations as $registration_name=>$registration){
     $log_name_options[$registration_name]=$registration_name;
     $action_key[$registration_name]=array();
