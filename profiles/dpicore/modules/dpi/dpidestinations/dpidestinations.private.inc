@@ -658,7 +658,7 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
 
 function __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_id,$target_name){
 
-  if($target_id='' || $target_name==NULL)
+  if($target_id='' || $target_name==NULL){
     return array(""=>"");
   }
 
