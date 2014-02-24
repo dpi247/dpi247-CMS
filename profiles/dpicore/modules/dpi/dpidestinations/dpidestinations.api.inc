@@ -74,7 +74,7 @@ function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
 }
 
 function dpidestinations_api_get_sections_vocabulary_vid(){
-  return _dpidestinations_variable_get('dpidestinations_destination_vid',2);
+  return _dpidestinations_variable_get('dpidestinations_section_vid',2);
 }
 
 function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){

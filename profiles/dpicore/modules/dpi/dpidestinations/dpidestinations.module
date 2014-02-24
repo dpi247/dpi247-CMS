@@ -60,12 +60,6 @@ function dpidestinations_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['target/add'] = array(
-    'title' => t('Add Target!'),
-    'page callback' => 'target_add',
-    'access arguments' => array('create target'),
-  );
-
   $target_entity = entity_get_info('target');
   if($target_entity['fieldable']) {
     // We present this menu item only if the target has been altered as fieldable

@@ -163,7 +163,7 @@ $plugin = array(
   ),
 
   'edit forms' => array(
-    'content' => t('Panel content'),
+    'content' => t('Section content'),
     'criteria' => t('Selection rules'),
     'settings' => t('General'),
     'context' => t('Contexts'),
