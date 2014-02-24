@@ -235,7 +235,7 @@ function dpicontenttypes_field_formatter_info() {
 function dpicontenttypes_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
   switch($field['type']){
     case 'text':
-    case 'long_text':
+    case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       dpicontenttypes_field_formatter_prepare_view_simple_html_tag_formatter($entity_type, $entities, $field, $instances, $langcode, $items, $displays);
       break;
@@ -250,10 +250,9 @@ function dpicontenttypes_field_formatter_prepare_view($entity_type, $entities, $
  */
 function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-
   switch($field['type']){
     case 'text':
-    case 'long_text':
+    case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       $element = dpicontenttypes_field_formatter_view_simple_html_tag_formatter($entity_type, $entity, $field, $instance, $langcode, $items, $display);
       break;
@@ -282,7 +281,7 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
 function dpicontenttypes_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   switch($field['type']) {
     case 'text':
-    case 'long_text':
+    case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       return dpicontenttypes_field_formatter_settings_form_simple_html_tag_formatter($field, $instance, $view_mode, $form, $form_state);
       break;
@@ -299,7 +298,7 @@ function dpicontenttypes_field_formatter_settings_form($field, $instance, $view_
 function dpicontenttypes_field_formatter_settings_summary($field, $instance, $view_mode) {
   switch($field['type']) {
     case 'text':
-    case 'long_text':
+    case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       return dpicontenttypes_field_formatter_settings_summary_simple_html_tag_formatter($field, $instance, $view_mode);
       break;

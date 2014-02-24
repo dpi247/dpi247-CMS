@@ -73,19 +73,20 @@ function theunfold_preprocess_node(&$vars) {
 function theunfold_preprocess_field(&$variables) {
   $element = $variables['element'];
   switch ($element['#field_name']) {
+    /*
     case 'field_textchapo':
       $variables['classes_array'][] = 'heading';
       break;
-
+*/
     case 'field_textbody':
     case 'field_linkslists':
       $variables['classes_array'][] = 'article-body';
       break;
-
+/*
     case 'field_textbarette':
       $variables['classes_array'][] = 'cat';
       break;
-
+*/
     case 'field_copyright':
       $variables['classes_array'][] = 'meta';
       break;

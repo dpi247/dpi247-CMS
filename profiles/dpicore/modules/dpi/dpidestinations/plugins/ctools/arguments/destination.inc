@@ -23,25 +23,24 @@ $plugin = array(
 );
 
 /**
- * 
  * We override the ctools_term_context to add the reference of the display handler cuz we
  * Need the did in the targetblock render
- * 
  */
 function dpidestinations_destination_context($arg = NULL, $conf = NULL, $empty = FALSE) {
-  
   // Use term context code.
   module_load_include('inc', 'ctools','plugins/arguments/term');
   $context = ctools_term_context($arg , $conf , $empty);
 
   $task=$conf['task'];
   $handlers = page_manager_load_sorted_handlers($task, '', TRUE);
-  
-  //@todo: we shouldn't hard code the argument_destination_1 name 
+
+  //@todo: we shouldn't hard code the argument_destination_1 name
   $id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array("argument_destination_1"=> $context), array());
-  
-  $context->data->handler=$handlers[$id];
-  
+
+  if (isset($handlers[$id])) {
+    $context->data->handler = $handlers[$id];
+  }
+
   return $context;
 }
 
@@ -84,7 +83,6 @@ function dpidestinations_destination_settings_form(&$form, &$form_state, $conf) 
     '#type' => 'checkbox',
     '#default_value' => !empty($conf['transform']),
   );
-//  return $form;
 }
 
 /**
@@ -95,13 +93,13 @@ function dpidestinations_destination_ctools_argument_placeholder($conf) {
     case 'tid':
     default:
       return array(
-        '#type' => 'textfield',
-        '#description' => t('Enter a taxonomy term ID.'),
+      '#type' => 'textfield',
+      '#description' => t('Enter a taxonomy term ID.'),
       );
     case 'term':
       return array(
-        '#type' => 'textfield',
-        '#description' => t('Enter a taxonomy term name.'),
+      '#type' => 'textfield',
+      '#description' => t('Enter a taxonomy term name.'),
       );
   }
 }

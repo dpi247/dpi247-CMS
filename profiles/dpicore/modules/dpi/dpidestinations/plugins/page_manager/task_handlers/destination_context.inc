@@ -42,6 +42,7 @@ $plugin = array(
       'description' => t('Change general settings about this variant.'),
       'form' => 'panels_panel_context_edit_settings',
     ),
+    
     'criteria' => array(
       'title' => t('Selection rules'),
       'description' => t('Control the criteria used to decide whether or not this variant is used.'),
@@ -58,6 +59,7 @@ $plugin = array(
         ),
       ),
     ),
+    
     'context' => array(
       'title' => t('Contexts'),
       'ajax' => FALSE,
@@ -74,6 +76,7 @@ $plugin = array(
         ),
       ),
     ),
+    
     'layout' => array(
       'title' => t('Layout'),
       'description' => t('Change the layout of this panel.'),
@@ -98,6 +101,7 @@ $plugin = array(
         ),
       ),
     ),
+    
     'content' => array(
       'title' => t('Content'),
       'description' => t('Add content items and change their location with a drag and drop interface.'),
@@ -137,6 +141,7 @@ $plugin = array(
         ),
       ),
     ),
+    
     'preview' => array(
       'title' => t('Preview'),
       'description' => t('Get a preview of what this variant will look like.'),
@@ -148,11 +153,11 @@ $plugin = array(
     ),
   ),
 
- 
   'add features' => array(
     'criteria' => t('Selection rules'),
     'context' => t('Contexts'),
   ),
+  
   // Where to go when finished.
   'add finish' => 'content',
 
@@ -171,6 +176,7 @@ $plugin = array(
     'section' => t('section'),
     'move' => '', // no title makes it a 'hidden' edit form.
   ),
+  
   'forms' => array(
     'settings' => array(
       'form id' => 'panels_panel_context_edit_settings',
@@ -206,6 +212,7 @@ $plugin = array(
       'form id' => 'ctools_context_handler_edit_criteria',
      ),
   ),
+  
   'default conf' => array(
     'title' => t('section'),
     'no_blocks' => FALSE,
@@ -216,9 +223,9 @@ $plugin = array(
     'css' => '',
     'contexts' => array(),
     'relationships' => array(),
+    'section_default_target' => '',
   ),
 );
-
 
 /**
  * Present the panels drag & drop editor to edit the display attached
@@ -230,23 +237,23 @@ function dpidestinations_sections_context_edit_content($form, &$form_state) {
   ctools_include('common', 'panels');
   ctools_include('context');
   ctools_include('context-task-handler');
-  
+
   $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . ':' . $form_state['handler_id']);
   $form_state['renderer'] = panels_get_renderer_handler('dpidestinations_editor', $cache->display);
-  
+
   $form_state['renderer']->cache = &$cache;
-  
+
   $form_state['display'] = &$cache->display;
   $form_state['content_types'] = $cache->content_types;
   // Tell the Panels form not to display save & cancel buttons.
   $form_state['no buttons'] = TRUE;
-  
+
   $form_state['display_title'] = !empty($cache->display_title);
   $form_state['no preview'] = TRUE;
   $form_state['page']->display_cache[$form_state['handler_id']] = $cache;
-  
+
   $form = panels_edit_display_form($form, $form_state);
-  
+
   if (!isset($form_state['type']) || $form_state['type'] != 'add' && !empty($form_state['handler_id']) && !empty($form['buttons'])) {
     $form['buttons']['preview'] = $form['buttons']['return'];
     $form['buttons']['preview']['#value'] = t('Update and preview');
@@ -307,7 +314,7 @@ function dpidestinations_section_renderer_editor($handler, $base_contexts, $args
   panels_get_current_page_display($display);
 
   $renderer = panels_get_renderer($handler->conf['pipeline'], $display);
-  
+
   // Remove and add body element classes
   $panel_body_css = &drupal_static('panel_body_css');
 
@@ -326,8 +333,8 @@ function dpidestinations_section_renderer_editor($handler, $base_contexts, $args
   $info['title'] = $display->get_title();
 
   return $info;
-
 }
+
 function dpidestinations_sections_context_edit_section($form, &$form_state){
   $conf = $form_state['handler']->conf;
 
@@ -337,6 +344,7 @@ function dpidestinations_sections_context_edit_section($form, &$form_state){
     '#title' => t('Administrative title'),
     '#description' => t('Administrative title of this variant.'),
   );
+
   return $form;
 }
 

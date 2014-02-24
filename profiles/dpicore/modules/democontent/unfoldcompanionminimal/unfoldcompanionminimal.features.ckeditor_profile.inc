@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * dpicontenttypes.features.ckeditor_profile.inc
+ * unfoldcompanionminimal.features.ckeditor_profile.inc
  */
 
 /**
  * Implements hook_ckeditor_profile_defaults().
  */
-function dpicontenttypes_ckeditor_profile_defaults() {
+function unfoldcompanionminimal_ckeditor_profile_defaults() {
   $data = array(
     'Advanced' => array(
       'name' => 'Advanced',
@@ -17,9 +17,7 @@ function dpicontenttypes_ckeditor_profile_defaults() {
         'show_toggle' => 't',
         'uicolor' => 'default',
         'uicolor_user' => 'default',
-        'toolbar' => '[
-    [\'Format\',\'Source\',\'Bold\',\'Italic\',\'Underline\',\'-\',\'NumberedList\',\'BulletedList\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Link\',\'Unlink\',\'-\',\'ScaldAtom\']
-]',
+        'toolbar' => '[[\'Format\',\'Source\',\'Bold\',\'Italic\',\'Underline\',\'-\',\'NumberedList\',\'BulletedList\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Link\',\'Unlink\',\'-\',\'ScaldAtom\']]',
         'expand' => 't',
         'width' => '100%',
         'lang' => 'en',
@@ -79,9 +77,7 @@ function dpicontenttypes_ckeditor_profile_defaults() {
         'show_toggle' => 't',
         'uicolor' => 'default',
         'uicolor_user' => 'default',
-        'toolbar' => '[
-    [\'Format\',\'Bold\',\'Italic\',\'Underline\',\'-\',\'NumberedList\',\'BulletedList\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Link\',\'Unlink\',\'-\']
-]',
+        'toolbar' => '[[\'Format\',\'Bold\',\'Italic\',\'Underline\',\'-\',\'NumberedList\',\'BulletedList\',\'-\',\'JustifyLeft\',\'JustifyCenter\',\'JustifyRight\',\'JustifyBlock\',\'-\',\'Link\',\'Unlink\',\'-\']]',
         'expand' => 't',
         'width' => '100%',
         'lang' => 'en',

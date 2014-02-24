@@ -362,15 +362,17 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
           $transcoders = scald_transcoders();
           $contexts = scald_contexts();
           $context_config = $contexts[$context];
-          $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
+          if (isset($context_config['type_format'][$atom->type]['transcoder']) && isset($transcoders[$context_config['type_format'][$atom->type]['transcoder']])) {
+            $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
 
-          if ($transcoder['provider'] == 'scald_image') {
-            $atom->rendered->player = theme('dpicontenttypes_image_render_context', array(
-              'context' => $context,
-              'atom' => $atom,
-              'style_name' => $transcoder['style'],
-              'options' => $options,
-            ));
+            if ($transcoder['provider'] == 'scald_image') {
+              $atom->rendered->player = theme('dpicontenttypes_image_render_context', array(
+                'context' => $context,
+                'atom' => $atom,
+                'style_name' => $transcoder['style'],
+                'options' => $options,
+              ));
+            }
           }
         }
 

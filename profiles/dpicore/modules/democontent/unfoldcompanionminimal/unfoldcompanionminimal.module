@@ -1,0 +1,68 @@
+<?php
+/**
+ * @file
+ * Code for the Unfold Companion Minimal feature.
+ */
+
+include_once 'unfoldcompanionminimal.features.inc';
+
+module_load_include('api.inc', 'unfoldcompanionminimal');
+
+/**
+ * Implementation of hook_field_extra_fields
+ *
+ * Add the "Media box" and "Publication date and comments count" extra fields
+ */
+function unfoldcompanionminimal_field_extra_fields() {
+  $extras = array(
+    'node' => array(
+      'package' => array(
+        'display' => array(
+          'field_mediabox' => array(
+            'label' => t('Media box'),
+            'description' => t('Contains some of the embedded objects'),
+            'weight' => 0,
+          ),
+          'field_publication_and_comments' => array(
+            'label' => t('Publication date and comments count'),
+            'description' => t('Show the publication date followed by the comments count'),
+            'weight' => 0,
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return $extras;
+}
+
+/**
+ * Implementation of hook_node_view
+ *
+ * Fill the "Media box" and "Publication date and comments count" extra fields
+ */
+function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
+  $extra_fields = field_info_extra_fields('node', $node->type, 'display');
+  if (isset($extra_fields['field_mediabox']['display'][$view_mode]) && $extra_fields['field_mediabox']['display'][$view_mode]['visible']) {
+    $media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE);
+    foreach ($media_box_emebeds as $delta => $embed) {
+      unset($node->content['field_embededobjects'][$delta]);
+    }
+    $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
+  }
+
+  if (isset($extra_fields['field_publication_and_comments']['display'][$view_mode]) && $extra_fields['field_publication_and_comments']['display'][$view_mode]['visible']) {
+    if (unfoldcompanionminimal_api_check_date_content_not_empty($node->content, 'field_editorialupdatedate')) {
+      $date = $node->content['field_editorialupdatedate'];
+    } else {
+      $date = $node->content['field_editorialpublicationdate'];
+    }
+    $node->content['field_publication_and_comments']['#markup'] = theme('theme_package_publication_date_and_comments_count', array('date' => $date, 'comment_count' => $node->comment_count));
+    if (isset($node->content['field_editorialupdatedate'])) {
+      unset($node->content['field_editorialupdatedate']);
+    }
+    if (isset($node->content['field_editorialpublicationdate'])) {
+      unset($node->content['field_editorialpublicationdate']);
+    }
+  }
+}

@@ -9,7 +9,7 @@
  * Implementation of hook_install
  */
 function dpicontenttypes_install() {
-  //Create a dpiproperties bundle
+  // Create a dpiproperties bundle
   $values = array(
     'type' => 'default',
     'label' => 'default',
@@ -21,6 +21,26 @@ function dpicontenttypes_install() {
   dpiproperties_type_save($dpipropertiestype);
 
   scald_add_type('links_list', 'Links List', 'Links List');
+
+  // Create base fields
+  module_load_include('field_base.inc', 'dpicontenttypes');
+  if ($fields = dpicontenttypes_field_default_field_bases()) {
+    field_info_cache_clear();
+
+    foreach ($fields as $field) {
+      field_create_field($field);
+    }
+  }
+
+  // Create base fields instances
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances()) {
+    field_info_cache_clear();
+
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
 }
 
 /**

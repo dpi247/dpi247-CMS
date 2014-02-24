@@ -36,9 +36,7 @@ function _dpidestinations_variable_del( $name){
   }
 }
 
-
 function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALSE){
-
   $vid = dpidestinations_api_get_sections_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
@@ -85,8 +83,6 @@ function _dpidestinations_get_all_targetviews(){
   return $targetviews;
 }
 
-
-
 function _dpidestinations_get_panels_displayid_for_sectionterm($term_id){
   $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
   return $handler->did;
@@ -108,13 +104,14 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id){
   return  $displays[$term_id];
 }
 
-/*
- * REturn the name form the page_manager_handlers table for a display_id
-*/
+/**
+ * Return the name form the page_manager_handlers table for a display_id
+ */
 function _dpidestinations_get_pagemanager_handler_name_for_displayid($did){
   $name=db_query('SELECT p.name FROM {page_manager_handlers} p WHERE p.did = :did', array(':did' => $did))->fetchField();
   return $name;
 }
+
 function _dpidestinations_get_panels_handler_for_sectionterm($term_id){
   $handlers = &drupal_static(__FUNCTION__);
   if (!isset($handlers[$term_id])) {
@@ -128,8 +125,10 @@ function _dpidestinations_get_panels_handler_for_sectionterm($term_id){
 
     $task= page_manager_get_task('sections');
     $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
+
     $sorted_handlers = page_manager_load_sorted_handlers($task, '', TRUE);
     $id = ctools_context_handler_get_render_handler($task, NULL, $sorted_handlers,$contexts, array());
+
     $handler=$sorted_handlers[$id];
     $handlers[$term_id] = $handler;
   }
@@ -149,6 +148,7 @@ function _dpidestinations_get_available_targetlayouts(){
   }
   return $return;
 }
+
 function _dpidestinations_get_targets_for_sectionterm($term_id){
   $targets = &drupal_static(__FUNCTION__);
   if (!isset($targets[$term_id])) {
@@ -313,7 +313,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
     $rank_max_value = $wrapper->rank_max_value->value();
 
-    $virtual_rank = _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value + 1);
+    $virtual_rank = (int)_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000) * ($rank_max_value + 1);
   } else {
     if($position == 1) {
       $virtual_rank = $array_results[0]->field_destinations_virtual_rank + _dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000);
@@ -326,43 +326,43 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
         $virtual_rank = $array_results[0]->field_destinations_virtual_rank/2;
       }
     }
-  }
-  $virtual_rank= (int)$virtual_rank;
+    $virtual_rank = (int)$virtual_rank;
 
-  if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
-    watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
-    drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
+    if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
+      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
+      drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
 
-    //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
+      //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
 
-    $query2 = db_select($destination_table, 'd');
-    //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
-    $query2->condition('d.field_destinations_tid', $tid, '=');
-    $query2->condition('d.field_destinations_target', $target, '=');
-    $query2->fields('d', array('field_destinations_virtual_rank','entity_id','delta'));
-    $query2->orderBy('d.field_destinations_virtual_rank', 'DESC');
-    $query2->range(0,$position -1); //offset is the first argument, second argument is
-    $results2 = $query2->execute();
+      $query2 = db_select($destination_table, 'd');
+      //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
+      $query2->condition('d.field_destinations_tid', $tid, '=');
+      $query2->condition('d.field_destinations_target', $target, '=');
+      $query2->fields('d', array('field_destinations_virtual_rank','entity_id','delta'));
+      $query2->orderBy('d.field_destinations_virtual_rank', 'DESC');
+      $query2->range(0,$position -1); //offset is the first argument, second argument is
+      $results2 = $query2->execute();
 
-    $nids = array();
-    foreach($results2 as $index => $row_result) {
-      $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000));
-      $nids[] = array('nid' => $row_result->entity_id, 'virtual_rank' => $new_virtual_rank);
-      $keyed_nids[$index] = $row_result->entity_id;
-      $keyed_virtualranks[$index] = $new_virtual_rank;
+      $nids = array();
+      foreach($results2 as $index => $row_result) {
+        $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000));
+        $nids[] = array('nid' => $row_result->entity_id, 'virtual_rank' => $new_virtual_rank);
+        $keyed_nids[$index] = $row_result->entity_id;
+        $keyed_virtualranks[$index] = $new_virtual_rank;
 
-      db_update($destination_table) // Table name no longer needs {}
-      ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
-      ->condition('entity_id', $row_result->entity_id)
-      ->condition('field_destinations_tid', $tid)
-      ->condition('field_destinations_target', $target)
-      ->condition('delta',$row_result->delta)
-      ->execute();
+        db_update($destination_table) // Table name no longer needs {}
+          ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
+          ->condition('entity_id', $row_result->entity_id)
+          ->condition('field_destinations_tid', $tid)
+          ->condition('field_destinations_target', $target)
+          ->condition('delta',$row_result->delta)
+          ->execute();
+      }
+
+      entity_get_controller('node')->resetCache($keyed_nids);
+
+      module_invoke_all('dpidestinations_virtualrank_dispersion', $tid, $target, $keyed_nids);
     }
-
-    entity_get_controller('node')->resetCache($keyed_nids);
-
-    module_invoke_all('dpidestinations_virtualrank_dispersion', $tid, $target, $keyed_nids);
   }
 
   return $virtual_rank;
@@ -602,6 +602,7 @@ function   _dpidestinations_targetview_initialize_view_get_term_filter($term_val
     ),
   );
 }
+
 function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id){
   if($term_id==''){
     return array(''=>'');
@@ -655,10 +656,8 @@ function __dpidestinations_dependant_target_viewname_and_display_options_for_vie
   return $options;
 }
 
-
 function __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_id,$target_name){
-
-  if($target_id='' || $target_name==NULL){
+  if($target_id='' || $target_name==NULL) {
     return array(""=>"");
   }
 
@@ -858,4 +857,47 @@ function _dpidestination_get_instance_field_info_for_destination($entity_type,$b
     'bundle' => $bundle,
     'deleted' => '0',
   );
+}
+
+/**
+ * Get the view mode of a node in a destination from a views row result
+ *
+ * @param object $view
+ *   The view
+ * @param object $row
+ *   The views row
+ *
+ * @return string | bool
+ *   The view mode or FALSE in case of failure
+ */
+function _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_type) {
+  $view_mode = FALSE;
+
+  list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  // Get destinations from entity
+  static $static_destinations = array();
+  if (!isset($static_destinations[$eid])) {
+    $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
+    $static_destinations[$eid] = $destinations;
+  } else {
+    $destinations = $static_destinations[$eid];
+  }
+
+  if ($destinations) {
+    if (isset($view->targetview_tid) && isset($view->targetview_target)) {
+      $tid = $view->targetview_tid;
+      $target = $view->targetview_target;
+
+      // Get view mode from destination and add suggestions
+      foreach ($destinations as $destination) {
+        if ($destination['tid'] == $tid && $destination['target'] == $target) {
+          $view_mode = $destination['layout'];
+          break;
+        }
+      }
+    }
+
+    return $view_mode;
+  }
 }
