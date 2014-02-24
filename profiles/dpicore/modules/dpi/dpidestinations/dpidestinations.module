@@ -404,14 +404,16 @@ function dpidestinations_preprocess_node(&$vars) {
 
   if (isset($vars['elements']['#entity_type'])) {
     $entity_type = $vars['elements']['#entity_type'];
-    $entity = $vars[$entity_type];
-    if ($entity && $entity_type) {
-      $view = $vars['view'];
-      if ($view_mode = _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_type)) {
-        //Add suggestion regarding view_mode
-        $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
-        $vars['theme_hook_suggestions'][] = 'node__'.$vars['type'].'__'.$view_mode;
-        $vars['view_mode'] = $view_mode;
+    if (isset($vars[$entity_type])) {
+      $entity = $vars[$entity_type];
+      if ($entity && $entity_type && isset($vars['view'])) {
+        $view = $vars['view'];
+        if ($view_mode = _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_type)) {
+          //Add suggestion regarding view_mode
+          $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
+          $vars['theme_hook_suggestions'][] = 'node__'.$vars['type'].'__'.$view_mode;
+          $vars['view_mode'] = $view_mode;
+        }
       }
     }
   }
