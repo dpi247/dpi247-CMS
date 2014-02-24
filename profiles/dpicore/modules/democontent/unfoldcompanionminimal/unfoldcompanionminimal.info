@@ -1,0 +1,17 @@
+name = Unfold Companion Minimal
+description = Companion module for the theunfold theme, contains formatters, basic fields configurations, etc.
+core = 7.x
+package = DPI Demo-content
+dependencies[] = ckeditor
+dependencies[] = image
+features[ckeditor_profile][] = Advanced
+features[ckeditor_profile][] = Full
+features[features_api][] = api:2
+features[image][] = 120x120
+features[image][] = 1440x1080
+features[image][] = 241x150
+features[image][] = 300x300
+features[image][] = 366x228
+features[image][] = 500x500
+features[image][] = 70x70
+features[image][] = 743x430

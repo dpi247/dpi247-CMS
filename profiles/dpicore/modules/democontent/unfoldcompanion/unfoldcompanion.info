@@ -1,6 +1,14 @@
 name = Unfold Companion
-description = Companion module for the theunfold theme.
-package = DPI Demo-content
+description = Companion module for the theunfold theme, contains demo contents, user roles, etc.
 core = 7.x
-
-
+package = DPI Demo-content
+dependencies[] = unfoldcompanionminimal
+dependencies[] = features
+dependencies[] = menu
+features[features_api][] = api:2
+features[menu_custom][] = main-menu
+features[menu_links][] = main-menu_home:<front>
+features[user_role][] = administrator
+features[user_role][] = contributor
+features[user_role][] = journalist
+features[user_role][] = webmaster

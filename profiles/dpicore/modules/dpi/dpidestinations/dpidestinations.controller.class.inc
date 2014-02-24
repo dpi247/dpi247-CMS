@@ -160,7 +160,7 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   public function syncrohize_global_settings_of_targetblocks($entity, $operation) {
-    if (!isset($entity->prevent_sync_recurssion)) {
+    if ($entity && is_object($entity) && !isset($entity->prevent_sync_recurssion)) {
       $original_entity_id = isset($entity->targetblockid) ? $entity->targetblockid : NULL;
 
       if(!isset($entity->targetblockid) || !$entity->targetblockid) {

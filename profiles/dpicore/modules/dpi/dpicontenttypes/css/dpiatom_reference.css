@@ -1,14 +1,14 @@
-.dnd-library-wrapper .editor-item .meta.type-link_list {
-	background-image: url('../icons/link_list.png');
+.dnd-library-wrapper .editor-item .meta.type-links_list {
+	background-image: url('../icons/links_list.png');
 }
 
-.scald-menu .add-buttons .add-link_list {
-	background: url('../icons/link_list-large-inverted.png') 50% 50%
+.scald-menu .add-buttons .add-links_list {
+	background: url('../icons/links_list-large-inverted.png') 50% 50%
 		no-repeat;
 }
 
-.scald-menu .add-buttons .add-link_list:hover {
-	background-image: url('../icons/link_list-large-color.png');
+.scald-menu .add-buttons .add-links_list:hover {
+	background-image: url('../icons/links_list-large-color.png');
 }
 
 .dpiatom_reference_drop_zone {

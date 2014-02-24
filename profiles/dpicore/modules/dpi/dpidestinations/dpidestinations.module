@@ -381,49 +381,36 @@ function dpidestinations_preprocess_views_view_field(&$vars) {
       $entity = $entity_infos['entity'];
       $entity_type = $entity_infos['entity_type'];
       if ($entity && $entity_type) {
-        list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
-
-        // Get destinations from entity
-        static $static_destinations = array();
-        if (!isset($static_destinations[$eid])) {
-          $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
-          $static_destinations[$eid] = $destinations;
-        } else {
-          $destinations = $static_destinations[$eid];
-        }
-
-        if ($destinations) {
-          $view = $vars['view'];
-          if (isset($view->targetview_tid) && isset($view->targetview_target)) {
-            $tid = $view->targetview_tid;
-            $target = $view->targetview_target;
-
-            // Get view mode from destination and add suggestions
-            foreach ($destinations as $destination) {
-              if ($destination['tid'] == $tid && $destination['target'] == $target) {
-                $view_mode = $destination['layout'];
-                $field_name = $vars['field']->field;
-
-                $vars['theme_hook_suggestions'][] = 'views_view_field__'.$view_mode;
-                $vars['theme_hook_suggestions'][] = 'views_view_field__'.$field_name.'__'.$view_mode;
-                break;
-              }
-            }
-          }
+        $view = $vars['view'];
+        if ($view_mode = _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_type)) {
+          $field_name = $vars['field']->field;
+          $vars['theme_hook_suggestions'][] = 'views_view_field__'.$view_mode;
+          $vars['theme_hook_suggestions'][] = 'views_view_field__'.$field_name.'__'.$view_mode;
         }
       }
     }
   }
 }
 
-function dpidestinations_preprocess_node(& $vars){
-
+function dpidestinations_preprocess_node(&$vars) {
   //Remove this suggestion... useless
   unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
 
-  //Add suggestion regarding view_mode
-  $vars['theme_hook_suggestions'][]='node__'.$vars['view_mode'];
-  $vars['theme_hook_suggestions'][]='node__'.$vars['node']->type.'__'.$vars['view_mode'];
+  if (isset($vars['elements']['#entity_type'])) {
+    $entity_type = $vars['elements']['#entity_type'];
+    if (isset($vars[$entity_type])) {
+      $entity = $vars[$entity_type];
+      if ($entity && $entity_type && isset($vars['view'])) {
+        $view = $vars['view'];
+        if ($view_mode = _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_type)) {
+          //Add suggestion regarding view_mode
+          $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
+          $vars['theme_hook_suggestions'][] = 'node__'.$vars['type'].'__'.$view_mode;
+          $vars['view_mode'] = $view_mode;
+        }
+      }
+    }
+  }
 
   // The 'view' attribute of the node is added in views_preprocess_node()
 
@@ -456,13 +443,14 @@ function dpidestinations_dpicache_cache_entry_register() {
       'plugin' => 'dpicache_memcache', // which storage?
       'catagory' => 'dpidestinations', // group
       'data_type' => "object", // the callback returns a string
-      'ttl' => 0,//7*24*60*60, //(in seconds) keep a cache for one week
-      'refresh_interval'=> 60*400, //no need to refresh since hook_nodeapi will do it for us
-      'file'=>array(
-        "module"=>"dpidestinations",
-        "type"=>"inc",
-        "name"=>"plugins/ctools/content_types/targetblock/targetblock"
-        ),
+      'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+      'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+      'file' => array(
+        "module" => "dpidestinations",
+        "type" => "inc",
+        "name" => "plugins/ctools/content_types/targetblock/targetblock",
+      ),
+      'bypass' => TRUE,
     )
   );
 }

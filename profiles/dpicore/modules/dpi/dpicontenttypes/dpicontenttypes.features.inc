@@ -4,8 +4,6 @@
  * etest.features.inc
  */
 
-
-
 /**
  * Implements hook_node_info().
  *
@@ -22,7 +20,5 @@ function dpicontenttypes_node_info(){
       'title_label' => 'Title',      
       'help'=>""
     ),
-   
   );
 }
-

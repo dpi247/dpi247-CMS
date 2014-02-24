@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implementation of hook_install
+ */
+function unfoldcompanionminimal_install() {
+  variable_set('dnd_modal_width', 1500);
+  variable_set('dnd_modal_height', 800);
+}

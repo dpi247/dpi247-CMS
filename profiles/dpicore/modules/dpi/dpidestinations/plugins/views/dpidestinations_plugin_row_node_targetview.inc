@@ -34,7 +34,7 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
   
   function option_definition() {
     $options = parent::option_definition();
-  
+
     unset($options['view_mode']);
     $options['links'] = array('default' => TRUE, 'bool' => TRUE);
     $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
@@ -53,12 +53,14 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
       '#title' => t('Display links'),
       '#default_value' => $this->options['links'],
     );
+    
     $form['comments'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display comments'),
       '#default_value' => $this->options['comments'],
     );
   }
+  
    //simpler summary title
   function summary_title() {
     return t('Settings');

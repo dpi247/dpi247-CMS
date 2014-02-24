@@ -147,29 +147,6 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
         ),
       ),
     ),
-    'packagelayout' => array(
-      'name' => 'Package Layout',
-      'machine_name' => 'packagelayout',
-      'description' => '',
-      'hierarchy' => 0,
-      'module' => 'taxonomy',
-      'weight' => 0,
-      'rdf_mapping' => array(
-        'rdftype' => array(
-          0 => 'skos:ConceptScheme',
-        ),
-        'name' => array(
-          'predicates' => array(
-            0 => 'dc:title',
-          ),
-        ),
-        'description' => array(
-          'predicates' => array(
-            0 => 'rdfs:comment',
-          ),
-        ),
-      ),
-    ),
     'package_type' => array(
       'name' => 'Package Type',
       'machine_name' => 'package_type',
@@ -193,7 +170,29 @@ function dpicontenttypes_taxonomy_default_vocabularies() {
         ),
       ),
     ),
-
+    'packagelayout' => array(
+      'name' => 'Package Layout',
+      'machine_name' => 'packagelayout',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
     'persons' => array(
       'name' => 'Persons',
       'machine_name' => 'persons',
