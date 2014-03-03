@@ -183,6 +183,11 @@ function dpicontenttypes_theme() {
       'path' => drupal_get_path('module', 'dpicontenttypes'),
       'file' => 'dpicontenttypes.effects.inc',
     ),
+    'dpicontenttypes_dpicropcopy_summary' => array(
+      'variables' => array('data' => NULL),
+      'path' => drupal_get_path('module', 'dpicontenttypes'),
+      'file' => 'dpicontenttypes.effects.inc',
+    ),
   );
 }
 
