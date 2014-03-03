@@ -60,9 +60,11 @@ function dpidestinations_api_get_all_targetblocks_from_target_for_destination($t
   }
   return $targetblocks;
 }
-
+/*
+ * Return the quadruplet of information that define the destination that is used in a specific node for a specifique section 
+ */
 function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
-  $destinations_val = field_get_items('node', $node, 'destinations');
+  $destinations_val = field_get_items('node', $node, 'field_destinations');
   if(isset($destinations_val) and $destinations_val!=FALSE){
     foreach($destinations_val as $index=>$destination){
       if($destination['tid']==$tid){
