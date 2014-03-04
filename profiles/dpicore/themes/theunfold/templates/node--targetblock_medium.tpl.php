@@ -1,4 +1,3 @@
-blablabla
 <?php hide($content['comments']); ?>
 <?php hide($content['links']); ?>
 <a href="">
