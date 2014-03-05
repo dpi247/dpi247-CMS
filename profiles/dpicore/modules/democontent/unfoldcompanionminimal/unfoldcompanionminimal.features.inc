@@ -5,6 +5,15 @@
  */
 
 /**
+ * Implements hook_ctools_plugin_api().
+ */
+function unfoldcompanionminimal_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "scald" && $api == "context_config") {
+    return array("version" => "1");
+  }
+}
+
+/**
  * Implements hook_image_default_styles().
  */
 function unfoldcompanionminimal_image_default_styles() {
@@ -323,6 +332,53 @@ function unfoldcompanionminimal_image_default_styles() {
         'data' => array(
           'width' => 743,
           'height' => 430,
+          'upscale' => 1,
+        ),
+        'weight' => 2,
+      ),
+    ),
+  );
+
+  // Exported image style: targetblock_medium.
+  $styles['targetblock_medium'] = array(
+    'name' => 'targetblock_medium',
+    'label' => 'targetblock_medium',
+    'effects' => array(
+      19 => array(
+        'label' => 'DPI Crop Copy',
+        'help' => 'Copy a DPI Crop effect.',
+        'effect callback' => 'dpicontenttypes_dpicropcopy_effect',
+        'form callback' => 'dpicontenttypes_dpicropcopy_form',
+        'summary theme' => 'dpicontenttypes_dpicropcopy_summary',
+        'module' => 'dpicontenttypes',
+        'name' => 'dpicontenttypes_dpicropcopy',
+        'data' => array(
+          'copied_style' => 14,
+          'effects_ids' => array(
+            1 => 1,
+            15 => 5,
+            16 => 7,
+            17 => 9,
+            18 => 11,
+            19 => 13,
+            20 => 15,
+            14 => 3,
+          ),
+        ),
+        'weight' => 1,
+      ),
+      20 => array(
+        'label' => 'Scale',
+        'help' => 'Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.',
+        'effect callback' => 'image_scale_effect',
+        'dimensions callback' => 'image_scale_dimensions',
+        'form callback' => 'image_scale_form',
+        'summary theme' => 'image_scale_summary',
+        'module' => 'image',
+        'name' => 'image_scale',
+        'data' => array(
+          'width' => 100,
+          'height' => '',
           'upscale' => 1,
         ),
         'weight' => 2,

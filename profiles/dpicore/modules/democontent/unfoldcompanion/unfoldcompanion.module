@@ -1,3 +1,9 @@
 <?php
+/**
+ * @file
+ * Code for the Unfold Companion feature.
+ */
+
+include_once 'unfoldcompanion.features.inc';
 
 module_load_include('entity.inc', 'unfoldcompanion');

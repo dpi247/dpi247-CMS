@@ -68,6 +68,17 @@ function theunfold_process_page(&$vars) {
  * Hook preprocess_node
  */
 function theunfold_preprocess_node(&$vars) {
+  if (strstr($vars['view_mode'], 'targetblock_')) {
+    $node_url = $vars['node_url'];
+    if (!isset($vars['content']['#prefix'])) {
+      $vars['content']['#prefix'] = '';
+    }
+    if (!isset($vars['content']['#suffix'])) {
+      $vars['content']['#suffix'] = '';
+    }
+    $vars['content']['#prefix'] = '<a href="'.$node_url.'">'.$vars['content']['#prefix'];
+    $vars['content']['#suffix'] .= '</a>';
+  }
 }
 
 function theunfold_preprocess_field(&$variables) {
@@ -126,17 +137,6 @@ function theunfold_theme_package_top_items($vars) {
     $content .= '</div>';
   }
 
-  return $content;
-}
-
-function theunfold_theme_package_publication_date_and_comments_count($vars) {
-  $timestamp = $vars['date']['#items'][0]['value'];
-  $content = '<div class="meta">';
-  $content .= '<p class="date">';
-  $content .= t('Published') . '<time datetime="'.$timestamp.'">'.drupal_render($vars['date']).'</time> | ';
-  $content .= '<span id="comment-count"><a href="#comments-container" class="comment-count-link"><i class="lsf">comment</i>'.$vars['comment_count'].'</a></span>';
-  $content .= '</p>';
-  $content .= '</div>';
   return $content;
 }
 
