@@ -109,9 +109,9 @@ function theunfold_preprocess_dpicontenttypes_image_render_context(&$variables, 
     $atom = $variables['atom'];
     $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
     $title_value = $atom_wrapper->field_displaytitle->value();
-    $variables['title'] = $title_value['safe_value'];
+    $variables['title'] = check_plain($title_value['value']);
     $summary_value = $atom_wrapper->field_byline->value();
-    $variables['summary'] = $summary_value['safe_value'];
+    $variables['summary'] = check_plain($summary_value['value']);
   }
 }
 
