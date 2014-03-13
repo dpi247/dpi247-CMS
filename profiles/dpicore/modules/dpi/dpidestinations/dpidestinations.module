@@ -151,6 +151,17 @@ function dpidestinations_permission(){
 }
 
 /**
+ * Implementation of hook_form_FORM-ID_alter
+ * Set the default variant type to "Section" for sections pages
+ */
+function dpidestinations_form_page_manager_handler_add_alter(&$form, $form_state) {
+  if (isset($form_state['task_id']) && $form_state['task_id'] == 'sections' &&
+      isset($form['handler']['#options']['destination_context'])) {
+    $form['handler']['#default_value'] = 'destination_context';
+  }
+}
+
+/**
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
