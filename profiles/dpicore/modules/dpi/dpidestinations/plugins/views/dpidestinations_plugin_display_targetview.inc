@@ -4,7 +4,7 @@
  * The plugin that handles a panel_pane.
  */
 class dpidestinations_plugin_display_targetview extends views_plugin_display {
- 
+
   /**
    * Get the instance of a plugin, for example style or row.
    *
@@ -15,21 +15,26 @@ class dpidestinations_plugin_display_targetview extends views_plugin_display {
    *
    * @return views_plugin|FALSE
    */
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['defaults']['default']['row_plugin'] = FALSE;
+    $options['row_plugin']['default'] = 'targetblock_node_row';
+    return $options;
+  }
+
   /**
    * Provide the default form for setting options.
    */
   function options_form(&$form, &$form_state) {
-  
-    $option_form=parent::options_form($form, $form_state);
-    if($form_state['section']=="row_plugin"){
-      foreach($form['row_plugin']["#options"] as $key =>$value){
-        if($key!='targetblock_node_row' and $key!='fields'){
+    $option_form = parent::options_form($form, $form_state);
+    if($form_state['section'] == "row_plugin") {
+      foreach($form['row_plugin']["#options"] as $key => $value) {
+        if($key != 'targetblock_node_row' && $key != 'fields') {
           unset($form['row_plugin']["#options"][$key]);
         }
-        
       }
     }
     return $options;
   }
-  
 }
