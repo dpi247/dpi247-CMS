@@ -238,7 +238,7 @@ function dpidestinations_sections_context_edit_content($form, &$form_state) {
   ctools_include('context');
   ctools_include('context-task-handler');
 
-  $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . ':' . $form_state['handler_id']);
+  $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . '::' . $form_state['handler_id'] . '::::');
   $form_state['renderer'] = panels_get_renderer_handler('dpidestinations_editor', $cache->display);
 
   $form_state['renderer']->cache = &$cache;
