@@ -13,7 +13,7 @@ module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 function dpidestinations_theme() {
 
   $theme['dpidestinations_add_content_modal'] = array(
-    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL,'group' => NULL, 'categories'=> array(), 'column_count' => 2),
+    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL, 'group' => NULL, 'categories'=> array(), 'column_count' => 2),
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',

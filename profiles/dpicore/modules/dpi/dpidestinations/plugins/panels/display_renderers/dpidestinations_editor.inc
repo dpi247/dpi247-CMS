@@ -34,7 +34,7 @@ class dpidestinations_renderer_editor extends panels_renderer_editor {
     if (empty($groups)) {
       $output = t('There are no content types you may add to this display.');
     } else {
-      $output = theme('dpidestinations_add_content_modal', array('renderer' => $this, 'groups' => $groups, 'categories'=>$categories, 'category' => $category, 'group' => $group, 'region' => $region));
+      $output = theme('dpidestinations_add_content_modal', array('renderer' => $this, 'groups' => $groups, 'categories' => $categories, 'category' => $category, 'group' => $group, 'region' => $region));
     }
     $this->commands[] = ctools_modal_command_display($title, $output);
   }
