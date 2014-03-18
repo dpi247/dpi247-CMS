@@ -28,7 +28,7 @@ function theme_dpilog_watchdog_message($variables) {
     if ($variables['as_link'] && isset($event->wid)) {
       // Truncate message to 56 chars.
       $output = truncate_utf8($output, $length, TRUE, TRUE);
-      $output = l($output, 'admin/dpi/dpilogs/watchdog/event/' . $event->wid, array('html' => TRUE));
+      $output = l($output, 'admin/dpi247/dpilogs/watchdog/event/' . $event->wid, array('html' => TRUE));
     }
   }
   return $output;
@@ -65,7 +65,7 @@ function theme_dpilog_watchdog_rules_settings_form($variables){
     $row = array();
     // Add operations
     if($key != "DEFAULT")
-      $row[] = l("Delete","admin/dpi/dpilogs/configure/watchdog/delete".$key,array("attributes"=>array("class"=>"dpiwatchdogdelete","onclick"=>"return confirm('Do you really want to delete configuration for module $key ?');")));
+      $row[] = l("Delete","admin/dpi247/dpilogs/configure/watchdog/delete".$key,array("attributes"=>array("class"=>"dpiwatchdogdelete","onclick"=>"return confirm('Do you really want to delete configuration for module $key ?');")));
     else
       $row[] = "&nbsp;";
     // Add module name

@@ -135,7 +135,6 @@ function dpilog_watchdog_filters() {
   foreach (_dpilog_watchdog_get_message_types() as $type) {
     $types[$type] = t($type);
   }
-
   if (!empty($types)) {
     $filters['type'] = array(
       'title' => t('Type'),
@@ -155,8 +154,6 @@ function dpilog_watchdog_filters() {
     'where' => 'w.uid = ?',
     'options' => _dpilog_watchdog_get_users_listed(),
   );
-
-  
 
   return $filters;
 }
@@ -206,6 +203,7 @@ function dpilog_watchdog_filter_form($form) {
     '#collapsible' => TRUE,
     '#collapsed' => empty($_SESSION['dpilog_watchdog_overview_filter']),
   );
+
   foreach ($filters as $key => $filter) {
     $form['filters']['status'][$key] = array(
       '#title' => $filter['title'],
@@ -223,16 +221,19 @@ function dpilog_watchdog_filter_form($form) {
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
   );
+
   $form['filters']['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Filter'),
   );
+
   if (!empty($_SESSION['dpilog_watchdog_overview_filter'])) {
     $form['filters']['actions']['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset')
     );
   }
+
   return $form;
 }
 
@@ -291,6 +292,7 @@ function dpilog_watchdog_clear_log_form($form) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+  
   $form['dpilog_watchdog_clear']['clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
@@ -309,9 +311,6 @@ function dpilog_watchdog_clear_log_submit() {
   db_delete($watchdog_table_name)->execute();
   drupal_set_message(t('All watchdogs have been cleared.'));
 }
-
-
-
 
 // --------------------------------------------------------------
 // ------------- Affichage du détail d'un watchdog --------------
@@ -340,7 +339,7 @@ function dpilog_watchdog_event($id) {
       "title"    => "Watchdog details",
       "subtitle" => "Basic information",
       "content"  => _dpilog_watchdog_event_main_details($dpiwatchdog)
-      );
+    );
 
     // backtrace(s)
     if($dpiwatchdog->backtrace){
@@ -651,7 +650,7 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
  * @param $module {String} Module name
  */
 function dpilog_watchdog_delete_rule($module=""){
-  $url_config_page = 'admin/dpi/dpilogs/configure/watchdog';
+  $url_config_page = 'admin/dpi247/dpilogs/configure/watchdog';
   if(trim($module) == '' || $module == "DEFAULT")
     drupal_goto($url_config_page);
   $mapping = _dpilog_watchdog_get_rules();

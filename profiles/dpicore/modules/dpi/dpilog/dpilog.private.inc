@@ -1,15 +1,12 @@
 <?php
+
 function dpilog_get_logs_query_based_on_filters( $filters){
-
-
-
   $query = db_select('dpilog_logs', 'l');
   $query->join('users', 'u', 'l.user = u.uid'); //JOIN node with users
   $query->fields('l', array('lid','log_name', 'action','message','user', 'timestamp','id','severity','thread_id'));
   $query->fields('u', array('name'));
   $query = $query
   ->extend('PagerDefault')->limit(30);
-
 
   foreach($filters as $filter_name=>$filter_value){
     if($filter_value!='' && $filter_value!=array()){
@@ -160,7 +157,7 @@ function _dpilog_format_watchdog_structure($log_name, $action, $message, $severi
   $watchdog->severity=$severity;
   $watchdog->link=NULL;
   if(isset($dpilog_structure->lid)){
-    $watchdog->link=l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid);
+    $watchdog->link=l('dpilog','admin/dpi247/dpilogs/dpilog/log/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpi247/dpilogs/dpilog/log/'.$dpilog_structure->lid);
   }
   return $watchdog;
 }
