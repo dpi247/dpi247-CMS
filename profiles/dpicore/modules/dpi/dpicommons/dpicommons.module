@@ -79,8 +79,10 @@ function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL,
  */
 function dpicommons_get_field_from_entity($entity, $entity_type, $field_name, $info = array(), $options = array()) {
   if ($entity_wrapper = entity_metadata_wrapper($entity_type, $entity, $info)) {
-    $value = $entity_wrapper->{$field_name}->value($options);
-    return $value;
+    if (isset($entity_wrapper->{$field_name})) {
+      $value = $entity_wrapper->{$field_name}->value($options);
+      return $value;
+    }
   }
 
   return FALSE;
