@@ -615,9 +615,9 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'delete terms in destiantions'.
-  $permissions['delete terms in destiantions'] = array(
-    'name' => 'delete terms in destiantions',
+  // Exported permission: 'delete terms in destinations'.
+  $permissions['delete terms in destinations'] = array(
+    'name' => 'delete terms in destinations',
     'roles' => array(
       'administrator' => 'administrator',
     ),
@@ -786,9 +786,9 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'edit terms in destiantions'.
-  $permissions['edit terms in destiantions'] = array(
-    'name' => 'edit terms in destiantions',
+  // Exported permission: 'edit terms in destinations'.
+  $permissions['edit terms in destinations'] = array(
+    'name' => 'edit terms in destinations',
     'roles' => array(
       'administrator' => 'administrator',
     ),
