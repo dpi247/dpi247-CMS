@@ -67,7 +67,7 @@ class dpidestinations_renderer_editor extends panels_renderer_editor {
           $groups[$group_key]['contents'][$type_name] = $subtypes;
         }
 
-        $content_title = filter_xss_admin($content_type['title']);
+        $content_title = $subtype_name;//filter_xss_admin($content_type['title']);
 
         // Ensure content with the same title doesn't overwrite each other.
         while (isset($groups[$group_key]['content'][$content_title])) {

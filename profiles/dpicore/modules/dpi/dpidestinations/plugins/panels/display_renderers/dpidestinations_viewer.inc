@@ -8,7 +8,7 @@ $plugin = array(
  * @file
 * Class file to control the main Panels editor.
 */
-class dpidestinations_renderer_viewer extends  panels_renderer_standard{
+class dpidestinations_renderer_viewer extends panels_renderer_standard {
 
   /**
    * Render the interior contents of a single pane.
