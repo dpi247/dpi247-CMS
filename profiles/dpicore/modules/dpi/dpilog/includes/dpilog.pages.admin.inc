@@ -260,6 +260,9 @@ function dpilog_page_view_list_build_filters(){
 function dpilog_page_view_list_filter_form(){
   $registrations = dpi_variable_get("dpilog_configuration_granularity", array());
   $registrations = (isset($registrations['registrations']) && is_array($registrations['registrations'])) ? $registrations['registrations'] : array();
+  if (empty($registrations)) {
+    drupal_set_message(t('All logs and watchdogs are currently ignored, you have to configure the module to start saving some.'));
+  }
 
   $filters=dpilog_page_view_list_build_filters();
   $actions_options = $log_name_options = array();
@@ -283,24 +286,28 @@ function dpilog_page_view_list_filter_form(){
     '#collapsed' => empty($_SESSION['dpilog_filters']),
   );
 
-  $form['default']['log_name']=array(
-    '#type'=>'select',
-    '#options'=>$log_name_options,
-    '#title'=>t('Log Name'),
-    '#multiple'=>TRUE,
-    '#default_value'=>isset($filters['log_name'])?$filters['log_name']:'',
-    '#rows'=>10,
-  );
+  if (!empty($log_name_options)) {
+    $form['default']['log_name']=array(
+      '#type'=>'select',
+      '#options'=>$log_name_options,
+      '#title'=>t('Log Name'),
+      '#multiple'=>TRUE,
+      '#default_value'=>isset($filters['log_name'])?$filters['log_name']:'',
+      '#rows'=>10,
+    );
+  }
 
-  $form['default']['action']=array(
-    '#type'=>'select',
-    '#options'=>$actions_options,
-    '#title'=>t('Action'),
-    '#multiple'=>TRUE,
-    '#default_value'=>isset($filters['action'])?array_keys($filters['action']):'',
-    '#size'=>10,
-    // '#attributes' => array('class' => array('container-inline')),
-  );
+  if (!empty($actions_options)) {
+    $form['default']['action']=array(
+      '#type'=>'select',
+      '#options'=>$actions_options,
+      '#title'=>t('Action'),
+      '#multiple'=>TRUE,
+      '#default_value'=>isset($filters['action'])?array_keys($filters['action']):'',
+      '#size'=>10,
+      // '#attributes' => array('class' => array('container-inline')),
+    );
+  }
 
   $form['default']['user']=array(
     '#type'=>'textfield',
@@ -331,22 +338,28 @@ function dpilog_page_view_list_filter_form(){
     '#multiple'=>TRUE,
   );
 
-  $form['default']['date']=array(
-    '#type'=>'fieldset',
+  $form['default']['date'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Date'),
+  );
+  $date_format = 'Y-m-d H:i';
+
+  $form['default']['date']['after_timestamp'] = array(
+    '#title' => t('After'),
+    '#type' => module_exists('date_popup') ? 'date_popup' : 'date_select',
+    '#default_value' => (isset($filters['after_timestamp']) && $filters['after_timestamp'] && $filters['after_timestamp'] != "") ? date($date_format, $filters['after_timestamp']) : '',
+    '#date_format' => $date_format,
+    '#date_timezone' => date_default_timezone(),
+    '#timepicker' => 'default',
   );
 
-  $form['default']['date']['before_timestamp']=array(
-    '#title'=>t('before'),
-    '#type' => 'date_popup',
-    '#default_value'=>isset($filters['before_timestamp'])&&$filters['before_timestamp']!=""?date('Y-m-d h:i',$filters['before_timestamp']):'',
-    '#date_format' => 'Y-m-d h:i A',
-  );
-
-  $form['default']['date']['after_timestamp']=array(
-    '#title'=>t('after'),
-    '#type' => 'date_popup',
-    '#default_value'=>isset($filters['after_timestamp'])&&$filters['after_timestamp']!=""?date('Y-m-d h:i',$filters['after_timestamp']):'',
-    '#date_format' => 'Y-m-d h:i A',
+  $form['default']['date']['before_timestamp'] = array(
+    '#title' => t('Before'),
+    '#type' => module_exists('date_popup') ? 'date_popup' : 'date_select',
+    '#default_value' => (isset($filters['before_timestamp']) && $filters['before_timestamp'] && $filters['before_timestamp'] != "") ? date($date_format, $filters['before_timestamp']) : '',
+    '#date_format' => $date_format,
+    '#date_timezone' => date_default_timezone(),
+    '#timepicker' => 'default',
   );
 
   $form['#attached'] = array(
@@ -384,6 +397,7 @@ function dpilog_page_view_list_filter_form_submit($form, & $form_state){
               $_SESSION['dpilog_filters'][$name] = strtotime($value);
               break;
             case 'action':
+              $actions = array();
               foreach($form_state['values'][$name] as $encoded_action){
                 $action=substr(strstr($encoded_action, '['), 1, -1);
                 $actions[$encoded_action]=$action;

@@ -199,7 +199,7 @@ function dpilog_watchdog_filter_form($form) {
 
   $form['filters'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Filter log messages'),
+    '#title' => t('Filter watchdogs'),
     '#collapsible' => TRUE,
     '#collapsed' => empty($_SESSION['dpilog_watchdog_overview_filter']),
   );
@@ -287,7 +287,7 @@ function dpilog_watchdog_filter_form_submit($form, &$form_state) {
 function dpilog_watchdog_clear_log_form($form) {
   $form['dpilog_watchdog_clear'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Clear log messages'),
+    '#title' => t('Clear watchdogs'),
     '#description' => t('This will permanently remove the log messages from the database.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -295,7 +295,7 @@ function dpilog_watchdog_clear_log_form($form) {
   
   $form['dpilog_watchdog_clear']['clear'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear log messages'),
+    '#value' => t('Clear watchdogs'),
     '#submit' => array('dpilog_watchdog_clear_log_submit'),
   );
 
