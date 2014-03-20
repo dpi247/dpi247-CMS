@@ -2,10 +2,6 @@
 
 module_load_include('inc', 'dpilog','dpilog.private');
 
-function dpilog_form_page_log($lid){
-
-}
-
 function dpilog_page_view_list(){
   $filters=dpilog_page_view_list_build_filters();
   $filters_form=drupal_get_form("dpilog_page_view_list_filter_form");
@@ -135,8 +131,6 @@ function dpilog_page_view_timeline_json(){
 
   $dates=array();
   foreach($results as $result){
-    dsm($result);
-
     if(isset( $config_display[$result->log_name]['display'][$result->action]['display']['color'])){
       $color=$config_display[$result->log_name]['display'][$result->action]['display']['color'];
       $color=substr($color,1);
@@ -563,10 +557,10 @@ function dpilog_form_page_configure_granularity_form_submit($form, &$form_state)
   dpi_variable_set('dpilog_configuration_granularity',$conf);
 }
 
-function dpilog_form_page_flush($form,$form_state){
+function dpilog_form_page_flush_form($form,$form_state){
   $form['content'] = array(
     "#markup"=>'totot',
   );
-   
+
   return $form;
 }
