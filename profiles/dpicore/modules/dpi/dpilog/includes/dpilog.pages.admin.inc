@@ -2,24 +2,30 @@
 
 module_load_include('inc', 'dpilog','dpilog.private');
 
-function dpilog_page_view_list(){
-  $filters=dpilog_page_view_list_build_filters();
-  $filters_form=drupal_get_form("dpilog_page_view_list_filter_form");
-  $logs_table=dpilog_page_view_list_build_logs_table($filters);
+function dpilog_page_view_list() {
+  $filters = dpilog_page_view_list_build_filters();
+  $filters_form = drupal_get_form("dpilog_page_view_list_filter_form");
+  $clear_form = drupal_get_form('dpilog_logs_clear_log_form');
+  $logs_table = dpilog_page_view_list_build_logs_table($filters);
 
   $render_array['filters_form'] = array(
     '#type' => 'form',
-    "form"=>$filters_form,
+    'form' => $filters_form,
+  );
+
+  $render_array['clear_form'] = array(
+    '#type' => 'form',
+    'form' => $clear_form,
   );
 
   $render_array['content'] = array(
     '#type' => 'markup',
-    "#markup"=> $logs_table,
+    '#markup' => $logs_table,
   );
 
   $render_array['pager'] = array(
     '#type' => 'markup',
-    "#markup"=>theme('pager', array('tags' => array())),
+    '#markup' => theme('pager', array('tags' => array())),
   );
 
   $render_array['#attached'] = array(
@@ -30,6 +36,40 @@ function dpilog_page_view_list(){
   );
 
   return $render_array;
+}
+
+/**
+ * Form constructor for the form that clears out the logs
+ *
+ * @see dpilog_logs_clear_log_submit()
+ * @ingroup forms
+ */
+function dpilog_logs_clear_log_form($form) {
+  $form['dpilog_logs_clear'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Clear'),
+    '#description' => t('This will permanently remove the log messages from the database.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['dpilog_logs_clear']['clear'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear'),
+    '#submit' => array('dpilog_logs_clear_log_submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for dpilog_logs_clear_log_form().
+ */
+function dpilog_logs_clear_log_submit() {
+  $logs_table_name = _dpilog_get_table_name('logs');
+  $_SESSION['dpilog_filters'] = array();
+  db_delete($logs_table_name)->execute();
+  drupal_set_message(t('All logs have been cleared.'));
 }
 
 function dpilog_page_view_list_build_logs_table($filters) {
@@ -468,6 +508,70 @@ function dpilog_form_page_view_timeline($form,$form_state){
   return $form;
 }
 
+/**
+ * Page callback: Displays details about a specific database log message.
+ *
+ * @param int $id
+ *   Unique ID of the database log message.
+ *
+ * @return array|string
+ *   If the ID is located in the Database Logging table, a build array in the
+ *   format expected by drupal_render(); otherwise, an empty string.
+ *
+ * @see dpilog_watchdog_menu()
+ */
+function dpilog_log_event($id) {
+  module_load_include('inc', 'dpilog', 'includes/dpilog.pages.watchdog');
+  $logs_table_name = _dpilog_get_table_name('logs');
+  $result = db_query('SELECT l.*, u.name, u.uid FROM {'.$logs_table_name.'} l INNER JOIN {users} u ON l.user = u.uid WHERE l.lid = :id', array(':id' => $id))->fetchObject();
+  $build = array();
+  if ($dpilog = $result) {
+    $vtab_data = array();
+    // basic details
+    $vtab_data[] = array(
+      "title"    => "Log details",
+      "subtitle" => "Basic information",
+      "content"  => _dpilog_logs_event_main_details($dpilog)
+    );
+
+    // backtrace(s)
+    if($dpilog->trace){
+      $backtrace = unserialize($dpilog->trace);
+      $vtab_data[] = array(
+        "title"   => "Trace",
+        "subtitle"=> "Simplied functions call tree",
+        "content" => theme('dpilog_wathchog_backtrace', array('backtrace'=>$backtrace))
+      );
+      if(function_exists("kprint_r")){
+        $vtab_data[] = array(
+          "title"   => "Full trace",
+          "subtitle"=> "Complete PHP backtrace",
+          "content" => kprint_r($backtrace, true)
+        );
+      }
+      unset($backtrace);
+    }
+    else {
+      $vtab_data[] = array(
+        "title"    => "Trace",
+        "subtitle" => "PHP backtrace",
+        "content"  => "No trace available"
+      );
+    }
+
+    // Other watchdogs
+    $vtab_data[] = array(
+      "title"    => "Other logs",
+      "subtitle" => "for the same process",
+      "content"  => _dpilog_logs_other_events($dpilog->thread_id, $dpilog->lid)
+    );
+    return theme('dpi_vertical_tabs', $vtab_data);
+  }
+  else { // No event with this ID
+    return t('No data available for this log.');
+  }
+}
+
 function dpilog_form_page_configure_granularity_form($form, &$form_state){
   $config_registrations=dpi_variable_get("dpilog_configuration_granularity",array());
   if(!empty($config_registrations))
@@ -557,10 +661,116 @@ function dpilog_form_page_configure_granularity_form_submit($form, &$form_state)
   dpi_variable_set('dpilog_configuration_granularity',$conf);
 }
 
-function dpilog_form_page_flush_form($form,$form_state){
-  $form['content'] = array(
-    "#markup"=>'totot',
+/**
+ * Table with main details of a logs event.
+ *
+ * @param array $dpilog A log.
+ *
+ * @return string The HTML table with all information.
+ */
+function _dpilog_logs_event_main_details($dpilog){
+  if(!$dpilog)
+    return '';
+
+  $severity = watchdog_severity_levels();
+  $rows = array(
+    array(
+      array('data' => t('Name'), 'header' => TRUE),
+      t($dpilog->log_name),
+    ),
+    array(
+      array('data' => t('Action'), 'header' => TRUE),
+      t($dpilog->action),
+    ),
+    array(
+      array('data' => t('Date'), 'header' => TRUE),
+      format_date($dpilog->timestamp, 'custom', "l, F j, Y - H:i:s")
+      .' <span class="help">[timestamp: '.$dpilog->timestamp.']</span>',
+    ),
+    array(
+      array('data' => t('User'), 'header' => TRUE),
+      theme('username', array('account' => $dpilog))
+      . ' <span class="help">[user id: '.$dpilog->user.']</span>',
+    ),
+    array(
+      array('data' => t('Thread&nbsp;ID'), 'header' => TRUE),
+      $dpilog->thread_id,
+    ),
+    array(
+      array('data' => t('Message'), 'header' => TRUE),
+      theme('dpilog_watchdog_message', array('event' => $dpilog, 'as_link'=>FALSE)),
+    ),
+    array(
+      array('data' => t('Severity'), 'header' => TRUE),
+      '<meter optimum=0 low=4 high=4 min=0 max='.(count($severity)-1).' value='.(count($severity)-$dpilog->severity).'>'.$severity[$dpilog->severity].'</meter> '.$severity[$dpilog->severity],
+    ),
   );
 
-  return $form;
+  $build['dpilog_watchdog_table'] = array(
+    '#theme' => 'table',
+    '#rows' => $rows,
+    '#attributes' => array('class' => array('dpiwatchdog-event')),
+  );
+  $output_table = drupal_render($build);
+
+  return $output_table;
+}
+
+/**
+ * List of other events that occured on the same page load.
+ *
+ * @param string $thread_id ID of the thread.
+ * @param integer $current_lid ID of current displayed log.
+ *
+ * @return string HTML table with all associated logs.
+ */
+function _dpilog_logs_other_events($thread_id, $current_lid) {
+  if(!$thread_id)
+    return '';
+
+  $logs_table_name = _dpilog_get_table_name('logs');
+  $query = db_select($logs_table_name, 'l');
+  $query->leftJoin('users', 'u', 'l.user = u.uid');
+  $query->fields('l', array('lid', 'user', 'severity', 'log_name', 'action', 'timestamp', 'message', 'variables'));
+  $query->addField('u', 'name');
+  $query->condition('thread_id', $thread_id, '=');
+  $query->orderBy('timestamp');
+  $result = $query->execute();
+  $count = 0;
+  foreach ($result as $dpilog) {
+    $rows[] = array('data' =>
+      array(
+        ++$count,
+        $dpilog->log_name,
+        $dpilog->action,
+        format_date($dpilog->timestamp, 'custom', "H:i:s"),
+        theme('dpilog_watchdog_message', array('event' => $dpilog, 'as_link' => TRUE, 'length' => 150)),
+        theme('username', array('account' => $dpilog)),
+      ),
+      // Attributes for tr
+      'class' => array(($dpilog->lid == $current_lid ? 'dpiwatchdog-highlight' : ''))
+    );
+  }
+
+  $header = array(
+    array('data' => '#'),
+    array('data' => t('Name')),
+    array('data' => t('Action')),
+    array('data' => t('Time')),
+    t('Message'),
+    array('data' => t('User')),
+  );
+
+  $build['dpilog_logs_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#attributes' => array(
+      'id' => 'admin-dpiwatchdog',
+      'class' => array('dpiwatchdog-otherprocesses')
+    ),
+    '#empty' => t('No log messages available.'),
+  );
+
+  return drupal_render($build);
 }

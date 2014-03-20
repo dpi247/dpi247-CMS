@@ -180,11 +180,20 @@ function _dpilog_random_color() {
 // --------------------------------------------------------------
 
 /**
- * Returns name of SQL table used for logs
+ * Returns name of SQL table used for logs or watchdogs
+ *
  * @return String SQL table name.
  */
-function _dpilog_watchdog_get_table_name(){
-  return "dpilog_watchdog";
+function _dpilog_get_table_name($type) {
+  switch ($type) {
+    case 'logs':
+      return 'dpilog_logs';
+    case 'watchdogs':
+      return 'dpilog_watchdog';
+    default:
+      return FALSE;
+  }
+  return FALSE;
 }
 
 /**
@@ -196,7 +205,7 @@ function _dpilog_watchdog_get_table_name(){
 function _dpilog_watchdog_get_message_types() {
   $types = array();
 
-  $result = db_query('SELECT DISTINCT(type) FROM {'._dpilog_watchdog_get_table_name().'} ORDER BY type');
+  $result = db_query('SELECT DISTINCT(type) FROM {'._dpilog_get_table_name('watchdogs').'} ORDER BY type');
   foreach ($result as $object) {
     $types[] = $object->type;
   }
