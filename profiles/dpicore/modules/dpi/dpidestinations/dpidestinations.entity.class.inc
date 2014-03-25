@@ -1,6 +1,6 @@
 <?php
-class TargetEntity extends Entity{
 
+class TargetEntity extends Entity {
   /**
    * The target id.
    *
@@ -39,12 +39,13 @@ class TargetEntity extends Entity{
   protected function defaultLabel() {
     return $this->label;
   }
+
   protected function defaultUri() {
     return array('path' => 'target/' . $this->targetid);
   }
 }
-class TargetBlockEntity extends Entity{
 
+class TargetBlockEntity extends Entity {
   /**
    * The target id.
    *
@@ -118,11 +119,10 @@ class TargetBlockEntity extends Entity{
    */
   public $split_delta;
 
-
-
   protected function defaultLabel() {
     return $this->machine_name;
   }
+
   protected function defaultUri() {
     return array('path' => 'targetblock/' . $this->targetblockid);
   }

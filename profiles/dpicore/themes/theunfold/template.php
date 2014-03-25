@@ -68,6 +68,17 @@ function theunfold_process_page(&$vars) {
  * Hook preprocess_node
  */
 function theunfold_preprocess_node(&$vars) {
+  if (strstr($vars['view_mode'], 'targetblock_')) {
+    $node_url = $vars['node_url'];
+    if (!isset($vars['content']['#prefix'])) {
+      $vars['content']['#prefix'] = '';
+    }
+    if (!isset($vars['content']['#suffix'])) {
+      $vars['content']['#suffix'] = '';
+    }
+    $vars['content']['#prefix'] = '<a href="'.$node_url.'">'.$vars['content']['#prefix'];
+    $vars['content']['#suffix'] .= '</a>';
+  }
 }
 
 function theunfold_preprocess_field(&$variables) {
@@ -98,9 +109,9 @@ function theunfold_preprocess_dpicontenttypes_image_render_context(&$variables, 
     $atom = $variables['atom'];
     $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
     $title_value = $atom_wrapper->field_displaytitle->value();
-    $variables['title'] = $title_value['safe_value'];
+    $variables['title'] = check_plain($title_value['value']);
     $summary_value = $atom_wrapper->field_byline->value();
-    $variables['summary'] = $summary_value['safe_value'];
+    $variables['summary'] = check_plain($summary_value['value']);
   }
 }
 
@@ -111,7 +122,7 @@ function theunfold_theme_package_top_items($vars) {
   drupal_add_js(drupal_get_path('theme', 'theunfold').'/scripts/mylibs/pagination.js');
 
   $content = '';
-  if (count($vars['topItems']) != 0) {
+  if (isset($vars['topItems']) && is_array($vars['topItems']) && count($vars['topItems']) != 0) {
     $content .= '<div class="block-slidepic media">';
     $content .= '<ul class="page-inner">';
     foreach ($vars['topItems'] as $item) {
@@ -126,17 +137,6 @@ function theunfold_theme_package_top_items($vars) {
     $content .= '</div>';
   }
 
-  return $content;
-}
-
-function theunfold_theme_package_publication_date_and_comments_count($vars) {
-  $timestamp = $vars['date']['#items'][0]['value'];
-  $content = '<div class="meta">';
-  $content .= '<p class="date">';
-  $content .= t('Published') . '<time datetime="'.$timestamp.'">'.drupal_render($vars['date']).'</time> | ';
-  $content .= '<span id="comment-count"><a href="#comments-container" class="comment-count-link"><i class="lsf">comment</i>'.$vars['comment_count'].'</a></span>';
-  $content .= '</p>';
-  $content .= '</div>';
   return $content;
 }
 

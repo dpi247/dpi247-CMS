@@ -36,7 +36,7 @@ function dpidestinations_preprocess_dpidestinations_add_content_modal(&$vars) {
   $vars['root_content'] = '';
   if (!empty($vars['categories']['root'])) {
     foreach ($vars['categories']['root']['content'] as $content_type) {
-      $vars['columns'][$which] .= theme('panels_add_content_link', array('renderer' => $vars['renderer'], 'region' => $vars['region'], 'content_type' => $content[$title]));
+      $vars['columns'][$content['name']] .= theme('panels_add_content_link', array('renderer' => $vars['renderer'], 'region' => $vars['region'], 'content_type' => $content_type));
     }
   }
 }
@@ -48,7 +48,7 @@ function dpidestinations_preprocess_dpidestinations_add_content_modal(&$vars) {
  * actually rendered.
  */
 function dpidestinations_process_dpidestinations_add_content_modal(&$vars) {
-   $content = !empty($vars['categories'][$vars['category']]['content']) ? $vars['categories'][$vars['category']]['content'] : array();
+  $content = !empty($vars['categories'][$vars['category']]['content']) ? $vars['categories'][$vars['category']]['content'] : array();
   // If no category is selected or the category is empty or our special empty
   // category render a 'header' that will appear instead of the columns.
   if (empty($vars['category']) || empty($content) || $vars['category'] == 'root') {
@@ -68,13 +68,11 @@ function dpidestinations_process_dpidestinations_add_content_modal(&$vars) {
     foreach ($titles as $title) {
       $which = floor($count++ / $col_size) + 1;
       $vars['columns'][$which] .= theme('panels_add_content_link', array('renderer' => $vars['renderer'], 'region' => $vars['region'], 'content_type' => $content[$title]));
-          }
+    }
   }
 
   $vars['messages'] = theme('status_messages');
 }
-
-
 
 /**
  * Processes variables for block-admin-display-form.tpl.php.
@@ -96,17 +94,13 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
     $variables['node_listing'][$i] = new stdClass();
     $variables['node_listing'][$i]->row_class = 'node-weight';
     $variables['node_listing'][$i]->weight_select = drupal_render($node['weight']);
-
     $variables['node_listing'][$i]->node_title = drupal_render($node['title']);
     $variables['node_listing'][$i]->publication_date = drupal_render($node['title']);
     $variables['node_listing'][$i]->author = drupal_render($node['title']);
     $variables['node_listing'][$i]->actions = drupal_render($node['edit']).' ,'. !empty($node['delete']) ? drupal_render($node['delete']) : '';
     $variables['node_listing'][$i]->printed = FALSE;
-
     $variables['node_listing'][$i]->author = 'coco';
     $variables['node_listing'][$i]->publication_date = '12-04-2013';
-
   }
   $variables['form_submit'] = drupal_render_children($variables['form']);
 }
-

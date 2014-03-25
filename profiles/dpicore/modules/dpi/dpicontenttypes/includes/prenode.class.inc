@@ -112,13 +112,11 @@ class Prenode {
    */
   public function destinationRender($destination){
     $task = page_manager_get_task('destinations');
-    dsm($task);
-    
+
     // Load the term into a context.
     ctools_include('context');
     ctools_include('context-task-handler');
     $contexts = ctools_context_handler_get_task_contexts($task, '', array($destination));
-    dsm($contexts);
     
     $preview_context = new stdClass();
     $preview_context->wallyedit_preview = array();
@@ -129,7 +127,6 @@ class Prenode {
     
     
     $output = ctools_context_handler_render($task, '', $contexts, array(array($destination), 0, 'page'));
-    dsm($output);
     // Hide messages before return
     //drupal_get_messages();
     //generate destinations html*/

@@ -1,45 +1,42 @@
 <?php
+
 function dpilog_get_logs_query_based_on_filters( $filters){
-
-
-
   $query = db_select('dpilog_logs', 'l');
   $query->join('users', 'u', 'l.user = u.uid'); //JOIN node with users
-  $query->fields('l', array('lid','log_name', 'action','message','user', 'timestamp','id','severity','thread_id'));
+  $query->fields('l', array('lid', 'log_name', 'action', 'message', 'user', 'timestamp', 'id', 'severity', 'thread_id'));
   $query->fields('u', array('name'));
-  $query = $query
-  ->extend('PagerDefault')->limit(30);
-
+  $query = $query->extend('PagerDefault')->limit(30);
+  $query->orderby('l.timestamp', 'DESC');
 
   foreach($filters as $filter_name=>$filter_value){
     if($filter_value!='' && $filter_value!=array()){
       switch($filter_name){
         case 'log_name':
-          $query->condition('l.log_name', $filter_value,'IN');
+          $query->condition('l.log_name', $filter_value, 'IN');
           break;
         case 'action':
           $query->condition('l.action', $filter_value, 'IN');
           break;
         case 'id':
-          $query->condition('l.id', $filter_value,'=');
+          $query->condition('l.id', $filter_value, '=');
           break;
         case 'user':
-          $query->condition('l.user', $filter_value,'=');
+          $query->condition('l.user', $filter_value, '=');
           break;
         case 'thread_id':
-          $query->condition('l.thread_id', $filter_value,'=');
+          $query->condition('l.thread_id', $filter_value, '=');
           break;
         case 'before_timestamp':
-          $query->condition('l.timestamp', $filter_value,'<');
+          $query->condition('l.timestamp', $filter_value, '<');
           break;
         case 'after_timestamp':
-          $query->condition('l.timestamp', $filter_value,'>');
+          $query->condition('l.timestamp', $filter_value, '>');
           break;
         case 'id':
-          $query->condition('l.id', $filter_value,'IN');
+          $query->condition('l.id', $filter_value, 'IN');
           break;
         case 'severity':
-          $query->condition('l.severity', $filter_value,'IN');
+          $query->condition('l.severity', $filter_value, 'IN');
           break;
       }
     }
@@ -58,9 +55,9 @@ function _dpilog_log($log_name, $action, $message, $variables = array(), $id = N
     $registrations = array();
   }
 
-  // defaut case
+  // default case
   if(!isset($registrations[$log_name][$action])) {
-    $registrations[$log_name][$action]['dpilog'] = 'save';
+    $registrations[$log_name][$action]['dpilog'] = 'ignore';
     $registrations[$log_name][$action]['watchdog'] = 'ignore';
     $registrations[$log_name][$action]['color'] = '#FFFFFF';
   }
@@ -160,7 +157,7 @@ function _dpilog_format_watchdog_structure($log_name, $action, $message, $severi
   $watchdog->severity=$severity;
   $watchdog->link=NULL;
   if(isset($dpilog_structure->lid)){
-    $watchdog->link=l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpi/dpilogs/dpilog/log/'.$dpilog_structure->lid);
+    $watchdog->link=l('dpilog','admin/dpi247/dpilogs/dpilog/log/'.$dpilog_structure->lid). ' '.l('dpilog','admin/dpi247/dpilogs/dpilog/log/'.$dpilog_structure->lid);
   }
   return $watchdog;
 }
@@ -183,11 +180,20 @@ function _dpilog_random_color() {
 // --------------------------------------------------------------
 
 /**
- * Returns name of SQL table used for logs
+ * Returns name of SQL table used for logs or watchdogs
+ *
  * @return String SQL table name.
  */
-function _dpilog_watchdog_get_table_name(){
-  return "dpilog_watchdog";
+function _dpilog_get_table_name($type) {
+  switch ($type) {
+    case 'logs':
+      return 'dpilog_logs';
+    case 'watchdogs':
+      return 'dpilog_watchdog';
+    default:
+      return FALSE;
+  }
+  return FALSE;
 }
 
 /**
@@ -199,7 +205,7 @@ function _dpilog_watchdog_get_table_name(){
 function _dpilog_watchdog_get_message_types() {
   $types = array();
 
-  $result = db_query('SELECT DISTINCT(type) FROM {'._dpilog_watchdog_get_table_name().'} ORDER BY type');
+  $result = db_query('SELECT DISTINCT(type) FROM {'._dpilog_get_table_name('watchdogs').'} ORDER BY type');
   foreach ($result as $object) {
     $types[] = $object->type;
   }

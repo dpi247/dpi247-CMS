@@ -16,3 +16,5 @@ regions[bottom] = Bottom
 regions[top] = Top
 
 plugins[panels][layouts] = plugins/layouts
+
+settings[toggle_secondary_menu] = 0

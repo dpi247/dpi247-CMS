@@ -9,6 +9,23 @@ include_once 'unfoldcompanionminimal.features.inc';
 module_load_include('api.inc', 'unfoldcompanionminimal');
 
 /**
+ * Implementation of hook_theme
+ */
+function unfoldcompanionminimal_theme() {
+  $base = array(
+    'path' => drupal_get_path('module', 'unfoldcompanionminimal') . '/templates',
+    'file' => 'theme.inc',
+  );
+  
+  return array(
+    'field_extra_field' => $base + array(
+      'variables' => array('view_mode' => '', 'fields' => array()),
+      'template' => 'field-extra-field',
+    ),
+  );
+}
+
+/**
  * Implementation of hook_field_extra_fields
  *
  * Add the "Media box" and "Publication date and comments count" extra fields
@@ -23,9 +40,9 @@ function unfoldcompanionminimal_field_extra_fields() {
             'description' => t('Contains some of the embedded objects'),
             'weight' => 0,
           ),
-          'field_publication_and_comments' => array(
-            'label' => t('Publication date and comments count'),
-            'description' => t('Show the publication date followed by the comments count'),
+          'field_publication_comments_and_embeds_count' => array(
+            'label' => t('Publication date, comments count and embeds count'),
+            'description' => t('Show the publication date followed by the comments count and the various embeds counts'),
             'weight' => 0,
           ),
         ),
@@ -39,25 +56,39 @@ function unfoldcompanionminimal_field_extra_fields() {
 /**
  * Implementation of hook_node_view
  *
- * Fill the "Media box" and "Publication date and comments count" extra fields
+ * Fill the "Media box" and "Publication date, comments count and embeds count" extra fields
  */
 function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
   $extra_fields = field_info_extra_fields('node', $node->type, 'display');
+
+  // Fill the "Media box" field
   if (isset($extra_fields['field_mediabox']['display'][$view_mode]) && $extra_fields['field_mediabox']['display'][$view_mode]['visible']) {
-    $media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE);
-    foreach ($media_box_emebeds as $delta => $embed) {
-      unset($node->content['field_embededobjects'][$delta]);
+    if ($media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE)) {
+      foreach ($media_box_emebeds as $delta => $embed) {
+        unset($node->content['field_embededobjects'][$delta]);
+      }
+      $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
+    } else {
+      $node->content['field_mediabox']['#markup'] = '';
     }
-    $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
   }
 
-  if (isset($extra_fields['field_publication_and_comments']['display'][$view_mode]) && $extra_fields['field_publication_and_comments']['display'][$view_mode]['visible']) {
+  // Fill the "Publication date, comments count and embeds count" field
+  if (isset($extra_fields['field_publication_comments_and_embeds_count']['display'][$view_mode]) && $extra_fields['field_publication_comments_and_embeds_count']['display'][$view_mode]['visible']) {
     if (unfoldcompanionminimal_api_check_date_content_not_empty($node->content, 'field_editorialupdatedate')) {
       $date = $node->content['field_editorialupdatedate'];
     } else {
       $date = $node->content['field_editorialpublicationdate'];
     }
-    $node->content['field_publication_and_comments']['#markup'] = theme('theme_package_publication_date_and_comments_count', array('date' => $date, 'comment_count' => $node->comment_count));
+    $template_fields = array(
+      'view_mode' => $view_mode,
+      'fields' => array(
+        'date' => $date,
+        'comment_count' => $node->comment_count,
+        'embeds_count' => dpicontenttypes_api_get_embeds_count_by_type($node),
+      ),
+    );
+    $node->content['field_publication_comments_and_embeds_count']['#markup'] = theme('field_extra_field', $template_fields);
     if (isset($node->content['field_editorialupdatedate'])) {
       unset($node->content['field_editorialupdatedate']);
     }

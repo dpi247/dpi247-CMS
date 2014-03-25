@@ -92,7 +92,7 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
 
   // Add the current entity in the effect datas
   foreach ($style['effects'] as $effect_id => $effect) {
-    if ($effect['name'] == 'dpicontenttypes_dpicrop') {
+    if ($effect['name'] == 'dpicontenttypes_dpicrop' || $effect['name'] == 'dpicontenttypes_dpicropcopy') {
       $style['effects'][$effect_id]['data']['entity'] = $entity;
       $style['effects'][$effect_id]['data']['atom'] = $atom;
       $style_copy = $style;

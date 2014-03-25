@@ -183,6 +183,11 @@ function dpicontenttypes_theme() {
       'path' => drupal_get_path('module', 'dpicontenttypes'),
       'file' => 'dpicontenttypes.effects.inc',
     ),
+    'dpicontenttypes_dpicropcopy_summary' => array(
+      'variables' => array('data' => NULL),
+      'path' => drupal_get_path('module', 'dpicontenttypes'),
+      'file' => 'dpicontenttypes.effects.inc',
+    ),
   );
 }
 
@@ -274,6 +279,13 @@ function dpicontenttypes_scald_contexts() {
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
+    'dpi_simpleimg'      => array(
+      'title'           => t('DPI Simple Image'),
+      'description'     => t('To display a simple image tag.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
   );
 }
 
@@ -332,7 +344,7 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
 /**
  * Implements hook_scald_render
  * 
- * This should be used only for dpi inline and dpi mediabox scald's context
+ * This should be used only for dpi inline, dpi mediabox and dpi simpleimg scald's context
  */
 function dpicontenttypes_scald_render($atom, $context, $options) {
   switch ($context) {
@@ -355,8 +367,8 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
     default:
       // If this is a custom context created through the UI, we use a special
       // render.
-
-      if($context == 'dpi_mediabox' || $context == 'dpi_inline') {
+      $dpi_contexts = dpicontenttypes_scald_contexts();
+      if(array_key_exists($context, $dpi_contexts)) {
         if (isset($options['entity'])) {
           // Replace the image style rendered image with our own
           $transcoders = scald_transcoders();

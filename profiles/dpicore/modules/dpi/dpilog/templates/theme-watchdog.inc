@@ -25,10 +25,20 @@ function theme_dpilog_watchdog_message($variables) {
       $output = format_string($event->message, unserialize($event->variables));
     }
     $output = filter_xss($output, array());
-    if ($variables['as_link'] && isset($event->wid)) {
+    $id = FALSE;
+    $link = FALSE;
+    if (isset($event->wid)) {
+      $id = $event->wid;
+      $link = 'admin/dpi247/dpilogs/watchdog/event/';
+    }
+    if (isset($event->lid)) {
+      $id = $event->lid;
+      $link = 'admin/dpi247/dpilogs/dpilog/view/log/';
+    }
+    if ($variables['as_link'] && $id && $link) {
       // Truncate message to 56 chars.
       $output = truncate_utf8($output, $length, TRUE, TRUE);
-      $output = l($output, 'admin/dpi/dpilogs/watchdog/event/' . $event->wid, array('html' => TRUE));
+      $output = l($output, $link . $id, array('html' => TRUE));
     }
   }
   return $output;
@@ -65,7 +75,7 @@ function theme_dpilog_watchdog_rules_settings_form($variables){
     $row = array();
     // Add operations
     if($key != "DEFAULT")
-      $row[] = l("Delete","admin/dpi/dpilogs/configure/watchdog/delete".$key,array("attributes"=>array("class"=>"dpiwatchdogdelete","onclick"=>"return confirm('Do you really want to delete configuration for module $key ?');")));
+      $row[] = l("Delete","admin/dpi247/dpilogs/configure/watchdog/delete".$key,array("attributes"=>array("class"=>"dpiwatchdogdelete","onclick"=>"return confirm('Do you really want to delete configuration for module $key ?');")));
     else
       $row[] = "&nbsp;";
     // Add module name

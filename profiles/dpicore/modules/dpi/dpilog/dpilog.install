@@ -1,18 +1,24 @@
 <?php 
 
-
-function dpilog_install(){
+/**
+ * Implementation of hook_install
+ *
+ * Disable the dblog module
+ */
+function dpilog_install() {
   // Disable dblog
   try {
     module_disable(array('dblog'));
   }
   catch(Exception $e){
-    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.','error');
+    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.', 'error');
   }
 }
 
 /**
- *Implementation of hook_enable().
+ * Implementation of hook_enable
+ *
+ * Disable the dblog module
  */
 function dpilog_enable(){
   // Disable dblog
@@ -20,33 +26,41 @@ function dpilog_enable(){
     module_disable(array('dblog'));
   }
   catch(Exception $e){
-    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.','warning');
+    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.', 'warning');
   }
 }
 
+/**
+ * Implementation of hook_modules_enabled
+ *
+ * Check wheter the dblog modules is enabled or not
+ */
 function dpilog_modules_enabled($modules) {
   if (in_array('dblog', $modules)) {
     drupal_set_message(t('Dblog should not be enabled when DPILog is active. Please disable Dblog module.'), 'error');
   }
 }
 
+/**
+ * Implementation of hook_uninstall
+ *
+ * Delete variables
+ */
 function dpilog_uninstall(){
   dpi_variable_del('dpilog_configuration_granularity');
   dpi_variable_del('dpilog_configuration_display'); 
 }
 
 /**
- * Implements hook_schema().
- *
+ * Implements hook_schema
  */
 function dpilog_schema() {
   $indexes = array(
     'log_name' => array('log_name'),
     'id' => array('id'),
     'timestamp' => array('timestamp'),
-   // 'compound' => array('log_name','action','lid'),
   );
-  
+
   $schema['dpilog_logs'] = array(
      'description'=>"de",
      'fields' => array(
@@ -164,6 +178,8 @@ function dpilog_schema() {
 
 /**
  * Install dpilog_watchdog table
+ *
+ * Install dpilog_watchdog table and disable the dblog module
  */
 function dpilog_update_7101(){
   $schema = drupal_get_schema('dpilog_watchdog', TRUE);
@@ -174,6 +190,6 @@ function dpilog_update_7101(){
     module_disable(array('dblog'));
   }
   catch(Exception $e){
-    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.','warning');
+    drupal_set_message('Please uninstall module "Database logging" (dblog) before using DPILog.', 'warning');
   }
 }

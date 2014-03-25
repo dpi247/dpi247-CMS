@@ -20,7 +20,7 @@ module_load_include('inc', 'dpilog','dpilog.private');
  * @ingroup logging_severity_levels
  */
 function dpilog_watchdog_overview() {
-  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  $watchdog_table_name = _dpilog_get_table_name('watchdogs');
   $filter = dpilog_watchdog_build_filter_query();
   $rows = array();
   $classes = array(
@@ -135,7 +135,6 @@ function dpilog_watchdog_filters() {
   foreach (_dpilog_watchdog_get_message_types() as $type) {
     $types[$type] = t($type);
   }
-
   if (!empty($types)) {
     $filters['type'] = array(
       'title' => t('Type'),
@@ -156,8 +155,6 @@ function dpilog_watchdog_filters() {
     'options' => _dpilog_watchdog_get_users_listed(),
   );
 
-  
-
   return $filters;
 }
 
@@ -167,7 +164,7 @@ function dpilog_watchdog_filters() {
  */
 function _dpilog_watchdog_get_users_listed() {
   $users = array();
-  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  $watchdog_table_name = _dpilog_get_table_name('watchdogs');
 
   $query = db_select($watchdog_table_name, 'w');
   $query->leftJoin('users', 'u', 'w.uid = u.uid');
@@ -202,10 +199,11 @@ function dpilog_watchdog_filter_form($form) {
 
   $form['filters'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Filter log messages'),
+    '#title' => t('Filter'),
     '#collapsible' => TRUE,
     '#collapsed' => empty($_SESSION['dpilog_watchdog_overview_filter']),
   );
+
   foreach ($filters as $key => $filter) {
     $form['filters']['status'][$key] = array(
       '#title' => $filter['title'],
@@ -223,16 +221,19 @@ function dpilog_watchdog_filter_form($form) {
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
   );
+
   $form['filters']['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Filter'),
   );
+
   if (!empty($_SESSION['dpilog_watchdog_overview_filter'])) {
     $form['filters']['actions']['reset'] = array(
       '#type' => 'submit',
       '#value' => t('Reset')
     );
   }
+
   return $form;
 }
 
@@ -286,14 +287,15 @@ function dpilog_watchdog_filter_form_submit($form, &$form_state) {
 function dpilog_watchdog_clear_log_form($form) {
   $form['dpilog_watchdog_clear'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Clear log messages'),
+    '#title' => t('Clear'),
     '#description' => t('This will permanently remove the log messages from the database.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+  
   $form['dpilog_watchdog_clear']['clear'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear log messages'),
+    '#value' => t('Clear'),
     '#submit' => array('dpilog_watchdog_clear_log_submit'),
   );
 
@@ -304,14 +306,11 @@ function dpilog_watchdog_clear_log_form($form) {
  * Form submission handler for dpilog_watchdog_clear_log_form().
  */
 function dpilog_watchdog_clear_log_submit() {
-  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  $watchdog_table_name = _dpilog_get_table_name('watchdogs');
   $_SESSION['dpilog_watchdog_overview_filter'] = array();
   db_delete($watchdog_table_name)->execute();
   drupal_set_message(t('All watchdogs have been cleared.'));
 }
-
-
-
 
 // --------------------------------------------------------------
 // ------------- Affichage du détail d'un watchdog --------------
@@ -330,7 +329,7 @@ function dpilog_watchdog_clear_log_submit() {
  * @see dpilog_watchdog_menu()
  */
 function dpilog_watchdog_event($id) {
-  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  $watchdog_table_name = _dpilog_get_table_name('watchdogs');
   $result = db_query('SELECT w.*, u.name, u.uid FROM {'.$watchdog_table_name.'} w INNER JOIN {users} u ON w.uid = u.uid WHERE w.wid = :id', array(':id' => $id))->fetchObject();
   $build = array();
   if ($dpiwatchdog = $result) {
@@ -340,7 +339,7 @@ function dpilog_watchdog_event($id) {
       "title"    => "Watchdog details",
       "subtitle" => "Basic information",
       "content"  => _dpilog_watchdog_event_main_details($dpiwatchdog)
-      );
+    );
 
     // backtrace(s)
     if($dpiwatchdog->backtrace){
@@ -456,7 +455,7 @@ function _dpilog_watchdog_event_main_details($dpiwatchdog){
 function _dpilog_watchdog_other_events($processid, $current_wid){
   if(!$processid)
     return "";
-  $watchdog_table_name = _dpilog_watchdog_get_table_name();
+  $watchdog_table_name = _dpilog_get_table_name('watchdogs');
   $query = db_select($watchdog_table_name, 'w');
   $query->leftJoin('users', 'u', 'w.uid = u.uid');
   $query->fields('w', array('wid', 'uid', 'severity', 'type', 'timestamp', 'message', 'variables'));
@@ -497,8 +496,6 @@ function _dpilog_watchdog_other_events($processid, $current_wid){
   );
   return drupal_render($build);
 }
-
-
 
 // --------------------------------------------------------------
 // ------------- Page de configuration des watchdogs ------------
@@ -651,7 +648,7 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
  * @param $module {String} Module name
  */
 function dpilog_watchdog_delete_rule($module=""){
-  $url_config_page = 'admin/dpi/dpilogs/configure/watchdog';
+  $url_config_page = 'admin/dpi247/dpilogs/configure/watchdog';
   if(trim($module) == '' || $module == "DEFAULT")
     drupal_goto($url_config_page);
   $mapping = _dpilog_watchdog_get_rules();

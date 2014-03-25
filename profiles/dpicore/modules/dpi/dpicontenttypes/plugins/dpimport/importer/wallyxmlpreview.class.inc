@@ -8,7 +8,6 @@ class WallyXmlPreview extends WallyXmlV1{
   * @param EntityDrupalWrapper $package
   */
   public function savePackage($dom, $package){
-    dsm($package);
       //@todo create prenode and set id into class variable to create de render form
     $prenode = new Prenode();
     $prenode->setNode($package);

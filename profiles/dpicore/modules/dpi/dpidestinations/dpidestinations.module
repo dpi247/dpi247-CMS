@@ -13,7 +13,7 @@ module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 function dpidestinations_theme() {
 
   $theme['dpidestinations_add_content_modal'] = array(
-    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL,'group' => NULL, 'categories'=> array(), 'column_count' => 2),
+    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL, 'group' => NULL, 'categories'=> array(), 'column_count' => 2),
     'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
     'file' => 'theme.inc',
     'template' => 'dpidestinations-add-content-modal',
@@ -148,6 +148,17 @@ function dpidestinations_permission(){
       'title' => t('Create targets'),
     ),
   );
+}
+
+/**
+ * Implementation of hook_form_FORM-ID_alter
+ * Set the default variant type to "Section" for sections pages
+ */
+function dpidestinations_form_page_manager_handler_add_alter(&$form, $form_state) {
+  if (isset($form_state['task_id']) && $form_state['task_id'] == 'sections' &&
+      isset($form['handler']['#options']['destination_context'])) {
+    $form['handler']['#default_value'] = 'destination_context';
+  }
 }
 
 /**
@@ -321,9 +332,8 @@ function dpidestinations_views_plugins() {
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-node',
-
-      )
-    )
+      ),
+    ),
     /*
      'style' => array( //declare the style plugin
      'target_style' => array(
@@ -357,10 +367,7 @@ function dpidestinations_views_plugins() {
      )
     */
   );
-
 }
-
-
 
 function dpidestinations_views_api() {
   return array('api' => 2

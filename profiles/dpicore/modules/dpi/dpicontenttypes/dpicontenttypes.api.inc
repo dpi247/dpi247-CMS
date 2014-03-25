@@ -223,6 +223,45 @@ function dpicontenttypes_api_get_first_embed($node, $type = FALSE, $provider = F
 }
 
 /**
+ * Get the count of embedded objects for a node, grouped by type
+ *
+ * @param object $node
+ *
+ * @return array | bool
+ *   An array (the keys are the types of the objects) containing the objects count or FALSE in case of failure
+ */
+function dpicontenttypes_api_get_embeds_count_by_type($node) {
+  $count_embeds = array();
+  if ($type_embeds = dpicontenttypes_api_get_embeds_by_type($node)) {
+    foreach ($type_embeds as $type => $embeds) {
+      $count_embeds[$type] = count($embeds);
+    }
+  }
+  return empty($count_embeds) ? FALSE : $count_embeds;
+}
+
+/**
+ * Get all embedded objects for a node, grouped by type
+ *
+ * @param object $node
+ *
+ * @return array | bool
+ *   An array (the keys are the types of the objects) containing the objects or FALSE in case of failure
+ */
+function dpicontenttypes_api_get_embeds_by_type($node) {
+  $type_embeds = array();
+  if ($embeds = dpicontenttypes_api_get_embeds($node)) {
+    foreach ($embeds as $embed) {
+      if (!isset($type_embeds[$embed['type']])) {
+        $type_embeds[$embed['type']] = array();
+      }
+      $type_embeds[$embed['type']][] = $embed;
+    }
+  }
+  return empty($type_embeds) ? FALSE : $type_embeds;
+}
+
+/**
  * Get all embedded objects of a node
  *
  * @param object $node

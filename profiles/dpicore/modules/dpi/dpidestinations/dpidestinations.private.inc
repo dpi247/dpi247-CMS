@@ -97,11 +97,12 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id){
 
     $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
+
     $display = panels_panel_context_get_display($handler);
 
     $displays[$term_id] = $display;
   }
-  return  $displays[$term_id];
+  return $displays[$term_id];
 }
 
 /**
@@ -244,37 +245,36 @@ function _dpidestinations_virtualrank_update_items( & $items){
 /**
  * Update the virtualrank of an item
  */
-function _dpidestinations_virtualrank_update_item( & $item){
-  if($item['rank']=='default'){
-    $controller=new TargetBlockController('targetblock');
-    $targetblock=$controller->load_targetblock_by_termid_and_target($item['tid'],$item['target']);
+function _dpidestinations_virtualrank_update_item(&$item) {
+  if($item['rank'] == 'default') {
+    $controller = new TargetBlockController('targetblock');
+    $targetblock = $controller->load_targetblock_by_termid_and_target($item['tid'], $item['target']);
 
-    if($targetblock){
+    if($targetblock) {
       $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-      $rank_max_value= $wrapper->rank_max_value->value();
-      $item['rank']=1;
+      $rank_max_value = $wrapper->rank_max_value->value();
+      $item['rank'] = $rank_max_value + 1;
     }
-    else{
+    else {
       //We need a fallback if the targetblock is not found
-      watchdog("dpidestinations",t("No targetblock found for tid %tid, target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));
-      drupal_set_message(t("An error occured during rank calculation for tid %tid and target %target",array('%tid'=>$item['tid'],'%target'=>$item['target'])));
+      watchdog("dpidestinations", t("No targetblock found for tid %tid, target %target", array('%tid' => $item['tid'], '%target' => $item['target'])));
+      drupal_set_message(t("An error occured during rank calculation for tid %tid and target %target", array('%tid' => $item['tid'], '%target' => $item['target'])));
 
-      if($item['rank']=='default'){
-        $item['rank']=1;
+      if($item['rank'] == 'default') {
+        $item['rank'] = 1;
       }
-      elseif($item['rank']=='DNC'){
-        $item['rank']=0;
-
+      elseif($item['rank'] == 'DNC') {
+        $item['rank'] = 0;
       }
     }
   }
 
-  if($item['rank']!='DNC'){
+  if($item['rank'] != 'DNC') {
     //Caclulate virtual_rank
-    $item['virtual_rank']=_dpidestinations_virtualrank_give_virtual_rank_for_position( $item['tid'],$item['target'],$item['rank']);
+    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank']);
   }
-  else{
-    $item['rank']=0;
+  else {
+    $item['rank'] = 0;
   }
 }
 
@@ -441,7 +441,6 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   //We use the targetview_reorder view to ensure we got the proper information.
   $targetview=$target_wrapper->targetview->value();
 
-
   //We double the number of rows and force the use of pager
   $targetblock->node_count_for_targetblockinstance=2*$targetblock->node_count_for_targetblockinstance;
   $targetblock->use_pager=TRUE;
@@ -466,11 +465,11 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
  * @param unknown $target_value
  * @param unknown $targetblock
  */
-function   _dpidestinations_targetview_initialize_view(& $targetview, $term_value,$target_value,$targetblock){
+function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, $target_value, $targetblock) {
   //@todo: documenter ces arguments dans la doc technique
   $targetview->targetview_tid=$term_value;
   $targetview->targetview_target=$target_value;
-   
+
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
 
@@ -668,20 +667,20 @@ function __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_targ
   return $wrapper->available_targetlayouts->value();
 }
 
-function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update=FALSE){
-  if($term_id==""){
-    return array(''=>'');
+function __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id, $target_name, $is_update = FALSE) {
+  if($term_id == "") {
+    return array('' => '');
   }
 
-  $rank_options=array();
+  $rank_options = array();
 
-  if($is_update){
-    $rank_options['DNC']=t('Dont change the rank');
+  if($is_update) {
+    $rank_options['DNC'] = t('Dont change the rank');
   }
-  $rank_options['default']=t('Default behavior');
+  $rank_options['default'] = t('Default behavior');
 
-  $options=dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update);
-  return $rank_options+$options;
+  $options = dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id, $target_name, $is_update);
+  return $rank_options + $options;
 }
 
 /**

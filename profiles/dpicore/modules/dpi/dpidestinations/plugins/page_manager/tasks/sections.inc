@@ -1,7 +1,7 @@
 <?php
-   
+ 
 function dpidestinations_sections_page_manager_tasks() {
- return array(
+  return array(
     // This is a 'page' task and will fall under the page admin UI
     'task type' => 'page',
     'title' => t('All Sections'),
@@ -17,14 +17,13 @@ function dpidestinations_sections_page_manager_tasks() {
     'handler type' => 'context',
     'get arguments' => 'dpidestinations_sections_get_arguments',
     'get context placeholders' => 'dpidestinations_sections_get_contexts',
-       
+     
 
     // Allow this to be enabled or disabled:
     'disabled' => variable_get('dpidestinations_sections_disabled', TRUE),
     'enable callback' => 'dpidestinations_sections_enable',
     'access callback' => 'dpidestinations_sections_access_check',
   );
- 
 }
 
 /**
@@ -37,9 +36,9 @@ function dpidestinations_sections_menu_alter(&$items, $task) {
   if (variable_get('dpidestinations_sections_disabled', TRUE)) {
     return;
   }
-  
+
   $callback = $items['section/%sectionterm']['page callback'];
-  
+
   // Override the node edit handler for our purpose.
   if ($callback == 'dpidestinations_page_section_view') {
     $items['section/%sectionterm']['page callback'] = 'dpidestinations_section_view_page';
@@ -47,13 +46,11 @@ function dpidestinations_sections_menu_alter(&$items, $task) {
     $items['section/%sectionterm']['file'] = $task['file'];
   }
   else {
-      variable_set('dpidestinations_sections_disabled', TRUE);
-      drupal_set_message(t('Page manager module is unable to enable destinations page because some other module already has overridden with %callback.', array('%callback' => $callback)), 'warning');
+    variable_set('dpidestinations_sections_disabled', TRUE);
+    drupal_set_message(t('Page manager module is unable to enable destinations page because some other module already has overridden with %callback.', array('%callback' => $callback)), 'warning');
     return;
   }
-
 }
-
 
 /**
  * Entry point for our overridden term view.
@@ -62,10 +59,10 @@ function dpidestinations_sections_menu_alter(&$items, $task) {
  * to run with it. If no one does, it passes through to Drupal core's
  * term view, which is term_page_view().
  */
-function   dpidestinations_section_view_page($section) {
+function dpidestinations_section_view_page($section) {
   // Assign the term name as the page title, just as the original page
   // callback did.
-  
+
   drupal_set_title($section->name);
 
   // While we ordinarily should never actually get feeds through here,
@@ -76,16 +73,15 @@ function   dpidestinations_section_view_page($section) {
   // Load the term into a context.
   ctools_include('context');
   ctools_include('context-task-handler');
-  
-  
+
   $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
-  
+
   if (empty($contexts) or $section->vid!=dpidestinations_api_get_sections_vocabulary_vid()) {
     return drupal_not_found();
   }
-  
+
   $output = ctools_context_handler_render($task, '', $contexts, array($section->tid));
-  
+
   if ($output !== FALSE) {
     return $output;
   }
@@ -105,8 +101,6 @@ function   dpidestinations_section_view_page($section) {
   return '';
   return $function($term);
 }
-
-
 
 /**
  * Callback to enable/disable the page from the UI.
@@ -136,25 +130,19 @@ function dpidestinations_sections_access_check($task, $subtask_id, $contexts) {
   return TRUE;
 }
 
-
 function dpidestinations_sections_get_arguments( $task, $subtask_id ){
   module_load_include('inc', 'page_manager', 'plugins/tasks/term_view');
   $args=dpidestinations_sections_get_default_arguments($task, $subtask_id);
   return $args;
-  
 }
-function dpidestinations_sections_get_contexts( $task, $subtask_id ){
 
-  
+function dpidestinations_sections_get_contexts( $task, $subtask_id ){
   module_load_include('inc', 'page_manager', 'plugins/tasks/term_view');
   $contexts=page_manager_term_view_get_contexts($task, $subtask_id);
   return $contexts;
-  
-  
 }
 
 function dpidestinations_sections_get_default_arguments($task, $subtask_id){
-  
   return array(
     array(
       'keyword' => 'destination',
@@ -173,7 +161,5 @@ function dpidestinations_sections_get_default_arguments($task, $subtask_id){
       'name' => 'string',
       'settings' => array(),
     ),
-  );  
-  
+  );
 }
-

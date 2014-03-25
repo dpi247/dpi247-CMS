@@ -1,11 +1,11 @@
 <?php
 function dpidestinations_views_default_views() {
 $view = new view();
-$view->name = 'defaut_targetview';
+$view->name = 'default_targetview';
 $view->description = '';
 $view->tag = 'default';
 $view->base_table = 'node';
-$view->human_name = 'defaut targetview';
+$view->human_name = 'default targetview';
 $view->core = 7;
 $view->api_version = '3.0';
 $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */

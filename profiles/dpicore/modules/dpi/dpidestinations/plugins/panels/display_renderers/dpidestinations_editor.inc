@@ -34,7 +34,7 @@ class dpidestinations_renderer_editor extends panels_renderer_editor {
     if (empty($groups)) {
       $output = t('There are no content types you may add to this display.');
     } else {
-      $output = theme('dpidestinations_add_content_modal', array('renderer' => $this, 'groups' => $groups, 'categories'=>$categories, 'category' => $category, 'group' => $group, 'region' => $region));
+      $output = theme('dpidestinations_add_content_modal', array('renderer' => $this, 'groups' => $groups, 'categories' => $categories, 'category' => $category, 'group' => $group, 'region' => $region));
     }
     $this->commands[] = ctools_modal_command_display($title, $output);
   }
@@ -67,7 +67,7 @@ class dpidestinations_renderer_editor extends panels_renderer_editor {
           $groups[$group_key]['contents'][$type_name] = $subtypes;
         }
 
-        $content_title = filter_xss_admin($content_type['title']);
+        $content_title = $subtype_name;//filter_xss_admin($content_type['title']);
 
         // Ensure content with the same title doesn't overwrite each other.
         while (isset($groups[$group_key]['content'][$content_title])) {

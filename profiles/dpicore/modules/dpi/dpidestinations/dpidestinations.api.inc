@@ -139,17 +139,18 @@ function dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target
   return array(1=>"layout1",2=>"layout2");
 }
 
-function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id,$target_name,$is_update=FALSE){
-  $controller=new TargetBlockController('targetblock');
-  $targetblock=$controller->load_targetblock_by_termid_and_target($term_id,$target_name);
-  $rank_options=array();
-  if($targetblock){
+function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id, $target_name, $is_update = FALSE) {
+  $controller = new TargetBlockController('targetblock');
+  $targetblock = $controller->load_targetblock_by_termid_and_target($term_id, $target_name);
+
+  $rank_options = array();
+  if($targetblock) {
     $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
 
-    $rank_max_value= $wrapper->rank_max_value->value();
-    $rank_options=array();
-    for($i=1;$i<=$rank_max_value;$i++){
-      $rank_options[$i]=$i;
+    $rank_max_value = $wrapper->rank_max_value->value();
+    $rank_options = array();
+    for($i = 1; $i <= $rank_max_value; $i++) {
+      $rank_options[$i] = $i;
     }
   }
   return $rank_options;

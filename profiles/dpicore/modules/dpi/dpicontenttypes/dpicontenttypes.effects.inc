@@ -15,6 +15,14 @@ function dpicontenttypes_image_effect_info() {
     'summary theme' => 'dpicontenttypes_dpicrop_summary',
   );
 
+  $effects['dpicontenttypes_dpicropcopy'] = array(
+    'label' => t('DPI Crop Copy'),
+    'help' => t('Copy a DPI Crop effect.'),
+    'effect callback' => 'dpicontenttypes_dpicropcopy_effect',
+    'form callback' => 'dpicontenttypes_dpicropcopy_form',
+    'summary theme' => 'dpicontenttypes_dpicropcopy_summary',
+  );
+
   return $effects;
 }
 
@@ -34,6 +42,27 @@ function theme_dpicontenttypes_dpicrop_summary($variables) {
   $output .= ', Ratio : '.round($data['width']/$data['height'], 2);
   $output .= ', X offset : '.$data['xoffset'];
   $output .= ', Y offset : '.$data['yoffset'];
+  $output = '('.$output.')';
+
+  return $output;
+}
+
+/**
+ * Returns HTML for a summary of an image DPI Crop Copy effect.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - data: The current configuration for this DPI Crop Copy effect.
+ *
+ * @ingroup themeable
+ */
+function theme_dpicontenttypes_dpicropcopy_summary($variables) {
+  $data = $variables['data'];
+
+  $copied_style = image_style_load(NULL, $data['copied_style']);
+  $copied_stylename = $copied_style['name'];
+
+  $output = 'Copied crop : '.$copied_stylename;
   $output = '('.$output.')';
 
   return $output;
@@ -94,6 +123,49 @@ function dpicontenttypes_dpicrop_form($data = array()) {
 }
 
 /**
+ * Settings form for the DPI Crop Copy image effect
+ *
+ * @param $data
+ *   The current configuration for this resize effect.
+ */
+function dpicontenttypes_dpicropcopy_form($data = array()) {
+  $form = array();
+
+  $data += array(
+    'copied_style' => 0,
+  );
+
+  $styles = image_styles();
+  $existing_effects = $effects_ids = array();
+  foreach ($styles as $style) {
+    if ($style['effects']) {
+      foreach ($style['effects'] as $effect_id => $effect) {
+        if ($effect['name'] == 'dpicontenttypes_dpicrop') {
+          $ratio = round($effect['data']['width']/$effect['data']['height'], 2);
+          $existing_effects[$style['isid']] = $style['name'].' (ratio: '.$ratio.')';
+          $effects_ids[$style['isid']] = $effect_id;
+          break;
+        }
+      }
+    }
+  }
+
+  $form['copied_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Choose the style to copy'),
+    '#options' => $existing_effects,
+    '#default_value' => $data['copied_style']
+  );
+
+  $form['effects_ids'] = array(
+    '#type' => 'value',
+    '#value' => $effects_ids,
+  );
+
+  return $form;
+}
+
+/**
  * Validate function for the DPI Crop image effect settings form
  */
 function dpicontenttypes_dpicrop_form_validate($form, $form_state, $data) {
@@ -145,6 +217,71 @@ function dpicontenttypes_dpicrop_effect(&$image, $data) {
       $data['yoffset'] = $crop[1];
       $data['width'] = $crop[2];
       $data['height'] = $crop[3];
+    }
+
+    if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {
+      // If the effect has a "center_max" value as parameter, we have to maximise the crop
+      if (image_scale_and_crop($image, $data['width'], $data['height'])) {
+        return TRUE;
+      }
+    } else {
+      // Simply apply the crop effect
+      if (!is_numeric($data['xoffset'])) {
+        $data['xoffset'] = image_filter_keyword($data['xoffset'], $image->info['width'], $data['width']);
+      }
+      if (!is_numeric($data['yoffset'])) {
+        $data['yoffset'] = image_filter_keyword($data['yoffset'], $image->info['height'], $data['height']);
+      }
+      if (image_crop($image, $data['xoffset'], $data['yoffset'], $data['width'], $data['height'])) {
+        return TRUE;
+      }
+    }
+
+    watchdog('image', 'Image dpicrop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+  }
+
+  return FALSE;
+}
+
+/**
+ * Image effect callback; Apply DPI Crop Copy effect on an image resource.
+ *
+ * @param $image
+ *   An image object returned by image_load().
+ * @param $data
+ *   An array of attributes to use when performing the DPI Crop effect.
+ *
+ * @return
+ *   TRUE on success. FALSE on failure to resize image.
+ */
+function dpicontenttypes_dpicropcopy_effect(&$image, $data) {
+  if (isset($data['entity']) && isset($data['atom'])) {
+    $copied_style = image_style_load(NULL, $data['copied_style']);
+    $copied_stylename = $copied_style['name'];
+    $datas_found = FALSE;
+
+    $entity = $data['entity'];
+    $atom = $data['atom'];
+    list($eid, $revision, $bundle) = entity_extract_ids($entity->entity_type, $entity);
+
+    $cropings = _dpicontenttypes_get_saved_cropings_for_entity_and_atom($entity->entity_type, $eid, $atom->sid, $copied_stylename);
+    if ($cropings && is_array($cropings) && !empty($cropings)) {
+      $datas_found = TRUE;
+      $crop = $cropings;
+      $data['xoffset'] = $crop[0];
+      $data['yoffset'] = $crop[1];
+      $data['width'] = $crop[2];
+      $data['height'] = $crop[3];
+    }
+
+    if (!$datas_found) {
+      $effects_ids = $data['effects_ids'];
+      $data['effect_id'] = $effects_ids[$data['copied_style']];
+      $crop = $copied_style['effects'][$data['effect_id']]['data'];
+      $data['xoffset'] = $crop['xoffset'];
+      $data['yoffset'] = $crop['yoffset'];
+      $data['width'] = $crop['width'];
+      $data['height'] = $crop['height'];
     }
 
     if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {

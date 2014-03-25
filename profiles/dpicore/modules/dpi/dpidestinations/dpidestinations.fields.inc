@@ -1,7 +1,5 @@
 <?php
 
-
-
 /**
  * Implements hook_field_info().
  *
@@ -46,11 +44,7 @@ function dpidestinations_field_validate($entity_type, $entity, $field, $instance
   }
   }
   */
-
-
 }
-
-
 
 /**
  * Implements hook_field_is_empty().
@@ -362,8 +356,6 @@ function dpidestinations_field_extra_fields() {
         'weight' => 0,
       ),
     ),
-
-
   );
 
   return $return;
@@ -478,10 +470,8 @@ function dpidestinations_field_formatter_info() {
 function dpidestinations_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-
   switch ($display['type']) {
     // This formatter simply outputs the field as text and with a color.
-
     case 'destination_default_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
@@ -491,6 +481,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
+
     case 'sectiontid_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
@@ -500,6 +491,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
+
     case 'sectiontid_name_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
@@ -510,6 +502,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         );
       }
       break;
+
     case 'sectiontid_name_linked_formatter':
       foreach ($items as $delta => $item) {
         $term=taxonomy_term_load($item['tid']);
@@ -519,8 +512,8 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
           '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
         );
       }
-
       break;
+
     case 'destination_main_tid_name_formatter':
       $term=taxonomy_term_load($item['tid']);
       $element[0] = array(
@@ -529,6 +522,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         '#value' => taxonomy_term_title($term),
       );
       break;
+
     case 'destination_main_tid_name__linked_formatter':
       $term=taxonomy_term_load($item['tid']);
       $element[0] = array(
@@ -537,15 +531,12 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
         '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
       );
       break;
-
   }
 
   return $element;
 }
 
-
-function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
-
+function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
   // Iterate over the form parents to find the element.
@@ -561,6 +552,4 @@ function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state){
   // by the field API.
   unset($element['_weight']);
   return $element;
-
-
 }
