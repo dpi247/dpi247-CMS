@@ -55,7 +55,7 @@ function _dpilog_log($log_name, $action, $message, $variables = array(), $id = N
     $registrations = array();
   }
 
-  // defaut case
+  // default case
   if(!isset($registrations[$log_name][$action])) {
     $registrations[$log_name][$action]['dpilog'] = 'ignore';
     $registrations[$log_name][$action]['watchdog'] = 'ignore';

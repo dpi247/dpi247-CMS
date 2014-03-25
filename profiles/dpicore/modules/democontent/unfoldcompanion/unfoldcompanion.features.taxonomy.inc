@@ -9,29 +9,6 @@
  */
 function unfoldcompanion_taxonomy_default_vocabularies() {
   return array(
-    'destinations' => array(
-      'name' => 'Destinations',
-      'machine_name' => 'destinations',
-      'description' => 'Destinations represent the structure of your editorial content.',
-      'hierarchy' => 0,
-      'module' => 'taxonomy',
-      'weight' => 0,
-      'rdf_mapping' => array(
-        'rdftype' => array(
-          0 => 'skos:ConceptScheme',
-        ),
-        'name' => array(
-          'predicates' => array(
-            0 => 'dc:title',
-          ),
-        ),
-        'description' => array(
-          'predicates' => array(
-            0 => 'rdfs:comment',
-          ),
-        ),
-      ),
-    ),
     'scald_authors' => array(
       'name' => 'Authors',
       'machine_name' => 'scald_authors',

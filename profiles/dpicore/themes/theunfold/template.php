@@ -122,7 +122,7 @@ function theunfold_theme_package_top_items($vars) {
   drupal_add_js(drupal_get_path('theme', 'theunfold').'/scripts/mylibs/pagination.js');
 
   $content = '';
-  if (count($vars['topItems']) != 0) {
+  if (isset($vars['topItems']) && is_array($vars['topItems']) && count($vars['topItems']) != 0) {
     $content .= '<div class="block-slidepic media">';
     $content .= '<ul class="page-inner">';
     foreach ($vars['topItems'] as $item) {

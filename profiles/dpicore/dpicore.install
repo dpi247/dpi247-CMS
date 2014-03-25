@@ -220,6 +220,7 @@ function dpicore_install_set_a_taxonomy_variable($name){
   }
 
   dpi_variable_set('dpi_'.$name, $vid);
+  return $vid;
 }
 
 function dpicore_install_demo_contents_form($form, &$form_state, &$install_state) {
@@ -281,6 +282,44 @@ function _dpicore_install_demo_contents_minimal() {
 
 function _dpicore_install_demo_contents_full() {
   module_enable(array('unfoldcompanion'));
+
+  // Add default destinations terms
+  $dest_voc = 'sections';
+  $dest_vid = _dpidestinations_variable_get('dpidestinations_section_vid', 0);
+  if ($dest_vid) {
+    $base_term = new stdClass();
+    $base_term->vid = $dest_vid;
+    $base_term->weight = 0;
+    $base_term->vocabulary_machine_name = $dest_voc;
+    $terms = array('News', 'Politics', 'Sports', 'Economy');
+    foreach ($terms as $term) {
+      $base_term->weight++;
+      $copied_term = clone $base_term;
+      $copied_term->name = $term;
+      taxonomy_term_save($copied_term);
+    }
+  }
+
+  // Activate the sections page in the page manager
+  module_load_include('admin.inc', 'page_manager');
+  // load context plugin as there may be contexts cached here.
+  ctools_include('context');
+  $page = page_manager_get_page_cache('sections');
+  if ($function = ctools_plugin_get_function($page->subtask, 'enable callback')) {
+    $result = $function($page, FALSE);
+
+    // We want to re-cache this if it's changed so that status is properly
+    // updated on the changed form.
+    if (!empty($page->changed)) {
+      page_manager_set_page_cache($page);
+    }
+  }
+  variable_set('site_frontpage', 'section/1');
+/*
+  module_load_include('pages_default.inc', 'unfoldcompanion');
+  $sections_page = unfoldcompanion_default_page_manager_handlers();
+  page_manager_save_page_cache($sections_page['sections_destination_context']);
+  */
 }
 
 function _dpicore_install_default_contents() {

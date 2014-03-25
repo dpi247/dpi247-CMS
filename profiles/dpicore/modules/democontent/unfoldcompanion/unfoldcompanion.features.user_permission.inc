@@ -615,15 +615,6 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
-  // Exported permission: 'delete terms in destinations'.
-  $permissions['delete terms in destinations'] = array(
-    'name' => 'delete terms in destinations',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'taxonomy',
-  );
-
   // Exported permission: 'delete terms in entities'.
   $permissions['delete terms in entities'] = array(
     'name' => 'delete terms in entities',
@@ -780,15 +771,6 @@ function unfoldcompanion_user_default_permissions() {
   // Exported permission: 'edit terms in concepts'.
   $permissions['edit terms in concepts'] = array(
     'name' => 'edit terms in concepts',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'taxonomy',
-  );
-
-  // Exported permission: 'edit terms in destinations'.
-  $permissions['edit terms in destinations'] = array(
-    'name' => 'edit terms in destinations',
     'roles' => array(
       'administrator' => 'administrator',
     ),

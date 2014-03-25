@@ -30,7 +30,9 @@ function unfoldcompanion_default_page_manager_handlers() {
     'relationships' => array(),
     'section_default_target' => '',
   );
+  $handler->did = 1;
   $display = new panels_display();
+  $display->did = 1;
   $display->layout = 'base-layout-brick';
   $display->layout_settings = array();
   $display->panel_settings = array(
