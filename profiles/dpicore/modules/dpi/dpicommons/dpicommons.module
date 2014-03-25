@@ -67,7 +67,36 @@ function dpicommons_init() {
     register_shutdown_function('_dpicommons_shutdown_function');
   }
 }
-
+/*
+ * dpilog is used to log some actions (user interactions and system actions).
+ * 
+ * dpilog is more powerfull than watchdog since you have more granularit to groups log and have the ability to save some variable and one id.
+ * dpilog is also a wrapper for the watchdog fonction.
+ * No need to use both cause dpilog can trigger a watchdog based on settings in the dpilog settings page.
+ * 
+ * @param string $log_name
+ *   A string used to to identify the log category (see the related hook_dpilog_register).
+ * @param string $action
+ *   A string used to to identify the log action (see the related hook_dpilog_register).
+ * @param string $message
+ *   A text describing the log
+ * @param array $variables
+ *   Use the variable if you need to log some usefull variables.
+ *   variables will be serialized in DB
+ * @param string/int $id
+ *   The id is related to the log that you are. If you log something about a node it will probably be the nid...
+ *   It can be usefull for grouping  logs from different type (different module) but  that affect a same object a node for example.
+ *   You could see each log for a specific nid across dpilog from several modules
+ * @param int $uid
+ *   The id of the user that trigger the log. by default the gloabal $user is used.
+ *   is FALSE.
+ * @param boolean $keep_backtrace
+ *   If TRUE it will keep the backtrace as a vardump
+ *
+ * @see hook_dpilog_register() 
+ * @see _dpilog() 
+ * 
+ */
 function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
   if (module_exists('dpilog')) {
     _dpilog_log($log_name, $action, $message, $variables,$id, $severity, $uid, $keep_backtrace);
