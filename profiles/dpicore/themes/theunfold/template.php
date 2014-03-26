@@ -65,6 +65,40 @@ function theunfold_process_page(&$vars) {
 }
 
 /**
+ * Hook process_node
+ */
+function theunfold_process_node(&$vars) {
+  if ($vars['type'] == 'package') {
+    if (isset($vars['content']['field_displaytitle']) && !empty($vars['content']['field_displaytitle'])) {
+      // This handles the title_prefix, title_suffix and title_attributes
+      // These are usually used for the title, we report theme on the displaytitle
+
+      $rendered_title_prefix = isset($vars['title_prefix']) ? render($vars['title_prefix']) : '';
+      if (isset($vars['title_attributes']) && !empty($vars['title_attributes'])) {
+        $attributes_prefix_tag = '<span '.$vars['title_attributes'].' >';
+      } else {
+        $attributes_prefix_tag = '';
+      }
+      if (!isset($vars['content']['field_displaytitle'][0]['#prefix'])) {
+        $vars['content']['field_displaytitle'][0]['#prefix'] = '';
+      }
+      $vars['content']['field_displaytitle'][0]['#prefix'] = $rendered_title_prefix . $attributes_prefix_tag . $vars['content']['field_displaytitle'][0]['#prefix'];
+
+      $rendered_title_suffix = isset($vars['title_suffix']) ? render($vars['title_suffix']) : '';
+      if (isset($vars['title_attributes']) && !empty($vars['title_attributes'])) {
+        $attributes_suffix_tag = '</span>';
+      } else {
+        $attributes_suffix_tag = '';
+      }
+      if (!isset($vars['content']['field_displaytitle'][0]['#suffix'])) {
+        $vars['content']['field_displaytitle'][0]['#suffix'] = '';
+      }
+      $vars['content']['field_displaytitle'][0]['#suffix'] = $vars['content']['field_displaytitle'][0]['#suffix'] . $attributes_suffix_tag . $rendered_title_suffix;
+    }
+  }
+}
+
+/**
  * Hook preprocess_node
  */
 function theunfold_preprocess_node(&$vars) {
