@@ -2,6 +2,8 @@
 
 /**
  * Implementation of hook_install
+ *
+ * Set the default date formats
  */
 function unfoldcompanion_install() {
   variable_set('date_format_short', 'd/m/Y - H:i');

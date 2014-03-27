@@ -79,8 +79,8 @@ function dpimport_process_import($importer, $dispatcher){
     }
   }
 }
+
 /**
- * 
  * Delete old files
  */
 function dpimport_deleteoldfiles(){
@@ -98,8 +98,8 @@ function dpimport_deleteoldfiles(){
     }
   }
 }
+
 /**
- * 
  * Helping function to process an import with the postdispatcher via a form
  * 
  * @param String $importer_name
@@ -114,6 +114,15 @@ function dpimport_page_test($importer_name) {
         Choose a file to upload: <input name="uploadedfile" type="file" /><br />
         <input type="submit" value="Upload File" />
       </form>';
+  
+  $content = drupal_get_form('dpimport_page_test_form');
 
   return $content;
+}
+
+function dpimport_page_test_form(&$form, $form_state) {
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Upload File',
+  );
 }

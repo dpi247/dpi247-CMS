@@ -206,7 +206,7 @@ function dpilog_watchdog_filter_form($form) {
 
   foreach ($filters as $key => $filter) {
     $form['filters']['status'][$key] = array(
-      '#title' => $filter['title'],
+      '#title' => t($filter['title']),
       '#type' => 'select',
       '#multiple' => TRUE,
       '#size' => 8,
@@ -647,13 +647,15 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
  * Delete configuration of $module
  * @param $module {String} Module name
  */
-function dpilog_watchdog_delete_rule($module=""){
+function dpilog_watchdog_delete_rule($module = "") {
   $url_config_page = 'admin/dpi247/dpilogs/configure/watchdog';
-  if(trim($module) == '' || $module == "DEFAULT")
+  if(trim($module) == '' || $module == "DEFAULT") {
     drupal_goto($url_config_page);
+  }
   $mapping = _dpilog_watchdog_get_rules();
   unset($mapping[$module]);
-  variable_set("dpilog_watchdog_rules_map",$mapping);
+  variable_set("dpilog_watchdog_rules_map", $mapping);
+  $module = check_plain($module);
   drupal_set_message("The configuration for module <em>$module</em> has been deleted.");
   drupal_goto($url_config_page);
 }

@@ -581,7 +581,7 @@ function dpilog_form_page_configure_granularity_form($form, &$form_state){
   foreach($registrations as $registration_name => $registration){ // cache_entry, cache_error
     $form['registrations'][$registration_name ]=array(
       '#type'=>'fieldset',
-      '#title'=>$registration_name,
+      '#title'=>check_plain($registration_name),
     );
 
     foreach($registration["actions"] as $action_name){ // cache_hit, cache_miss...

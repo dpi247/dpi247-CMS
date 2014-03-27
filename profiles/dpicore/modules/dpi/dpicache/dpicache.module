@@ -3,6 +3,9 @@
 module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
 
+/**
+ * Implementation of hook_menu
+ */
 function dpicache_menu(){
   $items=array();
 
@@ -23,13 +26,19 @@ function dpicache_menu(){
   return $items;
 }
 
-function dpicache_cron(){
+/**
+ * Implementation of hook_cron
+ */
+function dpicache_cron() {
   //We need to ensure everybody is sync
-  $time=time();
+  $time = time();
   dpicache_regenerate_cache_entries_since_time($time);
   dpicache_cron_cleanup($time);
 }
 
+/**
+ * Implementation of hook_dpilog_register
+ */
 function dpicache_dpilog_register(){
   return array(
     "dpicache"=>array(

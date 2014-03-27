@@ -68,7 +68,6 @@ function dpicache_delete_cache($entry_name, $entry_hash){
   cache_clear_all($entry_name.'_'.$entry_hash, $bin);
 }
 
-
 /**
  * Regenerate caches that need to be regenerated based on the time
  * @param  Integer $time Current timestamp
@@ -84,7 +83,6 @@ function dpicache_regenerate_cache_entries_since_time($time){
   $query->where('dce.expiration_date > '.$time.' AND dce.last_run+dce.update_freq < '.$time);
   dpicache_regenerate_cache_entries_process($query);
   return TRUE;
-
 }
 
 /**
@@ -142,9 +140,9 @@ function dpicache_get_cache_entry_definition($cache_name){
   return FALSE;
 }
 
-/*
+/**
  * Call all the hook_dpicache_cache_entry_register
-*/
+ */
 function dpicache_get_all_cache_entries_definitions(){
   $infos = &drupal_static(__FUNCTION__);
   if (!isset($infos)) {
@@ -224,26 +222,26 @@ function dpicache_save_cache_entry($options=array(), $update=FALSE){
     // Insert or update
     $query = db_merge($table_cache_entries);
     $query
-    ->key(array('name' => $options['name'], 'hash' => $options['hash']))
-    ->insertFields(array(
-      'name' => @$options['name'],
-      'hash' => @$options['hash'],
-      'creation_date' => @$options['creation_date'],
-      'parameters' => @$options['parameters'],
-      'category' => $options['category'],
-      'data_type' => $options['data_type'],
-      'expiration_date' => $options['expiration_date'],
-      'last_run' => $options['last_run'],
-      'update_freq' => $options['update_freq'],
-    ))
-    ->updateFields(array(
-      'category' => $options['category'],
-      'data_type' => $options['data_type'],
-      'expiration_date' => $options['expiration_date'],
-      'last_run' => $options['last_run'],
-      'update_freq' => $options['update_freq'],
-    ))
-    ->execute();
+      ->key(array('name' => $options['name'], 'hash' => $options['hash']))
+      ->insertFields(array(
+        'name' => @$options['name'],
+        'hash' => @$options['hash'],
+        'creation_date' => @$options['creation_date'],
+        'parameters' => @$options['parameters'],
+        'category' => $options['category'],
+        'data_type' => $options['data_type'],
+        'expiration_date' => $options['expiration_date'],
+        'last_run' => $options['last_run'],
+        'update_freq' => $options['update_freq'],
+      ))
+      ->updateFields(array(
+        'category' => $options['category'],
+        'data_type' => $options['data_type'],
+        'expiration_date' => $options['expiration_date'],
+        'last_run' => $options['last_run'],
+        'update_freq' => $options['update_freq'],
+      ))
+      ->execute();
     return TRUE;
   }
   catch (Exception $e) {
@@ -279,9 +277,9 @@ function dpicache_cron_cleanup($time){
     dpicache_delete_cache($entry['name'], $entry['hash']);
     // ... and associated entries
     $num_deleted = db_delete($table_cache_entries)
-    ->condition('name',$entry['name'])
-    ->condition('hash',$entry['hash'])
-    ->execute();
+      ->condition('name',$entry['name'])
+      ->condition('hash',$entry['hash'])
+      ->execute();
     dpi_log('dpicache', "regenerate_cold", t("This out of date entry has been deleted : name = !cache_name, hash = !hash",array("!cache_name"=>$entry['name'],"!hash"=>$entry['hash'])),array(),$entry['hash'],WATCHDOG_DEBUG);
   }
   return TRUE;
@@ -305,7 +303,7 @@ function _dpicache_regenerate_one_cache_entry_callback($cache_name){
   $args=func_get_args();
   unset($args[0]);
   $hash=_dpicache_get_hash($cache_name, $args);
-  
+
   drupal_set_message(t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));
 
   dpi_log('dpicache', "manual_regeneration_of_cache_entry", t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),array(),$hash,WATCHDOG_INFO);
@@ -314,7 +312,7 @@ function _dpicache_regenerate_one_cache_entry_callback($cache_name){
   $cache_definition=dpicache_get_cache_entry_definition($cache_name);
   $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
   $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-  
+
   drupal_goto();
 }
 
@@ -324,10 +322,8 @@ function _dpicache_regenerate_one_cache_entry_callback($cache_name){
  * @return Boolean       Success of regenerations
  */
 function _dpicache_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
-
   drupal_set_message(t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
   dpi_log('dpicache', "manual_regeneration_of_cache_name", t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)),array(),NULL,WATCHDOG_INFO);
-
 
   $table_cache_entries = 'dpicache_cache_entries';
   $query = db_select($table_cache_entries, 'dce');
@@ -341,6 +337,5 @@ function _dpicache_regenerate_all_cache_entry_callback($cache_type,$category=NUL
   }
   dpicache_regenerate_cache_entries_process($query);
 
-drupal_goto();
+  drupal_goto();
 }
-
