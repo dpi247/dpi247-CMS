@@ -7,12 +7,11 @@ module_load_include('inc', 'dpimport','dpimport.private');
  */
 function dpimport_menu(){
   $items = array();
-  
+
   //dpimport/process/dpixml (cas folder)
   //dpimport/process/dpixml/fichier.zip (cas fichier)
   //dpimport/process/url
-  
-  
+
   $items['dpimport/process/%'] = array(
     'title'            => t('Run XML Import'),
     'page callback'    => 'dpimport_page_process_import',
@@ -22,7 +21,7 @@ function dpimport_menu(){
     'file'             => 'includes/dpimport.process.inc',
     'type'             => MENU_LOCAL_TASK,
   );
-  
+
   $items['admin/config/dpimport'] = array(
     'title' => 'DPImport',
     'description' => 'Parent item import',
@@ -33,7 +32,7 @@ function dpimport_menu(){
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
-  
+
   $items['admin/config/dpimport/import'] = array(
     'title'            => t('Import'),
     'description'      => t('Import settings'),
@@ -42,13 +41,13 @@ function dpimport_menu(){
     'file'             => 'dpimport.admin.pages.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
   );
-  
+
   $items['admin/config/dpimport/import/list'] = array(
     'title'            => t('List'),
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
   );
-  
+
   $items['admin/config/dpimport/import/add'] = array(
     'title'            => t('Add Import'),
     'description'      => t('Adding an import.'),
@@ -60,7 +59,7 @@ function dpimport_menu(){
     'type'             => MENU_LOCAL_TASK,
     'weight'           => 1,
   );
-  
+
   $items['admin/config/dpimport/import/edit/%'] = array(
     'title'            => t('Edit Import'),
     'description'      => t('Editing an import.'),
@@ -71,7 +70,7 @@ function dpimport_menu(){
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'weight'           => 1,
   );
-  
+
   $items['admin/config/dpimport/import/delete/%'] = array(
     'title'            => t('Delete Import'),
     'description'      => t('Deleting an import.'),
@@ -82,7 +81,7 @@ function dpimport_menu(){
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'weight'           => 1,
   );
-  
+
   $items['dpimport/test/%'] = array(
     'title'            => t('Test XML POST Import'),
     'page callback'    => 'dpimport_page_test',
@@ -91,12 +90,11 @@ function dpimport_menu(){
     'file'             => 'includes/dpimport.process.inc',
     'type'             => MENU_LOCAL_TASK,
   );
-  
+
   return $items;
 }
 
 /**
- * 
  * Implementation of hook_permission
  */
 function dpimport_permission() {
@@ -122,13 +120,13 @@ function dpimport_ctools_plugin_type() {
 }
 /**
  * A modifier, donner la main à l'importer
- * */
+ */
 function dpimport_access($importer_name){
   //@todo
   return TRUE;
 }
+
 /**
- * 
  * Implementation of hook_theme
  */
 function dpimport_theme(){
@@ -139,9 +137,10 @@ function dpimport_theme(){
   
   return $theme;
 }
+
 /**
-* Implements hook_stream_wrappers().
-*/
+ * Implements hook_stream_wrappers().
+ */
 function dpimport_stream_wrappers() {
   return array(
     'importer' => array(
@@ -152,8 +151,8 @@ function dpimport_stream_wrappers() {
     ),
   );
 }
+
 /**
- * 
  * Implementation of hook_cron
  */
 function dpimport_cron(){

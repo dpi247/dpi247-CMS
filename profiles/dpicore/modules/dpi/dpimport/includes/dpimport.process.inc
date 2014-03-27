@@ -1,7 +1,8 @@
-<?php 
+<?php
+
 /**
- * 
  * Callback function to launch an import.
+ *
  * @param string $importer_name
  * @return string
  */
@@ -28,19 +29,18 @@ function dpimport_page_process_import($importer_name){
       Logger::logError('importer', 0, 'importer_001', t('There is no plugin for this importer.'));
     }
   } else {
-    Logger::logError('importer', 0, 'importer_002', t('There is no importer with these name.'));
+    Logger::logError('importer', 0, 'importer_002', t('There is no importer with this name.'));
   }
   if ($return == NULL){
     $return = Logger::printLog();
   }
   
   print $return;
-  
 }
 
 /**
- * 
  * Get importer settings from importer name
+ *
  * @param string $importer_name
  * @return Object $importer
  */
@@ -50,8 +50,8 @@ function dpimport_getimportersettings($importer_name){
 }
 
 /**
- * 
  * Get All importer settings
+ *
  * @return Array $importers
  */
 function dpimport_getallimportersettings(){
@@ -62,13 +62,13 @@ function dpimport_getallimportersettings(){
   }
   return $importers;
 }
+
 /**
- * 
  * Process import
+ *
  * @param Importer $importer
  */
 function dpimport_process_import($importer, $dispatcher){
-  
   $sources = $dispatcher->extractSources();
   if ($sources != NULL){
     foreach ($sources as $source){
@@ -105,24 +105,37 @@ function dpimport_deleteoldfiles(){
  * @param String $importer_name
  */
 function dpimport_page_test($importer_name) {
-  /* If you want to test it by curl : 
-  curl -X POST http://url -H "Content-Type: application/zip" --data-binary "@/local_path_to/test.xml" > /path_to_reception_folder/curl_response.html
-  */
-  
   $content = '';
-  $content .= '<form enctype="multipart/form-data" action="/dpimport/process/'.$importer_name.'" method="POST">
-        Choose a file to upload: <input name="uploadedfile" type="file" /><br />
-        <input type="submit" value="Upload File" />
-      </form>';
-  
-  $content = drupal_get_form('dpimport_page_test_form');
+
+  $importer_settings = dpimport_getimportersettings($importer_name);
+  if ($importer_settings != NULL) {
+    /* If you want to test it by curl :
+     curl -X POST http://url -H "Content-Type: application/zip" --data-binary "@/local_path_to/test.xml" > /path_to_reception_folder/curl_response.html
+    */
+
+    $content = drupal_get_form('dpimport_page_test_form', $importer_name);
+  }
+  else {
+    drupal_set_message(t('The chosen importer doesn\'t exist.'), 'error');
+  }
 
   return $content;
 }
 
-function dpimport_page_test_form(&$form, $form_state) {
+function dpimport_page_test_form($form, $form_state, $importer_name) {
+  $form['#action'] = '/dpimport/process/'.$importer_name;
+
+  $form['uploadedfile'] = array(
+    '#name' => 'uploadedfile',
+    '#type' => 'file',
+    '#title' => t('Choose a file'),
+    '#title_display' => 'invisible',
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Upload File',
   );
+
+  return $form;
 }
