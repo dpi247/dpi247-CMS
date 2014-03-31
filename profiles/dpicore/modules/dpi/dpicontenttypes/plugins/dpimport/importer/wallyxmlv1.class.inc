@@ -360,7 +360,7 @@ class WallyXmlV1 extends Importer{
     //@todo s'occuper des destinations multiples
     $term = array();
     $result = array();
-    $vid = dpi_variable_get('dpidestinations_destination_vid', NULL);
+    $vid = _dpidestinations_variable_get('dpidestinations_section_vid', NULL);
     if ($vid) {    
       $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
 

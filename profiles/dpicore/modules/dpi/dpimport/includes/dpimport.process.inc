@@ -122,6 +122,9 @@ function dpimport_page_test($importer_name) {
   return $content;
 }
 
+/**
+ * Form to upload a test zip to be imported
+ */
 function dpimport_page_test_form($form, $form_state, $importer_name) {
   $form['#action'] = '/dpimport/process/'.$importer_name;
 

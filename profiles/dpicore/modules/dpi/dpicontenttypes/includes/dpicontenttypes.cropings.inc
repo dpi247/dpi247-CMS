@@ -87,25 +87,27 @@ function _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $en
   if (!empty($fields_to_alter)) {
     $existing_crops = _dpicontenttypes_get_saved_cropings_for_entity($entity_type, $eid);
 
-    foreach ($entity as $element => $field) {
-      if (in_array($element, $fields_to_alter)) {
-        $items = $field[$entity->language];
-        foreach (dpicommons_element_children_numeric($items) as $item_id) {
-          $item = $items[$item_id];
-          if (isset($item['type']) && $item['type'] == 'image'
-              && isset($item['provider']) && $item['provider'] == 'scald_image') {
-            // Set temporary cropings as permanent
-            $aid = $item['sid'];
-            if ($entity->is_new) {
-              $form_token = $entity->form_token;
-            } else {
-              $form_token = '';
-            }
-            _dpicontenttypes_cropings_update_cropings($entity_type, $eid, $aid, array(), FALSE, $form_token);
+    if ($entity_wrapper = entity_metadata_wrapper($entity_type, $entity)) {
+      foreach ($entity as $element => $field) {
+        if (in_array($element, $fields_to_alter) && isset($entity_wrapper->{$element})) {
+          $items = $entity_wrapper->{$element}->value(array('identifier' => TRUE));
+          foreach (dpicommons_element_children_numeric($items) as $item_id) {
+            $item = $items[$item_id];
+            if (isset($item['type']) && $item['type'] == 'image'
+                && isset($item['provider']) && $item['provider'] == 'scald_image') {
+              // Set temporary cropings as permanent
+              $aid = $item['sid'];
+              if ($entity->is_new) {
+                $form_token = $entity->form_token;
+              } else {
+                $form_token = '';
+              }
+              _dpicontenttypes_cropings_update_cropings($entity_type, $eid, $aid, array(), FALSE, $form_token);
 
-            // Keep only ununsed atoms in the existing cropings
-            if (isset($existing_crops[$aid])) {
-              unset($existing_crops[$aid]);
+              // Keep only ununsed atoms in the existing cropings
+              if (isset($existing_crops[$aid])) {
+                unset($existing_crops[$aid]);
+              }
             }
           }
         }

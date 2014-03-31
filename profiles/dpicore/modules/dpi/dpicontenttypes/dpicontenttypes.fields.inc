@@ -147,49 +147,48 @@ function dpicontenttypes_field_validate($entity_type, $entity, $field, $instance
  * Implements hook_field_presave().
  */
 function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  if($field['field_name']=='field_embededobjects'){
-    foreach($items as $delta=>$item){
-
-      $continue=FALSE;
+  if($field['field_name'] == 'field_embededobjects') {
+    foreach($items as $delta => $item) {
+      $continue = FALSE;
       //First remove all items that come from the inline
 
-      if(isset($item['inline']) and $item['inline']==1){
+      if(isset($item['inline']) && $item['inline'] == 1) {
         unset($items[$delta]);
-        $continue=TRUE;
+        $continue = TRUE;
       }
       //Add extra meta
-      if($continue===FALSE && $atom=scald_atom_load($items[$delta]['sid'])){
-        $items[$delta]['type']=$atom->type;
-        $items[$delta]['provider']=$atom->provider;
-        $items[$delta]['inline']=0;
+      if($continue === FALSE && /*isset($items[$delta]['sid']) && is_numeric($items[$delta]['sid']) &&*/ $atom = scald_atom_load($items[$delta]['sid'])) {
+        $items[$delta]['type'] = $atom->type;
+        $items[$delta]['provider'] = $atom->provider;
+        $items[$delta]['inline'] = 0;
       }
     }
 
-    $add_items=array();
+    $add_items = array();
 
     //@todo: je devrais  aller lire dans les settings du field,
     // quel type d atome de mon inline, j'accepte de mettre dans mon embedd
-    //dsm($field);
 
     //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
-    $field_to_analyse='field_textbody';
+    $field_to_analyse = 'field_textbody';
     $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
-    foreach($field_to_analyse_items as $field_to_analyse_item ){
-      foreach($field_to_analyse_item['mee']['resource_manager'] as $sid=>$mee){
-
-        if($atom=scald_atom_load($sid)){
-          $values=array(
-            'sid'=>$atom->sid,
-            'type'=>$atom->type,
-            'provider'=>$atom->provider,
-            'inline'=>1,
-          );
-          $add_items[]=$values;
+    foreach($field_to_analyse_items as $field_to_analyse_item) {
+      if (isset($field_to_analyse_item['mee']['resource_manager']) && is_array($field_to_analyse_item['mee']['resource_manager'])) {
+        foreach($field_to_analyse_item['mee']['resource_manager'] as $sid => $mee) {
+          if($atom = scald_atom_load($sid)) {
+            $values = array(
+              'sid' => $atom->sid,
+              'type' => $atom->type,
+              'provider' => $atom->provider,
+              'inline' => 1,
+            );
+            $add_items[] = $values;
+          }
         }
       }
     }
-    foreach ($add_items as $add_item){
-      $items[]=$add_item;
+    foreach($add_items as $add_item) {
+      $items[] = $add_item;
     }
   }
 }

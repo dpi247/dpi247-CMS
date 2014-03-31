@@ -142,8 +142,8 @@ function dpicontenttypes_dpicropcopy_form($data = array()) {
       foreach ($style['effects'] as $effect_id => $effect) {
         if ($effect['name'] == 'dpicontenttypes_dpicrop') {
           $ratio = round($effect['data']['width']/$effect['data']['height'], 2);
-          $existing_effects[$style['isid']] = $style['name'].' (ratio: '.$ratio.')';
-          $effects_ids[$style['isid']] = $effect_id;
+          $existing_effects[$style['name']] = $style['name'].' (ratio: '.$ratio.')';
+          $effects_ids[$style['name']] = $effect_id;
           break;
         }
       }
@@ -256,8 +256,8 @@ function dpicontenttypes_dpicrop_effect(&$image, $data) {
  */
 function dpicontenttypes_dpicropcopy_effect(&$image, $data) {
   if (isset($data['entity']) && isset($data['atom'])) {
-    $copied_style = image_style_load(NULL, $data['copied_style']);
-    $copied_stylename = $copied_style['name'];
+    $copied_stylename = $data['copied_style'];
+    $copied_style = image_style_load($copied_stylename);
     $datas_found = FALSE;
 
     $entity = $data['entity'];
@@ -276,7 +276,7 @@ function dpicontenttypes_dpicropcopy_effect(&$image, $data) {
 
     if (!$datas_found) {
       $effects_ids = $data['effects_ids'];
-      $data['effect_id'] = $effects_ids[$data['copied_style']];
+      $data['effect_id'] = $effects_ids[$copied_stylename];
       $crop = $copied_style['effects'][$data['effect_id']]['data'];
       $data['xoffset'] = $crop['xoffset'];
       $data['yoffset'] = $crop['yoffset'];

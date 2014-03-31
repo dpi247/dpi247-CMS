@@ -286,7 +286,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
   $destination_table = 'field_data_field_destinations';
 
   // USING OFFSET for efficency
-  if($position == 1 || $position == 2) {
+  if($position == 0 || $position == 1 || $position == 2) {
     $offset = 0;
   } else {
     $offset = $position - 2;
@@ -298,7 +298,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
   $query->condition('d.field_destinations_target', $target, '=');
   $query->fields('d', array('field_destinations_virtual_rank'));
   $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
-  $query->range($offset,2 ); //offset is the first argument, second argument is
+  $query->range($offset, 2); // Offset is the first argument, second argument is
   $results = $query->execute();
   $array_results = array();
   foreach($results as$result) {
@@ -315,6 +315,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
 
     $virtual_rank = (int)_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000) * ($rank_max_value + 1);
   } else {
+    $virtual_rank = 0;
     if($position == 1) {
       $virtual_rank = $array_results[0]->field_destinations_virtual_rank + _dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000);
     }

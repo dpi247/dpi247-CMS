@@ -23,14 +23,14 @@ function dpimport_menu(){
   );
 
   $items['admin/config/dpimport'] = array(
-    'title' => 'DPImport',
-    'description' => 'Parent item import',
-    'position' => 'left',
-    'weight' => -100,
-    'page callback' => 'system_admin_menu_block_page',
+    'title'            => 'DPImport',
+    'description'      => 'Parent item import',
+    'position'         => 'left',
+    'weight'           => -100,
+    'page callback'    => 'system_admin_menu_block_page',
     'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
+    'file'             => 'system.admin.inc',
+    'file path'        => drupal_get_path('module', 'system'),
   );
 
   $items['admin/config/dpimport/import'] = array(

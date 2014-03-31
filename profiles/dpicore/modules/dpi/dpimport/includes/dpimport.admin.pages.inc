@@ -115,7 +115,7 @@ function dpimport_page_form_importer_form_submit($form, &$form_state){
       if ($form_state['triggering_element']['#value'] != 'Back') {
         $result = dpimport_form_importer_save($form, $form_state);
         if ($result !== FALSE){
-          drupal_set_message(t('The importer instance has correctly been created'));
+          drupal_set_message(t('The importer instance has correctly been created/updated'));
         } else {
           drupal_set_message(t('The importer instance could not been created'), 'error');
         }
