@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * etest.features.inc
+ * dpicontenttypes.features.inc
  */
 
 /**
@@ -9,7 +9,6 @@
  *
  * We use hook_node_info() to define our node content type.
  */
-
 function dpicontenttypes_node_info(){
   return array(
     'package' => array(

@@ -48,17 +48,19 @@ Drupal.behaviors.dpiatom_reference = {
               .end()
               .find('input:button')
               .show();
-            // Add the "edit croping" link
-            var entityType = Drupal.settings.dpicontenttypesCropingsLinks.entityType;
-            var eid = Drupal.settings.dpicontenttypesCropingsLinks.eid;
-            var aid_regex_matches = e.originalEvent.dataTransfer.getData('Text').match(/^\[scald=(\d+).*$/);
-            var aid = aid_regex_matches[1];
-            var editCropLink = '/admin/editdpicrop/ajax/' + entityType + '/' + eid + '/' + aid;
-            var editCropLabel = Drupal.t('Click here to edit croping informations');
-            $this
-              .closest('div.form-item')
-              .after('<a href="' + editCropLink + '" class="ctools-use-modal" title="">' + editCropLabel + '</a>');
-            // Bind the modal behavior
+            if (ret.type == 'image') {
+	            // Add the "edit croping" link
+	            var entityType = Drupal.settings.dpicontenttypesCropingsLinks.entityType;
+	            var eid = Drupal.settings.dpicontenttypesCropingsLinks.eid;
+	            var aid_regex_matches = e.originalEvent.dataTransfer.getData('Text').match(/^\[scald=(\d+).*$/);
+	            var aid = aid_regex_matches[1];
+	            var editCropLink = '/admin/editdpicrop/ajax/' + entityType + '/' + eid + '/' + aid;
+	            var editCropLabel = Drupal.t('Click here to edit croping informations');
+	            $this
+	              .closest('div.form-item')
+	              .after('<a href="' + editCropLink + '" class="ctools-use-modal" title="">' + editCropLabel + '</a>');
+	            // Bind the modal behavior
+            }
             Drupal.behaviors.ZZCToolsModal.attach(document);
           }
           else {

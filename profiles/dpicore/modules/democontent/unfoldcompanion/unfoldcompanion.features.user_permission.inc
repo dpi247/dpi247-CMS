@@ -102,6 +102,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'system',
   );
 
+  // Exported permission: 'access statistics'.
+  $permissions['access statistics'] = array(
+    'name' => 'access statistics',
+    'roles' => array(),
+    'module' => 'statistics',
+  );
+
   // Exported permission: 'access user profiles'.
   $permissions['access user profiles'] = array(
     'name' => 'access user profiles',
@@ -334,6 +341,13 @@ function unfoldcompanion_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'system',
+  );
+
+  // Exported permission: 'administer statistics'.
+  $permissions['administer statistics'] = array(
+    'name' => 'administer statistics',
+    'roles' => array(),
+    'module' => 'statistics',
   );
 
   // Exported permission: 'administer targets'.
@@ -705,6 +719,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
+  // Exported permission: 'delete terms in sections'.
+  $permissions['delete terms in sections'] = array(
+    'name' => 'delete terms in sections',
+    'roles' => array(),
+    'module' => 'taxonomy',
+  );
+
   // Exported permission: 'edit any atom'.
   $permissions['edit any atom'] = array(
     'name' => 'edit any atom',
@@ -867,6 +888,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'taxonomy',
   );
 
+  // Exported permission: 'edit terms in sections'.
+  $permissions['edit terms in sections'] = array(
+    'name' => 'edit terms in sections',
+    'roles' => array(),
+    'module' => 'taxonomy',
+  );
+
   // Exported permission: 'execute php code'.
   $permissions['execute php code'] = array(
     'name' => 'execute php code',
@@ -1002,6 +1030,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'search',
   );
 
+  // Exported permission: 'use ipe with page manager'.
+  $permissions['use ipe with page manager'] = array(
+    'name' => 'use ipe with page manager',
+    'roles' => array(),
+    'module' => 'panels',
+  );
+
   // Exported permission: 'use page manager'.
   $permissions['use page manager'] = array(
     'name' => 'use page manager',
@@ -1119,6 +1154,13 @@ function unfoldcompanion_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'panels',
+  );
+
+  // Exported permission: 'view post access counter'.
+  $permissions['view post access counter'] = array(
+    'name' => 'view post access counter',
+    'roles' => array(),
+    'module' => 'statistics',
   );
 
   // Exported permission: 'view revisions'.

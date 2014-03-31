@@ -300,26 +300,43 @@ function _dpicore_install_demo_contents_full() {
     }
   }
 
-  // Activate the sections page in the page manager
+  // Add default destinations terms
+  $packlayout_voc = 'packagelayout';
+  $packlayout_vid = dpi_variable_get('dpi_packagelayout', 0);;
+  if ($packlayout_vid) {
+    $base_term = new stdClass();
+    $base_term->vid = $packlayout_vid;
+    $base_term->weight = 0;
+    $base_term->vocabulary_machine_name = $packlayout_voc;
+    $terms = array('Article');
+    foreach ($terms as $term) {
+      $base_term->weight++;
+      $copied_term = clone $base_term;
+      $copied_term->name = $term;
+      taxonomy_term_save($copied_term);
+    }
+  }
+
+  // Activate the sections and the node pages in the page manager
   module_load_include('admin.inc', 'page_manager');
   // load context plugin as there may be contexts cached here.
   ctools_include('context');
-  $page = page_manager_get_page_cache('sections');
-  if ($function = ctools_plugin_get_function($page->subtask, 'enable callback')) {
-    $result = $function($page, FALSE);
+  $enable_pages = array('sections', 'node_view');
+  foreach ($enable_pages as $enable_page) {
+    $page = page_manager_get_page_cache($enable_page);
+    if ($function = ctools_plugin_get_function($page->subtask, 'enable callback')) {
+      $function($page, FALSE);
 
-    // We want to re-cache this if it's changed so that status is properly
-    // updated on the changed form.
-    if (!empty($page->changed)) {
-      page_manager_set_page_cache($page);
+      // We want to re-cache this if it's changed so that status is properly
+      // updated on the changed form.
+      if (!empty($page->changed)) {
+        page_manager_set_page_cache($page);
+      }
     }
   }
+
+  // Set the "News" section page as home page
   variable_set('site_frontpage', 'section/1');
-/*
-  module_load_include('pages_default.inc', 'unfoldcompanion');
-  $sections_page = unfoldcompanion_default_page_manager_handlers();
-  page_manager_save_page_cache($sections_page['sections_destination_context']);
-  */
 }
 
 function _dpicore_install_default_contents() {

@@ -41,6 +41,9 @@ function dpicontenttypes_install() {
       field_create_instance($field_instance);
     }
   }
+
+  // Hide author and date information for packages by default
+  variable_set('node_submitted_package', FALSE);
 }
 
 /**
