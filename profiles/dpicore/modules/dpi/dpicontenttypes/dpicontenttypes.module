@@ -286,6 +286,20 @@ function dpicontenttypes_scald_contexts() {
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
+    'dpi_targetblock_medium'      => array(
+      'title'           => t('DPI TargetBlock Medium'),
+      'description'     => t('When atom is displayed in a package with medium layout.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
+    'dpi_targetblock_big'      => array(
+      'title'           => t('DPI TargetBlock Big'),
+      'description'     => t('When atom is displayed in a package with big layout.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
   );
 }
 

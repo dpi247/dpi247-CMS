@@ -61,14 +61,41 @@ function unfoldcompanionminimal_field_extra_fields() {
 function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
   $extra_fields = field_info_extra_fields('node', $node->type, 'display');
 
-  // Fill the "Media box" field
+  // Handle the "Media box" field
   if (isset($extra_fields['field_mediabox']['display'][$view_mode]) && $extra_fields['field_mediabox']['display'][$view_mode]['visible']) {
-    if ($media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE)) {
-      foreach ($media_box_emebeds as $delta => $embed) {
-        unset($node->content['field_embededobjects'][$delta]);
-      }
-      $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
-    } else {
+    switch ($view_mode) {
+      case 'full':
+        // All images and videos
+        if ($media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE)) {
+          foreach ($media_box_emebeds as $delta => $embed) {
+            unset($node->content['field_embededobjects'][$delta]);
+          }
+          $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
+        }
+        break;
+
+      case 'targetblock_big':
+        // Only the first image
+        if ($media_box_emebeds = dpicontenttypes_api_get_first_embed_view($node, $node->content, array('image'))) {
+          foreach ($node->content['field_embededobjects'] as $delta => $embed) {
+            unset($node->content['field_embededobjects'][$delta]);
+          }
+          $node->content['field_mediabox']['#markup'] = array_shift($media_box_emebeds);
+        }
+        break;
+
+      default:
+        // Only the first image, with the "top items" theming
+        if ($media_box_emebeds = dpicontenttypes_api_get_first_embed_view($node, $node->content, array('image'))) {
+          foreach ($node->content['field_embededobjects'] as $delta => $embed) {
+            unset($node->content['field_embededobjects'][$delta]);
+          }
+          $node->content['field_mediabox']['#markup'] = theme('theme_package_top_items', array('topItems' => $media_box_emebeds));
+        }
+        break;
+    }
+
+    if (!isset($node->content['field_mediabox']['#markup'])) {
       $node->content['field_mediabox']['#markup'] = '';
     }
   }
