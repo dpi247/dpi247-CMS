@@ -331,6 +331,26 @@ function dpicontenttypes_schema() {
     ),
   );
 
+  $schema['dpicontenttypes_styles_scald_contexts'] = array(
+    'description' => 'Contains programmatically created Scald contexts from image styles',
+    'fields' => array(
+      'cid' => array(
+        'description' => 'The primary identifier for a context',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'style' => array(
+        'description' => 'Image style name',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+
   return $schema;
 }
 
@@ -389,4 +409,12 @@ function dpicontenttypes_update_7003() {
 function dpicontenttypes_update_7004() {
   $schema = drupal_get_schema('dpicontenttypes_cropings', TRUE);
   db_create_table('dpicontenttypes_cropings', $schema);
+}
+
+/**
+ * Install the dpicontenttypes_styles_scald_contexts table
+ */
+function dpicontenttypes_update_7005() {
+  $schema = drupal_get_schema('dpicontenttypes_styles_scald_contexts', TRUE);
+  db_create_table('dpicontenttypes_styles_scald_contexts', $schema);
 }
