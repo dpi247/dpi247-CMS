@@ -24,8 +24,58 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'render element' => 'form',
   );
-
+  $theme['dpidestinations_ipe_pane_wrapper'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('output' => NULL, 'pane' => NULL, 'display' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_region_wrapper'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('output' => NULL, 'region_id' => NULL, 'display' => NULL, 'controls' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_add_pane_button'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('region_id' => NULL, 'display' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_placeholder_pane'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('region_id' => NULL, 'region_title' => NULL),
+  );
+  $theme['dpidestinations_ipe_dnd_form_container'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('link' => NULL, 'cache_key' => NULL, 'display' => NULL),
+  );
+  $theme['dpidestinations_ipe_toolbar'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('buttons' => NULL),
+  );
   return $theme;
+}
+
+
+/**
+ * Implementation of hook_footer()
+ *
+ * Adds the IPE control container.
+ *
+ * @param unknown_type $main
+ */
+function dpidestinations_page_alter(&$page) {
+  $buttons = &drupal_static('dpidestinations_ipe_toolbar_buttons', array());
+  if (empty($buttons)) {
+    return;
+  }
+
+  $output = theme('dpidestinations_ipe_toolbar', array('buttons' => $buttons));
+
+  $page['page_bottom']['dpidestinations_ipe'] = array(
+    '#markup' =>$output,
+  );
 }
 
 /**
@@ -214,23 +264,36 @@ function dpidestinations_panels_display_save($display){
 }
 
 function dpidestinations_default_panels_renderer_pipeline() {
+  
   $pipelines = array();
   $pipeline = new stdClass;
   $pipeline->disabled = FALSE; /* Edit this to true to make a default pipeline disabled initially */
   $pipeline->api_version = 1;
-  $pipeline->name = 'dpidestinations_viewer';
-  $pipeline->admin_title = t('Destinations viewer');
-  $pipeline->admin_description = t('Destination viewer.');
-  $pipeline->weight = 0;
+  $pipeline->name = 'dpipviewer';
+  $pipeline->admin_title = t('Dpi Panels viewer');
+  $pipeline->admin_description = t('Panels on steroids with in place editing and a better way to organize ctools content types.');
+  $pipeline->weight = -1;
   //This is add to know that this a print pipeline
   $pipeline->settings = array(
     'renderers' => array(
       0 => array(
-        'access' => array(),
-        'renderer' => 'dpidestinations_viewer',
+        'access' => array(
+          'plugins' => array(
+            0 => array(
+              'name' => 'perm',
+              'settings' => array(
+                'perm' => 'use panels in place editing',
+              ),
+              'context' => 'logged-in-user',
+            ),
+          ),
+          'logic' => 'and',
+        ),
+        'renderer' => 'dpiviewer',
         'options' => array(),
       ),
     ),
+    
   );
   $pipelines[$pipeline->name] = $pipeline;
 
