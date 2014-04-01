@@ -59,10 +59,7 @@ function theme_dpicontenttypes_dpicrop_summary($variables) {
 function theme_dpicontenttypes_dpicropcopy_summary($variables) {
   $data = $variables['data'];
 
-  $copied_style = image_style_load(NULL, $data['copied_style']);
-  $copied_stylename = $copied_style['name'];
-
-  $output = 'Copied crop : '.$copied_stylename;
+  $output = 'Copied crop : '.$data['copied_style'];
   $output = '('.$output.')';
 
   return $output;
