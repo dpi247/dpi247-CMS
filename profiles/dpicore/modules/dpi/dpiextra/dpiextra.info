@@ -1,5 +1,5 @@
 core = "7.x"
-description = "Dpi extra plugins containing all content types CTools created by Dpi and the most_view view"
+description = "DPI Extra plugins containing all content types CTools created by DPI"
 features[views][] = "most_view"
 features[views_api][] = "api:2"
 name = "DPI extra"

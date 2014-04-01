@@ -4,8 +4,8 @@
  * Plugin definition.
  */
 $plugin = array(
-  'title' => t('Remote html'),
-  'top level'      => TRUE,
+  'title' => t('Remote HTML'),
+  'top level' => TRUE,
   'no title override' => TRUE,
   'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
   'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
@@ -28,21 +28,21 @@ function dpiextra_remotehtml_content_type_content_types(){
 
   foreach($results as $record) {
     $remotehtml[$record->machine_name]= array(
-      'title' => t('remote html : '.$record->title),
+      'title' => t('Remote HTML : '.$record->title),
       'machine_name' => $record->machine_name,
       'description' => t(''),
       'add form'      => array(
         'dpiextra_remotehtml_content_type_view_form'=>'view remotehtml',
         'dpiextra_remotehtml_content_type_edit_form'=>'edit remotehtml',
       ),
-      'category' => t('Dpi extra'),
+      'category' => t('DPI Extras'),
     );
   }
   form_load_include($form_state, 'inc', 'dpiextra','includes/remotehtml.admin');
 
   $remotehtml['new_remotehtml']= array(
     'name'           => 'remotehtml',
-    'title'          => t('New remote html'),
+    'title'          => t('New remote HTML'),
     'top level'      => TRUE,
     'category'       => t('Custom'),
     'description'    => t('Create a completely custom piece of HTML content.'),
@@ -75,7 +75,7 @@ function dpiextra_remotehtml_content_type_add_form($form, &$form_state){
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_add_form_validate($form, &$form_state){
-  if($form_state['clicked_button']['#wizard type']!='cancel'){
+  if($form_state['clicked_button']['#wizard type'] != 'cancel'){
     $form_state2=array();
     form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
 
@@ -154,7 +154,7 @@ function dpiextra_remotehtml_content_type_edit_form($form, &$form_state){
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_validate($form, &$form_state){
-  if($form_state['clicked_button']['#value'] == 'Save'){
+  if($form_state['clicked_button']['#value'] == t('Save')){
     $form_state2=array();
     form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
      
@@ -175,7 +175,7 @@ function dpiextra_remotehtml_content_type_edit_form_validate($form, &$form_state
  * @param $form_state
  */
 function dpiextra_remotehtml_content_type_edit_form_submit($form, $form_state){
-  if($form_state['clicked_button']['#value'] == 'Save'){
+  if($form_state['clicked_button']['#value'] == t('Save')){
     $form_state2=array();
     //create a new form_state with just the values
     $form_state2['values']=$form_state['values'];
@@ -200,19 +200,19 @@ function dpiextra_remotehtml_content_type_view_form($form,&$form_state){
   $entity= _dpiextra_remotehtml_get_entity_by_subtype($form_state['subtype']['machine_name']);
 
   $form['machine_name'] = array(
-    '#markup' => '<h4>Machine name : '.$entity->machine_name.'</h4>'
+    '#markup' => '<h4>'.t('Machine name').' : '.$entity->machine_name.'</h4>'
   );
 
   $form['title'] = array(
-    '#markup' => '<p>Title : '.$entity->title.'</p>'
+    '#markup' => '<p>'.t('Title').' : '.$entity->title.'</p>'
   );
 
   $form['html_adresse'] = array(
-    '#markup' => '<p>url adresse : '.$entity->html_adresse.'</p>'
+    '#markup' => '<p>'.t('URL adress').' : '.$entity->html_adresse.'</p>'
   );
 
   $form['refresh_time'] = array(
-    '#markup' => '<p>refresh time in minutes : '.$entity->refresh_time.'</p>'
+    '#markup' => '<p>'.t('Refresh time (in minutes)').' : '.$entity->refresh_time.'</p>'
   );
 
   //add the modify button
@@ -228,14 +228,14 @@ function dpiextra_remotehtml_content_type_view_form($form,&$form_state){
   //add the finish button
   $form['buttons']['return'] = array(
     '#type' => 'submit',
-    '#value' => 'Finish',
+    '#value' => t('Finish'),
     '#wizard type' => 'finish',
   );
 
   //add the cancel button
   $form['buttons']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => 'Cancel',
+    '#value' => t('Cancel'),
     '#wizard type' => 'cancel',
   );
 

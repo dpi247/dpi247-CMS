@@ -28,16 +28,16 @@ $plugin = array(
  *
  * @return $custom_content
  * all custom content
-*/
+ */
 function dpiextra_custom_content_content_type_content_types(){
   $results = dpiextra_custom_content_get_all();
 
   foreach($results as $record) {
     //existant content type
-    $custom_content[$record->machine_name]= array(
-      'title' => t('custom content version : '.$record->title),
+    $custom_content[$record->machine_name] = array(
+      'title' => t('Custom content version : '.$record->title),
       'description' => t(''),
-      'category' => t('Dpi extra'),
+      'category' => t('DPI Extras'),
       'subtype'=> $record->machine_name,
       'add form' => array(
         'dpiextra_custom_content_content_type_view_form'=>'view custom content',
@@ -115,7 +115,7 @@ function dpiextra_custom_content_content_type_add_form($form,$form_state){
  */
 function dpiextra_custom_content_content_type_add_form_validate($form, &$form_state){
   $form_state2=array();
-  form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+  form_load_include($form_state2, 'inc', 'dpiextra','includes/custom_content.admin');
   //build form
   $formFromCustomContent = drupal_build_form('custom_content_form',$form_state2,$entity);
 
@@ -136,7 +136,7 @@ function dpiextra_custom_content_content_type_add_form_submit($form,&  $form_sta
   $form_state2=array();
   $form_state2['values']=$form_state['values'];
   //load form include
-  form_load_include($form_state2, 'inc', 'dpiextra','includes/custom_content.admin');
+  form_load_include($form_state2, 'inc', 'dpiextra', 'includes/custom_content.admin');
   //submit
   drupal_form_submit('custom_content_form', $form_state2);
   $form_state['pane']->subtype = $form_state2['custom_content']->machine_name;
@@ -184,9 +184,9 @@ function dpiextra_custom_content_content_type_edit_form($form,$form_state){
  * @param $form_state
  */
 function dpiextra_custom_content_content_type_edit_form_validate($form, &$form_state){
-  if($form_state['clicked_button']['#value'] == 'Save'){
+  if($form_state['clicked_button']['#value'] == t('Save')){
     $form_state2=array();
-    form_load_include($form_state2, 'inc', 'dpiextra','includes/remotehtml.admin');
+    form_load_include($form_state2, 'inc', 'dpiextra', 'includes/custom_content.admin');
     //build form
     $formFromCustomContent = drupal_build_form('custom_content_form',$form_state2,$entity);
 
@@ -205,7 +205,7 @@ function dpiextra_custom_content_content_type_edit_form_validate($form, &$form_s
  * @param $form_state
  */
 function dpiextra_custom_content_content_type_edit_form_submit($form,$form_state){
-  if($form_state['clicked_button']['#value'] == 'Save'){
+  if($form_state['clicked_button']['#value'] == t('Save')){
     $form_state2=array();
     $form_state2['values']=$form_state['values'];
     //get entity
@@ -233,18 +233,18 @@ function dpiextra_custom_content_content_type_view_form($form, $form_state){
   $entity= _dpiextra_custom_content_get_entity_by_subtype($form_state['subtype']['subtype']);
 
   $form['machine_name'] = array(
-    '#markup' => '<h4>Machine name : '.$entity->machine_name.'</h4>'
+    '#markup' => '<h4>'.t('Machine name').' : '.$entity->machine_name.'</h4>'
   );
 
   $form['title'] = array(
-    '#markup' => '<p>Title : '.$entity->title.'</p>'
+    '#markup' => '<p>'.t('Title').' : '.$entity->title.'</p>'
   );
 
   $form['body'] = array(
-    '#markup' => '<p>Content : '.$entity->body.'</p>'
+    '#markup' => '<p>'.t('Content').' : '.$entity->body.'</p>'
   );
 
-  //Buttons
+  // Buttons
   $form['modify'] = array(
     '#type' => 'submit',
     '#value' => t('Modify'),
@@ -255,7 +255,7 @@ function dpiextra_custom_content_content_type_view_form($form, $form_state){
   unset($form['buttons']);
   $form['buttons']['return'] = array(
     '#type' => 'submit',
-    '#value' => 'Finish',
+    '#value' => t('Finish'),
     '#wizard type' => 'finish',
   );
 
@@ -268,7 +268,7 @@ function dpiextra_custom_content_content_type_view_form($form, $form_state){
 
   $form['buttons']['cancel'] = array(
     '#type' => 'submit',
-    '#value' => 'Cancel',
+    '#value' => t('Cancel'),
     '#wizard type' => 'cancel',
   );
 
@@ -277,6 +277,7 @@ function dpiextra_custom_content_content_type_view_form($form, $form_state){
 
 /**
  * Implementation of content_type_edit_form_submit()
+ *
  * @param $form
  * @param $form_state
  */
@@ -316,13 +317,13 @@ function dpiextra_custom_content_type_revision_form_submit($form, $form_state){
 }
 
 /**
- * this function get all custom content from db
+ * This function get all custom content from db
  *
  * @return $results
  * the results from db
  */
 function dpiextra_custom_content_get_all(){
-  //get all remotehtml
+  // Get all custom content blocks
   $results = db_query('SELECT * FROM {dpiextra_custom_content}');
   return $results;
 }

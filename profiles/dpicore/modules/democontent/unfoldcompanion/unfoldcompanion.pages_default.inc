@@ -83,7 +83,7 @@ function unfoldcompanion_default_page_manager_handlers() {
       'override_title' => 1,
       'override_title_text' => '',
       'identifier' => '',
-      'link' => 1,
+      'link' => 0,
       'leave_node_title' => 0,
       'build_mode' => 'full',
       'context' => 'argument_entity_id:node_1',
@@ -149,7 +149,7 @@ function unfoldcompanion_default_page_manager_handlers() {
     $display->content['new-bc147e8e-ae52-4550-9818-0d3fa97064e1'] = $pane;
     $display->panels['mainContent'][2] = 'new-bc147e8e-ae52-4550-9818-0d3fa97064e1';
   $display->hide_title = PANELS_TITLE_FIXED;
-  $display->title_pane = 'new-26be826d-1238-4627-a8bb-3ac6fb41dd86';
+  $display->title_pane = '0';
   $handler->conf['display'] = $display;
   $export['node_view_panel_context'] = $handler;
 

@@ -4,12 +4,13 @@
  * Implementation of hook_entity_info()
  *
  * @return $entities
- * an array of definition
+ *  An array of definitions
  */
 function dpiextra_entity_info(){
-	//create entities info
+	// Create entities info
 	$entities = array();
-	//remotehtml
+	
+	// Remote HTML
 	$entities['remotehtml'] = array(
 			'label' => t('Remote Html'),
 			'entity class' => 'RemoteHtmlEntity',
@@ -39,7 +40,7 @@ function dpiextra_entity_info(){
 					),
 			),
 				
-			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+			// Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
 			'module'=> 'dpiextra',
 			'access callback' => 'remotehtml_access_admin_callback',
 			// Enable the entity API's admin UI.
@@ -51,7 +52,7 @@ function dpiextra_entity_info(){
 			),
 	);
 	
-	//custom content
+	// Custom content
 	$entities['custom_content'] = array(
 			'label' => t('Custom content'),
 			'entity class' => 'Custom_contentEntity',
@@ -83,7 +84,7 @@ function dpiextra_entity_info(){
 					),
 			),
 	
-			//Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+			// Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
 			'module'=> 'dpiextra',
 			'access callback' => 'custom_content_access_admin_callback',
 			// Enable the entity API's admin UI.
@@ -93,19 +94,22 @@ function dpiextra_entity_info(){
 					'file' => 'includes/custom_content.admin.inc',
 			),
 	);
+	
 	return $entities;
 }
 
 /**
- * Implement the access_admin_callback() for the remotehtml
+ * Implement the access_admin_callback() for the remote HTML
+ *
  * @return boolean
  */
 function remotehtml_access_admin_callback(){
-
 	return TRUE;
 }
+
 /**
  * Implement the access_admin_callback() for the custom content
+ *
  * @return boolean
  */
 function custom_content_access_admin_callback(){
@@ -113,13 +117,12 @@ function custom_content_access_admin_callback(){
 }
 
 /**
- * load a remotehtml entity with this id
+ * Load a remotehtml entity with this id
  *
  * @param $tid
  * @param $reset
  */
 function remotehtml_load($tid = NULL, $reset = FALSE){
-
 	$tids = (isset ($tid) ? array($tid) : array());
 
 	$remotehtml = remotehtml_load_multiple($tids, $reset);
@@ -128,13 +131,12 @@ function remotehtml_load($tid = NULL, $reset = FALSE){
 }
 
 /**
- * load a custom content entity with this id
+ * Load a custom content entity with this id
  *
  * @param $tid
  * @param $reset
  */
 function custom_content_load($tid = NULL, $reset = FALSE){
-
 	$tids = (isset ($tid) ? array($tid) : array());
 
 	$custom_content = custom_content_load_multiple($tids, $reset);
@@ -143,98 +145,87 @@ function custom_content_load($tid = NULL, $reset = FALSE){
 }
 
 /**
- * retrieve multiple remotehtml entities
+ * Retrieve multiple remotehtml entities
  *
  * @param $tids
- * their ids
+ *  Their ids
  * @param $conditions
- *
  * @param $reset
  *
  * @return object
- * return the entities
+ *  Return the entities
  */
 function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-
 	return entity_load('remotehtml', $tids, $conditions, $reset);
 }
 
 /**
- * retrieve multiple custom content entities
+ * Retrieve multiple custom content entities
  *
  * @param $tids
- * their ids
+ *  Their ids
  * @param $conditions
- *
  * @param $reset
  *
  * @return object
- * return the entities
+ *  Return the entities
  */
 function custom_content_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-
 	return entity_load('custom_content', $tids, $conditions, $reset);
 }
 
 /**
- * this function verify the validity of an url
+ * This function verify the validity of an url
  *
  * @param $url
- * the url
+ *  The url
+ *
  * @return $isGood
- * return a boolean
+ *  Return a boolean
  */
 function remotehtml_url_verification($url){
+  if (isset($url)) {
+    //http request on the url
+    $uri_response = drupal_http_request($url, array(), 'GET', NULL);
 
-	if (isset($url))
-	{
-		//http request on the url
-		$uri_response = drupal_http_request($url, array(), 'GET', NULL);
-		
-		if ($uri_response->status_message != 'OK')
-		{
-			$isGood = false;
-		}
-		else
-		{
-			$isGood = true;
-		}
-	}
+    if ($uri_response->status_message != 'OK') {
+      $isGood = FALSE;
+    }
+    else {
+      $isGood = TRUE;
+    }
+  }
 
-	return $isGood;
+  return $isGood;
 }
 
 /**
- * return the name of the given remotehtml entities
+ * Return the name of the given remote HTML entities
  *
  * @param $remotehtml
- * the given entities (remote html)
+ *  The given entities (remote HTML)
  */
 function remotehtml_page_title($remotehtml){
-
 	return $remotehtml->machine_name;
 }
 
-
 /**
- * return the name of the given custom content entities
+ * Return the name of the given custom content entities
  *
  * @param $custom_content
- * the given entities (custom_content)
+ *  The given entities (custom_content)
  */
 function custom_content_page_title($custom_content){
-
 	return $custom_content->title;
 }
 
 /**
- * Delete single remotehtml entity.
+ * Delete single remote HTML entity.
  *
  * @param $remotehtml
- * the entity
+ *  The entity
  */
 function remotehtml_delete($remotehtml) {
-
 	entity_delete('remotehtml', entity_id('remotehtml' ,$remotehtml));
 }
 
@@ -242,86 +233,77 @@ function remotehtml_delete($remotehtml) {
  * Delete single custom content entity.
  *
  * @param $custom_content
- * the entity
+ *  The entity
  */
 function custom_content_delete($custom_content) {
-
 	entity_delete('custom_content', entity_id('custom_content' ,$custom_content));
 }
 
 /**
- * Delete multiple remotehtml entities.
+ * Delete multiple remote HTML entities.
  *
  * @param $remotehtml_ids
- * their ids
+ *  Their ids
  */
 function remotehtml_delete_multiple($remotehtml_ids) {
-
 	entity_delete_multiple('remotehtml', $remotehtml_ids);
 }
-
 
 /**
  * Delete multiple custom content entities.
  *
  * @param $custom_content_ids
- * their ids
+ *  Their ids
  */
 function custom_content_delete_multiple($custom_content_ids) {
-
 	entity_delete_multiple('custom_content', $custom_content_ids);
 }
+
 /**
- * Save an remotehtml entity
+ * Save a remote HTML entity
  *
  * @param $remotehtml
  */
 function remotehtml_save(&$remotehtml){
-
 	return entity_save('remotehtml', $remotehtml);
 }
 
 /**
- * Save an custom content entity
+ * Save a custom content entity
  *
  * @param $custom_content
  */
 function custom_content_save(&$custom_content){
-
 	return entity_save('custom_content', $custom_content);
 }
 
 /**
- * Generate an array for rendering the given remotehtml entities
+ * Generate an array for rendering the given remote HTML entities
  *
  * @param $remotehtml
- * the given entities
+ *  The given entities
  * @param $view_mode
  */
 function remotehtml_view($remotehtml, $view_mode = 'full'){
-
 	return $remotehtml->view();
 }
-
 
 /**
  * Generate an array for rendering the given custom content entities
  *
  * @param $custom_content
- * the given entities
+ *  The given entities
  * @param $view_mode
  */
 function custom_content_view($custom_content, $view_mode = 'full'){
-
 	return $custom_content->view();
 }
+
 /**
- *
  * @param $remotehtml
  * @param $view_mode
  */
 function remotehtml_page_view($remotehtml, $view_mode = 'full'){
-
 	$remotehtml->content = array();
 
 	// Build fields content.
@@ -333,12 +315,10 @@ function remotehtml_page_view($remotehtml, $view_mode = 'full'){
 }
 
 /**
- *
  * @param $custom_content
  * @param $view_mode
  */
 function custom_content_page_view($custom_content, $view_mode = 'full'){
-
 	$custom_content->content = array();
 
 	// Build fields content.
@@ -350,13 +330,13 @@ function custom_content_page_view($custom_content, $view_mode = 'full'){
 }
 
 /**
- * this function get all remote html name from db
+ * This function get all remote HTML names from db
  *
  * @return $allRemotehtml
- * return all remote html
+ *  Return all remote html
  */
 function dpiextra_remotehtml_get_all(){
-	//get all remotehtml
+	// Get all remotehtml
 	$results = db_query('SELECT * FROM {dpiextra_remotehtml}');
 	return $results;
 }

@@ -11,9 +11,9 @@
  */
 function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
   ctools_include('dependent');
-  $form_state['values']['rid']=$remotehtml->rid;
+  $form_state['values']['rid'] = $remotehtml->rid;
 
-  if($remotehtml->rid==''){
+  if($remotehtml->rid == '') {
     $form['define'] = array(
       '#type' => 'checkbox',
       '#title' => t('Define or edit the machine name ?'),
@@ -31,7 +31,7 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
 
   $form['rid'] = array(
     '#type' => 'value',
-    '#value'=> $remotehtml->rid,
+    '#value' => $remotehtml->rid,
   );
 
   $form['machine_name'] = array(
@@ -48,16 +48,16 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
 
   $form['html_adresse'] = array(
     '#type' => 'textfield',
-    '#title' => t('url adresse'),
+    '#title' => t('URL Adress'),
     '#required' => TRUE,
     '#default_value' => $remotehtml->html_adresse,
   );
 
   $form['refresh_time'] = array(
     '#type' => 'textfield',
-    '#title' => t('refresh time in minutes'),
+    '#title' => t('Refresh time (in minutes)'),
     '#required' => TRUE,
-    '#default_value'=> $remotehtml->refresh_time,
+    '#default_value' => $remotehtml->refresh_time,
   );
 
   $form['submit'] = array(
@@ -79,7 +79,7 @@ function remotehtml_form($form, &$form_state, $remotehtml,$op = 'edit') {
 function remotehtml_form_validate($form, &$form_state){
   $remotehtml_submission = (object) $form_state['values'];
   $results = dpiextra_remotehtml_get_all();
-  //if the user want to define the machine name
+  // If the user want to define the machine name
   if($form_state['input']['define']){
     $machine_name = $remotehtml_submission->machine_name_edit;
     // Check for string identifier sanity
@@ -92,36 +92,36 @@ function remotehtml_form_validate($form, &$form_state){
         if($remotehtml_submission->rid != $record->rid){
           //if machine name already exist
           if($machine_name == $record->machine_name){
-            form_set_error('machine_name_edit',t('the machine name already exist'));
+            form_set_error('machine_name_edit', t('The machine name already exist'));
           }
         }
       }
     }
   }
-  //the machine name is define on the title
+  // The machine name is define on the title
   else if($results!=Null){
-    //construct the new machine name on the title
+    // Construct the new machine name on the title
     $machine_name = str_replace(' ', '_', $remotehtml_submission->title);
     $machine_name = strtolower($machine_name);
     foreach($results as $record){
       	
       if($remotehtml_submission->rid != $record->rid){
-        //if the machine name already exist
+        // If the machine name already exist
         if($machine_name == $record->machine_name){
-          form_set_error('title',t('the machine name based on the title already exist change your title or define a custom machine name'));
+          form_set_error('title', t('The machine name based on the title already exist change your title or define a custom machine name'));
         }
       }
     }
   }
 
-  //validate url
+  // Validate url
   if(!remotehtml_url_verification($remotehtml_submission->html_adresse)) {
-    form_set_error('html_adresse',t('you must enter a valid url adresse'));
+    form_set_error('html_adresse', t('You must enter a valid URL adress'));
   }
 
-  //validate the refresh time
-  if(!is_numeric($remotehtml_submission->refresh_time)) {
-    form_set_error('refresh_time',t('you must enter a number for the refresh time'));
+  // Validate the refresh time
+  if(!is_numeric($remotehtml_submission->refresh_time) || $remotehtml_submission->refresh_time < 0) {
+    form_set_error('refresh_time', t('You must enter a positive numerical value for the refresh time'));
   }
 }
 
