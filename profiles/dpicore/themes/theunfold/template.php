@@ -98,6 +98,21 @@ function theunfold_process_node(&$vars) {
   }
 }
 
+
+/**
+ * To allow contextual link on node
+ * see: http://drupal.stackexchange.com/questions/12528/contextual-link-for-individual-node
+ *
+ */
+function theunfold_node_view_alter(&$build) {
+  if(isset($build['#node'])) {
+    $node = $build['#node'];
+    if(!empty($node->nid)) {
+      $build['#contextual_links']['node'] = array('node', array($node->nid));
+    }
+  }
+}
+
 /**
  * Hook preprocess_node
  */
