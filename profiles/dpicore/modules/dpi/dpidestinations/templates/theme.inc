@@ -104,3 +104,183 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
   }
   $variables['form_submit'] = drupal_render_children($variables['form']);
 }
+
+
+
+
+
+
+/**
+ * Theme the 'placeholder' pane, which is shown on an active IPE when no panes
+ * live in that region.
+ *
+ * @param string $region_id
+ * @param string $region_title
+ */
+function theme_dpidestinations_ipe_placeholder_pane($vars) {
+  $region_id = $vars['region_id'];
+  $region_title = $vars['region_title'];
+
+  $output = '<div class="dpidestinations-ipe-placeholder-content">';
+  $output .= "<h3>$region_title</h3>";
+  $output .= '</div>';
+  return $output;
+}
+
+function template_preprocess_dpidestinations_ipe_pane_wrapper(&$vars) {
+  $pane = $vars['pane'];
+  $display = $vars['display'];
+  $renderer = $vars['renderer'];
+
+  $content_type = ctools_get_content_type($pane->type);
+  $subtype = ctools_content_get_subtype($content_type, $pane->subtype);
+  $vars['links'] = array();
+
+  if (ctools_content_editable($content_type, $subtype, $pane->configuration)) {
+    $vars['links']['edit'] = array(
+      'title' => isset($content_type['edit text']) ? '<span>' . $content_type['edit text'] . '</span>' : '<span>' . t('Settings') . '</span>',
+      'href' => $renderer->get_url('edit-pane', $pane->pid),
+      'html' => TRUE,
+      'attributes' => array(
+        'class' => array('ctools-use-modal', 'dpidestinations-ipe-hide-bar'),
+        'title' => isset($content_type['edit text']) ? $content_type['edit text'] : t('Settings'),
+        // 'id' => "pane-edit-panel-pane-$pane->pid",
+      ),
+    );
+  }
+
+  // Add option to configure style in IPE
+  if (user_access('administer panels styles')) {
+    $vars['links']['style'] = array(
+      'title' => '<span>' . t('Style') . '</span>',
+      'href' => $renderer->get_url('style-type', 'pane', $pane->pid),
+      'html' => TRUE,
+      'attributes' => array(
+        'class' => array('ctools-use-modal', 'dpidestinations-ipe-hide-bar'),
+        'title' => t('Style'),
+      ),
+    );
+  }
+
+  // Deleting is managed entirely in the js; this is just an attachment point
+  // for it
+  $vars['links']['delete'] = array(
+    'title' => '<span>' . t('Delete') . '</span>',
+    'href' => '#',
+    'html' => TRUE,
+    'attributes' => array(
+      'class' => 'pane-delete',
+      'id' => "pane-delete-panel-pane-$pane->pid",
+      'title' => t('Delete'),
+    ),
+  );
+
+  $context = array(
+    'pane' => $pane,
+    'display' => $display,
+    'renderer' => $renderer
+  );
+  drupal_alter('dpidestinations_ipe_pane_links', $vars['links'], $context);
+
+}
+
+function theme_dpidestinations_ipe_pane_wrapper($vars) {
+  $output = $vars['output'];
+  $pane = $vars['pane'];
+
+  $attributes = array(
+    'class' => 'dpidestinations-ipe-linkbar',
+  );
+
+  $links = theme('links', array('links' => $vars['links'], 'attributes' => $attributes));
+
+  if (!empty($pane->locks['type']) && $pane->locks['type'] == 'immovable') {
+    $links = '<div class="dpidestinations-ipe-dragbar dpidestinations-ipe-nodraghandle clearfix">' . $links . '</div>';
+  }
+  else {
+    $links = '<div class="dpidestinations-ipe-dragbar dpidestinations-ipe-draghandle clearfix">' . $links . '<span class="dpidestinations-ipe-draghandle-icon"><span class="dpidestinations-ipe-draghandle-icon-inner"></span></span></div>';
+  }
+
+  $handlebar = '<div class="dpidestinations-ipe-handlebar-wrapper dpidestinations-ipe-on">' . $links . '</div>';
+
+  return $handlebar . $output;
+}
+
+function theme_dpidestinations_ipe_region_wrapper($vars) {
+  return $vars['controls'] . $vars['output'];
+}
+
+function template_preprocess_dpidestinations_ipe_add_pane_button(&$vars) {
+  $region_id = $vars['region_id'];
+  $display = $vars['display'];
+  $renderer = $vars['renderer'];
+  $vars['links'] = '';
+
+  // Add option to configure style in IPE
+  if (user_access('administer panels styles')) {
+    $vars['links']['style'] = array(
+      'title' => '<span>' . t('Region style') . '</span>',
+      'href' => $renderer->get_url('style-type', 'region', $region_id),
+      'html' => TRUE,
+      'attributes' => array(
+        'class' => array('ctools-use-modal', 'dpidestinations-ipe-hide-bar', 'style'),
+        'title' => t('Region style'),
+      ),
+    );
+  }
+
+  // Add option to add items in the IPE
+  $vars['links']['add-pane'] = array(
+    'title' => '<span>' . t('Add new pane') . '</span>',
+    'href' => $renderer->get_url('select-content', $region_id),
+    'attributes' => array(
+      'class' => array('ctools-use-modal', 'add', 'dpidestinations-ipe-hide-bar'),
+      'title' => t('Add new pane'),
+    ),
+    'html' => TRUE,
+  );
+
+  $context = array(
+    'region_id' => $region_id,
+    'display' => $display,
+    'renderer' => $renderer,
+  );
+  drupal_alter('dpidestinations_ipe_region_links', $vars['links'], $context);
+
+}
+
+function theme_dpidestinations_ipe_add_pane_button($vars) {
+  $attributes = array(
+    'class' => array('dpidestinations-ipe-linkbar', 'inline'),
+  );
+
+  $links = theme('links', array('links' => $vars['links'], 'attributes' => $attributes));
+
+  return '<div class="dpidestinations-ipe-newblock dpidestinations-ipe-on">' . $links . '</div>';
+}
+
+function theme_dpidestinations_ipe_toolbar($vars) {
+  $buttons = $vars['buttons'];
+
+  $output = "<div id='dpidestinations-ipe-control-container' class='clearfix'>";
+  foreach ($buttons as $key => $ipe_buttons) {
+    $output .= "<div id='dpidestinations-ipe-control-$key' class='dpidestinations-ipe-control'>";
+
+    // Controls in this container will appear when the IPE is not on.
+    $output .= '<div class="dpidestinations-ipe-button-container clearfix">';
+    foreach ($ipe_buttons as $button) {
+      $output .= is_string($button) ? $button : drupal_render($button);
+    }
+    $output .= '</div>';
+
+    // Controls in this container will appear when the IPE is on. It is usually
+    // filled via AJAX.
+    $output .= '<div class="dpidestinations-ipe-form-container clearfix"></div>';
+    $output .= '</div>';
+  }
+
+  $output .= "</div>";
+
+  return $output;
+}
+
