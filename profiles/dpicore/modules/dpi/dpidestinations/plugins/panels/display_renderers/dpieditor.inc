@@ -1,15 +1,16 @@
 <?php
 
 $plugin = array(
-  'renderer' => 'dpidestinations_renderer_editor',
+  'renderer' => 'dpidestinations_renderer_dpieditor',
 );
+
 
 /**
  * @file
  * Class file to control the main Panels editor.
  */
-
-class dpidestinations_renderer_editor extends panels_renderer_editor {
+      
+class dpidestinations_renderer_dpieditor extends panels_renderer_editor {
   function init($plugin, &$display) {
     parent::init($plugin, $display);
   }

@@ -18,7 +18,7 @@ $plugin = array(
   'visible' => TRUE, // may be added up front.
 
   // Administrative fields.
-  'title' => t('Section'),
+  'title' => t('Dpi Panels'),
   'admin summary' =>'panels_panel_context_admin_summary',
   'admin title' => 'panels_panel_context_title',
   'tab operation' => 'panels_panel_context_tab_operation',
@@ -216,7 +216,7 @@ $plugin = array(
   'default conf' => array(
     'title' => t('section'),
     'no_blocks' => FALSE,
-    'pipeline' => 'dpidestinations_viewer',
+    'pipeline' => 'dpiviewer',
     'body_classes_to_remove' => '',
     'body_classes_to_add' => '',
     'css_id' => '',
@@ -239,8 +239,7 @@ function dpidestinations_sections_context_edit_content($form, &$form_state) {
   ctools_include('context-task-handler');
 
   $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . '::' . $form_state['handler_id'] . '::::');
-  $form_state['renderer'] = panels_get_renderer_handler('dpidestinations_editor', $cache->display);
-
+  $form_state['renderer'] = panels_get_renderer_handler('dpieditor', $cache->display);
   $form_state['renderer']->cache = &$cache;
 
   $form_state['display'] = &$cache->display;
