@@ -216,7 +216,7 @@ $plugin = array(
   'default conf' => array(
     'title' => t('section'),
     'no_blocks' => FALSE,
-    'pipeline' => 'dpidestinations_viewer',
+    'pipeline' => 'dpiviewer',
     'body_classes_to_remove' => '',
     'body_classes_to_add' => '',
     'css_id' => '',
@@ -240,7 +240,6 @@ function dpidestinations_sections_context_edit_content($form, &$form_state) {
 
   $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . '::' . $form_state['handler_id'] . '::::');
   $form_state['renderer'] = panels_get_renderer_handler('dpieditor', $cache->display);
-dsm($form_state);
   $form_state['renderer']->cache = &$cache;
 
   $form_state['display'] = &$cache->display;

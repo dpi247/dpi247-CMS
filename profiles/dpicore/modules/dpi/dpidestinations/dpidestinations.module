@@ -269,7 +269,7 @@ function dpidestinations_default_panels_renderer_pipeline() {
   $pipeline = new stdClass;
   $pipeline->disabled = FALSE; /* Edit this to true to make a default pipeline disabled initially */
   $pipeline->api_version = 1;
-  $pipeline->name = 'dpipviewer';
+  $pipeline->name = 'dpiviewer';
   $pipeline->admin_title = t('Dpi Panels viewer');
   $pipeline->admin_description = t('Panels on steroids with in place editing and a better way to organize ctools content types.');
   $pipeline->weight = -1;
