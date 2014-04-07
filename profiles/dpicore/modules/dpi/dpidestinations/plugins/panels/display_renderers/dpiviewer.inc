@@ -20,10 +20,10 @@ $plugin = array(
  * 
  * 
  */
-class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
+class dpidestinations_renderer_dpiviewer extends dpidestinations_renderer_dpieditor {
   // The IPE operates in normal render mode, not admin mode.
   var $admin = FALSE;
-/*
+
   function render() {
     $output = parent::render();
     return "<div id='dpidestinations-ipe-display-{$this->clean_key}' class='dpidestinations-ipe-display-container'>$output</div>";
@@ -97,14 +97,13 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
 
     parent::add_meta();
   }
-*/
+
   /**
    * Override & call the parent, then pass output through to the dnd wrapper
    * theme function.
    *
    * @param $pane
    */
-  /*
   function render_pane(&$pane) {
     $output = parent::render_pane($pane);
     if (empty($output)) {
@@ -181,14 +180,13 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
 
     return $content;
   }
-*/
+
   /**
    * Add an 'empty' pane placeholder above all the normal panes.
    *
    * @param $region_id
    * @param $panes
    */
-  /*
   function render_region($region_id, $panes) {
     // Generate this region's 'empty' placeholder pane from the IPE plugin.
     $empty_ph = theme('dpidestinations_ipe_placeholder_pane', array('region_id' => $region_id, 'region_title' => $this->plugins['layout']['regions'][$region_id]));
@@ -202,11 +200,10 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
 
     return "<div id='dpidestinations-ipe-regionid-$region_id' class='dpidestinations-ipe-region'>$output</div>";
   }
-*/
+
   /**
    * This is a generic lock test.
    */
-  /*
   function ipe_test_lock($url, $break) {
     if (!empty($this->cache->locked)) {
       if ($break != 'break') {
@@ -229,7 +226,7 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
       panels_edit_cache_break_lock($this->cache);
     }
   }
-*/
+
   /**
    * AJAX callback to unlock the IPE.
    *
@@ -240,16 +237,14 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
    * and the client side has already given all indications that things are
    * now in a 'normal' state.
    */
-  /*
   function ajax_unlock_ipe() {
     panels_edit_cache_clear($this->cache);
     $this->commands[] = array();
   }
-*/
+
   /**
    * AJAX entry point to create the controller form for an IPE.
    */
-  /*
   function ajax_save_form($break = NULL) {
     if ($this->ipe_test_lock('save-form', $break)) {
       return;
@@ -314,11 +309,10 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
       'key' => $this->clean_key,
     );
   }
-*/
+
   /**
    * AJAX entry point to create the controller form for an IPE.
    */
-  /*
   function ajax_change_layout($break = NULL) {
     if ($this->ipe_test_lock('change_layout', $break)) {
       return;
@@ -400,11 +394,10 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
 
     $this->commands[] = ctools_modal_command_display(t('Change layout'), $output);
   }
-*/
+
   /**
    * Create a command array to redraw a pane.
    */
-/*
   function command_update_pane($pid) {
     if (is_object($pid)) {
       $pane = $pid;
@@ -416,11 +409,10 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
     $this->commands[] = ajax_command_replace("#dpidestinations-ipe-paneid-$pane->pid", $this->render_pane($pane));
     $this->commands[] = ajax_command_changed("#dpidestinations-ipe-display-{$this->clean_key}");
   }
-*/
+
   /**
    * Create a command array to add a new pane.
    */
-/*
   function command_add_pane($pid) {
     if (is_object($pid)) {
       $pane = $pid;
@@ -440,7 +432,6 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
       'key' => $this->clean_key,
     );
   }
-  */
 }
 
 /**
