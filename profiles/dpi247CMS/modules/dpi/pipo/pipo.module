@@ -1,0 +1,222 @@
+<?php
+
+
+function pipo_entity_info(){
+
+  $entities=array();
+  $entities['pipo_entity']=array(
+    'label' => t('PipoEntity'),
+    // seulement si on utilise le module entity API
+    //'entity class' => 'DpidestinationsTarget',
+    //'controller class' => 'TargetController',
+    'base table' => 'pipo_entity',
+    'fieldable' => TRUE,
+    'uri callback' => 'dpidestinations_target_uri',
+    'label callback' => 'dpidestinations_target_label',
+
+    'entity keys' => array(
+      'id' => 'pid',
+    ),
+    'bundles'=>array(
+      'pipo_entity2'=>array(
+        
+      'label' => 't',
+        'admin' => array(
+          'path' => 'admin/structure/pipo_entity/manage/pipo_entity2',
+        'real path' => 'admin/structure/pipo_entity/manage/pipo_entity2',
+        'bundle argument' => "pipo_entity2",
+       ),
+        'pipo_entity1'=>array(
+        
+          'label' => 't',
+          'admin' => array(
+            'path' => 'admin/structure/pipo_entity/manage/pipo_entity1',
+            'real path' => 'admin/structure/pipo_entity/manage/pipo_entity1',
+            'bundle argument' => "pipo_entity1",
+          ),
+        
+      
+      ),
+      ),
+    ),
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    'access callback' => 'pipo_access',
+    
+    'admin ui' => array(
+      'label' => 'ti',
+      'path' => 'admin/structure/pipo',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      //'file' => 'target.admin.inc',
+      'controller class' => 'EntityDefaultUIController',
+    ),
+  );
+  return $entities;
+
+
+}
+
+function pipo_access(){
+  return TRUE;
+}
+function pipo_entity_form($form, &$form_state, $remotehtml,$op = 'edit'){
+  return array();
+}
+
+function pipo_pipo_entity_uri($pipoentity){
+  return array(
+    'path' => 'pipo/'.$pipoentity->pid,
+  );
+  return array(
+
+  );
+}
+
+
+function pipo_pipo_entity_label($pipo_entity){
+
+  return "pipo entity".$pipo_entity->pid;
+}
+
+
+function pipo_dpicache_cache_entry_register(){
+  return array(
+    'pipo_render'=>array(
+      'callback'=> 'pipo_get_render',
+      'category'=> 'pipo_render',
+      "data_type" => "string",
+      'ttl' => 3*24*60*60, // ttl in seconds (3 days)
+      'refresh_interval'=> 5*60 // refresh_interval in seconds (5 minutes)
+    ),
+    'pipo_array'=>array(
+      'callback'=> 'pipo_get_array',
+      'category'=> 'pipo_array',
+      "data_type" => "array",
+      'ttl' => 3*24*60*60, // ttl in seconds (3 days)
+      'refresh_interval'=> 5*60 // refresh_interval in seconds (5 minutes)
+    )
+    
+    );
+  
+  
+}
+
+function pipo_dpilog_register(){
+  return array(
+    "cache_entry"=>array(
+      "actions"=>array("pipo_log"),
+    ),
+    "cache_error"=>array(
+      "actions"=>array("pipo_error"),
+    ),
+  );
+}
+
+function pipo_get_render($param1,$param2,$param3){
+  dsm('hello je passe par pipo_get_render');
+  dsm($param2);
+  return $param1." - ".$param2." - ".$param3."   date de generation: ".date("Y-m-d H:i:s");
+}
+function pipo_get_array($param1,$param2){
+  dsm('hello je passe par pipo_get_array');
+  return  array($param1,$param2,date("Y-m-d H:i:s")); 
+}
+
+
+
+
+function pipo_random_fonction(){
+  $param1=(string) rand();
+  $param2="toto";
+  $param3=(string) rand();
+  
+  $r1 = dpicache_get_cache_entry('pipo_render',$param1,$param2,$param3);
+  print "[R1] String with random parameters : $r1 <br/>\n";
+  $r2 = dpicache_get_cache_entry('pipo_render','fixe1','fixe2','fix3');
+  print "[R2] String with fixed parameters : $r2 <br/>\n";
+  $r3 = dpicache_get_cache_entry('pipo_array',$param1,$param2);
+  print "[R3] Array with random parameters : ".print_r($r3,1)." <br/>\n";
+  $r4 = dpicache_get_cache_entry('pipo_array','fixe1','fixe2');
+  print "[R4] Array with fixed parameters : ".print_r($r4,1)." <br/>\n";
+}
+
+function pipo_test_generate_dpilogs(){
+  global $user;
+  //dpi_log($log_name, $action, $message, $variables=array(),$id=NULL, $severity=WATCHDOG_NOTICE, $uid=NULL, $keep_backtrace=FALSE){
+  dpi_log('cache_entry', "pipo_log", "1) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_entry', "pipo_log", "2) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_entry', "pipo_log", "3) This is a good test ".time(), array(), NULL, WATCHDOG_INFO, $user->uid, FALSE);
+  dpi_log('cache_error', "pipo_error", "This is a bad test ".time(), array(), NULL, WATCHDOG_ERROR, $user->uid, FALSE);
+}
+
+
+
+function pipo_menu(){
+  $items['node/%node/pipo'] = array(
+    'title callback' => 'section_view',
+    'title arguments' => array(1),
+    'page callback' => 'dpidestinations_page_section_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view section'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+
+
+
+
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function pipo_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+      'version' => 1,
+      'path' => drupal_get_path('module', 'pipo') . '/includes',
+    );
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function pipo_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'arguments') {
+    return 'plugins/ctools/arguments';
+  }
+  if ($module == 'ctools' && $plugin == 'contexts') {
+    return 'plugins/ctools/contexts';
+  }
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/ctools/content_types';
+  }
+  if ($module == 'page_manager' && $plugin == 'tasks') {
+    return 'plugins/page_manager/tasks';
+  }
+  if ($module == 'page_manager' && $plugin == 'task_handlers') {
+    return 'plugins/page_manager/task_handlers';
+  }
+  if ($module == 'panels' && $plugin == 'display_renderers') {
+    return 'plugins/panels/display_renderers';
+  }
+}
