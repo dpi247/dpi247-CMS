@@ -30,6 +30,7 @@ function theunfold_preprocess_page(&$vars) {
       'links' => $vars['main_menu'],
       'attributes' => array(
         'class' => array('links', 'inline', 'main-menu'),
+        'id' => 'nav',
       ),
       'heading' => array(
         'text' => t('Main menu'),
