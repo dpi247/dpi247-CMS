@@ -55,7 +55,7 @@ function unfoldcompanionminimal_ckeditor_profile_defaults() {
           'dnd' => array(
             'name' => 'dnd',
             'desc' => 'Scald Drag and Drop integration',
-            'path' => '%base_path%profiles/dpicore/modules/third/scald/modules/library/dnd/plugins/ckeditor/',
+            'path' => '%base_path%profiles/dpi247CMS/modules/third/scald/modules/library/dnd/plugins/ckeditor/',
             'buttons' => array(
               'ScaldAtom' => array(
                 'label' => 'ScaldAtom',
