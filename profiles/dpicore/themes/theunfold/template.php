@@ -201,13 +201,19 @@ function _theunfold_set_js() {
     //'type' => 'theme',
     'scope' => 'footer',
   );
+  
+  
+  /*
   drupal_add_js('http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/script.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/swipe.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/ticker.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/jquery.easing.1.3.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/jquery.elastislide.js', $js_options);
-
+*/
+  
+  
+  
   // Add js to the header
   drupal_add_js($path.'/scripts/vendor/modernizr-2.6.1.min.js');
   drupal_add_js("
