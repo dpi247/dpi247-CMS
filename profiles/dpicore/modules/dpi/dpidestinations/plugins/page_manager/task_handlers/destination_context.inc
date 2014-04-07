@@ -18,7 +18,7 @@ $plugin = array(
   'visible' => TRUE, // may be added up front.
 
   // Administrative fields.
-  'title' => t('Dpi Panels'),
+  'title' => t('Dpi Panels (Deprecated Do not use)'),
   'admin summary' =>'panels_panel_context_admin_summary',
   'admin title' => 'panels_panel_context_title',
   'tab operation' => 'panels_panel_context_tab_operation',
