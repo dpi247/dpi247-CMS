@@ -122,25 +122,6 @@ $plugin = array(
       ),
     ),
 
-    'section' => array(
-      'title' => t('Section'),
-      'description' => t('Set up some section\'s settings parameter.'),
-      'ajax' => FALSE,
-      'form' => array(
-        'order' => array(
-          'form' => t('Content'),
-        ),
-        'forms' => array(
-          'form' => array(
-            'include' => array(
-              drupal_get_path('module', 'panels') . '/includes/display-edit.inc',
-            ),
-            'form id' => 'dpidestinations_dpipanels_context_edit_section',
-            'no blocks' => TRUE,
-          ),
-        ),
-      ),
-    ),
     
     'preview' => array(
       'title' => t('Preview'),
@@ -173,7 +154,6 @@ $plugin = array(
     'settings' => t('General'),
     'context' => t('Contexts'),
     'layout' => t('Change layout'),
-    'section' => t('section'),
     'move' => '', // no title makes it a 'hidden' edit form.
   ),
   
@@ -214,7 +194,6 @@ $plugin = array(
   ),
   
   'default conf' => array(
-    'title' => t('section'),
     'no_blocks' => FALSE,
     'pipeline' => 'dpiviewer',
     'body_classes_to_remove' => '',
@@ -223,7 +202,6 @@ $plugin = array(
     'css' => '',
     'contexts' => array(),
     'relationships' => array(),
-    'section_default_target' => '',
   ),
 );
 
@@ -334,22 +312,3 @@ function dpidestinations_dpipanels_renderer_editor($handler, $base_contexts, $ar
   return $info;
 }
 
-function dpidestinations_dpipanels_context_edit_section($form, &$form_state){
-  $conf = $form_state['handler']->conf;
-
-  $form['conf']['section_default_target'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $conf['section_default_target'],
-    '#title' => t('Administrative title'),
-    '#description' => t('Administrative title of this variant.'),
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for general settings form.
- */
-function dpidestinations_dpipanels_context_edit_section_submit(&$form, &$form_state) {
-  $form_state['handler']->conf['section_default_target'] = $form_state['values']['section_default_target'];
-}
