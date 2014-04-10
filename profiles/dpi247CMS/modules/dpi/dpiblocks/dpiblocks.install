@@ -1,0 +1,164 @@
+<?php
+
+/**
+ * Implementation of hook_install
+ *
+ * Transfer datas from the dpiextra tables to the new tables
+ */
+function dpiblocks_install() {
+  /*
+  if (module_exists('dpiextra')) {
+    $db_results = db_select('dpiextra_remotehtml', 'd')
+      ->fields('d')
+      ->execute();
+    foreach ($db_results as $result) {
+      drupal_write_record('dpiblocks_remotehtml', $result);
+    }
+
+    $db_results = db_select('dpiextra_custom_content', 'd')
+      ->fields('d')
+      ->execute();
+    foreach ($db_results as $result) {
+      drupal_write_record('dpiblocks_custom_content', $result);
+    }
+
+    $db_results = db_select('dpiextra_custom_content_revision', 'd')
+      ->fields('d')
+      ->execute();
+    foreach ($db_results as $result) {
+      drupal_write_record('dpiblocks_custom_content_revision', $result);
+    }
+
+    module_disable(array('dpiextra'));
+    drupal_uninstall_modules(array('dpiextra'));
+  }
+  */
+}
+
+/**
+ * Implementation of hook_schema
+ */
+function dpiblocks_schema() {
+  $schema = array();
+
+  $schema['dpiblocks_remotehtml'] = array (
+    'description' => 'The remote HTML entity table',
+    'fields' => array(
+      'rid' => array(
+        'description' => 'Primary key for our table of custom content',
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The machine name of our HTML remote adress',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title of our HTML remote adress',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'html_adresse' => array(
+        'description' => 'The remote HTML adress',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'refresh_time' => array(
+        'description' => 'The remote HTML refresh time',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('rid'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name')
+    ),
+  );
+
+  $schema['dpiblocks_custom_content'] = array (
+    'description' => 'The custom content entity table',
+    'fields' => array(
+      'cid' => array(
+        'description' => 'Primary key for our table of custom content',
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The name of our custom content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title of our custom content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'body' => array(
+        'description' => 'The body of our custom content',
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => TRUE,
+      ),
+      'format' => array(
+        'description' => 'The format of our custom content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'type' => 'int',
+        'description' => 'The creation date of the version of the custom content',
+        'not null' => TRUE,
+      ),
+      'revision_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => 'The ID of the entity\'s default revision.',
+      ),
+    ),
+    'primary key' => array('cid'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name')
+    ),
+  );
+
+  $schema['dpiblocks_custom_content_revision'] = $schema['dpiblocks_custom_content'];
+
+  $schema['dpiblocks_custom_content_revision']['fields']['revision_id'] = array(
+    'type' => 'serial',
+    'not null' => TRUE,
+    'description' => 'Primary Key: Unique revision ID.',
+  );
+
+  $schema['dpiblocks_custom_content_revision']['fields']['cid'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'The ID of the attached entity custom_content.',
+  );
+
+  $schema['dpiblocks_custom_content_revision']['fields']['machine_name'] = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => TRUE,
+  );
+
+  $schema['dpiblocks_custom_content_revision']['primary key'] = array('revision_id');
+
+  $schema['dpiblocks_custom_content_revision']['unique keys'] = array();
+
+  return $schema;
+}

@@ -1,0 +1,14 @@
+core = "7.x"
+description = "DPI Blocks containing all blocks and content types CTools created by DPI"
+name = "DPI blocks"
+package = DPI
+
+dependencies[] = entity
+dependencies[] = ctools
+dependencies[] = page_manager
+dependencies[] = panels
+
+files[] = entity_controller/remotehtml.controller.class.inc
+files[] = entity_class/remotehtml.entity.class.inc
+files[] = entity_controller/custom_content.controller.class.inc
+files[] = entity_class/custom_content.entity.class.inc
