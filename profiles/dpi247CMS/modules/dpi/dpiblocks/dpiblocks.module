@@ -1,0 +1,311 @@
+<?php 
+
+// Load all entity function for remotehtml and custom content
+module_load_include('inc', 'dpiblocks','dpiblocks.entity');
+
+/**
+ * Implementation of hook_menu()
+ *
+ * @return $items
+*/
+function dpiblocks_menu(){
+  $items['remotehtml/%remotehtml'] = array(
+    'title callback' => 'remotehtml_view',
+    'title arguments' => array(1),
+    'page callback' => 'remotehtml_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view remotehtml'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['remotehtml/%remotehtml'] = array(
+    'title callback' => 'remotehtml_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'remotehtml_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view remotehtml'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['custom_content/%custom_content'] = array(
+    'title callback' => 'custom_content_view',
+    'title arguments' => array(1),
+    'page callback' => 'custom_content_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view custom content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['custom_content/%custom_content'] = array(
+    'title callback' => 'custom_content_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'custom_content_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view custom content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['dpiblocks/custom_content/form/%/ajax'] = array(
+    'page callback'    => 'dpiblocks_ajax_custom_contentform',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+    'page arguments'   => array(3),
+  );
+
+  $items['dpiblocks/custom_content/getversion/%/ajax'] = array(
+    'page callback'    => 'dpiblocks_ajax_custom_content_getversion',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+    'page arguments'   => array(3),
+  );
+
+  $items['dpiblocks/custom_content/setdefault/%/ajax'] = array(
+    'page callback'    => 'dpiblocks_ajax_custom_content_set_revision_default',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+    'page arguments'   => array(3),
+  );
+
+  $items['dpiblocks/custom_content/delete_revision/%/ajax'] = array(
+    'page callback'    => 'dpiblocks_ajax_custom_content_delete_revision',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+    'page arguments'   => array(3),
+  );
+
+  return $items;
+}
+
+/**
+ * Callback in ajax, delete a custom content revision
+ *
+ * @param $revision_id
+ *  The revision id
+ */
+function dpiblocks_ajax_custom_content_delete_revision($revision_id){
+  entity_revision_delete('custom_content', $revision_id);
+  drupal_set_message(t('the revision has been Deleted'),'status');
+  dpiblocks_ajax_custom_contentform('custom');
+}
+
+/**
+ * Callback in ajax, send the form for the custom content
+ *
+ * @param $type_form
+ *  Type of form (version or custom content)
+ */
+function dpiblocks_ajax_custom_contentform($content){
+  module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js();
+  ctools_add_js('ajax-responder');
+  $commands = array();
+  $commands[] = ctools_ajax_command_attr('#version_form', 'style', 'display:block;');
+
+  // Display status, warning, error messages
+  $commands[] = ajax_command_html('.messages', theme('status_messages'));
+
+  print ajax_render($commands);
+  exit;
+}
+
+/**
+ * This function set the revision by default
+ *
+ * @param $revision_id
+ *  The revision id
+ */
+function dpiblocks_ajax_custom_content_set_revision_default($revision_id){
+  $typeEntity = 'custom_content';
+  $entity_revision = entity_revision_load($typeEntity, $revision_id);
+
+  if(!entity_revision_is_default($typeEntity, $entity_revision)){
+
+    $customContent_submission->is_new = FALSE;
+    $customContent_submission->is_new_revision = FALSE;
+    drupal_set_message(t('the revision has been set by default'),'status');
+    // Set the revision by default
+    entity_revision_set_default($typeEntity, $entity_revision);
+    // Save
+    entity_save($typeEntity, $entity_revision);
+  }
+  else
+  {
+    drupal_set_message(t('the revision is already the default revision'),'error');
+  }
+
+  dpiblocks_ajax_custom_contentform('custom');
+}
+
+/**
+ * Callback in ajax, display the content of the revision
+ *
+ * @param $revision_id
+ *  Revision to display
+ */
+function dpiblocks_ajax_custom_content_getversion($revision_id){
+  module_load_include('inc', 'ctools','plugins/content_types/custom/custom');
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js();
+  ctools_add_js('ajax-responder');
+
+  $commands = array();
+  // Load the revision
+  $revision = entity_revision_load('custom_content', $revision_id);
+
+  // Display the content of the revision
+  $content  = '<input type="text" readonly="readonly" value="'.$revision->title.'"/></br>';
+  $content .= '<textarea class = "form-textarea resizable textarea-processed" rows="10" cols = "100" readonly="readonly">'.$revision->body.'</textarea>';
+  $content .= '<div>'.ctools_ajax_text_button(t('Switch back to this revision'), 'dpiblocks/custom_content/setdefault/'.$revision_id.'/ajax', t('Switch')).'</div>';
+
+  // Display content
+  $commands[] = ajax_command_html('#dpiblocks_version', $content);
+  $commands[] = ctools_ajax_command_attr('.dpiblocks_version_list', 'style', 'font-weight:none');
+  $commands[] = ctools_ajax_command_attr('#dpiblocks_version_'.$revision_id, 'style', 'font-weight:bold');
+
+  print ajax_render($commands);
+  exit;
+}
+
+/**
+ * Implementation of permission
+ *
+ * @return array
+ */
+function dpiblocks_permission(){
+  return array(
+    'administer remotehtml' =>  array(
+      'title' => t('Administer remotehtml'),
+      'restrict access' => TRUE,
+    ),
+    'view remotehtml' => array(
+      'title' => t('View remotehtml'),
+    )
+  );
+}
+
+/**
+ * Create a new object for the given $table.
+ *
+ * @param $table
+ *   The name of the table to use to retrieve $schema values. This table
+ *   must have an 'export' section containing data or this function
+ *   will fail.
+ * @param $plugin_name
+ *   The name of the concerned plugin.
+ * @param $set_defaults
+ *   If TRUE, which is the default, then default values will be retrieved
+ *   from schema fields and set on the object.
+ *
+ * @return
+ *   The loaded object.
+ */
+function dpiblocks_newctoolsexport($table, $plugin_name, $set_defaults = TRUE) {
+  $schema = ctools_export_get_schema($table);
+
+  $export = $schema['export'];
+
+  if (!empty($export['create callback']) && function_exists($export['create callback'])) {
+    return $export['create callback']($plugin_name, $set_defaults);
+  }
+  else {
+    return ctools_export_new_object($table, $set_defaults);
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ *
+ * hook_field_is_emtpy() is where Drupal asks us if this field is empty.
+ * Return TRUE if it does not contain data, FALSE if it does. This lets
+ * the form API flag an error when required fields are empty.
+ */
+function dpiblocks_field_is_empty($item, $field) {
+  if(empty($item['tid']) and empty($item['tid'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of ctools_plugin_directory()
+ *
+ * @param $module
+ * @param $plugin
+ *
+ * @return string
+ */
+function dpiblocks_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Get all the versions of a custom content type
+ *
+ * @param $id
+ *  The id of the custom content type
+ *
+ * @return
+ *  An array whith all the versions of the custom content type
+ */
+function dpiblocks_custom_content_type_getrevision($machine_name){
+  $items = array();
+
+  if ($machine_name !== NULL) {
+    $result = db_query("SELECT *
+        FROM {dpiblocks_custom_content_revision} r
+        WHERE r.machine_name = :machine_name", array(':machine_name' => $machine_name));
+    foreach($result as $revision){
+      $items[] = $revision;
+    }
+  }
+  return $items;
+}
+
+/**
+ * Implémentation of hook_theme();
+ *
+ * @param $var
+ *  Return array
+ */
+function dpiblocks_theme(&$var) {
+  $path = drupal_get_path('module', 'dpiblocks');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => "$path/theme",
+  );
+
+  return array(
+    'dpiblocks_custom_content_type_revision_form' => $base + array(
+      'render element' => 'form',
+    ),
+    'dpiblocks_custom_content_type_listversion' => $base + array(
+      'arguments' => array('versions' => NULL),
+    ),
+  );
+}
+
+/**
+ * This function get the entity form and unset the save button
+ *
+ * @param $form_id
+ * @param $form_state
+ * @param $entity
+ *  The current entity
+ *
+ * @return $form
+ *  Return the form
+ */
+function dpiblocks_get_entity_form($form_id,$form_state,$entity){
+  $form_state['build_info']['args'][] = $entity;
+  // See: http://drupal.org/node/1651046 use drupal_retrieve_form and not drupal_get_form
+  $form = drupal_retrieve_form($form_id,$form_state);
+  // Unset the save button
+  unset($form['submit']);
+
+  return $form;
+}
