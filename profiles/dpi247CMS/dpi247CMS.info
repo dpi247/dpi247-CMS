@@ -3,11 +3,6 @@ description = "Drupal Distribution for Press&Media Website."
 version = VERSION
 core = 7.x
 
-; Information added by drupal.org packaging script on 2013-04-03
-version = "7.22"
-project = "drupal"
-datestamp = "1365027012"
-
 ; Drupal Core
 dependencies[] = block
 dependencies[] = color
