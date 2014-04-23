@@ -171,7 +171,8 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
 
     //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
     $field_to_analyse = 'field_textbody';
-    $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
+    $language = isset($entity->language) ? $entity->language : NULL;
+    $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $language);
     foreach($field_to_analyse_items as $field_to_analyse_item) {
       if (isset($field_to_analyse_item['mee']['resource_manager']) && is_array($field_to_analyse_item['mee']['resource_manager'])) {
         foreach($field_to_analyse_item['mee']['resource_manager'] as $sid => $mee) {
