@@ -97,7 +97,7 @@ function _dpicontenttypes_cropings_entity_form_confirm_new_cropings($entity, $en
                 && isset($item['provider']) && $item['provider'] == 'scald_image') {
               // Set temporary cropings as permanent
               $aid = $item['sid'];
-              if ($entity->is_new) {
+              if ($entity->is_new && isset($entity->form_token)) {
                 $form_token = $entity->form_token;
               } else {
                 $form_token = '';
