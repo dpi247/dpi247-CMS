@@ -1,6 +1,27 @@
 <?php
 
 /**
+ * Check wheter or not an HTTP request is successfull :
+ *   - Code 200
+ *   - Not empty
+ *
+ * @param object $request
+ *   The result of the HTTP request
+ *
+ * @return bool
+ *   TRUE or FALSE
+ */
+function dpicommons_is_http_request_successfull($request) {
+  if (is_object($request) &&
+      ((isset($request->code) && $request->code == 200) || (isset($request->redirect_code) && $request->redirect_code == 200)) &&
+      isset($request->data) && !empty($request->data)) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
  * Helper fonction to calculate time consuming part of a script.
  *
  * @param $step
@@ -38,4 +59,22 @@ function dpicommons_set_microtime_step($step = '', $print = TRUE, $namespace = "
     }
     return $t;
   }
+}
+
+/**
+ * Return a boolean form the XML value (int, string or boolean)
+ *
+ * @param bool $xmlboolean
+ */
+function dpicommons_toboolean($boolean_to_check, $default = NULL){
+  $boolean = $default;
+  if ($boolean_to_check === FALSE) $boolean = FALSE;
+  elseif ($boolean_to_check === TRUE) $boolean = TRUE;
+  elseif (strtolower($boolean_to_check) == "true") $boolean = TRUE;
+  elseif (strtolower($boolean_to_check) == "false") $boolean = FALSE;
+  elseif (strtolower($boolean_to_check) == "null") $boolean = FALSE;
+  elseif (is_string($boolean_to_check) && !empty($boolean_to_check)) $boolean = TRUE;
+  elseif ($boolean_to_check == 0) $boolean = FALSE;
+  elseif ($boolean_to_check == 1) $boolean = TRUE;
+  return $boolean;
 }
