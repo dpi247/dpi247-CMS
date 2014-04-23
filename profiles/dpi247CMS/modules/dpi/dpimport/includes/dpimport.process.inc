@@ -7,15 +7,14 @@
  * @return string
  */
 function dpimport_page_process_import($importer_name){
-  ctools_include('plugins');
   $importer_settings = dpimport_getimportersettings($importer_name);
   $return = NULL;
   if ($importer_settings != NULL){
-    $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+    $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
     if ($importer_plugin != NULL){
-      //Get importer class from settings and plugin
+      // Get importer class from settings and plugin
       $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
-      //Importer Instance
+      // Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
       $dispatcher = $importer->getDispatcher();
       if (lock_acquire('dpimport_'.$importer->getName(), $dispatcher->getLockTimeout())) {
@@ -84,14 +83,14 @@ function dpimport_process_import($importer, $dispatcher){
  * Delete old files
  */
 function dpimport_deleteoldfiles(){
-  ctools_include('plugins');
   $importers = dpimport_getallimportersettings();
   foreach ($importers as $importer_settings){
     $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+    $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
     if ($importer_plugin != NULL){
-      //Get importer class from settings and plugin
+      // Get importer class from settings and plugin
       $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
-      //Importer Instance
+      // Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
       $dispatcher = $importer->getDispatcher();
       $dispatcher->cleanDirectories();

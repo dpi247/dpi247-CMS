@@ -91,6 +91,8 @@ function dpicontenttypes_field_schema($field) {
  * Implements hook_schema().
  */
 function dpicontenttypes_schema() {
+  $schema = array();
+  
   $schema['dpicontenttypes_properties'] = array(
     'description' => 'The base table for DPI Properties.',
     'fields' => array(
@@ -331,6 +333,42 @@ function dpicontenttypes_schema() {
     ),
   );
 
+  $schema['dpicontenttypes_external_files'] = array(
+    'description' => 'Stores informations for files fetched from outside',
+    'fields' => array(
+      'eid' => array(
+        'description' => 'Primary Key: Unique external files ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'fid' => array(
+        'description' => 'Unique files ID, link to files table.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'uri' => array(
+        'description' => 'URI of the original file',
+        'type' => 'varchar',
+        'length' => 510,
+        'not null' => TRUE,
+        'default' => ''
+      ),
+      'requestor' => array(
+        'description' => 'Requestor of this file',
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => NULL
+      ),
+    ),
+    'indexes' => array(
+      'uri' => array('uri'),
+    ),
+    'primary key' => array('eid'),
+  );
+
   return $schema;
 }
 
@@ -338,7 +376,7 @@ function dpicontenttypes_schema() {
  * Creation of the table dpi_properties
  */
 function dpicontenttypes_update_7000() {
-  //Creation of table dpi_properties
+  // Creation of table dpi_properties
   $schema = drupal_get_schema('dpicontenttypes_properties', TRUE);
   db_create_table('dpicontenttypes_properties', $schema);
   $schema = drupal_get_schema('dpicontenttypes_properties_type', TRUE);
@@ -387,6 +425,18 @@ function dpicontenttypes_update_7003() {
  * Install the dpicontenttypes_cropings table
  */
 function dpicontenttypes_update_7004() {
-  $schema = drupal_get_schema('dpicontenttypes_cropings', TRUE);
-  db_create_table('dpicontenttypes_cropings', $schema);
+  if (!db_table_exists('dpicontenttypes_cropings')) {
+    $schema = drupal_get_schema('dpicontenttypes_cropings', TRUE);
+    db_create_table('dpicontenttypes_cropings', $schema);
+  }
+}
+
+/**
+ * Install the dpicontenttypes_external_files table
+ */
+function dpicontenttypes_update_7005() {
+  if (!db_table_exists('dpicontenttypes_external_files')) {
+    $schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
+    db_create_table('dpicontenttypes_external_files', $schema);
+  }
 }

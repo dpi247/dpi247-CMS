@@ -118,10 +118,10 @@ abstract class Dispatcher{
       $dom = new DomDocument();
       $dom->LoadXML($contents);
 
-      //checkfile
+      // Checkfile
       $importer = $this->getImporter();
       if ($importer->checkXml($dom)){
-        //process file
+        // Process file
         $this->processDom($dom);
       }
     }
@@ -132,19 +132,21 @@ abstract class Dispatcher{
    *
    * @param DOM $dom
    */
-  function processDom($dom){
+  function processDom($dom) {
     $importer = $this->getImporter();
-    if ($dom->hasChildNodes()){
-      //For each child of the dom
-      foreach ($dom->childNodes as $child){
-        if ($child->nodeName != '#text'){
+    if ($dom->hasChildNodes()) {
+      // For each child of the dom
+      foreach ($dom->childNodes as $child) {
+        if ($child->nodeName != '#text') {
           $explore_child = TRUE;
           $callback = $importer->getCallback($child);
           $method_name = 'build'.$callback;
-          //Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
+          // Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists($importer, $method_name)){
             $explore_child = $importer->$method_name($child);
-            break;
+            if (!$explore_child) {
+              break;
+            }
           }
 
           if ($explore_child){
@@ -162,14 +164,14 @@ abstract class Dispatcher{
    * @param Object $object
    * @param Object $object2
    */
-  function processChildren($dom, $object, $object2){
+  function processChildren($dom, $object, $object2) {
     $importer = $this->getImporter();
-    foreach ($dom->childNodes as $child){
+    foreach ($dom->childNodes as $child) {
       $name = strtolower($child->nodeName);
-      if ($name != '#text'){
+      if ($name != '#text') {
         $callback = $importer->getCallback($child);
         $method_name = 'build'.$callback;
-        if (method_exists($importer, $method_name)){
+        if (method_exists($importer, $method_name)) {
           $importer->$method_name($child, $object, $object2);
         }
       }
@@ -454,7 +456,7 @@ abstract class Dispatcher{
       $destination_folder = $this->getDoneFolder();
     }
 
-    //Move file to done/error repository
+    // Move file to done/error repository
     if ($file = @file_move($source['source'], $destination_folder.'/'.$source['source']->filename, FILE_EXISTS_RENAME)) {
       //set the file as permanent
       $file->status = 1;
@@ -463,7 +465,7 @@ abstract class Dispatcher{
       Logger::logError('importer', 2, 'filemove', t('The file !file can not be moved.', array('!file' => $source['source']->uri)));
     }
 
-    //Delete temp folder
+    // Delete temp folder
     if ($this->isZip()){
       $temp_folder = $this->getTempFolder().'/'.$source['source']->name;
       file_unmanaged_delete_recursive($temp_folder);
