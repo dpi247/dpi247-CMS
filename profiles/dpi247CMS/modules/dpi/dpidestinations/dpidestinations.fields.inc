@@ -176,7 +176,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     $destinations['rank'] = 'DNC';
   }
   $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
-  if(!isset($rankt_options[$destinations['rank']])) {
+  if(!isset($rank_options[$destinations['rank']])) {
     $destinations['rank'] = current($rank_options);
   }
 
@@ -230,11 +230,11 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           'method'=>'replace',
         ),
       );
-       
+
       $widget['rank'] = array(
         '#type' => 'select',
         '#options' => $rank_options,
-        // '#default_value' => $destinations['rank'],
+        '#default_value' => $destinations['rank'],
         '#title' => t('Rank'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The position of the article in the target'),
@@ -539,6 +539,7 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
+
   // Iterate over the form parents to find the element.
   $element = $form;
   foreach ($array_parents as $name) {
