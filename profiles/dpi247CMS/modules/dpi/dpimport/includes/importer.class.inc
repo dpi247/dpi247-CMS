@@ -288,29 +288,31 @@ abstract class Importer {
    *
    * @param String $entity_type
    */
-  protected function constructEntity($dom, $entity_type){
+  protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
 
     $entity = $this->createOrLoadEntity($dom);
-    if (!Logger::error()){
+    if (!Logger::error()) {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
 
       // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
-      if (method_exists($this, $attributes_method)){
+      if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
 
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
 
+      if (Logger::error()) {
+        return NULL;
+      }
+
       // Save entity
-      if (!Logger::error()){
+      if ($save) {
         $this->saveEntity($dom, $entity_type, $entity);
-      } else {
-        $entity = NULL;
       }
     }
 

@@ -60,4 +60,17 @@ abstract class FlowToNode extends PackageHelper {
 
     return $form;
   }
+
+  /**
+   * Determine the next callback function from the Dom element
+   *
+   * @param DOM $dom
+   *
+   * @return String $callback
+   */
+  public function getCallback($dom){
+    $callback = strtolower($dom->nodeName);
+    $callback = str_replace(':', '_', $callback); // Handle namespaces
+    return $callback;
+  }
 }

@@ -1,6 +1,15 @@
 <?php
 
 /**
+ * Call the getimagesize function with a cleaned URL
+ */
+function dpicommons_getimagesize_cleaned_url($url) {
+  // Url encode white spaces
+  $url = preg_replace('/\s/', '%20', $url);
+  return getimagesize($url);
+}
+
+/**
  * Check wheter or not an HTTP request is successfull :
  *   - Code 200
  *   - Not empty

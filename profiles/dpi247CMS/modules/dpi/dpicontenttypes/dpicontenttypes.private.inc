@@ -27,21 +27,24 @@ function _dpicontenttypes_create_or_update_file($file_uri, $path, $stream = 'pub
     $file_query->isNULL('def.requestor');
   }
   $db_existing_files = $file_query->execute();
+
   foreach ($db_existing_files as $existing_fid) {
     $fid = $existing_fid->fid;
     $existing_file = file_load($fid);
-    if ($replace) {
-      if (!file_delete($existing_file)) {
-        db_delete('file_managed')
+    if ($existing_file && is_object($existing_file)) {
+      if ($replace) {
+        if (!file_delete($existing_file)) {
+          db_delete('file_managed')
+            ->condition('fid', $fid)
+            ->execute();
+          //_field_file_cache(NULL, $existing_file); // Delete the file from the cache
+        }
+        db_delete('dpicontenttypes_external_files')
           ->condition('fid', $fid)
           ->execute();
-        //_field_file_cache(NULL, $existing_file); // Delete the file from the cache
+      } else {
+        return $existing_file;
       }
-      db_delete('dpicontenttypes_external_files')
-        ->condition('fid', $fid)
-        ->execute();
-    } else {
-      return $existing_file;
     }
   }
 

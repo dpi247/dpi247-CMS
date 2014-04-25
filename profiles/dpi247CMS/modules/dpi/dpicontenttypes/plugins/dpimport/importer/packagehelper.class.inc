@@ -103,6 +103,9 @@ abstract class PackageHelper extends Importer {
     $atom->type = 'image';
     if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
       $atom = $temp_atom;
+    } else {
+      $node_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $node_wrapper->field_external_reference->set($external_reference);
     }
     return $atom;
   }
@@ -178,8 +181,12 @@ abstract class PackageHelper extends Importer {
   /**
    * Get the default text format
    */
-  protected function getDefaultTextFormat(){
-    return filter_default_format();
+  protected function getDefaultTextFormat() {
+    static $default_format = '';
+    if (empty($default_format)) {
+      $default_format = filter_default_format();
+    }
+    return $default_format;
   }
 
   /**
@@ -290,5 +297,30 @@ abstract class PackageHelper extends Importer {
    */
   protected function setAudioObjectTypeAttributes($dom, $wrapper, $entity){
     $this->setObjectAttributes($dom, $wrapper, $entity);
+  }
+
+  /**
+   * Add an atom reference to a field, checking it's presence
+   */
+  protected function addAtomToFied($wrapper, $entity, $field_name, $atom, $options = array()) {
+    $array_atom = (array)$atom;
+
+    if (!isset($array_atom['sid']) || empty($array_atom['sid']) || !is_numeric($array_atom['sid'])) {
+      // This is a new atom, we don't have to check further
+      $wrapper->{$field_name}->set((array)$array_atom);
+      return;
+    }
+
+    $new_sid = $array_atom['sid'];
+    $current_field = $wrapper->{$field_name}->value($options);
+    if ($current_field && is_array($current_field)) {
+      foreach ($current_field as $delta => $current_atom) {
+        if (is_array($current_atom) && isset($current_atom['sid']) && $current_atom['sid'] === $new_sid) {
+          return;
+        }
+      }
+    }
+
+    $wrapper->{$field_name}->set($array_atom);
   }
 }

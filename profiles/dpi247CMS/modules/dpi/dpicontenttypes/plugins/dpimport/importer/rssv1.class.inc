@@ -88,7 +88,7 @@ class RSSV1 extends FlowToNode {
       //'skipDays',
     );
     foreach ($channel_elements as $element) {
-      if ($val = $this->check_if_element_exists($dom, $element)) {
+      if ($val = $this->checkIfElementExists($dom, $element)) {
         $this->channel[$element] = $val;
       }
     }
@@ -103,7 +103,7 @@ class RSSV1 extends FlowToNode {
       );
       $this->channel['image'] = array();
       foreach ($channel_image_elements as $element) {
-        if ($val = $this->check_if_element_exists($channel_image, $element)) {
+        if ($val = $this->checkIfElementExists($channel_image, $element)) {
           $this->channel['image'][$element] = $val;
         }
       }
@@ -153,10 +153,10 @@ class RSSV1 extends FlowToNode {
    * @return Object $node
    */
   protected function createOrLoadEntityitem($dom) {
-    if ($guid = $this->check_if_element_exists($dom, 'guid')) {
+    if ($guid = $this->checkIfElementExists($dom, 'guid')) {
       $extref = $guid;
     } else {
-      $extref = $this->check_if_element_exists($dom, 'link');
+      $extref = $this->checkIfElementExists($dom, 'link');
     }
     $extref = md5($extref);
     $prefix = 'flow2node_'.$this->name.'_';
@@ -175,7 +175,24 @@ class RSSV1 extends FlowToNode {
    * @return Object $node
    */
   protected function createOrLoadEntityenclosure($dom) {
-    if ($url = $this->check_if_attribute_exists($dom, 'url')) {
+    if ($url = $this->checkIfAttributeExists($dom, 'url')) {
+      $external_reference = 'flow2node_'.$this->name.'_'.md5($url);
+      return $this->_createOrLoadEntityPhotoObjectType($dom, $external_reference);
+    } else {
+      // @todo : Add error if no url attribute
+      return FALSE;
+    }
+  }
+
+  /**
+   * Create or load a photo object from a media:content
+   *
+   * @param DOM $dom
+   *
+   * @return Object $node
+   */
+  protected function createOrLoadEntitymedia_content($dom) {
+    if ($url = $this->checkIfAttributeExists($dom, 'url')) {
       $external_reference = 'flow2node_'.$this->name.'_'.md5($url);
       return $this->_createOrLoadEntityPhotoObjectType($dom, $external_reference);
     } else {
@@ -276,32 +293,100 @@ class RSSV1 extends FlowToNode {
   }
 
   public function buildenclosure($dom, $wrapper, $entity) {
-    $mime_type = $this->check_if_attribute_exists($dom, 'type');
+    $mime_type = $this->checkIfAttributeExists($dom, 'type');
     if (strstr($mime_type, 'image')) {
       Logger::logExecution('photobojecttype', TRUE);
-      $atom = $this->constructEntity($dom, 'scald_atom');
       Logger::setCurrentToPreviousExecution();
-      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      if ($atom = $this->constructEntity($dom, 'scald_atom')) {
+        $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
 
-      $format = $this->getDefaultTextFormat();
-      $atom_wrapper->title->set($this->filterHtmlTags($wrapper->title->value()));
-      $atom_wrapper->field_displaytitle->set(array('value' => $wrapper->field_displaytitle->value(), 'format' => $format));
+        $atom_wrapper->title->set($wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($wrapper->field_displaytitle->value());
 
-      $uri = $this->check_if_attribute_exists($dom, 'url');
-      if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name)) {
-        $atom->base_entity = $file;
-        $atom_wrapper->scald_thumbnail->set((array)$file);
-        $atom->base_id = $file->fid;
-        scald_atom_save($atom);
+        $uri = $this->checkIfAttributeExists($dom, 'url');
+        if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name)) {
+          $atom->base_entity = $file;
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->base_id = $file->fid;
+          scald_atom_save($atom);
 
-        $wrapper->field_embededobjects->set((array)$atom);
+          $this->addAtomToFied($wrapper, $entity, 'field_embededobjects', $atom, array('identifier' => TRUE));
+        }
       }
     } else {
       // @todo : Handle other types
     }
   }
 
-  private function check_if_element_exists($dom_item, $name, $namespace = 'none', $default = '') {
+  public function buildmedia_content($dom, $wrapper, $entity) {
+    if ($this->checkIsImage($dom)) {
+      Logger::logExecution('photobojecttype', TRUE);
+      Logger::setCurrentToPreviousExecution();
+      if ($atom = $this->constructEntity($dom, 'scald_atom', FALSE)) {
+        $media_children = array();
+        foreach ($dom->childNodes as $child) {
+          $media_children[strtolower($child->nodeName)] = $child;
+        }
+        $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+
+        if (!isset($media_children['media:title']) || empty($media_children['media:title']->nodeValue)) {
+          $atom_wrapper->title->set($wrapper->title->value());
+          $atom_wrapper->field_displaytitle->set($wrapper->field_displaytitle->value());
+        }
+
+        $uri = $this->checkIfAttributeExists($dom, 'url');
+        if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name)) {
+          $atom->base_entity = $file;
+          $atom->base_id = $file->fid;
+          $atom->file_source = $file->uri;
+
+          if (!isset($media_children['media:thumbnail']) /*|| empty($media_children['media:thumbnail']->nodeValue)*/) {
+            dsm('coco');
+            $atom_wrapper->scald_thumbnail->set((array)$file);
+            $atom->thumbnail_source = $file->uri;
+          }
+
+          // Save entity
+          if (!Logger::error()) {
+            $this->saveEntity($dom, 'scald_atom', $atom);
+          }
+
+          $this->addAtomToFied($wrapper, $entity, 'field_embededobjects', $atom, array('identifier' => TRUE));
+        }
+      }
+    } else {
+      // @todo : Handle other types
+    }
+  }
+
+  public function buildmedia_title($dom, $wrapper, $entity) {
+    if ($this->entity_is_atom($wrapper, $entity)) {
+      $value = $dom->nodeValue;
+      $format = $this->getDefaultTextFormat();
+      $wrapper->title->set($this->filterHtmlTags($value));
+      $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+    }
+  }
+
+  public function buildmedia_description($dom, $wrapper, $entity) {
+    if ($this->entity_is_atom($wrapper, $entity)) {
+      $value = $dom->nodeValue;
+      $format = $this->getDefaultTextFormat();
+      $wrapper->field_caption->set(array('value' => $value, 'format' => $format));
+    }
+  }
+
+  public function buildmedia_thumbnail($dom, $wrapper, $entity) {
+    if ($this->entity_is_atom($wrapper, $entity)) {
+      $uri = $this->checkIfAttributeExists($dom, 'url');
+      if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name.'-thumb')) {
+        $wrapper->scald_thumbnail->set((array)$file);
+        $entity->thumbnail_source = $file->uri;
+      }
+    }
+  }
+
+  private function checkIfElementExists($dom_item, $name, $namespace = 'none', $default = '') {
     $return = $default;
     if (is_object($dom_item)) {
       if ($namespace != 'none') {
@@ -314,7 +399,7 @@ class RSSV1 extends FlowToNode {
     return $return;
   }
 
-  private function check_if_attribute_exists($dom_item, $name, $namespace = 'none', $default = '') {
+  private function checkIfAttributeExists($dom_item, $name, $namespace = 'none', $default = '') {
     $return = $default;
     if (is_object($dom_item)) {
       if ($namespace != 'none' && $dom_item->hasAttributeNS($namespace, $name)) {
@@ -354,5 +439,26 @@ class RSSV1 extends FlowToNode {
         'alt' => $img_alt,
       );
     }
+  }
+
+  private function checkIsImage($media_content) {
+    if ($media_content->getAttribute('type') && stristr($media_content->getAttribute('type'), 'image')) {
+      return TRUE;
+    } elseif ($media_content->getAttribute('medium') && stristr($media_content->getAttribute('medium'), 'image')) {
+      return TRUE;
+    } elseif ($media_url = $media_content->getAttribute('url')) {
+      if (stristr($media_url,'.jpg') || stristr($media_url,'.jpeg') || stristr($media_url,'.gif') || stristr($media_url,'.png')) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  private function entity_is_atom($wrapper, $entity) {
+    if ($wrapper->type() == 'scald_atom') {
+      return TRUE;
+    }
+    return FALSE;
   }
 }
