@@ -35,13 +35,6 @@ class RSSV1 extends FlowToNode {
       '#type'             => 'checkbox',
       '#default_value'    => isset($values['channel_img']) ? $values['channel_img'] : 1,
     );
-    /*
-     $form['get_distant_img'] = array (
-       '#type'             => 'checkbox',
-       '#default_value'    => $values['get_distant_img'],
-       '#title'            => t('Copy RSS feeds images to locale folder.'),
-     );
-    */
 
     $form['importer_settings']['filter_body'] = array(
       '#title'            => t('Filter all tags from the text body'),
@@ -65,49 +58,7 @@ class RSSV1 extends FlowToNode {
   public function buildchannel($dom) {
     Logger::logExecution('channel', TRUE);
 
-    // Save every channel elements in a channel attribute
-    $channel_elements = array(
-      'title',
-      'link',
-      'description',
-      'language',
-      'copyright',
-      'managingEditor',
-      'webMaster',
-      'pubDate',
-      'lastBuildDate',
-      'category',
-      'generator',
-      'docs',
-      //'cloud',
-      'ttl',
-      //'image',
-      'rating',
-      'textInput',
-      //'skipHours',
-      //'skipDays',
-    );
-    foreach ($channel_elements as $element) {
-      if ($val = $this->checkIfElementExists($dom, $element)) {
-        $this->channel[$element] = $val;
-      }
-    }
-    if ($channel_image = $dom->getElementsByTagName('image')->item(0)) {
-      $channel_image_elements = array(
-        'url',
-        'title',
-        'link',
-        'width',
-        'height',
-        'description',
-      );
-      $this->channel['image'] = array();
-      foreach ($channel_image_elements as $element) {
-        if ($val = $this->checkIfElementExists($channel_image, $element)) {
-          $this->channel['image'][$element] = $val;
-        }
-      }
-    }
+    $this->setChannelProperties($dom);
 
     $count = 0;
     // Process the items
@@ -136,6 +87,8 @@ class RSSV1 extends FlowToNode {
     }
 
     $package = $this->constructPackage($dom);
+
+    $this->setImageFromDescription($dom, $package);
 
     if (!Logger::error()){
       $this->savePackage($dom, $package);
@@ -412,12 +365,101 @@ class RSSV1 extends FlowToNode {
     return $return;
   }
 
+  private function setChannelProperties($dom) {
+    // Save every channel elements in a channel attribute
+    $channel_elements = array(
+      'title',
+      'link',
+      'description',
+      'language',
+      'copyright',
+      'managingEditor',
+      'webMaster',
+      'pubDate',
+      'lastBuildDate',
+      'category',
+      'generator',
+      'docs',
+      //'cloud',
+      'ttl',
+      //'image',
+      'rating',
+      'textInput',
+      //'skipHours',
+      //'skipDays',
+    );
+    foreach ($channel_elements as $element) {
+      if ($val = $this->checkIfElementExists($dom, $element)) {
+        $this->channel[$element] = $val;
+      }
+    }
+    if ($channel_image = $dom->getElementsByTagName('image')->item(0)) {
+      $channel_image_elements = array(
+        'url',
+        'title',
+        'link',
+        'width',
+        'height',
+        'description',
+      );
+      $this->channel['image'] = array();
+      foreach ($channel_image_elements as $element) {
+        if ($val = $this->checkIfElementExists($channel_image, $element)) {
+          $this->channel['image'][$element] = $val;
+        }
+      }
+    }
+  }
+
+  private function setImageFromDescription($dom, $package) {
+    $no_photo = TRUE;
+    $package_wrapper = entity_metadata_wrapper('node', $package);
+    $current_embeds = $package_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+    if ($current_embeds && !empty($current_embeds)) {
+      foreach ($current_embeds as $embed) {
+        if ($embed['type'] == 'image'){
+          $no_photo = FALSE;
+          break;
+        }
+      }
+    }
+
+    // Get embeded images in the text body
+    if ($this->importer_settings['embed_img'] && $no_photo) {
+      $extracted_image = $this->extractImgFromDescription($dom->getElementsByTagName('description')->item(0)->nodeValue);
+      $url = $extracted_image['url'];
+      $external_reference = 'flow2node_'.$this->name.'_'.md5($url);
+
+      $atom = $this->_createOrLoadEntityPhotoObjectType($dom, $external_reference);
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+
+      if (!empty($extracted_image['alt'])) {
+        $format = $this->getDefaultTextFormat();
+        $atom_wrapper->title->set($this->filterHtmlTags($extracted_image['alt']));
+        $atom_wrapper->field_displaytitle->set(array('value' => $extracted_image['alt'], 'format' => $format));
+      } else {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+      }
+
+      if ($file = _dpicontenttypes_create_or_update_file($url, 'flowtonode/'.$this->name)) {
+        $atom->base_entity = $file;
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->base_id = $file->fid;
+        scald_atom_save($atom);
+
+        $this->addAtomToFied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+      }
+    }
+  }
+
   private function extractImgFromDescription($description) {
     $substr = strstr($description, '<img');
     $substr = $substr ? $substr : strstr($description, rawurlencode('<img'));
     $tmp_substr = $substr ? strstr($substr, '>', TRUE) : FALSE;
     $substr = $tmp_substr ? $tmp_substr : ($substr ? strstr($substr, rawurlencode('>'), TRUE) : FALSE);
-    
+
+    $extracted_image = FALSE;
     if ($substr) {
       $src_substr = strstr($substr, 'src=');
       $src_delimiter = substr($src_substr, 4, 1);
@@ -434,11 +476,12 @@ class RSSV1 extends FlowToNode {
         $img_alt = '';
       }
 
-      $this->description_image = array(
+      $extracted_image = array(
         'url' => $img_url,
         'alt' => $img_alt,
       );
     }
+    return $extracted_image;
   }
 
   private function checkIsImage($media_content) {
