@@ -45,6 +45,12 @@ class RSSV1 extends FlowToNode {
     return $form;
   }
 
+  /**
+   * Intercept dom at element <rss>
+   * Get the media namespace
+   *
+   * @param DOM $dom
+   */
   public function buildrss($dom) {
     Logger::logExecution('rss', TRUE);
     if ($dom->hasAttributeNS('http://www.w3.org/2000/xmlns/', 'media')) {
@@ -55,6 +61,12 @@ class RSSV1 extends FlowToNode {
     return TRUE;
   }
 
+  /**
+   * Intercept dom at element <channel>
+   * Get the channel properties and process the items
+   *
+   * @param DOM $dom
+   */
   public function buildchannel($dom) {
     Logger::logExecution('channel', TRUE);
 
@@ -76,6 +88,7 @@ class RSSV1 extends FlowToNode {
 
   /**
    * Intercept dom at element <item>
+   * Build a package
    *
    * @param DOM $dom
    */
@@ -154,6 +167,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set the package destination from the settings of the importer
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   protected function setPackageAttributes($dom, $wrapper, $entity) {
     $term = array();
     $result = array();
@@ -167,6 +187,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set fields title and displaytitle
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildtitle($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
@@ -174,11 +201,25 @@ class RSSV1 extends FlowToNode {
     $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
   }
 
+  /**
+   * Set field externalurl
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildlink($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     $wrapper->field_externalurl->set(array('url' => $value));
   }
 
+  /**
+   * Set field textbody
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function builddescription($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     if ($this->importer_settings['filter_body']) {
@@ -188,6 +229,13 @@ class RSSV1 extends FlowToNode {
     $wrapper->field_textbody->set(array('value' => $value, 'format' => $format));
   }
 
+  /**
+   * Set field authors
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildauthor($dom, $wrapper, $entity) {
     $dom_author_name = trim($dom->nodeValue);
     if (!empty($dom_author_name)) {
@@ -209,6 +257,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set field iptc
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildcategory($dom, $wrapper, $entity) {
     $dom_category_name = trim($dom->nodeValue);
     if (!empty($dom_category_name)) {
@@ -230,6 +285,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set fields editorialpublicationdate and editorialupdatedate
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildpubDate($dom, $wrapper, $entity) {
     $dom_pub_date = trim($dom->nodeValue);
     $pub_date = empty($dom_pub_date) ? time() : strtotime($dom_pub_date);
@@ -239,12 +301,26 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set field source
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildsource($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     $format = $this->getDefaultTextFormat();
     $wrapper->field_source->set(array('value' => $value, 'format' => $format));
   }
 
+  /**
+   * Build an atom from an enclosure and set the field embededobjects with it
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildenclosure($dom, $wrapper, $entity) {
     $mime_type = $this->checkIfAttributeExists($dom, 'type');
     if (strstr($mime_type, 'image')) {
@@ -271,6 +347,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Build an atom from a media:content and set the field embededobjects with it
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildmedia_content($dom, $wrapper, $entity) {
     if ($this->checkIsImage($dom)) {
       Logger::logExecution('photobojecttype', TRUE);
@@ -293,8 +376,7 @@ class RSSV1 extends FlowToNode {
           $atom->base_id = $file->fid;
           $atom->file_source = $file->uri;
 
-          if (!isset($media_children['media:thumbnail']) /*|| empty($media_children['media:thumbnail']->nodeValue)*/) {
-            dsm('coco');
+          if (!isset($media_children['media:thumbnail'])) {
             $atom_wrapper->scald_thumbnail->set((array)$file);
             $atom->thumbnail_source = $file->uri;
           }
@@ -312,6 +394,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set fields title and displaytitle of an atom
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildmedia_title($dom, $wrapper, $entity) {
     if ($this->entity_is_atom($wrapper, $entity)) {
       $value = $dom->nodeValue;
@@ -321,6 +410,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Set field caption of an atom
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildmedia_description($dom, $wrapper, $entity) {
     if ($this->entity_is_atom($wrapper, $entity)) {
       $value = $dom->nodeValue;
@@ -329,6 +425,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Create a file and set thumbnail of an atom
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
   public function buildmedia_thumbnail($dom, $wrapper, $entity) {
     if ($this->entity_is_atom($wrapper, $entity)) {
       $uri = $this->checkIfAttributeExists($dom, 'url');
@@ -339,6 +442,16 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Check the presence of an element as the child of a given DOM Node and return its value
+   *
+   * @param DOM Node $dom_item
+   * @param string $name
+   * @param string $namespace
+   * @param string $default
+   *
+   * @return string
+   */
   private function checkIfElementExists($dom_item, $name, $namespace = 'none', $default = '') {
     $return = $default;
     if (is_object($dom_item)) {
@@ -352,6 +465,16 @@ class RSSV1 extends FlowToNode {
     return $return;
   }
 
+  /**
+   * Check the presence of an attribute in a given DOM Node and return its value
+   *
+   * @param DOM Node $dom_item
+   * @param string $name
+   * @param string $namespace
+   * @param string $default
+   *
+   * @return string
+   */
   private function checkIfAttributeExists($dom_item, $name, $namespace = 'none', $default = '') {
     $return = $default;
     if (is_object($dom_item)) {
@@ -365,6 +488,11 @@ class RSSV1 extends FlowToNode {
     return $return;
   }
 
+  /**
+   * Get all properties of a channel DOM Node
+   *
+   * @param DOM Node $dom
+   */
   private function setChannelProperties($dom) {
     // Save every channel elements in a channel attribute
     $channel_elements = array(
@@ -411,6 +539,12 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Build an atom from an image tag embeded in a text
+   *
+   * @param DOM Node $dom
+   * @param Object $package
+   */
   private function setImageFromDescription($dom, $package) {
     $no_photo = TRUE;
     $package_wrapper = entity_metadata_wrapper('node', $package);
@@ -453,6 +587,13 @@ class RSSV1 extends FlowToNode {
     }
   }
 
+  /**
+   * Extract an URL and a Title/Description from an image tag embeded in a text
+   *
+   * @param string $description
+   *
+   * @return array|boolean
+   */
   private function extractImgFromDescription($description) {
     $substr = strstr($description, '<img');
     $substr = $substr ? $substr : strstr($description, rawurlencode('<img'));
@@ -484,6 +625,13 @@ class RSSV1 extends FlowToNode {
     return $extracted_image;
   }
 
+  /**
+   * Check wheter a media:content element is an image or not
+   *
+   * @param DOM Node $media_content
+   *
+   * @return boolean
+   */
   private function checkIsImage($media_content) {
     if ($media_content->getAttribute('type') && stristr($media_content->getAttribute('type'), 'image')) {
       return TRUE;
@@ -498,6 +646,14 @@ class RSSV1 extends FlowToNode {
     return FALSE;
   }
 
+  /**
+   * Check if the given entity is an atom or not
+   *
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   *
+   * @return boolean
+   */
   private function entity_is_atom($wrapper, $entity) {
     if ($wrapper->type() == 'scald_atom') {
       return TRUE;
