@@ -8,6 +8,8 @@ abstract class Dispatcher{
    */
 
   protected $zip;
+  protected $cron;
+  protected $cron_frequency;
   protected $temp_folder;
   protected $temp_subdir;
   protected $done_folder;
@@ -24,7 +26,9 @@ abstract class Dispatcher{
    */
   public function Dispatcher($importer, $settings) {
     $this->importer = $importer;
-    $this->zip = isset($settings['zip']) ? $settings['zip'] : NULL;
+    $this->zip = isset($settings['zip']) ? $settings['zip'] : 0;
+    $this->cron = isset($settings['cron']) ? $settings['cron'] : 0;
+    $this->cron_frequency = isset($settings['cron_frequency']) ? $settings['cron_frequency'] : 10;
     $this->temp_folder = isset($settings['temp_folder']) ? $settings['temp_folder'] : NULL;
     $this->done_folder = isset($settings['temp_folder']) ? $settings['done_folder'] : NULL;
     $this->error_folder = isset($settings['temp_folder']) ? $settings['error_folder'] : NULL;
@@ -45,6 +49,15 @@ abstract class Dispatcher{
   */
   public function isZip(){
     return $this->zip;
+  }
+
+  /**
+   * Return the cron variable of the class
+   *
+   * @return boolean
+   */
+  public function isCron(){
+    return $this->cron;
   }
 
   /**
@@ -349,12 +362,28 @@ abstract class Dispatcher{
   public function getSettingsForm(&$form_state, $values){
     $form = array();
     $form['dispatcher']['zip'] = array(
-      '#type' => 'select',
+      '#type' => 'checkbox',
       '#title' => t('Are the data zipped?'),
       '#description' => t('Indicates if the data to import are zipped'),
-      '#options' => array(0 => 'No', 1 => 'Yes'),
-      '#default_value' => isset($values['zip']) ? $values['zip'] : NULL,
+      '#default_value' => isset($values['zip']) ? $values['zip'] : 0,
       '#required' => TRUE,
+    );
+    $form['dispatcher']['cron'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Are the data imported by a CRON job?'),
+      '#default_value' => isset($values['cron']) ? $values['cron'] : 0,
+      '#required' => TRUE,
+    );
+    $form['dispatcher']['cron_frequency'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cron frequency (minutes)'),
+      '#description' => t('Time between two cron runs'),
+      '#default_value' => isset($values['cron_frequency']) ? $values['cron_frequency'] : 10,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="cron"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['dispatcher']['temp_folder'] = array(
       '#type' => 'textfield',
@@ -421,6 +450,8 @@ abstract class Dispatcher{
   public function submitSettingsForm($values){
     $dispatcher_settings = array(
       'zip' => $values['zip'],
+      'cron' => $values['cron'],
+      'cron_frequency' => $values['cron_frequency'],
       'temp_folder' => $values['temp_folder'],
       'done_folder' => $values['done_folder'],
       'error_folder' => $values['error_folder'],
@@ -437,6 +468,8 @@ abstract class Dispatcher{
   public function initializeForm(){
     return array(
       'zip' => $this->isZip(),
+      'cron' => $this->isCron(),
+      'cron_frequency' => $this->cron_frequency,
       'temp_folder' => $this->temp_folder,
       'done_folder' => $this->done_folder,
       'error_folder' => $this->error_folder,

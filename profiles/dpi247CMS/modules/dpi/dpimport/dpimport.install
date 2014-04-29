@@ -1,45 +1,53 @@
-<?php 
+<?php
+
 /**
- * 
+ * Implementation of hook_install
+ * Add an importer user, role and permissions
+ */
+function dpimport_install() {
+  dpimport_create_importer_user();
+}
+
+/**
  * Implementation of hook_schema
  */
 function dpimport_schema() {
   $schema['dpimport_importer'] = array(
-    'description' => 'The base table for DPI Importer.',
+    'description' => 'The base table for DPI Importer',
     'fields' => array(
       'iid' => array(
-        'description' => 'The primary identifier for a DPI properties.',
+        'description' => 'The primary identifier for a DPI properties',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-  	  'type' => array(
-        'description' => 'The type of the importer.',
+      'type' => array(
+        'description' => 'The type of the importer',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
       'version' => array(
-        'description' => 'The version of the importer.',
+        'description' => 'The version of the importer',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'name' => array(
-        'description' => 'The unique name of the instance.',
+        'description' => 'The unique name of the instance',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
       ),
       'description' => array(
-        'description' => 'The description of the Importer.',
+        'description' => 'The description of the Importer',
         'type' => 'text',
         'size' => 'medium',
         'not null' => FALSE,
       ),
       'dispatcher' => array(
-        'description' => 'The dispatcher of this import.',
+        'description' => 'The dispatcher of this import',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -58,12 +66,73 @@ function dpimport_schema() {
         'serialize' => TRUE,
         'object default' => array(),
       ),
+      'last_run' => array(
+        'description' => 'Last import run',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'name' => array('name'),
     ),
     'primary key' => array('iid'),
   );
-  
+
   return $schema;
+}
+
+/**
+ * Add an importer user, role and permissions
+ */
+function dpimport_create_importer_user() {
+  $role = new stdClass();
+  $role->rid = 0;
+  $role->name = 'Importer';
+  $role->weight = 2;
+  user_role_save($role);
+  $rid = $role->rid;
+
+  $permissions = array(
+    'fetch any atom',
+    'view any atom',
+  );
+  user_role_grant_permissions($rid, $permissions);
+
+  $account = new stdClass();
+  $account->uid = 0;
+  $account->roles = array($rid => TRUE, 2 => TRUE);
+  $account->name = 'Importer';
+  global $base_url;
+  $parsed_url = parse_url($base_url);
+  $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'].'://' : '';
+  $stripped_url = str_replace($scheme, '', $base_url);
+  $account->mail = 'importer@'.$stripped_url;
+  require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+  $account->pass = user_hash_password(user_password());
+  $account->status = 1;
+  $account->notify = 0;
+  user_save($account);
+
+  if (function_exists('dpi_variable_set')) {
+    dpi_variable_set('dpimport_importer_user', $account->uid);
+  } else {
+    variable_set('dpimport_importer_user', $account->uid);
+  }
+}
+
+/**
+ * Add a last_run column to the dpimport_importer table
+ */
+function dpimport_update_7000() {
+  $schema = drupal_get_schema('dpimport_importer', TRUE);
+  db_add_field('dpimport_importer', 'last_run', $schema['fields']['last_run']);
+}
+
+/**
+ * Add an importer user, role and permissions
+ */
+function dpimport_update_7001() {
+  dpimport_create_importer_user();
 }

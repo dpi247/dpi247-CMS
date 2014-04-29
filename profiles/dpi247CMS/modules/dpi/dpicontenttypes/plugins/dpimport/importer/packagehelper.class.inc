@@ -321,6 +321,7 @@ abstract class PackageHelper extends Importer {
       }
     }
 
+    // @todo : Add try catch to avoid 'Invalid data value given. Be sure it matches the required data type and format.'
     $wrapper->{$field_name}->set($array_atom);
   }
 }

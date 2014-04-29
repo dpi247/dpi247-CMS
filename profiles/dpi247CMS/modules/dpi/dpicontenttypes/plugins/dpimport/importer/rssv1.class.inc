@@ -103,8 +103,10 @@ class RSSV1 extends FlowToNode {
 
     $this->setImageFromDescription($dom, $package);
 
-    if (!Logger::error()){
-      $this->savePackage($dom, $package);
+    if (!Logger::error()) {
+      global $user;
+      print_r($user);
+			$this->savePackage($dom, $package);
     }
 
     // Indicates that the dispatcher must not process the children
