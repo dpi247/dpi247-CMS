@@ -103,9 +103,9 @@ class RSSV1 extends FlowToNode {
 
     $this->setImageFromDescription($dom, $package);
 
+    $this->setImageFromChannel($dom, $package);
+
     if (!Logger::error()) {
-      global $user;
-      print_r($user);
 			$this->savePackage($dom, $package);
     }
 
@@ -548,21 +548,11 @@ class RSSV1 extends FlowToNode {
    * @param Object $package
    */
   private function setImageFromDescription($dom, $package) {
-    $no_photo = TRUE;
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    $current_embeds = $package_wrapper->field_embededobjects->value(array('identifier' => TRUE));
-    if ($current_embeds && !empty($current_embeds)) {
-      foreach ($current_embeds as $embed) {
-        if ($embed['type'] == 'image'){
-          $no_photo = FALSE;
-          break;
-        }
-      }
-    }
+    $no_photo = $this->checkPackageHasImage($package_wrapper);
 
     // Get embeded images in the text body
-    if ($this->importer_settings['embed_img'] && $no_photo) {
-      $extracted_image = $this->extractImgFromDescription($dom->getElementsByTagName('description')->item(0)->nodeValue);
+    if ($this->importer_settings['channel_img'] && $no_photo) {
       $url = $extracted_image['url'];
       $external_reference = 'flow2node_'.$this->name.'_'.md5($url);
 
@@ -573,6 +563,44 @@ class RSSV1 extends FlowToNode {
         $format = $this->getDefaultTextFormat();
         $atom_wrapper->title->set($this->filterHtmlTags($extracted_image['alt']));
         $atom_wrapper->field_displaytitle->set(array('value' => $extracted_image['alt'], 'format' => $format));
+      } else {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+      }
+
+      if ($file = _dpicontenttypes_create_or_update_file($url, 'flowtonode/'.$this->name)) {
+        $atom->base_entity = $file;
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->base_id = $file->fid;
+        scald_atom_save($atom);
+
+        $this->addAtomToFied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+      }
+    }
+  }
+
+  /**
+   * Build an atom from a default channel image
+   *
+   * @param DOM Node $dom
+   * @param Object $package
+   */
+  private function setImageFromChannel($dom, $package) {
+    $package_wrapper = entity_metadata_wrapper('node', $package);
+    $no_photo = $this->checkPackageHasImage($package_wrapper);
+
+    if ($this->importer_settings['embed_img'] && !empty($this->channel['image']) && $no_photo) {
+      $channel_image = $this->channel['image'];
+      $url = $channel_image['url'];
+      $external_reference = 'flow2node_'.$this->name.'_'.md5($url);
+
+      $atom = $this->_createOrLoadEntityPhotoObjectType($dom, $external_reference);
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+
+      if (isset($channel_image['title']) && !empty($channel_image['title'])) {
+        $format = $this->getDefaultTextFormat();
+        $atom_wrapper->title->set($this->filterHtmlTags($channel_image['title']));
+        $atom_wrapper->field_displaytitle->set(array('value' => $channel_image['title'], 'format' => $format));
       } else {
         $atom_wrapper->title->set($package_wrapper->title->value());
         $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
@@ -646,6 +674,27 @@ class RSSV1 extends FlowToNode {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Check wheter a package contains images or not
+   *
+   * @param EntityDrupalWrapper $package_wrapper
+   *
+   * @return boolean
+   */
+  private function checkPackageHasImage($package_wrapper) {
+    $no_photo = TRUE;
+    $current_embeds = $package_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+    if ($current_embeds && !empty($current_embeds)) {
+      foreach ($current_embeds as $embed) {
+        if ($embed['type'] == 'image'){
+          $no_photo = FALSE;
+          break;
+        }
+      }
+    }
+    return $no_photo;
   }
 
   /**
