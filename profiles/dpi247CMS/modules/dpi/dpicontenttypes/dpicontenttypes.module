@@ -13,6 +13,15 @@ include_once 'dpicontenttypes.features.inc';
 function dpicontenttypes_menu(){
   $items = array();
 
+  $items['admin/dpi247/external-files'] = array(
+    'title' => 'External files management',
+    'description' => 'This concerns files fetched from external services, like RSS feeds',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicontenttypes_form_page_external_files_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/dpicontenttypes.pages.admin.inc',
+  );
+
   $dpiproperties_uri = 'dpiproperties/%dpiproperties';
   $dpiproperties_uri_argument_position = 1;
 
