@@ -335,7 +335,7 @@ class RSSV1 extends FlowToNode {
         $atom_wrapper->field_displaytitle->set($wrapper->field_displaytitle->value());
 
         $uri = $this->checkIfAttributeExists($dom, 'url');
-        if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name)) {
+        if ($file = dpicontenttypes_api_create_or_update_file($uri, 'flowtonode/'.$this->name, 'public', $this->name, TRUE, FALSE)) {
           $atom->base_entity = $file;
           $atom_wrapper->scald_thumbnail->set((array)$file);
           $atom->base_id = $file->fid;
@@ -373,7 +373,7 @@ class RSSV1 extends FlowToNode {
         }
 
         $uri = $this->checkIfAttributeExists($dom, 'url');
-        if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name)) {
+        if ($file = dpicontenttypes_api_create_or_update_file($uri, 'flowtonode/'.$this->name, 'public', $this->name, TRUE, FALSE)) {
           $atom->base_entity = $file;
           $atom->base_id = $file->fid;
           $atom->file_source = $file->uri;
@@ -437,7 +437,7 @@ class RSSV1 extends FlowToNode {
   public function buildmedia_thumbnail($dom, $wrapper, $entity) {
     if ($this->entity_is_atom($wrapper, $entity)) {
       $uri = $this->checkIfAttributeExists($dom, 'url');
-      if ($file = _dpicontenttypes_create_or_update_file($uri, 'flowtonode/'.$this->name.'-thumb')) {
+      if ($file = dpicontenttypes_api_create_or_update_file($uri, 'flowtonode/'.$this->name.'-thumb', 'public', $this->name, TRUE, FALSE)) {
         $wrapper->scald_thumbnail->set((array)$file);
         $entity->thumbnail_source = $file->uri;
       }
@@ -522,7 +522,7 @@ class RSSV1 extends FlowToNode {
         $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
       }
 
-      if ($file = _dpicontenttypes_create_or_update_file($url, 'flowtonode/'.$this->name)) {
+      if ($file = dpicontenttypes_api_create_or_update_file($url, 'flowtonode/'.$this->name, 'public', $this->name, TRUE, FALSE)) {
         $atom->base_entity = $file;
         $atom_wrapper->scald_thumbnail->set((array)$file);
         $atom->base_id = $file->fid;
@@ -560,7 +560,7 @@ class RSSV1 extends FlowToNode {
         $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
       }
 
-      if ($file = _dpicontenttypes_create_or_update_file($url, 'flowtonode/'.$this->name)) {
+      if ($file = dpicontenttypes_api_create_or_update_file($url, 'flowtonode/'.$this->name, 'public', $this->name, TRUE, FALSE)) {
         $atom->base_entity = $file;
         $atom_wrapper->scald_thumbnail->set((array)$file);
         $atom->base_id = $file->fid;

@@ -1,6 +1,74 @@
 <?php
 
 /**
+ * Save or update a file in the Drupal file table and his associate file in the directory structure
+ * We also use a third level with the day of the month
+ *
+ * @param string $file_uri
+ *   A string containing the file uri.
+ * @param string $path
+ *   Path relatively to the stream wrapper
+ * @param string $stream
+ *   The stream wrapper
+ * @param string $requestor
+ *   Allows to divide files in groups
+ * @param boolean $replace
+ *   If the given URI already exists, replace current with new one or not
+ * @param boolean $cron_delete
+ *   If TRUE, the file will be deleted by a cron task, after a given time (7 days by default)
+ *
+ * @return Object|boolean
+ *   The created/updated file if no problem occured, FALSE otherwise
+ */
+function dpicontenttypes_api_create_or_update_file($file_uri, $path, $stream = 'public', $requestor = NULL, $replace = TRUE, $cron_delete = TRUE) {
+  $new_file_path = $stream.'://'.$path.'/'.date('Ymd', time());
+
+  $file_query = db_select('dpicontenttypes_external_files', 'def')
+    ->fields('def', array('fid'))
+    ->condition('def.uri', $file_uri);
+  if ($requestor) {
+    $file_query->condition('def.requestor', $requestor);
+  } else {
+    $file_query->isNULL('def.requestor');
+  }
+  $db_existing_files = $file_query->execute();
+
+  foreach ($db_existing_files as $existing_fid) {
+    $fid = $existing_fid->fid;
+    $existing_file = file_load($fid);
+    if ($existing_file && is_object($existing_file)) {
+      if ($replace) {
+        if (!file_delete($existing_file)) {
+          db_delete('file_managed')
+            ->condition('fid', $fid)
+            ->execute();
+          //_field_file_cache(NULL, $existing_file); // Delete the file from the cache
+        }
+        db_delete('dpicontenttypes_external_files')
+          ->condition('fid', $fid)
+          ->execute();
+      } else {
+        return $existing_file;
+      }
+    }
+  }
+
+  if ($new_file = _dpicontenttypes_create_file_from_uri($file_uri, $new_file_path)) {
+    $new_file_obj = new stdClass();
+    $new_file_obj->fid = $new_file->fid;
+    $new_file_obj->uri = $file_uri;
+    if ($requestor) {
+      $new_file_obj->requestor = $requestor;
+    }
+    $new_file_obj->cron_delete = $cron_delete;
+    drupal_write_record('dpicontenttypes_external_files', $new_file_obj);
+    return $new_file;
+  }
+
+  return FALSE;
+}
+
+/**
  * Truncate a text in a coherent way. Cut a the end of, in order :
  *  - A paragraph
  *  - A line break

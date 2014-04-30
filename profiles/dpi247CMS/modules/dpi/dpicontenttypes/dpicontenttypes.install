@@ -340,27 +340,35 @@ function dpicontenttypes_schema() {
         'description' => 'Primary Key: Unique external files ID.',
         'type' => 'serial',
         'unsigned' => TRUE,
-        'not null' => TRUE
+        'not null' => TRUE,
       ),
       'fid' => array(
         'description' => 'Unique files ID, link to files table.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0
+        'default' => 0,
       ),
       'uri' => array(
         'description' => 'URI of the original file',
         'type' => 'varchar',
         'length' => 510,
         'not null' => TRUE,
-        'default' => ''
+        'default' => '',
       ),
       'requestor' => array(
         'description' => 'Requestor of this file',
         'type' => 'varchar',
         'length' => 255,
-        'default' => NULL
+        'default' => NULL,
+      ),
+      'cron_delete' => array(
+        'description' => 'Does this file has to be deleted after some times or not',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
       ),
     ),
     'indexes' => array(
@@ -439,4 +447,12 @@ function dpicontenttypes_update_7005() {
     $schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
     db_create_table('dpicontenttypes_external_files', $schema);
   }
+}
+
+/**
+ * Add a cron_delete column to the dpicontenttypes_external_files table
+ */
+function dpicontenttypes_update_7006() {
+  $schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
+  db_add_field('dpicontenttypes_external_files', 'cron_delete', $schema['fields']['cron_delete']);
 }

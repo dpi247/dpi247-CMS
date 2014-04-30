@@ -99,6 +99,14 @@ function dpicontenttypes_menu(){
 }
 
 /**
+ * Implementation of hook_cron
+ */
+function dpicontenttypes_cron() {
+  // Remove old external files
+  _dpicontenttypes_cron_remove_external_files();
+}
+
+/**
  * Implementation of hook_permission()
  */
 function dpicontenttypes_permission(){
