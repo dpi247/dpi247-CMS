@@ -1,0 +1,15 @@
+core = "7.x"
+description = "DPI Json exporter is a legacy dpi module to reproduce a json feed provided in wally (dpi in drupal6). Use this module for legacy reason otherwise We recommand using the Services module."
+name = "DPI Json Exporter"
+package = DPI Bonus
+
+dependencies[] = dpicontenttypes
+
+
+files[] = dpijsonexporter.info.inc
+files[] = dpijsonexporter.controller.class.inc
+files[] = dpijsonexporter.entity.class.inc
+files[] = dpijsonexporter.entity.inc
+
+files[] = includes/dpidjsonexporter.pages.admin.inc
+

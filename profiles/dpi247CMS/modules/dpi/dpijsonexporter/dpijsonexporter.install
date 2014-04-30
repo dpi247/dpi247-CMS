@@ -1,0 +1,69 @@
+<?php 
+// dpijsonexporter.install
+    /**
+     * Implements hook_install().
+     */
+    function dpijsonexporter_install() {
+    }
+    /**
+     * Implements hook_uninstall().
+     */
+    function dpijsonexporter_uninstall() {
+    }
+    /**
+     * Implements hook_schema().
+     */
+    function dpijsonexporter_schema() {
+      return array(
+        'dpijsonexporter_jsonproduct' => array(
+          'description' => 'Stores information about products',
+          'fields' => array(
+            'id' => array(
+              'description' => 'The primary identifier for a product.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+            ),
+            'uid' => array(
+              'description' => t('The user that created the product.'),
+              'type' => 'int',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+              'default' => 0,
+            ),
+            
+            'description' => array(
+              'type' => 'text',
+              'size' => 'big',
+              'description' => 'Administrative description for this jsonproduct.',
+              'object default' => '',
+            ),
+            'machine_name' => array(
+              'description' => 'The machine name of the jsonproduct',
+              'type' => 'varchar',
+              'length' => '255',
+              'not null' => TRUE
+            ),
+            'label' => array(
+              'description' => 'The label of the jsonproduct',
+              'type' => 'varchar',
+              'length' => '255',
+              'not null' => TRUE
+            ),
+            'menu_name' => array(
+              'description' => t('The menu of the product'),
+              'type' => 'varchar',
+              'length' => 255,
+              'not null' => TRUE,
+            ),
+            'presets' => array(
+              'description' => t('The preset of the product'),
+              'type' => 'text',
+              'size' => 'medium',
+              'serialize'=>TRUE,
+            ),
+          ),
+          'primary key' => array('id'),
+        ),
+      );
+    }

@@ -1,0 +1,11 @@
+<?php 
+
+module_load_include('inc', 'dpijsonexporter','dpijsonexporter.entity');
+module_load_include('inc', 'dpijsonexporter','dpijsonexporter.private');
+
+
+
+function dpijsonexporter_perm(){
+ return  array('administer dpijsonexporter');
+}
+
