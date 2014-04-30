@@ -20,7 +20,7 @@
  * @return Object|boolean
  *   The created/updated file if no problem occured, FALSE otherwise
  */
-function dpicontenttypes_api_create_or_update_file($file_uri, $path, $stream = 'public', $requestor = NULL, $replace = TRUE, $cron_delete = TRUE) {
+function dpicontenttypes_api_create_or_update_file($file_uri, $path, $stream = 'public', $requestor = NULL, $replace = FALSE, $cron_delete = TRUE) {
   $new_file_path = $stream.'://'.$path.'/'.date('Ymd', time());
 
   $file_query = db_select('dpicontenttypes_external_files', 'def')
