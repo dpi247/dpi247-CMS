@@ -1,10 +1,5 @@
 <?php
 
-function lalapo() {
-  print_r(error_get_last());
-}
-//register_shutdown_function('lalapo');
-
 /**
  * @file
  * The PHP page that serves all page requests on a Drupal installation.
