@@ -5,6 +5,7 @@ package = DPI
 dependencies[] = ctools
 dependencies[] = date
 dependencies[] = dpicache
+dependencies[] = dpicommons
 dependencies[] = dpidestinations
 dependencies[] = entity
 dependencies[] = entityreference

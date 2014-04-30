@@ -12,7 +12,8 @@ function dpimport_page_importer_list(){
   foreach ($importers as $imp){
     $edit = '<a href="/admin/config/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
     $delete = ' <a href="/admin/config/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
-    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete);
+    $process = ' <a href="/dpimport/process/'.$imp->name.'">'.t('Process').'</a>';
+    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete.$process);
   }
   return theme('table', $vars);
 }
@@ -154,25 +155,23 @@ function dpimport_page_form_importer_form_submit($form, &$form_state){
  * @return FALSE if an error occurs
  */
 function dpimport_form_importer_save($form, $form_state){
-  ctools_include('plugins');
-
   $default_values = $form_state['multistep_values']['default'];
   $importer_values = $form_state['multistep_values']['importer'];
   $dispatcher_values = $form_state['multistep_values']['dispatcher'];
 
-  //dispatcher
+  // Dispatcher
   $dispatcher_class = $importer_values['dispatcher'];
   $importer = NULL;
   $settings = array();
   $dispatcher = new $dispatcher_class($importer, $settings);
 
-  //importer
-  $importer_plugin = ctools_get_plugins('dpimport', 'importer', $default_values['type']);
+  // Importer
+  $importer_plugin = _dpimport_load_importer_plugin($default_values['type'], $default_values['version']);
   $importer_class = $importer_plugin['versions'][$default_values['version']]['class'];
   $importer_settings = array();
   $importer = new $importer_class($importer_settings, $importer_plugin);
 
-  //Save values in dpimport_importer
+  // Save values in dpimport_importer
   $record = array();
   $record['type'] = $default_values['type'];
   $record['version'] = $default_values['version'];
@@ -289,7 +288,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
   $form['default']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
-    '#description' => t('The machine name of the Importer. It must be unique and alphanumerique only'),
+    '#description' => t('The machine name of the Importer, it must be unique, alphanumeric and lower case only'),
     '#required' => TRUE,
     '#default_value' => isset($values['name']) ? $values['name'] : NULL,
     '#disabled' => isset($values['iid']) ? TRUE : FALSE,
@@ -298,7 +297,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
   $form['default']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
-    '#description' => t('Description of the importer'),
+    '#description' => '',
     '#default_value' => isset($values['description']) ? $values['description'] : NULL,
   );
 
@@ -312,7 +311,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
   $form['default']['type'] = array(
     '#type' => 'select',
     '#title' => t('Importer'),
-    '#description' => t('Choose the type of the importer'),
+    '#description' => '',
     '#required' => TRUE,
     '#options' => $options,
     '#default_value' => isset($values['type']) ? $values['type'] : NULL,
@@ -377,7 +376,7 @@ function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
 
   if (!preg_match('/^[a-z0-9]+$/' , $form_state['values']['name'])){
-    form_set_error('name', t('Name must be alphanumeric only.'));
+    form_set_error('name', t('Name must be alphanumeric and lower case only'));
   }
 
   if (!is_numeric($form_state['values']['iid']) && dpimport_getimportersettings($form_state['values']['name']) != NULL){
@@ -394,13 +393,13 @@ function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
 function dpimport_form_importer_stageimporter_form(&$form, &$form_state){
   $values = isset($form_state['multistep_values']['importer']) ? $form_state['multistep_values']['importer'] : array();
 
-  $importer_plugin = ctools_get_plugins('dpimport', 'importer', $form_state['multistep_values']['default']['type']);
+  $importer_plugin = _dpimport_load_importer_plugin($form_state['multistep_values']['default']['type'], $form_state['multistep_values']['default']['version']);
 
   $importer_class = $importer_plugin['versions'][$form_state['multistep_values']['default']['version']]['class'];
   $importer_settings = array();
   $importer = new $importer_class($importer_settings, $importer_plugin);
 
-  //Get the specific form elements for this importer
+  // Get the specific form elements for this importer
   $form = $importer->getSettingsForm($form_state, $values);
 
   $options = array();
@@ -425,13 +424,12 @@ function dpimport_form_importer_stageimporter_form(&$form, &$form_state){
  * @param Array $form_state
  */
 function dpimport_form_importer_stageimporter_form_validate($form, &$form_state){
-  ctools_include('plugins');
-  $importer_plugin = ctools_get_plugins('dpimport', 'importer', $form_state['multistep_values']['default']['type']);
+  $importer_plugin = _dpimport_load_importer_plugin($form_state['multistep_values']['default']['type'], $form_state['multistep_values']['default']['version']);
 
   $importer_class = $importer_plugin['versions'][$form_state['multistep_values']['default']['version']]['class'];
   $importer_settings = array();
   $importer = new $importer_class($importer_settings, $importer_plugin);
-  //Get the validation for the specific form elements of this importer
+  // Get the validation for the specific form elements of this importer
   $importer->validateSettingsForm($form_state);
 }
 
@@ -442,12 +440,13 @@ function dpimport_form_importer_stageimporter_form_validate($form, &$form_state)
  * @param Array $form_state
  */
 function dpimport_form_importer_stagedispatcher_form(&$form, &$form_state){
+  $importer_plugin = _dpimport_load_importer_plugin($form_state['multistep_values']['default']['type'], $form_state['multistep_values']['default']['version']);
+
   $values = isset($form_state['multistep_values']['dispatcher']) ? $form_state['multistep_values']['dispatcher'] : array();
   $dispatcher_class = $form_state['multistep_values']['importer']['dispatcher'];
-  $importer = NULL;
   $settings = array();
-  $dispatcher = new $dispatcher_class($importer, $settings);
-  //Get the specific form elements for this dispatcher
+  $dispatcher = new $dispatcher_class($importer_plugin, $settings);
+  // Get the specific form elements for this dispatcher
   $form = $dispatcher->getSettingsForm($form_state, $values);
 }
 
@@ -476,12 +475,12 @@ function dpimport_form_importer_initializeform(&$form_state, $edit_id){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
   $importer_settings = dpimport_getimportersettings($edit_id);
 
-  //importer
-  $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+  // Importer
+  $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
   $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
   $importer = new $importer_class($importer_settings, $importer_plugin);
 
-  //dispatcher
+  // Dispatcher
   $dispatcher = $importer->getDispatcher();
 
   $form_state['multistep_values']['default']['iid'] = $importer_settings->iid;
@@ -489,7 +488,7 @@ function dpimport_form_importer_initializeform(&$form_state, $edit_id){
   $form_state['multistep_values']['default']['description'] = $importer_settings->description;
   $form_state['multistep_values']['default']['type'] = $importer_settings->type;
   $form_state['multistep_values']['default']['version'] = $importer_settings->version;
-  $form_state['multistep_values']['importer'] = $importer->initializeForm();
+  $form_state['multistep_values']['importer'] = $importer->initializeForm($importer_settings);
   $form_state['multistep_values']['importer']['dispatcher'] = $importer_settings->dispatcher;
   $form_state['multistep_values']['dispatcher'] = $dispatcher->initializeForm();
 }
@@ -528,11 +527,10 @@ function dpimport_page_form_importer_delete_form($form, &$form_state, $delete_id
  * @param Array $form_state
  */
 function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
-  ctools_include('plugins');
   module_load_include('inc', 'dpimport','includes/dpimport.process');
 
   $importer_settings = dpimport_getimportersettings($form_state['values']['name']);
-  $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+  $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
   $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
   $importer = new $importer_class($importer_settings, $importer_plugin);
 

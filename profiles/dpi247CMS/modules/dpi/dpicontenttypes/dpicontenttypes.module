@@ -7,7 +7,6 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
 
-
 /**
  * Implementation of hook_menu()
  */

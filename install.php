@@ -1,5 +1,10 @@
 <?php
 
+function lalapobis() {
+  print_r(error_get_last());
+}
+//register_shutdown_function('lalapobis');
+
 /**
  * @file
  * Initiates a browser-based installation of Drupal.

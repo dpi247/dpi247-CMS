@@ -8,6 +8,8 @@ abstract class Dispatcher{
    */
 
   protected $zip;
+  protected $cron;
+  protected $cron_frequency;
   protected $temp_folder;
   protected $temp_subdir;
   protected $done_folder;
@@ -24,7 +26,9 @@ abstract class Dispatcher{
    */
   public function Dispatcher($importer, $settings) {
     $this->importer = $importer;
-    $this->zip = isset($settings['zip']) ? $settings['zip'] : NULL;
+    $this->zip = isset($settings['zip']) ? $settings['zip'] : 0;
+    $this->cron = isset($settings['cron']) ? $settings['cron'] : 0;
+    $this->cron_frequency = isset($settings['cron_frequency']) ? $settings['cron_frequency'] : 10;
     $this->temp_folder = isset($settings['temp_folder']) ? $settings['temp_folder'] : NULL;
     $this->done_folder = isset($settings['temp_folder']) ? $settings['done_folder'] : NULL;
     $this->error_folder = isset($settings['temp_folder']) ? $settings['error_folder'] : NULL;
@@ -45,6 +49,15 @@ abstract class Dispatcher{
   */
   public function isZip(){
     return $this->zip;
+  }
+
+  /**
+   * Return the cron variable of the class
+   *
+   * @return boolean
+   */
+  public function isCron(){
+    return $this->cron;
   }
 
   /**
@@ -118,10 +131,10 @@ abstract class Dispatcher{
       $dom = new DomDocument();
       $dom->LoadXML($contents);
 
-      //checkfile
+      // Checkfile
       $importer = $this->getImporter();
       if ($importer->checkXml($dom)){
-        //process file
+        // Process file
         $this->processDom($dom);
       }
     }
@@ -132,19 +145,21 @@ abstract class Dispatcher{
    *
    * @param DOM $dom
    */
-  function processDom($dom){
+  function processDom($dom) {
     $importer = $this->getImporter();
-    if ($dom->hasChildNodes()){
-      //For each child of the dom
-      foreach ($dom->childNodes as $child){
-        if ($child->nodeName != '#text'){
+    if ($dom->hasChildNodes()) {
+      // For each child of the dom
+      foreach ($dom->childNodes as $child) {
+        if ($child->nodeName != '#text') {
           $explore_child = TRUE;
           $callback = $importer->getCallback($child);
           $method_name = 'build'.$callback;
-          //Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
+          // Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists($importer, $method_name)){
             $explore_child = $importer->$method_name($child);
-            break;
+            if (!$explore_child) {
+              break;
+            }
           }
 
           if ($explore_child){
@@ -162,14 +177,14 @@ abstract class Dispatcher{
    * @param Object $object
    * @param Object $object2
    */
-  function processChildren($dom, $object, $object2){
+  function processChildren($dom, $object, $object2) {
     $importer = $this->getImporter();
-    foreach ($dom->childNodes as $child){
+    foreach ($dom->childNodes as $child) {
       $name = strtolower($child->nodeName);
-      if ($name != '#text'){
+      if ($name != '#text') {
         $callback = $importer->getCallback($child);
         $method_name = 'build'.$callback;
-        if (method_exists($importer, $method_name)){
+        if (method_exists($importer, $method_name)) {
           $importer->$method_name($child, $object, $object2);
         }
       }
@@ -347,12 +362,28 @@ abstract class Dispatcher{
   public function getSettingsForm(&$form_state, $values){
     $form = array();
     $form['dispatcher']['zip'] = array(
-      '#type' => 'select',
+      '#type' => 'checkbox',
       '#title' => t('Are the data zipped?'),
       '#description' => t('Indicates if the data to import are zipped'),
-      '#options' => array(0 => 'No', 1 => 'Yes'),
-      '#default_value' => isset($values['zip']) ? $values['zip'] : NULL,
+      '#default_value' => isset($values['zip']) ? $values['zip'] : 0,
       '#required' => TRUE,
+    );
+    $form['dispatcher']['cron'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Are the data imported by a CRON job?'),
+      '#default_value' => isset($values['cron']) ? $values['cron'] : 0,
+      '#required' => TRUE,
+    );
+    $form['dispatcher']['cron_frequency'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cron frequency (minutes)'),
+      '#description' => t('Time between two cron runs'),
+      '#default_value' => isset($values['cron_frequency']) ? $values['cron_frequency'] : 10,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="cron"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['dispatcher']['temp_folder'] = array(
       '#type' => 'textfield',
@@ -419,6 +450,8 @@ abstract class Dispatcher{
   public function submitSettingsForm($values){
     $dispatcher_settings = array(
       'zip' => $values['zip'],
+      'cron' => $values['cron'],
+      'cron_frequency' => $values['cron_frequency'],
       'temp_folder' => $values['temp_folder'],
       'done_folder' => $values['done_folder'],
       'error_folder' => $values['error_folder'],
@@ -435,6 +468,8 @@ abstract class Dispatcher{
   public function initializeForm(){
     return array(
       'zip' => $this->isZip(),
+      'cron' => $this->isCron(),
+      'cron_frequency' => $this->cron_frequency,
       'temp_folder' => $this->temp_folder,
       'done_folder' => $this->done_folder,
       'error_folder' => $this->error_folder,
@@ -454,7 +489,7 @@ abstract class Dispatcher{
       $destination_folder = $this->getDoneFolder();
     }
 
-    //Move file to done/error repository
+    // Move file to done/error repository
     if ($file = @file_move($source['source'], $destination_folder.'/'.$source['source']->filename, FILE_EXISTS_RENAME)) {
       //set the file as permanent
       $file->status = 1;
@@ -463,7 +498,7 @@ abstract class Dispatcher{
       Logger::logError('importer', 2, 'filemove', t('The file !file can not be moved.', array('!file' => $source['source']->uri)));
     }
 
-    //Delete temp folder
+    // Delete temp folder
     if ($this->isZip()){
       $temp_folder = $this->getTempFolder().'/'.$source['source']->name;
       file_unmanaged_delete_recursive($temp_folder);

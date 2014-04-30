@@ -7,15 +7,14 @@
  * @return string
  */
 function dpimport_page_process_import($importer_name){
-  ctools_include('plugins');
   $importer_settings = dpimport_getimportersettings($importer_name);
   $return = NULL;
-  if ($importer_settings != NULL){
-    $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
-    if ($importer_plugin != NULL){
-      //Get importer class from settings and plugin
+  if ($importer_settings != NULL) {
+    $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
+    if ($importer_plugin != NULL) {
+      // Get importer class from settings and plugin
       $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
-      //Importer Instance
+      // Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
       $dispatcher = $importer->getDispatcher();
       if (lock_acquire('dpimport_'.$importer->getName(), $dispatcher->getLockTimeout())) {
@@ -68,7 +67,7 @@ function dpimport_getallimportersettings(){
  *
  * @param Importer $importer
  */
-function dpimport_process_import($importer, $dispatcher){
+function dpimport_process_import($importer, $dispatcher) {
   $sources = $dispatcher->extractSources();
   if ($sources != NULL){
     foreach ($sources as $source){
@@ -83,20 +82,77 @@ function dpimport_process_import($importer, $dispatcher){
 /**
  * Delete old files
  */
-function dpimport_deleteoldfiles(){
-  ctools_include('plugins');
-  $importers = dpimport_getallimportersettings();
+function dpimport_deleteoldfiles($importers) {
   foreach ($importers as $importer_settings){
-    $importer_plugin = ctools_get_plugins('dpimport', 'importer', $importer_settings->type);
+    $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
     if ($importer_plugin != NULL){
-      //Get importer class from settings and plugin
+      // Get importer class from settings and plugin
       $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
-      //Importer Instance
+      // Importer Instance
       $importer = new $importer_class($importer_settings, $importer_plugin);
       $dispatcher = $importer->getDispatcher();
       $dispatcher->cleanDirectories();
     }
   }
+}
+
+/**
+ * Process Cron driven imports
+ */
+function dpimport_process_cron_imports($importers) {
+  if (function_exists('dpi_variable_get')) {
+    $importer_uid = dpi_variable_get('dpimport_importer_user', 0);
+  } else {
+    $importer_uid = variable_get('dpimport_importer_user', 0);
+  }
+  if ($importer_uid) {
+    // Use a fake user for entities creation/update
+    global $user;
+    $old_user = $user;
+    $user = user_load($importer_uid);
+
+    foreach ($importers as $importer_settings) {
+      $dispatcher_settings = unserialize($importer_settings->dispatcher_settings);
+      if (isset($dispatcher_settings['cron']) && $dispatcher_settings['cron'] && dpimport_cron_has_to_run($importer_settings, $dispatcher_settings)) {
+        $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
+        if ($importer_plugin != NULL) {
+          // Get importer class from settings and plugin
+          $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
+          // Importer Instance
+          $importer = new $importer_class($importer_settings, $importer_plugin);
+          $dispatcher = $importer->getDispatcher();
+          if (lock_acquire('dpimport_'.$importer->getName(), $dispatcher->getLockTimeout())) {
+            dpimport_process_import($importer, $dispatcher);
+            lock_release('dpimport_'.$importer->getName());
+            db_update('dpimport_importer')
+              ->fields(array('last_run' => time()))
+              ->condition('iid', $importer_settings->iid)
+              ->execute();
+          } else {
+            Logger::logError('importer', 0, 'semaphore', t('This importer is currently working. Please try again later'));
+          }
+        }
+      }
+    }
+
+    $user = $old_user;
+  } else {
+    // @todo : No importer user defined, add an error
+  }
+}
+
+/**
+ * Check if an importer cron has to run
+ *
+ * @param Object $importer_settings
+ */
+function dpimport_cron_has_to_run($importer_settings, $dispatcher_settings) {
+  $run_frequency = (isset($dispatcher_settings['cron_frequency']) && is_numeric($dispatcher_settings['cron_frequency'])) ? $dispatcher_settings['cron_frequency'] : 10;
+  $run_frequency *= 60;
+  if (time() > ($importer_settings->last_run + $run_frequency)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**

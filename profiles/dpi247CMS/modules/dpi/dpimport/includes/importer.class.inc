@@ -1,194 +1,207 @@
 <?php 
 
-abstract class Importer{
-  
-  protected $type; 
+abstract class Importer {
+
+  protected $type;
   protected $version;
   protected $name;
   protected $dispatcher_class;
   protected $dispatcher_settings;
   protected $dispatcher;
-  
-  function Importer($settings, $plugin){
+
+  function Importer($settings, $plugin) {
     $this->type = isset($settings->type) ? $settings->type : NULL;
     $this->version = isset($settings->version) ? $settings->version : NULL;
     $this->name = isset($settings->name) ? $settings->name : NULL;
     $this->dispatcher_class = isset($settings->dispatcher) ? $settings->dispatcher : NULL;
     $this->dispatcher_settings = isset($settings->dispatcher_settings) ? unserialize($settings->dispatcher_settings) : array();
-    
+    $this->importer_settings = isset($settings->importer_settings) ? unserialize($settings->importer_settings) : array();
+
     if ($this->getDispatcherClass() != NULL){
       $dispatcher_class = $this->getDispatcherClass();
       $dispatcher = new $dispatcher_class($this, $this->getDispatcherSettings());
       $this->dispatcher = $dispatcher;
     }
-    
   }
-  
+
   /**
-   * 
    * Return the type of the importer
+   *
    * @return String $type
    */
   public function getType(){
     return $this->type;
   }
-  
+
   /**
-  *
-  * Return the version of the importer
-  * @return Integer $version
-  */
+   * Return the version of the importer
+   *
+   * @return Integer $version
+   */
   public function getVersion(){
     return $this->version;
   }
-  
+
   /**
-  *
-  * Return the dispatcher class of the importer
-  * @return String $dispatcher_class
-  */
+   * Return the dispatcher class of the importer
+   *
+   * @return String $dispatcher_class
+   */
   public function getDispatcherClass(){
     return $this->dispatcher_class;
   }
-  
+
   /**
-  *
-  * Return the dispatcher settings of the importer
-  * @return Array $dispatcher_settings
-  */
+   * Return the dispatcher settings of the importer
+   *
+   * @return Array $dispatcher_settings
+   */
   public function getDispatcherSettings(){
     return $this->dispatcher_settings;
   }
-  
+
   /**
-  *
-  * Return the dispatcher of the importer
-  * @return Dispatcher $dispatcher
-  */
+   * Return the dispatcher of the importer
+   *
+   * @return Dispatcher $dispatcher
+   */
   public function getDispatcher(){
     $dispatcher = $this->dispatcher;
     return $dispatcher;
   }
-  
+
   /**
-  *
-  * Return the name of the importer
-  * @return String $name
-  */
+   * Return the name of the importer
+   *
+   * @return String $name
+   */
   public function getName(){
     $name = $this->name;
     return $name;
   }
-  
+
   /**
-   * 
    * Check if the XML is valid
+   *
    * @param Php DOM $dom
    */
   public function checkXml($dom){
     return TRUE;
   }
+
   /**
-   * 
    * Render de result of the import
    */
   public function render(){
     return Logger::printLog();
   }
-  
+
   /**
-  *
-  * Form to complete the settings of the importer
-  * @param Array $form_state
-  * @param Array $values
-  */
+   * Form to complete the settings of the importer
+   *
+   * @param Array $form_state
+   * @param Array $values
+   */
   public function getSettingsForm(&$form_state, $values){
     $form = array();
-    
     return $form;
   }
-  
+
   /**
-  *
-  * Validation of the settings form
-  * @param Array $form_state
-  */
+   * Validation of the settings form
+   *
+   * @param Array $form_state
+   */
   public function validateSettingsForm(&$form_state){
-    
   }
-  
+
   /**
-  *
-  * Submission of the settings form
-  * @param Array $values
-  * @return Array $dispatcher_settings
-  */
+   * Submission of the settings form
+   *
+   * @param Array $values
+   *
+   * @return Array $dispatcher_settings
+   */
   public function submitSettingsForm($values){
     $importer_settings = array();
+    if (isset($values['importer_settings']) && is_array($values['importer_settings'])) {
+      foreach ($values['importer_settings'] as $key => $val) {
+        $importer_settings[$key] = $val;
+      }
+    }
     return $importer_settings;
   }
-  
+
   /**
-   * 
-   * Insert new importer settings in to the db
+   * Insert new importer settings in to the DB
+   *
    * @param Array $settings
    */
   public function insertImporterSettings($settings){
     $result = db_insert('dpimport_importer')
-    ->fields($settings)
-    ->execute();
+      ->fields($settings)
+      ->execute();
     return $result;
   }
-  
+
   /**
-  *
-  * Update importer settings in to the db
-  * @param Array $settings
-  */
+   * Update importer settings in to the DB
+   *
+   * @param Array $settings
+   */
   public function updateImporterSettings($settings, $iid){
     $result = db_update('dpimport_importer')
-    ->fields($settings)
-    ->condition('iid', $iid)
-    ->execute();
+      ->fields($settings)
+      ->condition('iid', $iid)
+      ->execute();
     return $result;
   }
-  
+
   /**
-  *
-  * Delete importer settings in to the db
-  * @param Array $settings
-  */
+   * Delete importer settings in to the DB
+   *
+   * @param Array $settings
+   */
   public function deleteImporterSettings($iid){
     $result = db_delete('dpimport_importer')
-    ->condition('iid', $iid)
-    ->execute();
+      ->condition('iid', $iid)
+      ->execute();
     return $result;
   }
-  
+
   /**
-   * 
    * Initialize settings form
+   *
    * @param Array $importer_settings
    */
-  public function initializeForm(){
-    return array();
+  public function initializeForm($importer_settings) {
+    $return = array();
+    if (isset($importer_settings->importer_settings) && !empty($importer_settings->importer_settings)) {
+      $tmp_return = unserialize($importer_settings->importer_settings);
+      if ($tmp_return && is_array($tmp_return)) {
+        $return = $tmp_return;
+      }
+    }
+    return $return;
   }
-  
+
   /**
-   * 
    * Determine the next callback function from the Dom element
+   *
    * @param DOM $dom
+   *
    * @return String $callback
    */
   public function getCallback($dom){
     $callback = strtolower($dom->nodeName);
     return $callback;
   }
-  
+
   /**
-   * 
    * Call the create_or_load_node function based on the callback
+   *
    * @param DOM $dom
+   *
    * @return Object $node
    */
   protected function createOrLoadEntity($dom){
@@ -202,26 +215,29 @@ abstract class Importer{
     }
     return $entity;
   }
-  
+
   /**
-   * 
-   * Return a boolean form the xml value (int, string or boolean)
-   * @param unknown_type $xmlboolean
+   * Return a boolean form the XML value (int, string or boolean)
+   *
+   * @param bool $xmlboolean
    */
-  protected function xmlbooleantophpboolean($xmlboolean){
-    $phpboolean = NULL;
+  protected function xmlbooleantophpboolean($xmlboolean, $default = NULL){
+    $phpboolean = $default;
     if ($xmlboolean === FALSE) $phpboolean = FALSE;
     elseif ($xmlboolean === TRUE) $phpboolean = TRUE;
     elseif (strtolower($xmlboolean) == "true") $phpboolean = TRUE;
     elseif (strtolower($xmlboolean) == "false") $phpboolean = FALSE;
+    elseif (strtolower($xmlboolean) == "null") $phpboolean = FALSE;
+    elseif (is_string($xmlboolean) && !empty($xmlboolean)) $phpboolean = TRUE;
     elseif ($xmlboolean == 0) $phpboolean = FALSE;
     elseif ($xmlboolean == 1) $phpboolean = TRUE;
     return $phpboolean;
   }
+
   /**
-   * 
-   * Filter xss if the module filter is enabled else, use php function strip_tags
-   * @param unknown_type $text
+   * Filter XSS if the module filter is enabled else, use PHP function strip_tags
+   *
+   * @param string $text
    */
   protected function filterHtmlTags($text){
     if (module_exists('filter')) {
@@ -231,11 +247,12 @@ abstract class Importer{
     }
     return $filtered_text;
   }
-  
+
   /**
-   * 
-   * Create a file from uri
+   * Create a file from URI
+   *
    * @param String $uri
+   *
    * @return Object $file
    */
   protected function createFile($file_uri, $destination){
@@ -263,43 +280,48 @@ abstract class Importer{
     }
     return $file;
   }
+
   /**
-   * return an save entity created by a create or load function, a setAttribute function and a process children
+   * Return an save entity created by a create or load function, a setAttribute function and a process children
+   *
    * @param DOM $dom
+   *
    * @param String $entity_type
    */
-  protected function contructEntity($dom, $entity_type){
+  protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
-    
+
     $entity = $this->createOrLoadEntity($dom);
-    if (!Logger::error()){
-      //Initialize the entity
+    if (!Logger::error()) {
+      // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-      
-      //Set attributes
+
+      // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
-      if (method_exists($this, $attributes_method)){
+      if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
-      
-      //Process children
+
+      // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-      
-      //Save entity
-      if (!Logger::error()){
-        $this->saveEntity($dom, $entity_type, $entity);
-      } else {
-        $entity = NULL;
+
+      if (Logger::error()) {
+        return NULL;
       }
-    } 
-    
+
+      // Save entity
+      if ($save) {
+        $this->saveEntity($dom, $entity_type, $entity);
+      }
+    }
+
     return $entity;
   }
-  
+
   /**
-   * 
    * Save entity
+   *
    * @param DOM $dom
    * @param String $entity_type
    * @param Object $entity
@@ -308,4 +330,3 @@ abstract class Importer{
     entity_save($entity_type, $entity);
   }
 }
-

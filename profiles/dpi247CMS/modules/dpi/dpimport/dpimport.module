@@ -157,5 +157,7 @@ function dpimport_stream_wrappers() {
  */
 function dpimport_cron(){
   module_load_include('inc', 'dpimport', 'includes/dpimport.process');
-  dpimport_deleteoldfiles();
+  $importers = dpimport_getallimportersettings();
+  dpimport_deleteoldfiles($importers);
+  dpimport_process_cron_imports($importers);
 }
