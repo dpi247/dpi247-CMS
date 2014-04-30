@@ -73,4 +73,50 @@ abstract class FlowToNode extends PackageHelper {
     $callback = str_replace(':', '_', $callback); // Handle namespaces
     return $callback;
   }
+
+  /**
+   * Check the presence of an element as the child of a given DOM Node and return its value
+   *
+   * @param DOM Node $dom_item
+   * @param string $name
+   * @param string $namespace
+   * @param string $default
+   *
+   * @return string
+   */
+  protected function checkIfElementExists($dom_item, $name, $namespace = 'none', $default = '') {
+    $return = $default;
+    if (is_object($dom_item)) {
+      if ($namespace != 'none') {
+        $return = $dom_item->getElementsByTagNameNS($namespace, $name)->item(0) ? $dom_item->getElementsByTagNameNS($namespace, $name)->item(0)->firstChild->wholeText : '';
+      }
+      else {
+        $return = $dom_item->getElementsByTagName($name)->item(0) ? $dom_item->getElementsByTagName($name)->item(0)->firstChild->wholeText : '';
+      }
+    }
+    return $return;
+  }
+
+  /**
+   * Check the presence of an attribute in a given DOM Node and return its value
+   *
+   * @param DOM Node $dom_item
+   * @param string $name
+   * @param string $namespace
+   * @param string $default
+   *
+   * @return string
+   */
+  protected function checkIfAttributeExists($dom_item, $name, $namespace = 'none', $default = '') {
+    $return = $default;
+    if (is_object($dom_item)) {
+      if ($namespace != 'none' && $dom_item->hasAttributeNS($namespace, $name)) {
+        $return = $dom_item->getAttributeNS($namespace, $name);
+      }
+      elseif ($dom_item->hasAttribute($name)) {
+        $return = $dom_item->getAttribute($name);
+      }
+    }
+    return $return;
+  }
 }

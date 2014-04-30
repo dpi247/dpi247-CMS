@@ -329,4 +329,19 @@ abstract class Importer {
   protected function saveEntity($dom, $entity_type, $entity){
     entity_save($entity_type, $entity);
   }
+
+  /**
+   * Check if the given entity is an atom or not
+   *
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   *
+   * @return boolean
+   */
+  protected function entity_is_atom($wrapper, $entity) {
+    if ($wrapper->type() == 'scald_atom') {
+      return TRUE;
+    }
+    return FALSE;
+  }
 }

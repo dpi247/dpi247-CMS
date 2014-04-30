@@ -445,52 +445,6 @@ class RSSV1 extends FlowToNode {
   }
 
   /**
-   * Check the presence of an element as the child of a given DOM Node and return its value
-   *
-   * @param DOM Node $dom_item
-   * @param string $name
-   * @param string $namespace
-   * @param string $default
-   *
-   * @return string
-   */
-  private function checkIfElementExists($dom_item, $name, $namespace = 'none', $default = '') {
-    $return = $default;
-    if (is_object($dom_item)) {
-      if ($namespace != 'none') {
-        $return = $dom_item->getElementsByTagNameNS($namespace, $name)->item(0) ? $dom_item->getElementsByTagNameNS($namespace, $name)->item(0)->firstChild->wholeText : '';
-      }
-      else {
-        $return = $dom_item->getElementsByTagName($name)->item(0) ? $dom_item->getElementsByTagName($name)->item(0)->firstChild->wholeText : '';
-      }
-    }
-    return $return;
-  }
-
-  /**
-   * Check the presence of an attribute in a given DOM Node and return its value
-   *
-   * @param DOM Node $dom_item
-   * @param string $name
-   * @param string $namespace
-   * @param string $default
-   *
-   * @return string
-   */
-  private function checkIfAttributeExists($dom_item, $name, $namespace = 'none', $default = '') {
-    $return = $default;
-    if (is_object($dom_item)) {
-      if ($namespace != 'none' && $dom_item->hasAttributeNS($namespace, $name)) {
-        $return = $dom_item->getAttributeNS($namespace, $name);
-      }
-      elseif ($dom_item->hasAttribute($name)) {
-        $return = $dom_item->getAttribute($name);
-      }
-    }
-    return $return;
-  }
-
-  /**
    * Get all properties of a channel DOM Node
    *
    * @param DOM Node $dom
@@ -673,42 +627,6 @@ class RSSV1 extends FlowToNode {
       }
     }
 
-    return FALSE;
-  }
-
-  /**
-   * Check wheter a package contains images or not
-   *
-   * @param EntityDrupalWrapper $package_wrapper
-   *
-   * @return boolean
-   */
-  private function checkPackageHasImage($package_wrapper) {
-    $no_photo = TRUE;
-    $current_embeds = $package_wrapper->field_embededobjects->value(array('identifier' => TRUE));
-    if ($current_embeds && !empty($current_embeds)) {
-      foreach ($current_embeds as $embed) {
-        if ($embed['type'] == 'image'){
-          $no_photo = FALSE;
-          break;
-        }
-      }
-    }
-    return $no_photo;
-  }
-
-  /**
-   * Check if the given entity is an atom or not
-   *
-   * @param EntityDrupalWrapper $wrapper
-   * @param Object $entity
-   *
-   * @return boolean
-   */
-  private function entity_is_atom($wrapper, $entity) {
-    if ($wrapper->type() == 'scald_atom') {
-      return TRUE;
-    }
     return FALSE;
   }
 }

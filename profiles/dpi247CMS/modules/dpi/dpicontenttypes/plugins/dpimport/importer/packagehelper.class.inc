@@ -300,6 +300,27 @@ abstract class PackageHelper extends Importer {
   }
 
   /**
+   * Check wheter a package contains images or not
+   *
+   * @param EntityDrupalWrapper $package_wrapper
+   *
+   * @return boolean
+   */
+  protected function checkPackageHasImage($package_wrapper) {
+    $no_photo = TRUE;
+    $current_embeds = $package_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+    if ($current_embeds && !empty($current_embeds)) {
+      foreach ($current_embeds as $embed) {
+        if ($embed['type'] == 'image'){
+          $no_photo = FALSE;
+          break;
+        }
+      }
+    }
+    return $no_photo;
+  }
+
+  /**
    * Add an atom reference to a field, checking it's presence
    */
   protected function addAtomToFied($wrapper, $entity, $field_name, $atom, $options = array()) {
