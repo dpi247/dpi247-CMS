@@ -9,3 +9,27 @@ function dpijsonexporter_perm(){
  return  array('administer dpijsonexporter');
 }
 
+
+
+function xcal_format_autoload_info() {
+  return array(
+    'XCalFormatView' => array(
+      'file' => 'XCalFormatView.inc',
+    ),
+  );
+}
+
+function dpijsonexporter_format_rest_server_response_formatters_alter(&$formatters) {
+  $formatters['jsonexporter_xml'] = array(
+    'model' => 'ServiceJsonExporterModel',
+    'mime types' => array('application/xml', 'text/xml'),
+    'view' => 'XCalFormatView',
+  );
+  $formatters['jsonexporter_json'] = array(
+    'mime types' => array('application/json'),
+    'view' => 'RESTServerViewBuiltIn',
+    'view arguments' => array('format' => 'json'),
+  );
+  
+ 
+}
