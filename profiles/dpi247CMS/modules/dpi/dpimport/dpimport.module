@@ -1,5 +1,6 @@
 <?php 
 
+module_load_include('inc', 'dpimport','dpimport.api');
 module_load_include('inc', 'dpimport','dpimport.private');
 
 /**
@@ -157,7 +158,7 @@ function dpimport_stream_wrappers() {
  */
 function dpimport_cron(){
   module_load_include('inc', 'dpimport', 'includes/dpimport.process');
-  $importers = dpimport_getallimportersettings();
+  $importers = dpimport_api_get_all_importer_settings();
   dpimport_deleteoldfiles($importers);
   dpimport_process_cron_imports($importers);
 }

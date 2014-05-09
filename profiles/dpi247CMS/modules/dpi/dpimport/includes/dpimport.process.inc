@@ -7,7 +7,7 @@
  * @return string
  */
 function dpimport_page_process_import($importer_name){
-  $importer_settings = dpimport_getimportersettings($importer_name);
+  $importer_settings = dpimport_api_get_importer_settings($importer_name);
   $return = NULL;
   if ($importer_settings != NULL) {
     $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
@@ -35,31 +35,6 @@ function dpimport_page_process_import($importer_name){
   }
   
   print $return;
-}
-
-/**
- * Get importer settings from importer name
- *
- * @param string $importer_name
- * @return Object $importer
- */
-function dpimport_getimportersettings($importer_name){
-  $result = db_query("SELECT * FROM {dpimport_importer} WHERE name = :name", array(':name' => $importer_name));
-  return $result->fetchObject();
-}
-
-/**
- * Get All importer settings
- *
- * @return Array $importers
- */
-function dpimport_getallimportersettings(){
-  $importers = array();
-  $result = db_query("SELECT * FROM {dpimport_importer} ");
-  foreach ($result as $record){
-    $importers[] = $record;
-  }
-  return $importers;
 }
 
 /**
@@ -163,7 +138,7 @@ function dpimport_cron_has_to_run($importer_settings, $dispatcher_settings) {
 function dpimport_page_test($importer_name) {
   $content = '';
 
-  $importer_settings = dpimport_getimportersettings($importer_name);
+  $importer_settings = dpimport_api_get_importer_settings($importer_name);
   if ($importer_settings != NULL) {
     /* If you want to test it by curl :
      curl -X POST http://url -H "Content-Type: application/zip" --data-binary "@/local_path_to/test.xml" > /path_to_reception_folder/curl_response.html

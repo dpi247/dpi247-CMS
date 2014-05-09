@@ -5,7 +5,7 @@
  */
 function dpimport_page_importer_list(){
   module_load_include('inc', 'dpimport', 'includes/dpimport.process');
-  $importers = dpimport_getallimportersettings();
+  $importers = dpimport_api_get_all_importer_settings();
   $vars = array();
   $vars['header'] = array('Name', 'Type', 'Version', 'Dispatcher', 'Action');
   $vars['rows'] = array();
@@ -379,7 +379,7 @@ function dpimport_form_importer_stagedefault_form_validate($form, &$form_state){
     form_set_error('name', t('Name must be alphanumeric and lower case only'));
   }
 
-  if (!is_numeric($form_state['values']['iid']) && dpimport_getimportersettings($form_state['values']['name']) != NULL){
+  if (!is_numeric($form_state['values']['iid']) && dpimport_api_get_importer_settings($form_state['values']['name']) != NULL){
     form_set_error('name', t('A importer with this name already exists'));
   }
 }
@@ -473,7 +473,7 @@ function dpimport_form_importer_stagedispatcher_form_validate($form, &$form_stat
  */
 function dpimport_form_importer_initializeform(&$form_state, $edit_id){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
-  $importer_settings = dpimport_getimportersettings($edit_id);
+  $importer_settings = dpimport_api_get_importer_settings($edit_id);
 
   // Importer
   $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
@@ -529,7 +529,7 @@ function dpimport_page_form_importer_delete_form($form, &$form_state, $delete_id
 function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
 
-  $importer_settings = dpimport_getimportersettings($form_state['values']['name']);
+  $importer_settings = dpimport_api_get_importer_settings($form_state['values']['name']);
   $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
   $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
   $importer = new $importer_class($importer_settings, $importer_plugin);
