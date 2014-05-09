@@ -168,7 +168,7 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
  * @see dpi_variable_set()
  */
 function dpi_variable_get_all() {
-  $dpivariables = &drupal_static("dpivariables");
+  $dpivariables = &drupal_static('dpivariables');
 
   $result = db_query('SELECT * FROM {dpi_variables}');
   while($variable = db_fetch_array($result)) {
@@ -194,9 +194,9 @@ function dpi_variable_get_all() {
  * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
  */
 function dpi_variable_set($name, $value) {
-  $dpivariables = &drupal_static("dpivariables");
+  $dpivariables = &drupal_static('dpivariables');
 
-  $dpivariables[$name]=$value;
+  $dpivariables[$name] = $value;
 
   $serialized_value = serialize($value);
 
@@ -223,9 +223,28 @@ function dpi_variable_set($name, $value) {
  */
 function dpi_variable_del($name) {
   db_delete('dpi_variables')
-  ->condition('name', $name)
-  ->execute();
-  drupal_static_reset($name);
+    ->condition('name', $name)
+    ->execute();
+  drupal_static_reset('dpivariables');
+}
+
+/**
+ * Unsets persistent variables starting with a given namespace
+ *
+ * Case-sensitivity of the dpi_variable_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * variable names.
+ *
+ * @param $name
+ *   The name of the namespace to undefine.
+ *
+ * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
+ */
+function dpi_variable_del_namespace($namespace) {
+  db_delete('dpi_variables')
+    ->condition('name', $namespace.'%', 'LIKE')
+    ->execute();
+  drupal_static_reset('dpivariables');
 }
 
 /**
