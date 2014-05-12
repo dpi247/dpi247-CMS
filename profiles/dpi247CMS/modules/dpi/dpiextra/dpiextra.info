@@ -2,7 +2,7 @@ core = "7.x"
 description = "DPI Extra plugins containing all content types CTools created by DPI"
 features[views][] = "most_view"
 features[views_api][] = "api:2"
-name = "DPI extra"
+name = "DPI Extra"
 package = DPI
 
 dependencies[] = entity
