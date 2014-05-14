@@ -71,7 +71,7 @@ function dpidam_api_check_search_profile_exists($pid) {
 }
 
 /**
- * Check wheter a DAM search profile exists or not
+ * Get the default DAM search profile
  *
  * @return array
  *   The default search profile
@@ -88,6 +88,50 @@ function dpidam_api_get_default_search_profile() {
     break;
   }
   return $profile;
+}
+
+/**
+ * Get the default DAM search profile
+ */
+function dpidam_api_get_loaded_default_search_profile() {
+  static $default_profile = NULL;
+
+  if (!$default_profile) {
+    $db_profiles = db_select('dpidam_search_profiles', 'dsp')
+      ->fields('dsp')
+      ->condition('default_profile', 1)
+      ->execute();
+    foreach ($db_profiles as $db_profile) {
+      $default_profile = (array)$db_profile;
+      break;
+    }
+    if (!$default_profile) {
+      $db_query_min_profile = db_select('dpidam_search_profiles', 'dsp');
+      $db_query_min_profile->addExpression('MIN(dsp.pid)', 'min_pid');
+      $db_min_profile = $db_query_min_profile->execute();
+      $min_profile = FALSE;
+      foreach ($db_min_profile as $db_min_profile) {
+        $min_profile = $db_min_profile->min_pid;
+        break;
+      }
+      if ($min_profile) {
+        $db_profiles = db_select('dpidam_search_profiles', 'dsp')
+          ->fields('dsp')
+          ->condition('dsp.pid', $min_profile)
+          ->execute();
+        foreach ($db_profiles as $db_profile) {
+          $default_profile = (array)$db_profile;
+          break;
+        }
+      }
+    }
+
+    if ($default_profile && is_string($default_profile['settings'])) {
+      $default_profile['settings'] = unserialize($default_profile['settings']);
+    }
+  }
+
+  return $default_profile;
 }
 
 /**

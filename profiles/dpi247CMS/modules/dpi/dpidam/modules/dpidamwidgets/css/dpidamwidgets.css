@@ -1,0 +1,19 @@
+.damwrapper {
+	display: inline;
+}
+
+.damnavigationinfo {
+	float: left;
+}
+
+.dampagination {
+	float: right;
+}
+
+.damclearboth {
+	clear: both;
+}
+
+ul.facet li {
+	list-style-type: none;
+}

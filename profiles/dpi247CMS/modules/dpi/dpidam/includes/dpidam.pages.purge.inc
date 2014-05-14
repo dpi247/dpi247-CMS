@@ -79,3 +79,114 @@ function dpidam_page_admin_purge_form_validate($form, $form_state) {
 function dpidam_page_admin_purge_form_submit($form, $form_state) {
   drupal_set_message(t('This functionnality is not activated yet!'), 'warning');
 }
+
+/**
+ * Cron task to purge old packages
+ */
+function dpidam_purge_cron() {
+  if (dpidam_purge_cron_has_to_run()) {
+    print '<strong>'.t('Nodes purge :').'</strong><br>';
+
+    $old_nodes_age = dpi_variable_get('dpidam_purge_age', 15);
+
+    $nids = dpidam_purge_get_nids();
+    dpidam_purge_node_delete($nids);
+
+    // Clear the page and block caches.
+    cache_clear_all();
+  }
+}
+
+/**
+ * Check if the cron process has to run : if it is set to run all day or if we are at night
+ *
+ * @return boolean Whether the cron has to run or not
+ */
+function dpidam_purge_cron_has_to_run() {
+  if (!dpi_variable_get('dpidam_historic_archive_done', FALSE)) {
+    return FALSE;
+  }
+
+  switch (dpi_variable_get('dpidam_purge_run_period', 'night')) {
+    case 'all_day':
+      return TRUE;
+      break;
+
+    case 'night':
+      $current_hour = (int)date('G');
+      if ($current_hour >= 0 && $current_hour < 4) {
+        return TRUE;
+      }
+      break;
+  }
+  return FALSE;
+}
+
+/**
+ * Get an array of nids to purge
+ */
+function dpidam_purge_get_nids() {
+  $age_limit = dpi_variable_get('dpidam_purge_age', 15);
+  $changed_limit = time() - ($age_limit * 24 * 60 * 60);
+  $node_limit = dpi_variable_get('dpidam_purge_limit', 20);
+
+  $nids = array();
+  $db_nids = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('n.changed', $changed_limit, '<')
+    ->condition('n.type', 'package')
+    ->orderBy('n.nid', 'ASC')
+    ->range(0, $node_limit)
+    ->execute();
+  foreach ($db_nids as $db_nid) {
+    $nids[] = $db_nid->nid;
+  }
+
+  return $nids;
+}
+
+/**
+ * Delete nodes, the same way that node_delete but without checking permissions and without clearing the caches
+ *
+ * @param {int} $nids
+ *   NIDs of the nodes to delete
+ */
+function dpidam_purge_node_delete($nids) {
+  foreach ($nids as $nid) {
+    // Clear the cache before the load, so if multiple nodes are deleted, the
+    // memory will not fill up with nodes (possibly) already removed.
+    $node = node_load($nid, NULL, TRUE);
+
+    // Call the node-specific callback (if any):
+    node_invoke($node, 'delete');
+    module_invoke_all('node_delete', $node);
+    module_invoke_all('entity_delete', $node, 'node');
+    field_attach_delete('node', $node);
+
+    // Remove this node from the search index if needed.
+    // This code is implemented in node module rather than in search module,
+    // because node module is implementing search module's API, not the other
+    // way around.
+    if (module_exists('search')) {
+      search_reindex($nid, 'node');
+    }
+
+    print t('Purged node @nid', array('@nid' => $nid)).'<br>';
+  }
+
+  // Delete after calling hooks so that they can query node tables as needed.
+  db_delete('node')
+    ->condition('nid', $nids, 'IN')
+    ->execute();
+  db_delete('node_revision')
+    ->condition('nid', $nids, 'IN')
+    ->execute();
+  db_delete('history')
+    ->condition('nid', $nids, 'IN')
+    ->execute();
+  db_delete('node_access')
+    ->condition('nid', $nids, 'IN')
+    ->execute();
+
+  watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
+}

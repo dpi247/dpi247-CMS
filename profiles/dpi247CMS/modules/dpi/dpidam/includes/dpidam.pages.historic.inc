@@ -79,7 +79,7 @@ function dpidam_historic_cron() {
     }
 
     foreach ($nids as $nid) {
-      $result = _dpidam_postpackage($nid);
+      $result = _dpidam_post_package($nid);
       dpi_variable_set('dpidam_historic_last_node', $nid);
       if ($result['success']) {
         print t('Archived node @nid', array('@nid' => $nid));
