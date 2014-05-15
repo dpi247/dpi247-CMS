@@ -18,7 +18,7 @@ if ($facet_active) {
 print "<li>";
 foreach($facet->terms as $term) {
   print "<ul class='cat facet facet-term'>";
-  print theme('damsearch_render_facet_term', $term, $facet, $profile);
+  print theme('damsearch_render_facet_term', array('term' => $term, 'facet' => $facet, 'profile' => $profile));
   print "</ul>";
 }
 print "</li>";

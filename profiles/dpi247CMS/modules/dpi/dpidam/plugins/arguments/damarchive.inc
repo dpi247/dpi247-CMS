@@ -59,16 +59,19 @@ function dpidam_argument_damarchive_context($arg = NULL, $conf = NULL, $empty = 
   $data = NULL;
 
   // GET
-  $result = drupal_http_request($this->getSourceUrl(), array('timeout' => $timeout));
+  $result = drupal_http_request($request.$request_args, array('timeout' => $timeout));
   $file_name = FALSE;
   module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
   if (dpicommons_is_http_request_successfull($result)) {
     if ($importer_name = dpi_variable_get('dpidam_archive_importer', '')) {
       $importer = dpimport_api_get_importer_settings($importer_name);
       $dispatcher_settings = unserialize($importer->dispatcher_settings);
-      $file_name = 'dam_archive_'.rand().'.zip';
+      $tmp_file_name = 'dam_archive_'.rand().'.zip';
+      $temp_path = 'importer://'.$dispatcher_settings['source_folder'].'/'.$tmp_file_name;
       // Save the file in the importer folder
-      file_put_contents($dispatcher_settings['temp_folder'].'/'.$file_name, $result->data);
+      if (file_put_contents($temp_path, $result->data)) {
+        $file_name = $tmp_file_name;
+      }
     }
   }
 

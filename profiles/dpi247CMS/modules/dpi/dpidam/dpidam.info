@@ -3,4 +3,5 @@ description = DAM archives recovery and synchronisation
 package = DPI
 core = 7.x
 
+dependencies[] = dpicontenttypes
 dependencies[] = dpiexport

@@ -4,11 +4,12 @@
  * Cron task to post packages to be archived in the DAM
  */
 function dpidam_post_packages_cron() {
+  return;
   $max_number = dpi_variable_get('dpidam_cronmaxnumber', 50);
 
   // Packages
   print '<strong>'.t('Post packages :').'</strong><br>';
-  $db_packages = db_select('dpidam_packagetosend', 'dp')
+  $db_packages = db_select('dpidam_packagestosend', 'dp')
     ->fields('dp', array('nid'))
     ->orderBy('dp.timestamp', 'ASC')
     ->range(0, $max_number)
@@ -29,6 +30,7 @@ function dpidam_post_packages_cron() {
  * Cron task to post URLs to be updated in the DAM
  */
 function dpidam_post_urls_cron() {
+  return;
   $max_number = dpi_variable_get('dpidam_cronmaxnumber', 50);
 
   // URL

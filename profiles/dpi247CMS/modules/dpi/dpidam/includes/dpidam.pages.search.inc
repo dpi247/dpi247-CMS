@@ -526,6 +526,7 @@ function _dpidam_page_admin_search_get_default_values() {
     'level' => 1,
     'sort' => 'none',
     'datefilter' => 'none',
+    'withthumbs' => 0,
   );
 }
 

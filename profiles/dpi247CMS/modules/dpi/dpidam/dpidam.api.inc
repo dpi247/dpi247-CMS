@@ -13,6 +13,7 @@ function dpidam_api_get_search_profiles() {
   $profiles = array();
   foreach ($db_profiles as $db_profile) {
     $profiles[$db_profile->pid] = (array)$db_profile;
+    $profiles[$db_profile->pid]['settings'] = unserialize($profiles[$db_profile->pid]['settings']);
   }
   return $profiles;
 }
@@ -39,6 +40,7 @@ function dpidam_api_get_search_profile($pid) {
   $profile = FALSE;
   foreach ($db_profiles as $db_profile) {
     $profile = (array)$db_profile;
+    $profile['settings'] = unserialize($profile['settings']);
     break;
   }
   return $profile;

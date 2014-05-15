@@ -357,4 +357,7 @@ function dpidam_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'arguments') {
     return 'plugins/arguments';
   }
+  if ($module == 'dpimport' && $plugin == 'importer') {
+    return 'plugins/dpimport/' . $plugin;
+  }
 }

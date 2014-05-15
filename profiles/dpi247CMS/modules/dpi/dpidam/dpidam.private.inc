@@ -254,9 +254,12 @@ function _dpidam_get_dam_image($id, $size) {
   $dam_image_subdirectory = dpi_variable_get('dpidam_image_subdirectory', '');
   $ressource = $id.'_'.$size;
 
+  $dam_file = NULL;
+
   if(preg_match('/^[d]-(\d{8})-[A-Z0-9]{6}_(high|thS|thM)/', $ressource)) {
     $dam_url .= '/'.$ressource.'.jpg';
     $dam_file = dpicontenttypes_api_create_or_update_file($dam_url, $dam_image_subdirectory, 'public', 'dpidam');
-    return $dam_file;
   }
+
+  return $dam_file;
 }

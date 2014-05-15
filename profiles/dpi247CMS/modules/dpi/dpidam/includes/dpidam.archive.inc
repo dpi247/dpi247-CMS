@@ -255,8 +255,8 @@ function dpidam_archive_import_node($importer_name, $file_name) {
           $importer->dpimport_preview = TRUE;
           $importer->dpimport_preview_norender = TRUE;
 
-          if ($importer != NULL){
-            $returns = dpimport_process_import_file($importer, $file_name);
+          if ($importer != NULL && $dispatcher != NULL) {
+            $returns = dpimport_process_import_file($importer, $dispatcher, $file_name);
           } else {
             //Unknown importer
             $returns[] = array('error' => TRUE, 'error_msg' => t('Unknown importer'));
@@ -266,7 +266,6 @@ function dpidam_archive_import_node($importer_name, $file_name) {
         //Keep the node even if it has no destination
         if (isset($returns[0]) && !$returns[0]['error']){
           $node = $returns[0]['tempnode'];
-          $node->damarchive = TRUE;
         }
       }
     }

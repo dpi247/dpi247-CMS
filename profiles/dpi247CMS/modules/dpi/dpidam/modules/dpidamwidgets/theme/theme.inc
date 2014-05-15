@@ -20,18 +20,27 @@ function dpidamwidgets_preprocess_damsearch_render_result(&$vars) {
 
   $get_thumb_url = dpi_variable_get('dpidam_search_thumbnails_URL', '');
   if($thumbnail_name && $get_thumb_url) {
-    $small = _dpidam_get_dam_image($thumbnail_name, 'thS');
-    $medium = _dpidam_get_dam_image($thumbnail_name, 'thM');
-    $big = _dpidam_get_dam_image($thumbnail_name, 'high');
-    $vars['thumbnail']['small'] = '<img src="/'.$small["filepath"].'" />';
-    $vars['thumbnail']['medium'] = '<img src="/'.$medium["filepath"].'" />';
-    $vars['thumbnail']['big'] = '<img src="/'.$big["filepath"].'" />';
+    if ($small = _dpidam_get_dam_image($thumbnail_name, 'thS')) {
+      $vars['thumbnail']['small'] = theme('image', array('attributes' => array(), 'path' => $small->uri));
+    } else {
+      $vars['thumbnail']['small'] = '';
+    }
+    if ($medium = _dpidam_get_dam_image($thumbnail_name, 'thM')) {
+      $vars['thumbnail']['medium'] = theme('image', array('attributes' => array(), 'path' => $medium->uri));
+    } else {
+      $vars['thumbnail']['medium'] = '';
+    }
+    if ($big = _dpidam_get_dam_image($thumbnail_name, 'high')) {
+      $vars['thumbnail']['big'] = theme('image', array('attributes' => array(), 'path' => $big->uri));
+    } else {
+      $vars['thumbnail']['big'] = '';
+    }
   }
 
-  $vars['prodId'] = (is_array($result->prodId)) ? $result->prodId : FALSE;
-  $vars['parutions'] = (is_array($result->parutions)) ? $result->parutions : FALSE;
-  $vars['zone'] = (is_array($result->zone)) ? $result->zone : FALSE;
-  $vars['newsroom'] = (is_array($result->newsroom)) ? $result->newsroom : FALSE;
+  $vars['prodId'] = (isset($result->prodId) && is_array($result->prodId)) ? $result->prodId : FALSE;
+  $vars['parutions'] = (isset($result->parutions) && is_array($result->parutions)) ? $result->parutions : FALSE;
+  $vars['zone'] = (isset($result->zone) && is_array($result->zone)) ? $result->zone : FALSE;
+  $vars['newsroom'] = (isset($result->newsroom) && is_array($result->newsroom)) ? $result->newsroom : FALSE;
 
   $url = FALSE;
   if ($url) {
@@ -58,7 +67,7 @@ function dpidamwidgets_preprocess_damsearch_render_result(&$vars) {
 }
 
 function dpidamwidgets_preprocess_damsearch_render_facet(&$vars) {
-  $facet = $vars["facet"];
+  $facet = $vars['facet'];
 
   $vars['facet_dname'] = $facet->dname;
   $vars['facet_url'] = $facet->url['url'];
@@ -69,9 +78,10 @@ function dpidamwidgets_preprocess_damsearch_render_facet(&$vars) {
 
 function dpidamwidgets_preprocess_damsearch_render_facet_term(&$vars) {
   $term = $vars['term'];
+
   $vars['term_display'] = $term->display;
   $vars['term_frequency'] = $term->freq;
-  $vars['term_url'] = $term->url["url"];
+  $vars['term_url'] = $term->url['url'];
 
   if (isset($term->active)) {
     $vars['term_active'] = $term->active;

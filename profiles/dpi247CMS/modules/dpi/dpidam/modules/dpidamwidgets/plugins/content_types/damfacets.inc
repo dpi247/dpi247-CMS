@@ -10,6 +10,9 @@ $plugin = array(
   'icon' => 'icon_search.png',
   'description' => t('The Facets results of a DAM search.'),
   'category' => t('Widgets'),
+  'edit form' => array(
+    'dpidamwidgets_damfacets_content_type_view_form' => 'DAM Facets',
+  ),
   'defaults' => array(
     'profile' => 'default',
   ),
@@ -18,7 +21,7 @@ $plugin = array(
 /**
  * Returns an edit form for custom type settings.
 */
-function dpidamwidgets_damfacets_content_type_edit_form(&$form, &$form_state) {
+function dpidamwidgets_damfacets_content_type_view_form($form, $form_state) {
   $conf = $form_state['conf'];
 
   $profiles = dpidam_api_get_search_profiles();
@@ -34,12 +37,14 @@ function dpidamwidgets_damfacets_content_type_edit_form(&$form, &$form_state) {
     '#options' => $profile_options,
     '#default_value' => $conf['profile'],
   );
+
+  return $form;
 }
 
 /**
  * Submit handler for search form.
  */
-function dpidamwidgets_damfacets_content_type_edit_form_submit(&$form, &$form_state) {
+function dpidamwidgets_damfacets_content_type_view_form_submit($form, &$form_state) {
   // Copy everything from our defaults.
   foreach (array_keys($form_state['plugin']['defaults']) as $key) {
     $form_state['conf'][$key] = $form_state['values'][$key];

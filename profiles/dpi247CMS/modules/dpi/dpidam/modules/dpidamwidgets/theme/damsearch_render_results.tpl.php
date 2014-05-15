@@ -19,8 +19,10 @@
 ?>
 <!--  Liste des réponses du DAM -->
 <ul class="article-group">
-	<?php foreach ($response["results"] as $result) {
-	  print theme('damsearch_render_result', $result, $profile);
-   } ?>
+  <?php if (isset($response) && isset($response['results']) && is_array($response['results'])) : ?>
+  	<?php foreach ($response['results'] as $result) : ?>
+      <?php print theme('damsearch_render_result', array('result' => $result, 'profile' => $profile)); ?>
+    <?php endforeach; ?>
+  <?php endif; ?>
 </ul>
 <!--  /Liste des réponses du DAM -->

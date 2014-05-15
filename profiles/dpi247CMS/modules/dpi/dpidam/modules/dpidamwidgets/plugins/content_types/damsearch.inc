@@ -10,17 +10,23 @@ $plugin = array(
   'icon' => 'icon_search.png',
   'description' => t('The results of a DAM search.'),
   'category' => t('Widgets'),
+  'edit form' => array(
+    'dpidamwidgets_damsearch_content_type_view_form' => 'DAM Search',
+  ),
   'defaults' => array(
-    'profile' => 'default',
     'display_results' => TRUE,
+    'profile' => 'default',
   ),
 );
 
-/**
- * Returns an edit form for custom type settings.
-*/
-function dpidamwidgets_damsearch_content_type_edit_form(&$form, &$form_state) {
+function dpidamwidgets_damsearch_content_type_view_form($form, $form_state) {
   $conf = $form_state['conf'];
+
+  $form['display_results'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display results'),
+    '#default_value' => $conf['display_results'],
+  );
 
   $profiles = dpidam_api_get_search_profiles();
   $profile_options = array();
@@ -36,16 +42,13 @@ function dpidamwidgets_damsearch_content_type_edit_form(&$form, &$form_state) {
     '#default_value' => $conf['profile'],
   );
 
-  $form["display_results"] = array(
-    '#type' => 'checkbox',
-    '#default_value' => $conf["display_results"],
-  );
+  return $form;
 }
 
 /**
  * Submit handler for search form.
  */
-function dpidamwidgets_damsearch_content_type_edit_form_submit(&$form, &$form_state) {
+function dpidamwidgets_damsearch_content_type_view_form_submit($form, &$form_state) {
   // Copy everything from our defaults.
   foreach (array_keys($form_state['plugin']['defaults']) as $key) {
     $form_state['conf'][$key] = $form_state['values'][$key];
@@ -69,7 +72,7 @@ function dpidamwidgets_damsearch_content_type_render($subtype, $conf, $panel_arg
 /**
  * Search form
  */
-function dpidamwidgets_damsearch_content_type_search_form($form_state, $conf) {
+function dpidamwidgets_damsearch_content_type_search_form($form, $form_state, $conf) {
   $form = array();
 
   if ($conf['profile'] == 'default') {
@@ -91,7 +94,8 @@ function dpidamwidgets_damsearch_content_type_search_form($form_state, $conf) {
 function dpidamwidgets_damsearch_content_type_search_form_submit(&$form, $form_state) {
   $values = $form_state['values'];
   list($redirect_path, $redirect_args) = _dpidamwidgets_damsearch_get_redirect_url($values);
-  drupal_goto($redirect_path, $redirect_args);
+  $goto_options = array('query' => $redirect_args);
+  drupal_goto($redirect_path, $goto_options);
 }
 
 /**
