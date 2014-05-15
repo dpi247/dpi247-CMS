@@ -1,19 +1,19 @@
 <?php 
+
 /**
- * 
  * Static class for log management
- * @author asl
  *
+ * @author asl
  */
 class Logger{
   private static $error = array();
   private static $warning = array();
   public static $execution = NULL;
   private static $currentexecution = NULL;
-  
+
   /**
-   * 
    * Add a Warning to the warning list
+   *
    * @param String $type
    * @param Integer $status
    * @param String $code
@@ -23,10 +23,10 @@ class Logger{
     self::$warning[] = new LoggerLog($type, $status, $code, $message);
     self::logExecution($type, FALSE, $status, $code, $message);
   }
-  
+
   /**
-   * 
    * Add an Error to the error list
+   *
    * @param String $type
    * @param Integer $status
    * @param String $code
@@ -36,10 +36,10 @@ class Logger{
     self::$error[] = new LoggerLog($type, $status, $code, $message);
     self::logExecution($type, FALSE, $status, $code, $message);
   }
-  
+
   /**
-   * 
    * Create an ExecutionLog and add it to the current execution log. Set current if specified
+   *
    * @param String $type
    * @param Boolean $current
    * @param Integer $status
@@ -56,18 +56,16 @@ class Logger{
       self::$currentexecution = $executionlog;
     }
   }
-  
+
   /**
-   * 
    * Initialize Execution
    */
   private static function initializeExecution(){
     self::$execution = new LoggerLog('base', 1, '000', 'OK');
     self::$currentexecution = self::$execution;
   }
-  
+
   /**
-   * 
    * Set the currentexecution to the previous execution
    */
   public static function setCurrentToPreviousExecution(){
@@ -75,9 +73,8 @@ class Logger{
       self::$currentexecution = self::$currentexecution->getParent();
     }
   }
-  
+
   /**
-   * 
    * Return execution
    */
   public static function getLogExecution(){
@@ -86,43 +83,42 @@ class Logger{
     }
     return self::$execution;
   }
-  
+
   public static function getStatusOfLastLogExecution(){
     $status = 1;
     if (self::error()){
       $logexecution = self::getLogExecution();
       $last_element = end($logexecution->children);
-      
+
       $status = $last_element->globalStatus();
-      
+
     }
     return $status;
   }
-  
+
   /**
-   * 
    * Return the array of errors
    */
   public static function getLogError(){
     return self::$error;
   }
+
   /**
-   * 
    * Return TRUE if an error is logged
    * @return boolean $error_exists
    */
   public static function error(){
     $error_exists = FALSE;
-    foreach (self::$error as $loggerlog){
-      if ($loggerlog->getStatus() == 0){
+    foreach (self::$error as $loggerlog) {
+      if ($loggerlog->getStatus() == 0) {
         $error_exists = TRUE;
         break;
       }
     }
     return $error_exists;
   }
+
   /**
-   * 
    * Return the log themed in html
    */
   public static function printLog(){
@@ -139,23 +135,24 @@ class Logger{
     return theme('dpimport_log_recursif', array('children' => array($base)));
   }
 }
+
 /**
- * 
  * Class representing a Log
- * @author asl
  *
+ * @author asl
  */
-class LoggerLog{
-  
+class LoggerLog {
+
   public $type;
   public $status;
   public $code;
   public $message;
   public $children = NULL;
   private $parent = NULL;
+
   /**
-   * 
    * Constructor
+   *
    * @param String $type
    * @param Integer $status
    * @param String $code
@@ -167,43 +164,45 @@ class LoggerLog{
     $this->code = $code;
     $this->message = $message;
   }
+
   /**
-   * 
    * Add a children to the log
+   *
    * @param LoggerLog $executionlog
    */
   public function addChildren($executionlog){
     $this->children[] = $executionlog;
     $executionlog->setParent($this);
   }
+
   /**
-   * 
    * Set parent to $parent
+   *
    * @param LoggerLog $parent
    */
   public function setParent($parent){
     $this->parent = $parent;
   }
-  
+
   /**
-   * 
    * Return parent
    */
   public function getParent(){
     return $this->parent;
   }
+
   /**
-   * 
    * Return status
+   *
    * @return number
    */
   public function getStatus(){
     return $this->status;
   }
-  
+
   /**
-   * 
    * Return global status of a LoggerLog
+   *
    * @return Integer $status
    */
   public function globalStatus(){
@@ -214,7 +213,7 @@ class LoggerLog{
     }
     return $status;
   }
-  
+
   public function getChildrenStatus(){
     $status = 1;
     foreach ($this->children as $logger){

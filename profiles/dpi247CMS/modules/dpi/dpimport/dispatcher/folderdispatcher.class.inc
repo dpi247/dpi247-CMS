@@ -1,6 +1,6 @@
 <?php 
 
-class FolderDispatcher extends Dispatcher{
+class FolderDispatcher extends Dispatcher {
 
   protected $source_folder;
 
@@ -29,10 +29,12 @@ class FolderDispatcher extends Dispatcher{
    *
    * @return array $files
    */
-  public function extractSources(){
+  public function extractSources($file_name = NULL) {
     $files = array();
 
-    $file_name = arg(3);
+    if (!$file_name) {
+      $file_name = arg(3);
+    }
 
     if ($file_name != NULL){
       // Get one file
