@@ -571,6 +571,11 @@ function typed_entity_load($typed_id) {
       $entity->entity_id = $typed_id;
       return $entity;
     }
+  } elseif ($entity_type == 'node' && $entity_id) {
+    // This must be a prenode
+    $prenode = new Prenode($entity_id);
+    $entity = $prenode->getNode();
+    return $entity;
   }
   return NULL;
 }

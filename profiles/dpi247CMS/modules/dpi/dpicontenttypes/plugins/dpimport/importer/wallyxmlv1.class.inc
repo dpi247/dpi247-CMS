@@ -12,7 +12,7 @@ class WallyXmlV1 extends PackageHelper {
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
 
-    if (!Logger::error()){
+    if (!Logger::error()) {
       $this->savePackage($dom, $package);
     }
 
@@ -63,7 +63,7 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function getCallback($dom){
     $callback = strtolower($dom->nodeName);
-    if (get_class($dom) == 'DOMElement' && $dom->hasAttribute('xsi:type') && $dom->nodeName != 'Package' && $dom->getAttribute('xsi:type') != 'xs:string'){
+    if (get_class($dom) == 'DOMElement' && $dom->hasAttribute('xsi:type') && $dom->nodeName != 'Package' && $dom->nodeName != 'MainStory' && $dom->getAttribute('xsi:type') != 'xs:string'){
       $callback = strtolower($dom->getAttributeNode('xsi:type')->value);
     }
     return $callback;
