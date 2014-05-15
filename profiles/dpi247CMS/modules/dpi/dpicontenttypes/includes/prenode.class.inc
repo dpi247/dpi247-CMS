@@ -11,23 +11,33 @@ class Prenode {
     } else {
       $this->id = $id;
       $this->getcachednode();
-    } 
+    }
   }
   
   /**
    * Get node from cache
    */
   protected function getcachednode(){
-    $result = db_query("SELECT data FROM {dpicontenttypes_prenode_object_cache} WHERE id = :id", array(':id' => $this->id));
+    $result = db_select('dpicontenttypes_prenode_object_cache', 'dpoc')
+      ->fields('dpoc', array('data'))
+      ->condition('dpoc.id', $this->id)
+      ->execute();
     foreach ($result as $record){
       $this->node = unserialize($record->data);
       break;
     }
   }
+
+  /**
+   * Get the prenode ID
+   */
+  public function getID() {
+    return $this->id;
+  }
   
   /**
-   * 
    * Add node to prenode
+   *
    * @param Object $node
    */
   public function setNode($node){
@@ -35,7 +45,6 @@ class Prenode {
   }
   
   /**
-   * 
    * Get node from prenode
    */
   public function getNode(){
@@ -46,7 +55,6 @@ class Prenode {
    * Save prenode in db
    */
   public function save(){
-
     //Save prenode id and title in prenode table
     db_merge('dpicontenttypes_prenode')
     ->key(array('id' => $this->id))
@@ -67,7 +75,6 @@ class Prenode {
   }
   
   /**
-   * 
    * Produce the render of the prenode and save it to the database
    */
   public function nodeRender(){
@@ -90,8 +97,8 @@ class Prenode {
   }
   
   /**
-   * 
    * Save the render in the database
+   *
    * @param String $render
    */
   protected function saveRender($render){   
@@ -106,7 +113,6 @@ class Prenode {
   }
   
   /**
-   * 
    * Produce de render of a destination of the prenode and save it to the database
    * @param Integer $destination
    */
