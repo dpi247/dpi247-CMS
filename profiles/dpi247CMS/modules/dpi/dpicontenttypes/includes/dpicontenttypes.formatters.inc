@@ -63,7 +63,7 @@ function dpicontenttypes_field_formatter_view_simple_html_tag_formatter($entity_
 
   foreach ($items as $delta => $item) {
     $element[$delta] = array(
-      '#markup' => $item['safe_value'],
+      '#markup' => isset($item['safe_value']) ? $item['safe_value'] : check_plain($item['value']),
       '#prefix' => '<'.$tag.' class="'.$class.'">',
       '#suffix' => '</'.$tag.'>'
     );
