@@ -55,6 +55,26 @@ function dpimport_process_import($importer, $dispatcher) {
 }
 
 /**
+ * Process a single file
+ */
+function dpimport_process_import_file($importer, $dispatcher, $file_name) {
+  $return = FALSE;
+
+  $sources = $dispatcher->extractSources($file_name);
+  if ($sources != NULL) {
+    foreach ($sources as $source) {
+      if ($source['temp_source'] != NULL) {
+        $dispatcher->process($source['temp_source']);
+      }
+      $dispatcher->moveSource($source);
+    }
+    $return = $importer->render();
+  }
+
+  return $return;
+}
+
+/**
  * Delete old files
  */
 function dpimport_deleteoldfiles($importers) {
