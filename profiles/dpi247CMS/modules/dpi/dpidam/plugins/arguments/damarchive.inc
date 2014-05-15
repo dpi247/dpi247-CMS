@@ -82,6 +82,17 @@ function dpidam_argument_damarchive_context($arg = NULL, $conf = NULL, $empty = 
       // Import the zip
       if ($node = dpidam_archive_import_node($importer_name, $file_name)) {
         $node->preview = TRUE;
+
+        // Simulate a node_load
+        $queried_entities = array($node->nid => &$node);
+        field_attach_load('node', $queried_entities);
+
+        // Call hook_entity_load().
+        foreach (module_implements('entity_load') as $module) {
+          $function = $module . '_entity_load';
+          $function($queried_entities, 'node');
+        }
+
         $dam_nodes[$arg] = $node;
       }
     }
