@@ -59,7 +59,7 @@ function dpidamwidgets_preprocess_damsearch_render_result(&$vars) {
   $vars['snippet'] = (isset($result->preview) && !empty($result->preview)) ? $result->preview : '';
   $vars['info'] = $result->pDate[0];
 
-  if ($vars['thumbnail']['small']) {
+  if (isset($vars['thumbnail']['small']) && $vars['thumbnail']['small']) {
     $vars['img'] = $vars['thumbnail']['small'];
   } else {
     $vars['img'] = '';

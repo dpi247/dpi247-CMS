@@ -245,9 +245,11 @@ function _dpidamwidgets_extract_facets($facets) {
   $facets_array = array();
   $facets = explode("::", $facets);
   foreach ($facets as $facet) {
-    $facet_array = explode(":", $facet);
-    $facet_array[1] = explode(",", $facet_array[1]);
-    $facets_array[$facet_array[0]] = $facet_array[1];
+    if (!empty($facet)) {
+      $facet_array = explode(":", $facet);
+      $facet_array[1] = explode(",", $facet_array[1]);
+      $facets_array[$facet_array[0]] = $facet_array[1];
+    }
   }
   return $facets_array;
 }
@@ -337,7 +339,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
  */
 function _dpidamwidgets_compute_facet_url(&$facets) {
   $argtemporigin = _filter_xss_array($_GET);
-  $get_facets = isset($_GET['facets']) ? $_GET['facets'] : array();
+  $get_facets = isset($_GET['facets']) ? $_GET['facets'] : '';
 
   foreach ($facets as $fkey => &$facet) {
     /* Urls of Terms - ADD or REMOVE */
