@@ -7,12 +7,20 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
 
-
 /**
  * Implementation of hook_menu()
  */
 function dpicontenttypes_menu(){
   $items = array();
+
+  $items['admin/dpi247/external-files'] = array(
+    'title' => 'External files management',
+    'description' => 'This concerns files fetched from external services, like RSS feeds',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicontenttypes_form_page_external_files_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/dpicontenttypes.pages.admin.inc',
+  );
 
   $dpiproperties_uri = 'dpiproperties/%dpiproperties';
   $dpiproperties_uri_argument_position = 1;
@@ -97,6 +105,14 @@ function dpicontenttypes_menu(){
   );
 
   return $items;
+}
+
+/**
+ * Implementation of hook_cron
+ */
+function dpicontenttypes_cron() {
+  // Remove old external files
+  _dpicontenttypes_cron_remove_external_files();
 }
 
 /**
@@ -555,6 +571,11 @@ function typed_entity_load($typed_id) {
       $entity->entity_id = $typed_id;
       return $entity;
     }
+  } elseif ($entity_type == 'node' && $entity_id) {
+    // This must be a prenode
+    $prenode = new Prenode($entity_id);
+    $entity = $prenode->getNode();
+    return $entity;
   }
   return NULL;
 }

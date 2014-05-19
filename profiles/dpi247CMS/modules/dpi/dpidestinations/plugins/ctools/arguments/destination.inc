@@ -31,14 +31,17 @@ function dpidestinations_destination_context($arg = NULL, $conf = NULL, $empty =
   module_load_include('inc', 'ctools','plugins/arguments/term');
   $context = ctools_term_context($arg , $conf , $empty);
 
-  $task=$conf['task'];
-  $handlers = page_manager_load_sorted_handlers($task, '', TRUE);
+  if (isset($conf['task'])) {
+    $task = $conf['task'];
+    $handlers = page_manager_load_sorted_handlers($task, '', TRUE);
 
-  //@todo: we shouldn't hard code the argument_destination_1 name
-  $id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array("argument_destination_1"=> $context), array());
+    module_load_include('inc', 'ctools','includes/context-task-handler');
+    //@todo: we shouldn't hard code the argument_destination_1 name
+    $id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array("argument_destination_1"=> $context), array());
 
-  if (isset($handlers[$id])) {
-    $context->data->handler = $handlers[$id];
+    if (isset($handlers[$id])) {
+      $context->data->handler = $handlers[$id];
+    }
   }
 
   return $context;

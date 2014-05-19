@@ -67,7 +67,8 @@ function dpicommons_init() {
     register_shutdown_function('_dpicommons_shutdown_function');
   }
 }
-/*
+
+/**
  * dpilog is used to log some actions (user interactions and system actions).
  * 
  * dpilog is more powerfull than watchdog since you have more granularit to groups log and have the ability to save some variable and one id.

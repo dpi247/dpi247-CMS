@@ -124,7 +124,7 @@ function dpilog_menu() {
   );
 
   $items['admin/dpi247/dpilogs/configure/watchdog/delete/%'] = array(
-    'title' => 'Delete module configuration for wallylog',
+    'title' => 'Delete module configuration for dpilog',
     'page callback' => 'dpilog_watchdog_delete_rule',
     'page arguments' => array(6),
     'access arguments' => array('administer site configuration'),

@@ -111,7 +111,7 @@ function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
       'view_mode' => $view_mode,
       'fields' => array(
         'date' => $date,
-        'comment_count' => $node->comment_count,
+        'comment_count' => isset($node->comment_count) ? $node->comment_count : 0,
         'embeds_count' => dpicontenttypes_api_get_embeds_count_by_type($node),
       ),
     );

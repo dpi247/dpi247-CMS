@@ -1,0 +1,3 @@
+<?php
+
+module_load_include('inc', 'dpiexport','dpiexport.api');
