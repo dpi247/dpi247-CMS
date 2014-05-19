@@ -12,8 +12,17 @@ function cciadmin_api_load_soapclient($wsdl_uri) {
       $client = new SoapClient($wsdl_uri, array('features' => SOAP_SINGLE_ELEMENT_ARRAYS, 'trace' => TRUE));
       return $client;
     } catch (SoapFault $exception) {
-      drupal_set_message(t('WebService error while creating SOAP client: \n FAULTSTRING: @faultstring\n FAULTCODE: @faultcode', array('@faultstring' => $exception->faultstring, '@faultcode' => $exception->faultcode)), 'error');
+      cciadmin_api_output_webservice_error('WebService error while creating SOAP cleint', $exception->faultstring, $exception->faultcode);
     }
   }
   return FALSE;
+}
+
+/**
+ * Output a CCI WebService error message
+ */
+function cciadmin_api_output_webservice_error($human_message, $error_message, $error_code) {
+  drupal_set_message(t($human_message).'<br />'.
+    t('Error message : @faultstring', array('@faultstring' => $exception->faultstring)).'<br />'.
+    t('Error code : @faultcode', array('@faultcode' => $exception->faultcode)), 'error');
 }
