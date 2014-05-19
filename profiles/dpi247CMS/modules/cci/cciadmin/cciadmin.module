@@ -1,0 +1,41 @@
+<?php
+
+module_load_include('inc', 'cciadmin', 'cciadmin.api');
+
+define('CCI_ADMIN_PATH', 'admin/cci');
+
+/**
+ * @file cciadmin.module
+*/
+
+/**
+ * Implementation of hook_menu().
+*/
+function cciadmin_menu() {
+  $items = array();
+  $items[CCI_ADMIN_PATH] = array(
+    'title' => 'CCI Newsgate',
+    'description' => t('CCI administration links.'),
+    'page callback' => 'system_admin_menu_block_page',
+    'access callback' => TRUE,
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission().
+ */
+function cciadmin_permission() {
+  return array(
+    'administer cci' =>  array(
+      'title' => t('Access CCI-NG administration pages'),
+    ),
+    'edit synchronization datas' => array(
+      'title' => t('Edit CCI-NG synchronization datas'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
