@@ -1,0 +1,82 @@
+<?php 
+
+function dpiesitest_block_info(){
+  $blocks['dpiesitest_no_cache'] = array(
+    'info' => t('ESI TEST: No cache'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['dpiesitest_cache_user'] = array(
+    'info' => t('ESI TEST: Cache per user'),
+    'cache' => DRUPAL_CACHE_PER_USER,
+  );
+  $blocks['dpiesitest_cache_user_page'] = array(
+    'info' => t('ESI TEST: Cache per user per page'),
+    'cache' => DRUPAL_CACHE_PER_PAGE | DRUPAL_CACHE_PER_USER  ,
+  );
+  $blocks['dpiesitest_cache_role'] = array(
+    'info' => t('ESI TEST: Cache per role'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['dpiesitest_cache_role_page'] = array(
+    'info' => t('ESI TEST: Cache per role per page'),
+    'cache' => DRUPAL_CACHE_PER_PAGE | DRUPAL_CACHE_PER_ROLE  ,
+  );
+  $blocks['dpiesitest_global'] = array(
+    'info' => t('ESI TEST: Cache global'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+  );
+  $blocks['dpiesitest_cache_page'] = array(
+    'info' => t('ESI TEST: Cache per page'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  return $blocks;
+}
+
+function dpiesitest_block_view($delta){
+  global $user;
+  drupal_add_css(".dpiesitest dt{font-weight:bold;}",array('type'=>"inline"));
+  $blocks_info=dpiesitest_block_info();
+  $username=$user?$user->name:"Anonymous";
+switch ($delta){
+    default:
+      $block['subject'] = $blocks_info[$delta]["info"];
+      $block['content'] = '<div class="dpiesitest"><dl>';
+      $block['content'] .="<dt>Build time</dt><dd>".date("Y-m-d h:i:s")."</dd>";
+      $block['content'] .="<dt>Page</dt><dd>".$_GET['q']."</dd>";
+      $block['content'] .="<dt>Page</dt><dd>".print_r($_GET,1)."</dd>";
+      $block['content'] .="<dt>User that generate content</dt><dd>".$username."</dd>";
+      $block['content'] .="<dt>User role from original user</dt><dd>".print_r($user->roles,1)."</dd>";
+      $block['content'] .="<dt>Granularity</dt><dd>".$blocks_info[$delta]["info"]."</dd>";
+      $block['content'] .= "</dl></div>";
+      break;
+  }
+  switch ($delta){
+    case 'dpiesitest_global':
+      $block['content'] ="<h4>hello".$user->name."</h4>".$block['content'];
+      
+      
+      break;
+    default:
+      $block['subject'] = $blocks_info[$delta]["info"];
+   
+      break;
+  }
+  
+  
+  return $block;
+  
+}
+
+
+
+
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function dpiesitest_ctools_plugin_directory($module, $plugin) {
+   if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/ctools/content_types';
+  }
+  
+}

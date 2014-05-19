@@ -84,3 +84,108 @@ function dpicache_schema() {
 
   return $schemas;
 }
+
+
+
+
+
+
+
+
+/**
+ * Implements hook_schema().
+ */
+function dpicache_schema_alter(&$schema = array()) {
+  // Add columns to the block schema, to record if a block should be processed
+  // by ESI, and its TTL.
+  // Adding to the schema is the most performant way to integrate, because the
+  // data is immediately available with no extra lookups.
+  $schema['block']['fields']['esi_enabled'] = array(
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => FALSE,
+    'default' => 0,
+    'description' => 'Should block be served via ESI.',
+  );
+  $schema['block']['fields']['esi_ttl'] = array(
+    'type' => 'int',
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'Time-to-live (in seconds) for the block contents when served via ESI.',
+  );
+  $schema['block']['fields']['esi_roles'] = array(
+    'type' => 'blob',
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'Esi role visibility.',
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function dpicache_install() {
+  $schema = dpicache_schema_alter();
+  foreach($schema['block']['fields'] as $field_name => $spec) {
+    db_add_field('block', $field_name, $spec);
+  }
+
+  // @TODO: iterate through the variable "dpicache_config" and push to the
+  // block table.
+  if ($old_configuration = variable_get('dpicache_config', array())) {
+    foreach ($old_configuration as $key => $config) {
+      // The key is $module_$delta...which unfortunately makes things slightly
+      // trickier...Is "dpicache_foo_bar" "esi":"block_foo_bar" or
+      // "dpicache":"foo_bar"? Hard to say!
+
+      // Remove the old variable once it's migrated.
+      variable_del('dpicache_config');
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dpicache_uninstall() {
+  // Remove the columns that were added to the 'block' table in hook_install().
+  $schema = dpicache_schema_alter();
+  foreach($schema['block']['fields'] as $field_name => $spec) {
+    db_drop_field('block', $field_name);
+  }
+
+  // Remove obsolete variables.
+  variable_del('dpicache_default_ttl');
+}
+
+function dpicache_update_7001() {
+ 
+  $schema['block']['fields']['esi_enabled'] = array(
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => FALSE,
+    'default' => 0,
+    'description' => 'Should block be served via ESI.',
+  );
+  db_add_field( 'block', 'esi_enabled', $schema['block']['fields']['esi_enabled']);
+  
+  $schema['block']['fields']['esi_ttl'] = array(
+    'type' => 'int',
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'Time-to-live (in seconds) for the block contents when served via ESI.',
+  );
+  db_add_field( 'block', 'esi_ttl', $schema['block']['fields']['esi_ttl']);
+  
+  $schema['block']['fields']['esi_roles'] = array(
+    'type' => 'blob',
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'Esi role visibility.',
+  );
+  db_add_field( 'block', 'esi_roles', $schema['block']['fields']['esi_roles']);
+  
+}
+

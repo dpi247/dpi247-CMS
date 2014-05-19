@@ -1,0 +1,4 @@
+name = "Dpi Esi Test"
+description = "Provides some blocks, pane to test ESI config."
+core = 7.x
+package = "Dpi developpement"
