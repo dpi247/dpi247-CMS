@@ -47,7 +47,7 @@ function ccimapping_menu() {
 /**
  * Implementation of the hook_theme
  */
-function ccimapping_theme(){
+function ccimapping_theme() {
   $path = drupal_get_path('module', 'ccimapping');
   $base = array(
     'file' => 'theme.inc',
@@ -55,7 +55,7 @@ function ccimapping_theme(){
   );
   return array(
     'ccimapping_typeselector' => $base + array(
-      'variables' => array('type'),
+      'variables' => array('type' => ''),
       'template' => 'ccimapping-typeselector',
     ),
   );
