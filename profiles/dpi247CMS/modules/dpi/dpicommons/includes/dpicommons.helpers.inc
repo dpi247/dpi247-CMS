@@ -128,3 +128,25 @@ function dpicommons_format_xml_string($xml) {
 
   return $result;
 }
+
+function dpicommons_validate_xml($dom, $xsd_path) {
+  set_error_handler('_dpicommons_validate_xml_error', E_WARNING);
+  return $dom->schemaValidate($xsd_path);
+}
+
+function _dpicommons_validate_xml_error($errno, $errstr, $errfile = '', $errline = 0, $errcontext = array()) {
+  if (strpos($errstr, 'DOMDocument::schemaValidate') === 0) {
+    switch ($errno) {
+      case 1:
+        $mess_type = 'error';
+        break;
+      case 2:
+        $mess_type = 'warning';
+        break;
+      default:
+        $mess_type = 'status';
+        break;
+    }
+    drupal_set_message(check_plain($errstr), $mess_type);
+  }
+}
