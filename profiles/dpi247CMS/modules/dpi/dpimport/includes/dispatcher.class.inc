@@ -119,7 +119,7 @@ abstract class Dispatcher{
    *
    * @param string $source
    */
-  public function process($source){
+  public function process($source) {
     $handle = fopen(drupal_realpath($source), "r");
 
     if (!$handle) {
@@ -133,7 +133,10 @@ abstract class Dispatcher{
 
       // Checkfile
       $importer = $this->getImporter();
-      if ($importer->checkXml($dom)){
+      if ($importer->checkXml($dom)) {
+        // Allow to alter the XML before treatment
+        module_invoke_all('dpimport_xml_preprocess', $dom, $importer);
+
         // Process file
         $this->processDom($dom);
       }
