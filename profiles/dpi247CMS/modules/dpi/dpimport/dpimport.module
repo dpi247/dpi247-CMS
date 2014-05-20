@@ -9,6 +9,8 @@ module_load_include('inc', 'dpimport','dpimport.private');
 function dpimport_menu(){
   $items = array();
 
+  $dpi_path_size = sizeof(explode('/', DPI_ADMIN_PATH));
+
   //dpimport/process/dpixml (cas folder)
   //dpimport/process/dpixml/fichier.zip (cas fichier)
   //dpimport/process/url
@@ -23,7 +25,7 @@ function dpimport_menu(){
     'type'             => MENU_LOCAL_TASK,
   );
 
-  $items['admin/config/dpimport'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport'] = array(
     'title'            => 'DPImport',
     'description'      => 'Parent item import',
     'position'         => 'left',
@@ -34,7 +36,7 @@ function dpimport_menu(){
     'file path'        => drupal_get_path('module', 'system'),
   );
 
-  $items['admin/config/dpimport/import'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport/import'] = array(
     'title'            => t('Import'),
     'description'      => t('Import settings'),
     'page callback'    => 'dpimport_page_importer_list',
@@ -43,13 +45,13 @@ function dpimport_menu(){
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
   );
 
-  $items['admin/config/dpimport/import/list'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport/import/list'] = array(
     'title'            => t('List'),
     'type'             => MENU_DEFAULT_LOCAL_TASK,
     'weight'           => 0,
   );
 
-  $items['admin/config/dpimport/import/add'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport/import/add'] = array(
     'title'            => t('Add Import'),
     'description'      => t('Adding an import.'),
     'page callback'    => 'drupal_get_form',
@@ -61,22 +63,22 @@ function dpimport_menu(){
     'weight'           => 1,
   );
 
-  $items['admin/config/dpimport/import/edit/%'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport/import/edit/%'] = array(
     'title'            => t('Edit Import'),
     'description'      => t('Editing an import.'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('dpimport_page_form_importer_form', 5),
+    'page arguments'   => array('dpimport_page_form_importer_form', $dpi_path_size + 3),
     'access arguments' => array('administer dpimport'),
     'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',
     'weight'           => 1,
   );
 
-  $items['admin/config/dpimport/import/delete/%'] = array(
+  $items[DPI_ADMIN_PATH.'/dpimport/import/delete/%'] = array(
     'title'            => t('Delete Import'),
     'description'      => t('Deleting an import.'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('dpimport_page_form_importer_delete_form', 5),
+    'page arguments'   => array('dpimport_page_form_importer_delete_form', $dpi_path_size + 3),
     'access arguments' => array('administer dpimport'),
     'file'             => 'dpimport.pages.admin.inc',
     'file path'        => drupal_get_path('module', 'dpimport').'/includes',

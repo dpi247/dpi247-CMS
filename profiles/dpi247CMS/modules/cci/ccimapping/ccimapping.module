@@ -9,6 +9,8 @@ module_load_include('inc', 'cciadmin', 'cciadmin.private');
 function ccimapping_menu() {
   $items = array();
 
+  $cci_path_size = sizeof(explode('/', CCI_ADMIN_PATH));
+
   $items[CCI_ADMIN_PATH.'/ccimapping/configuration'] = array(
     'title' => t('CCI Newsgate - Mapping configuration & settings'),
     'page callback' => 'drupal_get_form',
@@ -20,7 +22,7 @@ function ccimapping_menu() {
   $items[CCI_ADMIN_PATH.'/ccimapping/packagetype/editor'] = array(
     'title' => t('Packagetype Editor'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('ccimapping_form_packagetype_editor_form', 5),
+    'page arguments' => array('ccimapping_form_packagetype_editor_form', $cci_path_size + 3),
     'access arguments' => array('administer cci'),
     'file' => 'includes/packagetype.editor.inc',
   );
@@ -28,7 +30,7 @@ function ccimapping_menu() {
   $items[CCI_ADMIN_PATH.'/ccimapping/productinfo/editor'] = array(
     'title' => t('Product Info editor'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('ccimapping_form_productinfo_editor_form', 5),
+    'page arguments' => array('ccimapping_form_productinfo_editor_form', $cci_path_size + 3),
     'access arguments' => array('administer cci'),
     'file' => 'includes/productinfo.editor.inc',
   );

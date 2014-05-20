@@ -2,7 +2,7 @@
 
 module_load_include('inc', 'cciadmin', 'cciadmin.api');
 
-define('CCI_ADMIN_PATH', 'admin/cci');
+define('CCI_ADMIN_PATH', 'admin/dpi247/cci');
 
 /**
  * @file cciadmin.module
