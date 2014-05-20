@@ -7,7 +7,7 @@ abstract class PackageHelper extends Importer {
    * @param Dom $dom
    * @param Object $package
    */
-  protected function savePackage($dom, $package){
+  protected function savePackage($dom, $package) {
     node_save($package);
   }
 
@@ -16,15 +16,21 @@ abstract class PackageHelper extends Importer {
    *
    * @param DOM $dom
    */
-  protected function constructPackage($dom){
+  protected function constructPackage($dom) {
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    if (!Logger::error()){
+    if (!Logger::error()) {
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_beforeprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
+
       $this->setPackageAttributes($dom, $package_wrapper, $package);
-      if (!Logger::error()){
+      if (!Logger::error()) {
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
+
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
     return $package;
   }
