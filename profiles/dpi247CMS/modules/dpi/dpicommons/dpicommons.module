@@ -30,6 +30,7 @@ function dpicommons_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'dpicommons.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpicommons').'/includes',
+    'weight' => -1,
   );
 
   return $items;

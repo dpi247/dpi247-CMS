@@ -29,7 +29,6 @@ function dpimport_menu(){
     'title'            => 'DPImport',
     'description'      => 'Parent item import',
     'position'         => 'left',
-    'weight'           => -100,
     'page callback'    => 'system_admin_menu_block_page',
     'access arguments' => array('administer site configuration'),
     'file'             => 'system.admin.inc',
