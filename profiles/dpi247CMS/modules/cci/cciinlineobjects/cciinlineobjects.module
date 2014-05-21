@@ -1,0 +1,58 @@
+<?php
+
+module_load_include('inc', 'cciinlineobjects', 'cciinlineobjects.private');
+
+/**
+ * Implementation of hook_dpimport_entity_postprocess
+ *
+ * Transform CCI Inline Objects tags into ScalD tags
+ */
+function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, $entity_type, $importer, $dispatcher) {
+  if ($entity_type == 'node' && $entity->type = 'package') {
+    $embed_objects = $entity_wrapper->field_embededobjects->value(array('identifier' => TRUE));
+    if ($embed_objects && !empty($embed_objects)) {
+      $embed_objects_by_ext_ref = array();
+      // Get all embeded objects related to the given package
+      foreach ($embed_objects as $embed_object) {
+        $dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $embed_object['sid']);
+        $external_reference = $dpiproperties->external_reference;
+        $embed_objects_by_ext_ref[$external_reference] = $embed_object;
+      }
+
+      // This is the default inline ScalD context
+      $scald_context = variable_get('dnd_context_default', 'sdl_editor_representation');
+
+      $field_instances = field_info_instances($entity_type, 'package');
+      foreach ($field_instances as $field_instance) {
+        if (strstr($field_instance['widget']['type'], 'text_textarea')) {
+          // This is a text area, search for CCI Inline Objects tags
+          if ($current_field = $entity_wrapper->{$field_instance['field_name']}->value()) {
+            $text = $current_field['value'];
+            $tag_regex = "@<ccix:inline(\s.*)?>.*<\/ccix:inline(\s.*)?>@sU";
+            $tag_matches = array();
+            // Get all ccix:inline tags in the text
+            preg_match_all($tag_regex, $text, $tag_matches);
+
+            if (!empty($tag_matches[0])) {
+              foreach ($tag_matches[0] as $match_id => $match_val) {
+                // Extract attributes from the tag
+                $tag_values = _cciinlineobjects_inline_objects_get_tag_values(trim($tag_matches[1][$match_id]));
+                if (isset($tag_values['extref']) && !empty($tag_values['extref']) && isset($embed_objects_by_ext_ref[$tag_values['extref']])) {
+                  // We have a matching object
+                  $matching_embed = $embed_objects_by_ext_ref[$tag_values['extref']];
+                  $matching_sid = $matching_embed['sid'];
+                  $scald_tag = "[scald=$matching_sid:$scald_context]";
+                  $text = str_replace($match_val, $scald_tag, $text);
+
+                  // Update the new value in the text field
+                  $current_field['value'] = $text;
+                  $entity_wrapper->{$field_instance['field_name']}->set($current_field);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
