@@ -60,7 +60,8 @@ function dpidestinations_api_get_all_targetblocks_from_target_for_destination($t
   }
   return $targetblocks;
 }
-/*
+
+/**
  * Return the quadruplet of information that define the destination that is used in a specific node for a specifique section 
  */
 function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
@@ -156,12 +157,12 @@ function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($
   return $rank_options;
 }
 
-function dpidestination_api_get_panelsdisplayid_for_sectionterm($term_id){
+function dpidestinations_api_get_panelsdisplayid_for_sectionterm($term_id){
   $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display->did;
 }
 
-function dpidestination_api_get_panelsdisplay_for_sectionterm($term_id){
+function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id){
   $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display;
 }
