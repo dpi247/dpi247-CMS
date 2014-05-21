@@ -8,12 +8,12 @@ function dpicontenttypes_entity_info() {
 
   $entities['dpiproperties'] = array(
     'label' => t('DPI properties'),
-    // seulement si on utilise le module entity API
+    // Only if we use the entity API module
     'exportable' => FALSE,
     'entity class' => 'DPIPropertiesEntity',
     'controller class' => 'DPIPropertiesController',
     'base table' => 'dpicontenttypes_properties',
-    'fieldable' => TRUE,
+    'fieldable' => TRUE,  
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
@@ -31,7 +31,7 @@ function dpicontenttypes_entity_info() {
         'custom settings' => FALSE,
       ),
     ),
-    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
     'module' => 'dpicontenttypes',
     'access callback' => 'dpiproperties_access_admin_callback',
   );
@@ -75,7 +75,15 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     'label' => t('Target default'),
     'custom settings' => FALSE,
   );
-  foreach (dpiproperties_types() as $type => $info) {
+
+  $dpiproperties_types = dpiproperties_types();
+  $package_type_info = new stdClass();
+  $package_type_info->label = 'Package';
+  $dpiproperties_types['package'] = $package_type_info;
+  /*$scald_atom_type_info = new stdClass();
+  $scald_atom_type_info->label = 'Scald Atom';
+  $dpiproperties_types['scald_atom'] = $scald_atom_type_info;*/
+  foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,
       'admin' => array(
@@ -85,7 +93,7 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
       ),
     );
   }
-
+  
   $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
 }
 
@@ -123,6 +131,13 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
+  
+  $cciinlineobject_orig_attr = array(
+    'label' => t("CCI Inline Objects original attributes"),
+    'type' => 'text',
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
 
   //Set to the package
   $info['node']['bundles']['package']['properties']['field_product_id'] = $product_id;
@@ -136,6 +151,7 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
     $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
     $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
+    $info['scald_atom']['bundles']['image']['properties']['field_cciinline_orig_attr'] = $cciinlineobject_orig_attr;
   }
 
   //Set to the atoms video
@@ -535,10 +551,12 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#title' => t('Product ID'),
     '#default_value' => $dpiproperties->product_id,
   );
+
   $form['entity'] = array(
     '#type' => 'value',
     '#value' => $dpiproperties->entity,
   );
+
   $form['id'] = array(
     '#type' => 'value',
     '#value' => $dpiproperties->id,

@@ -1,8 +1,59 @@
 <?php
 
 /**
- * Implementation of hook_uninstall().
+ * Implementation of hook_install()
+ */
+function cciinlineobjects_install() {
+  // Add fields to the DpiProperties entity
+  cciinlineobjects_attach_fields_to_dpiproperties_entity();
+}
+
+/**
+ * Implementation of hook_uninstall()
  */
 function cciinlineobjects_uninstall() {
+  // Delete all variable defined by this module
   dpi_variable_del_namespace('cciinlineobjects_');
+
+  // Remove fields from the DpiProperties entity
+  cciinlineobjects_remove_fields_from_dpiproperties_entity();
+}
+
+/**
+ * Add the field_cciinlineobjects_orig_attributes to the scald_atom bundle of the dpiproperties entity
+ */
+function cciinlineobjects_update_7001() {
+  if (!field_read_field('field_cciinline_orig_attr')) {
+    // Add fields to the DpiProperties entity
+    cciinlineobjects_attach_fields_to_dpiproperties_entity();
+  }
+}
+
+function cciinlineobjects_attach_fields_to_dpiproperties_entity() {
+  $field_name = 'field_cciinline_orig_attr';
+  $entity_type = 'dpiproperties';
+  $bundle_name = 'scald_atom';
+
+  $field = array(
+    'field_name' => $field_name,
+    'cardinality' => 1,
+    'type' => 'text',
+  );
+  field_create_field($field);
+
+  $field_instance = array(
+    'field_name' => $field_name,
+    'label' => t('Contains attributes received from CCI-NG in the original CCI Inline Object tag'),
+  );
+
+  // Add a couple of info to the instance
+  $field_instance['entity_type'] = $entity_type;
+  $field_instance['bundle'] = $bundle_name;
+  // Create the instance
+  field_create_instance($field_instance);
+}
+
+function cciinlineobjects_remove_fields_from_dpiproperties_entity() {
+  $field_name = 'field_cciinline_orig_attr';
+  field_delete_field($field_name);
 }

@@ -17,6 +17,7 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
         $dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $embed_object['sid']);
         $external_reference = $dpiproperties->external_reference;
         $embed_objects_by_ext_ref[$external_reference] = $embed_object;
+        $embed_objects_by_ext_ref[$external_reference]['dpiproperties'] = $dpiproperties;
       }
 
       // This is the default inline ScalD context
@@ -43,6 +44,16 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
                   $matching_sid = $matching_embed['sid'];
                   $scald_tag = "[scald=$matching_sid:$scald_context]";
                   $text = str_replace($match_val, $scald_tag, $text);
+
+                  // Save original tag values in the atom's dpiproperties
+                  $dpiproperties = $matching_embed['dpiproperties'];
+                  $a = entity_metadata_wrapper('dpiproperties', $dpiproperties, array('bundle' => 'scald_atom'));
+                  $a->field_cciinline_orig_attr->set(serialize($tag_values));
+                  //$a->field_cciinline_orig_attr->set(array('value' => serialize($tag_values), 'format' => filter_default_format()));
+                  dpiproperties_save($dpiproperties);
+                  /*$dpiproperties->field_cciinline_orig_attr = array('value' => serialize($tag_values), 'format' => filter_default_format());
+                  dpiproperties_save($dpiproperties);
+                  dsm($dpiproperties);*/
 
                   // Update the new value in the text field
                   $current_field['value'] = $text;
