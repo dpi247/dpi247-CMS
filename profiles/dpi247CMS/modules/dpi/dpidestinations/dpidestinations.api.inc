@@ -3,24 +3,26 @@
 /**
  * Get all destinations hierarchic tree containing sections terms, targets, layouts and ranks
  */
-function dpidestinations_get_destinations_hierarchies($reset = FALSE) {
-  static $hierarchies = array();
+function dpidestinations_api_get_destinations_hierarchies($reset = FALSE) {
+  static $destination_hierarchy = array();
 
-  if (empty($hierarchies) || $reset) {
+  if (empty($destination_hierarchy) || $reset) {
     $section_vid = dpidestinations_api_get_sections_vocabulary_vid();
     $section_terms = dpidestinations_api_get_all_sections_terms_hierachical_struct($section_vid);
-    foreach ($section_terms as &$section_term) {
+    foreach ($section_terms as $section_term) {
       $section_term->targetblocks = array();
       $targets = dpidestinations_api_get_all_targetblocks_for_destination($section_term->tid);
+      dsm($targets);
       foreach ($targets as $target) {
         $layouts = dpidestinations_api_get_all_layouts_from_target_for_destination($target->targetblockid, $target->target);
         $target->layouts = $layouts;
         $section_term->targetblocks[$target->targetblockid] = $target;
       }
+      $destination_hierarchy[$section_term->tid] = $section_term;
     }
   }
 
-  return $section_terms;
+  return $destination_hierarchy;
 }
 
 /**
@@ -77,12 +79,11 @@ function dpidestinations_api_get_all_targetblocks_for_destination($sectiontid) {
 
   $db_targetblocks = db_select('dpidestinations_targetblock', 'dt')
     ->fields('dt')
-    ->distinct()
     ->condition('dt.did', $panels_display_id)
     ->execute();
 
   foreach ($db_targetblocks as $db_targetblock) {
-    $targetblocks[$db_targetblock->targetblockid] = $db_targetblock;
+    $targetblocks[$db_targetblock->target] = $db_targetblock;
   }
 
   return $targetblocks;
