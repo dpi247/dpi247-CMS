@@ -1,6 +1,29 @@
 <?php
 
 /**
+ * Get all destinations hierarchic tree containing sections terms, targets, layouts and ranks
+ */
+function dpidestinations_get_destinations_hierarchies($reset = FALSE) {
+  static $hierarchies = array();
+
+  if (empty($hierarchies) || $reset) {
+    $section_vid = dpidestinations_api_get_sections_vocabulary_vid();
+    $section_terms = dpidestinations_api_get_all_sections_terms_hierachical_struct($section_vid);
+    foreach ($section_terms as &$section_term) {
+      $section_term->targetblocks = array();
+      $targets = dpidestinations_api_get_all_targetblocks_for_destination($section_term->tid);
+      foreach ($targets as $target) {
+        $layouts = dpidestinations_api_get_all_layouts_from_target_for_destination($target->targetblockid, $target->target);
+        $target->layouts = $layouts;
+        $section_term->targetblocks[$target->targetblockid] = $target;
+      }
+    }
+  }
+
+  return $section_terms;
+}
+
+/**
  * Load a target from his machine name
  *
  * We use EntityFieldQuery to do the querry and return the first (and assumed result) if we found it
@@ -32,6 +55,13 @@ function dpidestinations_api_target_machinename_load($target_machine_name){
 }
 
 /**
+ * Get the sections vocabulary ID
+ */
+function dpidestinations_api_get_sections_vocabulary_vid() {
+  return _dpidestinations_variable_get('dpidestinations_section_vid', 2);
+}
+
+/**
  * Return all targetblock instance related to a specific target in a destination
  *
  * We take in account all targetblockinstance related to splitted targetblocks
@@ -41,34 +71,66 @@ function dpidestinations_api_target_machinename_load($target_machine_name){
  *
  * @return an array of targetblockEntity
  */
-function dpidestinations_api_get_all_targetblocks_from_target_for_destination($target_machinename,$sectiontid){
-  //$target=dpidestinations_api_target_machinename_load($target_machine_name);
-  $targetblocks=array();
-  $panels_display_id=_dpidestinations_get_panels_displayid_for_sectionterm($sectiontid);
+function dpidestinations_api_get_all_targetblocks_for_destination($sectiontid) {
+  $targetblocks = array();
+  $panels_display_id = _dpidestinations_get_panels_displayid_for_sectionterm($sectiontid);
+
+  $db_targetblocks = db_select('dpidestinations_targetblock', 'dt')
+    ->fields('dt')
+    ->distinct()
+    ->condition('dt.did', $panels_display_id)
+    ->execute();
+
+  foreach ($db_targetblocks as $db_targetblock) {
+    $targetblocks[$db_targetblock->targetblockid] = $db_targetblock;
+  }
+
+  return $targetblocks;
+}
+
+/**
+ * Return all targetblock instance related to a section
+ *
+ * @param String $target_machinename
+ * @param Integer $sectiontid
+ *
+ * @return an array of targetblockEntity
+ */
+function dpidestinations_api_get_all_targetblocks_from_target_for_destination($target_machinename, $sectiontid) {
+  $targetblocks = array();
+  $panels_display_id = _dpidestinations_get_panels_displayid_for_sectionterm($sectiontid);
 
   $query = new EntityFieldQuery;
 
   $result = $query
     ->entityCondition('entity_type', 'targetblock')
-    ->propertyCondition('target',$target_machinename)
-    ->propertyCondition('did',$panels_display_id)
+    ->propertyCondition('target', $target_machinename)
+    ->propertyCondition('did', $panels_display_id)
     ->execute();
 
   $result = $query->execute();
   if (!empty($result['targetblock'])) {
     $targetblocks = entity_load('targetblock', array_keys($result['targetblock']));
   }
+
   return $targetblocks;
 }
 
 /**
- * Return the quadruplet of information that define the destination that is used in a specific node for a specifique section 
+ * Get all layouts related to a given target
  */
-function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
+function dpidestinations_api_get_all_layouts_from_target_for_destination($target_id, $target_machinename) {
+  return __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_id, $target_machinename);
+}
+
+/**
+ * Return the quadruplet of information that define the destination that is used in a specific node for a specifique section
+ */
+function dpidestinations_api_get_destination_from_node_for_tid($node, $tid) {
   $destinations_val = field_get_items('node', $node, 'field_destinations');
-  if(isset($destinations_val) and $destinations_val!=FALSE){
-    foreach($destinations_val as $index=>$destination){
-      if($destination['tid']==$tid){
+  if(isset($destinations_val) && $destinations_val != FALSE) {
+    foreach($destinations_val as $index => $destination) {
+      if($destination['tid'] == $tid){
         return $destination;
       }
     }
@@ -76,34 +138,33 @@ function dpidestinations_api_get_destination_from_node_for_tid($node,$tid){
   return FALSE;
 }
 
-function dpidestinations_api_get_sections_vocabulary_vid(){
-  return _dpidestinations_variable_get('dpidestinations_section_vid',2);
-}
-
-function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache=FALSE, $load_entities = FALSE){
-
+function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache = FALSE, $load_entities = FALSE) {
   return _dpidestinations_api_get_all_sections_terms_from_db($reset_cache);
 }
 
-function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
-  $vid=dpidestinations_api_get_sections_vocabulary_vid();
+function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE) {
+  $vid = dpidestinations_api_get_sections_vocabulary_vid();
   return taxonomy_get_tree($vid, $parent, NULL, $load_entities);
 }
 
-function dpidestinations_api_get_all_sections_term_available_as_select_options($is_update){
-  $terms=dpidestinations_api_get_all_sections_terms_flat_struct();
-  if($is_update)
-    $options=array(''=>'Remove this destination');
-  else
-    $options=array(''=>'Add a new destination');
+function dpidestinations_api_get_all_sections_term_available_as_select_options($is_update) {
+  $terms = dpidestinations_api_get_all_sections_terms_flat_struct();
 
-  foreach ($terms as $term){
-    $options[(int)  $term->tid]=$term->name;
+  if($is_update) {
+    $options = array('' => t('Remove this destination'));
   }
+  else {
+    $options = array('' => t('Add a new destination'));
+  }
+
+  foreach ($terms as $term) {
+    $options[(int)$term->tid] = $term->name;
+  }
+
   return $options;
 }
 
-function dpidestinations_api_get_all_targets(){
+function dpidestinations_api_get_all_targets() {
   $query = new EntityFieldQuery;
 
   $result = $query
@@ -114,7 +175,7 @@ function dpidestinations_api_get_all_targets(){
   return $targets;
 }
 
-function dpidestinations_api_get_all_targetblocks(){
+function dpidestinations_api_get_all_targetblocks() {
   $query = new EntityFieldQuery;
 
   $result = $query
@@ -127,17 +188,6 @@ function dpidestinations_api_get_all_targetblocks(){
   }
 
   return $targets;
-}
-
-function dpidestinations_api_get_all_targets_available_for_sectiontid($tid){
-  if($tid==2){
-    return array('target1'=>"Default","target2"=>"BHV");
-  }
-  return array("target1"=>"Default","target3"=>"Football");
-}
-
-function dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($tid,$target){
-  return array(1=>"layout1",2=>"layout2");
 }
 
 function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($term_id, $target_name, $is_update = FALSE) {
@@ -157,16 +207,16 @@ function dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($
   return $rank_options;
 }
 
-function dpidestinations_api_get_panelsdisplayid_for_sectionterm($term_id){
-  $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
+function dpidestinations_api_get_panelsdisplayid_for_sectionterm($term_id) {
+  $display = _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display->did;
 }
 
-function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id){
-  $display= _dpidestinations_get_panels_display_for_sectionterm($term_id);
+function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
+  $display = _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display;
 }
 
-function hook_dpidestinations_virtualrank_dispersion($term_id,$target_name,$nids){
+function hook_dpidestinations_virtualrank_dispersion($term_id, $target_name, $nids) {
   //Clear some cache for example
 }
