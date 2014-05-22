@@ -139,12 +139,9 @@ function ccimapping_get_productinfo_fromWS() {
  * @return an XML in string format
  */
 function ccimapping_build_productinfo() {
-  $dom = new DomDocument('1.0', 'UTF-8');
-  return $dom;
-
-  $hierarchies_array = wallyctools_get_hierarchies();
-  $taxonomy_tree = taxonomy_get_tree(variable_get('wallymport_destinationpath', 0));
-  $nested_taxonomy_tree = wallytoolbox_convert_taxonomy_flat_to_tree($taxonomy_tree);
+  $hierarchies_array = dpidestinations_api_get_destinations_hierarchies();
+  module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
+  $nested_taxonomy_tree = dpicommons_convert_taxonomy_flat_to_tree($hierarchies_array);
   $dom = new DomDocument('1.0', 'UTF-8');
   ccimapping_build_productinfo_xml($dom, $hierarchies_array, $nested_taxonomy_tree);
   $context = 'generate';
@@ -155,18 +152,18 @@ function ccimapping_build_productinfo() {
 function ccimapping_build_productinfo_xml(&$dom, $hierarchies_array, $nested_taxonomy_tree) {
   $dom->standalone = FALSE;
   $exportproductinformation = $dom->appendChild($dom->createElement('exportproductinformation'));
-  $exportproductinformation->setAttribute('newsroom', wally_variable_get('ccimapping_newsroom', ''));
-  $exportproductinformation->setAttribute('publicationchannel', wally_variable_get('wallyadmin_product', ''));
+  $exportproductinformation->setAttribute('newsroom', dpi_variable_get('ccimapping_newsroom', ''));
+  $exportproductinformation->setAttribute('publicationchannel', dpi_variable_get('dpicommons_product', ''));
   $exportproductinformation->setAttribute('subtype', 'Online');
   $pubdatestring = $exportproductinformation->appendChild($dom->createElement('pubdatestring'));
   $pubdatestring->setAttribute('name', '%d-%m-%Y');
-  $product = $exportproductinformation->appendChild($dom->createElement('product', wally_variable_get('wallyadmin_product', '')));
+  $product = $exportproductinformation->appendChild($dom->createElement('product', dpi_variable_get('dpicommons_product', '')));
 
   $baseinfo = $exportproductinformation->appendChild($dom->createElement('baseinfo'));
   $leafname = $baseinfo->appendChild($dom->createElement('leafname'));
   $leafname->setAttribute('name', 'Target');
   $mainpriorities = $baseinfo->appendChild($dom->createElement('mainpriorities'));
-  $rank_limit = wally_variable_get('cckdestinations_rank_limit', 10);
+  $rank_limit = 20; // This has to be hardcoded because the rank limit is set by targetblock, it has no global value
   $mainpriority = $mainpriorities->appendChild($dom->createElement('mainpriority'));
   $mainpriority->setAttribute('name', 'Rank 0');
   $mainpriority->setAttribute('value', '0');
@@ -176,7 +173,7 @@ function ccimapping_build_productinfo_xml(&$dom, $hierarchies_array, $nested_tax
     $mainpriority->setAttribute('name', 'Rank '.$i);
     $mainpriority->setAttribute('value', $i);
   }
-  
+
   $budgettemplate = $exportproductinformation->appendChild($dom->createElement('budgettemplate'));
   ccimapping_build_productinfo_xml_hierarchy_items($dom, $budgettemplate, $hierarchies_array, $nested_taxonomy_tree);
 }
@@ -186,12 +183,10 @@ function ccimapping_build_productinfo_xml_hierarchy_items($dom, &$dom_element, $
     $term = $values['term'];
     $level = $term->depth + 1;
     $dom_level = $dom_element->appendChild($dom->createElement('level'.$level));
-    $dom_level->setAttribute('name', $hierarchies[$term->tid]['term_name']);
-
-    unset($hierarchies[$term->tid]['redacblocks']['none']);
-    foreach ($hierarchies[$term->tid]['redacblocks'] as $redack_machine_name => $redacblock) {
+    $dom_level->setAttribute('name', $hierarchies[$term->tid]->name);
+    foreach ($hierarchies[$term->tid]->targetblocks as $targetblock) {
       $leaf = $dom_level->appendChild($dom->createElement('leaf'));
-      $leaf->setAttribute('name', $redack_machine_name);
+      $leaf->setAttribute('name', $targetblock->target);
     }
     ccimapping_build_productinfo_xml_hierarchy_items($dom, $dom_level, $hierarchies, $values['childrens']);
   }
