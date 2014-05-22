@@ -1,6 +1,67 @@
 <?php
 
 /**
+ * Take a flat vocabulary tree and turn it into a multi-tiered array
+ *
+ * @see taxonomy_tree()
+ *
+ * @param $array_of_terms_flat
+ *   A flat array of taxonomy_term -tipicaly the return of taxonomy_tree() -
+ *
+ * @return
+ *   The return array will simply contain an array of pointers rather then physical objects
+ */
+function dpicommons_convert_taxonomy_flat_to_tree(&$array_of_terms_flat) {
+  $map = array();
+
+  // Go through the tree and find the lowest depth as well as all available depth levels to scan
+  $startdepth = FALSE;
+  $depthlist = array();
+  foreach($array_of_terms_flat as $vocindex => &$vocitem) {
+    if ($startdepth === FALSE || $startdepth > $vocitem->depth) {
+      //new start depth found
+      $startdepth = $vocitem->depth;
+    }
+
+    // Add this item to the speciffic depth level
+    $depthlist[$vocitem->depth][$vocitem->tid] = &$vocitem;
+  }
+
+  // Sort the depthlist so lowest is first
+  ksort($depthlist);
+
+  // Scan all depth levels found
+  $lastdepth = NULL;
+  foreach($depthlist as $depthlevel => &$depths) {
+    // Check for first depth (root) level
+    $currentdepthdata = array();
+
+    if ($depthlevel == $startdepth) {
+      // Add root items to the map
+      foreach($depths as $itemindex => &$item) {
+        $mapindex = count($map);
+        $map[$mapindex] = array('term' => &$item, 'childrens' => array());
+        $currentdepthdata[$itemindex] = &$map[$mapindex];
+      }
+    } else {
+      // Scan through all items within this depth
+      foreach($depths as $itemindex => &$item) {
+        // Find a matching 'map' in teh last depth to assign the item too
+        foreach($item->parents as $parentindex) {
+          $mapindex = count($lastdepthdata[$parentindex]['childrens']);
+          $lastdepthdata[$parentindex]['childrens'][$mapindex] = array('term' => &$item,'childrens' => array());
+          $currentdepthdata[$itemindex] = &$lastdepthdata[$parentindex]['childrens'][$mapindex];
+        }
+      }
+    }
+
+    $lastdepthdata = $currentdepthdata;
+  }
+
+  return $map;
+}
+
+/**
  * Call the getimagesize function with a cleaned URL
  */
 function dpicommons_getimagesize_cleaned_url($url) {
