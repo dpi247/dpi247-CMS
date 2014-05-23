@@ -260,7 +260,7 @@ function dpi_variable_del_namespace($namespace) {
  * @see system_settings_form()
  *
  */
-function dpi_system_settings_form($form){
+function dpi_system_settings_form($form) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
