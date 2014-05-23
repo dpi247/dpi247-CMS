@@ -240,6 +240,22 @@ function dpicontenttypes_form_image_effect_form_alter_validate($form, $form_stat
 }
 
 /**
+ * Implementation of hook_form_FROM-ID_alter
+ *
+ * Add a devel link for nodes in the admin/content page
+ */
+function dpicontenttypes_form_node_admin_content_alter(&$form, $form_state) {
+  if (module_exists('devel') && user_access('access devel information')) {
+    foreach ($form['admin']['nodes']['#options'] as $nid => $options) {
+      $form['admin']['nodes']['#options'][$nid]['operations']['data']['#links']['devel'] = array(
+        'title' => 'devel',
+        'href' => 'node/'.$nid.'/devel',
+      );
+    }
+  }
+}
+
+/**
  * Implementation of hook_image_style_flush
  *
  * Flushes cached dpi media for a style.
