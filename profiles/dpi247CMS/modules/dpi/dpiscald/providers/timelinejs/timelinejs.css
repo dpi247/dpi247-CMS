@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-timelinejs {
+ background: url('icons/timelinejs-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-timelinejs:hover {
+ background-image: url('icons/timelinejs-large-color.png');
+}
+.dnd-library-wrapper .editor-item .meta.type-timelinejs {
+ background-image: url('icons/timelinejs-large-color.png');
+}
