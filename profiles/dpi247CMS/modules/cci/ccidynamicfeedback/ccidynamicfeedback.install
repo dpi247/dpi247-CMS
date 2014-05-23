@@ -1,0 +1,5 @@
+<?php
+
+function ccidynamicfeedback_uninstall() {
+  dpi_variable_del_namespace('ccimapping_');
+}

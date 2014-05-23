@@ -1,0 +1,8 @@
+name = CCI Mapping
+description = Save and send a file who define the mapping between CCI and Wally content type
+package = CCI
+core = 7.x
+
+dependencies[] = 'dpicache'
+dependencies[] = 'dpicommons'
+dependencies[] = 'cciadmin'

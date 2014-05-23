@@ -2,24 +2,27 @@
 
 module_load_include('inc', 'dpilog', 'dpilog.private');
 
+define('DPI_ADMIN_PATH', 'admin/dpi247');
+
 /**
  * Implementation of hook_menu
 */
 function dpicommons_menu() {
   $items = array();
 
-  $items['admin/config/dpi247'] = array(
+  // Menu items that are basically menu blocks.
+  $items[DPI_ADMIN_PATH] = array(
     'title' => 'DPI247',
-    'description' => 'Parent item for DPI247',
-    'position' => 'left',
-    'weight' => -100,
+    'description' => 'Administer DPI247 settings.',
+    'position' => 'right',
+    'weight' => -8,
     'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
+    'file path'=> drupal_get_path('module', 'system'),
   );
 
-  $items['admin/config/dpi247/settings'] = array(
+  $items[DPI_ADMIN_PATH.'/general-settings'] = array(
     'title' => 'DPI247 Settings',
     'description' => 'General settings for DPI247',
     'page callback' => 'drupal_get_form',
@@ -27,18 +30,7 @@ function dpicommons_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'dpicommons.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpicommons').'/includes',
-  );
-
-  // Menu items that are basically just menu blocks.
-  $items['admin/dpi247'] = array(
-    'title' => 'dpi247',
-    'description' => 'Administer dpi247 settings.',
-    'position' => 'right',
-    'weight' => -8,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('access administration pages'),
-    'file' => 'system.admin.inc',
-    'file path'=> drupal_get_path('module', 'system'),
+    'weight' => -1,
   );
 
   return $items;
