@@ -11,7 +11,7 @@
 function dpiscald_kewego_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('Kewego video identifier or URL'),
+    '#title' => t('Kewego video URL'),
     '#element_validate' => array('dpiscald_kewego_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000

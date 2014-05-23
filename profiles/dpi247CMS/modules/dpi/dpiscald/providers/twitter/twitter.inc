@@ -11,7 +11,7 @@
 function dpiscald_twitter_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('Twitter or URL'),
+    '#title' => t('Tweet URL'),
     '#element_validate' => array('dpiscald_twitter_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
