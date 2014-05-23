@@ -47,13 +47,9 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
 
                   // Save original tag values in the atom's dpiproperties
                   $dpiproperties = $matching_embed['dpiproperties'];
-                  $a = entity_metadata_wrapper('dpiproperties', $dpiproperties, array('bundle' => 'scald_atom'));
-                  $a->field_cciinline_orig_attr->set(serialize($tag_values));
-                  //$a->field_cciinline_orig_attr->set(array('value' => serialize($tag_values), 'format' => filter_default_format()));
+                  $dpiproperties_wrapper = entity_metadata_wrapper('dpiproperties', $dpiproperties, array('bundle' => 'scald_atom'));
+                  $dpiproperties_wrapper->field_cciinline_orig_attr->set(serialize($tag_values));
                   dpiproperties_save($dpiproperties);
-                  /*$dpiproperties->field_cciinline_orig_attr = array('value' => serialize($tag_values), 'format' => filter_default_format());
-                  dpiproperties_save($dpiproperties);
-                  dsm($dpiproperties);*/
 
                   // Update the new value in the text field
                   $current_field['value'] = $text;

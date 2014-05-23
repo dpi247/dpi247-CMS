@@ -80,9 +80,9 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
   $package_type_info = new stdClass();
   $package_type_info->label = 'Package';
   $dpiproperties_types['package'] = $package_type_info;
-  /*$scald_atom_type_info = new stdClass();
+  $scald_atom_type_info = new stdClass();
   $scald_atom_type_info->label = 'Scald Atom';
-  $dpiproperties_types['scald_atom'] = $scald_atom_type_info;*/
+  $dpiproperties_types['scald_atom'] = $scald_atom_type_info;
   foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,

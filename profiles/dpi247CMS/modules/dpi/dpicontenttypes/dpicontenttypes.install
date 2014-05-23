@@ -456,3 +456,17 @@ function dpicontenttypes_update_7006() {
   $schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
   db_add_field('dpicontenttypes_external_files', 'cron_delete', $schema['fields']['cron_delete']);
 }
+
+/**
+ * Update the dpicontenttypes_properties with the new bundles (package and scald_atom) 
+ */
+function dpicontenttypes_update_7007() {
+  db_update('dpicontenttypes_properties')
+    ->fields(array('type' => 'package'))
+    ->condition('entity', 'node')
+    ->execute();
+  db_update('dpicontenttypes_properties')
+    ->fields(array('type' => 'scald_atom'))
+    ->condition('entity', 'scald_atom')
+    ->execute();
+}
