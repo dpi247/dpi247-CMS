@@ -47,4 +47,21 @@ class DamArchiveV1 extends WallyXmlPreview {
       Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
     }
   }
+
+  /**
+   * Set field CustomFields
+   *
+   * @param DOM $dom
+   * @param EntityDrupalWrapper $wrapper
+   * @param Object $entity
+   */
+  public function buildCustomFields($dom, $wrapper, $entity) {
+    $temp_custom_fields = array();
+    foreach ($dom->getElementsByTagName('CustomField') as $dom_custom_field) {
+      if ($dom_custom_field->hasAttribute('FieldName')) {
+        $temp_custom_fields[$dom_custom_field->getAttribute('FieldName')] = $dom_custom_field->nodeValue;
+      }
+    }
+    $entity->custom_fields = $temp_custom_fields;
+  }
 }

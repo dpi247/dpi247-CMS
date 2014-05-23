@@ -206,7 +206,6 @@ abstract class Importer {
    */
   protected function createOrLoadEntity($dom){
     $callback = $this->getCallback($dom);
-    dsm($callback);
     $create_or_load_method = 'createOrLoadEntity'.$callback;
     if (method_exists($this, $create_or_load_method)){
       $entity = $this->$create_or_load_method($dom);
