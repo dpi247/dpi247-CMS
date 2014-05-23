@@ -20,12 +20,19 @@ function dpidam_install() {
     $archive_term->name = 'Archive';
     taxonomy_term_save($archive_term);
   }
+
+  $dpi247_source = new stdClass();
+  $dpi247_source->name = 'dpi247';
+  $dpi247_source->archive = 1;
+  $dpi247_source->archive_from_dpimport = 1;
+  drupal_write_record('dpidam_source', $dpi247_source);
 }
 
 /**
  * Implementation of hook_uninstall().
  */
 function dpidam_uninstall() {
+  // Delete all variable defined by this module
   dpi_variable_del_namespace('dpidam_');
 }
 

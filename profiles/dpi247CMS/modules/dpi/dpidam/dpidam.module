@@ -206,36 +206,20 @@ function dpidam_permission(){
 }
 
 /**
- * Implementation of hook_node_presave
- */
-function dpidam_node_presave($node) {
-  if ($node->type == 'package' && $node->nid === NULL) {
-    $node_wrapper = entity_metadata_wrapper('package', $node);
-    if (isset($node_wrapper->field_source)) {
-      $current_source = $node_wrapper->field_source->value();
-      if (!$current_source || empty($current_source)) {
-        // Set the source to dpi247 if a new node without source
-        $node_wrapper->field_source->set('dpi247');
-      }
-    }
-  }
-}
-
-/**
  * Implementation of hook_node_insert
  */
 function dpidam_node_insert($node) {
   if ($node->type == 'package') {
-    // URL Alias Update
+    // URL Alias Insert
     $url = drupal_get_path_alias('node/'.$node->nid);
     _dpidam_add_url_to_buffer($node->nid, $url);
 
-    // Package Update
-    $node_wrapper = entity_metadata_wrapper('package', $node);
-    if (isset($node_wrapper->field_source)) {
-      $current_source = $node_wrapper->field_source->value();
-      if ($current_source && !empty($current_source)) {
-        $source = _dpidam_get_source_by_name($current_source);
+    // Package Insert
+    $dpiproperties = dpiproperties_load_by_type_and_id('node', $node->nid);
+    $current_source = $dpiproperties->source;
+    if ($current_source && !empty($current_source)) {
+      $source = _dpidam_get_source_by_name($current_source);
+      if ($source) {
         if ($source->archive == 1 && ($source->archive_from_dpimport == 1 || !isset($node->dpimport_node))) {
           // If the package is to be archived and it's not from dpimport or archive_from_dpimport is set to one, the package is saved
           _dpidam_add_package_to_buffer($node->nid);

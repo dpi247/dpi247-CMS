@@ -155,7 +155,7 @@ function _dpidam_post_url($node, $node_url, $set_message = FALSE) {
 function _dpidam_add_url_to_buffer($nid, $url) {
   $row = new stdClass();
   $row->nid = $nid;
-  $url = url($path, array('alias' => TRUE, 'absolute' => TRUE));
+  $url = url($url, array('alias' => TRUE, 'absolute' => TRUE));
   // Allow to alter the URL to handle canonical URLs
   drupal_alter('dpidam_synchro_url', $url);
   $row->url = $url;
