@@ -217,7 +217,3 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
   $display = _dpidestinations_get_panels_display_for_sectionterm($term_id);
   return $display;
 }
-
-function hook_dpidestinations_virtualrank_dispersion($term_id, $target_name, $nids) {
-  //Clear some cache for example
-}
