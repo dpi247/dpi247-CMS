@@ -1,6 +1,65 @@
 <?php
 
 /**
+ * Return an array of all existing aliases for an internal url.
+ */
+function dpicommons_get_all_aliases($internal_url) {
+  $db_aliases = db_select('url_alias', 'ua')
+    ->fields('ua')
+    ->condition('source', $internal_url)
+    ->orderBy('ua.pid', 'DESC')
+    ->execute();
+
+  $return_aliases = array();
+  foreach ($db_aliases as $db_alias) {
+    $return_aliases[] = $db_alias;
+  }
+
+  if(count($return_aliases) == 0) {
+    $internal_alias = new stdClass();
+    $internal_alias->pid = 0;
+    $internal_alias->source = $internal_url;
+    $internal_alias->alias = $internal_url;
+    $internal_alias->language = '';
+    $return_aliases[] = $internal_alias;
+  }
+
+  return $return_aliases;
+}
+
+/**
+ * Get the latest created alias for an internal URL
+ * @param $internal_url {String}
+ *   Internal URL, it can't begin with "/" or "http://".
+ * @return {String}
+ *   The alias if found, a fake alias, based on the $internal_url, if not.
+ */
+function dpicommons_get_main_alias($internal_url) {
+  $db_aliases = db_select('url_alias', 'ua')
+    ->fields('ua')
+    ->condition('source', $internal_url)
+    ->orderBy('ua.pid', 'DESC')
+    ->range(0, 1)
+    ->execute();
+
+  $return_aliases = array();
+  foreach ($db_aliases as $db_alias) {
+    $return_aliases[] = $db_alias;
+  }
+
+  if(count($return_aliases) == 0) {
+    $internal_alias = new stdClass();
+    $internal_alias->pid = 0;
+    $internal_alias->source = $internal_url;
+    $internal_alias->alias = $internal_url;
+    $internal_alias->language = '';
+    $return_aliases[] = $internal_alias;
+  }
+
+  return $return_aliases;
+}
+
+/**
  * Take a flat vocabulary tree and turn it into a multi-tiered array
  *
  * @see taxonomy_tree()
