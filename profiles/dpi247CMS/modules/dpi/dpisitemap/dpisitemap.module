@@ -1,5 +1,6 @@
 <?php
 
+module_load_include('inc', 'dpisitemap', 'dpisitemap.api');
 module_load_include('inc', 'dpisitemap', 'dpisitemap.private');
 
 /**
@@ -77,7 +78,6 @@ function dpisitemap_theme() {
  * Call the sitemap generation.
  */
 function dpisitemap_cron() {
-  return;
   $return = '<b>'.t('Run').' '.date('Y-m-d H:i:s').' :</b></br>';
 
   if (lock_acquire('dpisitemap_cron_semaphore', 300)) {
@@ -89,7 +89,7 @@ function dpisitemap_cron() {
       module_load_include('inc', 'dpisitemap', 'includes/dpisitemap.generate_xml');
       dpisitemap_generate_sitemap_xml($site_infos, $settings);
 
-      $delta_t_global = dpicommons_set_microtime_step('', FALSE, 'wallysitemap_cron');
+      $delta_t_global = dpicommons_set_microtime_step('', FALSE, 'dpisitemap_cron');
       $micro = sprintf('%06d', ($delta_t_global - floor($delta_t_global)) * 1000000);
       $d = new DateTime(date('Y-m-d H:i:s.'.$micro, $delta_t_global));
       $formatted = $d->format('i:s.u');
