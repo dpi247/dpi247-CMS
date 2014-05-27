@@ -12,7 +12,6 @@ function dpidestinations_api_get_destinations_hierarchies($reset = FALSE) {
     foreach ($section_terms as $section_term) {
       $section_term->targetblocks = array();
       $targets = dpidestinations_api_get_all_targetblocks_for_destination($section_term->tid);
-      dsm($targets);
       foreach ($targets as $target) {
         $layouts = dpidestinations_api_get_all_layouts_from_target_for_destination($target->targetblockid, $target->target);
         $target->layouts = $layouts;
