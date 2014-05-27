@@ -175,13 +175,13 @@ function dpidam_cron() {
 
     // Send old packages to DAM
     if (!dpi_variable_get('dpidam_historic_archive_done', FALSE)) {
-      module_load_include('inc', 'dpidam', 'includes/dpidam.historic');
+      module_load_include('inc', 'dpidam', 'includes/dpidam.pages.historic');
       dpidam_historic_cron();
     }
 
     // Purge old packages
     if (dpi_variable_get('dpidam_historic_archive_done', FALSE)) {
-      module_load_include('inc', 'dpidam', 'includes/dpidam.purge');
+      module_load_include('inc', 'dpidam', 'includes/dpidam.pages.purge');
       dpidam_purge_cron();
     }
 
