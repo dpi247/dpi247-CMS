@@ -1,0 +1,150 @@
+<?php
+
+module_load_include('inc', 'dpisitemap', 'dpisitemap.private');
+
+/**
+ * Implementation of hook_menu()
+ */
+function dpisitemap_menu() {
+  $items = array();
+
+  $items[DPI_ADMIN_PATH.'/dpisitemap'] = array(
+    'title'            => t('DPI Sitemap'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisitemap_admin_settings_page_form'),
+    'access arguments' => array('administer sitemaps'),
+    'description'      => t('Manage Sitemaps settings'),
+    'file'             => 'includes/dpisitemap.pages.admin.inc',
+  );
+
+  $items[DPI_ADMIN_PATH.'/dpisitemap/mainsitemap'] = array(
+    'title'            => t('Main Sitemap'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisitemap_admin_settings_page_form'),
+    'access arguments' => array('administer sitemaps'),
+    'file'             => 'includes/dpisitemap.pages.admin.inc',
+    'weight'           => 0,
+    'type'             => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission()
+ */
+function dpisitemap_permission(){
+  return array(
+    'administer sitemaps' =>  array(
+      'title' => t('Administer Sitemaps'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpisitemap_theme() {
+  $path = drupal_get_path('module', 'dpisitemap');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => $path.'/templates',
+  );
+  return array(
+    'dpisitemap_checkboxes' => $base + array(
+      'render element' => 'element',
+    ),
+    'dpisitemap_checkboxes_elements' => $base + array(
+      'render element' => 'element',
+    ),
+    'dpisitemap_taxonomy_tree' => $base + array(
+      'render element' => 'element',
+    ),
+    'dpisitemap_taxonomy_tree_elements' => $base + array(
+      'render element' => 'element',
+    ),
+    'dpisitemap_elements_select' => $base + array(
+      'render element' => 'element',
+    ),
+    'dpisitemap_taxonomy_tree_checkbox' => $base + array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_cron()
+ * Call the sitemap generation.
+ */
+function dpisitemap_cron() {
+  return;
+  $return = '<b>'.t('Run').' '.date('Y-m-d H:i:s').' :</b></br>';
+
+  if (lock_acquire('dpisitemap_cron_semaphore', 300)) {
+    if ($settings = dpi_variable_get('dpisitemap_sitemaps_settings', FALSE)) {
+      module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
+      dpicommons_set_microtime_step('', FALSE, 'dpisitemap_cron');
+
+      $site_infos = _dpisitemap_get_site_infos();
+      module_load_include('inc', 'dpisitemap', 'includes/dpisitemap.generate_xml');
+      dpisitemap_generate_sitemap_xml($site_infos, $settings);
+
+      $delta_t_global = dpicommons_set_microtime_step('', FALSE, 'wallysitemap_cron');
+      $micro = sprintf('%06d', ($delta_t_global - floor($delta_t_global)) * 1000000);
+      $d = new DateTime(date('Y-m-d H:i:s.'.$micro, $delta_t_global));
+      $formatted = $d->format('i:s.u');
+      $return .= '<b>'.t('Total Runtime : !delta_t', array('!delta_t' => $formatted)).'</b></br>';
+    } else {
+      $return .= t('The module has not been configured yet, the sitemap will not be generated untill the configuration is set.').'<br>';
+    }
+  } else {
+    $return .= t('The cron didn\'t run successfully because the semaphore wasn\'t free.').'</br>';
+  }
+
+  print $return;
+}
+
+/**
+ * Implementation of hook_element_info()
+ *
+ * Add a dpisitemap_checkboxes and a dpisitemap_taxonomy_tree elements
+ */
+function dpisitemap_element_info() {
+  $type['dpisitemap_checkboxes'] = array(
+    '#input' => TRUE,
+    '#process' => array('dpisitemap_checkboxes_process_elements'),
+    '#tree' => TRUE,
+    '#theme' => array('dpisitemap_checkboxes'),
+    '#theme_wrappers' => array('form_element'),
+  );
+
+  $type['dpisitemap_taxonomy_tree'] = array(
+    '#input' => TRUE,
+    '#process' => array('dpisitemap_taxonomy_tree_process_elements'),
+    '#tree' => TRUE,
+    '#theme' => array('dpisitemap_taxonomy_tree'),
+    '#theme_wrappers' => array('form_element'),
+  );
+
+  return $type;
+}
+
+/**
+ * Wrapper function for the dpisitemap_checkboxes process function
+ *
+ * @see _dpisitemap_checkboxes_process_elements
+ */
+function dpisitemap_checkboxes_process_elements($element) {
+  module_load_include('inc', 'dpisitemap', 'includes/dpisitemap.elements');
+  return _dpisitemap_checkboxes_process_elements($element);
+}
+
+/**
+ * Wrapper function for the dpisitemap_taxonomy_tree process function
+ *
+ * @see _dpisitemap_taxonomy_tree_process_elements
+ */
+function dpisitemap_taxonomy_tree_process_elements($element) {
+  module_load_include('inc', 'dpisitemap', 'includes/dpisitemap.elements');
+  return _dpisitemap_taxonomy_tree_process_elements($element);
+}
