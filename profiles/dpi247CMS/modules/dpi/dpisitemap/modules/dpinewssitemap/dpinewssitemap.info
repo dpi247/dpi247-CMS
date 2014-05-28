@@ -1,0 +1,8 @@
+name = DPI News Sitemaps
+description = News Sitemaps generation
+package = DPI
+core = 7.x
+
+dependencies[] = dpicache
+dependencies[] = dpicommons
+dependencies[] = dpisitemap
