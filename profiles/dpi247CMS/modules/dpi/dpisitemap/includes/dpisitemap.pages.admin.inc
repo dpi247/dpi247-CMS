@@ -10,6 +10,14 @@ function dpisitemap_admin_settings_page_form($form, $form_state) {
     );
 
     $folder_path = $default_settings['dpisitemap_path'];
+
+    $scheme = 'public';
+    if (file_stream_wrapper_valid_scheme($scheme)) {
+      if ($wrapper = file_stream_wrapper_get_instance_by_uri('public://'.$folder_path)) {
+        $folder_path = $wrapper->getDirectoryPath().'/'.$folder_path;
+      }
+    }
+
     $index_link_form = $main_link_form = FALSE;
     if (file_exists($folder_path.'/sitemapindex.xml')) {
       $index_link_form = array(
