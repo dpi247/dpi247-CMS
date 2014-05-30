@@ -76,6 +76,16 @@
   display: inline;
 }
 
+#taxonomy-manager .treeview .form-item label,
+.treeview .form-item label {
+  margin: 0;
+  padding: 0;
+  display: inline;
+  font-size: 0.923em;
+  text-transform: none;
+  font-weight: normal;
+}
+
 #taxonomy-manager .treeview li,
 .treeview li {
   margin: 0;

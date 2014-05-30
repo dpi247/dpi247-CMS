@@ -141,8 +141,8 @@ function _dpisitemap_taxonomy_tree_process_elements($element) {
     }
 
     $index = 0;
-    $select_options = $element['#select_options'] ? $element['#select_options'] : array();
-    $freq_options = $element['#freq_options'] ? $element['#freq_options'] : array();
+    $select_options = isset($element['#select_options']) ? $element['#select_options'] : array();
+    $freq_options = isset($element['#freq_options']) ? $element['#freq_options'] : array();
     $addcheckbox = isset($element['#add_checkbox']) ? $element['#add_checkbox'] : TRUE;
     _dpisitemap_taxonomy_manager_tree_build_form($index, $tree, $element['#elements'], $element, $element['#parents'], $element['#default_value'], $select_options, $freq_options, $addcheckbox);
 
@@ -169,7 +169,7 @@ function _dpisitemap_taxonomy_tree_validate_recurse(&$return_values, $values) {
   foreach ($values as $id => $value) {
     $tmp_values = array();
     $tmp_values['check'] = isset($value['check']) && $value['check'];
-    $tmp_values['weight'] = $value['weight_select'];
+    $tmp_values['weight'] = isset($value['weight_select']) ? $value['weight_select'] : 0;
     $tmp_values['freq'] = $value['freq'];
     if (isset($value['children']) && is_array($value['children'])) {
       _dpisitemap_taxonomy_tree_validate_recurse($return_values, $value['children']);
@@ -202,12 +202,12 @@ function _dpisitemap_taxonomy_manager_tree_build_form(&$index, $tree, &$form, $r
     $this_parents[] = $term->tid;
 
     $values = array_key_exists($term->tid, $default_values) ?
-    $default_values[$term->tid] :
-    array(
-      'check' => 1,
-      'weight' => 0,
-      'freq' => 'daily',
-    );
+      $default_values[$term->tid] :
+      array(
+        'check' => 1,
+        'weight' => 0,
+        'freq' => 'daily',
+      );
 
     if ($add_checkbox) {
       $form[$term->tid]['check'] = array(
@@ -220,7 +220,7 @@ function _dpisitemap_taxonomy_manager_tree_build_form(&$index, $tree, &$form, $r
     if (!empty($select_options)) {
       $form[$term->tid]['weight_select'] = array(
         '#type' => 'select',
-        //'#title' => $term->name,
+        '#title' => $add_checkbox ? '' : $term->name,
         '#options' => $select_options,
         '#value' => $values['weight'],
         '#theme' => 'dpisitemap_elements_select',
@@ -229,7 +229,7 @@ function _dpisitemap_taxonomy_manager_tree_build_form(&$index, $tree, &$form, $r
     if ($freq_options) {
       $form[$term->tid]['freq'] = array(
         '#type' => 'select',
-        //'#title' => $term->name,
+        '#title' => $add_checkbox ? '' : $term->name,
         '#options' => $freq_options,
         '#value' => $values['freq'],
         '#theme' => 'dpisitemap_elements_select',
