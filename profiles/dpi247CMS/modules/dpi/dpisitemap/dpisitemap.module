@@ -85,7 +85,7 @@ function dpisitemap_cron() {
       module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
       dpicommons_set_microtime_step('', FALSE, 'dpisitemap_cron');
 
-      $site_infos = _dpisitemap_get_site_infos();
+      $site_infos = dpisitemap_api_get_site_infos();
       module_load_include('inc', 'dpisitemap', 'includes/dpisitemap.generate_xml');
       dpisitemap_generate_sitemap_xml($site_infos, $settings);
 

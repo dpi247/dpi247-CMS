@@ -57,3 +57,33 @@ function dpisitemap_api_get_namespaces() {
     'video' => 'http://www.google.com/schemas/sitemap-video/1.1',
   );
 }
+
+/**
+ * Get informations about the site which are necessary to build the sitemap.
+ */
+function dpisitemap_api_get_site_infos() {
+  global $language, $base_url;
+  return array(
+    'language' => $language->language,
+    'base_url' => $base_url,
+  );
+}
+
+/**
+ * This function is like a simplified hook, we allow one other module to alter a DOM url through a unique function.
+ * The alteration can thus only be called only once.
+ *
+ * @param object $dom
+ *   The complete DOM document
+ * @param object $url
+ *   The DOM url element
+ * @param string $type
+ *   The URL type, 'node', 'menu' or 'destination'
+ * @param array $args
+ *   Additionnal parameters, such a the node or the menu element. Depends on the URL type.
+ */
+function dpisitemap_api_call_url_alter($dom, &$url, $type, $args = array()) {
+  if (function_exists('dpisitemap_url_alter')) {
+    dpisitemap_url_alter($dom, $url, $type, $args);
+  }
+}

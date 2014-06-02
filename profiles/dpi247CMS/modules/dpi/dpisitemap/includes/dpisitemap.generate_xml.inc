@@ -81,7 +81,7 @@ function dpisitemap_generate_sitemap_xml_for_menu($dom, &$urlset, $site_infos, $
         'menu_item' => $menu_item,
         'settings' => $settings,
       );
-      _dpisitemap_call_url_alter($dom, $url, 'menu', $alter_args);
+      dpisitemap_api_call_url_alter($dom, $url, 'menu', $alter_args);
     }
   }
 }
@@ -125,7 +125,7 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
       'term' => $term,
       'settings' => $settings,
     );
-    _dpisitemap_call_url_alter($dom, $url, 'destination', $alter_args);
+    dpisitemap_api_call_url_alter($dom, $url, 'destination', $alter_args);
   }
 }
 
