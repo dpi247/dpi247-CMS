@@ -18,3 +18,38 @@ function dpinewssitemap_menu() {
 
   return $items;
 }
+
+/**
+ * Implementation of hook_cron
+ */
+function dpinewssitemap_cron() {
+  $return = '<b>'.t('Run').' '.date('Y-m-d H:i:s').' :</b></br>';
+
+  if (lock_acquire('dpinewssitemap_cron_semaphore', 300)) {
+    // Main process
+    if ($settings = dpi_variable_get('dpinewssitemap_sitemaps_settings', FALSE)) {
+      if ($main_settings = dpi_variable_get('dpisitemap_sitemaps_settings', FALSE)) {
+        $settings['dpinewssitemap_blacklist'] = array_merge($settings['dpinewssitemap_blacklist'], $main_settings['dpisitemap_blacklist']);
+        $settings['dpinewssitemap_default_freq'] = $main_settings['dpisitemap_default_freq'];
+      }
+
+      module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
+      dpicommons_set_microtime_step('', FALSE, 'dpinewssitemap_cron');
+
+      module_load_include('inc', 'dpinewssitemap', 'includes/dpinewssitemap.generate_xml');
+      dpinewssitemap_generate_sitemap_xml($settings);
+
+      $delta_t_global = dpicommons_set_microtime_step('', FALSE, 'dpinewssitemap_cron');
+      $micro = sprintf('%06d', ($delta_t_global - floor($delta_t_global)) * 1000000);
+      $d = new DateTime(date('Y-m-d H:i:s.'.$micro, $delta_t_global));
+      $formatted = $d->format('i:s.u');
+      $return .= '<b>'.t('Total Runtime : !delta_t', array('!delta_t' => $formatted)).'</b></br>';
+    } else {
+      $return .= t('The module has not been configured yet, the sitemap will not be generated untill the configuration is set.').'<br>';
+    }
+  } else {
+    $return .= t('The cron didn\'t run successfully because the semaphore wasn\'t free.').'</br>';
+  }
+
+  print $return;
+}
