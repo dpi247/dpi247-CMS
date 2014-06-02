@@ -6,6 +6,12 @@
  * Install the "Sitemap genre" vocabulary and some terms in it
  */
 function dpinewssitemap_install() {
+  // Set the  weight to 1 so that the hook_cron is called after dpisitemap
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'dpinewssitemap')
+    ->execute();
+
   // Add "Sitemap genre" Vocabulary
   $voc_machine_name = 'sitemap_genre';
   $edit = array(
