@@ -102,11 +102,11 @@ function dpinewssitemap_admin_settings_page_form($form, $form_state) {
     $styles_options[$style['name']] = $style['label'];
   }
 
-  $form['dpinewssitemap_image_preset'] = array(
+  $form['dpinewssitemap_image_style'] = array(
     '#type' => 'select',
     '#title' => t('Preset used for images'),
     '#options' => $styles_options,
-    '#default_value' => $default_settings['dpinewssitemap_image_preset'],
+    '#default_value' => $default_settings['dpinewssitemap_image_style'],
   );
 
   $form['dpinewssitemap_image_license'] = array(
@@ -116,11 +116,11 @@ function dpinewssitemap_admin_settings_page_form($form, $form_state) {
     '#default_value' => $default_settings['dpinewssitemap_image_license'],
   );
 
-  $form['dpinewssitemap_video_preset'] = array(
+  $form['dpinewssitemap_video_style'] = array(
     '#type' => 'select',
     '#title' => t('Preset used for videos thumbnails'),
     '#options' => $styles_options,
-    '#default_value' => $default_settings['dpinewssitemap_video_preset'],
+    '#default_value' => $default_settings['dpinewssitemap_video_style'],
   );
 
   $form['dpinewssitemap_default_img'] = array(
@@ -217,9 +217,9 @@ function dpinewssitemap_admin_settings_page_form_submit($form, $form_state) {
     }
   }
   $settings['dpinewssitemap_nodes_freqs'] = $values['dpinewssitemap_nodes_freqs'];
-  $settings['dpinewssitemap_image_preset'] = $values['dpinewssitemap_image_preset'];
+  $settings['dpinewssitemap_image_style'] = $values['dpinewssitemap_image_style'];
   $settings['dpinewssitemap_image_license'] = $values['dpinewssitemap_image_license'];
-  $settings['dpinewssitemap_video_preset'] = $values['dpinewssitemap_video_preset'];
+  $settings['dpinewssitemap_video_style'] = $values['dpinewssitemap_video_style'];
   $settings['dpinewssitemap_default_img'] = $values['dpinewssitemap_default_img'];
   $settings['dpinewssitemap_allow_embed'] = $values['dpinewssitemap_allow_embed'] ? 'yes' : 'no';
 
@@ -254,9 +254,9 @@ function dpinewssitemap_default_settings() {
     'dpinewssitemap_publication_name' => variable_get('site_name', ''),
     'dpinewssitemap_content_types' => array('package', 'page'),
     'dpinewssitemap_tags_fields' => array(),
-    'dpinewssitemap_image_preset' => '',
+    'dpinewssitemap_image_style' => '',
     'dpinewssitemap_image_license' => '',
-    'dpinewssitemap_video_preset' => '',
+    'dpinewssitemap_video_style' => '',
     'dpinewssitemap_default_img' => drupal_get_path('module', 'dpinewssitemap').'/images/default_pic.jpg',
     'dpinewssitemap_allow_embed' => 'no',
     'dpinewssitemap_nodes_freqs' => array(),
