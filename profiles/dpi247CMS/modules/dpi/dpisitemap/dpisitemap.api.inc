@@ -30,6 +30,33 @@ function dpisitemap_api_generate_xmlfile($xmlfiles_to_generate, $folder_path) {
   dpisitemap_api_update_index($sitemaps_full_path, $folder_path);
 }
 
+function dpisitemap_api_remove_files($paths_to_delete, $folder_path) {
+  $namespaces = dpisitemap_api_get_namespaces();
+
+  $scheme = 'public';
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    if ($wrapper = file_stream_wrapper_get_instance_by_uri('public://'.$folder_path)) {
+      $folder_path = $wrapper->getDirectoryPath().'/'.$folder_path;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  $index_local_path = $folder_path.'/sitemapindex.xml';
+  $dom_index = new DOMDocument('1.0', 'UTF-8');
+
+  _dpisitemap_get_or_create_index($dom_index, $namespaces['sitemap'], $index_local_path);
+  $dom_sitemapindex = $dom_index->getElementsByTagName('sitemapindex')->item(0);
+
+  foreach ($paths_to_delete as $path) {
+    _dpisitemap_delete_entry_in_index($dom_index, $dom_sitemapindex, $path);
+    unlink($path);
+  }
+
+  $dom_index->save($index_local_path);
+}
+
 function dpisitemap_api_update_index($paths, $folder_path) {
   $namespaces = dpisitemap_api_get_namespaces();
 

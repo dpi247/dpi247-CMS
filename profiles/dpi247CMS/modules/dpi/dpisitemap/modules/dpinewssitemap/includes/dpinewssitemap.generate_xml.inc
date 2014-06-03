@@ -12,13 +12,12 @@ function dpinewssitemap_generate_sitemap_xml($settings) {
     $xmlfiles_to_generate = dpinewssitemap_generate_urlset_xml($nids, $settings, $timestamp);
     dpisitemap_api_generate_xmlfile($xmlfiles_to_generate, $settings['dpinewssitemap_path']);
   }
-/*
+
   dpinewssitemap_cleanup_old_xmlfiles($settings, $timestamp - 3600);
 
   if ($settings['dpinewssitemap_consolidate_sitemap']) {
     dpinewssitemap_generate_consolidate_xml($settings);
   }
-  */
 }
 
 function dpinewssitemap_get_nids_to_generate($settings, $timestamp, $limit = 0) {
@@ -39,28 +38,31 @@ function dpinewssitemap_get_nids_to_generate($settings, $timestamp, $limit = 0) 
   return $nids;
 }
 
-function _wallynewssitemap_get_destinations_nids_to_generate($settings, $timestamp, $limit) {
+function dpinewssitemap_get_destinations_nids_to_generate($settings, $timestamp, $limit) {
   $nids = array();
 
-  $global_sitemap_settings = wally_variable_get('wallysitemap_sitemaps_settings', array());
-  $dest_settings = $global_sitemap_settings['wallysitemap_dests_params'] ? $global_sitemap_settings['wallysitemap_dests_params'] : array();
+  $global_sitemap_settings = dpi_variable_get('wallysitemap_sitemaps_settings', array());
+  $dest_settings = $global_sitemap_settings['dpisitemap_dests_params'] ? $global_sitemap_settings['dpisitemap_dests_params'] : array();
 
-  $select = "SELECT cfd.nid FROM {content_field_destinations} cfd";
-  $join = " LEFT JOIN {node} n ON n.nid = cfd.nid";
-  $in_content_types = implode("', '", $settings['wallynewssitemap_content_types']);
-  $where = " WHERE cfd.field_destinations_tid = %d AND n.changed > %d AND n.type IN ('$in_content_types')";
-  $order_by = " ORDER BY n.changed DESC";
-  $qlimit = " LIMIT 0, %d";
-  $query = $select.$join.$where.$order_by.$qlimit;
+  $query = db_select('field_data_field_destinations', 'fdfd')
+    ->fields('fdfd', array('nid'));
+  $query->join('node', 'n', 'n.nid = fdfd.nid');
+  $query->condition('n.changed', $timestamp, '>')
+    ->condition('n.type', $settings['dpinewssitemap_content_types'], 'IN')
+    ->range(0, $limit);
 
-  $terms = taxonomy_get_tree(variable_get('wallymport_destinationpath', 2));
+  $terms = taxonomy_get_tree(dpidestinations_api_get_sections_vocabulary_vid());
   foreach ($terms as $term) {
     $tid = $term->tid;
     $term_settings = $dest_settings[$tid] ? $dest_settings[$tid] : array('check' => 1);
     if ($term_settings['check']) {
-      $db_nids = db_query($query, $tid, $timestamp, $limit);
-      while ($db_nid = db_fetch_array($db_nids)) {
-        $nids[] = $db_nid['nid'];
+      $copied_query = clone $query;
+      
+      $db_results = $copied_query
+        ->condition('fdfd.field_destination_tid', $term->tid)
+        ->execute();
+      foreach ($db_results as $db_result) {
+        $nids[] = $db_result->nid;
       }
     }
   }
@@ -68,11 +70,11 @@ function _wallynewssitemap_get_destinations_nids_to_generate($settings, $timesta
   return $nids;
 }
 
-function _wallynewssitemap_cleanup_old_xmlfiles($settings, $timestamp) {
+function dpinewssitemap_cleanup_old_xmlfiles($settings, $timestamp) {
   $files_to_delete = array();
-  $limit_timestamp = $timestamp - $settings['wallynewssitemap_delta_hours'] * 3600 + 1800;
+  $limit_timestamp = $timestamp - $settings['dpinewssitemap_delta_hours'] * 3600 + 1800;
 
-  $current_files = file_scan_directory($settings['wallynewssitemap_path'], '.*\.xml');
+  $current_files = file_scan_directory($settings['dpinewssitemap_path'], '.*\.xml');
   foreach ($current_files as $current_file) {
     list($sitemap_prefix, $uniq_timestamp) = explode('_', $current_file->name);
     list($file_timestamp, $a) = explode('-', $uniq_timestamp);
@@ -83,22 +85,22 @@ function _wallynewssitemap_cleanup_old_xmlfiles($settings, $timestamp) {
     }
   }
 
-  wallysitemap_remove_files($files_to_delete, $settings['wallynewssitemap_path']);
+  dpisitemap_api_remove_files($files_to_delete, $settings['dpinewssitemap_path']);
 }
 
-function _wallynewssitemap_generate_consolidate_xml($settings) {
+function dpinewssitemap_generate_consolidate_xml($settings) {
   $nids = array();
-  switch ($settings['wallynewssitemap_consolidate_sitemap_type']) {
+  switch ($settings['dpinewssitemap_consolidate_sitemap_type']) {
     case 'global':
-      $nids = _wallynewssitemap_get_nids_to_generate($settings, time() - $settings['wallynewssitemap_delta_hours'] * 3600, $settings['wallynewssitemap_consolidate_sitemap_amount']);
+      $nids = dpinewssitemap_get_nids_to_generate($settings, time() - $settings['dpinewssitemap_delta_hours'] * 3600, $settings['dpinewssitemap_consolidate_sitemap_amount']);
       break;
     case 'destination':
-      $nids = _wallynewssitemap_get_destinations_nids_to_generate($settings, time() - $settings['wallynewssitemap_delta_hours'] * 3600, $settings['wallynewssitemap_consolidate_sitemap_amount']);
+      $nids = dpinewssitemap_get_destinations_nids_to_generate($settings, time() - $settings['dpinewssitemap_delta_hours'] * 3600, $settings['dpinewssitemap_consolidate_sitemap_amount']);
       break;
   }
 
   if (!empty($nids)) {
-    $main_settings = wally_variable_get('wallysitemap_sitemaps_settings', array());
+    $main_settings = dpi_variable_get('dpisitemap_sitemaps_settings', array());
     $dom = new DOMDocument('1.0', 'UTF-8');
     $dom->load($main_settings['wallysitemap_path'].'/sitemapmain.xml');
     $dom_urlset = $dom->getElementsByTagName('urlset')->item(0);
@@ -116,20 +118,21 @@ function _wallynewssitemap_generate_consolidate_xml($settings) {
     }
 
     $not_empty = FALSE;
-    $site_infos = wallysitemap_get_site_infos();
+    $site_infos = dpisitemap_api_get_site_infos();
     foreach ($nids as $nid) {
       $node = node_load($nid);
-      if (in_array($node->path, $settings['wallynewssitemap_blacklist'])) {
+      $node->path = drupal_get_path_alias('node/'.$node->nid);
+      if (in_array($node->path, $settings['dpinewssitemap_blacklist'])) {
         continue;
       }
       $url = $dom_urlset->appendChild($dom->createElement('url'));
-      _wallynewssitemap_generate_newsurl_xml_set_commons($dom, $url, $node, $site_infos, $settings);
+      dpinewssitemap_generate_newsurl_xml_set_commons($dom, $url, $node, $site_infos, $settings);
       $not_empty = TRUE;
     }
 
     if ($not_empty) {
       $context = array('consolidate');
-      drupal_alter('wallysitemap_dom', $dom, $context);
+      drupal_alter('dpisitemap_dom', $dom, $context);
 
       $xmlfiles_to_generate = array(array(
         'dom' => $dom,
@@ -137,7 +140,7 @@ function _wallynewssitemap_generate_consolidate_xml($settings) {
       ));
     }
 
-    wallysitemap_generate_xmlfile($xmlfiles_to_generate, $main_settings['wallysitemap_path']);
+    dpisitemap_api_generate_xmlfile($xmlfiles_to_generate, $main_settings['dpisitemap_path']);
   }
 }
 
@@ -171,7 +174,7 @@ function dpinewssitemap_generate_urlset_xml($nids, $settings, $timestamp) {
   $i = $n = 0;
   foreach ($nids as $nid) {
     $node = node_load($nid);
-    $node->path = drupal_get_path_alias('node/'.$node->nid);
+    $node->path = drupal_get_path_alias('node/'.$node->nid); 
     if (in_array($node->path, $settings['dpinewssitemap_blacklist'])) {
       continue;
     }
@@ -269,10 +272,7 @@ function dpinewssitemap_generate_newsurl_xml_set_commons($dom, &$url, $node, $si
     if ($term_settings['check']) {
       if (isset($node->field_editorialupdatedate)) {
         $editorial_update = field_get_items('node', $node, 'field_editorialupdatedate');
-        $form_date = date_make_date($editorial_update[0]['value'], 'UTC');
-        $form_date = (object)date_timezone_set($form_date, timezone_open($editorial_update[0]['timezone']));
-        $form_date = unserialize(serialize($form_date));
-        $lastmod_date = strtotime($form_date->date);
+        $lastmod_date = $editorial_update[0]['value'];
       } else {
         $lastmod_date = $node->changed;
       }
@@ -312,7 +312,7 @@ function dpinewssitemap_generate_newsurl_xml_set_commons($dom, &$url, $node, $si
  *   <news:stock_tickers>NASDAQ:A, NASDAQ:B</news:stock_tickers>
  * </news:news>
  */
-function _wallynewssitemap_generate_newsurl_xml_set_main_news($dom, &$main_news, $newsNS, $node, $site_infos, $settings) {
+function dpinewssitemap_generate_newsurl_xml_set_main_news($dom, &$main_news, $newsNS, $node, $site_infos, $settings) {
   $news_pub = $main_news->appendChild($dom->createElementNS($newsNS, 'news:publication'));
   $news_pub->appendChild($dom->createElementNS($newsNS, 'news:name', $settings['dpinewssitemap_publication_name']));
   $news_pub->appendChild($dom->createElementNS($newsNS, 'news:language', $site_infos['language']));
@@ -397,7 +397,7 @@ function dpinewssitemap_generate_newsurl_xml_set_image($dom, &$image, $imageNS, 
   $atom = $embed['atom'];
   $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
 
-  $image_style_url = dpicontenttypes_api_image_style_url($settings['dpinewssitemap_image_style'], $node->nid, $atom->sid, $embed->field_photofile[0]['filepath']);
+  $image_style_url = dpicontenttypes_api_image_style_url($settings['dpinewssitemap_image_style'], $node->nid, $atom->sid, $atom->file_source);
   $image->appendChild($dom->createElementNS($imageNS, 'image:loc', str_replace($base_url, $ref_base_url, $image_style_url)));
   if (isset($atom_wrapper->field_caption)) {
     $field_caption = $atom_wrapper->field_caption->value();
@@ -437,7 +437,7 @@ function dpinewssitemap_generate_newsurl_xml_set_videos($dom, &$url, $videoNS, $
   if ($embeds = dpicontenttypes_api_get_embeds($node, 'video', FALSE, TRUE)) {
     foreach ($embeds as $embed) {
       $video = $url->appendChild($dom->createElement('video:video'));
-      dpinewssitemap_generate_newsurl_xml_set_image($dom, $video, $videoNS, $node, $embed, $site_infos, $settings);
+      dpinewssitemap_generate_newsurl_xml_set_video($dom, $video, $videoNS, $node, $embed, $site_infos, $settings);
     }
   }
 }
@@ -470,44 +470,52 @@ function dpinewssitemap_generate_newsurl_xml_set_videos($dom, &$url, $videoNS, $
  * </video:video>
  */
 function dpinewssitemap_generate_newsurl_xml_set_video($dom, &$video, $videoNS, $node, $embed, $site_infos, $settings) {
-  $global_sitemap_settings = wally_variable_get('wallysitemap_sitemaps_settings', array());
-  $ref_base_url = isset($global_sitemap_settings['wallysitemap_base_url']) ? $global_sitemap_settings['wallysitemap_base_url'] : $site_infos['base_url'];
+  global $base_url;
 
-  if (isset($embed->field_thumbnail[0]['fid']) && is_numeric($embed->field_thumbnail[0]['fid']) && $embed->field_thumbnail[0]['fid'] > 0) {
-    $video_thumb = imagecache_create_url($settings['wallynewssitemap_video_style'], $embed->field_thumbnail[0]['filepath'], FALSE, FALSE);
-  } else {
-    $video_thumb = imagecache_create_url($settings['wallynewssitemap_video_style'], $settings['wallynewssitemap_default_img'], FALSE, FALSE);
+  $global_sitemap_settings = dpi_variable_get('dpisitemap_sitemaps_settings', array());
+  $ref_base_url = isset($global_sitemap_settings['dpisitemap_base_url']) ? $global_sitemap_settings['dpisitemap_base_url'] : $site_infos['base_url'];
+
+  $atom = $embed['atom'];
+  $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+
+  if (isset($atom_wrapper->field_thumbnail)) {
+    $video_thumb = dpicontenttypes_api_image_style_url($settings['wallynewssitemap_video_style'], $node->nid, $atom->sid, $embed->field_photofile[0]['filepath']);
+    $video_thumb = str_replace($base_url, $ref_base_url, $video_thumb);
   }
-  $video_thumb = $ref_base_url.$video_thumb;
+  else {
+    $default_image_path = $settings['dpinewssitemap_default_img'];
+    $video_thumb = dpicontenttypes_api_image_style_url($settings['wallynewssitemap_video_style'], $node->nid, $atom->sid, $default_image_path);
+    $video_thumb = str_replace($base_url, $ref_base_url, $video_thumb);
+  }
   $video->appendChild($dom->createElementNS($videoNS, 'video:thumbnail_loc', $video_thumb));
-  $video->appendChild($dom->createElementNS($videoNS, 'video:title', $embed->title));
-  if (isset($embed->field_summary[0]['value']) && !empty($embed->field_summary[0]['value'])) {
-    $video_desc = $embed->field_summary[0]['value'];
-  } elseif (isset($embed->field_objectdescription[0]['value']) && !empty($embed->field_objectdescription[0]['value'])) {
-    $video_desc = $embed->field_objectdescription[0]['value'];
-  } elseif (isset($embed->field_video3rdparty[0]['description']) && !empty($embed->field_video3rdparty[0]['description'])) {
-    $video_desc = $embed->field_video3rdparty[0]['description'];
-  } elseif (isset($embed->field_videofile[0]['data']['description']) && !empty($embed->field_videofile[0]['data']['description'])) {
-    $video_desc = $embed->field_videofile[0]['data']['description'];
-  } else {
-    $video_desc = $embed->title;
+  $video->appendChild($dom->createElementNS($videoNS, 'video:title', $atom->title));
+  if (isset($atom_wrapper->field_caption)) {
+    $field_caption = $atom_wrapper->field_caption->value();
+    $video_desc = $field_caption['safe_value'];
+  }
+  elseif (isset($atom_wrapper->field_displaytitle)) {
+    $field_displaytitle = $atom_wrapper->field_displaytitle->value();
+    $video_desc = $field_displaytitle['safe_value'];
+  }
+  else {
+    $video_desc = $atom->title;
   }
   $video->appendChild($dom->createElementNS($videoNS, 'video:description', $video_desc));
-  if (isset($embed->field_video3rdparty[0]['embed'])) {
+  if (true) {
     $player_loc = $video->appendChild($dom->createElementNS($videoNS, 'video:player_loc', $embed->field_video3rdparty[0]['embed']));
     $player_loc->setAttribute('allow_embed', $settings['wallynewssitemap_allow_embed']);
     // @todo : gérer l'autoplay
-    $video->appendChild($dom->createElementNS($videoNS, 'video:duration', $embed->field_video3rdparty[0]['duration']));
-  } else {
-    $video->appendChild($dom->createElementNS($videoNS, 'video:content_loc', $ref_base_url.'/'.$embed->field_videofile[0]['filepath']));
-    // video:duration not handled yet
+    // @todo : gérer la duration
+  }
+  else {
+    // @todo : comment savoir si c'est un 3rd party ou un embed local?
   }
   // video:expiration_date not handled yet
   // video:rating not handled yet
   // video:view_count not handled yet
   $video->appendChild($dom->createElementNS($videoNS, 'video:publication_date', date('Y-m-d\TH:i:sP', $embed->created)));
-  if (isset($embed->field_rating[0]['value']) && is_numeric($embed->field_rating[0]['value']) && $embed->field_rating[0]['value'] > 0) {
-    $rating_term = taxonomy_get_term($embed->field_rating[0]['value']);
+  if (isset($atom_wrapper->field_rating)) {
+    $rating_term = taxonomy_get_term($atom_wrapper->field_rating->value());
     if ($rating_term->name == 'G') {
       $video->appendChild($dom->createElementNS($videoNS, 'video:family_friendly', 'yes'));
     } else {
@@ -515,9 +523,9 @@ function dpinewssitemap_generate_newsurl_xml_set_video($dom, &$video, $videoNS, 
     }
   }
   $video_tags = array();
-  foreach ($settings['wallynewssitemap_tags_fields'] as $tag_field) {
-    if (isset($embed->{$tag_field}[0]['value']) && is_numeric($embed->{$tag_field}[0]['value'])) {
-      foreach ($embed->{$tag_field} as $embed_tag) {
+  foreach ($settings['dpinewssitemap_tags_fields'] as $tag_field) {
+    if (isset($atom_wrapper->{$tag_field})) {
+      foreach ($atom_wrapper->{$tag_field}->value() as $embed_tag) {
         $term_tag = taxonomy_get_term($embed_tag['value']);
         $video_tags[] = $term_tag->name;
       }
