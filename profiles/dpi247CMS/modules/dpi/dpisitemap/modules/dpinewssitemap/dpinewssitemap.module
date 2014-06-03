@@ -30,7 +30,6 @@ function dpinewssitemap_cron() {
     if ($settings = dpi_variable_get('dpinewssitemap_sitemaps_settings', FALSE)) {
       if ($main_settings = dpi_variable_get('dpisitemap_sitemaps_settings', FALSE)) {
         $settings['dpinewssitemap_blacklist'] = array_merge($settings['dpinewssitemap_blacklist'], $main_settings['dpisitemap_blacklist']);
-        $settings['dpinewssitemap_default_freq'] = $main_settings['dpisitemap_default_freq'];
       }
 
       module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');

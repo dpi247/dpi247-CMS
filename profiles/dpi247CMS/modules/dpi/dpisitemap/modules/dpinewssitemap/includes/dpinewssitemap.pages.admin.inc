@@ -260,6 +260,7 @@ function dpinewssitemap_default_settings() {
     'dpinewssitemap_default_img' => drupal_get_path('module', 'dpinewssitemap').'/images/default_pic.jpg',
     'dpinewssitemap_allow_embed' => 'no',
     'dpinewssitemap_nodes_freqs' => array(),
+    'dpinewssitemap_default_freq' => 'daily',
   );
 }
 
