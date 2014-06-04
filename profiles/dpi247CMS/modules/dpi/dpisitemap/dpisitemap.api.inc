@@ -1,7 +1,15 @@
 <?php
 
 /**
- * Generate XML file
+ * Generate physical XML files from DOM objects and paths
+ * and add them in the Sitemap index
+ *
+ * @param array $xmlfiles_to_generate
+ *   Array of filenames and DOM objects to generate XML files
+ * @param string $folder_path
+ *   Subpath of the "public" stream
+ *
+ * @return Nothing
  */
 function dpisitemap_api_generate_xmlfile($xmlfiles_to_generate, $folder_path) {
   // @todo : handle gzip compression of XMLs
@@ -30,6 +38,16 @@ function dpisitemap_api_generate_xmlfile($xmlfiles_to_generate, $folder_path) {
   dpisitemap_api_update_index($sitemaps_full_path, $folder_path);
 }
 
+/**
+ * Delete physical XML files and their entry in the Sitemap Index
+ *
+ * @param array $paths_to_delete
+ *   Array of strings, paths of the XML files to delete
+ * @param string $folder_path
+ *   Subpath of the "public" stream
+ *
+ * @return Nothing
+ */
 function dpisitemap_api_remove_files($paths_to_delete, $folder_path) {
   $namespaces = dpisitemap_api_get_namespaces();
 
@@ -57,6 +75,16 @@ function dpisitemap_api_remove_files($paths_to_delete, $folder_path) {
   $dom_index->save($index_local_path);
 }
 
+/**
+ * Add some XML paths to the Sitemap index
+ *
+ * @param array $paths
+ *   Array of strings, path to add to the index
+ * @param string $folder_path
+ *   Subpath of the "public" stream
+ *
+ * @return Nothing
+ */
 function dpisitemap_api_update_index($paths, $folder_path) {
   $namespaces = dpisitemap_api_get_namespaces();
 
@@ -75,6 +103,9 @@ function dpisitemap_api_update_index($paths, $folder_path) {
   $dom_index->save($index_local_path);
 }
 
+/**
+ * Get all Sitemap related XML namespaces
+ */
 function dpisitemap_api_get_namespaces() {
   return array(
     'w3' => 'http://www.w3.org/2000/xmlns/',

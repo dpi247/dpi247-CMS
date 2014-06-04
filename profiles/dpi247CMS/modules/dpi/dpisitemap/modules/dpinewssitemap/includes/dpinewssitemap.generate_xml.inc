@@ -41,7 +41,7 @@ function dpinewssitemap_get_nids_to_generate($settings, $timestamp, $limit = 0) 
 function dpinewssitemap_get_destinations_nids_to_generate($settings, $timestamp, $limit) {
   $nids = array();
 
-  $global_sitemap_settings = dpi_variable_get('wallysitemap_sitemaps_settings', array());
+  $global_sitemap_settings = dpi_variable_get('dpisitemap_sitemaps_settings', array());
   $dest_settings = $global_sitemap_settings['dpisitemap_dests_params'] ? $global_sitemap_settings['dpisitemap_dests_params'] : array();
 
   $query = db_select('field_data_field_destinations', 'fdfd')
@@ -101,8 +101,19 @@ function dpinewssitemap_generate_consolidate_xml($settings) {
 
   if (!empty($nids)) {
     $main_settings = dpi_variable_get('dpisitemap_sitemaps_settings', array());
+    $folder_path = $main_settings['dpisitemap_path'];
+    $scheme = 'public';
+    if (file_stream_wrapper_valid_scheme($scheme)) {
+      if ($wrapper = file_stream_wrapper_get_instance_by_uri('public://'.$folder_path)) {
+        $folder_path = $wrapper->getDirectoryPath().'/'.$folder_path;
+      }
+      else {
+        return FALSE;
+      }
+    }
+    $sitemap_local_path = $folder_path.'/sitemapmain.xml';
     $dom = new DOMDocument('1.0', 'UTF-8');
-    $dom->load($main_settings['wallysitemap_path'].'/sitemapmain.xml');
+    $dom->load($sitemap_local_path);
     $dom_urlset = $dom->getElementsByTagName('urlset')->item(0);
 
     if (!$dom_urlset) {
@@ -239,13 +250,13 @@ function dpinewssitemap_generate_newsurl_xml($dom, &$url, $namespaces, $node, $s
   dpinewssitemap_generate_newsurl_xml_set_main_news($dom, $main_news, $namespaces['news'], $node, $site_infos, $settings);
 
   if ($settings['dpinewssitemap_add_images']) {
-    if (isset($node->field_embededobjects_nodes) && !empty($node->field_embededobjects_nodes)) {
+    if (isset($node->field_embededobjects) && !empty($node->field_embededobjects)) {
       dpinewssitemap_generate_newsurl_xml_set_images($dom, $url, $namespaces['image'], $node, $site_infos, $settings);
     }
   }
 
   if ($settings['dpinewssitemap_add_videos']) {
-    if (isset($node->field_embededobjects_nodes) && !empty($node->field_embededobjects_nodes)) {
+    if (isset($node->field_embededobjects) && !empty($node->field_embededobjects)) {
       dpinewssitemap_generate_newsurl_xml_set_videos($dom, $url, $namespaces['video'], $node, $site_infos, $settings);
     }
   }
@@ -270,7 +281,7 @@ function dpinewssitemap_generate_newsurl_xml_set_commons($dom, &$url, $node, $si
       $term_settings['freq'] = $settings['dpinewssitemap_nodes_freqs'][$tid]['freq'];
     }
     if ($term_settings['check']) {
-      if (isset($node->field_editorialupdatedate)) {
+      if (isset($node->field_editorialupdatedate) && !empty($node->field_editorialupdatedate)) {
         $editorial_update = field_get_items('node', $node, 'field_editorialupdatedate');
         $lastmod_date = $editorial_update[0]['value'];
       } else {
@@ -319,46 +330,45 @@ function dpinewssitemap_generate_newsurl_xml_set_main_news($dom, &$main_news, $n
   if (isset($node->field_freeaccess[0]['value']) && $node->field_freeaccess[0]['value'] == 'No') {
     $main_news->appendChild($dom->createElementNS($newsNS, 'news:access', 'Subscription'));
   }
-  if (isset($node->field_sitemap_genre)) {
+  if (isset($node->field_sitemap_genre) && !empty($node->field_sitemap_genre)) {
     $sitemap_genres = array();
     foreach (field_get_items('node', $node, 'field_sitemap_genre') as $node_sitemap_genre) {
-      $term_sitemap_genre = taxonomy_get_term($node_sitemap_genre['value']);
+      $term_sitemap_genre = taxonomy_term_load($node_sitemap_genre['tid']);
       $sitemap_genres[] = $term_sitemap_genre->name;
     }
     $main_news->appendChild($dom->createElementNS($newsNS, 'news:genres', implode(', ', $sitemap_genres)));
   }
-  if (isset($node->field_publicationdate)) {
+  if (isset($node->field_publicationdate) && !empty($node->field_publicationdate)) {
     $field_pub_date = field_get_items('node', $node, 'field_publicationdate');
-    $form_date = date_make_date($field_pub_date[0]['value'], 'UTC');
-    $form_date = (object)date_timezone_set($form_date, timezone_open($field_pub_date[0]['timezone']));
-    $form_date = unserialize(serialize($form_date));
-    $publication_date = strtotime($form_date->date);
+    $publication_date = strtotime($field_pub_date[0]['value']);
   } else {
     $publication_date = $node->created;
   }
   $main_news->appendChild($dom->createElementNS($newsNS, 'news:publication_date', date('Y-m-d\TH:i:sP', $publication_date)));
-  $main_news->appendChild($dom->createElementNS($newsNS, 'news:title', $node->title));
-  // @todo : Equivalent DPI7 du field_markers ?
-  /*
+  if (isset($node->field_displaytitle) && !empty($node->field_displaytitle)) {
+    $field_disp_title = field_get_items('node', $node, 'field_displaytitle');
+    $news_title = $field_disp_title[0]['safe_value'];
+  }
+  else {
+    $news_title = $node->title;
+  }
+  $news_title_node = $main_news->appendChild($dom->createElementNS($newsNS, 'news:title'));
+  $news_title_node->appendChild($dom->createCDATASection($news_title));
   $sitemap_geoloc = array();
-  if (isset($node->field_markers[0]['city']) && !empty($node->field_markers[0]['city'])) {
-    $sitemap_geoloc[] = $node->field_markers[0]['city'];
-  }
-  if (isset($node->field_markers[0]['province_name']) && !empty($node->field_markers[0]['province_name'])) {
-    $sitemap_geoloc[] = $node->field_markers[0]['province_name'];
-  }
-  if (isset($node->field_markers[0]['country_name']) && !empty($node->field_markers[0]['country_name'])) {
-    $sitemap_geoloc[] = $node->field_markers[0]['country_name'];
+  if (isset($node->field_locations) && !empty($node->field_locations)) {
+    foreach (field_get_items('node', $node, 'field_locations') as $field_location) {
+      $location_term = taxonomy_term_load($field_location['tid']);
+      $sitemap_geoloc[] = $location_term->name;
+    }
   }
   if (!empty($sitemap_geoloc)) {
     $main_news->appendChild($dom->createElementNS($newsNS, 'news:geo_location', implode(', ', $sitemap_geoloc)));
   }
-  */
   $sitemap_tags = array();
   foreach ($settings['dpinewssitemap_tags_fields'] as $tag_field) {
     if (isset($node->{$tag_field})) {
       foreach (field_get_items('node', $node, $tag_field) as $node_tag) {
-        $term_tag = taxonomy_get_term($node_tag['value']);
+        $term_tag = taxonomy_term_load($node_tag['tid']);
         $sitemap_tags[] = $term_tag->name;
       }
     }
@@ -399,35 +409,37 @@ function dpinewssitemap_generate_newsurl_xml_set_image($dom, &$image, $imageNS, 
 
   $image_style_url = dpicontenttypes_api_image_style_url($settings['dpinewssitemap_image_style'], $node->nid, $atom->sid, $atom->file_source);
   $image->appendChild($dom->createElementNS($imageNS, 'image:loc', str_replace($base_url, $ref_base_url, $image_style_url)));
-  if (isset($atom_wrapper->field_caption)) {
+  if (isset($atom_wrapper->field_caption) && !empty($atom_wrapper->field_caption)) {
     $field_caption = $atom_wrapper->field_caption->value();
     $image_caption = $field_caption['safe_value'];
   }
-  elseif (isset($atom_wrapper->field_displaytitle)) {
+  elseif (isset($atom_wrapper->field_displaytitle) && !empty($atom_wrapper->field_displaytitle)) {
     $field_displaytitle = $atom_wrapper->field_displaytitle->value();
     $image_caption = $field_displaytitle['safe_value'];
   }
   else {
     $image_caption = $atom->title;
   }
-  $image->appendChild($dom->createElementNS($imageNS, 'image:caption', $image_caption));
-  // @todo : Equivalent DPI7 du field_markers ?
-  /*
+  $image_caption_node = $image->appendChild($dom->createElementNS($imageNS, 'image:caption'));
+  $image_caption_node->appendChild($dom->createCDATASection($image_caption));
   $sitemap_geoloc = array();
-  if (isset($embed->field_markers[0]['city']) && !empty($embed->field_markers[0]['city'])) {
-    $sitemap_geoloc[] = $embed->field_markers[0]['city'];
-  }
-  if (isset($embed->field_markers[0]['province_name']) && !empty($embed->field_markers[0]['province_name'])) {
-    $sitemap_geoloc[] = $embed->field_markers[0]['province_name'];
-  }
-  if (isset($embed->field_markers[0]['country_name']) && !empty($embed->field_markers[0]['country_name'])) {
-    $sitemap_geoloc[] = $embed->field_markers[0]['country_name'];
+  if (isset($atom_wrapper->field_locations) && !empty($atom_wrapper->field_locations)) {
+    foreach ($atom_wrapper->field_locations->value() as $field_location) {
+      $sitemap_geoloc[] = $field_location->name;
+    }
   }
   if (!empty($sitemap_geoloc)) {
     $image->appendChild($dom->createElementNS($imageNS, 'image:geo_location', implode(', ', $sitemap_geoloc)));
   }
-  */
-  $image->appendChild($dom->createElementNS($imageNS, 'image:title', $atom->title));
+  if (isset($atom_wrapper->field_displaytitle) && !empty($atom_wrapper->field_displaytitle)) {
+    $field_displaytitle = $atom_wrapper->field_displaytitle->value();
+    $image_title = $field_displaytitle['safe_value'];
+  }
+  else {
+    $image_title = $atom->title;
+  }
+  $image_title_node = $image->appendChild($dom->createElementNS($imageNS, 'image:title'));
+  $image_title_node->appendChild($dom->createCDATASection($image_title));
   if (!empty($settings['dpinewssitemap_image_license'])) {
     $image->appendChild($dom->createElementNS($imageNS, 'image:license', $settings['dpinewssitemap_image_license']));
   }
@@ -478,32 +490,33 @@ function dpinewssitemap_generate_newsurl_xml_set_video($dom, &$video, $videoNS, 
   $atom = $embed['atom'];
   $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
 
-  if (isset($atom_wrapper->field_thumbnail)) {
-    $video_thumb = dpicontenttypes_api_image_style_url($settings['wallynewssitemap_video_style'], $node->nid, $atom->sid, $embed->field_photofile[0]['filepath']);
+  if (isset($atom_wrapper->field_thumbnail) && !empty($atom_wrapper->field_thumbnail)) {
+    $video_thumb = dpicontenttypes_api_image_style_url($settings['dpinewssitemap_video_style'], $node->nid, $atom->sid, $embed->field_photofile[0]['filepath']);
     $video_thumb = str_replace($base_url, $ref_base_url, $video_thumb);
   }
   else {
     $default_image_path = $settings['dpinewssitemap_default_img'];
-    $video_thumb = dpicontenttypes_api_image_style_url($settings['wallynewssitemap_video_style'], $node->nid, $atom->sid, $default_image_path);
+    $video_thumb = dpicontenttypes_api_image_style_url($settings['dpinewssitemap_video_style'], $node->nid, $atom->sid, $default_image_path);
     $video_thumb = str_replace($base_url, $ref_base_url, $video_thumb);
   }
   $video->appendChild($dom->createElementNS($videoNS, 'video:thumbnail_loc', $video_thumb));
   $video->appendChild($dom->createElementNS($videoNS, 'video:title', $atom->title));
-  if (isset($atom_wrapper->field_caption)) {
+  if (isset($atom_wrapper->field_caption) && !empty($atom_wrapper->field_caption)) {
     $field_caption = $atom_wrapper->field_caption->value();
     $video_desc = $field_caption['safe_value'];
   }
-  elseif (isset($atom_wrapper->field_displaytitle)) {
+  elseif (isset($atom_wrapper->field_displaytitle) && !empty($atom_wrapper->field_displaytitle)) {
     $field_displaytitle = $atom_wrapper->field_displaytitle->value();
     $video_desc = $field_displaytitle['safe_value'];
   }
   else {
     $video_desc = $atom->title;
   }
-  $video->appendChild($dom->createElementNS($videoNS, 'video:description', $video_desc));
+  $video_caption_node = $video->appendChild($dom->createElementNS($videoNS, 'video:description'));
+  $video_caption_node->appendChild($dom->createCDATASection($video_desc));
   if (true) {
     $player_loc = $video->appendChild($dom->createElementNS($videoNS, 'video:player_loc', $embed->field_video3rdparty[0]['embed']));
-    $player_loc->setAttribute('allow_embed', $settings['wallynewssitemap_allow_embed']);
+    $player_loc->setAttribute('allow_embed', $settings['dpinewssitemap_allow_embed']);
     // @todo : gérer l'autoplay
     // @todo : gérer la duration
   }
@@ -513,21 +526,21 @@ function dpinewssitemap_generate_newsurl_xml_set_video($dom, &$video, $videoNS, 
   // video:expiration_date not handled yet
   // video:rating not handled yet
   // video:view_count not handled yet
-  $video->appendChild($dom->createElementNS($videoNS, 'video:publication_date', date('Y-m-d\TH:i:sP', $embed->created)));
-  if (isset($atom_wrapper->field_rating)) {
-    $rating_term = taxonomy_get_term($atom_wrapper->field_rating->value());
-    if ($rating_term->name == 'G') {
-      $video->appendChild($dom->createElementNS($videoNS, 'video:family_friendly', 'yes'));
-    } else {
-      $video->appendChild($dom->createElementNS($videoNS, 'video:family_friendly', 'no'));
+  $video->appendChild($dom->createElementNS($videoNS, 'video:publication_date', date('Y-m-d\TH:i:sP', $node->created)));
+  if (isset($atom_wrapper->field_rating) && !empty($atom_wrapper->field_rating)) {
+    if ($field_rating = $atom_wrapper->field_rating->value()) {
+      if ($field_rating->name == 'G') {
+        $video->appendChild($dom->createElementNS($videoNS, 'video:family_friendly', 'yes'));
+      } else {
+        $video->appendChild($dom->createElementNS($videoNS, 'video:family_friendly', 'no'));
+      }
     }
   }
   $video_tags = array();
   foreach ($settings['dpinewssitemap_tags_fields'] as $tag_field) {
-    if (isset($atom_wrapper->{$tag_field})) {
+    if (isset($atom_wrapper->{$tag_field}) && !empty($atom_wrapper->{$tag_field})) {
       foreach ($atom_wrapper->{$tag_field}->value() as $embed_tag) {
-        $term_tag = taxonomy_get_term($embed_tag['value']);
-        $video_tags[] = $term_tag->name;
+        $video_tags[] = $embed_tag->name;
       }
     }
   }
@@ -563,7 +576,7 @@ function dpinewssitemap_new_dom($settings) {
 /**
  * Snipet de code pour insérer un DOM node dans un autre DOM document
  *
- * $a = '<loc>http://wally.drupal.dev/category/destination-path/home</loc><changefreq>hourly</changefreq><priority>1</priority>';
+ * $a = '<loc>http://dpi247.drupal.dev/category/destination-path/home</loc><changefreq>hourly</changefreq><priority>1</priority>';
  $b = '<?xml version="1.0" encoding="UTF-8"?><url>'.$a.'</url>';
  $dom_a = new DomDocument();
  $dom_a->formatOutput = true;
