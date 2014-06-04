@@ -446,7 +446,7 @@ function dpinewssitemap_generate_newsurl_xml_set_image($dom, &$image, $imageNS, 
 }
 
 function dpinewssitemap_generate_newsurl_xml_set_videos($dom, &$url, $videoNS, $node, $site_infos, $settings) {
-  if ($embeds = dpicontenttypes_api_get_embeds($node, 'video', FALSE, TRUE)) {
+  if ($embeds = dpicontenttypes_api_get_embeds($node, array('video', 'youtube'), FALSE, TRUE)) {
     foreach ($embeds as $embed) {
       $video = $url->appendChild($dom->createElement('video:video'));
       dpinewssitemap_generate_newsurl_xml_set_video($dom, $video, $videoNS, $node, $embed, $site_infos, $settings);
@@ -515,7 +515,8 @@ function dpinewssitemap_generate_newsurl_xml_set_video($dom, &$video, $videoNS, 
   $video_caption_node = $video->appendChild($dom->createElementNS($videoNS, 'video:description'));
   $video_caption_node->appendChild($dom->createCDATASection($video_desc));
   if (true) {
-    $player_loc = $video->appendChild($dom->createElementNS($videoNS, 'video:player_loc', $embed->field_video3rdparty[0]['embed']));
+    $video_loc = isset($atom->data['orig_identifier']) ? $atom->data['orig_identifier'] : $atom->base_id;
+    $player_loc = $video->appendChild($dom->createElementNS($videoNS, 'video:player_loc', $video_loc));
     $player_loc->setAttribute('allow_embed', $settings['dpinewssitemap_allow_embed']);
     // @todo : gérer l'autoplay
     // @todo : gérer la duration
