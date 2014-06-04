@@ -118,15 +118,14 @@ function dpiscald_theme(){
 }
 
 /**
- * Implements hook_scald_fetch().
+ * Implementation of hook_scald_fetch()
  */
 function dpiscald_scald_fetch($atom, $type) {
-  $typ='youtube';
-  module_load_include('inc', 'dpiscald', 'providers/'.$typ.'/'.$typ);
-  $function_name='dpiscald_'.$typ.'_scald_fetch';
+  $atom_type = $atom->type;
+  module_load_include('inc', 'dpiscald', 'providers/'.$atom_type.'/'.$atom_type);
+  $function_name = 'dpiscald_'.$atom_type.'_scald_fetch';
   $function_name($atom, $type);
 }
-
 
 /**
  * Private function to prerender images (like Flickr)
@@ -386,16 +385,18 @@ function dpiscald_atom_add_form_add_submit(&$form, &$form_state) {
     $count = $function($form, $form_state);
     $atom_count_implemented = TRUE;
   }
-  if ($scald['source'] == 'dpiscald' || startsWith($scald['source'], 'scald_')){
-  	$tmp[0] = $scald['source'];
-  	$tmp[1] = $scald['type']->type;
-  } 
-  elseif (startsWith($scald['source'], 'dpiscald_')){
-    $tmp = explode('_',$scald['source']);
+
+  if ($scald['source'] == 'dpiscald' || startsWith($scald['source'], 'scald_')) {
+    $tmp[0] = $scald['source'];
+    $tmp[1] = $scald['type']->type;
+  }
+  elseif (startsWith($scald['source'], 'dpiscald_')) {
+    $tmp = explode('_', $scald['source']);
   }
   for ($delta = 0; $delta < $count; $delta++) {
-    $atoms[$delta] = new ScaldAtom($tmp[1], $tmp[0]);//$scald['type']->type, $tmp[0]);
+    $atoms[$delta] = new ScaldAtom($tmp[1], $tmp[0]); //$scald['type']->type, $tmp[0]);
   }
+
   // Allow the source provider to alter it, filling in defaults value.
   $function = $scald['source'] . '_scald_add_form_fill';
   if (function_exists($function)) {
@@ -406,6 +407,15 @@ function dpiscald_atom_add_form_add_submit(&$form, &$form_state) {
       $function($atoms[0], $form, $form_state);
     }
   }
+
+  foreach ($atoms as &$atom) {
+    if (!isset($atom->data)) {
+      $atom->data = array();
+    }
+    // Save original identifier
+    $atom->data['orig_identifier'] = $form_state['values']['identifier'];
+  }
+
   // And put it in the form_state
   $form_state['scald']['atoms'] = $atoms;
 }
