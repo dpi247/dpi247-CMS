@@ -138,6 +138,17 @@ function dpidestinations_api_get_destination_from_node_for_tid($node, $tid) {
   return FALSE;
 }
 
+/**
+ * Return the quadruplet of information that define the main destination that is used in a specific node
+ */
+function dpidestinations_api_get_main_destination_from_node($node) {
+  $destinations_val = field_get_items('node', $node, 'field_destinations');
+  if (isset($destinations_val) && $destinations_val != FALSE) {
+    return array_shift($destinations_val);
+  }
+  return FALSE;
+}
+
 function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache = FALSE, $load_entities = FALSE) {
   return _dpidestinations_api_get_all_sections_terms_from_db($reset_cache);
 }

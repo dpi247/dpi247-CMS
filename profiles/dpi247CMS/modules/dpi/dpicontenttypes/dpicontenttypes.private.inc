@@ -171,7 +171,7 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
   } else {
     $dpiproperties = $object->dpiproperties;
   }
-  $dpiproperties->type = $dpiproperties->type ? $dpiproperties->type : 'default';
+  $dpiproperties->type = isset($dpiproperties->type) ? $dpiproperties->type : 'default';
   $dpiproperties->id = $eid;
   $dpiproperties->entity = $entity;
   $dpiproperties->external_reference = $dpiproperties->external_reference ? $dpiproperties->external_reference : dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand();

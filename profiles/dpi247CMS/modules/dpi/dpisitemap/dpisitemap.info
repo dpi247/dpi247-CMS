@@ -1,0 +1,7 @@
+name = DPI Sitemap
+description = Sitemap generation
+package = DPI
+core = 7.x
+
+dependencies[] = dpicache
+dependencies[] = dpicommons
