@@ -13,7 +13,8 @@ function dpimport_page_importer_list(){
     $edit = '<a href="/'.DPI_ADMIN_PATH.'/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
     $delete = ' <a href="/'.DPI_ADMIN_PATH.'/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
     $process = ' <a href="/dpimport/process/'.$imp->name.'">'.t('Process').'</a>';
-    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete.$process);
+    $test = ' <a href="/dpimport/test/'.$imp->name.'">'.t('Test').'</a>';
+    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete.$process.$test);
   }
   return theme('table', $vars);
 }
