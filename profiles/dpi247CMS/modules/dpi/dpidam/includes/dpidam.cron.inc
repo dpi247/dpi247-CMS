@@ -15,7 +15,7 @@ function dpidam_post_packages_cron() {
     ->range(0, $max_number)
     ->execute();
   foreach ($db_packages as $obj) {
-    $post_result = dpidam_post_package($obj->nid);
+    $post_result = _dpidam_post_package($obj->nid);
     if ($post_result['success']) {
       _dpidam_remove_package_from_buffer($obj->nid);
       print t('Posted package NID @nid', array('@nid' => $obj->nid));
