@@ -364,19 +364,24 @@ abstract class Dispatcher{
    */
   public function getSettingsForm(&$form_state, $values){
     $form = array();
+
     $form['dispatcher']['zip'] = array(
-      '#type' => 'checkbox',
+      '#type' => 'select',
       '#title' => t('Are the data zipped?'),
-      '#description' => t('Indicates if the data to import are zipped'),
+      '#description' => '',
+      '#options' => array(t('No'), t('Yes')),
       '#default_value' => isset($values['zip']) ? $values['zip'] : 0,
       '#required' => TRUE,
     );
+
     $form['dispatcher']['cron'] = array(
-      '#type' => 'checkbox',
+      '#type' => 'select',
       '#title' => t('Are the data imported by a CRON job?'),
+      '#options' => array(t('No'), t('Yes')),
       '#default_value' => isset($values['cron']) ? $values['cron'] : 0,
       '#required' => TRUE,
     );
+
     $form['dispatcher']['cron_frequency'] = array(
       '#type' => 'textfield',
       '#title' => t('Cron frequency (minutes)'),
@@ -388,6 +393,7 @@ abstract class Dispatcher{
         ),
       ),
     );
+
     $form['dispatcher']['temp_folder'] = array(
       '#type' => 'textfield',
       '#title' => t('Temporary directory path'),
@@ -395,6 +401,7 @@ abstract class Dispatcher{
       '#default_value' => isset($values['temp_folder']) ? $values['temp_folder'] : NULL,
       '#required' => TRUE,
     );
+
     $form['dispatcher']['done_folder'] = array(
       '#type' => 'textfield',
       '#title' => t('Done directory path'),
@@ -402,6 +409,7 @@ abstract class Dispatcher{
       '#default_value' => isset($values['done_folder']) ? $values['done_folder'] : NULL,
       '#required' => TRUE,
     );
+
     $form['dispatcher']['error_folder'] = array(
       '#type' => 'textfield',
       '#title' => t('Error directory path'),
@@ -409,6 +417,7 @@ abstract class Dispatcher{
       '#default_value' => isset($values['error_folder']) ? $values['error_folder'] : NULL,
       '#required' => TRUE,
     );
+
     $form['dispatcher']['ttl_folder'] = array(
       '#type' => 'textfield',
       '#title' => t('Time to live of the files in day'),
@@ -416,6 +425,7 @@ abstract class Dispatcher{
       '#default_value' => isset($values['ttl_folder']) ? $values['ttl_folder'] : 30,
       '#required' => TRUE,
     );
+
     return $form;
   }
 
