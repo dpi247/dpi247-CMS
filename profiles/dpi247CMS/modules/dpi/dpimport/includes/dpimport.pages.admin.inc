@@ -131,7 +131,7 @@ function dpimport_page_form_importer_form_submit($form, &$form_state){
   }
 
   if (isset($form_state['complete'])){
-    drupal_goto('admin/config/dpimport/import');
+    drupal_goto(DPI_ADMIN_PATH.'/dpimport/import');
   }
 
   if ($form_state['triggering_element']['#value'] == 'Back') {
@@ -544,5 +544,5 @@ function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
     drupal_set_message(t('The importer instance could not been deleted'), 'error');
   }
 
-  drupal_goto('admin/config/dpimport/import');
+  drupal_goto(DPI_ADMIN_PATH.'/dpimport/import');
 }
