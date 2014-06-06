@@ -97,6 +97,18 @@ abstract class Importer {
   }
 
   /**
+   * Get additionnal informations to display in the importers admin page
+   */
+  public function additionnalInformations() {
+    $additionnal_infos = '';
+    if ($this->dispatcher_class == 'PostDispatcher') {
+      global $base_url;
+      $additionnal_infos = t('POST URL : ').$base_url.'/dpimport/process/'.$this->name;
+    }
+    return $additionnal_infos;
+  }
+
+  /**
    * Form to complete the settings of the importer
    *
    * @param Array $form_state

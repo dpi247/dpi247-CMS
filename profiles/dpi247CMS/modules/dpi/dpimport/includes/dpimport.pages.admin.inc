@@ -3,18 +3,24 @@
 /**
  * Page callback that render the list of the importer
  */
-function dpimport_page_importer_list(){
+function dpimport_page_importer_list() {
   module_load_include('inc', 'dpimport', 'includes/dpimport.process');
   $importers = dpimport_api_get_all_importer_settings();
   $vars = array();
-  $vars['header'] = array('Name', 'Type', 'Version', 'Dispatcher', 'Action');
+  $vars['header'] = array(t('Name'), t('Type'), t('Version'), t('Dispatcher'), t('Additionnal informations'), t('Operations'));
   $vars['rows'] = array();
-  foreach ($importers as $imp){
+  foreach ($importers as $imp) {
+    $importer_plugin = _dpimport_load_importer_plugin($imp->type, $imp->version);
+    // Get importer class from settings and plugin
+    $importer_class = $importer_plugin['versions'][$imp->version]['class'];
+    // Importer Instance
+    $importer = new $importer_class($imp, $importer_plugin);
+
     $edit = '<a href="/'.DPI_ADMIN_PATH.'/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
     $delete = ' <a href="/'.DPI_ADMIN_PATH.'/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
     $process = ' <a href="/dpimport/process/'.$imp->name.'">'.t('Process').'</a>';
     $test = ' <a href="/dpimport/test/'.$imp->name.'">'.t('Test').'</a>';
-    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete.$process.$test);
+    $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $importer->additionnalInformations(), $edit.$delete.$process.$test);
   }
   return theme('table', $vars);
 }
