@@ -61,7 +61,7 @@ function ccimapping_form_productinfo_editor_form_submit($form, $form_state) {
       $return = TRUE;
     }
     if (empty($product_name)) {
-      drupal_set_message(t('Product name not configured, please configure it <a href="/admin/config/dpi247/settings">here</a>.'), 'error');
+      drupal_set_message(t('Product name not configured, please configure it <a href="/'.DPI_ADMIN_PATH.'/general-settings'.'">here</a>.'), 'error');
       $return = TRUE;
     }
     if ($return) {
@@ -113,7 +113,7 @@ function ccimapping_get_productinfo_fromWS() {
     $return = TRUE;
   }
   if (empty($product_name)) {
-    drupal_set_message(t('Product name not configured, please configure it <a href="/admin/config/dpi247/settings">here</a>.'), 'error');
+    drupal_set_message(t('Product name not configured, please configure it <a href="/'.DPI_ADMIN_PATH.'/general-settings">here</a>.'), 'error');
     $return = TRUE;
   }
   if ($return) {
