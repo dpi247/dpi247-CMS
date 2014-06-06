@@ -10,8 +10,8 @@ function dpimport_page_importer_list(){
   $vars['header'] = array('Name', 'Type', 'Version', 'Dispatcher', 'Action');
   $vars['rows'] = array();
   foreach ($importers as $imp){
-    $edit = '<a href="/admin/config/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
-    $delete = ' <a href="/admin/config/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
+    $edit = '<a href="/'.DPI_ADMIN_PATH.'/dpimport/import/edit/'.$imp->name.'">'.t('Edit').'</a>';
+    $delete = ' <a href="/'.DPI_ADMIN_PATH.'/dpimport/import/delete/'.$imp->name.'">'.t('Delete').'</a>';
     $process = ' <a href="/dpimport/process/'.$imp->name.'">'.t('Process').'</a>';
     $vars['rows'][] = array($imp->name, $imp->type, $imp->version, $imp->dispatcher, $edit.$delete.$process);
   }
