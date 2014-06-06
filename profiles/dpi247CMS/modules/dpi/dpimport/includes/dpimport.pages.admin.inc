@@ -311,7 +311,9 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state){
   $form['default']['type'] = array(
     '#type' => 'select',
     '#title' => t('Importer'),
-    '#description' => '',
+    '#description' => t('The choice of the importer determines the way the given XMLs are transformed into entities.<br />
+        An importer can only process a given XML structure, like RSS or DPI structured XMLs.<br />
+        The importer is also responsible for the creation of entities, it could create nodes or atoms for example, or it could produce nodes without saving them (it is the case for a preview importer for example).'),
     '#required' => TRUE,
     '#options' => $options,
     '#default_value' => isset($values['type']) ? $values['type'] : NULL,
@@ -409,7 +411,8 @@ function dpimport_form_importer_stageimporter_form(&$form, &$form_state){
   $form['importer']['dispatcher'] = array(
     '#type' => 'select',
     '#title' => t('Dispatcher'),
-    '#description' => t('Choose the dispatcher.'),
+    '#description' => t('The dispatcher determines the way XMLs are extracted regarding a given source and transmitted to the chosen importer.<br />
+        For example, the URL dispatcher will fetch an XML from a given URL while the folder dispatcher will fetch XMLs from a local repository.'),
     '#required' => TRUE,
     '#options' => $options,
     '#default_value' => isset($values['dispatcher']) ? $values['dispatcher'] : NULL,
