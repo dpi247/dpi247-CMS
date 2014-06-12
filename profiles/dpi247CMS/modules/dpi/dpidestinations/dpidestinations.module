@@ -528,7 +528,7 @@ function dpidestinations_dpicache_cache_entry_register() {
         "type" => "inc",
         "name" => "plugins/ctools/content_types/targetblock/targetblock",
       ),
-      'bypass' => TRUE,
+      'bypass' => TRUE, // Has to be set to FALSE in production environments
     )
   );
 }
