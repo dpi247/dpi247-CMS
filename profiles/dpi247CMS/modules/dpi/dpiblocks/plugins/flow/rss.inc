@@ -1,7 +1,5 @@
 <?php
 
-module_load_include('inc', 'dpiblocks', 'includes/dpiblocks.flowhelpers');
-
 /**
  * Plugins are described by creating a $plugin array which will be used
  * by the system that includes this file.
@@ -13,9 +11,12 @@ $plugin = array(
   'defaults' => dpiblocks_rss_flow_settings_default(),
 );
 
+/**
+ * Settings form
+*/
 function dpiblocks_rss_flow_settings_form(&$form, &$form_state) {
   $conf = dpiblocks_rss_flow_settings_default($form_state);
-  
+
   $form['uri'] = array(
     '#type'             => 'textfield',
     '#title'            => t('URI'),
@@ -25,14 +26,14 @@ function dpiblocks_rss_flow_settings_form(&$form, &$form_state) {
     '#maxlength'        => 512,
     '#required'         => TRUE,
   );
-  
+
   $form['request_timeout'] = array(
     '#type'             => 'textfield',
     '#title'            => t('HTTP requests timeout (in seconds)'),
     '#description'      => t('Specifies the timeout limit (in seconds) for every HTTP request made for this URL'),
     '#default_value'    => $conf['request_timeout'],
   );
-  
+
   $form['maxitem'] = array (
     '#type'             => 'textfield',
     '#title'            => t('Max item to fetch for this feed'),
@@ -40,26 +41,23 @@ function dpiblocks_rss_flow_settings_form(&$form, &$form_state) {
     '#default_value'    => $conf['maxitem'],
     '#required'         => TRUE,
   );
-  
+
   $form['embed_img'] = array(
     '#title'            => t('Use the first image embeded in the text if no media image found.'),
     '#type'             => 'checkbox',
     '#default_value'    => $conf['embed_img'],
   );
-  
+
   $form['channel_img'] = array(
     '#title'            => t('Use the default channel image if no media image found.'),
     '#type'             => 'checkbox',
     '#default_value'    => $conf['channel_img'],
   );
-  
-  $form['get_distant_img'] = array (
-    '#type'             => 'checkbox',
-    '#default_value'    => $conf['get_distant_img'],
-    '#title'            => t('Copy RSS feeds images to locale folder.'),
-  );
 }
 
+/**
+ * Settings form default values
+ */
 function dpiblocks_rss_flow_settings_default($form_state = array()) {
   if (isset($form_state) && !empty($form_state)) {
     return $form_state;
@@ -77,6 +75,9 @@ function dpiblocks_rss_flow_settings_default($form_state = array()) {
   return $defaults;
 }
 
+/**
+ * Validate the settings form
+ */
 function dpiblocks_rss_flow_settings_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
 
@@ -95,11 +96,18 @@ function dpiblocks_rss_flow_settings_form_validate(&$form, &$form_state) {
   }
 }
 
+/**
+ * Build function of the RSS flow plugin
+ */
 function dpiblocks_rss_flow_build(&$feed_infos) {
+  module_load_include('inc', 'dpiblocks', 'includes/dpiblocks.flowhelpers');
+
   $return_msg = 'RSS feed "@feed_name": ';
   $return_substion = array('@feed_name' => $feed_infos['name']);
+
+  // Initiate the packages array
   $struct_array = dpiblocks_flowhelpers_init_array($feed_infos);
-dsm($feed_infos, 'feed infos');
+
   $maxitem = (isset($feed_infos['conf']['maxitem']) && $feed_infos['conf']['maxitem'] > 0) ? $feed_infos['conf']['maxitem'] : 1000;
   $request_timeout = (isset($feed_infos['conf']['request_timeout']) && !empty($feed_infos['conf']['request_timeout'])) ? $feed_infos['conf']['request_timeout'] : dpi_variable_get('dpicommons_http_request_timeout', 3);
   $feed_xml = drupal_http_request($feed_infos['conf']['uri'], array('timeout' => $request_timeout));
@@ -107,57 +115,26 @@ dsm($feed_infos, 'feed infos');
   module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
   if (dpicommons_is_http_request_successfull($feed_xml)) {
     set_error_handler('dpiblocks_rss_flow_handle_errors');
-$struct_array['Packages']['Package'][] = node_load(1);
-$struct_array['Packages']['Package'][] = node_load(1);
-return $struct_array;
+
     $dom = new DomDocument();
     $dom->LoadXML($feed_xml->data);
     $channels = $dom->getElementsByTagName('channel');
     $rss_tags = $dom->getElementsByTagName('rss');
     if ($rss_tags->item(0)) {
       $media_namespace = $rss_tags->item(0)->getAttributeNS('http://www.w3.org/2000/xmlns/', 'media');
-      $channel_last_build = 0;
 
       if ($channels->item(0)) {
-        $sql_last_build = $feed_infos['last_build'];
-        $feed_name = check_plain($feed_infos['name']);
-        $channel_last_build = strtotime(_wallytoolbox_checkifelementexists($channels->item(0), 'lastBuildDate'));
+        foreach ($channels->item(0)->getElementsByTagName('item') as $item) {
+          // Build a package from an RSS item
+          $struct_array['Packages']['Package'][] = dpiblocks_rss_flow_item_to_node($channels->item(0), $item, $feed_infos, $media_namespace);;
 
-        if ($channel_last_build > $sql_last_build || empty($channel_last_build) || !isset($channel_last_build) || $channel_last_build == 0) {
-          $feed_infos['last_build'] = $channel_last_build;
-
-          if (strstr($feed_infos['caid'], 'Flow2Node_') && isset($feed_infos['conf']['get_distant_img'])) {
-            // Do not import image to local folder for Flow2Node
-            $feed_infos['conf']['get_distant_img'] = 0;
+          if (sizeof($struct_array['Packages']['Package']) >= $maxitem) {
+            break;
           }
-          while (isset($feed_infos['feeds_md5']) && is_string($feed_infos['feeds_md5'])) {
-            $feed_infos['feeds_md5'] = unserialize($feed_infos['feeds_md5']);
-          }
-          $feeds_md5 = isset($feed_infos['feeds_md5']) ? $feed_infos['feeds_md5'] : array();
-          $new_feeds_md5 = array();
-          $temp_struct_array = array();
+        }
 
-          foreach ($channels->item(0)->getElementsByTagName('item') as $item) {
-            $temp_struct_array = wallytoolbox_rss_item_to_array($channels->item(0), $item, $media_namespace, $feed_infos);
-
-            $elem_package = $temp_struct_array;
-            $elem_md5 = md5($elem_package['PublicationDate'].$elem_package['PackageTitle']['value'].$elem_package['ExternalURI']['value'].$elem_package['MainStory']['TextBody']['value']);
-            if (!isset($feeds_md5[$elem_md5])) {
-              $struct_array['Packages']['Package'][] = $temp_struct_array;
-            }
-
-            $new_feeds_md5[$elem_md5] = TRUE;
-
-            if (sizeof($struct_array['Packages']['Package']) >= $maxitem) break;
-          }
-
-          if (empty($struct_array['Packages']['Package'])) {
-            dpiblocks_rss_flow_set_log($struct_array['Packages'], TRUE, 'unchanged', t($return_msg.'No modifications', $return_substion));
-          }
-
-          $feed_infos['feeds_md5'] = $new_feeds_md5;
-        } else {
-          dpiblocks_rss_flow_set_log($struct_array['Packages'], TRUE, 'unchanged', t($return_msg.'Channel not rebuild', $return_substion));
+        if (empty($struct_array['Packages']['Package'])) {
+          dpiblocks_rss_flow_set_log($struct_array['Packages'], TRUE, 'unchanged', t($return_msg.'No modifications', $return_substion));
         }
       } else {
         dpiblocks_rss_flow_set_log($struct_array['Packages'], FALSE, 'structure', t($return_msg.'No channel', $return_substion));
@@ -173,17 +150,8 @@ return $struct_array;
 }
 
 /**
- * Build an array from a RSS item. The array structure is based on the
- * structure required by Wallymport.
- * 
- * The structure follows the rule :
- * $array[element_name][attribute_name] = attribute_value
- * or
- * $array[element_name][subelement_name] = subelement (array)
- * And so on..
- * 
- * If the subelement is just a string, use 'value' as subelement_name.
- * 
+ * Build a node from a RSS item, the node will not be saved.
+ *
  * @param $channel
  *   The full RSS channel, needed because of the media fields which can
  *   be written anywhere in the feed.
@@ -191,208 +159,159 @@ return $struct_array;
  *   The RSS to be transformed.
  * @param $feed_infos
  *   The infos of the feed as recorded in the DB.
- * 
+ *
  * @return
- *   The array-restructured item.
+ *   The node.
  */
-function wallytoolbox_rss_item_to_array($channel, $item, $media_namespace = 'http://search.yahoo.com/mrss/', $feed_infos = array('name' => 'RSS', 'destination' => '0///', 'prefix' => '')) {
-  $array_package = wallytoolbox_flow_to_array_new_package();
-  
+function dpiblocks_rss_flow_item_to_node($channel, $item, $feed_infos, $media_namespace = 'http://search.yahoo.com/mrss/') {
+  // Initiate a package and its wrapper
+  list($package, $package_wrapper) = dpiblocks_flowhelpers_new_package();
+
+  $feed_name = $feed_infos['name'];
+  $caid = $feed_infos['caid'];
+
   // Get package informations
-  list($feed_name, $prefix) = wallytoolbox_rss_item_to_array_set_package($array_package, $item, $feed_infos);
-  // Get main story
-  wallytoolbox_rss_item_to_array_set_mainstory($array_package, $item, $feed_name, $prefix);
+  dpiblocks_rss_flow_set_package($package, $package_wrapper, $item, $feed_name);
 
   // Get enclosure content
   $enclosure = $item->getElementsByTagName('enclosure');
   if ($enclosure->item(0) && $enclosure->item(0)->getAttribute('type') && strstr($enclosure->item(0)->getAttribute('type'), 'image')) {
-    wallytoolbox_rss_item_to_array_set_enclosure($array_package, $enclosure, $feed_name, $prefix);
+    dpiblocks_rss_flow_set_enclosure($package, $package_wrapper, $enclosure->item(0), $feed_name, $caid);
   }
 
   // Get media contents
   $media_contents = $item->getElementsByTagNameNS($media_namespace, 'content');
   if ($media_contents->item(0)) {
-    wallytoolbox_rss_item_to_array_set_medias($array_package, $channel, $item, $media_contents, $feed_name, $prefix, $media_namespace);
+    dpiblocks_rss_flow_set_medias($package, $package_wrapper, $channel, $item, $media_contents, $feed_name, $caid, $media_namespace);
   }
-  
-  $no_photo = TRUE;
-  if (isset($array_package['EmbeddedContent'])) {
-    foreach ($array_package['EmbeddedContent']['EmbeddedObjects']['Object'] as $object) {
-      if ($object['type'] == 'PhotoObjectType') {
-        $no_photo = FALSE;
-        break;
-      }
-    }
-  }
+
+  // Check wether there already are some photos in the package or not
+  $embeds_count = dpicontenttypes_api_get_embeds_count_by_type($package);
+  $no_photo = !isset($embeds_count['image']) || empty($embeds_count['image']);
 
   // Get embeded images in the text body
   if ($feed_infos['conf']['embed_img'] && $no_photo) {
-    wallytoolbox_rss_item_to_array_set_embeded_image($array_package, $item);
+    dpiblocks_rss_flow_set_embeded_image($package, $package_wrapper, $item, $feed_name, $caid);
   }
 
   // Get the channel image
   $channel_img = $channel->getElementsByTagName('image');
   if ($feed_infos['conf']['channel_img'] && $no_photo && $channel_img->item(0)) {
-    wallytoolbox_rss_item_to_array_set_channel_image($array_package, $channel_img->item(0));
-  }
-  
-  // Copy distant images to local
-  if ($feed_infos['conf']['get_distant_img'] == 1 && isset($array_package['EmbeddedContent'])) {
-    $file_temp_dir = file_directory_path();
-    module_load_include('inc', 'wallytoolbox', 'includes/wallytoolbox.helpers');
-
-    foreach ($array_package['EmbeddedContent']['EmbeddedObjects']['Object'] as $object_key => $object) {
-      if ($object['type'] == 'PhotoObjectType') {
-        $file_uri = $object['FileURI']['value'];
-        $locale_image = wallytoolbox_create_or_update_file($file_uri, 'Flows', $feed_infos['caid'], $file_temp_dir, $feed_infos['caid']);
-        if ($locale_image) {
-          $array_package['EmbeddedContent']['EmbeddedObjects']['Object'][$object_key]['LocaleImage'] = $locale_image;
-        }
-        //$array_package['EmbeddedContent']['EmbeddedObjects']['Object'][$object_key]['LocaleImage'] = _wallytoolbox_rss_create_or_update_file($file_uri, $file_temp_dir, $feed_infos['caid']);
-      }
-
-      if (isset($object['Thumbnail'])) {
-        $file_uri = $object['Thumbnail']['URI'];
-        $locale_image = wallytoolbox_create_or_update_file($file_uri, 'Flows', $feed_infos['caid'], $file_temp_dir, $feed_infos['caid']);
-        if ($locale_image) {
-          $array_package['EmbeddedContent']['EmbeddedObjects']['Object'][$object_key]['Thumbnail']['LocaleImage'] = $locale_image;
-        }
-        //$array_package['EmbeddedContent']['EmbeddedObjects']['Object'][$object_key]['Thumbnail']['LocaleImage'] = _wallytoolbox_rss_create_or_update_file($file_uri, $file_temp_dir, $feed_infos['caid']);
-      }
-    }
+    dpiblocks_rss_flow_set_channel_image($package, $package_wrapper, $channel_img->item(0), $feed_name, $caid);
   }
 
-  return $array_package;
+  return $package;
 }
 
 /**
- * Get package available parameters from an RSS feed item domElement
- * and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
- * @param domElement $item
- *   The XML RSS feed item domElement.
- * @param array $feed_infos
- *   General informations about the feed being analyzed.
- */
-function wallytoolbox_rss_item_to_array_set_package(&$array_item, $item, $feed_infos) {
-  $feed_name = $feed_infos['name'];
-  $prefix = ($feed_infos['prefix'] != '') ? $feed_infos['prefix'] : $feed_name;
-  $feed_destination = explode('/',$feed_infos['destination']);
-  $array_item['type'] = 'ArticlePackageType';
-  $array_item['PackageID'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name);
-  $xml_pub_date = _wallytoolbox_checkifelementexists($item, 'pubDate');
-  $channel_pubDate = empty($xml_pub_date) ? time() : strtotime($xml_pub_date);
-  $pubDate = date('Y-m-d', $channel_pubDate).'T'.date('H:i:sP', $channel_pubDate);
-  $array_item['PublicationDate'] = $pubDate;
-  $array_item['LastUpdateDate'] = date('Y-m-d').'T'.date('H:i:s');
-  $array_item['CreationDate'] = date('Y-m-d').'T'.date('H:i:s');
-  $array_item['PackageTitle']['value'] = _wallytoolbox_checkifelementexists($item, 'title');
-  $array_item['ExternalReference']['value'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name, $prefix);
-  $array_item['ExternalReference']['value'] = md5($array_item['ExternalReference']['value']);
-  $array_item['ProductID']['value'] = variable_get('wallyadmin_product', $_SERVER['HTTP_HOST']);
-  $array_item['CommentsAllowed']['value'] = variable_get('comment_wally_articlepackage', 0);
-  $term = taxonomy_get_term($feed_destination[0]);
-  $temp_dest = array();
-  $temp_dest['DestinationRank'] = $feed_destination[3];
-  $temp_dest['Position'] = $feed_destination[1];
-  $temp_dest['DocumentLayout'] = $feed_destination[2];
-  $temp_dest['DestinationPath']['value'] = is_object($term) ? wallytoolbox_taxonomy_get_path_by_tid_or_term($term->tid) : '';
-  $array_item['Destinations']['Destination'][] = $temp_dest;
-  $array_item['Channels'] = array('Channel' => array(array('Name' => 'web')));
-  $array_item['PackageLayout']['value'] = isset($feed_infos['package_layout']) ? $feed_infos['package_layout'] : '';
-  $array_item['ExternalURI']['value'] = _wallytoolbox_checkifelementexists($item, 'link');
-  if ($feed_infos['source'] != NULL){
-    $array_item['Source']['value'] = $feed_infos['source'];
-  }
-  return array($feed_name, $prefix);
-}
-
-/**
- * Get mainstory available parameters from an RSS feed item domElement
- * and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get package available parameters from an RSS feed item domElement.
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domElement $item
  *   The XML RSS feed item domElement.
  * @param string $feed_name
- *   The name of the feed being analyzed.
+ *   Name of the feed being analyzed.
  */
-function wallytoolbox_rss_item_to_array_set_mainstory(&$array_item, $item, $feed_name, $prefix) {
-  $array_item['MainStory'] = wallytoolbox_flow_to_array_new_textobject();
-  $array_item['MainStory']['ObjectID'] = _wallytoolbox_checkifelementexists($item, 'title');
-  $array_item['MainStory']['PublicationDate'] = $array_item['PublicationDate'];
-  $array_item['MainStory']['LastUpdateDate'] = $array_item['LastUpdateDate'];
-  $array_item['MainStory']['UnPublishDate'] = $array_item['UnPublishDate'];
-  $array_item['MainStory']['CreationDate'] = $array_item['CreationDate'];
-  $array_item['MainStory']['Title']['value'] = _wallytoolbox_checkifelementexists($item, 'title');
-  static $i = 0;
-  $ext_ref_suffix = 'text-'.$i++;
-  $array_item['MainStory']['ExternalReference']['value'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name, $prefix).'-'.$ext_ref_suffix;
-  $array_item['MainStory']['ExternalReference']['value'] = md5($array_item['MainStory']['ExternalReference']['value']);
-  /*$array_item['MainStory']['Taxonomy']['Vocabulary']['VocabularyName'] = 'RSS feeds';
-  $categories = $item->getElementsByTagName('category');
-  if ($categories->item(0)) {
-    foreach ($categories as $category) {
-      $array_item['MainStory']['Taxonomy']['Vocabulary']['Term'][] = $feed_name.'/'.str_replace('/', '-', $category->firstChild->wholeText);
-    }
-  }*/
-  $array_item['MainStory']['Copyright']['value'] = _wallytoolbox_checkifelementexists($item, 'author');
-  $array_item['MainStory']['TextTitle']['value'] = _wallytoolbox_checkifelementexists($item, 'title');
-  $array_item['MainStory']['TextBody']['value'] = _wallytoolbox_checkifelementexists($item, 'description');
+function dpiblocks_rss_flow_set_package($package, $package_wrapper, $item, $feed_name) {
+  $dpiproperties = &$package->dpiproperties;
+  $dpiproperties->entity = 'node';
+  if ($guid = dpiblocks_rss_flow_check_if_element_exists($item, 'guid')) {
+    $pack_id = $guid;
+  }
+  else {
+    $pack_id = dpiblocks_rss_flow_check_if_element_exists($item, 'link');
+  }
+  $external_reference = 'flow2node_'.$feed_name.'_'.md5($pack_id);
+  $dpiproperties->external_reference = $external_reference;
+  $dpiproperties->external_reference_2 = 'text-'.$external_reference;
+  $dpiproperties->source = 'flowmix_'.$feed_name;
+  $dpiproperties->product_id = dpi_variable_get('dpicommons_product', '');
+
+  // The format is used for multiple fields, get it once for all
+  $format = dpiblocks_flowhelpers_get_default_text_format();
+
+  // This field is used in the flowmix process, if it is not present in the feed set it to current time
+  if ($xml_pub_date = dpiblocks_rss_flow_check_if_element_exists($item, 'pubDate')) {
+    $editorialpublicationdate = dpiblocks_flowhelpers_get_datestamp_from_datetime($xml_pub_date);
+  }
+  else {
+    $editorialpublicationdate = time();
+  }
+  $package_wrapper->field_editorialpublicationdate->set($editorialpublicationdate);
+
+  $value = dpiblocks_rss_flow_check_if_element_exists($item, 'title');
+  $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($value));
+  $package_wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+
+  if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'link')) {
+    $package_wrapper->field_externalurl->set(array('url' => $value));
+  }
+
+  if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'author')) {
+    $package_wrapper->field_copyright->set($value);
+  }
+
+  if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'description')) {
+    $package_wrapper->field_textbody->set(array('value' => $value, 'format' => $format));
+  }
 }
 
 /**
- * Get available parameters from an enclosure domElement of a RSS feed
- * item and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get available parameters from an enclosure domElement of a RSS feed item
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domElement $enclosure
  *   The enclosure domElement from the XML RSS feed item.
  * @param string $feed_name
  *   The name of the feed being analyzed.
+ * @param string $caid
+ *   Cache ID of the flowmix
  */
-function wallytoolbox_rss_item_to_array_set_enclosure(&$array_item, $enclosure, $feed_name, $prefix) {
-  $img_url = $enclosure->item(0)->getAttribute('url');
-  $img_url = urldecode(html_entity_decode($img_url));
-  if (valid_url($img_url, TRUE)) {
-    if (!isset($array_item['EmbeddedContent'])) {
-      $array_item['EmbeddedContent'] = array();
-      $array_item['EmbeddedContent']['EmbeddedObjects'] = array();
-      $array_item['EmbeddedContent']['EmbeddedObjects']['Object'] = array();
-    }
+function dpiblocks_rss_flow_set_enclosure($package, $package_wrapper, $enclosure, $feed_name, $caid) {
+  $url = dpiblocks_rss_flow_check_if_attribute_exists($enclosure, 'url');
+  // Make sur the URL is clean
+  $url = urldecode(html_entity_decode($url));
+  if (valid_url($url, TRUE)) {
+    // Check the type of the enclosure
+    if (dpiblocks_rss_flow_check_is_image($enclosure)) {
+      $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
+      list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
+      if ($atom && $atom_wrapper) {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
 
-    $tempobject = wallytoolbox_flow_to_array_new_photoobject();
-    $tempobject['ObjectID'] = _wallytoolbox_checkifelementexists($item, 'title');
-    $tempobject['PublicationDate'] = $array_item['PublicationDate'];
-    $tempobject['LastUpdateDate'] = $array_item['LastUpdateDate'];
-    $tempobject['UnPublishDate'] = $array_item['UnPublishDate'];
-    $tempobject['MimeType'] = $enclosure->item(0)->getAttribute('type');
-    $tempobject['Title']['value'] = $img_url;
-    $tempobject['ExternalReference']['value'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name, $prefix);
-    if (empty($tempobject['ExternalReference']['value'])) {
-      $tempobject['ExternalReference']['value'] = $tempobject['Title']['value'];
+        if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
+          $atom->base_entity = $file;
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->base_id = $file->fid;
+
+          // We have to save the atom for all the following processes
+          scald_atom_save($atom);
+
+          // Add or update the atom in the embeded objects
+          dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+        }
+      }
     }
-    $tempobject['ExternalReference']['value'] = md5($tempobject['ExternalReference']['value']);
-    $tempobject['FileURI']['value'] = $img_url;
-    $tempobject['FileSize']['value'] = $enclosure->item(0)->getAttribute('length');
-    $array_item['EmbeddedContent']['EmbeddedObjects']['Object'][] = $tempobject;
+    else {
+      // @todo : Handle other types
+    }
   }
 }
 
 /**
- * Get available parameters from medias domElement of a RSS feed
- * item and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get available parameters from medias domElement of a RSS feed item
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domNode $channel
  *   The full RSS channel from a RSS feed.
  * @param domElement $item
@@ -401,201 +320,133 @@ function wallytoolbox_rss_item_to_array_set_enclosure(&$array_item, $enclosure, 
  *   The medias domElements from a RSS feed.
  * @param string $feed_name
  *   The name of the feed being analyzed.
+ * @param string $caid
+ *   Cache ID of the flowmix
+ * @param string $media_namespace = 'http://search.yahoo.com/mrss/'
+ *   RSS media namespace
  */
-function wallytoolbox_rss_item_to_array_set_medias(&$array_item, $channel, $item, $media_contents, $feed_name, $prefix, $media_namespace = 'http://search.yahoo.com/mrss/') {
-  $first_media = TRUE;
+function dpiblocks_rss_flow_set_medias($package, $package_wrapper, $channel, $item, $media_contents, $feed_name, $caid, $media_namespace = 'http://search.yahoo.com/mrss/') {
   foreach ($media_contents as $media_content) {
-    $media_type = NULL;
-    if (_wallytoolbox_rss_flow_check_is_image($media_content)) {
-      module_load_include('inc', 'wallytoolbox', 'includes/wallytoolbox.helpers');
-      if (@wallytoolbox_getimagesize_cleaned_url($media_content->getAttribute('url'))) {
-        $media_type = 'photoobject';
-      }
-    } elseif (_wallytoolbox_rss_flow_check_is_video($media_content)) {
-      if ($media_content->hasAttribute('url')) {
-        $third_party_url = $media_content->getAttribute('url');
-      } else {
-        $media_players = $item->getElementsByTagNameNS($media_namespace, 'player');
-        if ($media_player = $media_players->item(0)) {
-          $third_party_url = $media_player->hasAttribute('url') ? $media_player->getAttribute('url') : '';
-        } else {
-          return;
-        }
-      }
-      $providers = emfield_parse_embed(NULL, $third_party_url, 'emvideo');
-      if (!empty($providers))
-        $media_type = 'videoobject';
+    // Is the media content an image?
+    if (dpiblocks_rss_flow_check_is_image($media_content)) {
+      dpiblocks_rss_flow_set_media_image($package, $package_wrapper, $channel, $item, $media_content, $feed_name, $caid, $media_namespace);
     }
-    
-    if ($media_type) {
-      wallytoolbox_rss_item_to_array_set_media($array_item, $channel, $item, $media_content, $feed_name, $first_media, $media_type, $media_namespace, $third_party_url);
-      $first_media = FALSE;
+    else {
+      // @todo : Handle other types
     }
   }
 }
 
 /**
- * Get available parameters from a media domElement of a RSS feed
- * item and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get available parameters from media domElement of a RSS feed item
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domNode $channel
  *   The full RSS channel from a RSS feed.
  * @param domElement $item
  *   The XML RSS feed item domElement.
  * @param domElement $media_content
- *   One of the media domElement from a RSS feed.
+ *   The media domElement from a RSS feed.
  * @param string $feed_name
  *   The name of the feed being analyzed.
- * @param boolean $first_media
- *   Check if it's the first media added to this array item.
+ * @param string $caid
+ *   Cache ID of the flowmix
+ * @param string $media_namespace = 'http://search.yahoo.com/mrss/'
+ *   RSS media namespace
  */
-function wallytoolbox_rss_item_to_array_set_media(&$array_item, $channel, $item, $media_content, $feed_name, $first_media, $media_type, $media_namespace = 'http://search.yahoo.com/mrss/', $third_party_url = NULL) {
-  static $media_num = 0;
-  
-  if ($first_media) {
-    $array_item['EmbeddedContent'] = array();
-    $array_item['EmbeddedContent']['EmbeddedObjects'] = array();
-    $array_item['EmbeddedContent']['EmbeddedObjects']['Object'] = array();
-  }
-  
-  $tempobject = call_user_func('wallytoolbox_flow_to_array_new_'.$media_type);
-  call_user_func_array('wallytoolbox_rss_item_to_array_set_'.$media_type, array(&$tempobject, &$array_item, $channel, $item, $media_content, $feed_name, $media_num, $media_namespace, $third_party_url));
-  $media_num++;
-  
-  $array_item['EmbeddedContent']['EmbeddedObjects']['Object'][] = $tempobject;
-}
+function dpiblocks_rss_flow_set_media_image($package, $package_wrapper, $channel, $item, $media_content, $feed_name, $caid, $media_namespace = 'http://search.yahoo.com/mrss/') {
+  // Get its URL
+  $url = dpiblocks_rss_flow_check_if_attribute_exists($media_content, 'url');
+  // Make sur the URL is clean
+  $url = urldecode(html_entity_decode($url));
+  if (valid_url($url, TRUE)) {
+    // Load an existing atom or create a new one from an URL-based external reference
+    $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
+    list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
+    if ($atom && $atom_wrapper) {
+      // The format is used for multiple fields, get it once for all
+      $format = dpiblocks_flowhelpers_get_default_text_format();
 
-function wallytoolbox_rss_item_to_array_set_photoobject(&$tempobject, &$array_item, $channel, $item, $media_content, $feed_name, $media_num, $media_namespace = 'http://search.yahoo.com/mrss/', $third_party_url = NULL, $prefix = '') {
-  $tempobject['type'] = 'PhotoObjectType';
-  $tempobject['ObjectID'] = _wallytoolbox_checkifelementexists($item, 'title');
-  $tempobject['PublicationDate'] = $array_item['PublicationDate'];
-  $tempobject['LastUpdateDate'] = $array_item['LastUpdateDate'];
-  $tempobject['UnPublishDate'] = $array_item['UnPublishDate'];
-  $tempobject['MimeType'] = $media_content->getAttribute('type');
-  $media_title = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'title');
-  $tempobject['Title']['value'] = ($media_title == '') ? $tempobject['ObjectID'].'_image_'.$media_num : $media_title;
-  static $i = 0;
-  $ext_ref_suffix = 'photo-'.$i++;
-  $tempobject['ExternalReference']['value'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name, $prefix).'-'.$ext_ref_suffix;
-  $tempobject['ExternalReference']['value'] = md5($tempobject['ExternalReference']['value']);
-  $tempobject['Copyright']['value'] = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'copyright');
-  $tempobject['FileURI']['value'] = $media_content->getAttribute('url');
-  $object_filesize = $media_content->getAttribute('fileSize');
-  if (!$object_filesize) $object_filesize = 0;
-  $tempobject['FileSize']['value'] = $object_filesize;
-  /*$keywords = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'keywords');
-  if ($keywords != '') {
-    $keywords = explode(',',$keywords);
-    foreach ($keywords as $keyword) {
-      $array_item['MainStory']['Taxonomy']['Vocabulary']['Term'][] = $feed_name.'/'.str_replace('/', '-', $keyword);
-    }
-  }
-  $media_categories = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'category');
-  if ($media_categories != '') {
-    $media_categories = explode('/',$media_categories);
-    foreach ($media_categories as $media_category) {
-      $array_item['MainStory']['Taxonomy']['Vocabulary']['Term'][] = $feed_name.'/'.str_replace('/', '-', $media_category);
-    }
-  }*/
-  $media_thumbnails = $media_content->getElementsByTagNameNS($media_namespace, 'thumbnail');
-  if ($media_thumbnails->item(0)) {
-    $media_thumbnail = $media_thumbnails->item(0);
-    $tempobject['Thumbnail']['URI'] = $media_thumbnail->getAttribute('url');
-    $thumbnail_w = $media_content->getAttribute('width');
-    if ($thumbnail_w) $tempobject['Thumbnail']['W'] = $thumbnail_w;
-    $thumbnail_h = $media_content->getAttribute('height');
-    if ($thumbnail_h) $tempobject['Thumbnail']['H'] = $thumbnail_h;
-  }
-  $media_rating = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'rating');
-  $acceptable_rating = array();
-  $all_voc = taxonomy_get_vocabularies();
-  foreach ($all_voc as $voc) {
-    if ($voc->name == 'Rating') {
-      $available_ratings = taxonomy_get_tree($voc->vid);
-      foreach ($available_ratings as $available_rating) {
-        $acceptable_rating[] = $available_rating->name;
+      // Set title and display title
+      if ($value = dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $media_namespace, 'title')) {
+        $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($value));
+        $package_wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
       }
-      break;
-    }
-  }
-  if (in_array(strtoupper($media_rating), $acceptable_rating)) {
-    $tempobject['Rating']['value'] = strtoupper($media_rating);
-  }
-}
+      // If no title found, use the package title
+      else {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+      }
 
-function wallytoolbox_rss_item_to_array_set_videoobject(&$tempobject, &$array_item, $channel, $item, $media_content, $feed_name, $media_num, $media_namespace = 'http://search.yahoo.com/mrss/', $third_party_url = NULL, $prefix = '') {
-  $tempobject['type'] = 'VideoObjectType';
-  $tempobject['ObjectID'] = _wallytoolbox_checkifelementexists($item, 'title');
-  $tempobject['PublicationDate'] = $array_item['PublicationDate'];
-  $tempobject['LastUpdateDate'] = $array_item['LastUpdateDate'];
-  $tempobject['UnPublishDate'] = $array_item['UnPublishDate'];
-  $tempobject['MimeType'] = $media_content->getAttribute('type');
-  $media_title = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'title');
-  $tempobject['Title']['value'] = ($media_title == '') ? $tempobject['ObjectID'].'_image_'.$media_num : $media_title;
-  static $i = 0;
-  $ext_ref_suffix = 'video-'.$i++;
-  $tempobject['ExternalReference']['value'] = _wallytoolbox_checkifelementexists($item, 'guid', 'none', 'link', $feed_name, $prefix).'-'.$ext_ref_suffix;
-  $tempobject['ExternalReference']['value'] = md5($tempobject['ExternalReference']['value']);
-  $tempobject['Copyright']['value'] = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'copyright');
-  $tempobject['FileURI']['value'] = $third_party_url ? $third_party_url : '';
-  $object_filesize = $media_content->getAttribute('fileSize');
-  if (!$object_filesize) $object_filesize = 0;
-  $tempobject['FileSize']['value'] = $object_filesize;
-  /*$keywords = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'keywords');
-  if ($keywords != '') {
-    $keywords = explode(',',$keywords);
-    foreach ($keywords as $keyword) {
-      $array_item['MainStory']['Taxonomy']['Vocabulary']['Term'][] = $feed_name.'/'.str_replace('/', '-', $keyword);
-    }
-  }
-  $media_categories = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'category');
-  if ($media_categories != '') {
-    $media_categories = explode('/',$media_categories);
-    foreach ($media_categories as $media_category) {
-      $array_item['MainStory']['Taxonomy']['Vocabulary']['Term'][] = $feed_name.'/'.str_replace('/', '-', $media_category);
-    }
-  }*/
-  $media_thumbnails = $item->getElementsByTagNameNS($media_namespace, 'thumbnail');
-  if ($media_thumbnails->item(0)) {
-    $media_thumbnail = $media_thumbnails->item(0);
-    $tempobject['Thumbnail']['URI'] = $media_thumbnail->getAttribute('url');
-    $thumbnail_w = $media_content->getAttribute('width');
-    if ($thumbnail_w) $tempobject['Thumbnail']['W'] = $thumbnail_w;
-    $thumbnail_h = $media_content->getAttribute('height');
-    if ($thumbnail_h) $tempobject['Thumbnail']['H'] = $thumbnail_h;
-  }
-  $media_rating = _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $media_namespace, 'rating');
-  $acceptable_rating = array();
-  $all_voc = taxonomy_get_vocabularies();
-  foreach ($all_voc as $voc) {
-    if ($voc->name == 'Rating') {
-      $available_ratings = taxonomy_get_tree($voc->vid);
-      foreach ($available_ratings as $available_rating) {
-        $acceptable_rating[] = $available_rating->name;
+      // Set caption
+      if ($value = dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $media_namespace, 'description')) {
+        $atom_wrapper->field_caption->set(array('value' => $value, 'format' => $format));
       }
-      break;
+
+      // Set rating
+      if ($value = dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $media_namespace, 'rating')) {
+        $vid = dpi_variable_get('dpi_rating', NULL);
+        $item = dpicontenttypes_api_taxonomy_get_term_by_path($value, $vid);
+        // We take the first match even is there are more.
+        $atom_wrapper->field_rating->set($item[0]);
+      }
+
+      // Set copyright
+      if ($value = dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $media_namespace, 'copyright')) {
+        $atom_wrapper->field_copyright->set($value);
+      }
+
+      // Set thumbnail
+      $thumbnail_set = FALSE;
+      if ($value = dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $media_namespace, 'thumbnail')) {
+        $thumb_url = $this->checkIfAttributeExists($dom, 'url');
+        if ($file = dpicontenttypes_api_create_or_update_file($thumb_url, 'Flows/'.$caid, 'public', $caid)) {
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->thumbnail_source = $file->uri;
+          $thumbnail_set = TRUE;
+        }
+      }
+
+      // Create a file from the URL
+      if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
+        $atom->base_entity = $file;
+        $atom->base_id = $file->fid;
+        $atom->file_source = $file->uri;
+
+        // If no thumbnail where found before, set a copy of the main file
+        if (!$thumbnail_set) {
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->thumbnail_source = $file->uri;
+        }
+
+        // We have to save the atom for all the following processes
+        scald_atom_save($atom);
+
+        // Link the atom to the package
+        dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+      }
     }
-  }
-  if (in_array(strtoupper($media_rating), $acceptable_rating)) {
-    $tempobject['Rating']['value'] = strtoupper($media_rating);
   }
 }
 
 /**
- * Get embeded image in the text body of a RSS feed
- * item and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get embeded image in the text body of a RSS feed item
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domElement $item
  *   The XML RSS feed item domElement.
  */
-function wallytoolbox_rss_item_to_array_set_embeded_image(&$array_item, $item) {
-  $text_body = $array_item['MainStory']['TextBody']['value'];
+function dpiblocks_rss_flow_set_embeded_image($package, $package_wrapper, $item, $feed_name, $caid) {
+  $field_body = $package_wrapper->field_textbody->value();
+  $text_body = $field_body['value'];
+
+  // Get the image informations in the body text
   $substr = strstr($text_body, '<img');
   $substr = $substr ? $substr : strstr($text_body, rawurlencode('<img'));
   $tmp_substr = $substr ? strstr($substr, '>', TRUE) : FALSE;
@@ -605,87 +456,144 @@ function wallytoolbox_rss_item_to_array_set_embeded_image(&$array_item, $item) {
     $src_substr = strstr($substr, 'src=');
     $src_delimiter = substr($src_substr, 4, 1);
     $src_substr = substr($src_substr, 5);
-    $img_url = strstr($src_substr, $src_delimiter, TRUE);
-    $img_url = urldecode(html_entity_decode($img_url));
-    
+    $url = strstr($src_substr, $src_delimiter, TRUE);
+    $url = urldecode(html_entity_decode($url));
+
     $alt_substr = strstr($substr, 'alt=');
     if ($alt_substr) {
       $alt_delimiter = substr($alt_substr, 4, 1);
       $alt_substr = substr($alt_substr, 5);
       $img_alt = strstr($src_substr, $alt_delimiter, TRUE);
-    } else {
+    }
+    else {
       $img_alt = '';
     }
 
-    module_load_include('inc', 'wallytoolbox', 'includes/wallytoolbox.helpers');
-    if (@wallytoolbox_getimagesize_cleaned_url($img_url)) {
-      static $chan_img_num = 100;
-      if (!isset($array_item['EmbeddedContent'])) {
-        $array_item['EmbeddedContent'] = array();
-        $array_item['EmbeddedContent']['EmbeddedObjects'] = array();
-        $array_item['EmbeddedContent']['EmbeddedObjects']['Object'] = array();
+    if (valid_url($url, TRUE)) {
+      $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
+      list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
+      if ($atom && $atom_wrapper) {
+        // The format is used for multiple fields, get it once for all
+        $format = dpiblocks_flowhelpers_get_default_text_format();
+
+        // Set title and display title
+        if (!empty($img_alt)) {
+          $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($img_alt));
+          $package_wrapper->field_displaytitle->set(array('value' => $img_alt, 'format' => $format));
+        }
+        // If no title found, use the package title
+        else {
+          $atom_wrapper->title->set($package_wrapper->title->value());
+          $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+        }
+
+        // Create a file from the URL
+        if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
+          $atom->base_entity = $file;
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->base_id = $file->fid;
+
+          // Set a copy of the main file as thumbnail
+          $atom_wrapper->scald_thumbnail->set((array)$file);
+          $atom->thumbnail_source = $file->uri;
+
+          // We have to save the atom for all the following processes
+          scald_atom_save($atom);
+
+          // Link the atom to the package
+          dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+        }
       }
-      
-      $tempobject = wallytoolbox_flow_to_array_new_photoobject();
-      $tempobject['ObjectID'] = $img_url;
-      $tempobject['PublicationDate'] = $array_item['PublicationDate'];
-      $tempobject['LastUpdateDate'] = $array_item['LastUpdateDate'];
-      $tempobject['UnPublishDate'] = $array_item['UnPublishDate'];
-      $tempobject['MimeType'] = 'image';
-      $media_title = $img_alt;
-      $tempobject['Title']['value'] = ($media_title == '') ? $tempobject['ObjectID'].'_image_'.$chan_img_num : $media_title;
-      $chan_img_num++;
-      $tempobject['ExternalReference']['value'] = $img_url;
-      $tempobject['ExternalReference']['value'] = md5($tempobject['ExternalReference']['value']);
-      $tempobject['FileURI']['value'] = $img_url;
-      $tempobject['FileSize']['value'] = 0;
-      $tempobject['LinkTitle']['value'] = $img_alt;
-      $tempobject['LinkURI']['value'] = $img_url;
-      $array_item['EmbeddedContent']['EmbeddedObjects']['Object'][] = $tempobject;
     }
   }
 }
 
 /**
- * Get available parameters from an image domElement of a RSS feed
- * item and set an array item according to the structure defined in
- * Wallymport.
- * 
- * @param array &$array_item
- *   The array item under construction.
+ * Get available parameters from an image domElement of a RSS feed item
+ *
+ * @param object $package
+ *   The package item under construction.
+ * @param object $package_wrapper
+ *   The wrapper of the package item under construction
  * @param domElement $channel_img
  *   The image domElement from the XML RSS feed item.
  */
-function wallytoolbox_rss_item_to_array_set_channel_image(&$array_item, $channel_img) {
-  static $chan_img_num = 100;
-  if (!isset($array_item['EmbeddedContent'])) {
-    $array_item['EmbeddedContent'] = array();
-    $array_item['EmbeddedContent']['EmbeddedObjects'] = array();
-    $array_item['EmbeddedContent']['EmbeddedObjects']['Object'] = array();
+function dpiblocks_rss_flow_set_channel_image($package, $package_wrapper, $channel_img, $feed_name, $caid) {
+  $url = dpiblock_rss_flow_check_if_element_exists($channel_img, 'url');
+  // Make sur the URL is clean
+  $url = urldecode(html_entity_decode($url));
+  if (valid_url($url, TRUE)) {
+    $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
+    list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
+    if ($atom && $atom_wrapper) {
+      // The format is used for multiple fields, get it once for all
+      $format = dpiblocks_flowhelpers_get_default_text_format();
+
+      // Set title and display title
+      if ($value = dpiblock_rss_flow_check_if_element_exists($channel_img, 'title')) {
+        $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($value));
+        $package_wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+      }
+      // If no title found, use the package title
+      else {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+      }
+
+      // Create a file from the URL
+      if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
+        $atom->base_entity = $file;
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->base_id = $file->fid;
+
+        // Set a copy of the main file as thumbnail
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->thumbnail_source = $file->uri;
+
+        // We have to save the atom for all the following processes
+        scald_atom_save($atom);
+
+        // Link the atom to the package
+        dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
+      }
+    }
+    else {
+      // @todo : Handle other types
+    }
   }
-  $tempobject = wallytoolbox_flow_to_array_new_photoobject();
-  $tempobject['ObjectID'] = _wallytoolbox_checkifelementexists($channel_img, 'title');
-  $tempobject['PublicationDate'] = $array_item['PublicationDate'];
-  $tempobject['LastUpdateDate'] = $array_item['LastUpdateDate'];
-  $tempobject['UnPublishDate'] = $array_item['UnPublishDate'];
-  $tempobject['MimeType'] = 'image';
-  $media_title = _wallytoolbox_checkifelementexists($channel_img, 'title');
-  $tempobject['Title']['value'] = ($media_title == '') ? $tempobject['ObjectID'].'_image_'.$chan_img_num : $media_title;
-  $chan_img_num++;
-  $img_url = _wallytoolbox_checkifelementexists($channel_img, 'url');
-  $img_url = urldecode(html_entity_decode($img_url));
-  $tempobject['ExternalReference']['value'] = $img_url;
-  $tempobject['ExternalReference']['value'] = md5($tempobject['ExternalReference']['value']);
-  $tempobject['FileURI']['value'] = $img_url;
-  $tempobject['FileSize']['value'] = 0;
-  $tempobject['LinkTitle']['value'] = _wallytoolbox_checkifelementexists($channel_img, 'title');
-  $tempobject['LinkURI']['value'] = _wallytoolbox_checkifelementexists($channel_img, 'link');
-  $array_item['EmbeddedContent']['EmbeddedObjects']['Object'][] = $tempobject;
+}
+
+/**
+ * Search an item for a desired element.
+ *
+ * @param $dom_item
+ *   The item in which the search is performed.
+ * @param $name
+ *   The name of the searched element.
+ * @param $namespace
+ *   Value of the namespace if used.
+ * @param $default
+ *   A default value if the element is not found
+ *
+ * @return
+ *   The element value or ''.
+ */
+function dpiblocks_rss_flow_check_if_element_exists($dom_item, $name, $namespace = 'none', $default = '') {
+  $return = $default;
+  if (is_object($dom_item)) {
+    if ($namespace != 'none') {
+      $return = $dom_item->getElementsByTagNameNS($namespace, $name)->item(0) ? $dom_item->getElementsByTagNameNS($namespace, $name)->item(0)->firstChild->wholeText : '';
+    }
+    else {
+      $return = $dom_item->getElementsByTagName($name)->item(0) ? $dom_item->getElementsByTagName($name)->item(0)->firstChild->wholeText : '';
+    }
+  }
+  return $return;
 }
 
 /**
  * Perform a recursive search in a media item for a desired element.
- * 
+ *
  * @param $media_content
  *   The item in which the first step search is performed.
  * @param $item
@@ -696,25 +604,51 @@ function wallytoolbox_rss_item_to_array_set_channel_image(&$array_item, $channel
  *   Value of the namespace if used.
  * @param $name
  *   The name of the searched element.
- * 
+ *
  * @return
  *   The element value or ''.
  */
-function _wallytoolbox_checkifmediaelementexists($media_content, $item, $channel, $namespace, $name) {
-  $return = _wallytoolbox_checkifelementexists($media_content, $name, $namespace);
+function dpiblocks_rss_flow_check_if_media_element_exists($media_content, $item, $channel, $namespace, $name) {
+  $return = dpiblocks_rss_flow_check_if_element_exists($media_content, $name, $namespace);
   if ($return == '') {
-    $return = _wallytoolbox_checkifelementexists($item, $name, $namespace);
+    $return = dpiblocks_rss_flow_check_if_element_exists($item, $name, $namespace);
     if ($return == '') {
-      $return = _wallytoolbox_checkifelementexists($channel, $name, $namespace);
+      $return = dpiblocks_rss_flow_check_if_element_exists($channel, $name, $namespace);
     }
   }
   return $return;
 }
 
-function _wallytoolbox_rss_flow_check_is_image($media_content) {
-  if ($media_content->getAttribute('type') && stristr($media_content->getAttribute('type'), 'image')) {
+/**
+ * Check the presence of an attribute in a given DOM Node and return its value
+ *
+ * @param DOM Node $dom_item
+ * @param string $name
+ * @param string $namespace
+ * @param string $default
+ *
+ * @return string
+ */
+function dpiblocks_rss_flow_check_if_attribute_exists($dom_item, $name, $namespace = 'none', $default = '') {
+  $return = $default;
+  if (is_object($dom_item)) {
+    if ($namespace != 'none' && $dom_item->hasAttributeNS($namespace, $name)) {
+      $return = $dom_item->getAttributeNS($namespace, $name);
+    }
+    elseif ($dom_item->hasAttribute($name)) {
+      $return = $dom_item->getAttribute($name);
+    }
+  }
+  return $return;
+}
+
+/**
+ * Is the given media an image or not?
+ */
+function dpiblocks_rss_flow_check_is_image($media_content) {
+  if ($media_content->hasAttribute('type') && stristr($media_content->getAttribute('type'), 'image')) {
     return TRUE;
-  } elseif ($media_content->getAttribute('medium') && stristr($media_content->getAttribute('medium'), 'image')) {
+  } elseif ($media_content->hasAttribute('medium') && stristr($media_content->getAttribute('medium'), 'image')) {
     return TRUE;
   } elseif ($media_url = $media_content->getAttribute('url')) {
     if (stristr($media_url,'.jpg') || stristr($media_url,'.jpeg') || stristr($media_url,'.gif') || stristr($media_url,'.png')) {
@@ -725,7 +659,10 @@ function _wallytoolbox_rss_flow_check_is_image($media_content) {
   return FALSE;
 }
 
-function _wallytoolbox_rss_flow_check_is_video($media_content) {
+/**
+ * Is the given media a video or not?
+ */
+function dpiblocks_rss_flow_check_is_video($media_content) {
   if ($media_content->getAttribute('type') && stristr($media_content->getAttribute('type'), 'video')) {
     return TRUE;
   } elseif ($media_content->getAttribute('medium') && stristr($media_content->getAttribute('medium'), 'video')) {
@@ -746,58 +683,14 @@ function dpiblocks_rss_flow_handle_errors($errno, $errstr, $errfile, $errline, $
   }
 }
 
+/**
+ * Set a log in an item
+ */
 function dpiblocks_rss_flow_set_log(&$item, $success, $type, $msg, $severity = 'notice') {
   if (user_access('access administration pages')) {
     drupal_set_message($msg, $severity);
   }
-  $item['__log']['success'] = $success;
-  $item['__log']['msg'] = $msg;
-  $item['__log']['type'] = $type;
-}
-
-function _wallytoolbox_rss_create_or_update_file($file_uri, $file_temp_dir, $caid) {
-  $new_file_path = 'Flows/'.$caid.'-'.date('Ymd', time());
-
-  $uri = parse_url($file_uri);
-  $expl_path = explode('/', $uri['path']);
-  $file_name = $expl_path[count($expl_path)-1];
-  $badcar = array('+', ' ');
-  $good_file_name = str_replace($badcar, '_', $file_name);
-  $photo_name = md5($file_uri).'_'.$good_file_name;
-  //$matching_photos = file_scan_directory($file_temp_dir, $photo_name);
-  $matching_photos = file_scan_directory($file_temp_dir.'/'.$new_file_path, $photo_name);
-  $matching_photo = NULL;
-  foreach ($matching_photos as $match) {
-    $match_path = $match->filename;
-    $expl_match_path = explode('/', $match_path);
-    $not_found = TRUE;
-    while($not_found) {
-      $a = array_shift($expl_match_path);
-      if ($a == 'Flows') {
-        $match_dir = array_shift($expl_match_path);
-        $match_name = array_pop($expl_match_path);
-        $not_found = FALSE;
-      }
-      if (empty($expl_match_path)) {
-        $not_found = FALSE;
-      }
-    }
-    if ($match_name == $photo_name && ereg($caid.'-[0-9]{8}', $match_dir)) {
-      $matching_photo = $match;
-      break;
-    }
-  }
-
-  if ($matching_photo) {
-    $db_matching_photos = db_query("SELECT fid, filepath FROM {files} WHERE filepath = '%s'", $matching_photo->filename);
-    while($file = db_fetch_object($db_matching_photos)) {
-      if (!field_file_delete($file)) {
-        db_query('DELETE FROM {files} WHERE fid = %d', $file->fid);
-        _field_file_cache(NULL, $file); // delete the file from the cache
-      }
-    }
-  }
-
-  module_load_include('inc', 'wallymport', 'includes/wallymport.fieldshelpers');
-  return _wimprthelp_create_file_from_uri($file_uri, $new_file_path);
+  $item->__log['success'] = $success;
+  $item->__log['msg'] = $msg;
+  $item->__log['type'] = $type;
 }

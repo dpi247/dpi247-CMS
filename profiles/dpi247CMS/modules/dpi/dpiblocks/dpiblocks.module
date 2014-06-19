@@ -1,6 +1,7 @@
 <?php 
 
 module_load_include('inc', 'dpiblocks','dpiblocks.api');
+module_load_include('inc', 'dpiblocks','dpiblocks.private');
 // Load all entity function for remotehtml and custom content
 module_load_include('inc', 'dpiblocks','dpiblocks.entity');
 
@@ -362,14 +363,15 @@ function dpiblocks_flow_process(&$plugin, $info){
  * @return
  *  An array whith all the versions of the custom content type
  */
-function dpiblocks_custom_content_type_getrevision($machine_name){
+function dpiblocks_custom_content_type_getrevision($machine_name) {
   $items = array();
 
   if ($machine_name !== NULL) {
-    $result = db_query("SELECT *
-        FROM {dpiblocks_custom_content_revision} r
-        WHERE r.machine_name = :machine_name", array(':machine_name' => $machine_name));
-    foreach($result as $revision){
+    $db_results = db_select('dpiblocks_custom_content_revision', 'r')
+      ->fields('r')
+      ->condition('r.machine_name', $machine_name)
+      ->execute();
+    foreach($db_results as $revision) {
       $items[] = $revision;
     }
   }
