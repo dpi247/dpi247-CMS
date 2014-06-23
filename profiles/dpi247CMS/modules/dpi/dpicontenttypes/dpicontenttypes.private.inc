@@ -71,7 +71,7 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
               list($file_type, $file_ext) = explode('/', $data->headers['content-type']);
               $current_ext = pathinfo($file_name, PATHINFO_EXTENSION);
               if (empty($current_ext)) {
-                $file_name = $file.'.'.$file_ext;
+                $file_name = $file_name.'.'.$file_ext;
               }
               $good_file_name = str_replace($badcar, '_', $file_name);
               if (_dpicontenttypes_file_check_directory_recursive($destination, 1)) {
