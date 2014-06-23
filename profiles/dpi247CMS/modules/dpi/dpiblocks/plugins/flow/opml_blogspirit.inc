@@ -258,6 +258,11 @@ function dpiblocks_opml_blogspirit_flow_set_package($package, $package_wrapper, 
     }
     $package_wrapper->field_iptc->set($field_categories);
   }
+
+  // Some additionnal fields
+  $package->section = dpiblocks_opml_blogspirit_flow_check_if_attribute_exists($item, 'blog_title');
+  $package->SectionUrl = dpiblocks_opml_blogspirit_flow_check_if_attribute_exists($item, 'blog_url');
+  $package->PostDate = dpiblocks_opml_blogspirit_flow_check_if_attribute_exists($item, 'post_pubdate');
 }
 
 /**
