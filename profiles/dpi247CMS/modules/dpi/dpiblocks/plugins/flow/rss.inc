@@ -69,7 +69,6 @@ function dpiblocks_rss_flow_settings_default($form_state = array()) {
     'maxitem' => '',
     'embed_img' => 0,
     'channel_img' => 0,
-    'get_distant_img' => 0,
   );
 
   return $defaults;
@@ -216,6 +215,7 @@ function dpiblocks_rss_flow_item_to_node($channel, $item, $feed_infos, $media_na
  *   Name of the feed being analyzed.
  */
 function dpiblocks_rss_flow_set_package($package, $package_wrapper, $item, $feed_name) {
+  // Set dpiproperties
   $dpiproperties = &$package->dpiproperties;
   $dpiproperties->entity = 'node';
   if ($guid = dpiblocks_rss_flow_check_if_element_exists($item, 'guid')) {
@@ -224,7 +224,7 @@ function dpiblocks_rss_flow_set_package($package, $package_wrapper, $item, $feed
   else {
     $pack_id = dpiblocks_rss_flow_check_if_element_exists($item, 'link');
   }
-  $external_reference = 'flow2node_'.$feed_name.'_'.md5($pack_id);
+  $external_reference = 'flowmix_'.$feed_name.'_'.md5($pack_id);
   $dpiproperties->external_reference = $external_reference;
   $dpiproperties->external_reference_2 = 'text-'.$external_reference;
   $dpiproperties->source = 'flowmix_'.$feed_name;
@@ -242,20 +242,45 @@ function dpiblocks_rss_flow_set_package($package, $package_wrapper, $item, $feed
   }
   $package_wrapper->field_editorialpublicationdate->set($editorialpublicationdate);
 
+  // Set title and display title
   $value = dpiblocks_rss_flow_check_if_element_exists($item, 'title');
   $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($value));
   $package_wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
 
+  // Set external URL
   if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'link')) {
     $package_wrapper->field_externalurl->set(array('url' => $value));
   }
 
+  // Set copyright
   if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'author')) {
     $package_wrapper->field_copyright->set($value);
   }
 
+  // Set text body
   if ($value = dpiblocks_rss_flow_check_if_element_exists($item, 'description')) {
     $package_wrapper->field_textbody->set(array('value' => $value, 'format' => $format));
+  }
+
+  // Set IPTC
+  $category_name = dpiblocks_rss_flow_check_if_element_exists($item, 'category');
+  $category_name = trim($category_name);
+  if (!empty($category_name)) {
+    $category = taxonomy_get_term_by_name($category_name, 'iptc');
+    if (empty($category)) {
+      if ($vid = dpi_variable_get('dpi_iptc', FALSE)) {
+        $new_term = new stdClass();
+        $new_term->vid = $vid;
+        $new_term->weight = 0;
+        $new_term->vocabulary_machine_name = 'iptc';
+        $new_term->name = $category_name;
+        taxonomy_term_save($new_term);
+        $category = $new_term;
+      }
+    } else {
+      $category = array_shift($category);
+    }
+    $package_wrapper->field_iptc->set(array($category->tid));
   }
 }
 
@@ -446,63 +471,42 @@ function dpiblocks_rss_flow_set_embeded_image($package, $package_wrapper, $item,
   $field_body = $package_wrapper->field_textbody->value();
   $text_body = $field_body['value'];
 
-  // Get the image informations in the body text
-  $substr = strstr($text_body, '<img');
-  $substr = $substr ? $substr : strstr($text_body, rawurlencode('<img'));
-  $tmp_substr = $substr ? strstr($substr, '>', TRUE) : FALSE;
-  $substr = $tmp_substr ? $tmp_substr : ($substr ? strstr($substr, rawurlencode('>'), TRUE) : FALSE);
+  // Extract image informations from text
+  list($url, $alt) = dpiblocks_flowhelpers_extract_image_from_text($text_body);
 
-  if ($substr) {
-    $src_substr = strstr($substr, 'src=');
-    $src_delimiter = substr($src_substr, 4, 1);
-    $src_substr = substr($src_substr, 5);
-    $url = strstr($src_substr, $src_delimiter, TRUE);
-    $url = urldecode(html_entity_decode($url));
+  if (!empty($url) && valid_url($url, TRUE)) {
+    $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
+    list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
+    if ($atom && $atom_wrapper) {
+      // The format is used for multiple fields, get it once for all
+      $format = dpiblocks_flowhelpers_get_default_text_format();
 
-    $alt_substr = strstr($substr, 'alt=');
-    if ($alt_substr) {
-      $alt_delimiter = substr($alt_substr, 4, 1);
-      $alt_substr = substr($alt_substr, 5);
-      $img_alt = strstr($src_substr, $alt_delimiter, TRUE);
-    }
-    else {
-      $img_alt = '';
-    }
+      // Set title and display title
+      if (!empty($alt)) {
+        $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($alt));
+        $package_wrapper->field_displaytitle->set(array('value' => $alt, 'format' => $format));
+      }
+      // If no title found, use the package title
+      else {
+        $atom_wrapper->title->set($package_wrapper->title->value());
+        $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
+      }
 
-    if (valid_url($url, TRUE)) {
-      $external_reference = 'flowmix_'.$feed_name.'_'.md5($url);
-      list($atom, $atom_wrapper) = dpiblocks_flowhelpers_create_or_load_atom('image', 'scald_image', $external_reference);
-      if ($atom && $atom_wrapper) {
-        // The format is used for multiple fields, get it once for all
-        $format = dpiblocks_flowhelpers_get_default_text_format();
+      // Create a file from the URL
+      if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
+        $atom->base_entity = $file;
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->base_id = $file->fid;
 
-        // Set title and display title
-        if (!empty($img_alt)) {
-          $package_wrapper->title->set(dpiblocks_flowhelpers_filter_html_tags($img_alt));
-          $package_wrapper->field_displaytitle->set(array('value' => $img_alt, 'format' => $format));
-        }
-        // If no title found, use the package title
-        else {
-          $atom_wrapper->title->set($package_wrapper->title->value());
-          $atom_wrapper->field_displaytitle->set($package_wrapper->field_displaytitle->value());
-        }
+        // Set a copy of the main file as thumbnail
+        $atom_wrapper->scald_thumbnail->set((array)$file);
+        $atom->thumbnail_source = $file->uri;
 
-        // Create a file from the URL
-        if ($file = dpicontenttypes_api_create_or_update_file($url, 'Flows/'.$caid, 'public', $caid)) {
-          $atom->base_entity = $file;
-          $atom_wrapper->scald_thumbnail->set((array)$file);
-          $atom->base_id = $file->fid;
+        // We have to save the atom for all the following processes
+        scald_atom_save($atom);
 
-          // Set a copy of the main file as thumbnail
-          $atom_wrapper->scald_thumbnail->set((array)$file);
-          $atom->thumbnail_source = $file->uri;
-
-          // We have to save the atom for all the following processes
-          scald_atom_save($atom);
-
-          // Link the atom to the package
-          dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
-        }
+        // Link the atom to the package
+        dpiblocks_flowhelpers_add_atom_to_fied($package_wrapper, $package, 'field_embededobjects', $atom, array('identifier' => TRUE));
       }
     }
   }

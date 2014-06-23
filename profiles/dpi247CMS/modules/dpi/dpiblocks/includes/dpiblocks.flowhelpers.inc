@@ -41,6 +41,10 @@ function dpiblocks_flowhelpers_new_package() {
  * @param string $date
  */
 function dpiblocks_flowhelpers_get_datestamp_from_datetime($date) {
+  if (is_numeric($date)) {
+    return $date;
+  }
+
   $datetime = new DateTime($date);
   return $datetime->getTimestamp();
 }
@@ -121,4 +125,33 @@ function dpiblocks_flowhelpers_add_atom_to_fied($wrapper, $entity, $field_name, 
   catch (Exception $e) {
     // @todo : What should we do with the Exception ('Invalid data value given. Be sure it matches the required data type and format.')
   }
+}
+
+/**
+ * Extract an URL and a alt attribute from the img tag in a text
+ */
+function dpiblocks_flowhelpers_extract_image_from_text($text) {
+  $url = $alt = '';
+
+  $substr = strstr($text, '<img');
+  $substr = $substr ? $substr : strstr($text, rawurlencode('<img'));
+  $tmp_substr = $substr ? strstr($substr, '>', TRUE) : FALSE;
+  $substr = $tmp_substr ? $tmp_substr : ($substr ? strstr($substr, rawurlencode('>'), TRUE) : FALSE);
+
+  if ($substr) {
+    $src_substr = strstr($substr, 'src=');
+    $src_delimiter = substr($src_substr, 4, 1);
+    $src_substr = substr($src_substr, 5);
+    $url = strstr($src_substr, $src_delimiter, TRUE);
+    $url = urldecode(html_entity_decode($url));
+
+    $alt_substr = strstr($substr, 'alt=');
+    if ($alt_substr) {
+      $alt_delimiter = substr($alt_substr, 4, 1);
+      $alt_substr = substr($alt_substr, 5);
+      $alt = strstr($src_substr, $alt_delimiter, TRUE);
+    }
+  }
+
+  return array($url, $alt);
 }

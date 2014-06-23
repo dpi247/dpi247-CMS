@@ -304,12 +304,19 @@ function dpiblocks_flowmix_content_type_flowmix_get_most_recent_from_availables(
 function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
   $default_settings = $form_state['plugin']['defaults'];
 
+  $current_pane = FALSE;
   if ($form_state['step'] == 'step1' && (!isset($form_state['conf']) || empty($form_state['conf']))) {
     // We have to reinitialize the cached pane at the first load of the form
     // If we didn't do that there would be a confusion between the cached pane and the current pane
     // after the submission of a new flow (when the "OK" button is pressed on the "plugin" form)
     $current_pane = $form_state['pane'];
-    $form_state['display cache']->new_pane = panels_new_pane($pane->type, $pane->subtype, TRUE);
+
+    if ($current_pane->subtype != 'new_flowmix') {
+      $default_settings = dpiblocks_flowmix_content_type_generate_settings_for_subtype($current_pane->subtype);
+    } else {
+          $form_state['display cache']->new_pane = panels_new_pane($pane->type, $pane->subtype, TRUE);
+
+    }
   }
   elseif ($form_state['step'] == 'step1' && !isset($form_state['clicked_button']) && $form_state['input'] < 5) {
     // We want to load the settings for this flowmix, only when we are editing it
@@ -325,6 +332,32 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
   }
   // Save settings for next steps
   $form_state['settings'] = $settings;
+
+  if (isset($settings->fid)) {
+    $form['fid'] = array(
+      '#type'          => 'hidden',
+      '#value'         => $settings->fid,
+    );
+  }
+  
+  $form['caid'] = array (
+    '#type'            => 'hidden',
+    '#value'           => $settings->caid,
+  );
+
+  // We are using a reusable flowmix, there's no form for this case
+  if ($current_pane && $current_pane->subtype != 'new_flowmix') {
+    unset($form['buttons']['next']);
+
+    $form['buttons']['save'] = array(
+      '#type'          => 'submit',
+      '#value'         => t('Save'),
+      '#wizard type'   => 'finish',
+      '#name'          => 'save',
+    );
+
+    return $form;
+  }
 
   // Display current flows
   foreach ($settings->flows as $key => $flow) {
@@ -348,18 +381,6 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
       '#markup'        => $flow->name,
     );
   }
-
-  if (isset($settings->fid)) {
-    $form['fid'] = array(
-      '#type'          => 'hidden',
-      '#value'         => $settings->fid,
-    );
-  }
-
-  $form['caid'] = array (
-    '#type'            => 'hidden',
-    '#value'           => $settings->caid,
-  );
 
   $form['title'] = array(
     '#type'            => 'textfield',
@@ -448,21 +469,21 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
   // We can only save if there are flows defined
   if(count($settings->flows)) {
     $form['buttons']['save'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-      '#wizard type' => 'finish',
-      '#name' => 'save',
+      '#type'          => 'submit',
+      '#value'         => t('Save'),
+      '#wizard type'   => 'finish',
+      '#name'          => 'save',
     );
   }
 
   // Add a new flow and pass the next flow id via the "#name" attribute
   $current_max_key = (!isset($settings->flows) || empty($settings->flows)) ? 1 : max(array_keys($settings->flows)) + 1;
   $form['buttons']['add_flow'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add a new flow'),
-    '#wizard type' => 'next',
-    '#name' => 'next_'.$current_max_key,
-    '#next' => 'step2',
+    '#type'            => 'submit',
+    '#value'           => t('Add a new flow'),
+    '#wizard type'     => 'next',
+    '#name'            => 'next_'.$current_max_key,
+    '#next'            => 'step2',
   );
 
   return $form;
