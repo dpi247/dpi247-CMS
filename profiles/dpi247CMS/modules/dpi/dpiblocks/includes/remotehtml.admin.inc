@@ -113,8 +113,10 @@ function remotehtml_form_validate($form, &$form_state) {
   }
 
   // Validate url
-  if(!remotehtml_url_verification($remotehtml_submission->html_adresse)) {
-    form_set_error('html_adresse', t('You must enter a valid URL adress'));
+  $check_url = drupal_http_request($remotehtml_submission->html_adresse, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)));
+  module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
+  if (!dpicommons_is_http_request_successfull($check_url)) {
+    form_set_error('html_adresse', t('The URL doesn\'t respond.'));
   }
 
   // Validate the refresh time
@@ -147,7 +149,7 @@ function remotehtml_form_submit($form, &$form_state) {
   }
   // The remote HTML entity exist and the machine name can't be redefine
   else {
-    $remotehtml_submission->is_new = False;
+    $remotehtml_submission->is_new = FALSE;
   }
 
   // Save the entity

@@ -41,6 +41,41 @@ function dpiblocks_install() {
 function dpiblocks_schema() {
   $schema = array();
 
+  $schema['dpiblocks_flowmix'] = array (
+    'description' => 'The FlowMix entity table',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'Primary key for our table of custom content',
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The machine name of the FlowMix block',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title of the FlowMix block',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'datas' => array(
+        'description' => 'The FlowMix serialized settings',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name')
+    ),
+  );
+
   $schema['dpiblocks_remotehtml'] = array (
     'description' => 'The remote HTML entity table',
     'fields' => array(
@@ -52,13 +87,13 @@ function dpiblocks_schema() {
         'not null' => TRUE,
       ),
       'machine_name' => array(
-        'description' => 'The machine name of our HTML remote adress',
+        'description' => 'The machine name of our remote HTML',
         'type' => 'varchar',
         'length' => '255',
         'not null' => TRUE,
       ),
       'title' => array(
-        'description' => 'The title of our HTML remote adress',
+        'description' => 'The title of our remote HTML',
         'type' => 'varchar',
         'length' => '255',
         'not null' => TRUE,
@@ -161,4 +196,12 @@ function dpiblocks_schema() {
   $schema['dpiblocks_custom_content_revision']['unique keys'] = array();
 
   return $schema;
+}
+
+/**
+ * Create the dpiblocks_flowmix table
+ */
+function dpiblocks_update_7001() {
+  $schema = drupal_get_schema('dpiblocks_flowmix', TRUE);
+  db_create_table('dpiblocks_flowmix', $schema);
 }
