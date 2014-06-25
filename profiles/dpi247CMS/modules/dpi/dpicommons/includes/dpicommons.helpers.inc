@@ -1,6 +1,38 @@
 <?php
 
 /**
+ * Check if the current memory usage is over a given percentage of the fixed memory_limit
+ *
+ * @param number $percentage
+ *   The memory_limit percentage to check
+ */
+function dpicommons_is_memory_limit_reached($percentage = 80) {
+  if (dpicommons_get_memory_usage_normalized() > $percentage/100) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Get the current memory usage normalized with the fixed memory_limit
+ */
+function dpicommons_get_memory_usage_normalized() {
+  $memory_limit = ini_get('memory_limit');
+
+  // Convert M or K to bytes
+  $matches = array();
+  if (preg_match('/^(\d+)(.)$/', $memory_limit, $matches)) {
+    if ($matches[2] == 'M') {
+      $memory_limit = $matches[1] * 1024 * 1024; // nnnM -> nnn MB
+    } else if ($matches[2] == 'K') {
+      $memory_limit = $matches[1] * 1024; // nnnK -> nnn KB
+    }
+  }
+
+  return memory_get_usage()/$memory_limit;
+}
+
+/**
  * Return an array of all existing aliases for an internal url.
  */
 function dpicommons_get_all_aliases($internal_url) {
