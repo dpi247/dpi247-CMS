@@ -3,80 +3,84 @@
 /**
  * Return the list of all available functions which return a statistic's parameter.
  */
-function wallystat_available_params_function() {
+function dpistat_available_params_function() {
   return array(
-    'wallystat_get_url_argument' => t('One of the URL arguments'),
-    'wallystat_get_node_field' => t('The value of one of the node fields'),
-    'wallystat_get_eval' => t('PHP code'),
+    'dpistat_get_url_argument' => t('One of the URL arguments'),
+    'dpistat_get_node_field' => t('The value of one of the node fields'),
+    'dpistat_get_eval' => t('PHP code'),
   );
 }
 
 /**
  * Return an URL argument
  */
-function wallystat_get_url_argument($node, $i) {
+function dpistat_get_url_argument($node, $i) {
   return arg($i);
 }
 
 /**
  * Return the form element(s) for this callback
  */
-function wallystat_get_url_argument_form() {
+function dpistat_get_url_argument_form() {
   $form = array();
-  
+
   $form[] = array(
-    '#type' => 'select',
-    '#title' => t('Argument ID in URL'),
-    '#options' => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+    '#type'        => 'select',
+    '#title'       => t('Argument ID in URL'),
+    '#options'     => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
   );
-  
+
   return $form;
 }
 
 /**
  * Return the value of a node field
  */
-function wallystat_get_node_field($node, $field) {
-  $node_field = isset($node->$field) ? $node->$field : NULL;
-  return isset($node_field) ? $node_field[0]['value'] : '';
+function dpistat_get_node_field($node, $field) {
+  $node_wrapper = entity_metadata_wrapper('node', $node);
+  if (isset($node_wrapper->{$field}) && $field_value = $node_wrapper->{$field}->value()) {
+    return $field_value['value'];
+  }
+  return '';
 }
 
 /**
  * Return the form element(s) for this callback
  */
-function wallystat_get_node_field_form() {
+function dpistat_get_node_field_form() {
   $form = array();
-  
+
   $form[] = array(
-    '#type'      => 'textfield',
-    '#title'     => t('Field name'),
-    '#size'      => 80,
-    '#maxlength' => 512,
+    '#type'        => 'textfield',
+    '#title'       => t('Field name'),
+    '#size'        => 80,
+    '#maxlength'   => 512,
   );
-  
+
   return $form;
 }
 
 /**
  * Return the evaluated code
  */
-function wallystat_get_eval($node, $code) {
+function dpistat_get_eval($node, $code) {
   return eval($code);
 }
 
 /**
  * Return the form element(s) for this callback
  */
-function wallystat_get_eval_form() {
+function dpistat_get_eval_form() {
   $form = array();
-  
+
   $form[] = array(
     '#type'        => 'textarea',
-    '#description' => t('The $node variable is available.'),
     '#title'       => t('PHP Code'),
+    '#description' => t('The $node variable is available.<br>
+        <b style="color:red;">Use this with caution! This code will be executed every time a node is viewed.</b>'),
     '#rows'        => 5,
   );
-  
+
   return $form;
 }
 
@@ -96,9 +100,9 @@ function dpistat_add_updater_callback(&$vars) {
     }
   }
   $db_terms = db_select('taxonomy_index', 't')
-    ->fields('t', array('tid'))
-    ->condition('t.nid', $current_id)
-    ->execute();
+  ->fields('t', array('tid'))
+  ->condition('t.nid', $current_id)
+  ->execute();
   foreach ($db_terms as $row) {
     $current_terms .= $row->tid.'+';
   }
@@ -120,19 +124,19 @@ function dpistat_add_updater_callback(&$vars) {
 
   $current_terms = trim($current_terms, '+');
   drupal_add_js("
-    (function($) {
-      function updateStats(){
-        $.ajax({
-          url: \""."/".drupal_get_path('module', 'dpistat')."/updater.php?nid=".$current_id."&title=".$title."&terms=".$current_terms."&".implode('&', $params_array)."\",
-          cache: false,
-          async: false
-        });
-      }
-
-      Drupal.behaviors.dpiatom_reference = {
-        attach: function(context) {
-          updateStats();
+      (function($) {
+        function updateStats(){
+          $.ajax({
+            url: \""."/".drupal_get_path('module', 'dpistat')."/updater.php?nid=".$current_id."&title=".$title."&terms=".$current_terms."&".implode('&', $params_array)."\",
+            cache: false,
+            async: false
+          });
         }
-      }
-    })(jQuery);", "inline");
+
+        Drupal.behaviors.dpiatom_reference = {
+          attach: function(context) {
+            updateStats();
+          }
+        }
+      })(jQuery);", "inline");
 }

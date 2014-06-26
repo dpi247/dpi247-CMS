@@ -193,15 +193,37 @@ function dpi_variable_del($name) {
  * variable names.
  *
  * @param $name
- *   The name of the namespace to undefine.
+ *   The name of the variable to undefine.
+ * @param $type
+ *   Type of variables to delete, "system" (classic variable_set variables),
+ *   "dpi" (dpi_variable_set variables) or "both".
  *
- * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
+ * @see dpi_variable_get(), dpi_variable_set(), dpi_variable_del()
  */
-function dpi_variable_del_namespace($namespace) {
-  db_delete('dpi_variables')
-    ->condition('name', $namespace.'%', 'LIKE')
-    ->execute();
-  drupal_static_reset('dpivariables');
+function dpi_variable_del_namespace($namespace, $type = 'both') {
+  if ($type == 'system' || $type == 'both') {
+    global $conf;
+
+    $db_vars = db_select('variable', 'v')
+      ->fields('v', array('name'))
+      ->condition('v.name', $namespace.'%', 'LIKE')
+      ->execute();
+    foreach ($db_vars as $db_var) {
+      unset($conf[$db_var->name]);
+    }
+    db_delete('variable')
+      ->condition('name', $namespace.'%', 'LIKE')
+      ->execute();
+
+    cache_clear_all('variables', 'cache_bootstrap');
+  }
+
+  if ($type == 'dpi' || $type == 'both') {
+    db_delete('dpi_variables')
+      ->condition('name', $namespace.'%', 'LIKE')
+      ->execute();
+    drupal_static_reset('dpivariables');
+  }
 }
 
 /**
