@@ -36,12 +36,64 @@ function dpicommons_menu() {
   return $items;
 }
 
-function dpicommons_theme(){
+/**
+ * Implementation of hook_theme()
+ */
+function dpicommons_theme() {
+  $chart_base = array(
+    'file' => 'theme.charts.inc',
+    'path' => drupal_get_path('module', 'dpicommons').'/templates',
+  );
+
   return array(
     'dpi_vertical_tabs' => array(
       'variables' => array('data' => null),
-      'file'=>'templates/theme.inc',
-    )
+      'file' => 'templates/theme.inc',
+    ),
+    'dpicommons_line_chart'	=> $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'pointSize' => NULL,
+        'AxeXTitle' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_pie_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'header_name' => NULL,
+        'header_unit' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_gauge_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'hAxis' => NULL,
+        'vAxis' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_bar_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'hAxis' => NULL,
+        'vAxis' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
   );
 }
 
