@@ -11,6 +11,7 @@
  */
 function dpistat_api_node_get_counts($nid) {
   $return_counts = array();
+
   $db_query = db_select('dpistat_node_counter', 'd');
   $db_query->addExpression('SUM(d.totalcount)', 'totalcount');
   $db_query->addExpression('SUM(d.daycount)', 'daycount');
@@ -20,9 +21,9 @@ function dpistat_api_node_get_counts($nid) {
   $db_query->condition('d.nid', $nid);
   $db_results = $db_query->execute();
   foreach ($db_results as $db_result) {
-    $return_counts = (array)$db_result;
-    break;
+    $return_counts[] = (array)$db_result;
   }
+
   return $return_counts;
 }
 
@@ -52,9 +53,10 @@ function dpistat_api_node_get_count_by_params($column, $params) {
   }
   $db_results = $db_query->execute();
   foreach ($db_results as $db_result) {
-    $return_counts = (array)$db_result;
-    break;
+    $return_counts[] = (array)$db_result;
   }
+
+  return $return_counts;
 }
 
 /**
@@ -67,7 +69,7 @@ function dpistat_api_node_get_count_by_params($column, $params) {
  *   The counts
  */
 function dpistat_api_node_get_hourly_counts($nid) {
-  return dpistat_api_get_hourly_counts_with_params(array(array('column' => 'nid', 'value' => $nid)));
+  return dpistat_api_node_get_hourly_counts_with_params(array(array('column' => 'nid', 'value' => $nid)));
 }
 
 /**
@@ -83,7 +85,7 @@ function dpistat_api_node_get_hourly_counts($nid) {
  * @return array
  *   The counts
  */
-function dpistat_api_get_hourly_counts_with_params($params = array()) {
+function dpistat_api_node_get_hourly_counts_with_params($params = array()) {
   $return_counts = array();
 
   $db_query = db_select('dpistat_node_hourly_counter', 'd');
@@ -97,8 +99,7 @@ function dpistat_api_get_hourly_counts_with_params($params = array()) {
   $db_query->orderBy('d.timestamp', 'ASC');
   $db_results = $db_query->execute();
   foreach ($db_results as $db_result) {
-    $return_counts = (array)$db_result;
-    break;
+    $return_counts[$db_result->timestamp] = $db_result->count;
   }
 
   return $return_counts;

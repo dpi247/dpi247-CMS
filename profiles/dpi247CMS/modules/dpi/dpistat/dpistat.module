@@ -131,3 +131,62 @@ function dpistat_init() {
     }
   }
 }
+
+/**
+ * Implementation of hook_panels_pane_content_alter()
+ */
+function dpistat_panels_pane_content_alter(&$content, $pane, $args, $context, $renderer, $display) {
+  // Add contextual link to enable or disable live statistics
+  if ($pane->type == 'targetblock' && user_access('access statistics')) {
+    if (dpi_variable_get('dpistat_display_follower', 0)) {
+      $content->admin_links[] = array(
+        'title' => t('Disable live statistics'),
+        'href' => 'admin/dpistat/setdisplayfollower/0',
+        'query' => array('destination' => $_GET['q']),
+      );
+    } else {
+      $content->admin_links[] = array(
+        'title' => t('Enable live statistics'),
+        'href' => 'admin/dpistat/setdisplayfollower/1',
+        'query' => array('destination' => $_GET['q']),
+      );
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_view_alter
+ */
+function dpistat_node_view_alter(&$build, $type) {
+  if (isset($build['#node'])) {
+    $node = $build['#node'];
+    // Add div, JS and CSS to display live statistics in overlay
+    if (isset($node->targetview_destination) && dpi_variable_get('dpistat_display_follower', 0) && user_access('access statistics')) {
+      static $first_load = TRUE;
+
+      drupal_add_css(drupal_get_path('module', 'dpistat').'/css/follower.css');
+      $nid = $node->nid;
+      if (!isset($build['#prefix'])) {
+        $build['#prefix'] = '';
+      }
+      $build['#prefix'] = '<span class = "dpistat_follower" id = "'.$nid.'">'.$build['#prefix'];
+      if (!isset($build['#suffix'])) {
+        $build['#suffix'] = '';
+      }
+      $build['#suffix'] .= '</span>';
+      drupal_add_js(drupal_get_path('module', 'dpistat').'/js/display_stats_follower.js');
+
+      //drupal_add_js('https://www.google.com/jsapi', 'external');
+      drupal_add_js(drupal_get_path('module', 'dpicommons').'/js/googleChartApi.js');
+      if ($first_load) {
+        drupal_add_js('
+          (function($) {
+            $(document).ready(function() {
+              setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            });
+          })(jQuery);', 'inline');
+        $first_load = FALSE;
+      }
+    }
+  }
+}

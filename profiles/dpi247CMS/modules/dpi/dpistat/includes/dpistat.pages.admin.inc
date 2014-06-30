@@ -346,6 +346,9 @@ function dpistat_generate_stats($tids, $targets, $node_amount = 10, $options = a
       dpistat_generate_stats_recursively_add_param($res, $options_copy, $default_options, $current_hour);
     }
   }
+
+  // Clear the live statistics cache
+  cache_clear_all('dpistat_stats_content_', 'cache', TRUE);
 }
 
 function dpistat_generate_stats_recursively_add_param(&$res, &$options, $default_options, $current_hour) {
