@@ -133,6 +133,16 @@ function dpistat_init() {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function dpistat_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpistat') .'/views',
+  );
+}
+
+/**
  * Implementation of hook_panels_pane_content_alter()
  */
 function dpistat_panels_pane_content_alter(&$content, $pane, $args, $context, $renderer, $display) {
