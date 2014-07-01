@@ -44,7 +44,7 @@ function dpistat_api_node_get_counts($nid) {
  */
 function dpistat_api_node_get_count_by_params($column, $params) {
   $return_counts = array();
-  
+
   $db_query = db_select('dpistat_node_counter', 'd');
   $db_query->addExpression('SUM(d.'.$column.')', $column);
   foreach ($params as $param) {
