@@ -69,11 +69,8 @@ Drupal.TaxonomyManagerTree.prototype.attachTreeview = function(ul, currentIndex)
   if (currentIndex) {
     ul = $(ul).slice(currentIndex);
   }
-  console.log(ul);	
   var expandableParent = $(ul).find("div.hitArea");
-  console.log(expandableParent);
   $(expandableParent).click(function() {
-	  console.log('click');
     var li = $(this).parent();
     tree.loadChildForm(li);
     tree.toggleTree(li);
