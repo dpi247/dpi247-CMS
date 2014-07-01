@@ -250,6 +250,13 @@ function dpidestinations_install(){
   $field_info=_dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
   _dpidestination_attach_field_destination_to_bundle('node', 'package');
+
+  // Add "view section" permission to anonymous and authenticated user roles
+  $rids = array(1, 2);
+  $permissions = array('view section');
+  foreach ($rids as $rid) {
+    user_role_grant_permissions($rid, $permissions);
+  }
 }
 
 function dpidestinations_uninstall(){
@@ -299,4 +306,15 @@ function dpidestinations_field_schema($field) {
     'indexes' => $indexes,
     'unique keys' => $unique_keys,
   );
+}
+
+/**
+ * Add "view section" permission to anonymous and authenticated user roles
+ */
+function dpidestinations_update_7001() {
+  $rids = array(1, 2);
+  $permissions = array('view section');
+  foreach ($rids as $rid) {
+    user_role_grant_permissions($rid, $permissions);
+  }
 }
