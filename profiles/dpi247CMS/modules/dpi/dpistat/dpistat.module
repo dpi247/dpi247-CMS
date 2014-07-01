@@ -162,6 +162,73 @@ function dpistat_views_api() {
 }
 
 /**
+ * Implementation of hook_ccidynamicfeedback_options
+ */
+function dpistat_ccidynamicfeedback_options($op, $delta = '', $node = NULL) {
+  switch ($op) {
+    case 'list':
+      return array(
+      'comments_count' => t('Comments count'),
+      'views_count' => t('Total views count'),
+      'hourly_count' => t('Last hour count'),
+      //'48h_chart' => t('Last 48 hours chart'),
+      //'param1_chart' => t('First parameter chart'),
+      );
+
+    case 'content':
+      $datas = array();
+      switch ($delta) {
+        case 'comments_count':
+          $datas = array(
+          'label' => t('Comments'),
+          'value' => $node->comment_count,
+          );
+          break;
+
+        case 'views_count':
+          $counts = dpistat_api_node_get_counts($node->nid);
+          dsm($counts);
+          if (isset($counts[0]['totalcount'])) {
+            $datas = array(
+              'label' => t('Total views count'),
+              'value' => $counts[0]['totalcount'],
+            );
+          }
+          break;
+
+        case 'hourly_count':
+          $hourly_counts = dpistat_api_node_get_hourly_counts($node->nid);
+          if (!empty($hourly_counts)) {
+            $most_recent_time = max(array_keys($hourly_counts));
+            $datas = array(
+              'label' => t('Last hour count'),
+              'value' => $hourly_counts[$most_recent_time],
+            );
+          }
+          break;
+          /*
+           case '48h_chart':
+          $datas = array(
+            'label' => '',
+            'value' => theme('wallystat_show_stats_48h', $node->nid),
+          );
+          break;
+
+          case 'param1_chart':
+          if ($params_callback = variable_get('wallystat_param_1', FALSE)) {
+          $datas = array(
+            'label' => '',
+            'value' => theme('wallystat_show_stats_param', $node->nid, 1, $params_callback),
+          );
+          }
+          break;
+          */
+      }
+      return $datas;
+  }
+}
+
+/**
  * Implementation of hook_panels_pane_content_alter()
  */
 function dpistat_panels_pane_content_alter(&$content, $pane, $args, $context, $renderer, $display) {
