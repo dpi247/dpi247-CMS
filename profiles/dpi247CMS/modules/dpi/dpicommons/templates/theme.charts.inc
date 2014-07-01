@@ -45,28 +45,33 @@ function theme_dpicommons_line_chart($vars) {
 	    <script type="text/javascript">
 	      drawFunctions.push("'.$function_name.'");';
 	} else {
-	  $jsCode .= '
-	    google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback('.$function_name.');';
-	}
+    $jsCode .= '
+        (function($) {
+          $(document).ready(function() {
+            setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            google.setOnLoadCallback('.$function_name.');';
+  }
 	$jsCode .= '
-	    function '.$function_name.'() {
-        var data = google.visualization.arrayToDataTable('.$data.');
-console.log(data);
-            console.log("qdslmkfj");
-        var options = {
-          title: "'.$title.'",
-          pointSize: '.$pointSize.',
-          hAxis: {title: "'.$AxeXTitle.'"}
-        };
+      	    function '.$function_name.'() {
+              var data = google.visualization.arrayToDataTable('.$data.');
 
-        var chart = new google.visualization.LineChart(document.getElementById("chart_div_'.$i.'"));
-        chart.draw(data, options);
-      }';
+              var options = {
+                title: "'.$title.'",
+                pointSize: '.$pointSize.',
+                hAxis: {title: "'.$AxeXTitle.'"}
+              };
+
+              var chart = new google.visualization.LineChart(document.getElementById("chart_div_'.$i.'"));
+              chart.draw(data, options);
+            }';
 	if ($jsprint) {
 	  $jsCode .= '
 	    </script>';
-	}
+	} else {
+    $jsCode .= '
+          });
+        })(jQuery);';
+  }
 
 	$output = dpicommons_theme_chart_div('chart_div_'.$i, $width, $height);
 	// Include the js code in the page
@@ -136,27 +141,33 @@ function theme_dpicommons_pie_chart($vars) {
 	      drawFunctions.push("'.$function_name.'");';
   } else {
     $jsCode .= '
-	    google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback('.$function_name.');';
+        (function($) {
+          $(document).ready(function() {
+            setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            google.setOnLoadCallback('.$function_name.');';
   }
   $jsCode .= '
-	    function '.$function_name.'() {
-        // Set chart options
-        var data = new google.visualization.DataTable();
-        data.addColumn("string", "'.$header_name.'");
-        data.addColumn("number", "'.$header_unit.'");
-        data.addRows('.$data.');
+      	    function '.$function_name.'() {
+              // Set chart options
+              var data = new google.visualization.DataTable();
+              data.addColumn("string", "'.$header_name.'");
+              data.addColumn("number", "'.$header_unit.'");
+              data.addRows('.$data.');
 
-        var options = {
-            "title":"'.$title.'",
-        };
+              var options = {
+                  "title":"'.$title.'",
+              };
 
-        var chart = new google.visualization.PieChart(document.getElementById("piechart_div_'.$i.'"));
-        chart.draw(data, options);
-      }';
+              var chart = new google.visualization.PieChart(document.getElementById("piechart_div_'.$i.'"));
+              chart.draw(data, options);
+            }';
   if ($jsprint) {
     $jsCode .= '
 	    </script>';
+  } else {
+    $jsCode .= '
+          });
+        })(jQuery);';
   }
 
   $output = dpicommons_theme_chart_div('piechart_div_'.$i, $width, $height);
@@ -222,6 +233,17 @@ function theme_dpicommons_bar_chart($vars) {
   // Google api takes datas in JSON table
   $data = json_encode($data);
 
+  static $first_load = TRUE;
+  if ($first_load) {
+    drupal_add_js('
+          (function($) {
+            $(document).ready(function() {
+              setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            });
+          })(jQuery);', 'inline');
+    $first_load = FALSE;
+  }
+
   $function_name = 'drawChartBar'.$i;
   $jsCode = '';
   if ($jsprint) {
@@ -230,25 +252,31 @@ function theme_dpicommons_bar_chart($vars) {
 	      drawFunctions.push("'.$function_name.'");';
   } else {
     $jsCode .= '
-	    google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback('.$function_name.');';
+        (function($) {
+          $(document).ready(function() {
+            setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            google.setOnLoadCallback('.$function_name.');';
   }
   $jsCode .= '
-	    function '.$function_name.'() {
-        // Set chart options
-        var data = google.visualization.arrayToDataTable('.$data.');
+      	    function '.$function_name.'() {
+              // Set chart options
+              var data = google.visualization.arrayToDataTable('.$data.');
 
-        var options = {"title":"'.$title.'",
-                        vAxis: {title: "'.$vAxis.'"},
-                        hAxis: {title: "'.$hAxis.'"},
-        };
+              var options = {"title":"'.$title.'",
+                              vAxis: {title: "'.$vAxis.'"},
+                              hAxis: {title: "'.$hAxis.'"},
+              };
 
-        var chart = new google.visualization.BarChart(document.getElementById("barchart_div_'.$i.'"));
-        chart.draw(data, options);
-      }';
+              var chart = new google.visualization.BarChart(document.getElementById("barchart_div_'.$i.'"));
+              chart.draw(data, options);
+            }';
   if ($jsprint) {
     $jsCode .= '
 	    </script>';
+  } else {
+    $jsCode .= '
+          });
+        })(jQuery);';
   }
 
   $output = dpicommons_theme_chart_div('barchart_div_'.$i, $width, $height);
@@ -311,6 +339,17 @@ function theme_dpicommons_gauge_chart($vars) {
   drupal_add_js(drupal_get_path('module', 'dpicommons').'/js/googleChartApi.js');
   // Google api takes datas in JSON table
   $data = json_encode($data);
+
+  static $first_load = TRUE;
+  if ($first_load) {
+    drupal_add_js('
+          (function($) {
+            $(document).ready(function() {
+              setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            });
+          })(jQuery);', 'inline');
+    $first_load = FALSE;
+  }
   
   $function_name = 'drawChartGauge'.$i;
   $jsCode = '';
@@ -320,26 +359,32 @@ function theme_dpicommons_gauge_chart($vars) {
 	      drawFunctions.push("'.$function_name.'");';
   } else {
     $jsCode .= '
-	    google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback('.$function_name.');';
+        (function($) {
+          $(document).ready(function() {
+            setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            google.setOnLoadCallback('.$function_name.');';
   }
   $jsCode .= '
-	    function '.$function_name.'() {
-        var data = google.visualization.arrayToDataTable('.$data.');
+	          function '.$function_name.'() {
+              var data = google.visualization.arrayToDataTable('.$data.');
 
-        var options = {
-            title:"'.$title.'",
-            vAxis: {title: "'.$vAxis.'"},
-            hAxis: {title: "'.$hAxis.'",maxValue:"100"},
-            isStacked: "True"
-        }
+              var options = {
+                title:"'.$title.'",
+                vAxis: {title: "'.$vAxis.'"},
+                hAxis: {title: "'.$hAxis.'",maxValue:"100"},
+                isStacked: "True"
+              }
 
-        var chart = new google.visualization.BarChart(document.getElementById("gaugechart_div_'.$i.'"));
-        chart.draw(data, options);
-      }';
+              var chart = new google.visualization.BarChart(document.getElementById("gaugechart_div_'.$i.'"));
+              chart.draw(data, options);
+            }';
   if ($jsprint) {
     $jsCode .= '
 	    </script>';
+  } else {
+    $jsCode .= '
+          });
+        })(jQuery);';
   }
 
   $output = dpicommons_theme_chart_div('gaugechart_div_'.$i, $width, $height);
