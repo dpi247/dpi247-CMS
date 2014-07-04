@@ -72,17 +72,21 @@ function dpistat_viewers_stats_content_type_render($subtype, $conf, $panel_args,
     if (arg(0) == 'node') {
       $authenticated = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'nid', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1)));
       $anonymous = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'nid', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 0)));
-      $data = array(
-        array(t('Authenticated'), (int)$authenticated[0]['weekcount']),
-        array(t('Anonymous'), (int)$anonymous[0]['weekcount']),
-      );
+      if (!empty($authenticated) && !empty($anonymous)) {
+        $data = array(
+          array(t('Authenticated'), (int)$authenticated[0]['weekcount']),
+          array(t('Anonymous'), (int)$anonymous[0]['weekcount']),
+        );
+      }
     } else {
       $authenticated = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'param01', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1)));
       $anonymous = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'param01', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 0)));
-      $data = array(
-        array(t('Authenticated'), (int)$authenticated[0]['weekcount']),
-        array(t('Anonymous'), (int)$anonymous[0]['weekcount']),
-      );
+      if (!empty($authenticated) && !empty($anonymous)) {
+        $data = array(
+          array(t('Authenticated'), (int)$authenticated[0]['weekcount']),
+          array(t('Anonymous'), (int)$anonymous[0]['weekcount']),
+        );
+      }
     }
     if (!empty($data)) {
       $theme_args = array(
@@ -100,19 +104,23 @@ function dpistat_viewers_stats_content_type_render($subtype, $conf, $panel_args,
     if (arg(0) == 'node') {
       $subscribed_user = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'nid', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1), array('column' => 'param03', 'value' => 1, 'op' => '>')));
       $not_subscribed_user = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'nid', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1), array('column' => 'param03', 'value' => 1)));
-      $data = array(
-        array(t('User type'), t('Users count')),
-        array(t('Subscribed user'), (int)$subscribed_user[0]['weekcount']),
-        array(t('Not subscribed user'), (int)$not_subscribed_user[0]['weekcount']),
-      );
+      if (!empty($subscribed_user) && !empty($not_subscribed_user)) {
+        $data = array(
+          array(t('User type'), t('Users count')),
+          array(t('Subscribed user'), (int)$subscribed_user[0]['weekcount']),
+          array(t('Not subscribed user'), (int)$not_subscribed_user[0]['weekcount']),
+        );
+      }
     } else {
       $subscribed_user = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'param01', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1), array('column' => 'param03', 'value' => 1, 'op' => '>')));
       $not_subscribed_user = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'param01', 'value' => $panel_args[0]), array('column' => 'param02', 'value' => 1), array('column' => 'param03', 'value' => 1)));
-      $data = array(
-        array(t('User type'), t('Users count')),
-        array(t('Subscribed user'), (int)$subscribed_user['weekcount']),
-        array(t('Not subscribed user'), (int)$not_subscribed_user['weekcount']),
-      );
+      if (!empty($subscribed_user) && !empty($not_subscribed_user)) {
+        $data = array(
+          array(t('User type'), t('Users count')),
+          array(t('Subscribed user'), (int)$subscribed_user[0]['weekcount']),
+          array(t('Not subscribed user'), (int)$not_subscribed_user[0]['weekcount']),
+        );
+      }
     }
     if (!empty($data)) {
       $theme_args = array(
