@@ -187,7 +187,6 @@ function dpistat_ccidynamicfeedback_options($op, $delta = '', $node = NULL) {
 
         case 'views_count':
           $counts = dpistat_api_node_get_counts($node->nid);
-          dsm($counts);
           if (isset($counts[0]['totalcount'])) {
             $datas = array(
               'label' => t('Total views count'),
