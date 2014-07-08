@@ -89,16 +89,18 @@ function dpistat_destinations_stats_content_type_render($subtype, $conf, $panel_
   if ($conf['display_ratio']) {
     $dest_count = dpistat_api_node_get_count_by_params('weekcount', array(array('column' => 'param01', 'value' => $destination_term)));
     $all_dest_count = dpistat_api_node_get_count_by_params('weekcount', array());
-    $dest_ratio = (int)(100 * $dest_count[0]['weekcount']/$all_dest_count[0]['weekcount']);
-    $data = array(
-      array(t('Views'), t('This destination'), t('All other destinations')),
-      array(t('Percentage'), $dest_ratio, 100 - $dest_ratio),
-    );
-    $chart_args = array(
-      'data' => $data,
-      'title' => t('Views in this destination vs all other destinations'),
-    );
-    $block->content .= theme('dpicommons_gauge_chart', $chart_args);
+    if (isset($dest_count[0]['weekcount']) && $dest_count[0]['weekcount'] && isset($all_dest_count[0]['weekcount']) && $all_dest_count[0]['weekcount']) {
+      $dest_ratio = (int)(100 * $dest_count[0]['weekcount']/$all_dest_count[0]['weekcount']);
+      $data = array(
+        array(t('Views'), t('This destination'), t('All other destinations')),
+        array(t('Percentage'), $dest_ratio, 100 - $dest_ratio),
+      );
+      $chart_args = array(
+        'data' => $data,
+        'title' => t('Views in this destination vs all other destinations'),
+      );
+      $block->content .= theme('dpicommons_gauge_chart', $chart_args);
+    }
   }
 
   if ($conf['display_views']) {
