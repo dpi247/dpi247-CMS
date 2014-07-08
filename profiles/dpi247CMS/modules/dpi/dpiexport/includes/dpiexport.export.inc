@@ -10,7 +10,7 @@
  */
 function dpiexport_node_to_dpixml($node, &$files_to_zip) {
   $node_wrapper = entity_metadata_wrapper('node', $node);
-  $dpiproperties = dpiproperties_load_by_type_and_id('node', $node->nid);
+  $node_dpiproperties = dpiproperties_load_by_type_and_id('node', $node->nid);
 
   $dom = new DomDocument('1.0', 'UTF-8');
 
@@ -24,11 +24,45 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
   $package_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', 'ArticlePackageType');
 
   // Set package fields
-  dpiexport_node_to_dpixml_fill_package($dom, $package_node, $node, $node_wrapper, $dpiproperties);
+  dpiexport_node_to_dpixml_fill_package($dom, $package_node, $node, $node_wrapper, $node_dpiproperties);
 
   // Set main story
-  dpiexport_node_to_dpixml_fill_article_package_type($dom, $package_node, $node, $node_wrapper, $dpiproperties);
+  dpiexport_node_to_dpixml_fill_article_package_type($dom, $package_node, $node, $node_wrapper, $node_dpiproperties);
 
+  // Set objects
+  if ($embeds = dpicontenttypes_api_get_embeds($node, FALSE, FALSE, TRUE)) {
+    $embeddedcontent_node = $package_node->appendChild($dom->createElement('EmbeddedContent'));
+    $embeddedobjects_node = $embeddedcontent_node->appendChild($dom->createElement('EmbeddedObjects'));
+    foreach ($embeds as $embed) {
+      $object_node = $embeddedobjects_node->appendChild($dom->createElement('Object'));
+      $types_translator = array(
+        'image' => 'PhotoObjectType',
+        'video' => 'VideoObjectType',
+      );
+      $object_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $types_translator[$embed['type']]);
+      $atom = $embed['atom'];
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $atom_dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $atom->sid);
+      dpiexport_node_to_dpixml_fill_object_type($dom, $object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+      switch ($embed['type']) {
+        case 'TextObjectType' :
+          _wallytoolbox_arraytowallyxml_fillTextObjectType($valid_dom, $object_node, $object_array);
+          break;
+        case 'AudioObjectType':
+          _wallytoolbox_arraytowallyxml_fillAudioObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
+          break;
+        case 'VideoObjectType':
+          _wallytoolbox_arraytowallyxml_fillVideoObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
+          break;
+        case 'image':
+          dpiexport_node_to_dpixml_fill_photo_object_type($dom, $object_node, $node, $atom, $atom_wrapper, $atom_dpiproperties, $files_to_zip);
+          break;
+        case 'PollObjectType':
+          _wallytoolbox_arraytowallyxml_fillPollObjectType($valid_dom, $object_node, $object_array);
+          break;
+      }
+    }
+  }
   return $dom;
 
   if (isset($package_array['EmbeddedContent'])){
@@ -180,15 +214,13 @@ function dpiexport_node_to_dpixml_fill_package($dom, &$package_node, $node, $nod
 function dpiexport_node_to_dpixml_fill_article_package_type($dom, &$package_node, $node, $node_wrapper, $dpiproperties) {
   $mainstory_node = $package_node->appendChild($dom->createElement('MainStory'));
   $mainstory_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', 'TextObjectType');
-
-  dpiexport_node_to_dpixml_fill_object_type($dom, $mainstory_node, $node, $node_wrapper, $dpiproperties);
   dpiexport_node_to_dpixml_fill_text_object_type($dom, $mainstory_node, $node, $node_wrapper, $dpiproperties);
 }
 
 /**
  * Set the Object elements
  */
-function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $node_wrapper, $dpiproperties) {
+function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties) {
   // @todo : What is ObjectID ?
   //$object_node->setAttribute('ObjectID', $object_array['ObjectID']);
   if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialpublicationdate', 'value', 'now')) {
@@ -199,21 +231,39 @@ function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $
     $object_node->setAttribute('LastUpdateDate', $date);
   }
 
-  $object_node->appendChild($dom->createElement('PackageTitle', $node->title));
-  $object_node->appendChild($dom->createElement('InternalReference', 'Drupal_NID:'.$node->nid));
-  $object_node->appendChild($dom->createElement('ExternalReference', $dpiproperties->external_reference_2));
+  $object_node->appendChild($dom->createElement('InternalReference', 'Drupal_SID:'.$atom_dpiproperties->id));
+  $object_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference));
 
-  if (isset($node_wrapper->field_copyright) && $field_value = $node_wrapper->field_copyright->value()) {
+  dpiexport_node_to_dpixml_fill_taxonomies($dom, $object_node, $atom_wrapper);
+
+  if (isset($atom_wrapper->field_copyright) && $field_value = $atom_wrapper->field_copyright->value()) {
     $object_node->appendChild($dom->createElement('Copyright', $field_value));
   }
-
-  dpiexport_node_to_dpixml_fill_taxonomies($dom, $object_node, $node, $node_wrapper, $dpiproperties);
 }
 
 /**
  * Set the Text Object elements
  */
 function dpiexport_node_to_dpixml_fill_text_object_type($dom, &$mainstory_node, $node, $node_wrapper, $dpiproperties) {
+  // @todo : What is ObjectID ?
+  //$object_node->setAttribute('ObjectID', $object_array['ObjectID']);
+  if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialpublicationdate', 'value', 'now')) {
+    $mainstory_node->setAttribute('PublicationDate', $date);
+  }
+  $mainstory_node->setAttribute('CreationDate', date('Y-m-d', $node->created).'T'.date('H:i:s', $node->created));
+  if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialupdatedate', 'value', 'now')) {
+    $mainstory_node->setAttribute('LastUpdateDate', $date);
+  }
+
+  $mainstory_node->appendChild($dom->createElement('InternalReference', 'Drupal_NID:'.$node->nid));
+  $mainstory_node->appendChild($dom->createElement('ExternalReference', $dpiproperties->external_reference_2));
+
+  dpiexport_node_to_dpixml_fill_taxonomies($dom, $mainstory_node, $node_wrapper);
+
+  if (isset($node_wrapper->field_copyright) && $field_value = $node_wrapper->field_copyright->value()) {
+    $mainstory_node->appendChild($dom->createElement('Copyright', $field_value));
+  }
+
   if (isset($node_wrapper->field_textbarette) && $field_value = $node_wrapper->field_textbarette->value()) {
     $value = html_entity_decode($field_value['safe_value'], ENT_COMPAT, 'UTF-8');
     $text_barette_node = $mainstory_node->appendChild($dom->createElement('TextBarette'));
@@ -253,152 +303,201 @@ function dpiexport_node_to_dpixml_fill_text_object_type($dom, &$mainstory_node, 
   }
 }
 
-function dpiexport_node_to_dpixml_fill_taxonomies($dom, &$object_node, $node, $node_wrapper, $dpiproperties) {
-  return;
-  $temp_object = array();
-
-  $temp_object['Locations']['Location'] = array();
-  if ($object->field_locations && is_array($object->field_locations) && !empty($object->field_locations)) {
-    foreach ($object->field_locations as $location) {
-      if ($location['value']) {
-        $temp_object['Locations']['Location'][$location['value']] = $location['value'];
-        unset($object->taxonomy[$location['value']]);
-      }
-    }
+/**
+ * Set a media object
+ */
+function dpiexport_node_to_dpixml_fill_media_object_type($dom, &$object_node, $atom, $atom_wrapper, $atom_dpiproperties) {
+  if (isset($atom_wrapper->field_caption) && $field_value = $atom_wrapper->field_caption->value()) {
+    $field_caption_node = $object_node->appendChild($dom->createElement('Caption'));
+    $field_caption_node->appendChild($dom->createCDATASection($field_value['safe_value']));
   }
-  if ($object->field_locations_nodes && is_array($object->field_locations_nodes) && !empty($object->field_locations_nodes)) {
-    foreach ($object->field_locations_nodes as $location) {
-      $tid = $location->field_locationtaxonomy[0]['value'];
-      if (in_array($tid, $temp_object['Locations']['Location']))
-        $temp_object['Locations']['Location'][$tid] = wallytoolbox_destinations_flow_set_locationtax($location, $tid);
-      else
-        $temp_object['Locations']['Location'][] = wallytoolbox_destinations_flow_set_locationtax($location, $tid);
-    }
+  $object_node->appendChild($dom->createElement('URI', $atom->file_source));
+  $object_node->appendChild($dom->createElement('FileSize', $atom->base_entity->filesize));
+  $thumbnail_node = $object_node->appendChild($dom->createElement('Thumbnail'));
+  $thumbnail_node->setAttribute('URI', $atom->thumbnail_source);
+  if (isset($atom_wrapper->scald_thumbnail) && $field_value = $atom_wrapper->scald_thumbnail->value()) {
+    $thumbnail_node->setAttribute('Type', $field_value['filemime']);
+    $thumbnail_node->setAttribute('Title', $field_value['title']);
+    $thumbnail_node->setAttribute('W', $field_value['width']);
+    $thumbnail_node->setAttribute('H', $field_value['height']);
   }
-  $temp_object['Entities']['Entity'] = array();
-  if ($object->field_entities && is_array($object->field_entities) && !empty($object->field_entities)) {
-    foreach ($object->field_entities as $entity) {
-      if ($entity['value']) {
-        $temp_object['Entities']['Entity'][$entity['value']] = $entity['value'];
-        unset($object->taxonomy[$entity['value']]);
-      }
-    }
+  else {
+    $thumbnail_node->setAttribute('xsi:nil', 'true');
   }
-  if ($object->field_entities_nodes && is_array($object->field_entities_nodes) && !empty($object->field_entities_nodes)) {
-    foreach ($object->field_entities_nodes as $entity) {
-      $tid = $entity->field_entity[0]['value'];
-      if (in_array($tid, $temp_object['Entities']['Entity']))
-        $temp_object['Entities']['Entity'][$tid] = wallytoolbox_destinations_flow_set_entitytax($entity, $tid);
-      else
-        $temp_object['Entities']['Entity'][] = wallytoolbox_destinations_flow_set_entitytax($entity, $tid);
-    }
-  }
-  $temp_object['Persons']['Person'] = array();
-  if ($object->field_persons && is_array($object->field_persons) && !empty($object->field_persons)) {
-    foreach ($object->field_persons as $person) {
-      if ($person['value']) {
-        $temp_object['Persons']['Person'][$person['value']] = $person['value'];
-        unset($object->taxonomy[$person['value']]);
-      }
-    }
-  }
-  if ($object->field_persons_nodes && is_array($object->field_persons_nodes) && !empty($object->field_persons_nodes)) {
-    foreach ($object->field_persons_nodes as $person) {
-      $tid = $person->field_persontaxonomy[0]['value'];
-      if (in_array($tid, $temp_object['Persons']['Person']))
-        $temp_object['Persons']['Person'][$tid] = wallytoolbox_destinations_flow_set_persontax($person, $tid);
-      else
-        $temp_object['Persons']['Person'][] = wallytoolbox_destinations_flow_set_persontax($person, $tid);
-    }
-  }
-  $temp_object['Authors']['Person'] = array();
-  if ($object->field_authors && is_array($object->field_authors) && !empty($object->field_authors)) {
-    foreach ($object->field_authors as $author) {
-      if ($author['value']) {
-        $temp_object['Authors']['Person'][$author['value']] = $author['value'];
-        unset($object->taxonomy[$author['value']]);
-      }
-    }
-  }
-  if ($object->field_authors_nodes && is_array($object->field_authors_nodes) && !empty($object->field_authors_nodes)) {
-    foreach ($object->field_authors_nodes as $author) {
-      $tid = $author->field_authortaxonomy[0]['value'];
-      if (in_array($tid, $temp_object['Authors']['Person']))
-        $temp_object['Authors']['Person'][$tid] = wallytoolbox_destinations_flow_set_persontax($author, $tid);
-      else
-        $temp_object['Authors']['Person'][] = wallytoolbox_destinations_flow_set_persontax($author, $tid);
-    }
-  }
-  $temp_object['Taxonomy']['Vocabulary'] = array();
-  if ($object->taxonomy && is_array($object->taxonomy)) {
-    foreach ($object->taxonomy as $taxonomy) {
-      $temp_object['Taxonomy']['Vocabulary'][] = wallytoolbox_destinations_flow_set_taxonomytax($taxonomy);
-    }
+  if (isset($atom_wrapper->field_rating) && $field_value = $atom_wrapper->field_rating->value()) {
+    $object_node->appendChild($dom->createElement('Rating', $field_value->name));
   }
 
-  $temp_taxonomy = wallytoolbox_flow_to_array_struct_term($temp_object);
-
-  return $temp_taxonomy;
+  $object_node->setAttribute('MimeType', $atom->base_entity->filemime);
 }
 
 /**
- * Set the Taxonomy elements
+ * Set a photo object
  */
-function dpiexport_node_to_dpixml_fill_create_voc_items(&$valid_dom, &$object_node, $taxonomy_array){
-  $taxonomy_node = $object_node->appendChild($valid_dom->createElement('Taxonomy'));
+function dpiexport_node_to_dpixml_fill_photo_object_type($dom, &$object_node, $node, $atom, $atom_wrapper, $atom_dpiproperties, &$files_to_zip) {
+  $files_to_zip[] = $atom->base_entity;
 
-  foreach ($taxonomy_array['Vocabulary'] as $vocabulary_array){
-    $vocabulary_node = $taxonomy_node->appendChild($valid_dom->createElement('Vocabulary'));
-    $vocabulary_node->setAttribute('VocabularyName',$vocabulary_array['VocabularyName']);
-    if (isset($vocabulary_array['VocabularyDescription']) & $vocabulary_array['VocabularyDescription'] != NULL & $vocabulary_array['VocabularyDescription'] != ''){
-      $vocabulary_node->setAttribute('VocabularyDescription',$vocabulary_array['VocabularyDescription']);
+  dpiexport_node_to_dpixml_fill_media_object_type($dom, $object_node, $atom, $atom_wrapper, $atom_dpiproperties);
+
+  $crops_node = $object_node->appendChild($dom->createElement('Crops'));
+  $cropings = dpicontenttypes_api_get_cropings_for_entity_and_atom('node', $node->nid, $atom->sid);
+  if (!empty($cropings)) {
+    foreach ($cropings as $type => $crop) {
+      $crop_node = $crops_node->appendChild($dom->createElement('Crop'));
+      $crop_node->setAttribute('Type', $type);
+      $crop_node->setAttribute('X', $crop[0]);
+      $crop_node->setAttribute('Y', $crop[1]);
+      $crop_node->setAttribute('W', $crop[2]);
+      $crop_node->setAttribute('H', $crop[3]);
     }
-    if (isset($vocabulary_array['VocabularyType']) & $vocabulary_array['VocabularyType'] != NULL & $vocabulary_array['VocabularyType'] != ''){
-      $vocabulary_node->setAttribute('VocabularyType',$vocabulary_array['VocabularyType']);
+  }
+  else {
+    $crops_node->setAttribute('xsi:nil', 'true');
+  }
+
+  // @todo : LinkTitle, LinkURI, Width and Height ?
+}
+
+/**
+ * Set taxonomies
+ */
+function dpiexport_node_to_dpixml_fill_taxonomies($dom, &$object_node, $node_wrapper) {
+  $taxonomy_node = $object_node->appendChild($dom->createElement('Taxonomy'));
+
+  if (isset($node_wrapper->field_locations) && $field_value = $node_wrapper->field_locations->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Locations', 'categorized');
+    foreach ($field_value as $location) {
+      $location_node = dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $location, 'LocationType');
+      dpiexport_node_to_dpixml_fill_location($dom, $location_node, $location);
     }
-    if (isset($vocabulary_array['Term'])){
-      foreach($vocabulary_array['Term'] as $term_array){
-        $term_node = $vocabulary_node->appendChild($valid_dom->createElement('Term'));
-        $term_type = NULL;
-        if (isset($term_array['type']) & $term_array['type'] != NULL & $term_array['type'] != ''){
-          $term_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $term_array['type']);
-          $term_type = $term_array['type'];
-        }
-        if (isset($term_array['Name']) & $term_array['Name'] != NULL & $term_array['Name'] != ''){
-          $term_node->setAttribute('Name',$term_array['Name']);
-        }
-        if (isset($term_array['ID']) & $term_array['ID'] != NULL & $term_array['ID'] != ''){
-          $term_node->setAttribute('ID',$term_array['ID']);
-        }
-        if (isset($term_array['ConfidenceScore']) & $term_array['ConfidenceScore'] != NULL & $term_array['ConfidenceScore'] != ''){
-          $term_node->setAttribute('ConfidenceScore',$term_array['ConfidenceScore']);
-        }
-        if (isset($term_array['RelevancyScore']) & $term_array['RelevancyScore'] != NULL & $term_array['RelevancyScore'] != ''){
-          $term_node->setAttribute('RelevancyScore',$term_array['RelevancyScore']);
-        }
-        if (isset($term_array['Variations']) & $term_array['Variations'] != NULL & $term_array['Variations'] != ''){
-          $variations_node = $term_node->appendChild($valid_dom->createElement('Variations'));
-          if (isset($term_array['Variations']['Variation'])){
-            foreach ($term_array['Variations']['Variation'] as $variation_array){
-              if ($variation_array['value'] != '' & $variation_array['value'] != NULL){
-                $variations_node->appendChild($valid_dom->createElement('Variation', $variation_array['value']));
-              }
-            }
-          }
-        }
-        switch ($term_type){
-          case 'PersonType':
-            _wallytoolbox_arraytowallyxml_fillPersonType($valid_dom,$term_node,$term_array);
-            break;
-          case 'EntityType':
-            _wallytoolbox_arraytowallyxml_fillEntityType($valid_dom,$term_node,$term_array);
-            break;
-          case 'LocationType':
-            _wallytoolbox_arraytowallyxml_fillLocationType($valid_dom,$term_node,$term_array);
-            break;
-        }
-      }
+  }
+  if (isset($node_wrapper->field_entities) && $field_value = $node_wrapper->field_entities->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Entities', 'categorized');
+    foreach ($field_value as $entity) {
+      $entity_node = dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $entity, 'EntityType');
+      dpiexport_node_to_dpixml_fill_entity($dom, $entity_node, $entity);
     }
+  }
+  if (isset($node_wrapper->field_persons) && $field_value = $node_wrapper->field_persons->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Persons', 'categorized');
+    foreach ($field_value as $person) {
+      $person_node = dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $person, 'PersonType');
+      dpiexport_node_to_dpixml_fill_person($dom, $person_node, $person);
+    }
+  }
+  if (isset($node_wrapper->field_authors) && $field_value = $node_wrapper->field_authors->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Authors', 'categorized');
+    foreach ($field_value as $author) {
+      $author_node = dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $author, 'PersonType');
+      dpiexport_node_to_dpixml_fill_person($dom, $author_node, $author);
+    }
+  }
+  if (isset($node_wrapper->field_freetags) && $field_value = $node_wrapper->field_freetags->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Tags', 'free');
+    foreach ($field_value as $tag) {
+      dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $tag);
+    }
+  }
+  if (isset($node_wrapper->field_concepts) && $field_value = $node_wrapper->field_concepts->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'Concepts', 'free');
+    foreach ($field_value as $concept) {
+      dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $concept);
+    }
+  }
+  if (isset($node_wrapper->field_iptc) && $field_value = $node_wrapper->field_iptc->value()) {
+    $vocabulary_node = dpiexport_node_to_dpixml_fill_vocabulary($dom, $taxonomy_node, $field_value[0]->vid, 'IPTC', 'categorized');
+    foreach ($field_value as $iptc) {
+      dpiexport_node_to_dpixml_fill_term($dom, $vocabulary_node, $iptc);
+    }
+  }
+}
+
+/**
+ * Set a vocabulary item
+ */
+function dpiexport_node_to_dpixml_fill_vocabulary($dom, &$taxonomy_node, $vid, $name, $type) {
+  $vocabulary = taxonomy_vocabulary_load($vid);
+  $vocabulary_node = $taxonomy_node->appendChild($dom->createElement('Vocabulary'));
+  $vocabulary_node->setAttribute('VocabularyName', $name);
+  $vocabulary_node->setAttribute('VocabularyDescription', $vocabulary->description);
+  $vocabulary_node->setAttribute('VocabularyType', $type);
+  return $vocabulary_node;
+}
+
+/**
+ * Set a term item
+ */
+function dpiexport_node_to_dpixml_fill_term($dom, &$vocabulary_node, $term, $type = FALSE) {
+  $term_node = $vocabulary_node->appendChild($dom->createElement('Term'));
+  if ($type) {
+    $term_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $type);
+  }
+  $term_node->setAttribute('Name', $term->name);
+  $term_node->setAttribute('ID', $term->tid);
+  // @todo : ConfidenceScore and RelevancyScore
+  return $term_node;
+}
+
+/**
+ * Set a location item
+ */
+function dpiexport_node_to_dpixml_fill_location($dom, $location_node, $location) {
+  $term_wrapper = entity_metadata_wrapper('taxonomy_term', $location);
+  if (isset($term_wrapper->field_address) && $field_value = $term_wrapper->field_address->value()) {
+    $address_node = $location_node->appendChild($dom->createElement('Address'));
+    $address_node->appendChild($dom->createElement('AddressLine', $field_value['thoroughfare']));
+    if (!empty($field_value['premise'])) {
+      $address_node->appendChild($dom->createElement('AddressLine', $field_value['premise']));
+    }
+    $address_node->appendChild($dom->createElement('City', $field_value['locality']));
+    $address_node->appendChild($dom->createElement('Zip', $field_value['postal_code']));
+    if (!empty($field_value['administrative_area'])) {
+      $address_node->appendChild($dom->createElement('State', $field_value['administrative_area']));
+    }
+    $address_node->appendChild($dom->createElement('Country', $field_value['country']));
+  }
+  // @todo : LocationGeo
+}
+
+/**
+ * Set an entity item
+ */
+function dpiexport_node_to_dpixml_fill_entity($dom, $entity_node, $entity) {
+  $term_wrapper = entity_metadata_wrapper('taxonomy_term', $entity);
+  $entity_node->appendChild($dom->createElement('EntityDescription', $entity->description));
+  if (isset($term_wrapper->field_entity_services) && $field_value = $term_wrapper->field_entity_services->value()) {
+    $entity_node->appendChild($dom->createElement('EntityServices', $field_value));
+  }
+}
+
+/**
+ * Set a person item
+ */
+function dpiexport_node_to_dpixml_fill_person($dom, $person_node, $person) {
+  $term_wrapper = entity_metadata_wrapper('taxonomy_term', $person);
+  if (isset($term_wrapper->field_personlastname) && $field_value = $term_wrapper->field_personlastname->value()) {
+    $person_node->appendChild($dom->createElement('PersonLastName', $field_value));
+  }
+  if (isset($term_wrapper->field_personfirstname) && $field_value = $term_wrapper->field_personfirstname->value()) {
+    $person_node->appendChild($dom->createElement('PersonFirstName', $field_value));
+  }
+  if (isset($term_wrapper->field_personnickname) && $field_value = $term_wrapper->field_personnickname->value()) {
+    $person_node->appendChild($dom->createElement('PersonNickName', $field_value));
+  }
+  if (isset($term_wrapper->field_personbirthdate) && $field_value = $term_wrapper->field_personbirthdate->value()) {
+    $person_node->appendChild($dom->createElement('PersonBirthDate', date('Y-m-d', $field_value)));
+  }
+  if (isset($term_wrapper->field_persongender) && $field_value = $term_wrapper->field_persongender->value()) {
+    $person_node->appendChild($dom->createElement('PersonSex', $field_value));
+  }
+  if (isset($term_wrapper->field_personemail) && $field_value = $term_wrapper->field_personemail->value()) {
+    $person_node->appendChild($dom->createElement('PersonEmail', $field_value));
+  }
+  if (isset($term_wrapper->field_personwebsite) && $field_value = $term_wrapper->field_personwebsite->value()) {
+    $person_node->appendChild($dom->createElement('PersonWebSite', $field_value['url']));
+  }
+  if (isset($term_wrapper->field_person_phonenumber) && $field_value = $term_wrapper->field_person_phonenumber->value()) {
+    $person_node->appendChild($dom->createElement('PersonPhoneNumber', $field_value));
   }
 }
 

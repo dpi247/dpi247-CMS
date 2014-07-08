@@ -27,12 +27,18 @@ function dpiexport_api_export_packages($nids, $zip = TRUE) {
     $files_to_zip = array();
     if ($dom = dpiexport_node_to_dpixml($node, $files_to_zip)) {
       if ($zip) {
+        // Convert the local paths URIs to relative paths
+        _dpiexport_convert_uris_to_relative($dom);
+
         // Generate ZIP from DOM and files
         $dpiproperties = dpiproperties_load_by_type_and_id('node', $node->nid);
         $zip_name = 'DPI_export_'.$node->nid.'_'.$dpiproperties->external_reference;
         $return[$node->nid] = _dpiexport_create_zip_from_dom($dom, $node->nid, $zip_name, $files_to_zip);
       }
       else {
+        // Convert the local paths URIs to absolute paths
+        _dpiexport_convert_uris_to_absolute($dom);
+
         // Return the DOM object and media contents
         $return[$node->nid] = array(
           'success' => TRUE,

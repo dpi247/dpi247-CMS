@@ -42,3 +42,63 @@ function _dpiexport_create_zip_from_dom($dom, $nid, $file_name, $files_to_zip = 
 
   return $return;
 }
+
+/**
+ * Convert the local paths URIs to absolute paths
+ */
+function _dpiexport_convert_uris_to_absolute(&$dom) {
+  // Replace URI elements with absolute URLs
+  foreach ($dom->getElementsByTagName('URI') as $uri_node) {
+    // Get local URI
+    $local_uri = $uri_node->nodeValue;
+    if ($wrapper = file_stream_wrapper_get_instance_by_uri($local_uri)) {
+      // Set the absolute path
+      $uri_node->nodeValue = $wrapper->getExternalUrl();
+    }
+  }
+
+  // Replace URI tags with absolute URLs
+  foreach ($dom->getElementsByTagName('Thumbnail') as $thumbnail_node) {
+    // Get local URI
+    if ($thumbnail_node->hasAttribute('URI')) {
+      $local_uri = $thumbnail_node->getAttribute('URI');
+      if ($wrapper = file_stream_wrapper_get_instance_by_uri($local_uri)) {
+        // Set the absolute path
+        $thumbnail_node->setAttribute('URI', $wrapper->getExternalUrl());
+      }
+    }
+  }
+}
+
+/**
+ * Convert the local paths URIs to relative paths
+ */
+function _dpiexport_convert_uris_to_relative(&$dom) {
+  // Replace URI elements with absolute URLs
+  foreach ($dom->getElementsByTagName('URI') as $uri_node) {
+    $local_uri = $uri_node->nodeValue;
+    // Get the file name
+    $expl_uri = explode('/', $local_uri);
+    if (!empty($expl_uri)) {
+      if ($file_name = array_pop($expl_uri)) {
+        // Set the relative path
+        $uri_node->nodeValue = 'embed://'.$file_name;
+      }
+    }
+  }
+
+  // Replace URI tags with absolute URLs
+  foreach ($dom->getElementsByTagName('Thumbnail') as $thumbnail_node) {
+    if ($thumbnail_node->hasAttribute('URI')) {
+      $local_uri = $thumbnail_node->getAttribute('URI');
+      // Get the file name
+      $expl_uri = explode('/', $local_uri);
+      if (!empty($expl_uri)) {
+        if ($file_name = array_pop($expl_uri)) {
+          // Set the relative path
+          $thumbnail_node->setAttribute('URI', 'embed://'.$file_name);
+        }
+      }
+    }
+  }
+}
