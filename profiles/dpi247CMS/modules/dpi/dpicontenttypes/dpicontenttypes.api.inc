@@ -316,9 +316,9 @@ function dpicontenttypes_api_get_embeds_count_by_type($node) {
  * @return array | bool
  *   An array (the keys are the types of the objects) containing the objects or FALSE in case of failure
  */
-function dpicontenttypes_api_get_embeds_by_type($node) {
+function dpicontenttypes_api_get_embeds_by_type($node, $load_atom = FALSE) {
   $type_embeds = array();
-  if ($embeds = dpicontenttypes_api_get_embeds($node)) {
+  if ($embeds = dpicontenttypes_api_get_embeds($node, FALSE, FALSE, $load_atom)) {
     foreach ($embeds as $embed) {
       if (!isset($type_embeds[$embed['type']])) {
         $type_embeds[$embed['type']] = array();
