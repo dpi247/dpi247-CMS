@@ -35,6 +35,7 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
     $embeddedobjects_node = $embeddedcontent_node->appendChild($dom->createElement('EmbeddedObjects'));
     foreach ($embeds as $embed) {
       $object_node = $embeddedobjects_node->appendChild($dom->createElement('Object'));
+      // Transform ScalD type to DPI XML type
       $types_translator = array(
         'image' => 'PhotoObjectType',
         'video' => 'VideoObjectType',
@@ -63,55 +64,35 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
       }
     }
   }
+
+  // Set links lists
+  if (isset($node_wrapper->field_linkslists) && $field_value = $node_wrapper->field_linkslists->value(array('identifier' => TRUE))) {
+    // Initialize EmbeddedContent element if not done yet
+    if (!isset($embeddedcontent_node)) {
+      $embeddedcontent_node = $package_node->appendChild($dom->createElement('EmbeddedContent'));
+    }
+    $linkslists_node = $embeddedcontent_node->appendChild($dom->createElement('LinksLists'));
+
+    foreach ($field_value as $links_list) {
+      $atom = scald_atom_load($links_list['sid']);
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $atom_dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $atom->sid);
+
+      $linkslist_node = $linkslists_node->appendChild($dom->createElement('LinksList'));
+      dpiexport_node_to_dpixml_fill_links_list($dom, $linkslist_node, $node, $atom, $atom_wrapper, $atom_dpiproperties);
+    }
+  }
+
   return $dom;
 
   if (isset($package_array['EmbeddedContent'])){
-    $embeddedcontent_node = $package_node->appendChild($valid_dom->createElement('EmbeddedContent'));
-    if (isset($package_array['EmbeddedContent']['EmbeddedObjects']['Object'])){
-      $embeddedobjects_node = $embeddedcontent_node->appendChild($valid_dom->createElement('EmbeddedObjects'));
-      foreach ($package_array['EmbeddedContent']['EmbeddedObjects']['Object'] as $object_array){
-        $object_node = $embeddedobjects_node->appendChild($valid_dom->createElement('Object'));
-        $object_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $object_array['type']);
-        _wallytoolbox_arraytowallyxml_fillObjectType($valid_dom, $object_node, $object_array);
-        switch ($object_array['type']){
-          case 'TextObjectType' :
-            _wallytoolbox_arraytowallyxml_fillTextObjectType($valid_dom, $object_node, $object_array);
-            break;
-          case 'AudioObjectType':
-            _wallytoolbox_arraytowallyxml_fillAudioObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
-            break;
-          case 'VideoObjectType':
-            _wallytoolbox_arraytowallyxml_fillVideoObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
-            break;
-          case 'PhotoObjectType':
-            _wallytoolbox_arraytowallyxml_fillPhotoObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
-            break;
-          case 'PollObjectType':
-            _wallytoolbox_arraytowallyxml_fillPollObjectType($valid_dom, $object_node, $object_array);
-            break;
-        }
-      }
-    }
     if (isset($package_array['EmbeddedContent']['EmbeddedObjects']['Link'])){
-      if (!$embeddedobjects_node) {
-        $embeddedobjects_node = $embeddedcontent_node->appendChild($valid_dom->createElement('EmbeddedObjects'));
-      }
       foreach ($package_array['EmbeddedContent']['EmbeddedObjects']['Link'] as $link_array){
         $link_node = $embeddedobjects_node->appendChild($valid_dom->createElement('Link'));
-        if (isset($link_array['EmbeddedObjectsOrder']) && $link_array['EmbeddedObjectsOrder'] != NULL && $link_array['EmbeddedObjectsOrder'] != ''){
-          $link_node->setAttribute('EmbeddedObjectsOrder', $link_array['EmbeddedObjectsOrder']['value']);
-        }
         $link_node->appendChild($valid_dom->createElement('ExternalReference', $link_array['ExternalReference']['value']));
         $link_node->appendChild($valid_dom->createElement('Title', $link_array['Title']['value']));
         $link_node->appendChild($valid_dom->createElement('Description', $link_array['Description']['value']));
         $link_node->appendChild($valid_dom->createElement('URI', $link_array['URI']['value']));
-      }
-    }
-    if (isset($package_array['EmbeddedContent']['LinksLists']['LinksList'])){
-      $linkslists_node = $embeddedcontent_node->appendChild($valid_dom->createElement('LinksLists'));
-      foreach ($package_array['EmbeddedContent']['LinksLists']['LinksList'] as $linkslist_array){
-        $linkslist_node = $linkslists_node->appendChild($valid_dom->createElement('LinksList'));
-        _wallytoolbox_arraytowallyxml_filllinkslist($valid_dom, $linkslist_node, $linkslist_array);
       }
     }
   }
@@ -221,8 +202,7 @@ function dpiexport_node_to_dpixml_fill_article_package_type($dom, &$package_node
  * Set the Object elements
  */
 function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties) {
-  // @todo : What is ObjectID ?
-  //$object_node->setAttribute('ObjectID', $object_array['ObjectID']);
+  // @todo : ObjectID and ObjectDescription
   if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialpublicationdate', 'value', 'now')) {
     $object_node->setAttribute('PublicationDate', $date);
   }
@@ -230,7 +210,16 @@ function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $
   if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialupdatedate', 'value', 'now')) {
     $object_node->setAttribute('LastUpdateDate', $date);
   }
+  static $embeds_order = 0;
+  $object_node->setAttribute('EmbeddedObjectsOrder', $embeds_order++);
 
+  if (isset($atom_wrapper->field_displaytitle) && $field_value = $atom_wrapper->field_displaytitle->value()) {
+    $title_node = $object_node->appendChild($dom->createElement('Title'));
+    $title_node->appendChild($dom->createCDATASection($field_value['safe_value']));
+  }
+  else {
+    $object_node->appendChild($dom->createElement('Title', $atom->title));
+  }
   $object_node->appendChild($dom->createElement('InternalReference', 'Drupal_SID:'.$atom_dpiproperties->id));
   $object_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference));
 
@@ -498,6 +487,36 @@ function dpiexport_node_to_dpixml_fill_person($dom, $person_node, $person) {
   }
   if (isset($term_wrapper->field_person_phonenumber) && $field_value = $term_wrapper->field_person_phonenumber->value()) {
     $person_node->appendChild($dom->createElement('PersonPhoneNumber', $field_value));
+  }
+}
+
+/**
+ * Set the LinksList elements
+ */
+function dpiexport_node_to_dpixml_fill_links_list($dom, &$linkslist_node, $node, $atom, $atom_wrapper, $atom_dpiproperties) {
+  $linkslist_node->appendChild($dom->createElement('InternalReference', 'Drupal_SID:'.$atom_dpiproperties->id));
+  $linkslist_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference));
+  if (isset($atom_wrapper->field_displaytitle) && $field_value = $atom_wrapper->field_displaytitle->value()) {
+    $title_node = $linkslist_node->appendChild($dom->createElement('Title'));
+    $title_node->appendChild($dom->createCDATASection($field_value['safe_value']));
+  }
+  else {
+    $linkslist_node->appendChild($dom->createElement('Title', $atom->title));
+  }
+  // @todo : Summary
+
+  if (isset($atom_wrapper->field_linkitems) && $field_value = $atom_wrapper->field_linkitems->value()) {
+    $links_node = $linkslist_node->appendChild($dom->createElement('Links'));
+    foreach ($field_value as $link) {
+      $link_node = $links_node->appendChild($dom->createElement('Link'));
+      static $order = 0;
+      $link_node->setAttribute('EmbeddedObjectsOrder', $order);
+      $link_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference.'-link-'.$order));
+      $order++;
+      $link_node->appendChild($dom->createElement('Title', $link['title']));
+      // @todo : Description
+      $link_node->appendChild($dom->createElement('URI', $link['url']));
+    }
   }
 }
 
