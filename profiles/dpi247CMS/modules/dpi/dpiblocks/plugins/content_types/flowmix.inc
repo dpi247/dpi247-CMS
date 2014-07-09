@@ -21,6 +21,7 @@ $plugin = array(
   ),
   'edit text'          => t('Edit'),
   'all contexts'       => TRUE,
+  'category'           => t('DPI Blocks'),
   'group'              => t('DPI Core'),
 );
 
@@ -36,10 +37,10 @@ function dpiblocks_flowmix_content_type_content_types() {
   // Display existing FlowMixes in the "DPI Extras" category
   foreach ($results as $record) {
     $flowmixes[$record->machine_name] = array(
-      'title' => t('FlowMix : '.$record->title),
-      'machine_name'  => $record->machine_name,
-      'description'   => t(''),
-      'add form'      => array(
+      'title'        => t('FlowMix : '.$record->title),
+      'machine_name' => $record->machine_name,
+      'description'  => t(''),
+      'add form'     => array(
         'dpiblocks_flowmix_content_type_form_summary_form'        => t('Summary'),
         'dpiblocks_flowmix_content_type_form_basicsetttings_form' => t('Create Flow 1/2: Basic settings'),
         'dpiblocks_flowmix_content_type_form_plugins_form'        => t('Create Flow 2/2: Plugin settings'),
@@ -49,7 +50,7 @@ function dpiblocks_flowmix_content_type_content_types() {
         'dpiblocks_flowmix_content_type_form_basicsetttings_form' => t('Create Flow 1/2: Basic settings'),
         'dpiblocks_flowmix_content_type_form_plugins_form'        => t('Create Flow 2/2: Plugin settings'),
       ),
-      'category'     => t('DPI Extras'),
+      'category'     => t('DPI Blocks'),
       'group'        => t('DPI Core'),
     );
   }

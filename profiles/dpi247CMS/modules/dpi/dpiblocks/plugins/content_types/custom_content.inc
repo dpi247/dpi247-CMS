@@ -4,23 +4,25 @@
  * Plugin definition.
  */
 $plugin = array(
-  'title' => t('Custom content'),
+  'title'             => t('Custom content'),
   'no title override' => TRUE,
-  'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
-  'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
+  'defaults'          => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
+  'js'                => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
   // Make sure the edit form is only used for some subtypes.
-  'edit text' => t('Edit'),
-  'all contexts' => TRUE,
-  'edit form' => array(
-    'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-    'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-    'dpiblocks_custom_content_type_revision_form'=>'view revision',
+  'edit text'         => t('Edit'),
+  'all contexts'      => TRUE,
+  'add form'          => array(
+    'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+    'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+    'dpiblocks_custom_content_type_revision_form'     => 'view revision',
   ),
-  'add form' => array(
-    'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-    'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-    'dpiblocks_custom_content_type_revision_form'=>'view revision',
+  'edit form'         => array(
+    'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+    'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+    'dpiblocks_custom_content_type_revision_form'     => 'view revision',
   ),
+  'category'          => t('DPI Blocks'),
+  'group'             => t('DPI Core'),
 );
 
 /**
@@ -35,19 +37,20 @@ function dpiblocks_custom_content_content_type_content_types(){
   foreach($results as $record) {
     //existant content type
     $custom_content[$record->machine_name] = array(
-      'title' => t('Custom content version : '.$record->title),
-      'description' => t(''),
-      'category' => t('DPI Extras'),
-      'subtype'=> $record->machine_name,
-      'add form' => array(
-        'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-        'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-        'dpiblocks_custom_content_type_revision_form'=>'view revision',
+      'title'        => t('Custom content version : '.$record->title),
+      'description'  => t(''),
+      'category'     => t('DPI Blocks'),
+      'group'        => t('DPI Core'),
+      'subtype'      => $record->machine_name,
+      'add form'     => array(
+        'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+        'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+        'dpiblocks_custom_content_type_revision_form'     => 'view revision',
       ),
-      'edit form' => array(
-        'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-        'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-        'dpiblocks_custom_content_type_revision_form'=>'view revision',
+      'edit form'    => array(
+        'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+        'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+        'dpiblocks_custom_content_type_revision_form'     => 'view revision',
       ),
     );
   }
@@ -56,16 +59,17 @@ function dpiblocks_custom_content_content_type_content_types(){
   //new custom content type
   $custom_content['custom']= array(
     'name'           => 'custom_version',
-    'title'          => t('New custom content version'),
+    'title'          => t('New versionnable custom content'),
     'top level'      => TRUE,
     'category'       => t('Custom'),
+    'group'          => t('DPI Core'),
     'description'    => t('Create a completely custom piece of custom content.'),
-    'edit form' => array(),
-    'add form' => 'dpiblocks_custom_content_content_type_add_form',
-    'edit form' => array(
-      'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-      'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-      'dpiblocks_custom_content_type_revision_form'=>'view revision',
+    'edit form'      => array(),
+    'add form'       => 'dpiblocks_custom_content_content_type_add_form',
+    'edit form'      => array(
+      'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+      'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+      'dpiblocks_custom_content_type_revision_form'     => 'view revision',
     ),
     'all contexts'   => TRUE,
   );

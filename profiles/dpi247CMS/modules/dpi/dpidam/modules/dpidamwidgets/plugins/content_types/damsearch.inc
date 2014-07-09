@@ -9,7 +9,8 @@ $plugin = array(
   'title' => t('DAM Search'),
   'icon' => 'icon_search.png',
   'description' => t('The results of a DAM search.'),
-  'category' => t('Widgets'),
+  'category' => t('DAM Archives'),
+  'group' => t('DPI Core'),
   'edit form' => array(
     'dpidamwidgets_damsearch_content_type_view_form' => 'DAM Search',
   ),
@@ -18,6 +19,29 @@ $plugin = array(
     'profile' => 'default',
   ),
 );
+
+/**
+ * Implementation of hook_content_type_content_types()
+ */
+function dpidamwidgets_damsearch_content_type_content_types() {
+  $blocks['damsearch'] = array(
+    'single' => TRUE,
+    'title' => t('DAM Search'),
+    'icon' => 'icon_search.png',
+    'description' => t('The results of a DAM search.'),
+    'category' => t('DAM Archives'),
+    'group' => t('DPI Core'),
+    'edit form' => array(
+      'dpidamwidgets_damsearch_content_type_view_form' => 'DAM Search',
+    ),
+    'defaults' => array(
+      'display_results' => TRUE,
+      'profile' => 'default',
+    ),
+  );
+
+  return $blocks;
+}
 
 function dpidamwidgets_damsearch_content_type_view_form($form, $form_state) {
   $conf = $form_state['conf'];
