@@ -76,12 +76,12 @@ function _dpidam_post_package($nid, $set_message = FALSE) {
   );
 
   // Export package
-  $export_result = dpiexport_api_export_entities(array($nid));
-  if ($export_result[0]['success'] == TRUE) {
+  $export_result = dpiexport_api_export_packages(array($nid));
+  if ($export_result[$nid]['success'] == TRUE) {
     // Send package in POST
     $target_url = dpi_variable_get('dpidam_updatepackageurl', '');
     if ($target_url != '') {
-      $path_to_file = $export_result[0]['zip'];
+      $path_to_file = $export_result[$nid]['zip'];
       $fp = fopen($path_to_file, 'r');
       if ($fp) {
         $content_type = 'application/zip';
