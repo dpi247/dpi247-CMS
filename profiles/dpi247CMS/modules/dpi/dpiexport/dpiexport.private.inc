@@ -23,7 +23,11 @@ function _dpiexport_create_zip_from_dom($dom, $nid, $file_name, $files_to_zip = 
       if ($res === TRUE) {
         $zip->addFromString($file_name.'.xml', $dom->saveXML());
         foreach ($files_to_zip as $file_to_zip) {
-          $zip->addFile($file_to_zip['filepath'], $file_to_zip['filename']);
+          // Convert stream path to real path
+          if ($wrapper = file_stream_wrapper_get_instance_by_uri($file_to_zip->uri)) {
+            $file_path = $wrapper->getDirectoryPath().'/'.$file_to_zip->uri;
+          }
+          $zip->addFile($file_path, $file_to_zip->filename);
         }
         $zip->close();
 
