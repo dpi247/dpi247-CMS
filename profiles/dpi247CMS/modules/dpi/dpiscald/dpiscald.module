@@ -4,16 +4,16 @@
  * Implements hook_scald_atom_providers.
  * Add to scald a bunch of providers.
  */
-function dpiscald_scald_atom_providers() { 
+function dpiscald_scald_atom_providers() {
   return array (
-      'twitter' => 'DPI Tweets hosted on Twitter',
-      'embedly' => 'DPI Media embedded through Embed.ly',
-      'googlemap' => 'DPI Maps hosted on Google Maps',
-      'storify' => 'DPI Storify ressources hosted on Storify',
-      'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
-      'coveritlive' => 'DPI Media hosted on CoveritLive',
-      'picktochart' => 'DPI Media hosted on Picktochart',
-      'scribblelive' => 'DPI Media hosted on Scribblelive' 
+    'twitter' => 'DPI Tweets hosted on Twitter',
+    'embedly' => 'DPI Media embedded through Embed.ly',
+    'googlemap' => 'DPI Maps hosted on Google Maps',
+    'storify' => 'DPI Storify ressources hosted on Storify',
+    'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
+    'coveritlive' => 'DPI Media hosted on CoveritLive',
+    'picktochart' => 'DPI Media hosted on Picktochart',
+    'scribblelive' => 'DPI Media hosted on Scribblelive'
   );
 }
 
@@ -50,7 +50,7 @@ function dpiscald_views_plugins_alter(&$views_plugins){
  */
 function dpiscald_scald_add_form(&$form, &$form_state) {
   $type=$form_state['scald']['type']->type;
-//$type='youtube';
+  //$type='youtube';
   module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
   $function_name='dpiscald_'.$type.'_scald_add_form';
   $function_name($form, $form_state);
@@ -75,8 +75,8 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
   if (startsWith($atom->provider,'dpiscald') && $atom->type!='flickr') {
     $type = $atom->type;
     if (startsWith($type, 'dpiscald_')){
-    	$type = explode('_',$type);
-    	$type = $type[1];
+      $type = explode('_',$type);
+      $type = $type[1];
     }
     module_load_include ( 'inc', 'dpiscald', 'providers/' . $type . '/' . $type );
     $function_name = 'dpiscald_' . $type . '_scald_prerender';
@@ -107,13 +107,13 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-      'coveritlive','picktochart','scribblelive');
+    'coveritlive','picktochart','scribblelive');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
     $themeReturn = $function_name();
     $theme = array_merge($theme,$themeReturn);
-  } 
+  }
   return $theme;
 }
 
@@ -166,11 +166,11 @@ function _dpiscald_image_prerender($atom, $context, $options, $mode) {
     $classes = array_merge(array('scald-atom', 'scald-atom-image'), explode(' ', check_plain($settings['classes'])));
     $caption = token_replace($settings['caption'], array('atom' => $atom));
     $atom->rendered->player = '
-      <figure class="' . implode(' ', $classes) . '">
-        ' . $atom->rendered->player . '
-        <figcaption>' . filter_xss_admin($caption) . '</figcaption>
-      </figure>
-    ';
+        <figure class="' . implode(' ', $classes) . '">
+            ' . $atom->rendered->player . '
+                <figcaption>' . filter_xss_admin($caption) . '</figcaption>
+                    </figure>
+                    ';
   }
   elseif ($mode == 'atom') {
     $attributes = array();
@@ -212,7 +212,6 @@ function _dpiscald_image_prerender($atom, $context, $options, $mode) {
   }
 }
 
-
 /**
  * Check if the string "$string" starts with the string "$begin"
  * (Used in storify.inc and googlemap.inc to check whether or not the url starts with 'https')
@@ -221,8 +220,7 @@ function startsWith($string, $begin) {
   return $begin=== "" || strpos($string, $begin) === 0;
 }
 
-
-function dpiscald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {  
+function dpiscald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {
   if ($js) {
     ctools_include('modal');
     ctools_include('ajax');
@@ -261,47 +259,47 @@ function dpiscald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {
   }
 
   $form_state = array(
-      'ajax' => $js,
-      'scald' => ctools_object_cache_get('scald_atom', $cache_id),
+    'ajax' => $js,
+    'scald' => ctools_object_cache_get('scald_atom', $cache_id),
   );
 
   $form_state['atom'] = $form_state['scald']['atoms'][0];
 
   if (empty($form_state['scald'])) {
     $form_state['scald'] = array(
-        'type' => $type,
-        'source' => isset($source) ? $source : NULL,
+      'type' => $type,
+      'source' => isset($source) ? $source : NULL,
     );
   }
 
   $form_state['scald']['step'] = $step;
 
   $form_info = array(
-      'id' => 'scald-atom-add',
-      'path' => 'atom/add/' . $type->type . '/' . ($js ? 'ajax' : 'nojs') . '/%step',
-      'show trail' => TRUE,
-      'show back' => FALSE,
-      'show cancel' => TRUE,
-      'show return' => FALSE,
-      'next callback' => 'scald_atom_add_wizard_next',
-      'finish callback' => 'scald_atom_add_wizard_finish',
-      'cancel callback' => 'scald_atom_add_wizard_cancel',
-      'order' => array(
-          'source' => t('Source'),
-          'add' => t('Add'),
-          'options' => t('Options'),
+    'id' => 'scald-atom-add',
+    'path' => 'atom/add/' . $type->type . '/' . ($js ? 'ajax' : 'nojs') . '/%step',
+    'show trail' => TRUE,
+    'show back' => FALSE,
+    'show cancel' => TRUE,
+    'show return' => FALSE,
+    'next callback' => 'scald_atom_add_wizard_next',
+    'finish callback' => 'scald_atom_add_wizard_finish',
+    'cancel callback' => 'scald_atom_add_wizard_cancel',
+    'order' => array(
+      'source' => t('Source'),
+      'add' => t('Add'),
+      'options' => t('Options'),
+    ),
+    'forms' => array(
+      'source' => array(
+        'form id' => 'scald_atom_add_form_source',
       ),
-      'forms' => array(
-          'source' => array(
-              'form id' => 'scald_atom_add_form_source',
-          ),
-          'add' => array(
-              'form id' => 'dpiscald_atom_add_form_add',
-          ),
-          'options' => array(
-              'form id' => 'scald_atom_add_form_options',
-          ),
+      'add' => array(
+        'form id' => 'dpiscald_atom_add_form_add',
       ),
+      'options' => array(
+        'form id' => 'scald_atom_add_form_options',
+      ),
+    ),
   );
 
   // Send this all off to our form. This is like drupal_get_form only wizardy.
@@ -350,7 +348,7 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
     $tmp=explode('_', $scald['source']);
     $tmp = $tmp[1];
     module_load_include('inc', 'dpiscald', 'providers/'.$tmp.'/'.$tmp);
-  } 
+  }
   elseif (startsWith($scald['source'], 'dpiscald_')) {
     $tmp = $scald['type']->type;
     module_load_include('inc', 'dpiscald', 'providers/'.$tmp.'/'.$tmp);
@@ -363,7 +361,7 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
   }
   else {
     $form['error'] = array(
-        '#markup' => 'Import without form; does it makes sense ?',
+      '#markup' => 'Import without form; does it makes sense ?',
     );
   }
 
@@ -386,13 +384,16 @@ function dpiscald_atom_add_form_add_submit(&$form, &$form_state) {
     $atom_count_implemented = TRUE;
   }
 
-  if ($scald['source'] == 'dpiscald' || startsWith($scald['source'], 'scald_')) {
+  $tmp = array();
+  if (startsWith($scald['source'], 'dpi') || startsWith($scald['source'], 'scald_')) {
     $tmp[0] = $scald['source'];
     $tmp[1] = $scald['type']->type;
   }
   elseif (startsWith($scald['source'], 'dpiscald_')) {
     $tmp = explode('_', $scald['source']);
   }
+
+  $atoms = array();
   for ($delta = 0; $delta < $count; $delta++) {
     $atoms[$delta] = new ScaldAtom($tmp[1], $tmp[0]); //$scald['type']->type, $tmp[0]);
   }
@@ -420,27 +421,27 @@ function dpiscald_atom_add_form_add_submit(&$form, &$form_state) {
   $form_state['scald']['atoms'] = $atoms;
 }
 
-/*
+/**
  * Implements hook_menu_alter().
  */
 function dpiscald_menu_alter(&$items){
   $items['atom/add/%scald_type'] = array(
-      'title' => 'Create Atom',
-      'page callback' => 'dpiscald_atom_add_page',
-      'page arguments' => array(FALSE, 2),
-      'access callback' => 'scald_atom_add_access',
-      'access arguments' => array(2),
-      'file' => drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
-      'type' => MENU_CALLBACK,
+    'title' => 'Create Atom',
+    'page callback' => 'dpiscald_atom_add_page',
+    'page arguments' => array(FALSE, 2),
+    'access callback' => 'scald_atom_add_access',
+    'access arguments' => array(2),
+    'file' => '/'.drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['atom/add/%scald_type/%ctools_js'] = array(
-      'title' => 'Create Atom',
-      'page callback' => 'dpiscald_atom_add_page',
-      'page arguments' => array(3, 2),
-      'access callback' => 'scald_atom_add_access',
-      'access arguments' => array(2),
-      'theme callback' => 'ajax_base_page_theme',
-      'file' => drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
-      'type' => MENU_CALLBACK,
+    'title' => 'Create Atom',
+    'page callback' => 'dpiscald_atom_add_page',
+    'page arguments' => array(3, 2),
+    'access callback' => 'scald_atom_add_access',
+    'access arguments' => array(2),
+    'theme callback' => 'ajax_base_page_theme',
+    'file' => '/'.drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 }
