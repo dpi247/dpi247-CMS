@@ -113,6 +113,27 @@ function dpicommons_init() {
 }
 
 /**
+ * Implementation of hook_form_FORM-ID_alter
+ *
+ * Add debug checkboxes to devel settings form
+ */
+function dpicommons_form_devel_admin_settings_alter(&$form, $form_alter) {
+  $form['dpicommons_activated_error_handler'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Activate Wally error handler'),
+    '#default_value' => variable_get('dpicommons_activated_error_handler', FALSE),
+  );
+
+  $form['dpicommons_activated_shutdown_function'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display error on shutdown'),
+    '#description' => t('Register a shutdown function to display the last PHP error.<br>
+        <strong>Do not forget to disable this feature when debug is done.</strong>'),
+    '#default_value' => variable_get('dpicommons_activated_shutdown_function', FALSE),
+  );
+}
+
+/**
  * dpilog is used to log some actions (user interactions and system actions).
  * 
  * dpilog is more powerfull than watchdog since you have more granularit to groups log and have the ability to save some variable and one id.
