@@ -25,7 +25,8 @@ function _dpiexport_create_zip_from_dom($dom, $nid, $file_name, $files_to_zip = 
         foreach ($files_to_zip as $file_to_zip) {
           // Convert stream path to real path
           if ($wrapper = file_stream_wrapper_get_instance_by_uri($file_to_zip->uri)) {
-            $file_path = $wrapper->getDirectoryPath().'/'.$file_to_zip->uri;
+            $file_subpath = array_pop(explode('://', $file_to_zip->uri));
+            $file_path = $wrapper->getDirectoryPath().'/'.$file_subpath;
           }
           $zip->addFile($file_path, $file_to_zip->filename);
         }
