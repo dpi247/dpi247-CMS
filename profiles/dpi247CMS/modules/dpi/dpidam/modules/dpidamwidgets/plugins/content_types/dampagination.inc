@@ -9,7 +9,8 @@ $plugin = array(
   'title' => t('DAM Pagination'),
   'icon' => 'icon_search.png',
   'description' => t('The paginations widget of a DAM search.'),
-  'category' => t('Widgets'),
+  'category' => t('DAM Archives'),
+  'group' => t('DPI Core'),
   'edit form' => array(
     'dpidamwidgets_dampagination_content_type_view_form' => 'DAM Pagination',
   ),
@@ -17,6 +18,28 @@ $plugin = array(
     'profile' => 'default',
   ),
 );
+
+/**
+ * Implementation of hook_content_type_content_types()
+ */
+function dpidamwidgets_dampagination_content_type_content_types() {
+  $blocks['dampagination'] = array(
+    'single' => TRUE,
+    'title' => t('DAM Pagination'),
+    'icon' => 'icon_search.png',
+    'description' => t('The paginations widget of a DAM search.'),
+    'category' => t('DAM Archives'),
+    'group' => t('DPI Core'),
+    'edit form' => array(
+      'dpidamwidgets_dampagination_content_type_view_form' => 'DAM Pagination',
+    ),
+    'defaults' => array(
+      'profile' => 'default',
+    ),
+  );
+
+  return $blocks;
+}
 
 /**
  * Returns an edit form for custom type settings.

@@ -9,7 +9,8 @@ $plugin = array(
   'title' => t('DAM Facets'),
   'icon' => 'icon_search.png',
   'description' => t('The Facets results of a DAM search.'),
-  'category' => t('Widgets'),
+  'category' => t('DAM Archives'),
+  'group' => t('DPI Core'),
   'edit form' => array(
     'dpidamwidgets_damfacets_content_type_view_form' => 'DAM Facets',
   ),
@@ -17,6 +18,28 @@ $plugin = array(
     'profile' => 'default',
   ),
 );
+
+/**
+ * Implementation of hook_content_type_content_types()
+ */
+function dpidamwidgets_damfacets_content_type_content_types() {
+  $blocks['damfacets'] = array(
+    'single' => TRUE,
+    'title' => t('DAM Facets'),
+    'icon' => 'icon_search.png',
+    'description' => t('The Facets results of a DAM search.'),
+    'category' => t('DAM Archives'),
+    'group' => t('DPI Core'),
+    'edit form' => array(
+      'dpidamwidgets_damfacets_content_type_view_form' => 'DAM Facets',
+    ),
+    'defaults' => array(
+      'profile' => 'default',
+    ),
+  );
+
+  return $blocks;
+}
 
 /**
  * Returns an edit form for custom type settings.
