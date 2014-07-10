@@ -51,7 +51,7 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
   $file = NULL;
 
   if ($uri && isset($uri['scheme'])) {
-    $badcar = array('+', ' ', '%20');
+    $badcar = array('+', ' ', '%20', '%28', '%29');
     $destination = str_replace($badcar, '_', rtrim($destination, '/'));
     $destination .= '/';
     switch ($uri['scheme']){
