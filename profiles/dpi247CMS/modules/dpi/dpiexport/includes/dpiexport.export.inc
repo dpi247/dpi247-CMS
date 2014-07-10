@@ -34,32 +34,47 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
     $embeddedcontent_node = $package_node->appendChild($dom->createElement('EmbeddedContent'));
     $embeddedobjects_node = $embeddedcontent_node->appendChild($dom->createElement('EmbeddedObjects'));
     foreach ($embeds as $embed) {
-      $object_node = $embeddedobjects_node->appendChild($dom->createElement('Object'));
-      // Transform ScalD type to DPI XML type
-      $types_translator = array(
-        'image' => 'PhotoObjectType',
-        'video' => 'VideoObjectType',
-      );
-      $object_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $types_translator[$embed['type']]);
       $atom = $embed['atom'];
+      // Mimic scald_image module
+      if ((!isset($atom->base_entity) || empty($atom->base_entity)) && isset($atom->base_id) && !empty($atom->base_id)) {
+        if ($file = file_load($atom->base_id)) {
+          $atom->base_entity = $file;
+          $atom->file_source = $file->uri;
+          $atom->thumbnail_source = $file->uri;
+        }
+      }
       $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
       $atom_dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $atom->sid);
-      dpiexport_node_to_dpixml_fill_object_type($dom, $object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+
       switch ($embed['type']) {
-        case 'TextObjectType' :
-          _wallytoolbox_arraytowallyxml_fillTextObjectType($valid_dom, $object_node, $object_array);
-          break;
-        case 'AudioObjectType':
-          _wallytoolbox_arraytowallyxml_fillAudioObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
-          break;
-        case 'VideoObjectType':
-          _wallytoolbox_arraytowallyxml_fillVideoObjectType($valid_dom, $object_node, $object_array, $files_to_zip);
+        case 'audio':
+          if (isset($atom->data['orig_identifier']) && $atom->data['orig_identifier'] && valid_url($atom->data['orig_identifier'], TRUE)) {
+            // Third party audio file
+            dpiexport_node_to_dpixml_fill_third_party_atom($dom, $embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+          }
+          else {
+            // Locally hosted audio
+            dpiexport_node_to_dpixml_fill_audio_object_type($dom, $embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties, $files_to_zip);
+          }
           break;
         case 'image':
-          dpiexport_node_to_dpixml_fill_photo_object_type($dom, $object_node, $node, $atom, $atom_wrapper, $atom_dpiproperties, $files_to_zip);
+          // Locally hosted image
+          dpiexport_node_to_dpixml_fill_photo_object_type($dom, $embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties, $files_to_zip);
           break;
-        case 'PollObjectType':
-          _wallytoolbox_arraytowallyxml_fillPollObjectType($valid_dom, $object_node, $object_array);
+        case 'video':
+          if (isset($atom->data['orig_identifier']) && $atom->data['orig_identifier'] && valid_url($atom->data['orig_identifier'], TRUE)) {
+            // Third party video
+            dpiexport_node_to_dpixml_fill_third_party_atom($dom, $embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+          }
+          else {
+            // Is it possible to have a video locally hosted?
+          }
+          break;
+        default:
+          if (isset($atom->data['orig_identifier']) && $atom->data['orig_identifier'] && valid_url($atom->data['orig_identifier'], TRUE)) {
+            // Third party embed
+            dpiexport_node_to_dpixml_fill_third_party_atom($dom, $embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+          }
           break;
       }
     }
@@ -79,33 +94,18 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
       $atom_dpiproperties = dpiproperties_load_by_type_and_id('scald_atom', $atom->sid);
 
       $linkslist_node = $linkslists_node->appendChild($dom->createElement('LinksList'));
-      dpiexport_node_to_dpixml_fill_links_list($dom, $linkslist_node, $node, $atom, $atom_wrapper, $atom_dpiproperties);
+      dpiexport_node_to_dpixml_fill_links_list($dom, $linkslist_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
     }
   }
 
   return $dom;
-
-  if (isset($package_array['EmbeddedContent'])){
-    if (isset($package_array['EmbeddedContent']['EmbeddedObjects']['Link'])){
-      foreach ($package_array['EmbeddedContent']['EmbeddedObjects']['Link'] as $link_array){
-        $link_node = $embeddedobjects_node->appendChild($valid_dom->createElement('Link'));
-        $link_node->appendChild($valid_dom->createElement('ExternalReference', $link_array['ExternalReference']['value']));
-        $link_node->appendChild($valid_dom->createElement('Title', $link_array['Title']['value']));
-        $link_node->appendChild($valid_dom->createElement('Description', $link_array['Description']['value']));
-        $link_node->appendChild($valid_dom->createElement('URI', $link_array['URI']['value']));
-      }
-    }
-  }
-
-  return $valid_dom;
 }
 
 /**
  * Set the package elements
  */
 function dpiexport_node_to_dpixml_fill_package($dom, &$package_node, $node, $node_wrapper, $dpiproperties) {
-  // @todo : What is Package ID ?
-  //$package_node->setAttribute('PackageID', '');
+  // @todo : PackageID
   if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialpublicationdate', 'value', 'now')) {
     $package_node->setAttribute('PublicationDate', $date);
   }
@@ -234,8 +234,7 @@ function dpiexport_node_to_dpixml_fill_object_type($dom, &$object_node, $node, $
  * Set the Text Object elements
  */
 function dpiexport_node_to_dpixml_fill_text_object_type($dom, &$mainstory_node, $node, $node_wrapper, $dpiproperties) {
-  // @todo : What is ObjectID ?
-  //$object_node->setAttribute('ObjectID', $object_array['ObjectID']);
+  // @todo : ObjectID
   if ($date = dpiexport_get_date_from_field($node_wrapper, 'field_editorialpublicationdate', 'value', 'now')) {
     $mainstory_node->setAttribute('PublicationDate', $date);
   }
@@ -301,7 +300,9 @@ function dpiexport_node_to_dpixml_fill_media_object_type($dom, &$object_node, $a
     $field_caption_node->appendChild($dom->createCDATASection($field_value['safe_value']));
   }
   $object_node->appendChild($dom->createElement('URI', $atom->file_source));
-  $object_node->appendChild($dom->createElement('FileSize', $atom->base_entity->filesize));
+  if (isset($atom->base_entity->filesize)) {
+    $object_node->appendChild($dom->createElement('FileSize', $atom->base_entity->filesize));
+  }
   $thumbnail_node = $object_node->appendChild($dom->createElement('Thumbnail'));
   $thumbnail_node->setAttribute('URI', $atom->thumbnail_source);
   if (isset($atom_wrapper->scald_thumbnail) && $field_value = $atom_wrapper->scald_thumbnail->value()) {
@@ -317,13 +318,21 @@ function dpiexport_node_to_dpixml_fill_media_object_type($dom, &$object_node, $a
     $object_node->appendChild($dom->createElement('Rating', $field_value->name));
   }
 
-  $object_node->setAttribute('MimeType', $atom->base_entity->filemime);
+  if (isset($atom->base_entity->filesize)) {
+    $object_node->setAttribute('MimeType', $atom->base_entity->filemime);
+  }
 }
 
 /**
  * Set a photo object
  */
-function dpiexport_node_to_dpixml_fill_photo_object_type($dom, &$object_node, $node, $atom, $atom_wrapper, $atom_dpiproperties, &$files_to_zip) {
+function dpiexport_node_to_dpixml_fill_photo_object_type($dom, &$embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties, &$files_to_zip) {
+  $object_node = $embeddedobjects_node->appendChild($dom->createElement('Object'));
+  $object_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', 'PhotoObjectType');
+
+  // Common object properties
+  dpiexport_node_to_dpixml_fill_object_type($dom, $object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+
   $files_to_zip[] = $atom->base_entity;
 
   dpiexport_node_to_dpixml_fill_media_object_type($dom, $object_node, $atom, $atom_wrapper, $atom_dpiproperties);
@@ -344,7 +353,26 @@ function dpiexport_node_to_dpixml_fill_photo_object_type($dom, &$object_node, $n
     $crops_node->setAttribute('xsi:nil', 'true');
   }
 
-  // @todo : LinkTitle, LinkURI, Width and Height ?
+  // @todo : LinkTitle, LinkURI, Width and Height
+}
+
+/**
+ * Set an audio object
+ */
+function dpiexport_node_to_dpixml_fill_audio_object_type($dom, &$embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties, &$files_to_zip) {
+  $object_node = $embeddedobjects_node->appendChild($dom->createElement('Object'));
+  $object_node->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', 'AudioObjectType');
+
+  // Common object properties
+  dpiexport_node_to_dpixml_fill_object_type($dom, $object_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
+
+  if (isset($atom->base_entity) && !empty($atom->base_entity)) {
+    $files_to_zip[] = $atom->base_entity;
+  }
+
+  dpiexport_node_to_dpixml_fill_media_object_type($dom, $object_node, $atom, $atom_wrapper, $atom_dpiproperties);
+
+  // @todo : AudioLength, LinkTitle, LinkURI
 }
 
 /**
@@ -493,7 +521,7 @@ function dpiexport_node_to_dpixml_fill_person($dom, $person_node, $person) {
 /**
  * Set the LinksList elements
  */
-function dpiexport_node_to_dpixml_fill_links_list($dom, &$linkslist_node, $node, $atom, $atom_wrapper, $atom_dpiproperties) {
+function dpiexport_node_to_dpixml_fill_links_list($dom, &$linkslist_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties) {
   $linkslist_node->appendChild($dom->createElement('InternalReference', 'Drupal_SID:'.$atom_dpiproperties->id));
   $linkslist_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference));
   if (isset($atom_wrapper->field_displaytitle) && $field_value = $atom_wrapper->field_displaytitle->value()) {
@@ -518,6 +546,25 @@ function dpiexport_node_to_dpixml_fill_links_list($dom, &$linkslist_node, $node,
       $link_node->appendChild($dom->createElement('URI', $link['url']));
     }
   }
+}
+
+/**
+ * Set a 3rd party atom
+ */
+function dpiexport_node_to_dpixml_fill_third_party_atom($dom, &$embeddedobjects_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties) {
+  $link_node = $embeddedobjects_node->appendChild($dom->createElement('Link'));
+  $link_node->appendChild($dom->createElement('ExternalReference', $atom_dpiproperties->external_reference));
+  if (isset($atom_wrapper->field_displaytitle) && $field_value = $atom_wrapper->field_displaytitle->value()) {
+    $title_node = $link_node->appendChild($dom->createElement('Title'));
+    $title_node->appendChild($dom->createCDATASection($field_value['safe_value']));
+  }
+  else {
+    $link_node->appendChild($dom->createElement('Title', $atom->title));
+  }
+  // @todo : Description
+  // CData needed to handle strange URLs such as Google Maps
+  $uri_node = $link_node->appendChild($dom->createElement('URI'));
+  $uri_node->appendChild($dom->createCDATASection($atom->data['orig_identifier']));
 }
 
 /**
