@@ -35,10 +35,15 @@ function dpicommons_admin_settings_form($form, $form_state) {
     '#maxlength' => 512,
     '#required' => TRUE,
   );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
+  
+  $form['dpicommons_http_request_retry'] = array(
+    '#type' => 'textfield',
+    '#title' => t('HTTP Request retry'),
+    '#description' => t('Specifies the default retry limit for every HTTP request made from this site'),
+    '#default_value' => dpi_variable_get('dpicommons_http_request_retry', 1),
+    '#size' => 80,
+    '#maxlength' => 512,
+    '#required' => TRUE,
   );
 
   $form['#validate'][] = 'dpicommons_admin_settings_form_validate';
@@ -55,5 +60,8 @@ function dpicommons_admin_settings_form($form, $form_state) {
 function dpicommons_admin_settings_form_validate($form, &$form_state){
   if (!preg_match('/^[0-9]+$/' , $form_state['values']['dpicommons_http_request_timeout'])){
     form_set_error('dpicommons_http_request_timeout', t('HTTP Request Timeout must be an integer.'));
+  }
+  if (!preg_match('/^[0-9]+$/' , $form_state['values']['dpicommons_http_request_retry'])){
+    form_set_error('dpicommons_http_request_retry', t('HTTP Request retry must be an integer.'));
   }
 }

@@ -251,8 +251,8 @@ function _pub_get_content_from_webservice($url, $params, $builder) {
   $options = array(
     'method' => 'GET',
     'data' => NULL,
-    'timeout' => variable_get('wallytoolbox_http_request_timeout', 3),
-    'retry' => variable_get('wallytoolbox_http_request_retry', 1),
+    'timeout' => variable_get('dpicommons_http_request_timeout', 3),
+    'retry' => variable_get('dpicommons_http_request_retry', 1),
   );
   $content = drupal_http_request($url.$req_params, $options);
   return ($content->code == '200') ? $content->data : FALSE;
