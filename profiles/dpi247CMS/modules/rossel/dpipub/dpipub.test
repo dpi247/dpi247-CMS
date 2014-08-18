@@ -1,0 +1,94 @@
+<?php 
+/**
+ * This test class is for tools file
+ * pub_taxonomy_get_path_by_tid_or_term is not possible to test 
+ * 
+ * @author lba@audaxis.com
+ */
+class SimpleTestDpiPubToolsTestCase extends DrupalWebTestCase{
+  
+  public static function getInfo(){
+    return array(
+      'name' => 'Tools unit test',
+      'description' => 'Unit test for dpipub.tools.inc',
+      'group' => 'dpipub',
+    );
+  }  
+  
+  function setUp() {
+    $this->setup = TRUE;
+  }
+  
+  function tearDown() { }
+  
+  function testToolsPubLoadBlock(){
+    $transact = db_transaction();
+    try {
+      $query = db_insert('zz_pub_UMI');
+      $query->fields(array('builder' => 'mybuilder', 'position' => 'myposition'))->execute();
+    } catch (Exception $e) {
+      $transact->rollback();
+    }
+    
+    $value_1 = pub_load_block('myposition');
+    $value_2 = pub_load_block('');
+    $value_3 = pub_load_block();
+    drupal_set_message($value_2, 'error');
+    $this->assertEqual($value_1, 'mybuilder', 'Information found is true', 'DpiPub');
+    $this->assertNull($value_2, 'Information return is null if delta is an empty argument', 'DpiPub');
+    $this->assertNull($value_3, 'Information return is null if no arguments is passed', 'DpiPub');
+    
+    try {
+      $query = db_delete('zz_pub_UMI');
+      $query->condition('builder','mybuilder','=')->execute();
+    } catch (Exception $e) {
+      $transact->rollback();
+    }
+  }
+
+  function testPubTaxonomyGetPathByTidOrTerm(){
+    /* create schema in taxonymy News/World/Belgium to test function */
+    $vocabulary = new stdClass();
+    $vocabulary->name = "voc";
+    $vocabulary->description = t('vocabulary for test unit');
+    $vocabulary->module = "dpipub";
+    $vocabulary->machine_name = 'dpipub';
+    taxonomy_vocabulary_save($vocabulary);
+    $vid = $vocabulary->vid;
+    
+    $term = new stdClass();
+    $term->name = "Unit";
+    $term->vid = $vid;
+    $term->parent = array();
+    taxonomy_term_save($term);
+    
+    $term1 = new stdClass();
+    $term1->name = "Test";
+    $term1->vid = $vid;
+    $term1->parent = array($term->tid);
+    taxonomy_term_save($term1);
+    
+    $term2 = new stdClass();
+    $term2->name = "Dpipub";
+    $term2->vid = $vid;
+    $term2->parent = array($term1->tid);
+    taxonomy_term_save($term2);
+    
+    $result = pub_taxonomy_get_path_by_tid_or_term('Dpipub', $vid);
+    $result1 = pub_taxonomy_get_path_by_tid_or_term('Dpipub');
+    $result2 = pub_taxonomy_get_path_by_tid_or_term('');
+    $result3 = pub_taxonomy_get_path_by_tid_or_term($term2->tid);
+    $this->assertEqual('Unit/Test/Dpipub', $result,'The term return is the same the you want to have !','DpiPub');
+    $this->assertEqual('Unit/Test/Dpipub', $result1,'The term return is the same the you want to have !(no VID specified)','DpiPub');
+    $this->assertEqual('', $result2,'Return empty string','DpiPub');
+    $this->assertEqual('Unit/Test/Dpipub', $result3,'Return correct value with tid parameter','DpiPub');
+    
+    taxonomy_term_delete($term2->tid);
+    taxonomy_term_delete($term1->tid);
+    taxonomy_term_delete($term->tid);
+    taxonomy_vocabulary_delete($vid);
+  }
+  
+}
+
+?>
