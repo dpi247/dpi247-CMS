@@ -5,24 +5,26 @@ module_load_include('inc', 'dpicache','dpicache.private');
 
 /**
  * Implementation of hook_menu
+ * 
+ * @return multitype:multitype:string multitype:number  multitype:string
  */
 function dpicache_menu(){
   $items=array();
 
   $items['dpicache/regenerate/one_cache_entry/%'] = array(
-    'page callback' => '_dpicache_regenerate_one_cache_entry_callback',
+    'page callback' => 'dpicache_api_regenerate_one_cache_entry_callback',
     'page arguments' => array(3),
     'access arguments' => array('dpicache flush caches'),
     'type' => MENU_CALLBACK,
   );
 
   $items['dpicache/regenerate/all_cache_entry/%'] = array(
-    'page callback' => '_dpicache_regenerate_all_cache_entry_callback',
+    'page callback' => 'dpicache_api_regenerate_all_cache_entry_callback',
     'page arguments' => array(3),
     'access arguments' => array('dpicache flush caches'),
     'type' => MENU_CALLBACK,
   );
-
+  
   return $items;
 }
 
@@ -38,6 +40,8 @@ function dpicache_cron() {
 
 /**
  * Implementation of hook_dpilog_register
+ * 
+ * @return multitype:multitype:multitype:string
  */
 function dpicache_dpilog_register(){
   return array(
