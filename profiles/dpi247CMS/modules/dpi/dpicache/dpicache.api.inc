@@ -13,7 +13,7 @@ function dpicache_api_get_cache_entry($cache_name) {
     dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array("!cache_name" => $cache_name)), array(), '', WATCHDOG_ERROR);
     return FALSE;
   }
-
+ 
   // Get arguments for callback
   $parameters = func_get_args();
   array_shift($parameters);
