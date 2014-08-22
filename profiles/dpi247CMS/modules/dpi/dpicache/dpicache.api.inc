@@ -7,7 +7,7 @@
  * @param  void   ???         Add all your parameters for your callback function then.
  * @return void               Your cache content, or FALSE.
  */
-function dpicache_api_get_cache_entry($cache_name) {
+function dpicache_get_cache_entry($cache_name) {
   $cache_definition = dpicache_get_cache_entry_definition($cache_name);
   if(!$cache_definition) {
     dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array("!cache_name" => $cache_name)), array(), '', WATCHDOG_ERROR);
@@ -76,7 +76,7 @@ function dpicache_api_get_cache_entry($cache_name) {
  * @param  String $cache_name Cache name
  * @return String  tur url to call
  */
-function dpicache_api_get_regenerate_url($cache_name){
+function dpicache_get_regenerate_url($cache_name){
   $args=func_get_args();
   unset($args[0]);
   $args_url=implode('/', $args);
@@ -126,12 +126,8 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
  */
 function dpi_variable_get_all() {
   $dpivariables = &drupal_static('dpivariables');
-
-  $result = db_query('SELECT * FROM {dpi_variables}');
-  while($variable = db_fetch_array($result)) {
-    $dpivariables[$name] = unserialize($variable['value']);
-  }
-
+  $result = db_select('dpi_variables','d')->fields('d',array('name','value'))->execute();
+  foreach ($result as $row) $dpivariables[$row->name] = unserialize($row->value);
   return  $dpivariables;
 }
 
