@@ -453,6 +453,6 @@ function dpicontenttypes_update_7005() {
  * Add a cron_delete column to the dpicontenttypes_external_files table
  */
 function dpicontenttypes_update_7006() {
-  $schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
-  db_add_field('dpicontenttypes_external_files', 'cron_delete', $schema['fields']['cron_delete']);
+  //$schema = drupal_get_schema('dpicontenttypes_external_files', TRUE);
+  //db_add_field('dpicontenttypes_external_files', 'cron_delete', $schema['fields']['cron_delete']);
 }

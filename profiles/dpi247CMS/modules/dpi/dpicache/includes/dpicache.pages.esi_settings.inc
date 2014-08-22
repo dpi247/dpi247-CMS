@@ -3,7 +3,7 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
   $form=array();
   $form['info']=array(
     '#markup'=>'hello This is the dpi247.'
-    );
+  );
   $form['debug'] = array(
     '#title' => t('Debug'),
     '#type' => 'fieldset',
@@ -11,12 +11,12 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
   $form['debug']['dpicache_disable_esi'] = array(
     '#title' => t('Disable Esi block for developpement'),
     '#type' => 'checkbox',
-    '#default_value'=>dpi_variable_get('dpicache_disable_esi', FALSE),
+    '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
   );
-  
 
 
-  
+
+
   $form['esi_ttl'] = array(
     '#title' => t('Esi TTL'),
     '#type' => 'fieldset',
@@ -35,7 +35,7 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     '#required' => TRUE,
     '#default_value'=>variable_get('dpicache_esi_default_tll_creditentials', FALSE),
   );
-  
+
 
   $form['varnish_purge'] = array(
     '#title' => t('Varnish purge method'),
@@ -47,7 +47,7 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     "#options"=>array(
       'direct'=>'Direct bla bla bla',
       'accumulator'=>'Acumulator bla bla bla',
-      ),
+    ),
     '#default_value'=>variable_get('dpicache_varnish_purge_method', array()),
     '#required' => TRUE,
   );
@@ -61,15 +61,15 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
       VARNISH_BANTYPE_BANLURKER => 'Ban Lurker',
     ),
   );
-  
-  
-  
-  
+
+
+
+
   $form['varnish_config'] = array(
     '#title' => t('Varnish server connection'),
     '#type' => 'fieldset',
     '#collapsible'=>TRUE,
-    '#collapsed'=>TRUE,  
+    '#collapsed'=>TRUE,
   );
   $form['varnish_config']['varnish_control_terminal'] = array(
     '#title' => t('Varnish url'),
@@ -102,8 +102,30 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     '#description' => t('If Varnish is running on a different server, you may need to increase this value.'),
     '#required' => TRUE,
   );
-  
-  
+  $form['submit'] = array(
+    '#type' => 'submit',
+   '#value'=>'Submit'
+  );
+
+  return $form;
   return system_settings_form($form);
-  
+
 }
+function dpicache_pages_form_esi_settings_form_submit($form, & $form_state){
+  
+  //Check if we have a modification in use of esi
+  if($form_state['values']['dpicache_disable_esi']!=variable_get('dpicache_disable_esi', FALSE)){
+    drupal_set_message("We have to sync Esi roles and Drupal Roles");
+    
+    //if yes then sync permission between drupal roles and esi visibility
+    if($form_state['values']['dpicache_disable_esi']){
+      _dpicache_esi_sync_esi_visibility_to_drupal_roles();
+    }
+    else{
+      _dpicache_esi_sync_drupal_roles_to_esi_visibility();
+    }
+  }
+  
+  system_settings_form_submit($form, $form_state);
+}
+

@@ -7,7 +7,7 @@ module_load_include('inc', 'dpicache','dpicache.private');
 
 /**
  * Implementation of hook_menu
- */
+*/
 function dpicache_menu(){
   $items=array();
 
@@ -32,13 +32,13 @@ function dpicache_menu(){
     'page arguments'=>array('dpicache_pages_form_esi_settings_form'),
     'file'=>'dpicache.pages.esi_settings.inc',
     'file path' => drupal_get_path('module', 'dpicache').'/includes',
-    
+
   );
   $items['admin/dpi247/dpicache/esi'] = array(
     'title' => 'Manage ESI cache',
     'access arguments' => array('administer dpicache'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    
+
   );
   $items['admin/dpi247/dpicache/config'] = array(
     'title' => 'config',
@@ -49,8 +49,8 @@ function dpicache_menu(){
     'file'=>'dpicache.pages.settings.inc',
     'file path' => drupal_get_path('module', 'dpicache').'/includes',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    
-  
+
+
   );
   $items['admin/dpi247/dpicache/dpicache_clear'] = array(
     'title' => 'config',
@@ -61,10 +61,10 @@ function dpicache_menu(){
     'file'=>'dpicache.pages.cache_clear.inc',
     'file path' => drupal_get_path('module', 'dpicache').'/includes',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-  
-  
+
+
   );
-  
+
   return $items;
 }
 
@@ -123,6 +123,12 @@ function dpicache_esi_component_info() {
       'flush'      => 'dpicache_block__esi_block_flush',
       'file'       => 'dpicache.esi.block.inc',
     ),
+    'panels' => array(
+      'preprocess' => 'dpicache_block__esi_panels_prepare',
+      'render'     => 'dpicache_block__esi_panels_render',
+      'flush'      => 'dpicache_block__esi_panels_flush',
+      'file'       => 'dpicache.esi.panels.inc',
+    ),
   );
 }
 
@@ -131,18 +137,21 @@ function dpicache_esi_component_info() {
  * Implements hook_page_alter().
  */
 function dpicache_page_alter(&$page) {
-  // The block system hard-codes some aspects of block information
-  // in _block_get_renderable_array().
-  // ESI blocks need to:
-  // - Remove the contextual-links data.
-  // - Remove the 'block' theme wrapper.
-  foreach (element_children($page) as $region_key) {
-    foreach (element_children($page[$region_key]) as $block_key) {
-      if (isset($page[$region_key][$block_key]['#block']) && is_object($page[$region_key][$block_key]['#block']) && !empty($page[$region_key][$block_key]['#block']->esi_enabled)) {
-        // Remove contextual-links.
-        unset($page[$region_key][$block_key]['#contextual_links']);
-        // Remove the theme wrapper.
-        unset($page[$region_key][$block_key]['#theme_wrappers']);
+
+  if(!variable_get('dpicache_disable_esi', FALSE)){
+    // The block system hard-codes some aspects of block information
+    // in _block_get_renderable_array().
+    // ESI blocks need to:
+    // - Remove the contextual-links data.
+    // - Remove the 'block' theme wrapper.
+    foreach (element_children($page) as $region_key) {
+      foreach (element_children($page[$region_key]) as $block_key) {
+        if (isset($page[$region_key][$block_key]['#block']) && is_object($page[$region_key][$block_key]['#block']) && !empty($page[$region_key][$block_key]['#block']->esi_enabled)) {
+          // Remove contextual-links.
+          unset($page[$region_key][$block_key]['#contextual_links']);
+          // Remove the theme wrapper.
+          unset($page[$region_key][$block_key]['#theme_wrappers']);
+        }
       }
     }
   }
@@ -154,23 +163,26 @@ function dpicache_page_alter(&$page) {
  * @see _block_load_blocks()
  */
 function dpicache_block_list_alter(&$block_info) {
-  dsm(dpicache_list_alter);
-  // Remove the blocks which have been marked as being served via ESI, and
-  // replace the blocks with the ESI handler.
-  // Altering the blocks here (rather than in the theme layer) is more
-  // performant because the overhead of block-generation (for a block which
-  // won't be rendered) is removed.
-  foreach ($block_info as $key => $block) {
-    if ($block->esi_enabled) {
-      // Preserve the original module-delta combination and pass to ESI as the
-      // replacement block's new delta.
-      // The format allows the delta to be gracefully split into the original
-      // module:delta components but still conforms to the standards which let
-      // the module:delta be used in constructing function names - for
-      // altering, themeing, etc.
-      $new_delta = dpicache__new_delta($block->module, $block->delta);
-      $block_info[$key]->module = 'dpicache';
-      $block_info[$key]->delta  = $new_delta;
+
+  if(!variable_get('dpicache_disable_esi', FALSE)){
+
+    // Remove the blocks which have been marked as being served via ESI, and
+    // replace the blocks with the ESI handler.
+    // Altering the blocks here (rather than in the theme layer) is more
+    // performant because the overhead of block-generation (for a block which
+    // won't be rendered) is removed.
+    foreach ($block_info as $key => $block) {
+      if ($block->esi_enabled) {
+        // Preserve the original module-delta combination and pass to ESI as the
+        // replacement block's new delta.
+        // The format allows the delta to be gracefully split into the original
+        // module:delta components but still conforms to the standards which let
+        // the module:delta be used in constructing function names - for
+        // altering, themeing, etc.
+        $new_delta = dpicache__new_delta($block->module, $block->delta);
+        $block_info[$key]->module = 'dpicache';
+        $block_info[$key]->delta  = $new_delta;
+      }
     }
   }
 }
@@ -202,7 +214,6 @@ function dpicache_block_view_alter(&$data, $block) {
       '#type' => 'esi',
       '#url' => $url,
     );
-    dsm($url,url_block);
   }
 }
 
@@ -212,58 +223,63 @@ function dpicache_block_view_alter(&$data, $block) {
  *   Add ESI-configuration options to the block-config pages.
  */
 function dpicache_form_block_admin_configure_alter(&$form, $form_state) {
-  $module = $form['module']['#value'];
-  $delta  = $form['delta']['#value'];
-  $block = block_load($module, $delta);
+
+  if(! variable_get('dpicache_disable_esi', FALSE)){
+
+    $module = $form['module']['#value'];
+    $delta  = $form['delta']['#value'];
+    $block = block_load($module, $delta);
 
 
-  dsm($block,block);
-  dsm($form,form);
-  dsm($form_state,form_state);
-  
-  $form['visibility']['role']['roles']['#default_value']=unserialize($block->esi_roles);
-  
-  $element['esi_config'] = array(
-    '#title'        => t('<acronym title="Edge Side Includes">ESI</acronym> settings'),
-    '#type'         => 'fieldset',
-    '#description'  => t('Control how this block is cached on an ESI-enabled reverse proxy.'),
-    '#collapsible'  => TRUE,
-    // Only open the block is ESI is enabled.
-    '#collapsed'    => empty($block->esi_enabled),
-  );
-  $element['esi_config']['esi_enabled'] = array(
-    '#title' => t('Enable ESI'),
-    '#type' => 'checkbox',
-    '#default_value' => $block->esi_enabled,
-  );
-  $element['esi_config']['esi_ttl'] = array(
-    '#title' => t('Cache Maximum Age (TTL)'),
-    '#type' => 'select',
-    '#options' => esi_max_age_options($block->esi_ttl),
-    '#default_value' => (is_null($block->esi_ttl)) ? ESI_DEFAULT_TTL : $block->esi_ttl,
-    '#description' => t('The maximum time (in seconds) that proxies or external caches should cache this individual block.'),
-  );
 
-  // Target the "visibility_title" vertical-tabs, and inject the form elements
-  // before them.
-  if ($index = array_search('visibility_title', array_keys($form))) {
-    $form = array_slice($form, 0, $index) + $element + array_slice($form, $index);
+    $form['visibility']['role']['roles']['#default_value']=unserialize($block->esi_roles);
+
+    $element['esi_config'] = array(
+      '#title'        => t('<acronym title="Edge Side Includes">ESI</acronym> settings'),
+      '#type'         => 'fieldset',
+      '#description'  => t('Control how this block is cached on an ESI-enabled reverse proxy.'),
+      '#collapsible'  => TRUE,
+      // Only open the block is ESI is enabled.
+      '#collapsed'    => empty($block->esi_enabled),
+    );
+    $element['esi_config']['esi_enabled'] = array(
+      '#title' => t('Enable ESI'),
+      '#type' => 'checkbox',
+      '#default_value' => $block->esi_enabled,
+    );
+    $element['esi_config']['esi_ttl'] = array(
+      '#title' => t('Cache Maximum Age (TTL)'),
+      '#type' => 'select',
+      '#options' => esi_max_age_options($block->esi_ttl),
+      '#default_value' => (is_null($block->esi_ttl)) ? ESI_DEFAULT_TTL : $block->esi_ttl,
+      '#description' => t('The maximum time (in seconds) that proxies or external caches should cache this individual block.'),
+    );
+
+    // Target the "visibility_title" vertical-tabs, and inject the form elements
+    // before them.
+    if ($index = array_search('visibility_title', array_keys($form))) {
+      $form = array_slice($form, 0, $index) + $element + array_slice($form, $index);
+    }
+    else {
+      $form += $element;
+    }
+
+    // The form only saves particular fields. Add a submit handler to save the
+    // ESI data.
+    array_unshift($form['#submit'], 'dpicache_block_admin_configure_submit');
   }
-  else {
-    $form += $element;
-  }
-
-  // The form only saves particular fields. Add a submit handler to save the
-  // ESI data.
-  array_unshift($form['#submit'], 'dpicache_block_admin_configure_submit');
 }
 
 /**
  * Submit handler for the block_admin_configure form.
+ *
+ * This sublit is added only if variable_get('dpicache_disable_esi') return TRUE
+ *
+ * @see dpicache_form_block_admin_configure_alter()
  */
 function dpicache_block_admin_configure_submit($form, &$form_state) {
-  dsm($form_state);
-  
+
+  //We remove drupal role and relace with esi role visibility
   $role_visibility=$form_state["values"]['roles'];
   foreach($form_state["values"]['roles'] as $id){
     $form_state["values"]['roles'][$id]=0;
@@ -271,6 +287,7 @@ function dpicache_block_admin_configure_submit($form, &$form_state) {
   // The regular block-configuration form only saves particular fields. This
   // submit handler stores the ESI-specific data.
   dpicache__set_esi_settings($form_state['values']['module'], $form_state['values']['delta'], (bool) $form_state['values']['esi_enabled'], (int) $form_state['values']['esi_ttl'],$role_visibility);
+
 }
 
 /**
@@ -382,11 +399,9 @@ function dpicache_block_url($block) {
   // altered through hook_block_info_alter().  The alter hook is the correct
   // method to specify a custom cache configuration which is different from
   // that defined in the original hook_block_info().
-  dsm($block);
   // If the block changes per page, encode the page URL in the ESI URL.
   if ($block->cache & DRUPAL_CACHE_PER_PAGE) {
     $url .= '/' . base64_encode($_GET['q']);
-    dsm($url,'url_cache_page');
   }
 
   if ($block->cache != DRUPAL_NO_CACHE) {
@@ -408,6 +423,88 @@ function dpicache_block_url($block) {
   return $url;
 }
 
+
+
+
+
+
+
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpicache_panels_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+      'version' => 1,
+    );
+  }
+}
+
+
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function dpicache_panels_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', ESI_PANELS_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  // We don't support the 'ctools' 'cache' plugin and pretending to causes
+  // errors when they're in use.
+  if ($module == 'ctools' && $plugin == 'cache') {
+    return;
+    // if we did we'd make a plugin/ctools_cache or something.
+  }
+
+  if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+/**
+ * Implements hook_ctools_plugin_post_alter().
+ * 
+ * @see dpicache.esi.panel.inc
+ * 
+ */
+function dpicache_ctools_plugin_post_alter(&$plugin, &$info) {
+  // Every time the configuration of a panel is saved, the default hook on the
+  // panel-context is invoked.  Replace that hook, in order to check for the
+  // presence of ESI panes, and switch the rendering pipeline if necessary.
+  dsm($plugin);
+  if ($plugin['name'] == 'panel_context') {
+    // Replace the default 'save' operation - panels_panel_context_save();
+    $plugin['save'] = 'dpicache__panel_context_save';
+  }
+}
+
+
+/**
+ * Save the configuration of a panel page.
+ * @see panels_panel_context_save().
+ */
+function dpicache__panel_context_save(&$handler, $update) {
+  // Override the rendering pipeline if any pane uses ESI.
+  // Only the standard rendering pipeline is supported; alternative/IPE/legacy
+  // pipelines cannot be used with ESI.
+  // @TODO: inform the user of this on the display, if a non-standard renderer
+  // is selected.
+  if ($handler->conf['pipeline'] == 'standard' && _esi_panels__display_uses_esi($handler->conf['display'])) {
+    $handler->conf['pipeline'] = 'dpicacheesi';
+  }
+  panels_panel_context_save($handler, $update);
+}
 
 
 /**

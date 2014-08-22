@@ -163,3 +163,22 @@ function dpicommons_element_children_numeric($element) {
 function dpicommons_element_child_numeric($key) {
   return is_numeric($key);
 }
+
+
+
+
+
+
+/**
+ * Implementation of hook_rules_event_info().
+ * @ingroup rules
+ */
+function dpicommons_rules_event_info_alter(&$events){
+  //We chose to remove the dpiproperties event related
+  foreach($events as $name=>& $event){
+
+    if(strpos( $name,'dpiproperties')===0){
+      $event['group']='z dpi247 advanced';
+    }
+  }
+}

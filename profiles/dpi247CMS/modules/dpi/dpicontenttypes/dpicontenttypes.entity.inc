@@ -268,7 +268,9 @@ function dpiproperties_load_by_type_and_id($type, $id, $reset = FALSE) {
  * Save dpiproperties.
  */
 function dpiproperties_save($dpiproperties) {
+  
   entity_save('dpiproperties', $dpiproperties);
+  
 }
 
 /**

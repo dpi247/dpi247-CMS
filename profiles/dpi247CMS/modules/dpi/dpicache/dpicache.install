@@ -1,5 +1,12 @@
 <?php 
 
+function dpicache_enable(){
+  _dpicache_esi_sync_drupal_roles_to_esi_visibility();
+}
+function dpicache_disable(){
+  _dpicache_esi_sync_esi_visibility_to_drupal_roles();
+}
+
 /**
  * Implementation of hook_schema
  */

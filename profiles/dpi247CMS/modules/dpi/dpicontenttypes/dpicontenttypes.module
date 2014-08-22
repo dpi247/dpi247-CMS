@@ -7,6 +7,10 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
 
+
+
+
+
 /**
  * Implementation of hook_menu()
  */
@@ -144,18 +148,47 @@ function dpicontenttypes_permission(){
 function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
+
+    rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
   }
 }
 
 /**
- * Implementation of hook_delete
+ * Implementation of hook_node_create
  *
- * @param Object $node
+ * @param object $node
+ */
+function dpicontenttypes_node_create($node) {
+  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+    rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
+ */
+function dpicontenttypes_node_presave($node) {
+  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+    rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
  */
 function dpicontenttypes_node_delete($node) {
-  //Delete the dpiproperties entry corresponding to the node
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
+  
+  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+    rules_invoke_event('dpicontenttypes_rules_event_package_deleted', $node);
+  }
 }
+    
+
 
 /**
  * Implementation of hook_theme
@@ -579,3 +612,5 @@ function typed_entity_load($typed_id) {
   }
   return NULL;
 }
+
+

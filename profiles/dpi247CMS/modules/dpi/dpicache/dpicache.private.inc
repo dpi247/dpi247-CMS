@@ -339,3 +339,117 @@ function _dpicache_regenerate_all_cache_entry_callback($cache_type,$category=NUL
 
   drupal_goto();
 }
+
+
+/*
+ * Sync block roles with esi role visibility
+ * 
+ * The dpicache esi block uses it's own visibility to show block.
+ * The main reason to that is to keep the page that contains the esi tag the same for 
+ * everybody.
+ * 
+ * If we rely on Drupal's block role this page would differ based on role ... 
+ * E.g : esi tag will appear or not...
+ * And thus we use the concept of esi block role visibility ...
+ * 
+ * In the admin this is transparent for the user 
+ * but in fact we collect the roles setup and put them on a custom column of the block page
+ * and we let the real role visibility blank
+ * 
+ * Now, when we activate/desactive the ESI from dpicache, we need to synchronize that with Drupal's role block...
+ * 
+ *  
+ * @see _dpicache_esi_sync_esi_visibility_to_drupal_roles()
+ * @see dpicache_block_admin_configure_submit()
+ * @see dpicache_form_block_admin_configure_alter()
+ * 
+ */
+function _dpicache_esi_sync_drupal_roles_to_esi_visibility(){
+  global $theme;
+  $query = db_select('block_role', 'br');
+  // Add extra detail to this query object: a condition, fields and a range
+  $query->condition('b.esi_enabled', 1, '=');
+  $query->condition('b.theme', $theme, '=');
+  $query->fields('br', array('module', 'delta', 'rid'));
+  $query->leftJoin('block', 'b', 'b.delta = br.delta AND b.module = br.module');
+  $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  foreach($results as $result){
+   $writes[$result['module']][$result['delta']][$result['rid']]=$result['rid'];
+   $deletes[$result['module']][$result['delta']][$result['rid']]=$result['rid'];
+    
+   }
+   dsm($deletes);
+   foreach($results as $result){
+     foreach(user_roles() as $rid=>$role){
+     if(!isset($write[$result['module']][$result['delta']][$rid])){
+     $writes[$result['module']][$result['delta']][$rid]=0;
+     
+     }
+     }
+   }
+   foreach($writes as $module=>$write){
+     foreach($write as $delta=>$roles){
+       
+       
+       $block_updated = db_update('block')
+       ->fields(array(
+         'esi_roles' => serialize($roles),
+       ))
+       ->condition('module', $module, '=')
+       ->condition('delta', $delta, '=')
+       ->execute();
+       
+     }
+   }
+   //remove entry from block roles
+   foreach($deletes as $module=>$delete){
+     foreach($delete as $delta=>$roles){
+       foreach($roles as $rid)
+        
+       $num_deleted = db_delete('block_role')
+       ->condition('module', $module, '=')
+       ->condition('delta', $delta, '=')
+       ->condition('rid', $rid, '=')
+       ->execute();      
+     }
+   }
+   
+  
+   dsm($write);
+}
+
+
+/*
+ * Sync esi role visibility with block roles with 
+ *
+ *
+ *
+ * @see _dpicache_esi_sync_drupal_roles_to_esi_visibility()
+ * @see dpicache_block_admin_configure_submit()
+ * @see dpicache_form_block_admin_configure_alter()
+ *
+ */
+function _dpicache_esi_sync_esi_visibility_to_drupal_roles(){
+  global $theme;
+  $query = db_select('block', 'b');
+  // Add extra detail to this query object: a condition, fields and a range
+  $query->condition('b.esi_enabled', 1, '=');
+  $query->condition('b.theme', $theme, '=');
+  $query->fields('b', array('module', 'delta', 'esi_roles'));
+  $results = $query->execute();
+  foreach($results as $result){
+    $esi_roles=unserialize($result->esi_roles);
+    dsm($esi_roles,esiroles);
+    foreach($esi_roles as $rid=>$esi_role){
+      if($esi_role){
+      $block_role=new stdClass();
+      $block_role->module=$result->module;
+      $block_role->delta=$result->delta;
+      $block_role->rid=$rid;
+      drupal_write_record('block_role', $block_role);
+      }
+    }
+  }
+  
+  
+}

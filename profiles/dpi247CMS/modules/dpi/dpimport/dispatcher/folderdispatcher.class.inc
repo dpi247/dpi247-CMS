@@ -21,6 +21,7 @@ class FolderDispatcher extends Dispatcher {
    * @return String $source_folder
    */
   public function getSourceFolder(){
+    dsm( 'importer://'.$this->source_folder);
     return 'importer://'.$this->source_folder;
   }
 

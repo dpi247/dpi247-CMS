@@ -342,7 +342,6 @@ function esi_max_age_options($current_max_age = NULL) {
  */
 function esi__set_user_contexts($account) {
   $cookie_data = esi__get_cookie_data($account);
-  dsm($cookie_data);
   // Transmit the cookies.
   foreach ($cookie_data as $cookie) {
     setcookie($cookie['name'], $cookie['value'], $cookie['expire'], $cookie['path'], $cookie['domain'], $cookie['secure'], $cookie['httponly']);

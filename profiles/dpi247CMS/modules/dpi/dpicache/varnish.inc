@@ -22,12 +22,25 @@ function varnish_purge_all_pages() {
   varnish_purge($host, $path);
 }
 
+
+
 /**
  * Helper function to purge items for a host that matches the provided pattern.
  * @param string $host the host to purge.
  * @param string $pattern the pattern to look for and purge.
  */
-function varnish_purge($host, $pattern) {
+function varnish_purge($host, $pattern,$force_direct_process=FALSE) {
+  //Check purge method: direct or accumulator.
+  _varnish_purge($host, $pattern);
+}
+
+/**
+ * Helper function to purge items for a host that matches the provided pattern.
+ * @param string $host the host to purge.
+ * @param string $pattern the pattern to look for and purge.
+ */
+function _varnish_purge($host, $pattern) {
+  
   // Get the current varnish version, if we are using Varnish 3.x, then we can
   // need to use ban instead of purge.
   $version = floatval(variable_get('varnish_version', 2.1));
@@ -76,6 +89,7 @@ function varnish_get_status() {
  * Utilizes sockets to talk to varnish terminal.
  */
 function _varnish_terminal_run($commands) {
+  dsm($commands,v_commands);
   if (!extension_loaded('sockets')) {
     // Prevent fatal errors if people don't have requirements.
     return FALSE;

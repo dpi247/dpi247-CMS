@@ -83,6 +83,27 @@ function dpidestinations_api_get_all_sections_terms_flat_struct($reset_cache=FAL
 
   return _dpidestinations_api_get_all_sections_terms_from_db($reset_cache);
 }
+function dpidestinations_api_get_all_sections_terms_flat_struct_as_options($reset_cache=FALSE, $load_entities = FALSE){
+  $options=array();
+  $terms= _dpidestinations_api_get_all_sections_terms_from_db($reset_cache);
+  foreach($terms as$term){
+    $options[$term->tid]=$term->name;
+  }
+  return $options;
+}
+
+function dpidestinations_api_get_all_targets_as_options(){
+  
+  $options=array();
+  
+  $targets=dpidestinations_api_get_all_targets();
+  foreach($targets as $target){
+    $options[$target->machine_name]=$target->label;
+  }
+  return $options;
+  
+}
+
 
 function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $parent = 0, $reset_cache = FALSE, $load_entities = FALSE){
   $vid=dpidestinations_api_get_sections_vocabulary_vid();
@@ -169,3 +190,17 @@ function dpidestination_api_get_panelsdisplay_for_sectionterm($term_id){
 function hook_dpidestinations_virtualrank_dispersion($term_id,$target_name,$nids){
   //Clear some cache for example
 }
+
+
+
+
+
+/*
+ * Return all node type that have a field_destination
+ */
+function dpidestinations_api_get_node_type_with_destination_field(){
+  return array(
+    'package'=>'Package'
+  );
+}
+
