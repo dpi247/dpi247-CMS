@@ -228,3 +228,11 @@ function dpicommons_element_children_numeric($element) {
 function dpicommons_element_child_numeric($key) {
   return is_numeric($key);
 }
+
+
+
+function dpicommons_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'panels' && $plugin=='layouts') {
+    return 'plugins/' . $plugin;
+  }
+}
