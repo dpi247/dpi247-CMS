@@ -1,0 +1,162 @@
+<?php 
+
+/**
+ * This test class is for Api dpicache
+ *
+ * @author lba@audaxis.com
+ */
+class SimpleTestDpiCacheApiTestCase extends DrupalWebTestCase{
+
+  /**
+   * Give information about tests
+   * 
+   * @return array:string
+   */
+  public static function getInfo(){
+    return array(
+      'name' => 'Dpicache unit test',
+      'description' => 'Unit test for dpicache.api.inc',
+      'group' => 'Dpicache',
+    );
+  }
+
+  /**
+   * This function is use to create our object into db
+   * (non-PHPdoc)
+   * @see DrupalWebTestCase::setUp()
+   */
+  function setUp() {
+    $this->setup = TRUE;
+    
+    /* create value to test */
+    $entry_information = array(
+      "name" => 'UnitTest_1',
+      "hash" => "ijgzqoiefzefdmozjfzoiejfmq4zef46z4fz",
+      "category" => 'web',
+      "data_type" => "string",
+      "creation_date" => time(),
+      "expiration_date" => intval(time() + 200),
+      "last_run" => time(),
+      "update_freq" => 2*60,
+      "parameters" => serialize(array())
+    );
+    dpicache_save_cache_entry($entry_information, false);
+    $entry_information = array(
+      "name" => 'UnitTest_2',
+      "hash" => "oiejfzepjoqfpzojfqzfe654654efzfz56",
+      "category" => 'web',
+      "data_type" => "string",
+      "creation_date" => time(),
+      "expiration_date" => intval(time() + 200),
+      "last_run" => time(),
+      "update_freq" => 2*60,
+      "parameters" => serialize(array())
+    );
+    dpicache_save_cache_entry($entry_information, false);
+  }
+
+  function tearDown() { }
+  
+  /**
+   * Test if regenerate url is correctly create to regenerate cache.
+   */
+  function testApiDpiCacheApiGetRegenerateUrl(){
+    $result = dpicache_api_get_regenerate_url('UnitTest_2', 'coucou','moi');
+    $this->assertEqual($result, 'dpicache/regenerate/one_cache_entry/UnitTest_2/coucou/moi','Return Url that we waiting', 'DpiCache');
+  }
+  
+  /**
+   * Test for dpi_variable_set.
+   */
+  function testApiDpiVariableSet(){
+    /* create value for all unit test */
+    dpi_variable_set('UnitTestValue1', 'coucou');
+    dpi_variable_set('UnitTestValue2', 'coucou');
+    dpi_variable_set('UnitTestValue3', 'coucou');
+    
+    /* get first value setted to my db */
+    $query = db_select('dpi_variables','v');
+    $result = $query->condition('name','UnitTestValue1','=')->fields('v',array('value'))->execute();
+    
+    /* this is presence */
+    $this->assertEqual($result->rowCount(), 1, 'Result is correctly saved to my db', 'DpiCache');
+    
+    /* change value to final test setted value */
+    dpi_variable_set('UnitTestValue1', 'toto');
+    
+    /* get new value */
+    $query = db_select('dpi_variables','v');
+    $result = $query->condition('name','UnitTestValue1','=')->fields('v',array('value'))->execute();
+    foreach($result as $row){
+      $info = $row;
+    }
+  
+    /* test is result */
+    $this->assertEqual(unserialize($info->value), 'toto','Field is correctly setted', 'DpiCache');
+  }
+  
+  /**
+   * Test for Dpi_variable_get.
+   */
+  function testApiDpiVariableGet(){
+    $result = dpi_variable_get('UnitTestValue1', null);
+    $this->assertEqual($result, 'toto', 'Value return from the table is correct', 'DpiCache');
+  }
+  
+  /**
+   * Test for Dpi_variable_get_all.
+   */
+  function testApidpi_variable_get_all(){
+    $this->assertTrue(count(dpi_variable_get_all())>=3, "We have 3 or more than 3 informations and it's what we want" ,"DpiCache");
+  }
+  
+  /**
+   * Test for dpi_variable_del.
+   */
+  function testApiDpiVariableDel(){
+    dpi_variable_del('UnitTestValue1');
+    
+    $query = db_select('dpi_variables','v');
+    $result = $query->condition('name','UnitTestValue1','=')->fields('v',array('value'))->execute();
+    $info = new stdClass();
+    foreach($result as $row){
+      $info = $row;
+    }
+    $this->assertTrue(isset($info), "value is null, it's what we want", "DpiCache");
+  }
+  
+  /**
+   * Test for Dpi_variable_del_namespace.
+   */
+  function testApiDpiVariableDelNamespace(){
+    
+    /*  */
+    dpi_variable_del_namespace('UnitTestValue', 'dpi');
+    
+    /* get first value setted to my db */
+    $query = db_select('dpi_variables','v');
+    $result = $query->condition('name','UnitTestValue%','LIKE')->fields('v',array('value'))->execute();
+    
+    /* this is presence */
+    $this->assertEqual($result->rowCount(), 0, 'Result is correctly deleted by her spacename', 'DpiCache');
+  }
+  
+  /**
+   * Function use to delete all information using into our database.
+   */
+  function testApiDpiCacheDeleteEntryForTest(){
+    $or = db_or()->condition('name','UnitTest_1')->condition('name', 'UnitTest_2');
+    db_delete('dpicache_cache_entries')->condition($or)->execute();
+  
+    $query = db_select('dpicache_cache_entries','d')->condition('name','UnitTest_%','LIKE')->fields('d',array('name'))->execute();
+    $info = null;
+    foreach ($query as $row){
+      $info = $row;
+    }
+  
+    $this->assertNull($info, 'Delete informations for test is success', 'DpiCache');
+  }
+
+}
+
+?>
