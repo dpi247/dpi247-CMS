@@ -69,7 +69,7 @@ function dpi247CMS_install() {
   filter_format_save($full_html_format);
 
   // Enable some standard blocks.
-  $admin_theme = 'seven';
+  $admin_theme = 'shiny';
   $blocks = array(
     array(
       'module' => 'system',
@@ -155,9 +155,9 @@ function dpi247CMS_install() {
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
-    ->condition('name', 'seven')
+    ->condition('name', $admin_theme)
     ->execute();
-  variable_set('admin_theme', 'seven');
+  variable_set('admin_theme', $admin_theme);
   variable_set('node_admin_theme', '1');
 }
 
