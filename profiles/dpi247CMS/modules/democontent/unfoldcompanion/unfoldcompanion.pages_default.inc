@@ -14,9 +14,10 @@ function unfoldcompanion_default_page_manager_handlers() {
   $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
   $handler->name = 'node_view_destination_context';
+  
   $handler->task = 'node_view';
   $handler->subtask = '';
-  $handler->handler = 'dpipanels_context';
+  $handler->handler = 'dpisectionspanels_context';
   $handler->weight = 0;
   $handler->conf = array(
     'title' => 'Default Node Page',
