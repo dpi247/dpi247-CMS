@@ -90,18 +90,20 @@ function dpidestinations_menu() {
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
-  $items['section/%taxonomy_term'] = array(
+  $items['section/%section'] = array(
     'title' => 'Section term',
     'title callback' => 'taxonomy_term_title',
     'title arguments' => array(1),
-    'page callback' => 'taxonomy_term_page',
+    'page callback' => 'toto',
     'page arguments' => array(1),
-    'access arguments' => array('access content'),
-    'file' => 'taxonomy.pages.inc',
-    'path'=>drupal_get_path('module','taxonomy'),
+    'access arguments' => TRUE,
+   
   );
 
   return $items;
+}
+function toto($r){
+  return 'coou';
 }
 
 function dpidestinations_menu_alter(&$items) {
@@ -233,6 +235,8 @@ function dpidestinations_form_page_manager_handler_add_alter(&$form, $form_state
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
+  
+  
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController = new TargetBlockController('targetblock');
   $existing_targetblocks = $targetController->load_targetblocks_by_panels_display($display->did);
