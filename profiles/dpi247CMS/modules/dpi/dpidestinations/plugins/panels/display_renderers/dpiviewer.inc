@@ -20,7 +20,7 @@ $plugin = array(
  * 
  * 
  */
-class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
+class dpidestinations_renderer_dpiviewer extends dpidestinations_renderer_ipe {
   // The IPE operates in normal render mode, not admin mode.
   var $admin = FALSE;
 /*
@@ -443,6 +443,9 @@ class dpidestinations_renderer_dpiviewer extends panels_renderer_standard {
   */
 }
 
+
+
+
 /**
  * FAPI callback to create the Save/Cancel form for the IPE.
  */
@@ -499,3 +502,14 @@ function dpidestinations_ipe_toolbar_add_button($cache_key, $id, $button) {
   $buttons = &drupal_static('dpidestinations_ipe_toolbar_buttons', array());
   $buttons[$cache_key][$id] = $button;
 }
+
+
+
+
+
+
+
+
+
+
+
