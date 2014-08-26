@@ -381,6 +381,19 @@ function dpidestinations_page_section_view($destination){
   return t('You need to activate the page manager');
 }
 
+
+
+/**
+ * Implementation of hook_views_plugins
+ */
+function dpidestinations_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
+    //'template path' => drupal_get_path('module', 'example') . '/themes',
+  );
+}
+
 /**
  * Implementation of hook_views_plugins
  */
