@@ -45,6 +45,7 @@ dependencies[] = scald_vimeo
 dependencies[] = scald_youtube
 dependencies[] = scald_dailymotion
 dependencies[] = taxonomy_menu
+dependencies[] = panels_ipe
 
 ; Dpi-Core
 dependencies[] = dpicontenttypes
