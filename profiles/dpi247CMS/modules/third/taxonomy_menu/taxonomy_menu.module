@@ -583,7 +583,6 @@ function taxonomy_menu_handler($op, $args = array(), $node = NULL, $item = array
  */
 function _taxonomy_menu_save($item) {
   $insert = TRUE;
-
   $flatten_menu = variable_get(_taxonomy_menu_build_variable('flat',
 $item['vid']));
   // Child items should appear around the parent/root, so set their weight
@@ -662,7 +661,6 @@ $item['vid']));
 
   // If remove is true then set hidden to 1
   $link['hidden'] = (isset($item['remove']) && $item['remove']) ? 1 : 0;
-
   // Save the menu item
   if ($mlid = menu_link_save($link)) {
     // if inserting a new menu item then insert a record into the table
@@ -728,10 +726,17 @@ function taxonomy_menu_path_default($vid, $tid) {
     // get all of the terms for the vocab
     $vtids = _taxonomy_menu_get_terms($vid);
     $end = implode(' ', $vtids);
-    $path = "taxonomy/term/$end";
+    $term = taxonomy_term_load($end);
+    $uri = entity_uri('taxonomy_term', $term);
+    $path = $uri['path'];
+    
   }
   else {
-    $path = 'taxonomy/term/' . $tid;
+    $term = taxonomy_term_load($tid);
+    $uri = entity_uri('taxonomy_term', $term);
+    $path = $uri['path'];
+    
+    //$path = 'taxonomy/term/' . $tid;
     if (variable_get(_taxonomy_menu_build_variable('display_decendants', $vid), FALSE)) {
       // Use 'all' at the end of the path
       if (variable_get(_taxonomy_menu_build_variable('end_all', $vid), FALSE)) {
