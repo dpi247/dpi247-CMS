@@ -1,5 +1,4 @@
 <?php
-dsm('rrr');
 // Plugin definition
 $plugin = array(
   'title' => t('Two column 66/33'),
