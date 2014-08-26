@@ -454,9 +454,35 @@ function dpidestinations_views_plugins() {
   );
 }
 
-function dpidestinations_views_api() {
-  return array('api' => 2
+/*
+ * Implementation of hook_contextual_links_view_alter
+ */
+function dpidestinations_contextual_links_view_alter(&$element, $items){
+  
+  //make sure we override contextual links for a view
+  if(isset($element['#element']["#views_contextual_links_info"]["views_ui"])){
+    //make sure we override contextual links for a target view
+    if(isset($element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_tid)){
+      $tid=$element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_tid;
+      $target=$element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_target;
+      
+      $element['#links']['dpidestinations-reorder']= array(
+      'title' => t('Reorder the target'),
+      'href' => 'admin/targetview_reorder/'.$tid.'/'.$target,
+    );
+    }
+  }
+}
+
+
+/*
+ * Implementation of hook_admin_paths_alter
+*/
+function dpidestinations_admin_paths() {
+  $paths = array(
+    'admin/targetview_reorder/*/*' => TRUE,
   );
+  return $paths;
 }
 
 /**
