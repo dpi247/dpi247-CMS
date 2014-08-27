@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+
+
+div.meta span.author{
+	font-size:12px;
+}
+
+ul li{
+	color:#444444;
+}
+
+
+.article-group li.views-row {
+margin-bottom: 9.5px;
+border-bottom: 1px solid #d4d7cb;
+}
+
+
+span.cat a{
+	color: #b8240d;
+	
+}

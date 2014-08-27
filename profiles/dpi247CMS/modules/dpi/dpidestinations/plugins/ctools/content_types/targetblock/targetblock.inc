@@ -47,7 +47,6 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $target_name = $subtype;
   $split_delta = $conf["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
-
   return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title);
 }
 

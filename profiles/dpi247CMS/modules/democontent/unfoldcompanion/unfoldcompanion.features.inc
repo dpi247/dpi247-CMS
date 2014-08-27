@@ -27,7 +27,17 @@ function unfoldcompanion_default_target() {
   $items = array();
   $items['main'] = entity_import('target', '{
     "machine_name" : "main",
-    "label" : "Main",
+    "label" : "Main content",
+    "view_name" : "default_targetview",
+    "view_display" : "targetview_1",
+    "description" : "Main target",
+    "available_targetlayouts" : "a:7:{s:17:\\u0022targetblock_small\\u0022;s:17:\\u0022targetblock_small\\u0022;s:18:\\u0022targetblock_medium\\u0022;s:18:\\u0022targetblock_medium\\u0022;s:15:\\u0022targetblock_big\\u0022;s:15:\\u0022targetblock_big\\u0022;s:15:\\u0022targetblock_red\\u0022;s:15:\\u0022targetblock_red\\u0022;s:4:\\u0022full\\u0022;i:0;s:6:\\u0022teaser\\u0022;i:0;s:7:\\u0022package\\u0022;i:0;}",
+    "available_templateoverrides" : "",
+    "rdf_mapping" : []
+  }');
+  $items['main'] = entity_import('target', '{
+    "machine_name" : "secondayr",
+    "label" : "Secondary content",
     "view_name" : "default_targetview",
     "view_display" : "targetview_1",
     "description" : "Main target",
