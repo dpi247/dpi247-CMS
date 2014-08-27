@@ -97,6 +97,10 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
   $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
 }
 
+
+function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
+}
+
 /**
  * Implementation of hook_entity_property_info_alter
  * Add Dpiproperties setter/getter to set/get dpiproperties on an object

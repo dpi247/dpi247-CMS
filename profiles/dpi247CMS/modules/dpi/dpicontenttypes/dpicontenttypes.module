@@ -290,8 +290,6 @@ function dpicontenttypes_file_delete($file) {
   dpicontenttypes_api_image_path_flush($file->uri);
 }
 
-function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
-}
 
 /**
  * Implements hook_scald_contexts().
