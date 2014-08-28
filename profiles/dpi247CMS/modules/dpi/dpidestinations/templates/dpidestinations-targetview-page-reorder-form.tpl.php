@@ -46,7 +46,6 @@ drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
   <tbody>
     <?php $row = 0; ?>
       <?php foreach ($node_listing as $delta => $data): ?>
-      <?php dsm($data);?>
       <tr class="draggable <?php print $row % 2 == 0 ? 'odd' : 'even'; ?>">
         <td class="node"><?php print $data->node_title; ?></td>
         <td><?php print $data->publication_date; ?></td>
