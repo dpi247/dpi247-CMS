@@ -160,7 +160,6 @@ function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $pa
 
 function dpidestinations_api_get_all_sections_term_available_as_select_options($is_update) {
   $terms = dpidestinations_api_get_all_sections_terms_flat_struct();
-  dsm($terms);
   if($is_update) {
     $options = array('' => t('Remove this destination'));
   }
@@ -169,7 +168,9 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
   }
 
   foreach ($terms as $term) {
-    $options[(int)$term->tid] = $term->name;
+    $depth=term_depth($term);
+    $level=str_repeat ('-',$depth);
+    $options[(int)$term->tid] = $level.$term->name;
   }
 
   return $options;
