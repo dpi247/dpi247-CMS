@@ -171,7 +171,8 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
   $vid = dpidestinations_api_get_sections_vocabulary_vid();
   
   if ($vocabulary = taxonomy_vocabulary_machine_name_load($vid)) {
-    if ($terms = taxonomy_get_tree($vocabulary->vid, $tree['parent'])) {
+    if ($terms = taxonomy_get_tree($vid, $tree['parent'])) {
+      
       foreach ($terms as $term) {
         $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
       }
