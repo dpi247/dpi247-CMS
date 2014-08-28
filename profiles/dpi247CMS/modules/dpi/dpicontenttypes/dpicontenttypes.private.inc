@@ -94,7 +94,9 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
 function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
 
   $language=$form["language"]["#value"];
-  dsm($language,lang);
+  if(!isset($language)){
+    $language='und';
+  }
   $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
 }
 
