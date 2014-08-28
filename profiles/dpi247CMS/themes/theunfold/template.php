@@ -26,7 +26,7 @@ function theunfold_theme() {
   );
 }
 function theunfold_preprocess_($variables, $base_theme){
-  dsm($variables);
+  
 }
 
 function theunfold_preprocess_page(&$vars) {
@@ -153,7 +153,6 @@ function theunfold_preprocess_field(&$variables) {
       if($element['#formatter'] == 'links_list_small'){
         $variables['theme_hook_suggestions'][] = 'field__field_linkslists_small__package';
       }
-      dsm($variables);
       break;
 /*
     case 'field_textbarette':
