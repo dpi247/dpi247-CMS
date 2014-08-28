@@ -169,7 +169,7 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
 
   foreach ($terms as $term) {
     $depth=term_depth($term->tid);
-    $level=str_repeat ('-',$depth);
+    $level=str_repeat('-',$depth);
     $options[(int)$term->tid] = $level.$term->name;
   }
 
