@@ -89,6 +89,15 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
   return $file;
 }
 
+
+
+function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
+
+  $language=$form["language"]["#value"];
+  dsm($language,lang);
+  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
+}
+
 /**
  * Checks whether a directory exists and is writable.
  *
