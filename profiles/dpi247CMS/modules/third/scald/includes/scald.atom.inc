@@ -31,7 +31,6 @@ function scald_atom_view($atom, $context = 'full', $langcode = NULL) {
   $build = $atom->content;
   // We don't need duplicate rendering info in atom->content.
   unset($atom->content);
-
   return $build;
 }
 

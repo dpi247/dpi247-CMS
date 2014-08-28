@@ -404,7 +404,7 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->pid = 'new-7916302a-c84c-4258-b4ae-fe91f7b0c9e4';
   $pane->panel = 'complementary';
   $pane->type = 'targetblock';
-  $pane->subtype = 'main';
+  $pane->subtype = 'secondary_content';
   $pane->shown = TRUE;
   $pane->access = array();
   $pane->configuration = array(
