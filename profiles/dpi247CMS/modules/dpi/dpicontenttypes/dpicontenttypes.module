@@ -52,7 +52,7 @@ function dpicontenttypes_menu(){
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
-  $items['admin/structure/dpiproperties-types/%dpiproperties_type/delete'] = array(
+  $items['admin/dpi247/dpiproperties-types/%dpiproperties_type/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpiproperties_type_form_delete_confirm', 4),
@@ -217,6 +217,14 @@ function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
   if (isset($form['#entity_type']) && isset($form['#bundle']) && isset($form['#entity']) && is_object($form['#entity'])) { // This is an entity edition form
     module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.cropings');
     _dpicontenttypes_cropings_entity_form_add_cropings_alter($form, $form_alter, $form_id);
+  }
+}
+
+function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
+  if(isset($form["field_displaytitle"])){
+  $form["title"]["#type"]='value';
+  $form["title"]["#required"]=FALSE;
+  $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
   }
 }
 

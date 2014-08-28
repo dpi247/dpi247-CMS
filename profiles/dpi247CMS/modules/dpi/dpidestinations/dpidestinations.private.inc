@@ -909,4 +909,14 @@ function _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_t
 
     return $view_mode;
   }
+  
+}
+
+
+
+
+function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
+
+  $language=$form["language"]["#value"];
+  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
 }
