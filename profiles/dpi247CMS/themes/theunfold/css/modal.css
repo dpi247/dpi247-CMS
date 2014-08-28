@@ -642,11 +642,6 @@ ul.action-links a {
  * DLA custom
  */
 
-div.panels-ipe-region {
-   border: #000 double 1px;
-   padding: 2px 2px 2px 2px;
-}
-
 div.panels-ipe-placeholder {
    border: 0px;
    padding: 0 0 0 0;
@@ -655,7 +650,6 @@ div.panels-ipe-placeholder {
 div.panels-ipe-placeholder h3 {
    width: 100%;
 }
-
 
 div.panels-ipe-newblock {
    box-shadow: 0;
