@@ -620,6 +620,7 @@ function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id
   $options=array();
   $targets= _dpidestinations_get_targets_for_sectionterm($term_id);
   foreach($targets as $subtype=>$target){
+    dsm($target);
     $options[$subtype]=$target->label;
   }
 
