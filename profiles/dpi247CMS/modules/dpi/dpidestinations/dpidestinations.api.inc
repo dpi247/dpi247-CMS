@@ -159,7 +159,6 @@ function dpidestinations_api_get_all_sections_terms_hierachical_struct($vid, $pa
 }
 
 function dpidestinations_api_get_all_sections_term_available_as_select_options($is_update) {
-  $terms = dpidestinations_api_get_all_sections_terms_flat_struct();
   if($is_update) {
     $options = array('' => t('Remove this destination'));
   }
@@ -169,9 +168,10 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
 
 
   $vid = dpidestinations_api_get_sections_vocabulary_vid();
-  
-  if ($vocabulary = taxonomy_vocabulary_machine_name_load($vid)) {
-    if ($terms = taxonomy_get_tree($vid, $tree['parent'])) {
+  $vocabularies=taxonomy_get_vocabularies();
+  $vocabulary=$vocabularies[$vid];$vocabulary;
+  if ($vocabulary = taxonomy_vocabulary_machine_name_load($vocabulary->name)) {
+    if ($terms = taxonomy_get_tree($vid, 0)) {
       
       foreach ($terms as $term) {
         $options[$term->tid] = str_repeat('-', $term->depth) . $term->name;
