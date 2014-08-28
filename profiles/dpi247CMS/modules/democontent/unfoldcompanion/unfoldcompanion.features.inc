@@ -65,10 +65,30 @@ function unfoldcompanion_default_target() {
  */
 function unfoldcompanion_default_targetblock() {
   $items = array();
+  /*
+  $items['1'] = entity_import('targetblock', '{
+      "targetblockid" : "1",
+      "machine_name" : null,
+      "target" : "main_content",
+      "page_manager_handlers_did" : null,
+      "node_count_for_targetblockinstance" : "10",
+      "use_pager" : "0",
+      "offset" : "0",
+      "hide_pager" : "0",
+      "use_split" : "",
+      "split_delta" : "0",
+      "did" : "1",
+      "pid" : "1",
+      "template_rule" : null,
+      "node_count_for_targetblock" : "10",
+      "pager_type" : "mini",
+      "rank_max_value" : "5",
+      "rdf_mapping" : []
+}');
   $items['2'] = entity_import('targetblock', '{
       "targetblockid" : "2",
       "machine_name" : null,
-      "target" : "main_content",
+      "target" : "secondary_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
       "use_pager" : "0",
@@ -84,5 +104,63 @@ function unfoldcompanion_default_targetblock() {
       "rank_max_value" : "5",
       "rdf_mapping" : []
 }');
+  $items['3'] = entity_import('targetblock', '{
+      "targetblockid" : "2",
+      "machine_name" : null,
+      "target" : "extra_content",
+      "page_manager_handlers_did" : null,
+      "node_count_for_targetblockinstance" : "10",
+      "use_pager" : "0",
+      "offset" : "0",
+      "hide_pager" : "0",
+      "use_split" : "",
+      "split_delta" : "0",
+      "did" : "1",
+      "pid" : "3",
+      "template_rule" : null,
+      "node_count_for_targetblock" : "10",
+      "pager_type" : "mini",
+      "rank_max_value" : "5",
+      "rdf_mapping" : []
+}');
+  $items['4'] = entity_import('targetblock', '{
+      "targetblockid" : "2",
+      "machine_name" : null,
+      "target" : "main_content",
+      "page_manager_handlers_did" : null,
+      "node_count_for_targetblockinstance" : "10",
+      "use_pager" : "0",
+      "offset" : "0",
+      "hide_pager" : "0",
+      "use_split" : "",
+      "split_delta" : "0",
+      "did" : "2",
+      "pid" : "4",
+      "template_rule" : null,
+      "node_count_for_targetblock" : "10",
+      "pager_type" : "mini",
+      "rank_max_value" : "5",
+      "rdf_mapping" : []
+}');
+  $items['5'] = entity_import('targetblock', '{
+      "targetblockid" : "2",
+      "machine_name" : null,
+      "target" : "extra_content",
+      "page_manager_handlers_did" : null,
+      "node_count_for_targetblockinstance" : "10",
+      "use_pager" : "0",
+      "offset" : "0",
+      "hide_pager" : "0",
+      "use_split" : "",
+      "split_delta" : "0",
+      "did" : "2",
+      "pid" : "5",
+      "template_rule" : null,
+      "node_count_for_targetblock" : "10",
+      "pager_type" : "mini",
+      "rank_max_value" : "5",
+      "rdf_mapping" : []
+}');
+  */
   return $items;
 }
