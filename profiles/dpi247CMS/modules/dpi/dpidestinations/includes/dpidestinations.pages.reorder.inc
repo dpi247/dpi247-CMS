@@ -72,7 +72,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     );
   
     $form['nodes'][$node->nid]['edit'] = array(
-      '#markup' => $node->node_title,
+      '#markup' => $node->title,
     );
   }
   
