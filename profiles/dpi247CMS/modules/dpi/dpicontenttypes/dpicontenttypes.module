@@ -340,8 +340,8 @@ function dpicontenttypes_scald_contexts() {
       'formats'         => array(),
     ),
     'links_list'      => array(
-      'title'           => t('DPI TargetBlock Big'),
-      'description'     => t('When atom is displayed in a package with big layout.'),
+      'title'           => t('DPI LinkList'),
+      'description'     => t('When linklist atom is displayed in a package.'),
       'render_language' => 'XHTML',
       'parseable'       => TRUE,
       'formats'         => array(),
