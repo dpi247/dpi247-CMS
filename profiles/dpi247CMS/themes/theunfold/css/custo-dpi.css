@@ -32,3 +32,9 @@ figure.no_width{
 .small_content aside{
 	float: none;
 }
+
+
+.item-list ul li {
+margin: 0 ;
+padding: 0;
+}
