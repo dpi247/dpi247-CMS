@@ -25,9 +25,9 @@ function unfoldcompanion_views_api($module = NULL, $api = NULL) {
  */
 function unfoldcompanion_default_target() {
   $items = array();
-  $items['main'] = entity_import('target', '{
+  $items['main_content'] = entity_import('target', '{
       "machine_name" : "main_content",
-      "label" : "Main content",
+      "label" : "Main Content",
       "view_name" : "default_targetview",
       "view_display" : "targetview_1",
       "description" : "THe main block in a page section",
@@ -58,6 +58,8 @@ function unfoldcompanion_default_target() {
   return $items;
 }
 
+
+
 /**
  * Implements hook_default_targetblock().
  */
@@ -66,7 +68,7 @@ function unfoldcompanion_default_targetblock() {
   $items['2'] = entity_import('targetblock', '{
       "targetblockid" : "2",
       "machine_name" : null,
-      "target" : "main",
+      "target" : "main_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
       "use_pager" : "0",
