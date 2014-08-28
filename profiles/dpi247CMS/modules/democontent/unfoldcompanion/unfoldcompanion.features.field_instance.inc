@@ -2668,7 +2668,7 @@ function unfoldcompanion_field_default_field_instances() {
         'module' => 'link',
         'settings' => array(),
         'type' => 'link_default',
-        'weight' => 5,
+        'weight' => -1,
       ),
     ),
     'entity_type' => 'scald_atom',

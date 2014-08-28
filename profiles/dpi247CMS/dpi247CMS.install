@@ -332,12 +332,9 @@ function _dpi247CMS_install_demo_contents_full() {
       $copied_term = clone $base_term;
       $copied_term->name = $term;
       taxonomy_term_save($copied_term);
-      watchdog('r',coucou3);
     }
-    watchdog('r',coucou2);
     
   }
-  watchdog('r',coucou1);
   
 
   // Add default destinations terms

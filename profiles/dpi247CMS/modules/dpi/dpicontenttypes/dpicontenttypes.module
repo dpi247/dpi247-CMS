@@ -222,9 +222,9 @@ function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
 
 function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
   if(isset($form["field_displaytitle"])){
-  $form["title"]["#type"]='value';
-  $form["title"]["#required"]=FALSE;
-  $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
+    $form["title"]["#type"]='value';
+    $form["title"]["#required"]=FALSE;
+    $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
   }
 }
 
@@ -356,6 +356,34 @@ function dpicontenttypes_scald_contexts() {
   );
 }
 
+/*
+ * Implementation of hook_admin_paths_alter
+*/
+function dpicontenttypes_admin_paths_alter(&$paths) {
+  $paths['node/*/edit'] = FALSE;
+  $paths['node/add'] = FALSE;
+  $paths['node/add/*'] = FALSE;
+  $paths['admin/structure/pages/*'] = FALSE;
+}
+
+/*
+ * Implementation of hook_custom_theme
+*/
+function dpicontenttypes_custom_theme(){
+
+  $menu_item=menu_get_item();
+  $path=$menu_item['path'];
+  if(strstr($path,'node/add')){
+    return 'shiny';
+  }
+  if(strstr($path,'node/edit')){
+    return 'shiny';
+  }
+  if(strstr($path,'admin/structure/pages')){
+    return 'shiny';
+  }
+}
+
 /**
  * Implementation of hook_scald_transcoders_alter
  *
@@ -410,7 +438,7 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
 
 /**
  * Implements hook_scald_render
- * 
+ *
  * This should be used only for dpi inline, dpi mediabox and dpi simpleimg scald's context
  */
 function dpicontenttypes_scald_render($atom, $context, $options) {
@@ -477,7 +505,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
 
 /**
  * Implementation of hook_scald_atom_insert
- * 
+ *
  * Create a dpi properties linked to the new atom
  *
  * @param Object $atom
@@ -488,7 +516,7 @@ function dpicontenttypes_scald_atom_insert($atom) {
 
 /**
  * Implementation of hook_scald_atom_delete
- * 
+ *
  * Delete the dpiproperties linked to the atom
  *
  * @param Object $atom
@@ -499,7 +527,7 @@ function dpicontenttypes_scald_atom_delete($atom) {
 
 /**
  * Implementation of hook_field_attach_view_alter
- * 
+ *
  * Add package nid to scald tag to get it as an option
  */
 function dpicontenttypes_field_attach_view_alter(&$output, $context) {

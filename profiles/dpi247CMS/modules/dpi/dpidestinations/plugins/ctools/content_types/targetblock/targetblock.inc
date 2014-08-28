@@ -9,6 +9,8 @@ $plugin = array(
   //'required context' => new ctools_context_required(t('Destination'), 'destination'),
   'category' => t('Target'),
   'group' => t('DPI Core'),
+  'admin info' => 'dpidestinations_targetblock_admin_info',
+  
   'all contexts' => TRUE,
 );
 
@@ -32,6 +34,37 @@ function dpidestinations_targetblock_content_type_content_types($plugin) {
   }
 
   return $types;
+}
+
+function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
+  dsm($conf);
+  dsm($subtype);
+
+  if($conf['use_pager']==0){
+    $pager='Pas de pager';
+  }
+  else{
+    $pager=$conf['pager_type'];
+  }
+ 
+  if($conf['use_split']!=0){
+    $split='(Split)';
+  }
+  
+  
+    $block = new stdClass;
+    $block->title = 'Target : <strong>'.$subtype.'</strong> '.$split;
+    $block->content = t('Showing: <em>@row_count nodes</em><br/> 
+        Nombre de position reservées: <em>@reserved_position</em><br/>
+        Pager: <em>@pager</em>.<br/>
+        
+        ', array(
+       '@reserved_position'   =>$conf['rank_max_value'],
+      '@row_count' => $conf['node_count_for_targetblockinstance'],
+      '@pager' => $pager,
+        ));
+    return $block;
+  
 }
 
 /**
