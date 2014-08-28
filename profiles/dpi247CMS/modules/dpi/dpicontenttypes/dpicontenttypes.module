@@ -346,6 +346,13 @@ function dpicontenttypes_scald_contexts() {
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
+    'links_list_small'      => array(
+      'title'           => t('DPI LinkList small'),
+      'description'     => t('When linklist atom is displayed in a context.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
   );
 }
 
@@ -419,9 +426,9 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
       $view_mode = "full";
 
       $temporary_content = scald_atom_view($atom, $context);
-
+      
       $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
-
+      
       //Don't show title, not needed
       $atom->rendered->title = '';
     }
@@ -474,16 +481,15 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
             }
           }
         }
-
+        
         $content = scald_atom_view($atom, $context);
-
+        
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
           unset($content['field_displaytitle']);
           unset($content['field_linkitems']);
         }
-
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.

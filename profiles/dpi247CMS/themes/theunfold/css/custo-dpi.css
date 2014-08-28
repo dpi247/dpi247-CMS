@@ -20,3 +20,11 @@ span.cat a{
 	color: #b8240d;
 	
 }
+
+figure.no_width{
+	width: 100% !important;
+}
+
+.color-red{
+	color: #B8240D !important;
+}
