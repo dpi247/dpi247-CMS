@@ -135,11 +135,11 @@ function dpicommons_form_devel_admin_settings_alter(&$form, $form_alter) {
 
 /**
  * dpilog is used to log some actions (user interactions and system actions).
- * 
+ *
  * dpilog is more powerfull than watchdog since you have more granularit to groups log and have the ability to save some variable and one id.
  * dpilog is also a wrapper for the watchdog fonction.
  * No need to use both cause dpilog can trigger a watchdog based on settings in the dpilog settings page.
- * 
+ *
  * @param string $log_name
  *   A string used to to identify the log category (see the related hook_dpilog_register).
  * @param string $action
@@ -159,9 +159,9 @@ function dpicommons_form_devel_admin_settings_alter(&$form, $form_alter) {
  * @param boolean $keep_backtrace
  *   If TRUE it will keep the backtrace as a vardump
  *
- * @see hook_dpilog_register() 
- * @see _dpilog() 
- * 
+ * @see hook_dpilog_register()
+ * @see _dpilog()
+ *
  */
 function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
   if (module_exists('dpilog')) {
@@ -239,7 +239,7 @@ function dpicommons_ctools_plugin_directory($module, $plugin) {
 
 
 function term_depth($tid) {
-  $parent = db_result(db_query("SELECT parent FROM {term_hierarchy} WHERE tid=%d", $tid));
+  $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", array(':tid' => $tid))->fetchField();
   if($parent == 0) {
     return 1;
   }else  {
