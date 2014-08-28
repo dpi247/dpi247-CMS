@@ -43,8 +43,10 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta =count($nodes);
   $original_weight=0;
   
-  dsm($nodes,nodes);
+  //dsm($nodes,nodes);
   foreach($nodes as $node){
+    //@todo: fix this performance issues: $nodes should contain all the data such as title
+    $node=node_load($node->nid);
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
       '#default_value' => 0,
