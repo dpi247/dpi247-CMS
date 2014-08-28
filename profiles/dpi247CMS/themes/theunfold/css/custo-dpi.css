@@ -28,3 +28,7 @@ figure.no_width{
 .color-red{
 	color: #B8240D !important;
 }
+
+.small_content aside{
+	float: none;
+}
