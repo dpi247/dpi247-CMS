@@ -649,10 +649,14 @@ div.panels-ipe-placeholder {
 
 div.panels-ipe-placeholder h3 {
    width: 100%;
+   margin-left: 10px;
 }
 
-div.panels-ipe-newblock {
-   box-shadow: 0;
-   -webkit-box-shadow: 0;
-   -moz-box-shadow: 0;
+span#modal-title {
+  color: #000;
+}
+
+
+div.ctools-modal-content a.close {
+  color: #F00;
 }
