@@ -652,3 +652,6 @@ div.panels-ipe-placeholder h3 {
    margin-left: 10px;
 }
 
+span#modal-title {
+  color: #000;
+}
