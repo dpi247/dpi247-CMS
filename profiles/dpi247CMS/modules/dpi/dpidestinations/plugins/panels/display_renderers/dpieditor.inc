@@ -191,6 +191,8 @@ class dpidestinations_renderer_ipe extends dpidestinations_renderer_dpieditor {
     ctools_add_js('panels_ipe', 'panels_ipe');
     ctools_add_css('panels_ipe', 'panels_ipe');
 
+    ctools_add_css('ctools-modal', 'dpidestinations');
+    
     drupal_add_js(array('PanelsIPECacheKeys' => array($this->clean_key)), 'setting');
 
     drupal_add_library('system', 'ui.draggable');
