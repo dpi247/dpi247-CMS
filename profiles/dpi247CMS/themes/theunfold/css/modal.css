@@ -655,3 +655,8 @@ div.panels-ipe-placeholder h3 {
 span#modal-title {
   color: #000;
 }
+
+
+div.ctools-modal-content a.close {
+  color: #F00;
+}
