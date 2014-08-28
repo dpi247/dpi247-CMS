@@ -45,5 +45,5 @@ padding: 0;
 }
 
 .twitter-timeline{
-	width:100%;
+	width:100% !important; 
 }
