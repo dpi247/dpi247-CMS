@@ -170,7 +170,7 @@ function   unfoldcompanionminimal_node_view_package_infos(&$node, $view_mode, $l
       $date = $node->content['field_editorialpublicationdate'];
     }
     $authors=array();
-    if($node->content['field_authors']){
+    if(isset($node->content['field_authors'])){
       $authors = $node->content['field_authors'];
     }
     $template_fields = array(
