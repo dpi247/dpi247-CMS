@@ -38,3 +38,8 @@ figure.no_width{
 margin: 0 ;
 padding: 0;
 }
+
+/* Pour positionner correctement les contextual links */
+.views-row{
+	position:relative;
+}
