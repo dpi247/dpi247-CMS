@@ -97,7 +97,7 @@ function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element,
   if(!isset($language)){
     $language='und';
   }
-  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
+  $form_state['values']['title']=$form_state['values']['field_displaytitle'][$language][0]['value'];
 }
 
 /**
