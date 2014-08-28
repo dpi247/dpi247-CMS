@@ -643,6 +643,15 @@ ul.action-links a {
  */
 
 div.panels-ipe-region {
-border: 1px dotted #000;
-padding: 2px 2px 2px 2px;
+   border: 1px dotted #000;
+   padding: 2px 2px 2px 2px;
+}
+
+div.panels-ipe-placeholder {
+   border: 0px;
+   padding: 0 0 0 0;
+}
+
+div.panels-ipe-placeholder h3 {
+   width: 100%;
 }
