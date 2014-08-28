@@ -286,7 +286,7 @@ span.panels-ipe-draghandle-icon:active {
 }
 
 .panels-ipe-editing .panels-ipe-region {
-  border: transparent dotted 1px;
+  border: #000 dotted 2px;
   float: left;
   width: 100%;
   margin-bottom: 5px;
