@@ -236,3 +236,13 @@ function dpicommons_ctools_plugin_directory($module, $plugin) {
     return 'plugins/' . $plugin;
   }
 }
+
+
+function term_depth($tid) {
+  $parent = db_result(db_query("SELECT parent FROM {term_hierarchy} WHERE tid=%d", $tid));
+  if($parent == 0) {
+    return 1;
+  }else  {
+    return 1+term_depth($parent);
+  }
+}
