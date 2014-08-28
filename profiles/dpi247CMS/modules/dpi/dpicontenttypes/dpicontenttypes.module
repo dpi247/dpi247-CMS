@@ -356,6 +356,7 @@ function dpicontenttypes_admin_paths_alter(&$paths) {
   $paths['node/*/edit'] = FALSE;
   $paths['node/add'] = FALSE;
   $paths['node/add/*'] = FALSE;
+  $paths['admin/structure/pages/*'] = FALSE;
 }
 
 /*
@@ -371,7 +372,9 @@ function dpicontenttypes_custom_theme(){
   if(strstr($path,'node/edit')){
     return 'shiny';
   }
-
+  if(strstr($path,'admin/structure/pages')){
+    return 'shiny';
+  }
 }
 
 /**
