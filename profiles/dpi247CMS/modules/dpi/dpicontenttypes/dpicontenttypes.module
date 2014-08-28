@@ -363,13 +363,12 @@ function dpicontenttypes_admin_paths_alter(&$paths) {
  * Implementation of hook_custom_theme
 */
 function dpicontenttypes_custom_theme(){
-
   $menu_item=menu_get_item();
   $path=$menu_item['path'];
   if(strstr($path,'node/add')){
     return 'shiny';
   }
-  if(strstr($path,'node/edit')){
+  if(strstr($path,'node/%/edit')){
     return 'shiny';
   }
   if(strstr($path,'admin/structure/pages')){
