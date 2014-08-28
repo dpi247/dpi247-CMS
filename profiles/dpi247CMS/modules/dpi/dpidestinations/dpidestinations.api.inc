@@ -168,7 +168,7 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
   }
 
   foreach ($terms as $term) {
-    $depth=cpunt(taxonomy_get_parents_all($term->tid));
+    $depth=count(taxonomy_get_parents_all($term->tid));
     $level=str_repeat('-',$depth);
     $options[(int)$term->tid] = $level.$term->name;
   }
