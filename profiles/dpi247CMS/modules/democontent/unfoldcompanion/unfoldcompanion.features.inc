@@ -65,7 +65,7 @@ function unfoldcompanion_default_target() {
  */
 function unfoldcompanion_default_targetblock() {
   $items = array();
-  /*
+  
   $items['1'] = entity_import('targetblock', '{
       "targetblockid" : "1",
       "machine_name" : null,
@@ -161,6 +161,6 @@ function unfoldcompanion_default_targetblock() {
       "rank_max_value" : "5",
       "rdf_mapping" : []
 }');
-  */
+  
   return $items;
 }
