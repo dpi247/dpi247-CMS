@@ -1,8 +1,8 @@
 <div class="article-group box red">
 	<blockquote>
-		<a href="" title="">
+		<?php print $content['#prefix'];?>
 			<p><?php print drupal_render($content['field_displaytitle']);?></p> 
-			<cite></cite>
-		</a>
+			<cite><?php print drupal_render($content['field_authors']);?></cite>
+		<?php print $content['#suffix'];?>
 	</blockquote>
 </div>
