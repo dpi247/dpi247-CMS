@@ -2,7 +2,7 @@
 	<blockquote>
 		<a href="" title="">
 			<p><?php print drupal_render($content['field_displaytitle']);?></p> 
-			<cite></cite>
+			<cite><?php print drupal_render($content['field_authors']);?></cite>
 		</a>
 	</blockquote>
 </div>
