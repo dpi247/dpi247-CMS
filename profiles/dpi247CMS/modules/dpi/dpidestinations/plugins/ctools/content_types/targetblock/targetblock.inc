@@ -37,9 +37,7 @@ function dpidestinations_targetblock_content_type_content_types($plugin) {
 }
 
 function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
-  dsm($conf);
-  dsm($subtype);
-
+  
   if($conf['use_pager']==0){
     $pager='Pas de pager';
   }

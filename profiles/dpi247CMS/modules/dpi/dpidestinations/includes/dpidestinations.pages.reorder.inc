@@ -43,14 +43,16 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta =count($nodes);
   $original_weight=0;
   
-  
+  //dsm($nodes,nodes);
   foreach($nodes as $node){
+    //@todo: fix this performance issues: $nodes should contain all the data such as title
+    $node=node_load($node->nid);
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
       '#default_value' => 0,
       '#delta' => $weight_delta,
       '#title_display' => 'invisible',
-      '#title' => t('Weight for @node ', array('@node' => $node->node_title)),
+      '#title' => t('Weight for @node ', array('@node' => $node->title)),
       '#attributes'=> array('class' => array('node-weight')),
     );
     $form['nodes'][$node->nid]['original_weight'] = array(
@@ -68,11 +70,11 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     );
     $original_weight++;
     $form['nodes'][$node->nid]['title'] = array(
-      '#markup' => $node->node_title,
+      '#markup' => $node->title,
     );
   
     $form['nodes'][$node->nid]['edit'] = array(
-      '#markup' => $node->node_title,
+      '#markup' => $node->title,
     );
   }
   
