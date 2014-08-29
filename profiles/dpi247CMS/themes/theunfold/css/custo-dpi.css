@@ -31,12 +31,16 @@ figure.no_width{
 
 .small_content aside{
 	float: none;
+	width: 100%;
 }
 
+.small_content aside ul li{
+	margin-left: 15px; 
+}
 
 .item-list ul li {
-margin: 0 ;
-padding: 0;
+	margin: 0 ;
+	padding: 0;
 }
 
 /* Pour positionner correctement les contextual links */
