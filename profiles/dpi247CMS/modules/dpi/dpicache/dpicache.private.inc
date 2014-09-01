@@ -107,14 +107,34 @@ function dpicache_regenerate_cache_entries_process($query){
     }
     // Save content into cache
     $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
+    
+    $update_freq=$cache_definition["refresh_interval"];
+    if(isset($cache_definition["refresh_interval_callback"])){
+      $func=$cache_definition["refresh_interval_callback"];
+      $update_freq=$func($cache_definition,unserialize($entry->parameters));
+    }
+    
+    $expiration_date=$cache_definition["ttl"];
+    if(isset($cache_definition["ttl_callback"])){
+      $func=$cache_definition["ttl_callback"];
+      $expiration_date=$func($cache_definition,unserialize($entry->parameters));
+    }
+    
+    $category = @$cache_definition["category"];
+    if(isset($cache_definition["category_callback"])){
+      $func=$cache_definition["category_callback"];
+      $category=$func($cache_definition,unserialize($entry->parameters));
+    }
+    
     $entry_information = array(
       "name" => $entry->name,
       "hash" => $entry->hash,
-      "category" => @$cache_definition["category"],
+      "category" => $category,
       "data_type" => @$cache_definition["data_type"] ?: "string",
-      "expiration_date" => intval($entry->creation_date + $cache_definition["ttl"]),
-      "update_freq" => $cache_definition["refresh_interval"]
+      "expiration_date" => intval($entry->creation_date + $expiration_date),
+      "update_freq" => $update_freq
     );
+    
     if($saved)
       $entry_information['last_run'] = time();
     // Update cache entry data
@@ -296,48 +316,6 @@ function dpicache_cron_cleanup($time){
 function _dpicache_get_hash($cache_name, $args = array()) {
   $hash = sha1($cache_name.'--'.implode('-', $args));
   return $hash;
-}
-
-function _dpicache_regenerate_one_cache_entry_callback($cache_name){
-
-  $args=func_get_args();
-  unset($args[0]);
-  $hash=_dpicache_get_hash($cache_name, $args);
-
-  drupal_set_message(t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));
-
-  dpi_log('dpicache', "manual_regeneration_of_cache_entry", t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),array(),$hash,WATCHDOG_INFO);
-
-  $hash=_dpicache_get_hash($cache_name, $args);
-  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
-  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
-  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-
-  drupal_goto();
-}
-
-/**
- * Regenerate caches that need to be regenerated based on the time
- * @param  Integer $time Current timestamp
- * @return Boolean       Success of regenerations
- */
-function _dpicache_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
-  drupal_set_message(t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
-  dpi_log('dpicache', "manual_regeneration_of_cache_name", t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)),array(),NULL,WATCHDOG_INFO);
-
-  $table_cache_entries = 'dpicache_cache_entries';
-  $query = db_select($table_cache_entries, 'dce');
-  $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
-
-  $query->condition('dce.name', $cache_type);
-
-  if($category!=NULL){
-    $query->condition('dce.category', $category);
-
-  }
-  dpicache_regenerate_cache_entries_process($query);
-
-  drupal_goto();
 }
 
 

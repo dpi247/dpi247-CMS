@@ -15,7 +15,6 @@ function dpidestinations_rules_event_info() {
       'module' => 'dpidestinations',
       'group'=>'DPI247 Destinations',
       'variables' => rules_events_node_variables(t('created content')),
-
       'arguments' => array(
         'acting_user' => array('type' => 'user', 'label' => t('The user who create the package.')),
         'package' => array('type' => 'package', 'label' => t('The purchased package.')),
@@ -228,3 +227,28 @@ function dpidestinations_rules_condition_has_section_and_target($node, $sections
   
 }
 
+function dpidestinations_rules_action_info(){
+  return array(
+     'regenerate_node' => array(
+        'label' => t('Refresh content'),
+        'parameter' => array(
+          'node' => array(
+            'type' => 'node',
+            'label' => t('Content'),
+          ),
+        ),
+        'group' => t('Dpi Actions Rules'),
+        'callbacks' => array(
+          'execute' => 'regenerate_content',
+        ),
+    ),
+  );
+}
+
+function regenerate_content($node){
+  if(isset($node->field_destinations['und'][0]['tid']) && is_numeric($node->field_destinations['und'][0]['tid'])){
+    $targetBlock = dpidestinations_api_get_all_targetblocks_for_destination($node->field_destinations['und'][0]['tid']);
+    
+    dsm($targetBlock);
+  }
+}

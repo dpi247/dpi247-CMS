@@ -215,9 +215,7 @@ function dpidestinations_node_insert($node) {
  * @param object $node
  */
 function dpidestinations_node_create($node) {
-  dsm('rrrr');
   if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
-    dsm(2);
     rules_invoke_event('dpidestinations_rules_event_package_create', $node);
   }
 }
@@ -228,9 +226,7 @@ function dpidestinations_node_create($node) {
  * @param object $node
  */
 function dpidestinations_node_presave($node) {
-  dsm(array_flip(dpidestinations_api_get_node_type_with_destination_field()),$node->type);
   if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
-    dsm('tule');
     rules_invoke_event('dpidestinations_rules_event_package_create_or_edit', $node);
   }
 }

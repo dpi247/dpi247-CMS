@@ -13,9 +13,12 @@
  *     - callback : the function to call to refresh the cache entry
  *     - plugin : the kind of storage
  *     - category : a group classification
+ *     - category_callback : the function to call to refresh a category
  *     - data_type : the type of datas to be cached
  *     - ttl : validity time (in seconds) for a cache entry
+ *     - ttl_callback : the function's name that return time
  *     - refresh_interval : the time (in seconds) between two cold refreshes for a cache entry
+ *     - refresh_interval_callback : the function's name that return interval
  *     - bypass : for development purpose, allows to always bypass the cache
  *     - file : an array defining a file to include
  *       - module : module to which the file belongs

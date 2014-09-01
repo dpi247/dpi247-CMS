@@ -13,7 +13,7 @@ function dpicache_get_cache_entry($cache_name) {
     dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array("!cache_name" => $cache_name)), array(), '', WATCHDOG_ERROR);
     return FALSE;
   }
-
+ 
   // Get arguments for callback
   $parameters = func_get_args();
   array_shift($parameters);
@@ -126,12 +126,8 @@ function dpi_variable_get($name, $default, $regenerate = FALSE) {
  */
 function dpi_variable_get_all() {
   $dpivariables = &drupal_static('dpivariables');
-
-  $result = db_query('SELECT * FROM {dpi_variables}');
-  while($variable = db_fetch_array($result)) {
-    $dpivariables[$name] = unserialize($variable['value']);
-  }
-
+  $result = db_select('dpi_variables','d')->fields('d',array('name','value'))->execute();
+  foreach ($result as $row) $dpivariables[$row->name] = unserialize($row->value);
   return  $dpivariables;
 }
 
@@ -239,7 +235,7 @@ function dpi_variable_del_namespace($namespace, $type = 'both') {
  * @see system_settings_form()
  *
  */
-function dpi_system_settings_form($form) {
+function dpi_api_system_settings_form($form) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -248,7 +244,7 @@ function dpi_system_settings_form($form) {
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
-  $form['#submit'][] = 'dpi_system_settings_form_submit';
+  $form['#submit'][] = 'dpi_api_system_settings_form_submit';
   // By default, render the form using theme_system_settings_form().
   if (!isset($form['#theme'])) {
     $form['#theme'] = 'system_settings_form';
@@ -261,14 +257,63 @@ function dpi_system_settings_form($form) {
  *
  * @see system_settings_form_submit()
  */
-function dpi_system_settings_form_submit($form, &$form_state) {
+function dpi_api_system_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   form_state_values_clean($form_state);
   foreach ($form_state['values'] as $key => $value) {
     if (is_array($value) && isset($form_state['values']['array_filter'])) {
       $value = array_keys(array_filter($value));
     }
-    dpi_variable_set($key, $value);
+    dpi_api_variable_set($key, $value);
   }
   drupal_set_message(t('The configuration options have been saved.'));
 }
+
+/**
+ * Regenerate one caches that need to be regenerated based on the cache's name
+ * 
+ * @param String $cache_name
+ */
+function dpicache_api_regenerate_one_cache_entry_callback($cache_name){
+
+  $args=func_get_args();
+  unset($args[0]);
+  $hash=_dpicache_get_hash($cache_name, $args);
+
+  drupal_set_message(t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));
+
+  dpi_log('dpicache', "manual_regeneration_of_cache_entry", t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),array(),$hash,WATCHDOG_INFO);
+
+  $hash=_dpicache_get_hash($cache_name, $args);
+  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
+  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
+  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
+
+  drupal_goto();
+}
+
+/**
+ * Regenerate caches that need to be regenerated based on the time
+ * 
+ * @param  Integer $time Current timestamp
+ * @return Boolean       Success of regenerations
+ */
+function dpicache_api_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
+  drupal_set_message(t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
+  dpi_log('dpicache', "manual_regeneration_of_cache_name", t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)),array(),NULL,WATCHDOG_INFO);
+
+  $table_cache_entries = 'dpicache_cache_entries';
+  $query = db_select($table_cache_entries, 'dce');
+  $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
+
+  $query->condition('dce.name', $cache_type);
+
+  if($category!=NULL){
+    $query->condition('dce.category', $category);
+  }
+  dpicache_regenerate_cache_entries_process($query);
+
+  drupal_goto();
+}
+
+
