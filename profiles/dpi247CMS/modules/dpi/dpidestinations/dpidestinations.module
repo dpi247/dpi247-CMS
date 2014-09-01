@@ -106,21 +106,6 @@ function toto($r){
   return 'coou';
 }
 
-function dpidestinations_menu_alter(&$items) {
-  // dpidestinations can be used as standalone module outside the distribution
-  if(!isset($items['admin/dpi247'])) {
-    $items['admin/dpi247'] = array(
-      'title' => 'dpi247',
-      'description' => 'Administer dpi247 settings.',
-      'position' => 'right',
-      'weight' => -8,
-      'page callback' => 'system_admin_menu_block_page',
-      'access arguments' => array('access administration pages'),
-      'file' => 'system.admin.inc',
-      'file path' => drupal_get_path('module', 'system'),
-    );
-  }
-}
 
 /**
  * Implementation of hook_theme()
