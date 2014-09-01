@@ -30,7 +30,7 @@ function dpidestinations_rules_event_info() {
     'dpidestinations_rules_event_package_create_or_edit' => array(
       'label' => t('Before a node type with field destination is created or edited'),
       'module' => 'dpidestinations',
-      'group'=>'DPI247 Destinations',
+      'group'=>'DPI247 Destinations',      
       'variables' => rules_events_node_variables(t('updated content'), TRUE),
       
     ),
@@ -172,17 +172,7 @@ function dpidestinations_rules_condition_info() {
     'options list' => 'dpidestinations_api_get_all_targets_as_options',
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
-  );
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  ); 
 
   return $items;
 }

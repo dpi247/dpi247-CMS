@@ -256,10 +256,6 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
   return $display;
 }
 
-
-
-
-
 /*
  * Return all node type that have a field_destination
  */
