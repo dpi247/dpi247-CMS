@@ -24,12 +24,14 @@ dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
 dependencies[] = comment
+dependencies[] = overlay
 
 ; Third Party
 dependencies[] = features
 dependencies[] = entity
 dependencies[] = scald
 dependencies[] = mee
+dependencies[] = date_popup
 dependencies[] = dnd
 dependencies[] = scald_dnd_library
 dependencies[] = views
@@ -43,6 +45,10 @@ dependencies[] = scald_audio
 dependencies[] = scald_vimeo
 dependencies[] = scald_youtube
 dependencies[] = scald_dailymotion
+dependencies[] = taxonomy_menu
+dependencies[] = panels_ipe
+dependencies[] = views_content
+
 
 ; Dpi-Core
 dependencies[] = dpicontenttypes

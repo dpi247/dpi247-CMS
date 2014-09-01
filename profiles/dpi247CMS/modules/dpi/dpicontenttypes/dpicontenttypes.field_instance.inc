@@ -132,18 +132,18 @@ function dpicontenttypes_field_default_field_instances() {
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-    'active' => 1,
-    'module' => 'date',
-    'settings' => array(
-    'increment' => 1,
-    'input_format' => 'm/d/Y - H:i:s',
-    'input_format_custom' => '',
-    'label_position' => 'above',
-    'text_parts' => array(),
-    'year_range' => '-3:+3',
-    ),
-    'type' => 'date_select',
-    'weight' => 12,
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'd/m/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => -3,
     ),
   );
 
@@ -346,18 +346,18 @@ function dpicontenttypes_field_default_field_instances() {
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-    'active' => 1,
-    'module' => 'date',
-    'settings' => array(
-    'increment' => 1,
-    'input_format' => 'm/d/Y - H:i:s',
-    'input_format_custom' => '',
-    'label_position' => 'above',
-    'text_parts' => array(),
-    'year_range' => '-3:+3',
-    ),
-    'type' => 'date_select',
-    'weight' => 14,
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'd/m/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => -3,
     ),
   );
 
@@ -400,18 +400,18 @@ function dpicontenttypes_field_default_field_instances() {
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-    'active' => 1,
-    'module' => 'date',
-    'settings' => array(
-    'increment' => 1,
-    'input_format' => 'm/d/Y - H:i:s',
-    'input_format_custom' => '',
-    'label_position' => 'above',
-    'text_parts' => array(),
-    'year_range' => '-3:+3',
-    ),
-    'type' => 'date_select',
-    'weight' => 13,
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'd/m/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => -3,
     ),
   );
 
@@ -2073,18 +2073,18 @@ function dpicontenttypes_field_default_field_instances() {
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-    'active' => 1,
-    'module' => 'date',
-    'settings' => array(
-    'increment' => 15,
-    'input_format' => 'm/d/Y - H:i:s',
-    'input_format_custom' => '',
-    'label_position' => 'above',
-    'text_parts' => array(),
-    'year_range' => '1000:+0',
-    ),
-    'type' => 'date_select',
-    'weight' => 4,
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'increment' => 15,
+        'input_format' => 'd/m/Y - H:i:s',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => -3,
     ),
   );
 

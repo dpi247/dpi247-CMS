@@ -1,0 +1,8 @@
+name = CCI Inline Objects
+description = Handle inline objects from and to CCI - NewsGate
+package = CCI
+core = 7.x
+
+dependencies[] = 'dpicache'
+dependencies[] = 'dpicommons'
+dependencies[] = 'cciadmin'

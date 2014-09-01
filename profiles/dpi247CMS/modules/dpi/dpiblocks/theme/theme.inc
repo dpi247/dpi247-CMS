@@ -58,3 +58,30 @@ function theme_dpiblocks_custom_content_type_listversion($versions) {
   }
   return $content;
 }
+
+/**
+ * Theme the FlowMix main form
+ */
+function theme_dpiblocks_flowmix_content_type_form_summary_form($variables) {
+  $form = $variables['form'];
+
+  foreach(element_children($form['flows']) as $key) {
+    $rows[] = array(
+      drupal_render($form['flows'][$key]['title']),
+      drupal_render($form['flows'][$key]['edit_action']).drupal_render($form['flows'][$key]['delete_action']),
+    );
+  }
+
+  if(count($form['flows'])) {
+    $table_output .= theme('table', array('header' => array ('titre', 'action'), 'rows' => $rows));
+    $button_add_flow_output .= drupal_render($form['buttons']['add_flow']);
+  }
+
+  $output_after = drupal_render_children($form);
+
+  $output .= $table_output;
+  $output .= $button_add_flow_output;
+  $output .= $output_after;
+
+  return $output;
+}

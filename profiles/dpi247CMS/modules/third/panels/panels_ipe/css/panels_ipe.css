@@ -121,7 +121,7 @@ div.panels-ipe-placeholder {
   padding: .5em;
   position: relative;
   margin-top: .5em;
-  background-color: #ECFAFF;
+  #background-color: #ECFAFF;
   color: #999;
   font: 15px/1.3em "Open Sans", "Lucida Grande", Tahoma, Verdana, sans-serif;
   text-transform: none;
@@ -152,9 +152,9 @@ div.panels-ipe-placeholder h3 {
 }
 
 div.panels-ipe-newblock {
-  -webkit-box-shadow: 0px 0 5px 5px #ECFAFF;
-  -moz-box-shadow: 0px 0 5px 5px #ECFAFF;
-  box-shadow: 0px 0 5px 5px #ECFAFF;
+  #-webkit-box-shadow: 0px 0 5px 5px #ECFAFF;
+  #-moz-box-shadow: 0px 0 5px 5px #ECFAFF;
+  #box-shadow: 0px 0 5px 5px #ECFAFF;
   position: absolute;
   right: 10px;
   top: 50%;
@@ -286,7 +286,7 @@ span.panels-ipe-draghandle-icon:active {
 }
 
 .panels-ipe-editing .panels-ipe-region {
-  border: transparent dotted 1px;
+  border: #000 dotted 2px;
   float: left;
   width: 100%;
   margin-bottom: 5px;

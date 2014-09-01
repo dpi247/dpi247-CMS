@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-scribblelive {
+  background: url('icons/scribblelive-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-scribblelive:hover {
+  background-image: url('icons/scribblelive-large-color.png');
+}
+.dnd-library-wrapper .editor-item .meta.type-scribblelive {
+ background-image: url('icons/scribblelive-large-color.png');
+}

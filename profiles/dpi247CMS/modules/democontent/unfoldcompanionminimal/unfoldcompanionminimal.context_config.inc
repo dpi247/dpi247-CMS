@@ -221,7 +221,7 @@ function unfoldcompanionminimal_default_scald_context_config() {
   $context_config->context = 'sdl_library_item';
   $context_config->transcoder = array(
     'image' => array(
-      '*' => 'passthrough',
+      '*' => 'style-medium',
     ),
     'audio' => array(
       '*' => 'passthrough',

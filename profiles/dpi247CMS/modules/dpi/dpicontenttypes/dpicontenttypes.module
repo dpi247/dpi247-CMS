@@ -56,7 +56,7 @@ function dpicontenttypes_menu(){
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
-  $items['admin/structure/dpiproperties-types/%dpiproperties_type/delete'] = array(
+  $items['admin/dpi247/dpiproperties-types/%dpiproperties_type/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpiproperties_type_form_delete_confirm', 4),
@@ -253,6 +253,14 @@ function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
   }
 }
 
+function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
+  if(isset($form["field_displaytitle"])){
+    $form["title"]["#type"]='value';
+    $form["title"]["#required"]=FALSE;
+    $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
+  }
+}
+
 /**
  * Implementation of hook_form_FROM-ID_alter
  *
@@ -269,6 +277,22 @@ function dpicontenttypes_form_image_effect_form_alter_validate($form, $form_stat
   $effect = $form_state['image_effect'];
   if (function_exists($effect['form callback'].'_validate')) {
     call_user_func($effect['form callback'].'_validate', $form, $form_state, $form_state['values']['data']);
+  }
+}
+
+/**
+ * Implementation of hook_form_FROM-ID_alter
+ *
+ * Add a devel link for nodes in the admin/content page
+ */
+function dpicontenttypes_form_node_admin_content_alter(&$form, $form_state) {
+  if (module_exists('devel') && user_access('access devel information')) {
+    foreach ($form['admin']['nodes']['#options'] as $nid => $options) {
+      $form['admin']['nodes']['#options'][$nid]['operations']['data']['#links']['devel'] = array(
+        'title' => 'devel',
+        'href' => 'node/'.$nid.'/devel',
+      );
+    }
   }
 }
 
@@ -307,8 +331,6 @@ function dpicontenttypes_file_delete($file) {
   dpicontenttypes_api_image_path_flush($file->uri);
 }
 
-function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
-}
 
 /**
  * Implements hook_scald_contexts().
@@ -350,7 +372,48 @@ function dpicontenttypes_scald_contexts() {
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
+    'links_list'      => array(
+      'title'           => t('DPI LinkList'),
+      'description'     => t('When linklist atom is displayed in a package.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
+    'links_list_small'      => array(
+      'title'           => t('DPI LinkList small'),
+      'description'     => t('When linklist atom is displayed in a context.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
   );
+}
+
+/*
+ * Implementation of hook_admin_paths_alter
+*/
+function dpicontenttypes_admin_paths_alter(&$paths) {
+  $paths['node/*/edit'] = FALSE;
+  $paths['node/add'] = FALSE;
+  $paths['node/add/*'] = FALSE;
+  $paths['admin/structure/pages/*'] = FALSE;
+}
+
+/*
+ * Implementation of hook_custom_theme
+*/
+function dpicontenttypes_custom_theme(){
+  $menu_item=menu_get_item();
+  $path=$menu_item['path'];
+  if(strstr($path,'node/add')){
+    return 'shiny';
+  }
+  if(strstr($path,'node/%/edit')){
+    return 'shiny';
+  }
+  if(strstr($path,'admin/structure/pages')){
+    return 'shiny';
+  }
 }
 
 /**
@@ -396,9 +459,9 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
       $view_mode = "full";
 
       $temporary_content = scald_atom_view($atom, $context);
-
+      
       $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
-
+      
       //Don't show title, not needed
       $atom->rendered->title = '';
     }
@@ -407,7 +470,7 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
 
 /**
  * Implements hook_scald_render
- * 
+ *
  * This should be used only for dpi inline, dpi mediabox and dpi simpleimg scald's context
  */
 function dpicontenttypes_scald_render($atom, $context, $options) {
@@ -451,16 +514,15 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
             }
           }
         }
-
+        
         $content = scald_atom_view($atom, $context);
-
+        
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
           unset($content['field_displaytitle']);
           unset($content['field_linkitems']);
         }
-
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.
@@ -475,7 +537,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
 
 /**
  * Implementation of hook_scald_atom_insert
- * 
+ *
  * Create a dpi properties linked to the new atom
  *
  * @param Object $atom
@@ -486,7 +548,7 @@ function dpicontenttypes_scald_atom_insert($atom) {
 
 /**
  * Implementation of hook_scald_atom_delete
- * 
+ *
  * Delete the dpiproperties linked to the atom
  *
  * @param Object $atom
@@ -497,7 +559,7 @@ function dpicontenttypes_scald_atom_delete($atom) {
 
 /**
  * Implementation of hook_field_attach_view_alter
- * 
+ *
  * Add package nid to scald tag to get it as an option
  */
 function dpicontenttypes_field_attach_view_alter(&$output, $context) {

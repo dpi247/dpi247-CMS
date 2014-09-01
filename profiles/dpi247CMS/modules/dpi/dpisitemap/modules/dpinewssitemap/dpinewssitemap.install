@@ -1,0 +1,93 @@
+<?php
+
+/**
+ * Implementation of hook_install()
+ * Add the "Sitemap genre" field to packages
+ * Install the "Sitemap genre" vocabulary and some terms in it
+ */
+function dpinewssitemap_install() {
+  // Set the  weight to 1 so that the hook_cron is called after dpisitemap
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'dpinewssitemap')
+    ->execute();
+
+  // Add "Sitemap genre" Vocabulary
+  $voc_machine_name = 'sitemap_genre';
+  $edit = array(
+    'name' => 'Sitemap genre',
+    'machine_name' => $voc_machine_name,
+    'description' => 'Possible genre related to News Sitemaps articles',
+    'module' => 'taxonomy',
+  );
+  $vocabulary = (object)$edit;
+  taxonomy_vocabulary_save($vocabulary);
+  dpi_variable_set('dpi_sitemap_genre', $vocabulary->vid);
+
+  // Add "Sitemap genre" taxonomy terms
+  if ($vocabulary->vid) {
+    $base_term = new stdClass();
+    $base_term->vid = $vocabulary->vid;
+    $base_term->weight = 0;
+    $base_term->vocabulary_machine_name = $voc_machine_name;
+    $terms = array('PressRelease', 'Satire', 'Blog', 'OpEd', 'Opinion', 'UserGenerated');
+    $descriptions = array(
+      'An official press release',
+      'An article which ridicules its subject for didactic purposes',
+      'Any article published on a blog, or in a blog format',
+      'An opinion-based article which comes specifically from the Op-Ed section of your site',
+      'Any other opinion-based article not appearing on an Op-Ed page, i.e., reviews, interviews, etc.',
+      'Newsworthy user-generated content which has already gone through a formal editorial review process on your site',
+    );
+    foreach ($terms as $id => $term) {
+      $base_term->weight++;
+      $copied_term = clone $base_term;
+      $copied_term->name = $term;
+      $copied_term->description = $descriptions[$id];
+      taxonomy_term_save($copied_term);
+    }
+  }
+
+  // Add field_sitemap_genre field
+  $field_name = 'field_sitemap_genre';
+  $field = array(
+    'field_name' => $field_name,
+    'cardinality' => -1,
+    'type' => 'taxonomy_term_reference',
+    'settings' => array(
+      'allowed_values' => array(
+        array('vocabulary' => $voc_machine_name, 'parent' => 0),
+      ),
+    ),
+  );
+  field_create_field($field);
+
+  // Add field_sitemap_genre field instance in the Package content type
+  $field_instance = array(
+    'field_name' => $field_name,
+    'label' => 'Sitemap Genre',
+    'entity_type' => 'node',
+    'bundle' => 'package',
+    'widget' => array(
+      'type' => 'options_select',
+    ),
+  );
+  field_create_instance($field_instance);
+}
+
+/**
+ * Implementation of hook_uninstall()
+ * Remove the "Sitemap genre" field from packages
+ * Delete the "Sitemap genre" vocabulary and terms in it
+ */
+function dpinewssitemap_uninstall() {
+  // Delete "Sitemap genre" Vocabulary and terms
+  if ($vid = dpi_variable_get('dpi_sitemap_genre', 0)) {
+    taxonomy_vocabulary_delete($vid);
+    dpi_variable_del('dpi_sitemap_genre');
+  }
+
+  // Delete field_sitemap_genre field and instance(s)
+  $field_name = 'field_sitemap_genre';
+  field_delete_field($field_name);
+}

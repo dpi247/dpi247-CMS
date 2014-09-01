@@ -1,0 +1,163 @@
+<?php
+
+/**
+ * Implementation of hook_menu
+ */
+function dpinewssitemap_menu() {
+  $items = array();
+
+  $items[DPI_ADMIN_PATH.'/dpisitemap/newssitemap'] = array(
+    'title'            => t('News Sitemap'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpinewssitemap_admin_settings_page_form'),
+    'access arguments' => array('administer sitemaps'),
+    'file'             => 'includes/dpinewssitemap.pages.admin.inc',
+    'weight'           => 1,
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_cron
+ */
+function dpinewssitemap_cron() {
+  $return = '<b>'.t('Run').' '.date('Y-m-d H:i:s').' :</b></br>';
+
+  if (lock_acquire('dpinewssitemap_cron_semaphore', 300)) {
+    // Main process
+    if ($settings = dpi_variable_get('dpinewssitemap_sitemaps_settings', FALSE)) {
+      if ($main_settings = dpi_variable_get('dpisitemap_sitemaps_settings', FALSE)) {
+        $settings['dpinewssitemap_blacklist'] = array_merge($settings['dpinewssitemap_blacklist'], $main_settings['dpisitemap_blacklist']);
+      }
+
+      module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
+      dpicommons_set_microtime_step('', FALSE, 'dpinewssitemap_cron');
+
+      module_load_include('inc', 'dpinewssitemap', 'includes/dpinewssitemap.generate_xml');
+      dpinewssitemap_generate_sitemap_xml($settings);
+
+      $delta_t_global = dpicommons_set_microtime_step('', FALSE, 'dpinewssitemap_cron');
+      $micro = sprintf('%06d', ($delta_t_global - floor($delta_t_global)) * 1000000);
+      $d = new DateTime(date('Y-m-d H:i:s.'.$micro, $delta_t_global));
+      $formatted = $d->format('i:s.u');
+      $return .= '<b>'.t('Total Runtime : !delta_t', array('!delta_t' => $formatted)).'</b></br>';
+    } else {
+      $return .= t('The module has not been configured yet, the sitemap will not be generated untill the configuration is set.').'<br>';
+    }
+  } else {
+    $return .= t('The cron didn\'t run successfully because the semaphore wasn\'t free.').'</br>';
+  }
+
+  print $return;
+}
+
+/**
+ * Implementation of hook_form_FORM-ID_alter
+ * Add the consolidation settings to the main sitemap settings form
+ */
+function dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter(&$form, $form_state) {
+  module_load_include('inc', 'dpinewssitemap', 'includes/dpinewssitemap.pages.admin');
+  $default_settings = array_merge(dpinewssitemap_default_settings(), dpi_variable_get('dpinewssitemap_sitemaps_settings', array()));
+
+  $form['consolidate'] = array(
+    '#type' => 'fieldset',
+  );
+
+  $form['consolidate']['dpinewssitemap_consolidate_sitemap'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Consolidate main sitemap with nodes URLs'),
+    '#description' => t('If checked some nodes URLs will be added to the main sitemap.'),
+    '#default_value' => $default_settings['dpinewssitemap_consolidate_sitemap'],
+  );
+
+  $consolidate_type_options = array(
+    'global' => t('Lastest nodes (any destination)'),
+    'destination' => t('Latest nodes in every destinations'),
+  );
+  $form['consolidate']['dpinewssitemap_consolidate_sitemap_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Consolidate main sitemap with nodes URLs'),
+    '#description' => t('If checked some nodes URLs will be added to the main sitemap.'),
+    '#options' => $consolidate_type_options,
+    '#default_value' => $default_settings['dpinewssitemap_consolidate_sitemap_type'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="dpinewssitemap_consolidate_sitemap"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['consolidate']['dpinewssitemap_consolidate_sitemap_amount'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of nodes to add to main sitemap (globaly or by destination)'),
+    '#description' => t('If the previous select list is set to "Lastest nodes",
+        this number specifies the total amount of nodes to be added to the main sitemap,
+        if the previous select list is set to "Lastest nodes in every destinations",
+        this number specifies the amount of nodes to be added to the main sitemap by destination.'),
+    '#default_value' => $default_settings['dpinewssitemap_consolidate_sitemap_amount'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="dpinewssitemap_consolidate_sitemap"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['#validate'][] = 'dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_validate';
+  $form['#submit'][] = 'dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_submit';
+  $form['reset']['#submit'][] = 'dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_submit_reset';
+}
+
+/**
+ * Validate the altered settings form
+ */
+function dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_validate($form, $form_state) {
+  $values = $form_state['values'];
+  if ($values['dpinewssitemap_consolidate_sitemap']) {
+    switch ($values['dpinewssitemap_consolidate_sitemap_type']) {
+      case 'global':
+        if ($values['dpinewssitemap_consolidate_sitemap_type'] > 1000) {
+          form_set_error('dpinewssitemap_consolidate_sitemap_type', t('The maximum node amount to be generated in the global type consolidation is 1000.'));
+        }
+        break;
+      case 'destination':
+        if ($values['dpinewssitemap_consolidate_sitemap_amount'] > 10) {
+          form_set_error('dpinewssitemap_consolidate_sitemap_amount', t('The maximum node amount to be generated in the destination type consolidation is 10 per destination.'));
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Submit the altered settings form
+ */
+function dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_submit($form, &$form_state) {
+  $values = $form_state['values'];
+
+  module_load_include('inc', 'dpinewssitemap', 'includes/dpinewssitemap.pages.admin');
+  $orig_settings = array_merge(dpinewssitemap_default_settings(), dpi_variable_get('dpinewssitemap_sitemaps_settings', array()));
+
+  $settings = $orig_settings;
+  $settings['dpinewssitemap_consolidate_sitemap'] = $values['dpinewssitemap_consolidate_sitemap'];
+  $settings['dpinewssitemap_consolidate_sitemap_type'] = $values['dpinewssitemap_consolidate_sitemap_type'];
+  $settings['dpinewssitemap_consolidate_sitemap_amount'] = $values['dpinewssitemap_consolidate_sitemap_amount'];
+
+  dpi_variable_set('dpinewssitemap_sitemaps_settings', $settings);
+}
+
+/**
+ * Reset submit for the altered submit form
+ */
+function dpinewssitemap_form_dpisitemap_admin_settings_page_form_alter_submit_reset($form, $form_state) {
+  module_load_include('inc', 'dpinewssitemap', 'includes/dpinewssitemap.pages.admin');
+  $orig_settings = array_merge(dpinewssitemap_default_settings(), dpi_variable_get('dpinewssitemap_sitemaps_settings', array()));
+
+  $settings = $orig_settings;
+  unset($settings['dpinewssitemap_consolidate_sitemap'],
+      $settings['dpinewssitemap_consolidate_sitemap_type'],
+      $settings['dpinewssitemap_consolidate_sitemap_amount']);
+
+  dpi_variable_set('dpinewssitemap_sitemaps_settings', $settings);
+}

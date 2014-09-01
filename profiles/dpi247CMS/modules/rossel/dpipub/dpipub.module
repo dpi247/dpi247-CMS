@@ -1,0 +1,327 @@
+<?php 
+
+module_load_include('inc', 'dpipub', 'dpipub.private.generate_tag');
+module_load_include('inc', 'dpipub', 'dpipub.private.generate_content');
+module_load_include('inc', 'dpipub', 'dpipub.private.tools');
+
+/**
+ * Implementation of hook_perm()
+ */
+function dpipub_perm() {
+  return array(
+    'manage pub',
+    'dfp_activate_pub',
+  );
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function dpipub_menu() {
+  $items = array();
+  $items['admin/rossel/pub'] = array(
+    'title' => t('Pub configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pub_page_admin_form'),
+    'access arguments' => array('manage pub'),
+    'description' => t('Configure availables ads providers.'),
+    'file' => 'includes/dpipub.admin.inc',
+  );
+
+  $items['admin/rossel/pub/adtech'] = array(
+    'title' => t('Pub adTech configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['admin/rossel/pub/purl'] = array(
+    'title' => t('Pub Purl configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pub_page_admin_purl_form'),
+    'access arguments' => array('manage pub'),
+    'file' => 'includes/dpipub.admin_purl.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+  $items['admin/rossel/pub/openx'] = array(
+    'title' => t('Pub OpenX configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pub_page_admin_openx_form'),
+    'access arguments' => array('manage pub'),
+    'file' => 'includes/dpipub.admin_openx.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+  
+  $items['admin/rossel/pubcron'] = array(
+    'title' => t('Run pub "cron"'),
+    'page callback' => 'pub_cron_run',
+    'access arguments' => array('manage pub'),
+    'description' => t('Run ads cron.'),
+  	'file' => 'includes/dpipub.admin.inc',
+  );
+  
+  $items['admin/rossel/pubblocks'] = array(
+    'title' => t('Manage blocks'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pub_blocks_admin_form'),
+    'access arguments' => array('manage pub'),
+    'description' => t('Manage existing ads blocks and create new ones.'),
+    'file' => 'includes/dpipub.admin.inc',
+  );
+  
+  $items['admin/rossel/pubcache'] = array(
+    'title' => t('Manage cache'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pub_cache_admin_form'),
+    'access arguments' => array('manage pub'),
+    'description' => t('View and delete existing cached ads.'),
+    'file' => 'includes/dpipub.admin.inc',
+  );
+  
+  $items ['admin/rossel/pub/dfp'] = array (
+    'title' => 'PUB DFP CONFIGURATION',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'dfpmodule_settings_url',
+    'access arguments' => array (
+      'dfp_activate_pub'
+    ),
+    'file' => 'includes/dpipub.admin_dfp.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 4,
+  );
+
+  return $items;
+}
+
+/**
+ * Implémentation du hook_theme
+ */
+function dpipub_theme() {
+  return array(
+    'pub__content' => array(
+      'arguments' => array('html_code' => NULL, 'delta' => NULL),
+      'template' => 'pub-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'pub_openx_content' => array(
+      'arguments' => array('html_code' => NULL, 'delta' => NULL),
+      'template' => 'pub-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'pub_dfp_content' => array(
+      'arguments' => array('html_code' => NULL, 'delta' => NULL),
+      'template' => 'pub-dfp-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    
+    'pub_purl_content' => array(
+      'arguments' => array('content' => NULL, 'delta' => NULL),
+      'template' => 'pub-purl-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'pub_header' => array(
+      'arguments' => array('header_code' => NULL),
+      'template' => 'pub-header',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'analytic_content' => array(
+      'arguments' => array('html_code' => NULL),
+      'template' => 'analytic-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'xiti_content' => array(
+      'arguments' => array('html_code' => NULL),
+      'template' => 'xiti-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'metriweb_content' => array(
+      'arguments' => array('html_code' => NULL),
+      'template' => 'metriweb-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'metriwebspring_content' => array(
+      'arguments' => array('html_code' => NULL),
+      'template' => 'metriwebspring-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    'metriwebgemius_content' => array(
+      'arguments' => array('html_code' => NULL),
+      'template' => 'metriwebgemius-content',
+      'path' => drupal_get_path('module', 'dpipub') . '/templates',
+    ),
+    
+  );
+}
+
+/**
+ * implementations of hook block
+ */
+function dpipub_block_info(){
+  static $blocks;
+  if (isset($blocks)) {
+    return $blocks;
+  }
+  
+  /**
+   * Value for any blocks (keys = key for name blocks, value = value for info)
+   * If you need to enter a new value for a block
+   */
+  $tabBlocks = array(
+    'pub_header' => 'Pub Header',
+    'analytic_block' => 'Analytic',
+    'xiti_block' => 'Xiti',
+    'metriweb_block' => 'MetriWeb',
+    'metriwebspring_block' => 'MetriWebSpring',
+    'metriwebgemius_block' => 'MetriWebGemius',
+  );
+  
+  foreach ($tabBlocks as $key => $value){
+    $blocks[$key] = array(
+      'info' => t($value),
+      'cache' => DRUPAL_CACHE_PER_PAGE,
+    );
+  }
+  
+  $query = db_select('zz_pub_UMI', 'p');
+  $pub_list = $query->fields('p',array('position'))->execute();
+  foreach ($pub_list as $row){ 
+      $blocks[$row->position] = array(
+        'info' => t('Pub '.$row->position),
+        'cache' => DRUPAL_CACHE_PER_PAGE,
+      );
+  }
+
+  return $blocks;
+}
+
+/**
+ * implementation of hook_block_configure
+ */
+function dpipub_block_configure($delta){
+  $form = array();
+  $hour_list = array();
+  for ($i=0; $i<=24; $i++) $hour_list[$i] = ($i==1 || $i==0) ? $i.' hour' : $i.' hours';
+  $day_list = array();
+  for ($i=0; $i<=30; $i++) $day_list[$i] = ($i==1 || $i==0) ? $i.' day' : $i.' days';
+  $default_time = variable_get('pub_block_'.$delta.'_refresh_time', 24);
+  $default_hour = $default_time%24;
+  $default_day = ($default_time - $default_time%24)/24;
+  $form['refresh_time_day'] = array(
+    '#title' => t('Time between updates'),
+    '#type' => 'select',
+    '#description' => t('Time, in days, between updates for this block.'),
+    '#options' => $day_list,
+    '#default_value' => $default_day,
+    '#required' => TRUE,
+  );
+  $form['refresh_time_hour'] = array(
+    '#type' => 'select',
+    '#description' => t('Time, in hours, between updates for this block.'),
+    '#options' => $hour_list,
+    '#default_value' => $default_hour,
+    '#required' => TRUE,
+  );
+  return $form;
+}
+
+/**
+ * Implementation of hook_block_save
+ */
+function dpipub_block_save($delta = '', $edit = array()){
+  switch ($delta) {
+    case 'pub_header':
+      variable_set('header_refresh_time', 24*$edit['refresh_time_day'] + $edit['refresh_time_hour']);
+      break;
+    case 'metriwebgemius_block' | 'metriwebspring_block' | 'metriweb_block' | 'xiti_block' | 'analytic_block':
+      variable_set($delta.'_refresh_time', 24*$edit['refresh_time_day'] + $edit['refresh_time_hour']);
+      break;
+    default:
+      variable_set('pub_block_'.$delta.'_refresh_time', 24*$edit['refresh_time_day'] + $edit['refresh_time_hour']);
+  }
+  return;
+}
+
+/**
+ * Implementation of hook_block_view
+ */
+function dpipub_block_view($delta = ''){
+  $cache_url = $_SERVER['HTTP_HOST'].'/'.$_GET['q'];
+  switch ($delta) {
+    case 'pub_header':
+      $block = array(
+      'subject' => t('Pub Header.'),
+      'content' => _pub_getheadercontent($cache_url),
+      );
+      break;
+    case 'analytic_block':
+      $block = array(
+      'subject' => t('Analytic block.'),
+      'content' => _pub_get_block_content($cache_url, 'analytic', 'GA-Async'),
+      );
+      break;
+    case 'xiti_block':
+      $block = array(
+      'subject' => t('Xiti block.'),
+      'content' => _pub_get_block_content($cache_url, 'xiti', 'Xiti'),
+      );
+      break;
+    case 'metriweb_block':
+      $block = array(
+      'subject' => t('MetriWeb block.'),
+      'content' => _pub_get_block_content($cache_url, 'metriweb', 'Metriweb'),
+      );
+      break;
+    case 'metriwebspring_block':
+      $block = array(
+      'subject' => t('MetriWebSpring block.'),
+      'content' => _pub_get_block_content($cache_url, 'metriwebspring', 'MetriwebSpring'),
+      );
+      break;
+    case 'metriwebgemius_block':
+      $block = array(
+      'subject' => t('MetriWebGemius block.'),
+      'content' => _pub_get_block_content($cache_url, 'metriwebgemius', 'MetriwebGemius'),
+      );
+      break;
+    default:
+      $block = array(
+      'subject' => t('Pub block.'),
+      'content' => _pub_get_pub_content($delta, $cache_url),
+      );
+  }
+  return $block;
+}
+
+/**
+ * Hook preprocess for meta tags.
+ */
+function dpipub_preprocess_page(&$variables) {  
+  if(!isset($variables['meta']))
+    $variables['meta'] = "";
+  $variables['meta'] .= pub_get_meta();
+}
+
+/**
+ * This function is use to modify values of params for dfp integration
+ *
+ * @return variable:array
+ */
+function dpipub_pub_params_alter(& $data , $builder){
+  if($builder=='_dfp'){
+    global $dfp_viewed_link_blocks;
+    $dfp_viewed_blocks = "";
+    $query = db_select('zz_pub_UMI', 'p');
+    $result = $query->condition('builder', 'dfp', '=')->fields('p', array('position'))->execute();
+    foreach ($result as $row){
+      $dfp_viewed_blocks .= $row->position."&positions=";
+      $dfp_viewed_link_blocks .= $row->position."+";
+    }
+    $dfp_viewed_link_blocks = substr($dfp_viewed_link_blocks, 0, -1);
+    $data['positions'] = substr($dfp_viewed_blocks, 0,-11);
+  }
+  return $data;
+}
+
+?>

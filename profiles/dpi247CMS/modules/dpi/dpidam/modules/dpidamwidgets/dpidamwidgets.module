@@ -1,0 +1,116 @@
+<?php
+
+module_load_include('inc', 'dpidamwidgets', 'dpidamwidgets.private');
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpidamwidgets_theme() {
+  $path = drupal_get_path('module', 'dpidamwidgets');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => $path.'/theme',
+  );
+
+  return array(
+    'damsearch_render_results' => $base + array(
+      'arguments' => array('response' => array(), 'profile' => array()),
+      'template' => 'damsearch_render_results',
+    ),
+    'damsearch_render_result' => $base + array(
+      'arguments' => array('result' => array(), 'profile' => array()),
+      'template' => 'damsearch_render_result',
+    ),
+    'damsearch_empty_results' => $base + array(
+      'arguments' => array('profile' => array(), 'messages' => array()),
+      'template' => 'damsearch_empty_results',
+    ),
+    'damsearch_render_facets' => $base + array(
+      'arguments' => array('facets' => array(), 'messages' => array()),
+      'template' => 'damsearch_render_facets',
+    ),
+    'damsearch_render_facet' => $base + array(
+      'arguments' => array('facet' => array(), 'profile' => array()),
+      'template' => 'damsearch_render_facet',
+    ),
+    'damsearch_render_facet_term' => $base + array(
+      'arguments' => array('term' => array(), 'facet' => array(), 'profile' => array()),
+      'template' => 'damsearch_render_facet_term',
+    ),
+    'damsearch_render_pagination' => $base + array(
+      'arguments' => array('pagination' => array(), 'results' => array(), 'profile' => array()),
+      'template' => 'damsearch_render_pagination',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpidamwidgets_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+      'version' => 1,
+    );
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function dpidamwidgets_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Implementation of hook_form_alter()
+ */
+function dpidamwidgets_form_alter(&$form, $form_state, $form_id) {
+  $search_form = array('search_theme_form', 'search_block_form');
+  if (in_array($form_id, $search_form)) {
+    $form['damsearch_link'] = array(
+      '#type' => 'markup',
+      '#value' => l(t('Archives search'), 'archives/damsearch'),
+    );
+  }
+}
+
+/**
+ * Implementation of hook_panels_display_save
+ */
+function dpidamwidgets_panels_display_save($display) {
+  $nomoredamresults = array();
+
+  // Searching for all DAMRESULTPANE
+  foreach ($display->content as $pid => $pane) {
+    if ($pane->type == 'damresult' && $pane->shown) {
+      $nomoredamresults[$pane->configuration['profile']] = TRUE;
+    }
+  }
+
+  // Set do not diusplay result on search pane for profile that got a result pane.
+  foreach ($display->content as $pid => &$pane) {
+    if ($pane->type == 'damsearch') {
+      if (isset($nomoredamresults[$pane->configuration['profile']]) && $nomoredamresults[$pane->configuration['profile']]) {
+        $pane->configuration['display_results'] = FALSE;
+      } else {
+        $pane->configuration['display_results'] = TRUE;
+      }
+      drupal_write_record('panels_pane', $pane, array('pid'));
+    }
+  }
+
+  // To be nice, even though we have a reference.
+  return $display;
+}

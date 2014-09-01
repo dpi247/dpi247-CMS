@@ -316,9 +316,9 @@ function dpicontenttypes_api_get_embeds_count_by_type($node) {
  * @return array | bool
  *   An array (the keys are the types of the objects) containing the objects or FALSE in case of failure
  */
-function dpicontenttypes_api_get_embeds_by_type($node) {
+function dpicontenttypes_api_get_embeds_by_type($node, $load_atom = FALSE) {
   $type_embeds = array();
-  if ($embeds = dpicontenttypes_api_get_embeds($node)) {
+  if ($embeds = dpicontenttypes_api_get_embeds($node, FALSE, FALSE, $load_atom)) {
     foreach ($embeds as $embed) {
       if (!isset($type_embeds[$embed['type']])) {
         $type_embeds[$embed['type']] = array();
@@ -474,21 +474,6 @@ function dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid = NULL) {
     }
   }
   return $result;
-}
-
-/**
- * Determine if a provider exists for this uri and in this case, return the provider (otherwise set provider to null)
- *
- * @return
- *   An array with the provider informations.
- *   following items:
- *   - "name": The machine name of the provider.
- *   - "type": The type of the provider (photo/video/audio/etc)
- */
-function hook_dpicontenttypes_provider($uri) {
-  return array(
-    'module_name' => array('name' => 'provider_name', 'type' => 'provider_type'),
-  );
 }
 
 /**

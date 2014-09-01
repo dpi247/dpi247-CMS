@@ -44,12 +44,11 @@
  * @ingroup themeable
  */
 ?>
-
 <div class="<?php print $classes; ?>"<?php print $attributes; ?>>
 	<div class="article-description">
-	<?php if (!$label_hidden): ?>
-    <span class="field-label"<?php print $title_attributes; ?>><?php print $label ?>:&nbsp;</span>
-  <?php endif; ?>
-  <?php print render($items); ?>
+  	  <?php if (!$label_hidden): ?>
+        <span class="field-label"<?php print $title_attributes; ?>><?php print $label ?>:&nbsp;</span>
+      <?php endif; ?>
+      <?php print drupal_render($items); ?>
 	</div>
 </div>

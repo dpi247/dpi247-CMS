@@ -51,7 +51,7 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
   $file = NULL;
 
   if ($uri && isset($uri['scheme'])) {
-    $badcar = array('+', ' ', '%20');
+    $badcar = array('+', ' ', '%20', '%28', '%29');
     $destination = str_replace($badcar, '_', rtrim($destination, '/'));
     $destination .= '/';
     switch ($uri['scheme']){
@@ -71,7 +71,7 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
               list($file_type, $file_ext) = explode('/', $data->headers['content-type']);
               $current_ext = pathinfo($file_name, PATHINFO_EXTENSION);
               if (empty($current_ext)) {
-                $file_name = $file.'.'.$file_ext;
+                $file_name = $file_name.'.'.$file_ext;
               }
               $good_file_name = str_replace($badcar, '_', $file_name);
               if (_dpicontenttypes_file_check_directory_recursive($destination, 1)) {
@@ -87,6 +87,17 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
   }
 
   return $file;
+}
+
+
+
+function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
+
+  $language=$form["language"]["#value"];
+  if(!isset($language) or $language==''){
+    $language='und';
+  }
+  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
 }
 
 /**
@@ -171,7 +182,7 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
   } else {
     $dpiproperties = $object->dpiproperties;
   }
-  $dpiproperties->type = 'default';
+  $dpiproperties->type = isset($dpiproperties->type) ? $dpiproperties->type : 'default';
   $dpiproperties->id = $eid;
   $dpiproperties->entity = $entity;
   $dpiproperties->external_reference = $dpiproperties->external_reference ? $dpiproperties->external_reference : dpi_variable_get('dpicommons_product', '').'-'.dpi_variable_get('dpicommons_environment', '').'-'.time().'-'.rand();

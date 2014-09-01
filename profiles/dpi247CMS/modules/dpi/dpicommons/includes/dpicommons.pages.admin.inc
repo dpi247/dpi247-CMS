@@ -5,9 +5,7 @@
  *
  * @param array $form_state
  */
-function dpicommons_admin_settings_form($form_state) {
-  $form = array();
-
+function dpicommons_admin_settings_form($form, $form_state) {
   $form['dpicommons_product'] = array(
     '#type' => 'textfield',
     '#title' => t('ProductID'),
@@ -37,13 +35,20 @@ function dpicommons_admin_settings_form($form_state) {
     '#maxlength' => 512,
     '#required' => TRUE,
   );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
+  
+  $form['dpicommons_http_request_retry'] = array(
+    '#type' => 'textfield',
+    '#title' => t('HTTP Request retry'),
+    '#description' => t('Specifies the default retry limit for every HTTP request made from this site'),
+    '#default_value' => dpi_variable_get('dpicommons_http_request_retry', 1),
+    '#size' => 80,
+    '#maxlength' => 512,
+    '#required' => TRUE,
   );
 
-  return $form;
+  $form['#validate'][] = 'dpicommons_admin_settings_form_validate';
+
+  return dpi_system_settings_form($form);
 }
 
 /**
@@ -53,25 +58,10 @@ function dpicommons_admin_settings_form($form_state) {
  * @param array $form_state
  */
 function dpicommons_admin_settings_form_validate($form, &$form_state){
-  if (!preg_match('/^[a-zA-Z0-9]+$/' , $form_state['values']['dpicommons_product'])){
-    form_set_error('dpicommons_product', t('Product must be alphanumeric only.'));
-  }
-  if (!preg_match('/^[a-zA-Z0-9]+$/' , $form_state['values']['dpicommons_environment'])){
-    form_set_error('dpicommons_environment', t('Environment must be alphanumeric only.'));
-  }
   if (!preg_match('/^[0-9]+$/' , $form_state['values']['dpicommons_http_request_timeout'])){
     form_set_error('dpicommons_http_request_timeout', t('HTTP Request Timeout must be an integer.'));
   }
-}
-
-/**
- * Submit of dpicommons_admin_settings_form
- *
- * @param array $form
- * @param array $form_state
- */
-function dpicommons_admin_settings_form_submit($form, &$form_state){
-  dpi_variable_set('dpicommons_product', $form_state['values']['dpicommons_product']);
-  dpi_variable_set('dpicommons_environment', $form_state['values']['dpicommons_environment']);
-  dpi_variable_set('dpicommons_http_request_timeout', $form_state['values']['dpicommons_http_request_timeout']);
+  if (!preg_match('/^[0-9]+$/' , $form_state['values']['dpicommons_http_request_retry'])){
+    form_set_error('dpicommons_http_request_retry', t('HTTP Request retry must be an integer.'));
+  }
 }

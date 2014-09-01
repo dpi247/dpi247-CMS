@@ -1,47 +1,4 @@
-<?php 
-
-/**
- * Define a cache entry type.
- *
- * If an cache entry type is not defined,
- * it will be impossible to use the functionnalities
- * of the dpicache module, like the hot and cold
- * cache refreshing processes.
- *
- * @return array
- *   An array of arrays defining the cache entries.
- *     - callback : the function to call to refresh the cache entry
- *     - plugin : the kind of storage
- *     - category : a group classification
- *     - data_type : the type of datas to be cached
- *     - ttl : validity time (in seconds) for a cache entry
- *     - refresh_interval : the time (in seconds) between two cold refreshes for a cache entry
- *     - bypass : for development purpose, allows to always bypass the cache
- *     - file : an array defining a file to include
- *       - module : module to which the file belongs
- *       - type : extension of the file
- *       - name : path of the file, relative to the module directory, without the extension
- */
-function hook_dpicache_cache_entry_register() {
-  return array(
-    'flowmix_render' => array(
-      'callback' => 'flowmix_get_render', // function to call
-      'plugin' => 'dpicache_memcache', // which storage?
-      'catagory' => 'flowmix_render', // group
-      'data_type' => "string", // the callback returns a string
-      'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
-      'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
-    ),
-    // file key if your callback is not auto loaded (not in .module)
-    //'file'=>array(
-    //  "module"=>"dpidestinations",
-    //  "type"=>"inc",
-    //  "name"=>"plugins/ctools/content_types/targetblock/targetblock"
-    //),
-    // use bypass to bypass cache for debugging purpose.
-    //'bypass'=>TRUE,
-  );
-}
+<?php
 
 /**
  * Get cache content throught DPIcache system.
@@ -236,15 +193,37 @@ function dpi_variable_del($name) {
  * variable names.
  *
  * @param $name
- *   The name of the namespace to undefine.
+ *   The name of the variable to undefine.
+ * @param $type
+ *   Type of variables to delete, "system" (classic variable_set variables),
+ *   "dpi" (dpi_variable_set variables) or "both".
  *
- * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
+ * @see dpi_variable_get(), dpi_variable_set(), dpi_variable_del()
  */
-function dpi_variable_del_namespace($namespace) {
-  db_delete('dpi_variables')
-    ->condition('name', $namespace.'%', 'LIKE')
-    ->execute();
-  drupal_static_reset('dpivariables');
+function dpi_variable_del_namespace($namespace, $type = 'both') {
+  if ($type == 'system' || $type == 'both') {
+    global $conf;
+
+    $db_vars = db_select('variable', 'v')
+      ->fields('v', array('name'))
+      ->condition('v.name', $namespace.'%', 'LIKE')
+      ->execute();
+    foreach ($db_vars as $db_var) {
+      unset($conf[$db_var->name]);
+    }
+    db_delete('variable')
+      ->condition('name', $namespace.'%', 'LIKE')
+      ->execute();
+
+    cache_clear_all('variables', 'cache_bootstrap');
+  }
+
+  if ($type == 'dpi' || $type == 'both') {
+    db_delete('dpi_variables')
+      ->condition('name', $namespace.'%', 'LIKE')
+      ->execute();
+    drupal_static_reset('dpivariables');
+  }
 }
 
 /**
@@ -260,7 +239,7 @@ function dpi_variable_del_namespace($namespace) {
  * @see system_settings_form()
  *
  */
-function dpi_system_settings_form($form){
+function dpi_system_settings_form($form) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',

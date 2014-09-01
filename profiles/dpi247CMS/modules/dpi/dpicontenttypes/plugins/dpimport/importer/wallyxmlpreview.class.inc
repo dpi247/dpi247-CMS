@@ -15,6 +15,7 @@ class WallyXmlPreview extends WallyXmlV1 {
     $prenode = new Prenode();
     $package->nid = $prenode->getID();
     $package->entity_id = $prenode->getID();
+    $package->entity_type = 'node';
     $prenode->setNode($package);
     $prenode->save();
     $this->prenode = $prenode;

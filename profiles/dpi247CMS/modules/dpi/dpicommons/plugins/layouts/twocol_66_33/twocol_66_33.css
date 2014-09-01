@@ -1,0 +1,51 @@
+
+.panel-2col-33 { 
+/*  overflow: hidden;  */
+}
+
+.panel-2col-33 { 
+  float: left; 
+  width: 33%; 
+}
+
+.panel-2col-66  { 
+  float: left; 
+  width: 66%; 
+}
+
+
+.panel-2col-99  { 
+  width: 99%; 
+}
+
+.panel-2col-33 .panel-col-first .inside { 
+  margin: 0 .5em 1em 0;
+}
+
+.panel-2col-33 .panel-col { 
+  float: left; 
+  width: 33%; 
+}
+
+.panel-panel .inside { 
+  margin: 0 .5em 1em .5em;
+}
+
+
+.filter-wrapper, .mee-wrap-editor-library{
+	display:none;
+}
+
+.field-type-text-long, .field-type-text-with-summary{
+	margin-bottom:20px;
+}
+.field-type-text{
+	margin-bottom: 0.5em;
+}
+
+.field-type-text a.ckeditor_links{
+	display: none !important; 
+}
+input.form-text{
+	width:100%;
+}

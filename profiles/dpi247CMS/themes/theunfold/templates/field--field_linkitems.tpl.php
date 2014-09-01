@@ -49,6 +49,6 @@ field--field_linkitems.tpl.php
 -->
 <ul class="article-list <?php print $classes; ?>">
      <?php foreach ($items as $delta => $item): ?>
-      <li class="field-item <?php print $delta % 2 ? 'odd' : 'even'; ?>"<?php print $item_attributes[$delta]; ?>><?php print render($item); ?></li>
+      <li class="field-item <?php print $delta % 2 ? 'odd' : 'even'; ?> color-red"<?php print $item_attributes[$delta]; ?>><?php print render($item); ?></li>
     <?php endforeach; ?>
 </ul>

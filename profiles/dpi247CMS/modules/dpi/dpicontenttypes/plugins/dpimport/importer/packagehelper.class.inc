@@ -7,7 +7,7 @@ abstract class PackageHelper extends Importer {
    * @param Dom $dom
    * @param Object $package
    */
-  protected function savePackage($dom, $package){
+  protected function savePackage($dom, $package) {
     node_save($package);
   }
 
@@ -16,15 +16,21 @@ abstract class PackageHelper extends Importer {
    *
    * @param DOM $dom
    */
-  protected function constructPackage($dom){
+  protected function constructPackage($dom) {
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    if (!Logger::error()){
+    if (!Logger::error()) {
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_beforeprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
+
       $this->setPackageAttributes($dom, $package_wrapper, $package);
-      if (!Logger::error()){
+      if (!Logger::error()) {
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
+
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
     return $package;
   }
@@ -43,7 +49,7 @@ abstract class PackageHelper extends Importer {
     $node->type = 'package';
     $node->is_new = TRUE;
     node_object_prepare($node);
-    $node->dpiproperties = new DPIPropertiesEntity(array(), 'dpiproperties');
+    $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
     if ($dpiproperties !== FALSE){
@@ -97,17 +103,38 @@ abstract class PackageHelper extends Importer {
    *
    * @return Object $node
    */
+  protected function _createOrLoadEntityScaldAtom($dom, $external_reference, $atom) {
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+      $atom = $temp_atom;
+    } else {
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $atom_wrapper->field_external_reference->set($external_reference);
+    }
+
+    $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
+    if ($dpiproperties !== FALSE) {
+      $atom->dpiproperties = $dpiproperties;
+    } else {
+      $atom->dpiproperties = new DPIPropertiesEntity(array('type' => 'scald_atom'), 'dpiproperties');
+    }
+
+    return $atom;
+  }
+
+  /**
+   * Create or load a photo object based on it's exeternal reference
+   *
+   * @param DOM $dom
+   * @param string $extref
+   *
+   * @return Object $node
+   */
   protected function _createOrLoadEntityPhotoObjectType($dom, $external_reference) {
     $atom = scald_atom_defaults('image');
     $atom->provider = 'scald_image';
     $atom->type = 'image';
-    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
-      $atom = $temp_atom;
-    } else {
-      $node_wrapper = entity_metadata_wrapper('scald_atom', $atom);
-      $node_wrapper->field_external_reference->set($external_reference);
-    }
-    return $atom;
+
+    return $this->_createOrLoadEntityScaldAtom($dom, $external_reference, $atom);
   }
 
   /**
@@ -281,11 +308,8 @@ abstract class PackageHelper extends Importer {
     $atom = scald_atom_defaults('audio');
     $atom->provider = 'scald_audio';
     $atom->type = 'audio';
-    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
-    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
-      $atom = $temp_atom;
-    }
-    return $atom;
+
+    return $this->_createOrLoadEntityScaldAtom($dom, $external_reference, $atom);
   }
 
   /**

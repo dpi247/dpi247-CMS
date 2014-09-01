@@ -1,0 +1,53 @@
+@CHARSET "UTF-8";
+
+
+div.meta span.author{
+	font-size:12px;
+}
+
+ul li{
+	color:#444444;
+}
+
+
+.article-group li.views-row {
+margin-bottom: 9.5px;
+border-bottom: 1px solid #d4d7cb;
+}
+
+
+span.cat a{
+	color: #b8240d;
+	
+}
+
+figure.no_width{
+	width: 100% !important;
+}
+
+.color-red{
+	color: #B8240D !important;
+}
+
+.small_content aside{
+	float: none;
+	width: 100%;
+}
+
+.small_content aside ul li{
+	margin-left: 15px; 
+}
+
+.item-list ul li {
+	margin: 0 ;
+	padding: 0;
+}
+
+/* Pour positionner correctement les contextual links */
+.views-row{
+	position:relative;
+}
+
+.twitter-timeline{
+	width:100% !important; 
+}

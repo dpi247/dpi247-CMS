@@ -1,5 +1,7 @@
 <?php 
 
+module_load_include('inc', 'dpiblocks','dpiblocks.api');
+module_load_include('inc', 'dpiblocks','dpiblocks.private');
 // Load all entity function for remotehtml and custom content
 module_load_include('inc', 'dpiblocks','dpiblocks.entity');
 
@@ -8,7 +10,15 @@ module_load_include('inc', 'dpiblocks','dpiblocks.entity');
  *
  * @return $items
 */
-function dpiblocks_menu(){
+function dpiblocks_menu() {
+  $items[DPI_ADMIN_PATH.'/dpiblocks/flowplugins'] = array(
+    'title' => 'Flow plugins',
+    'description' => 'Gives informations about existing flow plugins',
+    'page callback' => 'dpiblocks_page_flow_plugins',
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/dpiblocks.pages.flow.inc',
+  );
+
   $items['remotehtml/%remotehtml'] = array(
     'title callback' => 'remotehtml_view',
     'title arguments' => array(1),
@@ -74,6 +84,75 @@ function dpiblocks_menu(){
   );
 
   return $items;
+}
+
+/**
+ * Implementation of permission
+ *
+ * @return array
+ */
+function dpiblocks_permission(){
+  return array(
+    'administer remotehtml' =>  array(
+      'title' => t('Administer remotehtml'),
+      'restrict access' => TRUE,
+    ),
+    'view remotehtml' => array(
+      'title' => t('View remotehtml'),
+    ),
+    'manage flow plugins' => array(
+      'title' => t('Manage flow plugins'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpiblocks_theme(&$var) {
+  $path = drupal_get_path('module', 'dpiblocks');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => "$path/theme",
+  );
+
+  return array(
+    'dpiblocks_custom_content_type_revision_form' => $base + array(
+      'render element' => 'form',
+    ),
+    'dpiblocks_custom_content_type_listversion' => $base + array(
+      'variables' => array('versions' => NULL),
+    ),
+    'dpiblocks_flowmix' => $base + array(
+      'variables' => array('subtype' => '', 'context' => array(), 'feed' => array(), 'settings' => NULL),
+      'template' => 'dpiblocks-flowmix',
+    ),
+    'dpiblocks_flowmix_content_type_form_summary_form' => $base + array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_dpicache_cache_entry_register
+ */
+function dpiblocks_dpicache_cache_entry_register() {
+  return array(
+    'dpiblocks_flowmix_feed' => array(
+      'callback' => 'dpiblocks_flowmix_content_type_generate_feed', // Function to call
+      'plugin' => 'dpicache_memcache', // Which storage?
+      'catagory' => 'dpiblocks', // Group
+      'data_type' => 'array', // The callback returns an array
+      'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
+      'refresh_interval' => 15*60, // Default refresh interval
+      'file' => array( // File to load
+        'module' => 'dpiblocks',
+        'type' => 'inc',
+        'name' => 'plugins/content_types/flowmix',
+      ),
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+  );
 }
 
 /**
@@ -170,23 +249,6 @@ function dpiblocks_ajax_custom_content_getversion($revision_id){
 }
 
 /**
- * Implementation of permission
- *
- * @return array
- */
-function dpiblocks_permission(){
-  return array(
-    'administer remotehtml' =>  array(
-      'title' => t('Administer remotehtml'),
-      'restrict access' => TRUE,
-    ),
-    'view remotehtml' => array(
-      'title' => t('View remotehtml'),
-    )
-  );
-}
-
-/**
  * Create a new object for the given $table.
  *
  * @param $table
@@ -241,6 +303,55 @@ function dpiblocks_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
     return 'plugins/content_types';
   }
+  elseif ($module == 'dpiblocks' && $plugin == 'flow') {
+    return 'plugins/flow';
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api()
+ */
+function dpiblocks_ctools_plugin_api() {
+  return array(
+    'version' => 2,
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_type
+ */
+function dpiblocks_ctools_plugin_type() {
+  $plugins = array(
+    'flow' => array(
+      'cache' => FALSE, // Set this to TRUE in production environments!
+      'process' => 'dpiblocks_flow_process',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Called by ctools_plugin_load_includes()
+ * Gives default settings values for flow plugins
+ */
+function dpiblocks_flow_process(&$plugin, $info){
+  $function_base = $plugin['module'] . '_' . $plugin['name'] . '_flow_';
+
+  if (!isset($plugin['settings form']) && function_exists($function_base . 'settings_form')) {
+    $plugin['settings form'] = $function_base . 'settings_form';
+  }
+
+  if (!isset($plugin['settings form submit']) && function_exists($function_base . 'settings_form_submit')) {
+    $plugin['settings form submit'] = $function_base . 'settings_form_submit';
+  }
+
+  if (!isset($plugin['settings form validate']) && function_exists($function_base . 'settings_form_validate')) {
+    $plugin['settings form validate'] = $function_base . 'settings_form_validate';
+  }
+
+  if (!isset($plugin['build']) && function_exists($function_base . 'build')) {
+    $plugin['build'] = $function_base . 'build';
+  }
 }
 
 /**
@@ -252,41 +363,19 @@ function dpiblocks_ctools_plugin_directory($module, $plugin) {
  * @return
  *  An array whith all the versions of the custom content type
  */
-function dpiblocks_custom_content_type_getrevision($machine_name){
+function dpiblocks_custom_content_type_getrevision($machine_name) {
   $items = array();
 
   if ($machine_name !== NULL) {
-    $result = db_query("SELECT *
-        FROM {dpiblocks_custom_content_revision} r
-        WHERE r.machine_name = :machine_name", array(':machine_name' => $machine_name));
-    foreach($result as $revision){
+    $db_results = db_select('dpiblocks_custom_content_revision', 'r')
+      ->fields('r')
+      ->condition('r.machine_name', $machine_name)
+      ->execute();
+    foreach($db_results as $revision) {
       $items[] = $revision;
     }
   }
   return $items;
-}
-
-/**
- * Implémentation of hook_theme();
- *
- * @param $var
- *  Return array
- */
-function dpiblocks_theme(&$var) {
-  $path = drupal_get_path('module', 'dpiblocks');
-  $base = array(
-    'file' => 'theme.inc',
-    'path' => "$path/theme",
-  );
-
-  return array(
-    'dpiblocks_custom_content_type_revision_form' => $base + array(
-      'render element' => 'form',
-    ),
-    'dpiblocks_custom_content_type_listversion' => $base + array(
-      'arguments' => array('versions' => NULL),
-    ),
-  );
 }
 
 /**

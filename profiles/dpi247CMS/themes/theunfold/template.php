@@ -19,12 +19,18 @@ function theunfold_theme() {
       'template' => 'comment-form',
       'path' => $path.'/templates/comment',
     ),
+    'theme_package_top_items' => array(
+      'arguments' => array('variable' => array()),
+    ),
+    
   );
+}
+function theunfold_preprocess_($variables, $base_theme){
+  
 }
 
 function theunfold_preprocess_page(&$vars) {
   _theunfold_set_js();
-
   if (isset($vars['main_menu'])) {
     $vars['primary_nav'] = theme('links__system_main_menu', array(
       'links' => $vars['main_menu'],
@@ -63,6 +69,7 @@ function theunfold_preprocess_page(&$vars) {
  * Hook preprocess_page
  */
 function theunfold_process_page(&$vars) {
+  
 }
 
 /**
@@ -140,8 +147,12 @@ function theunfold_preprocess_field(&$variables) {
       break;
 */
     case 'field_textbody':
-    case 'field_linkslists':
+      break;
+    case 'field_linkslists':      
       $variables['classes_array'][] = 'article-body';
+      if($element['#formatter'] == 'links_list_small'){
+        $variables['theme_hook_suggestions'][] = 'field__field_linkslists_small__package';
+      }
       break;
 /*
     case 'field_textbarette':

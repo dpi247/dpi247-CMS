@@ -9,6 +9,9 @@
 function dpicontenttypes_entity_properties($type, $entity) {
   $content = '';
   $dpiproperties = dpiproperties_load_by_type_and_id($type, entity_id($type, $entity), TRUE);
+  if (module_exists('devel')) {
+    
+  }
   if ($dpiproperties != NULL) {
     $dpiproperties_view = dpiproperties_view($dpiproperties);
     $content = render($dpiproperties_view);

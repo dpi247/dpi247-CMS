@@ -97,6 +97,18 @@ abstract class Importer {
   }
 
   /**
+   * Get additionnal informations to display in the importers admin page
+   */
+  public function additionnalInformations() {
+    $additionnal_infos = '';
+    if ($this->dispatcher_class == 'PostDispatcher') {
+      global $base_url;
+      $additionnal_infos = t('POST URL : ').$base_url.'/dpimport/process/'.$this->name;
+    }
+    return $additionnal_infos;
+  }
+
+  /**
    * Form to complete the settings of the importer
    *
    * @param Array $form_state
@@ -297,6 +309,9 @@ abstract class Importer {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
 
+      // Allow to alter entity before process
+      module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
+
       // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
       if (method_exists($this, $attributes_method)) {
@@ -306,12 +321,18 @@ abstract class Importer {
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
 
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
+
       if (Logger::error()) {
         return NULL;
       }
 
       // Save entity
       if ($save) {
+        // Allow to alter entity before save
+        module_invoke_all('dpimport_entity_presave', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
+
         $this->saveEntity($dom, $entity_type, $entity);
       }
     }

@@ -1,0 +1,4 @@
+name = CCI Admin
+description = Admin module, with various admin tweaks
+package = CCI
+core = 7.x

@@ -69,7 +69,7 @@ function dpi247CMS_install() {
   filter_format_save($full_html_format);
 
   // Enable some standard blocks.
-  $admin_theme = 'seven';
+  $admin_theme = 'shiny';
   $blocks = array(
     array(
       'module' => 'system',
@@ -155,9 +155,9 @@ function dpi247CMS_install() {
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
-    ->condition('name', 'seven')
+    ->condition('name', $admin_theme)
     ->execute();
-  variable_set('admin_theme', 'seven');
+  variable_set('admin_theme', $admin_theme);
   variable_set('node_admin_theme', '1');
 }
 
@@ -302,6 +302,14 @@ function _dpi247CMS_install_demo_contents_minimal() {
       }
     }
   }
+  
+  //import taxonomy_menu config:
+  $form2=array();
+  $form_state2['values']['vid']=_dpidestinations_variable_get('dpidestinations_section_vid', 0);
+  $form_state2['values']['taxonomy_menu']['vocab_parent']="main-menu:0";
+  $form_state2['values']['taxonomy_menu']['path']="taxonomy_menu_path_default";
+  $form_state2['values']['taxonomy_menu']['options']=unserialize('a:12:{s:4:"sync";i:1;s:11:"display_num";i:0;s:16:"hide_empty_terms";i:0;s:8:"voc_item";b:0;s:20:"voc_item_description";i:0;s:21:"term_item_description";i:0;s:8:"expanded";i:1;s:4:"flat";i:0;s:8:"voc_name";b:0;s:19:"display_descendants";i:0;s:7:"end_all";b:0;s:7:"rebuild";i:0;}');
+  _dpi247CMS_taxonomy_menu_vocab_submit($form2, $form_state2);
 }
 
 /**
@@ -325,7 +333,9 @@ function _dpi247CMS_install_demo_contents_full() {
       $copied_term->name = $term;
       taxonomy_term_save($copied_term);
     }
+    
   }
+  
 
   // Add default destinations terms
   $packlayout_voc = 'packagelayout';
@@ -367,4 +377,68 @@ function _dpi247CMS_install_demo_contents_full() {
 }
 
 function _dpi247CMS_install_default_contents() {
+}
+
+
+
+function _dpi247CMS_taxonomy_menu_vocab_submit($form, &$form_state) {
+  $vid = $form_state['values']['vid'];
+  $changed = FALSE;
+
+  if (is_numeric($form_state['values']['taxonomy_menu']['vocab_parent'])) {
+    // Menu location has been set to disabled, don't want to throw notices
+    $form_state['values']['taxonomy_menu']['vocab_parent'] = '0:0';
+  }
+
+  // Split the menu location into menu name and menu item id.
+  list($vocab_parent['vocab_menu'], $vocab_parent['vocab_parent']) = explode(':', $form_state['values']['taxonomy_menu']['vocab_parent']);
+
+  // Init flag variables to avoid notices if changes haven't happened
+  $changed_menu = FALSE;
+  $change_vocab_item = FALSE;
+  $changed_path = FALSE;
+
+  // Set the menu name and check for changes
+  $variable_name = _taxonomy_menu_build_variable('vocab_menu', $vid);
+  if (_taxonomy_menu_check_variable($variable_name, $vocab_parent['vocab_menu'])) {
+    $changed_menu = TRUE;
+  }
+  variable_set($variable_name, $vocab_parent['vocab_menu']);
+
+  // Set the menu parent item and check for changes
+  $variable_name = _taxonomy_menu_build_variable('vocab_parent', $vid);
+  if (_taxonomy_menu_check_variable($variable_name, $vocab_parent['vocab_parent'])) {
+    $changed_menu = TRUE;
+  }
+  variable_set($variable_name, $vocab_parent['vocab_parent']);
+
+  // Set the path and check for changes
+  $variable_name = _taxonomy_menu_build_variable('path', $vid);
+  if (_taxonomy_menu_check_variable($variable_name, $form_state['values']['taxonomy_menu']['path'])) {
+    $changed_path = TRUE;
+  }
+  variable_set($variable_name, $form_state['values']['taxonomy_menu']['path']);
+
+  foreach ($form_state['values']['taxonomy_menu']['options'] as $key => $value) {
+    // Create the variable name
+    $variable_name = _taxonomy_menu_build_variable($key, $vid);
+
+    // Check to see if the vocab enable options has changed
+    if ($key == 'voc_item') {
+      if (_taxonomy_menu_check_variable($variable_name, $value)) {
+        $change_vocab_item = TRUE;
+      }
+    }
+
+    // If $changed is alreayd set to true, then don't bother checking any others.
+    if (!$changed) {
+      // Check to see if the variable has changed.
+      if (_taxonomy_menu_check_variable($variable_name, $value)) {
+        $changed = TRUE;
+      }
+    }
+    // Save variable.
+    variable_set($variable_name, $value);
+  }
+
 }
