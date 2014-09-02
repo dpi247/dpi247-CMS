@@ -52,16 +52,17 @@ function dpicache_get_cache_entry($cache_name) {
     $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
     dpi_log('dpicache', "regenerate_hot", t("Cache (re)generated for name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
 
+    $arg_callback = dpicache_get_arguments_values($cache_definition, $parameters);
     // Add or update cache entry data
     $entry_information = array(
       "name" => $cache_name,
       "hash" => $hash,
-      "category" => @$cache_definition["category"],
+      "category" => $arg_callback["category"],
       "data_type" => @$cache_definition["data_type"] ?: "string",
       "creation_date" => time(),
-      "expiration_date" => intval(time() + $cache_definition["ttl"]),
+      "expiration_date" => intval(time() + $arg_callback["expiration_date"]),
       "last_run" => time(),
-      "update_freq" => $cache_definition["refresh_interval"],
+      "update_freq" => $arg_callback['update_freq'],
       "parameters" => $parameters_array
     );
     dpicache_save_cache_entry($entry_information, false);
@@ -288,7 +289,7 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name){
   $cache_definition=dpicache_get_cache_entry_definition($cache_name);
   $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
   $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-
+  //@todo change this goto by an other think;
   drupal_goto();
 }
 

@@ -98,6 +98,7 @@ function _dpidestinations_targetblock_content_type_render_process($did, $destina
 
   $targetview_clone = _dpidestinations_targetblock_content_type_helper_get_local_targetview($targetblock, $targetview);
 
+  $block = new stdClass();
   $block->title = $title;
   $block->content = _dpidestinations_targetblock_content_type_helper_get_content($targetview_clone);
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta);

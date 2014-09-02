@@ -107,32 +107,16 @@ function dpicache_regenerate_cache_entries_process($query){
     }
     // Save content into cache
     $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
-    
-    $update_freq=$cache_definition["refresh_interval"];
-    if(isset($cache_definition["refresh_interval_callback"])){
-      $func=$cache_definition["refresh_interval_callback"];
-      $update_freq=$func($cache_definition,unserialize($entry->parameters));
-    }
-    
-    $expiration_date=$cache_definition["ttl"];
-    if(isset($cache_definition["ttl_callback"])){
-      $func=$cache_definition["ttl_callback"];
-      $expiration_date=$func($cache_definition,unserialize($entry->parameters));
-    }
-    
-    $category = @$cache_definition["category"];
-    if(isset($cache_definition["category_callback"])){
-      $func=$cache_definition["category_callback"];
-      $category=$func($cache_definition,unserialize($entry->parameters));
-    }
+        
+    $val_arg = dpicache_get_arguments_values($cache_definition, $fresh_content);
     
     $entry_information = array(
       "name" => $entry->name,
       "hash" => $entry->hash,
-      "category" => $category,
+      "category" => $val_arg['category'],
       "data_type" => @$cache_definition["data_type"] ?: "string",
-      "expiration_date" => intval($entry->creation_date + $expiration_date),
-      "update_freq" => $update_freq
+      "expiration_date" => intval($entry->creation_date + $val_arg['expiration_date']),
+      "update_freq" => $val_arg['update_freq']
     );
     
     if($saved)
@@ -144,6 +128,27 @@ function dpicache_regenerate_cache_entries_process($query){
   return TRUE;
 }
 
+function dpicache_get_arguments_values($cache_definition, $entry){  
+  $value_return['update_freq']=$cache_definition["refresh_interval"];
+
+  if(isset($cache_definition["refresh_interval_callback"])){
+    $func=$cache_definition["refresh_interval_callback"];
+    $value_return['update_freq']=$func($cache_definition,$entry);
+  }
+  
+  $value_return['expiration_date']=$cache_definition["ttl"];
+  if(isset($cache_definition["ttl_callback"])){
+    $func=$cache_definition["ttl_callback"];
+    $value_return['expiration_date']=$func($cache_definition,$entry);
+  }
+  
+  $value_return['category'] = @$cache_definition["category"];
+  if(isset($cache_definition["category_callback"])){
+    $func=$cache_definition["category_callback"];
+    $value_return['category']=$func($cache_definition,$entry);
+  }
+  return $value_return;
+}
 
 /**
  * Get registered infos associated with a cache type
@@ -356,7 +361,6 @@ function _dpicache_esi_sync_drupal_roles_to_esi_visibility(){
    $deletes[$result['module']][$result['delta']][$result['rid']]=$result['rid'];
     
    }
-   dsm($deletes);
    foreach($results as $result){
      foreach(user_roles() as $rid=>$role){
      if(!isset($write[$result['module']][$result['delta']][$rid])){
@@ -390,10 +394,7 @@ function _dpicache_esi_sync_drupal_roles_to_esi_visibility(){
        ->condition('rid', $rid, '=')
        ->execute();      
      }
-   }
-   
-  
-   dsm($write);
+   }  
 }
 
 
@@ -416,8 +417,7 @@ function _dpicache_esi_sync_esi_visibility_to_drupal_roles(){
   $query->fields('b', array('module', 'delta', 'esi_roles'));
   $results = $query->execute();
   foreach($results as $result){
-    $esi_roles=unserialize($result->esi_roles);
-    dsm($esi_roles,esiroles);
+    $esi_roles=unserialize($result->esi_roles);    
     foreach($esi_roles as $rid=>$esi_role){
       if($esi_role){
       $block_role=new stdClass();

@@ -478,7 +478,7 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, $target_value, $targetblock) {
   //@todo: documenter ces arguments dans la doc technique
   $targetview->targetview_tid=$term_value;
-  $targetview->targetview_target=$target_value;
+  $targetview->targetview_target=$target_value;  
 
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
@@ -501,9 +501,11 @@ function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, 
     $targetview->set_items_per_page($targetblock->node_count_for_targetblock);
     //$targetview->set_offset($targetblock->offset);
   }
+  $targetview->dpidestinations['destination'] = new stdClass();
   $targetview->dpidestinations['destination']->tid=$term_value;
+  $targetview->dpidestinations['target'] = new stdClass();
   $targetview->dpidestinations['target']->machine_name=$target_value;
-
+  
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 }

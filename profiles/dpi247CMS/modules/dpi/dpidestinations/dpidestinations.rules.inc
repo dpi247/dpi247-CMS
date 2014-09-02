@@ -245,10 +245,15 @@ function dpidestinations_rules_action_info(){
   );
 }
 
-function regenerate_content($node){
-  if(isset($node->field_destinations['und'][0]['tid']) && is_numeric($node->field_destinations['und'][0]['tid'])){
-    $targetBlock = dpidestinations_api_get_all_targetblocks_for_destination($node->field_destinations['und'][0]['tid']);
-    
-    dsm($targetBlock);
+/**
+ * $did $tid $targetname = $cache_name a refresh
+ * @param unknown $node
+ */
+function regenerate_content($node){  
+  if(isset($node->field_destinations['und'][0]['tid']) && is_numeric($node->field_destinations['und'][0]['tid']) && isset($node->field_destinations['und'][0]['target'])){
+    $did = dpidestinations_api_get_panelsdisplay_for_sectionterm($node->field_destinations['und'][0]['tid']);
+    dpicache_api_regenerate_one_cache_entry_callback($did->did.'_'.$node->field_destinations['und'][0]['tid'].'_'.$node->field_destinations['und'][0]['target']);
+  }else{
+    drupal_set_message('Cache entry is not refresh for this content', 'error');
   }
 }
