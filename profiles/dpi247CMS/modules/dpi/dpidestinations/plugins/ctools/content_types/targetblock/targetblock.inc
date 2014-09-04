@@ -78,7 +78,7 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $target_name = $subtype;
   $split_delta = $conf["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
-  return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title);
+  return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta,$title);
 }
 
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
@@ -101,7 +101,7 @@ function _dpidestinations_targetblock_content_type_render_process($did, $destina
   $block = new stdClass();
   $block->title = $title;
   $block->content = _dpidestinations_targetblock_content_type_helper_get_content($targetview_clone);
-  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta);
+  $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta,$title);
 
   return $block;
 }
@@ -410,7 +410,7 @@ function _dpidestinations_targetblock_content_type_helper_get_content($targetvie
   return $content;
 }
 
-function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta) {
+function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, $destination_term_id, $target_name, $split_delta='',$title) {
   return array(
     array(
       'title' => t('Reorder TargetBlock'),
@@ -419,7 +419,7 @@ function _dpidestinations_targetblock_content_type_helper_get_admin_links($did, 
     ),
     array(
       'title' => t('Refresh Cache'),
-      'href' => dpicache_get_regenerate_url('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta),
+      'href' => dpicache_get_regenerate_url('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta,$title),
       'query' => drupal_get_destination(),
     ),
     array(

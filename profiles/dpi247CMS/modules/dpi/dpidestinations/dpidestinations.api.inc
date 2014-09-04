@@ -261,7 +261,7 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
  */
 function dpidestinations_api_get_node_type_with_destination_field(){
   return array(
-    'package'=>'Package'
+    'package'=>'package'
   );
 }
 

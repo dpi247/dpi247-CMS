@@ -1,6 +1,9 @@
 <?php 
 
-
+define("DPICACHE_NULL_URL_PARAMETER",'dpicache_null');
+define("DPICACHE_EMPTYSTRING_URL_PARAMETER",'dpicache_emptystring');
+  
+  
 module_load_include('inc', 'dpicache','varnish');
 module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
@@ -69,6 +72,10 @@ function dpicache_menu(){
   return $items;
 }
 
+
+function dpicache_flush_caches() {
+  return array('cache_dpicache');
+}
 
 /**
  * Implementation of hook_permission

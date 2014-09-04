@@ -13,7 +13,7 @@
  * @ingroup views_row_plugins
  */
 class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_view {
-  
+
   function render($row) {
     if (isset($this->nodes[$row->{$this->field_alias}])) {
       $node = $this->nodes[$row->{$this->field_alias}];

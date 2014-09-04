@@ -33,7 +33,7 @@ function dpicache_get_cache_entry($cache_name) {
   else {
     // no cache available
     dpi_log('dpicache', "cache_miss", t("Cache miss : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_NOTICE);
-
+    
     // Get fresh content
     $fresh_content = _dpicache_cache_call_function($cache_definition, $parameters);
     if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
@@ -80,6 +80,14 @@ function dpicache_get_cache_entry($cache_name) {
 function dpicache_get_regenerate_url($cache_name){
   $args=func_get_args();
   unset($args[0]);
+  foreach ($args as $key=>$value){
+    if($value==NULL){
+      $args[$key]=DPICACHE_NULL_URL_PARAMETER;
+    }
+    if($value==""){
+      $args[$key]=DPICACHE_EMPTYSTRING_URL_PARAMETER;
+    }
+  }
   $args_url=implode('/', $args);
 
   $url='dpicache/regenerate/one_cache_entry/'.$cache_name.'/'.$args_url;
@@ -278,18 +286,29 @@ function dpi_api_system_settings_form_submit($form, &$form_state) {
 function dpicache_api_regenerate_one_cache_entry_callback($cache_name){
 
   $args=func_get_args();
+  
+  foreach ($args as $key=>$value){
+    if($value==DPICACHE_NULL_URL_PARAMETER){
+      $args[$key]=NULL;
+    }
+    if($value==DPICACHE_EMPTYSTRING_URL_PARAMETER){
+      $args[$key]="";
+    }
+  }
+  
   unset($args[0]);
-  $hash=_dpicache_get_hash($cache_name, $args);
-
-  drupal_set_message(t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));
+  
+  $hash=_dpicache_get_hash($cache_name, $args);  
 
   dpi_log('dpicache', "manual_regeneration_of_cache_entry", t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),array(),$hash,WATCHDOG_INFO);
-
-  $hash=_dpicache_get_hash($cache_name, $args);
-  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
-  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
-  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-  //@todo change this goto by an other think;
+  $cache_definition=dpicache_get_cache_entry_definition($cache_name);  
+  if($cache_definition!=FALSE){
+    $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
+    $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
+    drupal_set_message(t("Manual cache regeneration success: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));    
+  }else{
+    drupal_set_message(t("Manual cache regeneration failed: @cache_name (@args) : No cache",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),'error');
+  }
   drupal_goto();
 }
 
@@ -300,11 +319,11 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name){
  * @return Boolean       Success of regenerations
  */
 function dpicache_api_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
-  drupal_set_message(t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
+  
+  drupal_set_message(t("Manual cache regeneration: @cache_name, category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
   dpi_log('dpicache', "manual_regeneration_of_cache_name", t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)),array(),NULL,WATCHDOG_INFO);
 
-  $table_cache_entries = 'dpicache_cache_entries';
-  $query = db_select($table_cache_entries, 'dce');
+  $query = db_select('dpicache_cache_entries', 'dce');
   $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
 
   $query->condition('dce.name', $cache_type);

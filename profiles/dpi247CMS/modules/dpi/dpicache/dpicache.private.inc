@@ -105,11 +105,10 @@ function dpicache_regenerate_cache_entries_process($query){
       dpi_log('dpicache', "error", t("Error while calling callback function for name = !cache_name, hash = !hash : !error",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash,"!error"=>$fresh_content)),array(),$entry->hash,WATCHDOG_ERROR);
       continue;
     }
+    
     // Save content into cache
     $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
-        
-    $val_arg = dpicache_get_arguments_values($cache_definition, $fresh_content);
-    
+    $val_arg = dpicache_get_arguments_values($cache_definition, unserialize($entry->parameters));
     $entry_information = array(
       "name" => $entry->name,
       "hash" => $entry->hash,
@@ -118,7 +117,6 @@ function dpicache_regenerate_cache_entries_process($query){
       "expiration_date" => intval($entry->creation_date + $val_arg['expiration_date']),
       "update_freq" => $val_arg['update_freq']
     );
-    
     if($saved)
       $entry_information['last_run'] = time();
     // Update cache entry data
@@ -142,7 +140,7 @@ function dpicache_get_arguments_values($cache_definition, $entry){
     $value_return['expiration_date']=$func($cache_definition,$entry);
   }
   
-  $value_return['category'] = @$cache_definition["category"];
+  $value_return['category']=$cache_definition["category"];
   if(isset($cache_definition["category_callback"])){
     $func=$cache_definition["category_callback"];
     $value_return['category']=$func($cache_definition,$entry);
@@ -159,7 +157,7 @@ function dpicache_get_cache_entry_definition($cache_name){
   if(!$cache_name)
     return FALSE;
   $infos = dpicache_get_all_cache_entries_definitions();
-  if(isset($infos[$cache_name])){
+  if(isset($infos[$cache_name])){    
     return $infos[$cache_name];
   }
   return FALSE;
@@ -189,7 +187,7 @@ function dpicache_get_all_cache_entries_definitions(){
  */
 function _dpicache_cache_call_function($dpicache_definition, $parameters=array()){
   if(_dpicache_validate_cache_entry($dpicache_definition) === FALSE){
-    return "#ERROR# Cache entry defintion is not valid.";
+    return FALSE;
   }
   $out = '';
   try {

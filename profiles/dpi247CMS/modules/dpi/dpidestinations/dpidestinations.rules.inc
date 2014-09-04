@@ -1,11 +1,13 @@
 <?php
 
 
+
+
 /**
  * Implementation of hook_rules_event_info().
- * 
+ *
  * We talk about a package if the content type has a destination field whatever his content type
- * 
+ *
  * @ingroup rules
  */
 function dpidestinations_rules_event_info() {
@@ -29,38 +31,38 @@ function dpidestinations_rules_event_info() {
     'dpidestinations_rules_event_package_create_or_edit' => array(
       'label' => t('Before a node type with field destination is created or edited'),
       'module' => 'dpidestinations',
-      'group'=>'DPI247 Destinations',      
+      'group'=>'DPI247 Destinations',
       'variables' => rules_events_node_variables(t('updated content'), TRUE),
-      
+
     ),
     'dpidestinations_rules_event_package_deleted' => array(
       'label' => t('After a node type with field destination is deleted'),
       'module' => 'dpidestinations',
       'group'=>'DPI247 Destinations',
       'variables' => rules_events_node_variables(t('delete content'), TRUE),
-    
+
     ),
     'dpidestinations_rules_event_targetblock_created_on_panel' => array(
       'label' => t('After a targetblock is created on a panel'),
       'module' => 'dpidestinations',
       'group'=>'DPI247 Destinations',
       //@todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-    
+
     ),
     'dpidestinations_rules_event_targetblock_edited_on_panel' => array(
       'label' => t('After a targetblock is edited on a panel'),
       'module' => 'dpidestinations',
       'group'=>'DPI247 Destinations',
       //@todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-    
+
     ), 'dpidestinations_rules_event_targetblock_removed_on_panel' => array(
       'label' => t('After a targetblock is removed from a panel'),
       'module' => 'dpidestinations',
       'group'=>'DPI247 Destinations',
       //@todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-    
+
     ),
-    
+
   );
 }
 
@@ -75,7 +77,7 @@ function dpidestinations_rules_condition_info() {
       'node' => array('type' => 'node', 'label' => t('Content')),
     ),
     'group' => t('DPI247 Destinations'),
-   // 'access callback' => 'rules_node_integration_access',
+    // 'access callback' => 'rules_node_integration_access',
   );
   $items['dpidestinations_rules_condition_node_has_main_section'] = $defaults + array(
     'label' => t('Node has main section'),
@@ -89,8 +91,8 @@ function dpidestinations_rules_condition_info() {
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
   );
-  
-  
+
+
   $items['dpidestinations_rules_condition_node_has_section'] = $defaults + array(
     'label' => t('Node has a section'),
     'help' => t('Evaluates to TRUE if the given content has a destination\'s section set to a defined value.'),
@@ -116,7 +118,7 @@ function dpidestinations_rules_condition_info() {
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
   );
-  
+
   $items['dpidestinations_rules_condition_node_has_target'] = $defaults + array(
     'label' => t('Node has a target'),
     'help' => t('Evaluates to TRUE if the given content has a destination\'s target set to a defined value.'),
@@ -129,9 +131,9 @@ function dpidestinations_rules_condition_info() {
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
   );
-  
-  
-  
+
+
+
 
   $items['dpidestinations_rules_condition_node_has_main_section_and_main_target'] = $defaults + array(
     'label' => t('Node has main section and main target'),
@@ -152,11 +154,11 @@ function dpidestinations_rules_condition_info() {
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
   );
-  
+
   $items['dpidestinations_rules_condition_node_has_section_and_target'] = $defaults + array(
     'label' => t('Node has a section and a target'),
     'help' => t('Evaluates to TRUE if the given content has a main destination\'s section and a destination\'s target set to a defined value.'),
-        'base' => 'dpidestinations_rules_condition_has_section_and_target',
+    'base' => 'dpidestinations_rules_condition_has_section_and_target',
   );
   $items['dpidestinations_rules_condition_node_has_section_and_target']['parameter']['section'] = array(
     'type' => 'list<text>',
@@ -171,13 +173,13 @@ function dpidestinations_rules_condition_info() {
     'options list' => 'dpidestinations_api_get_all_targets_as_options',
     'description' => t('The content main section to check for.'),
     'restriction' => 'input',
-  ); 
+  );
 
   return $items;
 }
 
 function dpidestinations_rules_condition_has_section($node, $sections) {
-  
+
   $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
   $return=FALSE;
   foreach($destinations as $destination){
@@ -185,75 +187,88 @@ function dpidestinations_rules_condition_has_section($node, $sections) {
       $return=TRUE;
     }
   }
-  
+
   return $return;
 }
 function dpidestinations_rules_condition_has_main_section($node, $sections) {
   $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
   $main_section=$destinations['0']['tid'];
-  
+
   return in_array($main_section, $sections);
-  
+
 }
 
 function dpidestinations_rules_condition_has_main_target($node, $targets) {
   $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
   $main_section=$destinations['0']['target'];
-  
+
   return in_array($main_section, $sections);
 
 }
 
 
 function dpidestinations_rules_condition_has_target($node, $targets) {
- $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
+  $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
   $return=FALSE;
   foreach($destinations as $destination){
     if( in_array($destination['target'], $sections)){
       $return=TRUE;
     }
   }
-  
+
   return $return;
 }
 
 function dpidestinations_rules_condition_has_main_section_and_main_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_main_section($node, $sections) & dpidestinations_rules_condition_has_main_target($node, $targets) ;
-  
+
 }
 
 function dpidestinations_rules_condition_has_section_and_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_section($node, $sections) & dpidestinations_rules_condition_has_target($node, $targets) ;
-  
+
 }
 
+/**
+ * Definition of hook_rules_action_info()
+ *
+ * @return array
+ */
 function dpidestinations_rules_action_info(){
   return array(
-     'regenerate_node' => array(
-        'label' => t('Refresh content'),
-        'parameter' => array(
-          'node' => array(
-            'type' => 'node',
-            'label' => t('Content'),
-          ),
+    'regenerate_node' => array(
+      'label' => t('Refresh content'),
+      'parameter' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
         ),
-        'group' => t('Dpi Actions Rules'),
-        'callbacks' => array(
-          'execute' => 'regenerate_content',
-        ),
+      ),
+      'group' => t('Dpi Actions Rules'),
+      'callbacks' => array(
+        'execute' => 'regenerate_content',
+      ),
     ),
   );
 }
 
 /**
  * $did $tid $targetname = $cache_name a refresh
+ * 
  * @param unknown $node
  */
-function regenerate_content($node){  
+function regenerate_content($node){
+  /** 
+   * Invalidation cache for this node because the pre_render of 
+   * dpidestinations_plugin_row_node_targetview give the precedent node 
+   */
+  entity_get_controller('node')->resetCache(array($node->nid));  
   if(isset($node->field_destinations['und'][0]['tid']) && is_numeric($node->field_destinations['und'][0]['tid']) && isset($node->field_destinations['und'][0]['target'])){
     $did = dpidestinations_api_get_panelsdisplay_for_sectionterm($node->field_destinations['und'][0]['tid']);
-    dpicache_api_regenerate_one_cache_entry_callback($did->did.'_'.$node->field_destinations['und'][0]['tid'].'_'.$node->field_destinations['und'][0]['target']);
+    $category = $did->did.'_'.$node->field_destinations['und'][0]['tid'].'_'.$node->field_destinations['und'][0]['target'];
+    dpicache_api_regenerate_all_cache_entry_callback('dpidestinations_targetblock_render', $category);
   }else{
     drupal_set_message('Cache entry is not refresh for this content', 'error');
   }
 }
+

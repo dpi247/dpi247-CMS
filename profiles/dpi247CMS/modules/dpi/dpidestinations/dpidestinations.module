@@ -203,9 +203,9 @@ function dpidestinations_menu_alter(&$items) {
  *
  * @param object $node
  */
-function dpidestinations_node_insert($node) {
+function dpidestinations_node_update($node) {  
   if (in_array($node->type, dpidestinations_api_get_node_type_with_destination_field())) {
-    rules_invoke_event('dpidestinations_rules_event_package_create_or_edit', $node);
+    rules_invoke_event('dpidestinations_rules_event_package_edit', $node);
   }
 }
 
@@ -214,7 +214,7 @@ function dpidestinations_node_insert($node) {
  *
  * @param object $node
  */
-function dpidestinations_node_create($node) {
+function dpidestinations_node_insert($node) {
   if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
     rules_invoke_event('dpidestinations_rules_event_package_create', $node);
   }
@@ -627,16 +627,22 @@ function dpidestinations_dpicache_cache_entry_register() {
         "type" => "inc",
         "name" => "plugins/ctools/content_types/targetblock/targetblock",
       ),
-      'bypass' => TRUE, // Has to be set to FALSE in production environments
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
     )
   );
 }
 
 function dpidestinations_dpicache_category_callback($cachedefinition = '', $arguments = array()){  
   $retour = "dpidestinations";
-  if((isset($arguments[0])  && is_numeric($arguments[0])) && (isset($arguments[1])) && is_numeric($arguments[1])
+  if(is_array($arguments) && (isset($arguments[0])  && is_numeric($arguments[0])) && (isset($arguments[1])) && is_numeric($arguments[1])
         && isset($arguments[2])){
     $retour = $arguments[0].'_'.$arguments[1].'_'.$arguments[2];
   }
   return $retour;
 }
+
+
+
+
+
+
