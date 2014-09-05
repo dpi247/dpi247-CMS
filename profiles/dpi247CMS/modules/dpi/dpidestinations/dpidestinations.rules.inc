@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 /**
  * Implementation of hook_rules_event_info().
  *
@@ -246,7 +243,7 @@ function dpidestinations_rules_action_info(){
       ),
       'group' => t('Dpi Actions Rules'),
       'callbacks' => array(
-        'execute' => 'regenerate_content',
+        'execute' => 'dpidestinations_clear_cache_of_targetlbloks_for_a_node',
       ),
     ),
   );
@@ -257,18 +254,37 @@ function dpidestinations_rules_action_info(){
  * 
  * @param unknown $node
  */
-function regenerate_content($node){
+function dpidestinations_clear_cache_of_targetlbloks_for_a_node($node){
   /** 
    * Invalidation cache for this node because the pre_render of 
    * dpidestinations_plugin_row_node_targetview give the precedent node 
    */
+  $_GET['q']=$_GET['destination'];
+  drupal_static('drupal_get_destination', '', TRUE);
+  unset($_GET['destination']);
+  
   entity_get_controller('node')->resetCache(array($node->nid));  
-  if(isset($node->field_destinations['und'][0]['tid']) && is_numeric($node->field_destinations['und'][0]['tid']) && isset($node->field_destinations['und'][0]['target'])){
-    $did = dpidestinations_api_get_panelsdisplay_for_sectionterm($node->field_destinations['und'][0]['tid']);
-    $category = $did->did.'_'.$node->field_destinations['und'][0]['tid'].'_'.$node->field_destinations['und'][0]['target'];
-    dpicache_api_regenerate_all_cache_entry_callback('dpidestinations_targetblock_render', $category);
-  }else{
-    drupal_set_message('Cache entry is not refresh for this content', 'error');
+  foreach(field_get_items('node', $node,'field_destinations') as $destination){
+    if(isset($destination['tid']) && is_numeric($destination['tid']) && isset($destination['target'])){
+      
+      $category=dpidestination_api_get_category($destination);
+      //Clean dpicache for targetblocks
+      dpicache_api_regenerate_all_cache_entry_callback('dpidestinations_targetblock_render', $category);
+      
+      //Clean varnish for targetblocks
+      foreach(dpicommons_api_get_all_path_alias_for_node($node) as $url_alias){
+        dsm($url_alias);
+        dpicache_api_varnish_purge_pattern('/'.$url_alias);
+      }
+      
+    }else{
+      drupal_set_message('Cache entry is not refresh for this content', 'error');
+    }
+    
   }
+ 
 }
+
+
+
 

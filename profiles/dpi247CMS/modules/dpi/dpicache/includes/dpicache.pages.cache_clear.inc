@@ -2,18 +2,92 @@
 
 
 
-function dpicache_pages_form_cache_clear_form(&$form,&$form_state){
+function dpicache_pages_form_cache_clear_form($form, &$form_state){
   $form=array();
+  
   $form['info']=array(
-    '#markup'=>'hello'
+    '#markup'=>'This panels is use to manage cache.'
   );
 
-  $form['name'] = array(
-    '#title' => t('Your full name'),
-    '#type' => 'textfield',
-    '#required' => TRUE,
+  $form['dpicache_use'] = array(
+    '#title' => t('Utilization for caching system'),
+    '#description' => 'Check this box if you want to disable the module dpicache',
+    '#type' => 'fieldset',
   );
+  
+  $form['dpicache_use']['dpicache_utilisation'] = array(
+    '#title' => t('Disable dpicache'),
+    '#type' => 'checkbox',    
+    '#default_value'=>variable_get('dpicache_disable_dpicache_utilisation', FALSE),
+  );
+  
+  $form['dpicache_use']['dpicache_status'] = array(
+    '#type' => 'submit',
+    '#value'=>'Save',
+  );
+  
+  $form['dpicache_cache_varnish'] = array(
+    '#title' => t('Settings to clear varnish cache'),
+    '#description' => 'This button is for clearing varnish cache',
+    '#type' => 'fieldset',
+  );
+  
+  $form['dpicache_cache_varnish']['varnish_clean_cache'] = array(
+    '#type' => 'submit',
+    '#value'=>'Clear varnish cache',
+  );
+  
+  $form['dpicache_cache_submiting'] = array(
+    '#title' => t('Settings for clear dpicache cache'),
+    '#description' => 'This button is for clearing cache from dpicache module',
+    '#type' => 'fieldset',
+  );
+  
+  $form['dpicache_cache_submiting']['dpicache_clear_cache'] = array(
+    '#type' => 'submit',
+    '#value'=>'Clear cache from dpicache',
+  );
+  
+  $form['dpicache_cache_entries'] = array(
+    '#title' => t('Settings for Dpicache entries'),
+    '#description' => 'This button delete all entries from `dpicache_cache_entries` table',
+    '#type' => 'fieldset',
+  );
+  
+  $form['dpicache_cache_entries']['dpicache_table_entries'] = array(
+    '#type' => 'submit',
+    '#value'=>'Clar dpicache entries table',
+  );
+  
 
   return $form;
+}
 
+/**
+ * 
+ * @param unknown $form
+ * @param unknown $form_state
+ */
+function dpicache_pages_form_cache_clear_form_submit($form, &$form_state){
+  switch ($form_state['triggering_element']['#parents'][0]){
+    case 'dpicache_status':        
+        variable_set('dpicache_disable_dpicache_utilisation', $form_state['values']['dpicache_utilisation']);
+        drupal_set_message("Settings saved");
+      break;
+    case 'varnish_clean_cache':
+        dpicache_api_varnish_purge_all_page();
+        drupal_set_message("Varnish Cache Clear");
+      break;   
+    case 'dpicache_table_entries':
+        if(db_truncate('dpicache_cache_entries')->execute()==0){
+          drupal_set_message("The table dpicache_cache_entries is truncated");          
+        }else{
+          drupal_set_message("An error is occured", 'error');
+        }
+      break;
+    case 'dpicache_clear_cache':
+        drupal_flush_all_caches();
+        drupal_set_message("Cache Clear");
+      break;
+  }
 }

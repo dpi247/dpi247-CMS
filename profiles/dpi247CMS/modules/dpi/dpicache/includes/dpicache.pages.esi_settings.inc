@@ -1,8 +1,8 @@
 <?php
-function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
+function dpicache_pages_form_esi_settings_form($form, &$form_state){
   $form=array();
   $form['info']=array(
-    '#markup'=>'hello This is the dpi247.'
+    '#markup'=>'Attention, All required fields must be completed !!! This is the settings for using correctly the varnish & ESI. You need to complete all fields if you want to don\'t have problem with other module',
   );
   $form['debug'] = array(
     '#title' => t('Debug'),
@@ -13,9 +13,6 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     '#type' => 'checkbox',
     '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
   );
-
-
-
 
   $form['esi_ttl'] = array(
     '#title' => t('Esi TTL'),
@@ -45,8 +42,8 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     '#title' => t('Varnish url'),
     '#type' => 'radios',
     "#options"=>array(
-      'direct'=>'Direct bla bla bla',
-      'accumulator'=>'Acumulator bla bla bla',
+      'direct'=>'Direct',
+      'accumulator'=>'Acumulator',
     ),
     '#default_value'=>variable_get('dpicache_varnish_purge_method', array()),
     '#required' => TRUE,
@@ -62,9 +59,6 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     ),
   );
 
-
-
-
   $form['varnish_config'] = array(
     '#title' => t('Varnish server connection'),
     '#type' => 'fieldset',
@@ -75,7 +69,7 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
     '#title' => t('Varnish url'),
     '#type' => 'textfield',
     '#required' => TRUE,
-    '#default_value'=> variable_get('varnish_control_terminal', '127.0.0.1:6082'),
+    '#default_value'=>variable_get('varnish_control_terminal', '127.0.0.1:6082'),
   );
   $form['varnish_config']['varnish_control_key'] = array(
     '#title' => t('Varnish secret key'),
@@ -108,11 +102,10 @@ function dpicache_pages_form_esi_settings_form($form_id,&$form,&$form_state){
   );
 
   return $form;
-  return system_settings_form($form);
 
 }
+
 function dpicache_pages_form_esi_settings_form_submit($form, & $form_state){
-  
   //Check if we have a modification in use of esi
   if($form_state['values']['dpicache_disable_esi']!=variable_get('dpicache_disable_esi', FALSE)){
     drupal_set_message("We have to sync Esi roles and Drupal Roles");
@@ -124,8 +117,7 @@ function dpicache_pages_form_esi_settings_form_submit($form, & $form_state){
     else{
       _dpicache_esi_sync_drupal_roles_to_esi_visibility();
     }
-  }
-  
+  }  
   system_settings_form_submit($form, $form_state);
 }
 

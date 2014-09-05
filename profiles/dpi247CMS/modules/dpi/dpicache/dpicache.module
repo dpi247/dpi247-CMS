@@ -14,6 +14,9 @@ module_load_include('inc', 'dpicache','dpicache.private');
 function dpicache_menu(){
   $items=array();
 
+  /**
+   * Regenerate url section
+   */
   $items['dpicache/regenerate/one_cache_entry/%'] = array(
     'page callback' => 'dpicache_api_regenerate_one_cache_entry_callback',
     'page arguments' => array(3),
@@ -28,23 +31,26 @@ function dpicache_menu(){
     'type' => MENU_CALLBACK,
   );
 
-  $items['admin/dpi247/dpicache'] = array(
-    'title' => 'DpiCache',
+  /**
+   * Administration of dpicache
+   */
+  $items['admin/dpi247/dpicache'] = array(  
+    'title' => 'Manage ESI cache',           
     'description'=>'Administer dpicache settings, desactivate esi renderding,...',
-    'access arguments' => array('administer dpicache'),
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpicache_pages_form_esi_settings_form'),
-    'file'=>'dpicache.pages.esi_settings.inc',
-    'file path' => drupal_get_path('module', 'dpicache').'/includes',
-
-  );
-  $items['admin/dpi247/dpicache/esi'] = array(
-    'title' => 'Manage ESI cache',
     'access arguments' => array('administer dpicache'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-
+    'file'=>'dpicache.pages.esi_settings.inc',
+    'file path' => drupal_get_path('module', 'dpicache').'/includes',    
   );
-  $items['admin/dpi247/dpicache/config'] = array(
+  
+  $items['admin/dpi247/dpicache/esi'] = array(
+    'title' => 'Manage ESI cache',    
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  
+  /*$items['admin/dpi247/dpicache/config'] = array(
     'title' => 'config',
     'description'=>'Administer dpicache settings, desactivate esi renderding,...',
     'access arguments' => array('administer dpicache'),
@@ -53,20 +59,18 @@ function dpicache_menu(){
     'file'=>'dpicache.pages.settings.inc',
     'file path' => drupal_get_path('module', 'dpicache').'/includes',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-
-
-  );
+  );*/
+  
   $items['admin/dpi247/dpicache/dpicache_clear'] = array(
-    'title' => 'config',
-    'description'=>'Administer dpicache settings, desactivate esi renderding,...',
-    'access arguments' => array('administer dpicache'),
+    'title' => 'Manage DpiCache clear',
+    'description'=>'Manage cache of dpi cache ()',
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpicache_pages_form_cache_clear_form'),
+    'access arguments' => array('administer dpicache'),
     'file'=>'dpicache.pages.cache_clear.inc',
     'file path' => drupal_get_path('module', 'dpicache').'/includes',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-
-
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
   );
 
   return $items;

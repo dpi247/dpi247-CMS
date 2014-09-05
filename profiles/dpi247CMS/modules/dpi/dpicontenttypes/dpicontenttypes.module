@@ -394,6 +394,7 @@ function dpicontenttypes_scald_contexts() {
 */
 function dpicontenttypes_admin_paths_alter(&$paths) {
   $paths['node/*/edit'] = FALSE;
+  $paths['node/*/delete'] = FALSE;
   $paths['node/add'] = FALSE;
   $paths['node/add/*'] = FALSE;
   $paths['admin/structure/pages/*'] = FALSE;
@@ -401,16 +402,19 @@ function dpicontenttypes_admin_paths_alter(&$paths) {
 
 /*
  * Implementation of hook_custom_theme
- * We allow modification of the theme only for GET 
- * otherwise you will have some issue with rules cache regeneration the view mode of the admin theme
+ * We allow modification of the theme only for GET otherwise you will have some issue with rules cache regeneration the view mode of the admin theme
  * 
 */
 function dpicontenttypes_custom_theme(){
   $menu_item=menu_get_item();
   $path=$menu_item['path'];
-  if(strstr($path,'node/add')){
+if(strstr($path,'node/add')){
     if(count($_POST)==0)
     return 'shiny';
+  }
+  if(strstr($path,'node/%/delete')){
+    if(count($_POST)==0)
+      return 'shiny';
   }
   if(strstr($path,'node/%/edit')){
     if(count($_POST)==0)

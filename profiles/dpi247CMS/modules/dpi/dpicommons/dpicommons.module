@@ -248,3 +248,13 @@ function dpicommons_ctools_plugin_directory($module, $plugin) {
     return 'plugins/' . $plugin;
   }
 }
+
+
+
+
+function dpicommons_api_get_all_path_alias_for_node($node){
+  return array(
+    'node/'.$node->nid,
+    drupal_get_path_alias('node/'.$node->nid)
+  );
+}

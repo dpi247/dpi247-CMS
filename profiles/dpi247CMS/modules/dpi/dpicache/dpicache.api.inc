@@ -25,7 +25,7 @@ function dpicache_get_cache_entry($cache_name) {
   }
 
   // fetch cache from ad hoc storage
-  if(($content = dpicache_fetch_cache($cache_name, $hash)) && (!isset($cache_definition['bypass']) || $cache_definition['bypass'] !== TRUE)) {
+  if(($content = dpicache_fetch_cache($cache_name, $hash)) && (!isset($cache_definition['bypass']) || $cache_definition['bypass'] !== TRUE) && !variable_get('dpicache_disable_dpicache_utilisation', FALSE)) {
     // cache available
     dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
     return $content;
@@ -313,10 +313,10 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name){
 }
 
 /**
- * Regenerate caches that need to be regenerated based on the time
+ * Regenerate caches that need to be regenerated based on cachetype and category
  * 
- * @param  Integer $time Current timestamp
- * @return Boolean       Success of regenerations
+ * @param  String $time cache name
+ * @param String $categoroy the category of cache
  */
 function dpicache_api_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
   
@@ -325,15 +325,21 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type,$category=
 
   $query = db_select('dpicache_cache_entries', 'dce');
   $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
-
   $query->condition('dce.name', $cache_type);
 
   if($category!=NULL){
     $query->condition('dce.category', $category);
   }
   dpicache_regenerate_cache_entries_process($query);
-
-  drupal_goto();
 }
 
 
+
+function dpicache_api_varnish_purge_pattern($pattern){
+  $host=$_SERVER['SERVER_NAME'];
+  varnish_purge($host, $pattern);  
+}
+
+function dpicache_api_varnish_purge_all_page(){
+  varnish_purge_all_pages();
+}
