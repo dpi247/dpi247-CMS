@@ -258,3 +258,10 @@ function dpicommons_api_get_all_path_alias_for_node($node){
     drupal_get_path_alias('node/'.$node->nid)
   );
 }
+
+function dpicommons_api_get_all_path_alias_for_taxonomy($tid){
+  return array(
+    'section/'.$tid,
+    drupal_get_path_alias('section/'.$tid)
+  );
+}

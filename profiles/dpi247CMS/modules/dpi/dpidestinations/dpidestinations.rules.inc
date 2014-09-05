@@ -198,9 +198,7 @@ function dpidestinations_rules_condition_has_main_section($node, $sections) {
 function dpidestinations_rules_condition_has_main_target($node, $targets) {
   $destinations=field_get_items('node', $node, 'field_destinations', $langcode);
   $main_section=$destinations['0']['target'];
-
   return in_array($main_section, $sections);
-
 }
 
 
@@ -212,18 +210,15 @@ function dpidestinations_rules_condition_has_target($node, $targets) {
       $return=TRUE;
     }
   }
-
   return $return;
 }
 
 function dpidestinations_rules_condition_has_main_section_and_main_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_main_section($node, $sections) & dpidestinations_rules_condition_has_main_target($node, $targets) ;
-
 }
 
 function dpidestinations_rules_condition_has_section_and_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_section($node, $sections) & dpidestinations_rules_condition_has_target($node, $targets) ;
-
 }
 
 /**
@@ -239,22 +234,35 @@ function dpidestinations_rules_action_info(){
         'node' => array(
           'type' => 'node',
           'label' => t('Content'),
+        ),        
+      ),
+      'group' => t('Dpi Actions Rules'),
+      'callbacks' => array(
+        'execute' => 'dpidestinations_clear_cache_of_targetbloks_for_a_node',
+      ),
+    ),
+    'refresh_node_cash' => array(
+      'label' => t('Refresh node content'),
+      'parameter' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
         ),
       ),
       'group' => t('Dpi Actions Rules'),
       'callbacks' => array(
-        'execute' => 'dpidestinations_clear_cache_of_targetlbloks_for_a_node',
+        'execute' => 'dpidestinations_clear_cache_of_node_content',
       ),
     ),
   );
 }
 
 /**
- * $did $tid $targetname = $cache_name a refresh
+ * Function to invalidate cash for varnish and dpicache
  * 
- * @param unknown $node
+ * @param node $node
  */
-function dpidestinations_clear_cache_of_targetlbloks_for_a_node($node){
+function dpidestinations_clear_cache_of_targetbloks_for_a_node($node){
   /** 
    * Invalidation cache for this node because the pre_render of 
    * dpidestinations_plugin_row_node_targetview give the precedent node 
@@ -266,17 +274,14 @@ function dpidestinations_clear_cache_of_targetlbloks_for_a_node($node){
   entity_get_controller('node')->resetCache(array($node->nid));  
   foreach(field_get_items('node', $node,'field_destinations') as $destination){
     if(isset($destination['tid']) && is_numeric($destination['tid']) && isset($destination['target'])){
-      
       $category=dpidestination_api_get_category($destination);
       //Clean dpicache for targetblocks
       dpicache_api_regenerate_all_cache_entry_callback('dpidestinations_targetblock_render', $category);
       
-      //Clean varnish for targetblocks
-      foreach(dpicommons_api_get_all_path_alias_for_node($node) as $url_alias){
-        dsm($url_alias);
+      //clean varnish for argetblocks
+      foreach (dpicommons_api_get_all_path_alias_for_taxonomy($destination['tid']) as $url_alias){
         dpicache_api_varnish_purge_pattern('/'.$url_alias);
       }
-      
     }else{
       drupal_set_message('Cache entry is not refresh for this content', 'error');
     }
@@ -285,6 +290,14 @@ function dpidestinations_clear_cache_of_targetlbloks_for_a_node($node){
  
 }
 
-
-
-
+/**
+ * Invalide node section for varnish cache
+ * 
+ * @param node $node
+ */
+function dpidestinations_clear_cache_of_node_content($node){
+  //Clean varnish for node
+  foreach(dpicommons_api_get_all_path_alias_for_node($node) as $url_alias){
+    dpicache_api_varnish_purge_pattern('/'.$url_alias);
+  }
+}

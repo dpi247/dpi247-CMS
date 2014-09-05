@@ -89,7 +89,6 @@ function varnish_get_status() {
  * Utilizes sockets to talk to varnish terminal.
  */
 function _varnish_terminal_run($commands) {
-  dsm($commands,v_commands);
   if (!extension_loaded('sockets')) {
     // Prevent fatal errors if people don't have requirements.
     return FALSE;
