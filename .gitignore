@@ -7,5 +7,9 @@ sites/*/private
 sites/*/modules
 sites/*/importer
 
+#ignore eclipse settings
+.settings/*
+.project
+
 /.htaccess
 /robots.txt

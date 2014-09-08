@@ -234,7 +234,7 @@ function dpipub_block_save($delta = '', $edit = array()){
     case 'pub_header':
       variable_set('header_refresh_time', 24*$edit['refresh_time_day'] + $edit['refresh_time_hour']);
       break;
-    case 'metriwebgemius_block' | 'metriwebspring_block' | 'metriweb_block' | 'xiti_block' | 'analytic_block':
+    case 'metriwebgemius_block' || 'metriwebspring_block' || 'metriweb_block' || 'xiti_block' || 'analytic_block':
       variable_set($delta.'_refresh_time', 24*$edit['refresh_time_day'] + $edit['refresh_time_hour']);
       break;
     default:
@@ -301,6 +301,23 @@ function dpipub_preprocess_page(&$variables) {
   if(!isset($variables['meta']))
     $variables['meta'] = "";
   $variables['meta'] .= pub_get_meta();
+  global $dfp_viewed_link_blocks;
+  $url = variable_get('dfpmodule_url_ws_header_script', '');
+  if($url!='' && $dfp_viewed_link_blocks!= ''){
+    $url .= $dfp_viewed_link_blocks;
+    $options = array(
+      'method' => 'GET',
+      'data' => NULL,
+      'timeout' => variable_get('dpicommons_http_request_timeout', 3),
+      'retry' => variable_get('dpicommons_http_request_retry', 1),
+    );
+    $content = drupal_http_request($url, $options);
+    $content = substr($content->data, 31, -10);
+    drupal_add_js($content, 'inline');
+    $current_page = menu_get_item($_GET['q']);
+    cache_set('dfp_header_'.$current_page['href'], $content);
+    $dfp_viewed_link_blocks = "";
+  }
 }
 
 /**
@@ -311,15 +328,10 @@ function dpipub_preprocess_page(&$variables) {
 function dpipub_pub_params_alter(& $data , $builder){
   if($builder=='_dfp'){
     global $dfp_viewed_link_blocks;
-    $dfp_viewed_blocks = "";
-    $query = db_select('zz_pub_UMI', 'p');
-    $result = $query->condition('builder', 'dfp', '=')->fields('p', array('position'))->execute();
-    foreach ($result as $row){
-      $dfp_viewed_blocks .= $row->position."&positions=";
-      $dfp_viewed_link_blocks .= $row->position."+";
-    }
-    $dfp_viewed_link_blocks = substr($dfp_viewed_link_blocks, 0, -1);
-    $data['positions'] = substr($dfp_viewed_blocks, 0,-11);
+    if(!isset($dfp_viewed_link_blocks) || $dfp_viewed_link_blocks=="")
+      $dfp_viewed_link_blocks = "?scriptType=DFP&site=".rawurlencode($data['site'])."&context=".rawurlencode($data['context'])."&pageType=".rawurlencode($data['pageType'])."&domain=".rawurlencode($data['domain']);
+    $dfp_viewed_link_blocks .= "&positions=".rawurlencode($data['position']);
+    $dfp_viewed_blocks = "";    
   }
   return $data;
 }
