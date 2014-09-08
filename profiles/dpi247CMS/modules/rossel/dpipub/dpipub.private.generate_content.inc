@@ -33,13 +33,20 @@ function _pub_get_pub_content($delta, $cache_url) {
         $pub_content = _pub_generate_default_pub_content($block_settings, $delta, $webserv_req, '_'.$block_settings, $cache_url);
         break;
       default:
-        dsm('coucou');
         $pub_content = _pub_generate_default_pub_content($block_settings, $delta, $webserv_req, '', $cache_url);
     }
+    /* Create log message */
+    if(function_exists('dpi_log'))
+      dpi_log('Dpipub', "end_message", 'Content is created by webservice');
+    
     /* Set pub content to cache */
     cache_set('pub_'.$delta.'_temp-'.$cache_url, $pub_content, 'cache', time() + 3600*variable_get('pub_block_'.$delta.'_refresh_time', 24));
     cache_set('pub_'.$delta.'_perm-'.$cache_url, $pub_content);
   } else {
+    /* Create message log */
+    if(function_exists('dpi_log'))
+      dpi_log('Dpipub', "end_message", 'End - pub is created from cache');    
+    
     /* GET pub content to cache */
     $pub_content = $cached_pub->data;
     if (isset($pub_content['meta']) && !empty($pub_content['meta']['content'])) {
@@ -68,7 +75,6 @@ function _pub_get_pub_content($delta, $cache_url) {
  * @return Ambigous <HTML, string>
  */
 function _pub_generate_default_pub_content($block_settings, $delta, $webserv_req, $builder, $cache_url) {
-  dsm($builder);
   $script_type = variable_get('pub'.$builder.'_provider', 'AdTech');
   $website = variable_get('pub'.$builder.'_website', '');
   $expl_website = explode('_', $website);
@@ -263,10 +269,12 @@ function _pub_get_content_from_webservice($url, $params, $builder) {
     'timeout' => variable_get('dpicommons_http_request_timeout', 3),
     'retry' => variable_get('dpicommons_http_request_retry', 1),
   );
-  dsm($url, 'url');
-  dsm($url.$req_params, 'complete url');
   $content = drupal_http_request($url.$req_params, $options);
-  dsm($content, 'content');
+  $context = "context=no context";
+  if(isset($params["context"]))
+    $context = $params["context"];
+  if(function_exists('dpi_log'))
+    dpi_log('Dpipub', "threading", $builder.' - ['.$context.'] Web service content from : '.$url.$req_params);  
   return ($content->code == '200') ? $content->data : FALSE;
 }
 

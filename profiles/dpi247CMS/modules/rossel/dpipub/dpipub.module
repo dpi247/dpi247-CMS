@@ -248,6 +248,9 @@ function dpipub_block_save($delta = '', $edit = array()){
  */
 function dpipub_block_view($delta = ''){
   $cache_url = $_SERVER['HTTP_HOST'].'/'.$_GET['q'];
+  if(function_exists('dpi_log'))
+    dpi_log('Dpipub', "start_message", 'Starting to create content pub : '.$cache_url);
+
   switch ($delta) {
     case 'pub_header':
       $block = array(
@@ -303,8 +306,10 @@ function dpipub_preprocess_page(&$variables) {
   $variables['meta'] .= pub_get_meta();
   global $dfp_viewed_link_blocks;
   $url = variable_get('dfpmodule_url_ws_header_script', '');
-  if($url!='' && $dfp_viewed_link_blocks!= ''){
+  if($url!='' && $dfp_viewed_link_blocks!= ''){      
     $url .= $dfp_viewed_link_blocks;
+    if(function_exists('dpi_log'))
+      dpi_log('Dpipub', "threading", 'DFP - Header is generated with url : '.$url);
     $options = array(
       'method' => 'GET',
       'data' => NULL,
@@ -336,4 +341,12 @@ function dpipub_pub_params_alter(& $data , $builder){
   return $data;
 }
 
+
+function dpipub_dpilog_register(){
+  return array(
+    "Dpipub" => array(
+      "actions"=>array("start_message", "threading","end_message"),
+    ),    
+  );
+}
 ?>
