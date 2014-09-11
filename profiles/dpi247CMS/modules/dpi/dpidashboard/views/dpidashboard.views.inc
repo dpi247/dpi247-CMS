@@ -5,9 +5,11 @@
  */
 
 /**
- * Implementation of hook_views_data()
+ * Implementation of hook_views_default_views()
  */
-function dpidashboard_views_data() {
+function dpidashboard_views_default_views() {
+
+	$views = array();
 
 	/* ---------------
 	

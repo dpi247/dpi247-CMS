@@ -23,58 +23,6 @@ $plugin = array(
   
 );
 
-/**
- * 'Edit form' callback for the content type.
- */
-
-function youtube_embed_edit_form($form, &$form_state) {
-  $conf = $form_state['conf'];
-
-  $form['description'] = array(
-    '#title' => t('Description'),
-    '#description' => t('Description (administrative)'),
-    '#type' => 'textfield',
-    '#required' => FALSE,
-    '#default_value' => $conf['description'],
-  );
-
-
-  $form['youtube_url'] = array(
-    '#title' => t('Youtube url'),
-    '#description' => t('The url of the youtube video you want to show'),
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#default_value' => $conf['youtube_url'],
-  );
-
-  return $form;
-}
-
-
-/**
- * The submit form stores the data in $conf.
- */
-
-function youtube_embed_edit_form_submit($form, &$form_state) {
-
-  foreach (array_keys($form_state['plugin']['defaults']) as $key) {
-
-    if (isset($form_state['values'][$key])) {
-
-      $form_state['conf'][$key] = $form_state['values'][$key];
-
-    }
-
-  }
-
-}
-
-/**
-
-* implements 
-
-**/
-
 function servertime_render($subtype, $conf, $panel_args, $context, $a) {
 
   $description = (!empty($conf['description'])) ? check_plain($conf['description']) : '';
