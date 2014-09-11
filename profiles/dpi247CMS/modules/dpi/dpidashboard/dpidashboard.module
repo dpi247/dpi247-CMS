@@ -1,0 +1,11 @@
+<?php 
+
+module_load_include('inc', 'dpidashboard', 'dpidashboard.private');
+
+function dpidashboard_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+?>
