@@ -38,10 +38,22 @@ function dpiservices_menu(){
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpiservices_pages_form_view_product_form'),
     'access arguments' => array('administer dpiservices'),
-    'file'=>'dpicache.pages.cache_clear.inc',
+    'file'=>'dpiservices.pages.view_product.inc',
     'file path' => drupal_get_path('module', 'dpiservices').'/includes',
     'type' => MENU_LOCAL_TASK,
     'weight' => 1,
+  );
+  
+  $items['admin/dpi247/dpijsonexporter/add_map'] = array(
+    'title' => 'Add map',
+    'description'=>'Add map',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiservices_pages_form_add_map_form'),
+    'access arguments' => array('administer dpiservices'),
+    'file'=>'dpiservices.pages.addmap.inc',
+    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
   );
   
   return $items;
