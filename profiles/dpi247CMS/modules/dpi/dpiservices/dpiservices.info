@@ -1,0 +1,6 @@
+name = DpiServices
+description = Services use to get informations in special format
+package = DPI
+core = 7.x
+dependencies[] = services
+dependencies[] = rest_server 

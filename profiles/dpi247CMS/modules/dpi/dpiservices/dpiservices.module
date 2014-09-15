@@ -1,0 +1,61 @@
+<?php 
+
+/**
+ * 
+ * @param unknown $owner
+ * @param unknown $api
+ * @return multitype:number string
+ */
+function dpiservices_ctools_plugin_api($owner, $api) {
+  if ($owner == 'services' && $api == 'services') {
+    return array(
+      'version' => 3,
+      'file' => 'dpiservices.services.inc',
+    );
+  }
+}
+
+function dpiservices_menu(){
+  $items['admin/dpi247/dpijsonexporter'] = array(
+    'title' => 'JsonExporter',
+    'description'=>'Administer return json exporter',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiservices_pages_form_map_preset_form'),
+    'access arguments' => array('administer dpiservices'),
+    'file'=>'dpiservices.pages.settings.inc',
+    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+  );
+  
+  $items['admin/dpi247/dpijsonexporter/preset'] = array(
+    'title' => 'Map preset',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  
+  $items['admin/dpi247/dpijsonexporter/view'] = array(
+    'title' => 'View product',
+    'description'=>'Manage view from dpiservices for product',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiservices_pages_form_view_product_form'),
+    'access arguments' => array('administer dpiservices'),
+    'file'=>'dpicache.pages.cache_clear.inc',
+    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+  
+  return $items;
+  
+}
+
+/**
+ * Implementation of hook_permission
+ */
+function dpiservices_permission() {
+  return array(
+    'administer dpiservices' => array(
+      'title' => t('Administer dpiservices'),
+      'description' => t('Administer dpiservices.'),
+    ),
+  );
+}

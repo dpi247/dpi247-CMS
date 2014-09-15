@@ -1,0 +1,47 @@
+<?php
+
+
+function dpiservices_schema(){
+  
+  $schemas = array();
+  
+  $schemas['dpiservices_preset'] = array(
+    'description' => 'The table present mapping for preset and is availability',
+    'fields' => array(
+      'aid' => array(
+        'description' => 'id for service preset',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'preset_name' => array(
+        'description' => 'name for the preset',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'preset_map_name' => array(
+        'description' => 'map name for the preset',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'activate' => array(
+        'description' => 'activate this preset for a profil',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+    ),
+    'indexes' => array(
+      'aid'  => array('aid'),
+    ),
+    'primary key' => array('aid'),
+  );
+  
+  return $schemas;
+  
+}
