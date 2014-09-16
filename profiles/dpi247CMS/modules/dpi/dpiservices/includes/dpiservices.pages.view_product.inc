@@ -9,8 +9,7 @@
  */
 function dpiservices_pages_form_view_product_form($form, &$form_state, $argument = ''){
   $form=array();
-      drupal_set_message("Product jjjj be loaded", 'error');
-    if(isset($argument) && $argument != ''){
+  if(isset($argument) && $argument != ''){
     if(!$product_arg = dpiservices_get_one_product_by_label($argument)){
       drupal_set_message("Product cannot be loaded", 'error');
     }
@@ -19,14 +18,14 @@ function dpiservices_pages_form_view_product_form($form, &$form_state, $argument
   $query = db_select('menu_custom', 'm')->fields('m',array('menu_name','title'))->orderBy('title')->execute();
   $value_select_menu = array();
   while ($row = $query->fetchAssoc()){
-    $value_select_menu[$row['title']] = $row['title'];
+    $value_select_menu[$row['menu_name']] = $row['menu_name'];
   }
   
   $image_preset = array();
   foreach (image_styles() as $preset_info){
     $image_preset[$preset_info['name']] = $preset_info['name'];
   }
- 
+  
   $form['fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Add a product'),
