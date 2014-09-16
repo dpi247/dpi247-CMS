@@ -5,41 +5,56 @@ function dpiservices_schema(){
   
   $schemas = array();
   
-  $schemas['dpiservices_preset'] = array(
-    'description' => 'The table present mapping for preset and is availability',
+  $schemas['dpiservices_product'] = array(
+    'description' => 'This table is use to create a product in dpiservices settings',
     'fields' => array(
-      'aid' => array(
-        'description' => 'id for service preset',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'preset_name' => array(
-        'description' => 'name for the preset',
+      'label' => array(
+        'description' => 'label info',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
-      'preset_map_name' => array(
-        'description' => 'map name for the preset',
+      'machine_name' => array(
+        'description' => 'machine name info',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
-      'activate' => array(
-        'description' => 'activate this preset for a profil',
-        'type' => 'int',
-        'unsigned' => TRUE,
+      'description' => array(
+        'description' => 'description info',
+        'type' => 'varchar',
+        'length' => 255,
         'not null' => TRUE,
-        'default' => 0
+        'default' => '',
+      ),
+      'preset' => array(
+        'description' => 'product info',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product' => array(
+        'description' => 'product info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_type' => array(
+        'description' => 'product type info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
     ),
     'indexes' => array(
-      'aid'  => array('aid'),
+      'aid'  => array('label'),
     ),
-    'primary key' => array('aid'),
+    'primary key' => array('label'),
   );
   
   return $schemas;

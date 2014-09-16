@@ -1,70 +1,61 @@
 <?php
-
-function dpiservices_pages_form_map_preset_form($form, &$form_state){
-  $form=array();
-  $dpiservices_preset_value = dpiservices_get_active_value_for_preset();
-  $image_preset = array();
+function dpiservices_pages_form_map_preset_form() {
+  $products_table = dpiservices_create_table_product ();
   
-  foreach (image_styles() as $preset_info){
-    $image_preset[$preset_info['name']] = $preset_info['label'];
-  }
+  $render_array = dpiservices_create_table_product();
+  $render_array .= theme('pager');
   
-  $form['info']=array(
-    '#markup'=>'This form is use to create a mapping between preset and a preset title. It\'s important for export of json.',
+  return $render_array;
+}
+function dpiservices_create_table_product() {
+  $products = dpiservices_get_all_product_info (10);
+  
+  $header_row = array (
+    'Label',
+    'Name',
+    'Description',
+    'Product',
+    'Product type',
+    'Product link',
+    'Operations',
   );
   
-  foreach ($dpiservices_preset_value as $preset){    
-    $form['preset_select'][$preset['preset_map_name']] = array(
-      '#type' => 'select',
-      '#title' => t($preset['preset_map_name']),
-      '#default_value' => (isset($preset['preset_name'])) ? $preset['preset_name'] : '',
-      '#description' => t('Select your preset.'),
-      '#options' => $image_preset
+  $table_rows = array ();
+  foreach ( $products as $product ) {    
+    $table_rows [] = array (
+      $product ['label'],
+      $product ['machine_name'],
+      $product ['description'],
+      $product ['product'],
+      $product ['product_type'],
+      'link',
+      '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a><br /><a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
     );
   }
   
-  if(isset($dpiservices_preset_value)){
-    $form['submit'] = array(
-      '#type' => 'submit',
-     '#value'=>'Submit'
-    );
-  }
+  $table = theme_table ( array (
+    'header' => $header_row,
+    'rows' => $table_rows,
+    'attributes' => array('width' => '100%'),
+    'caption' => '',
+    'colgroups' => array(),
+    'sticky' => FALSE,
+    'empty' => t('No data is available'),
+  ) );
   
-  return $form;
+  return $table;
 }
-
-function dpiservices_pages_form_map_preset_form_submit($form, &$form_state){
-  if(isset($form_state['values'])){
-    $dpiservices_preset_value = dpiservices_get_active_value_for_preset();
-    foreach ($dpiservices_preset_value as $preset){
-      if(isset($preset['preset_map_name']) && isset($form_state['values'][$preset['preset_map_name']])){
-        dpiservices_insert_preset_name($form_state['values'][$preset['preset_map_name']], $preset['preset_map_name']);
-      }
-    }
-    drupal_set_message("Update information success");
+function dpiservices_get_all_product_info($nb = 0) {
+  $return = array ();
+  if($nb <= 0){
+    $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->execute();
   }else{
-    drupal_set_message("Service is not available" , 'error');
+    $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->range(0, $nb)->execute();
   }
-}
-
-function dpiservices_get_active_value_for_preset(){  
-  $return = array();
   
-  $value = db_select('dpiservices_preset', 'dp')
-            ->fields('dp', array('preset_name','preset_map_name'))
-            ->execute();
-  while($row = $value->fetchAssoc()){
-    $return[] = $row;
-  }  
   
+  while( $row = $query->fetchAssoc () ) {
+    $return [] = $row;
+  }
   return $return;
-}
-
-function dpiservices_insert_preset_name($preset_name, $preset_map_name){
-   db_update('dpiservices_preset')
-      ->fields(array(
-        'preset_name' => $preset_name
-      ))
-      ->condition('preset_map_name' , $preset_map_name, '=')
-      ->execute();
 }

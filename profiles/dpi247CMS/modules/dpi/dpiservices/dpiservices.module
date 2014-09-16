@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * 
@@ -8,66 +8,99 @@
  */
 function dpiservices_ctools_plugin_api($owner, $api) {
   if ($owner == 'services' && $api == 'services') {
-    return array(
+    return array (
       'version' => 3,
-      'file' => 'dpiservices.services.inc',
+      'file' => 'dpiservices.services.inc' 
     );
   }
 }
-
-function dpiservices_menu(){
-  $items['admin/dpi247/dpijsonexporter'] = array(
+function dpiservices_menu() {
+  $items ['admin/dpi247/dpijsonexporter'] = array (
     'title' => 'JsonExporter',
-    'description'=>'Administer return json exporter',
-    'page callback'=>'drupal_get_form',
-    'page arguments'=>array('dpiservices_pages_form_map_preset_form'),
-    'access arguments' => array('administer dpiservices'),
-    'file'=>'dpiservices.pages.settings.inc',
-    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+    'description' => 'Administer return json exporter',
+    'page callback' => 'dpiservices_pages_form_map_preset_form',
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.settings.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
-  $items['admin/dpi247/dpijsonexporter/preset'] = array(
-    'title' => 'Map preset',
+  $items ['admin/dpi247/dpijsonexporter/preset'] = array (
+    'title' => 'Product panel',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 0,
+    'weight' => 0 
   );
   
-  $items['admin/dpi247/dpijsonexporter/view'] = array(
-    'title' => 'View product',
-    'description'=>'Manage view from dpiservices for product',
-    'page callback'=>'drupal_get_form',
-    'page arguments'=>array('dpiservices_pages_form_view_product_form'),
-    'access arguments' => array('administer dpiservices'),
-    'file'=>'dpiservices.pages.view_product.inc',
-    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+  $items ['admin/dpi247/dpijsonexporter/add'] = array (
+    'title' => 'Add product',
+    'description' => 'Manage view from dpiservices for product',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_view_product_form' ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.view_product.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
+    'weight' => 1
   );
   
-  $items['admin/dpi247/dpijsonexporter/add_map'] = array(
+  $items ['admin/dpi247/dpijsonexporter/edit/%'] = array (
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_view_product_form',
+      4 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.view_product.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/add_map'] = array (
     'title' => 'Add map',
-    'description'=>'Add map',
-    'page callback'=>'drupal_get_form',
-    'page arguments'=>array('dpiservices_pages_form_add_map_form'),
-    'access arguments' => array('administer dpiservices'),
-    'file'=>'dpiservices.pages.addmap.inc',
-    'file path' => drupal_get_path('module', 'dpiservices').'/includes',
+    'description' => 'Add map',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_add_map_form' 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.addmap.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
+    'weight' => 2 
   );
+  
+  $items ['admin/dpi247/dpijsonexporter/del/%'] = array (
+    'page callback' => 'dpiservices_pages_form_delete',
+    'page arguments' => array (
+      4 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+    'type' => MENU_NORMAL_ITEM 
+  )
+  ;
   
   return $items;
-  
 }
 
 /**
  * Implementation of hook_permission
  */
 function dpiservices_permission() {
-  return array(
-    'administer dpiservices' => array(
-      'title' => t('Administer dpiservices'),
-      'description' => t('Administer dpiservices.'),
-    ),
+  return array (
+    'administer dpiservices' => array (
+      'title' => t ( 'Administer dpiservices' ),
+      'description' => t ( 'Administer dpiservices.' ) 
+    ) 
   );
 }
