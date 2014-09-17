@@ -70,7 +70,7 @@ function dpiservices_dpijson_section_retrieve($sid, $targetblock_name){
   $json_return["language"] = $language->language;
   $json_return["copyright"] = "@todo";
   $json_return["ttl"] = "@todo";
-  $json_return["version"] = "1.5";
+  $json_return["version"] = dpiservices_dpijson_section_get_version();
   
   if(!isset($targetblock_name)){
     $json_return["packages"] = dpiservices_dpijson_section_get_all_packages($sid);
@@ -91,7 +91,6 @@ function dpiservices_dpijson_section_get_all_packages($sid){
   $section_info = dpidestinations_api_get_all_targetblocks_for_destination($sid);
   $result = array();
   foreach ($section_info as $section){
-    $node_id = array();
     $targetBlockController = new TargetBlockController('targetblock');
   
     $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta($section->did, $section->target, $section->split_delta);
@@ -103,9 +102,8 @@ function dpiservices_dpijson_section_get_all_packages($sid){
     $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sid,  $section->target, $targetblock);
   
     foreach($targetview->result as $node_info){
-      $node_id[] = dpiservices_dpijson_packages_retrieve($node_info->nid);
+      $result[] = dpiservices_dpijson_packages_retrieve($node_info->nid);
     }
-    $result[$section->target] = $node_id;
   }
   return $result;
 }
@@ -121,7 +119,6 @@ function dpiservices_dpijson_section_get_one_packages($sectionid, $targetblock_n
   $section_info = dpidestinations_api_get_all_targetblocks_from_target_for_destination($targetblock_name, $sectionid);
   $section = current($section_info);
   $result = array();
-  $node_id = array();
   $targetBlockController = new TargetBlockController('targetblock');
   
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta($section->did, $section->target, $section->split_delta);
@@ -133,11 +130,12 @@ function dpiservices_dpijson_section_get_one_packages($sectionid, $targetblock_n
   $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sectionid,  $section->target, $targetblock);
   
   foreach($targetview->result as $node_info){
-    $node_id[] = dpiservices_dpijson_packages_retrieve($node_info->nid);
+    $result[] = dpiservices_dpijson_packages_retrieve($node_info->nid);
   }
-  $result[$section->target] = $node_id;
   
   return $result;
 }
 
-
+function dpiservices_dpijson_section_get_version(){
+  return "1.5";
+}
