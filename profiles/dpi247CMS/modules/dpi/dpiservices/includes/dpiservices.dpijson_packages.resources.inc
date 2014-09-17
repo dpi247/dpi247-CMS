@@ -74,8 +74,10 @@ function dpiservices_dpijson_packages_retrieve($nid) {
  * @return mixed
  */
 function dpiservices_dpijson_packages_get_field_element_by_search_value($type, $node, $field_name, $search_value) {
-  $element = current ( field_get_items ( $type, $node, $field_name ) );
-  return $element [$search_value];
+  if($info = field_get_items ( $type, $node, $field_name )){
+    $element = current($info);
+  }
+  return (isset($element[$search_value])) ? $element[$search_value] : FALSE;
 }
 
 /**
@@ -134,7 +136,7 @@ function dpiservices_dpijson_packages_get_all_related_object_from_node($node) {
 function dpiservices_dpijson_packages_get_all_related_object_definitions_from_node($node) {
   $table_value = array ();
   foreach ( field_get_items ( 'node', $node, 'field_embededobjects' ) as $item ) {
-    if(($var = dpiservices_dpijson_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'] )) !=null)
+    if(($var = dpiservices_dpijson_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'] )) != FALSE)
         $table_value [] = $var;
   }
   return $table_value;
@@ -157,6 +159,15 @@ function dpiservices_dpijson_packages_generate_related_object($sid, $nid, $inlin
   
   return $formatted_atom;
 }
+
+/**
+ * 
+ * 
+ * @param unknown $sid
+ * @param unknown $nid
+ * @param unknown $inline
+ * @return multitype:multitype:string unknown mixed multitype:unknown  multitype:Ambigous <multitype:string>  NULL
+ */
 function dpiservices_dpijson_packages_generate_related_object_definitions($sid, $nid, $inline) {
   $atom = scald_atom_load ( $sid );
   $all_crop_informations = dpiservices_dpijson_packages_generate_crop_informations ( $sid, $nid );
@@ -186,10 +197,11 @@ function dpiservices_dpijson_packages_generate_related_object_definitions($sid, 
       ) 
     );
   }
-  return $val_returned;
+  return (isset($val_returned)) ? $val_returned : FALSE;
 }
 
 /**
+ * 
  *
  * @param unknown $sid          
  * @param unknown $nid          
@@ -201,15 +213,17 @@ function dpiservices_dpijson_packages_generate_crop_informations($sid, $nid) {
   $crop_definition_value = array ();
   
   /* First, get crop information */
-  foreach ( _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid ) as $key => $value ) {
-    $crop_value ['_' . $value [0] . '_' . $value [1] . '_' . $value [2] . '_' . $value [3]] = $key;
-    $crop_definition_value [$key] = array (
-      'start_width' => $value [0],
-      'start_height' => $value [1],
-      'width' => $value [2],
-      'height' => $value [3] 
-    );
-  }
+  if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
+    foreach ($info as $key => $value ) {
+      $crop_value ['_' . $value [0] . '_' . $value [1] . '_' . $value [2] . '_' . $value [3]] = $key;
+      $crop_definition_value [$key] = array (
+        'start_width' => $value [0],
+        'start_height' => $value [1],
+        'width' => $value [2],
+        'height' => $value [3]
+      );
+    } 
+  }  
   
   /* Create table with 2 values */
   $gen_value [] = $crop_value;
