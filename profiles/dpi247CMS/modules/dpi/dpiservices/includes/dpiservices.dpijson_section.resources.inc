@@ -55,8 +55,7 @@ function dpiservices_dpijson_section_get_targets($tid){
  * @param string $targetblock
  * @return array
  */
-function dpiservices_dpijson_section_retrieve($sid, $targetblock_name){  
-
+function dpiservices_dpijson_section_retrieve($sid, $targetblock_name){    
   module_load_include('inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
   module_load_include('inc', 'dpidestinations', 'dpidestinations.controller.class');
   module_load_include('inc', 'dpiservices', 'includes/dpiservices.dpijson_packages.resources');
@@ -69,9 +68,9 @@ function dpiservices_dpijson_section_retrieve($sid, $targetblock_name){
   $json_return["id"] = $sid;
   $json_return["description"] = $sectionterm->vocabulary_machine_name;
   $json_return["language"] = $language->language;
-  $json_return["copyright"] = "";
-  $json_return["ttl"] = "";
-  $json_return["version"] = "";
+  $json_return["copyright"] = "@todo";
+  $json_return["ttl"] = "@todo";
+  $json_return["version"] = "1.5";
   
   if(!isset($targetblock_name)){
     $json_return["packages"] = dpiservices_dpijson_section_get_all_packages($sid);

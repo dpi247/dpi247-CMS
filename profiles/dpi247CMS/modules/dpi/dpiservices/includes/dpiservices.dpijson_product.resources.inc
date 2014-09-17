@@ -28,11 +28,12 @@ function dpiservices_dpijson_product_retrieve($product){
   }else{
     $json_export = array(
       'status' => 'success',
-      'other_access' => true,
+      'other_access' => 'N/A',
       'main' => array(
         $array_links
       ),
     );
+    drupal_alter('dpijson_product_add_other_access', $json_export);
   }
   
   return $json_export;  
@@ -51,12 +52,13 @@ function dpiservices_dpijson_product_get_element($tree){
         'original_url' => $v['link']['link_path'],
         'feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpijson_section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpijson_packages/'.$wildcard[1].'.json' :'undifined resource')),
         'options' => array(
-          "@todo"
+          //add options with hook alter
         ),
         'childrens' => array(
           dpiservices_dpijson_product_get_element($v['below'])
         ),
       );
+      drupal_alter('dpijson_product_add_options', $node_links);
     } catch (Exception $e) {
       
     }
