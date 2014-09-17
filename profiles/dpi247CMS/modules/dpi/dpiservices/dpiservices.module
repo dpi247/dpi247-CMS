@@ -1,6 +1,10 @@
 <?php
+/**
+ * @author lba
+ */
 
 /**
+ * This function implements hook_ctools_plugins_api
  * 
  * @param unknown $owner
  * @param unknown $api
@@ -14,6 +18,12 @@ function dpiservices_ctools_plugin_api($owner, $api) {
     );
   }
 }
+
+/**
+ * This function implements hook_menu
+ * 
+ * @return array
+ */
 function dpiservices_menu() {
   $items ['admin/dpi247/dpijsonexporter'] = array (
     'title' => 'JsonExporter',
@@ -107,7 +117,9 @@ function dpiservices_menu() {
 }
 
 /**
- * Implementation of hook_permission
+ * This function implements hook_permission
+ * 
+ * @return array
  */
 function dpiservices_permission() {
   return array (

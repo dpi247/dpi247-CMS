@@ -1,17 +1,26 @@
 <?php
+/**
+ * @author lba
+ */
 
+/**
+ * This fonction implements hook_services_resources
+ * to create new type of resources in services
+ * 
+ * @return array
+ */
 function dpiservices_services_resources(){
   return array(
-    'dpijson_packages' => array(
+    'dpi-packages' => array(
         'retrieve' => array(
           'help' => t('Return a packages for .'),
           'file' => array(
             'type' => 'inc',
             'module' => 'dpiservices',
-            'name' => 'includes/dpiservices.dpijson_packages.resources',
+            'name' => 'dpiservices.private.dpi-packages',
           ),
-          'callback' => 'dpiservices_dpijson_packages_retrieve',          
-          'access callback' => 'my_module_get_user_count_access_callback',
+          'callback' => 'dpiservices_dpi_packages_retrieve',          
+          'access callback' => 'dpiservices_get_permission_validity',
           'access arguments' => array('retrieve'),
           'access arguments append' => TRUE,
           'args' => array(
@@ -25,16 +34,16 @@ function dpiservices_services_resources(){
           ),
         ),
       ),
-    'dpijson_section' => array(
+    'dpi-section' => array(
       'retrieve' => array(
         'help' => t('Return a packages for .'),
         'file' => array(
           'type' => 'inc',
           'module' => 'dpiservices',
-          'name' => 'includes/dpiservices.dpijson_section.resources',
+          'name' => 'dpiservices.private.dpi-section',
         ),
-        'callback' => 'dpiservices_dpijson_section_retrieve',
-        'access callback' => 'my_module_get_user_count_access_callback',
+        'callback' => 'dpiservices_dpi_section_retrieve',
+        'access callback' => 'dpiservices_get_permission_validity',
         'access arguments' => array('retrieve'),
         'access arguments append' => TRUE,
         'args' => array(
@@ -55,22 +64,22 @@ function dpiservices_services_resources(){
         ),       
       ),
       'index' => array(
-        'file' => array('type' => 'inc', 'module' => 'dpiservices', 'name' => 'includes/dpiservices.dpijson_section.resources'),
-        'callback' => 'dpiservices_dpijson_section_index',
+        'file' => array('type' => 'inc', 'module' => 'dpiservices', 'name' => 'dpiservices.private.dpi-section'),
+        'callback' => 'dpiservices_dpi_section_index',
         'args' => array(),
         'access arguments' => array('index'),
       ),
     ),
-    'dpijson_product' => array(
+    'dpijsonexporter' => array(
       'retrieve' => array(
         'help' => t('Return a packages for .'),
         'file' => array(
           'type' => 'inc',
           'module' => 'dpiservices',
-          'name' => 'includes/dpiservices.dpijson_product.resources',
+          'name' => 'dpiservices.private.dpijsonexporter',
         ),
-        'callback' => 'dpiservices_dpijson_product_retrieve',
-        'access callback' => 'my_module_get_user_count_access_callback',
+        'callback' => 'dpiservices_dpijsonexporter_product_retrieve',
+        'access callback' => 'dpiservices_get_permission_validity',
         'access arguments' => array('retrieve'),
         'access arguments append' => TRUE,
         'args' => array(
@@ -84,16 +93,39 @@ function dpiservices_services_resources(){
         ),
       ),
     ),
-    'dpijson_sectionV1' => array(
+    'wally-packages' => array(
       'retrieve' => array(
         'help' => t('Return a packages for .'),
         'file' => array(
           'type' => 'inc',
           'module' => 'dpiservices',
-          'name' => 'includes/dpiservices.dpijson_sectionV1.resources',
+          'name' => 'dpiservices.private.wally-packages',
         ),
-        'callback' => 'dpiservices_dpijson_section_retrieve',
-        'access callback' => 'my_module_get_user_count_access_callback',
+        'callback' => 'dpiservices_wally_package_retrieve',
+        'access callback' => 'dpiservices_get_permission_validity',
+        'access arguments' => array('retrieve'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The nid of the node to get',
+          ),
+        ),
+      ),
+    ),
+    'wally-section' => array(
+      'retrieve' => array(
+        'help' => t('Return a packages for .'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'dpiservices',
+          'name' => 'dpiservices.private.wally-section',
+        ),
+        'callback' => 'dpiservices_wally_section_retrieve',
+        'access callback' => 'dpiservices_get_permission_validity',
         'access arguments' => array('retrieve'),
         'access arguments append' => TRUE,
         'args' => array(
@@ -114,8 +146,8 @@ function dpiservices_services_resources(){
         ),
       ),
       'index' => array(
-        'file' => array('type' => 'inc', 'module' => 'dpiservices', 'name' => 'includes/dpiservices.dpijson_section.resources'),
-        'callback' => 'dpiservices_dpijson_section_index',
+        'file' => array('type' => 'inc', 'module' => 'dpiservices', 'name' => 'dpiservices.private.dpi-section'),
+        'callback' => 'dpiservices_dpi_section_index',
         'args' => array(),
         'access arguments' => array('index'),
       ),
@@ -124,10 +156,10 @@ function dpiservices_services_resources(){
 }
 
 /**
- *
+ * This function manage access
  * @param unknown $op
  * @return boolean
  */
-function my_module_get_user_count_access_callback($op){
+function dpiservices_get_permission_validity($op){
   return true;
 }
