@@ -1,16 +1,20 @@
 <?php
+/**
+ * @author lba
+ */
 
 /**
+ * This function create form to add or edit a product
  * 
- * 
- * @param unknown $form
- * @param unknown $form_state
- * @return multitype:string The multitype:An
+ * @param array $form
+ * @param array $form_state
+ * @return array
  */
-function dpiservices_pages_form_view_product_form($form, &$form_state, $argument = ''){
+function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $argument = ''){
+  module_load_include('inc', 'dpiservices', 'dpiservices.api');
   $form=array();
   if(isset($argument) && $argument != ''){
-    if(!$product_arg = dpiservices_get_one_product_by_label($argument)){
+    if(!$product_arg = dpiservices_product_get_one_product_by_label($argument)){
       drupal_set_message("Product cannot be loaded", 'error');
     }
   }
@@ -93,12 +97,12 @@ function dpiservices_pages_form_view_product_form($form, &$form_state, $argument
 }
 
 /**
+ * This function merge information (insert or update)
  * 
- * 
- * @param unknown $form
- * @param unknown $form_state
+ * @param array $form
+ * @param array $form_state
  */
-function dpiservices_pages_form_view_product_form_submit($form, &$form_state){
+function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_state){
   if(isset($form_state['values'])){
     try {
       $presets=unserialize(dpi_variable_get("dpiservices_preset", array())) ;
@@ -130,16 +134,5 @@ function dpiservices_pages_form_view_product_form_submit($form, &$form_state){
     }
   } else {
     drupal_set_message('Information is not correctly sended', 'error');
-  }
-}
-
-function dpiservices_get_one_product_by_label($label){  
-  try {
-    return db_select('dpiservices_product', 'dp')
-              ->condition('label', $label, '=')
-              ->fields('dp', array())
-              ->execute()->fetchAssoc();
-  } catch (Exception $e) {
-    return FALSE;
   }
 }

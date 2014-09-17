@@ -1,5 +1,13 @@
 <?php
+/**
+ * @author lba
+ */
 
+/**
+ * This function create form to add map
+ * 
+ * @return array
+ */
 function dpiservices_pages_form_add_map_form(){ 
   $form = array();
 
@@ -33,6 +41,12 @@ function dpiservices_pages_form_add_map_form(){
   return $form;  
 }
 
+/**
+ * This function save information to dpi_variable
+ * 
+ * @param array $form
+ * @param array $form_state
+ */
 function dpiservices_pages_form_add_map_form_submit($form, & $form_state){  
   if(isset($form_state['values'])){
     $result = array();

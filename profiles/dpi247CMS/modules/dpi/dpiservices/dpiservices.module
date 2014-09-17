@@ -5,9 +5,9 @@
 
 /**
  * This function implements hook_ctools_plugins_api
- * 
- * @param unknown $owner
- * @param unknown $api
+ *
+ * @param unknown $owner          
+ * @param unknown $api          
  * @return multitype:number string
  */
 function dpiservices_ctools_plugin_api($owner, $api) {
@@ -21,22 +21,22 @@ function dpiservices_ctools_plugin_api($owner, $api) {
 
 /**
  * This function implements hook_menu
- * 
+ *
  * @return array
  */
 function dpiservices_menu() {
   $items ['admin/dpi247/dpijsonexporter'] = array (
     'title' => 'JsonExporter',
     'description' => 'Administer return json exporter',
-    'page callback' => 'dpiservices_pages_form_map_preset_form',
+    'page callback' => 'dpiservices_pages_form_table_product_form',
     'access arguments' => array (
       'administer dpiservices' 
     ),
-    'file' => 'dpiservices.pages.settings.inc',
+    'file' => 'dpiservices.pages.product_panel.inc',
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/preset'] = array (
+  $items ['admin/dpi247/dpijsonexporter/products'] = array (
     'title' => 'Product panel',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0 
@@ -47,27 +47,28 @@ function dpiservices_menu() {
     'description' => 'Manage view from dpiservices for product',
     'page callback' => 'drupal_get_form',
     'page arguments' => array (
-      'dpiservices_pages_form_view_product_form' ),
+      'dpiservices_pages_form_add_or_edit_product_form' 
+    ),
     'access arguments' => array (
       'administer dpiservices' 
     ),
-    'file' => 'dpiservices.pages.view_product.inc',
+    'file' => 'dpiservices.pages.add_product.inc',
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 1
+    'weight' => 1 
   );
   
   $items ['admin/dpi247/dpijsonexporter/edit/%'] = array (
     'page callback' => 'drupal_get_form',
     'page arguments' => array (
-      'dpiservices_pages_form_view_product_form',
+      'dpiservices_pages_form_add_or_edit_product_form',
       4 
     ),
     'access arguments' => array (
       'administer dpiservices' 
     ),
-    'file' => 'dpiservices.pages.view_product.inc',
-    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+    'file' => 'dpiservices.pages.add_product.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
   $items ['admin/dpi247/dpijsonexporter/add_map'] = array (
@@ -99,18 +100,20 @@ function dpiservices_menu() {
     'type' => MENU_NORMAL_ITEM 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/settings_links'] = array (
+  $items ['admin/dpi247/dpijsonexporter/settings'] = array (
     'title' => 'Settings',
     'description' => 'Settings for links creation',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array ('dpiservices_pages_form_settings_links_form' ),
-    'access arguments' => array (
-      'administer dpiservices'
+    'page arguments' => array (
+      'dpiservices_pages_form_settings_form' 
     ),
-    'file' => 'dpiservices.pages.settings.links.inc',
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.settings.inc',
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 3
+    'weight' => 3 
   );
   
   return $items;
@@ -118,7 +121,7 @@ function dpiservices_menu() {
 
 /**
  * This function implements hook_permission
- * 
+ *
  * @return array
  */
 function dpiservices_permission() {

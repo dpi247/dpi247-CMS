@@ -81,3 +81,26 @@ function dpiservices_product_get_one_product_by_label($label){
     return FALSE;
   }
 }
+
+/**
+ * This function get row from dpisrevices_product.
+ * Parameter limite number of row.
+ * No parameter return all informations from table.
+ *
+ * @param integer $nb
+ * @return array
+ */
+function dpiservices_product_get_all_product_info($nb = 0) {
+  $return = array ();
+  if($nb <= 0){
+    $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->execute();
+  }else{
+    $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->range(0, $nb)->execute();
+  }
+
+
+  while( $row = $query->fetchAssoc () ) {
+    $return [] = $row;
+  }
+  return $return;
+}
