@@ -11,7 +11,7 @@ class SimpleTestDpiPubToolsTestCase extends DrupalWebTestCase{
     return array(
       'name' => 'Tools unit test',
       'description' => 'Unit test for dpipub.tools.inc',
-      'group' => 'dpipub',
+      'group' => 'Dpipub',
     );
   }  
   
