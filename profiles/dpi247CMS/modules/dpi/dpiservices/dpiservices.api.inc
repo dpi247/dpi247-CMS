@@ -12,7 +12,7 @@
  * @param string $search_value name of the value in your field
  * @return (true)?string:false 
  */
-function dpiservices_packages_get_field_element_by_search_value($type, $node, $field_name, $search_value) {
+function dpiservices_packages_get_field_element_by_search_value($type = null, $node = null, $field_name = null, $search_value = null) {
   if($info = field_get_items ( $type, $node, $field_name )){
     $element = current($info);
   }
@@ -28,10 +28,12 @@ function dpiservices_packages_get_field_element_by_search_value($type, $node, $f
  * @param string $search_value name of the value in your field
  * @return (true)?array:null
  */
-function dpiservices_packages_get_one_element_from_item_from_node($type, $node, $field_name, $search_value, $get_item) {
+function dpiservices_packages_get_one_element_from_item_from_node($type = null, $node = null, $field_name = null, $search_value = null, $get_item = null) {
   $authors = array ();
-  foreach ( field_get_items ( $type, $node, $field_name ) as $items ) {
-    $authors [] = taxonomy_term_load ( $items [$search_value] )->$get_item;
+  if($var = field_get_items ( $type, $node, $field_name )){
+    foreach ($var  as $items ) {
+      $authors [] = taxonomy_term_load ( $items [$search_value] )->$get_item;
+    } 
   }
   return $authors;
 }
@@ -43,7 +45,7 @@ function dpiservices_packages_get_one_element_from_item_from_node($type, $node, 
  * @param integer $nid
  * @return array
  */
-function dpiservices_packages_generate_crop_informations($sid, $nid) {
+function dpiservices_packages_generate_crop_informations($sid=null, $nid=null) {
   $gen_value = array ();
   $crop_value = array ();
   $crop_definition_value = array ();
@@ -71,7 +73,10 @@ function dpiservices_packages_generate_crop_informations($sid, $nid) {
  * @param String $label
  * @return product|FALSE
  */
-function dpiservices_product_get_one_product_by_label($label){
+function dpiservices_product_get_one_product_by_label($label = null){
+  if(isset($label) && $label!= "")
+      return FALSE;
+  
   try {
     return db_select('dpiservices_product', 'dp')
     ->condition('label', $label, '=')
@@ -91,14 +96,14 @@ function dpiservices_product_get_one_product_by_label($label){
  * @return array
  */
 function dpiservices_product_get_all_product_info($nb = 0) {
+  if(!is_numeric($nb))
+    return FALSE;
   $return = array ();
   if($nb <= 0){
     $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->execute();
   }else{
     $query = db_select('dpiservices_product', 'dp')->fields('dp', array ())->range(0, $nb)->execute();
   }
-
-
   while( $row = $query->fetchAssoc () ) {
     $return [] = $row;
   }
