@@ -149,7 +149,10 @@ function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
 
+    if(function_exists("rules_invoke_event")){
+    
     rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
+    }
   }
 }
 
@@ -159,8 +162,11 @@ function dpicontenttypes_node_insert($node) {
  * @param object $node
  */
 function dpicontenttypes_node_create($node) {
+  if(function_exists("rules_invoke_event")){
+  
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+  }
   }
 }
 
@@ -170,8 +176,10 @@ function dpicontenttypes_node_create($node) {
  * @param object $node
  */
 function dpicontenttypes_node_presave($node) {
+  if(function_exists("rules_invoke_event")){
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
+  }
   }
 }
 
@@ -183,8 +191,11 @@ function dpicontenttypes_node_presave($node) {
 function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
   
+  if(function_exists("rules_invoke_event")){
+  
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     rules_invoke_event('dpicontenttypes_rules_event_package_deleted', $node);
+  }
   }
 }
     

@@ -58,16 +58,18 @@ function unfoldcompanion_field_default_field_instances() {
         'weight' => 18,
       ),
       'targetblock_big' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 24,
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 4,
       ),
       'targetblock_medium' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 24,
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 8,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -76,10 +78,11 @@ function unfoldcompanion_field_default_field_instances() {
         'weight' => 24,
       ),
       'targetblock_small' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 23,
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 7,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -128,13 +131,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 23,
+        'weight' => 24,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 23,
+        'weight' => 24,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -146,7 +149,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 22,
+        'weight' => 23,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -190,13 +193,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 22,
+        'weight' => 23,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 22,
+        'weight' => 23,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -208,7 +211,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 21,
+        'weight' => 22,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -261,13 +264,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 20,
+        'weight' => 21,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 20,
+        'weight' => 21,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -279,7 +282,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 19,
+        'weight' => 20,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -325,13 +328,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 21,
+        'weight' => 22,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 21,
+        'weight' => 22,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -343,7 +346,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 20,
+        'weight' => 21,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -529,7 +532,7 @@ function unfoldcompanion_field_default_field_instances() {
           'tag' => 'h2',
         ),
         'type' => 'simple_html_tag_formatter',
-        'weight' => 3,
+        'weight' => 4,
       ),
       'targetblock_red' => array(
         'label' => 'hidden',
@@ -605,14 +608,14 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'hidden',
         'module' => 'date',
         'settings' => array(
-          'format_type' => 'short',
+          'format_type' => 'long',
           'fromto' => 'both',
           'multiple_from' => '',
           'multiple_number' => '',
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 3,
+        'weight' => 10,
       ),
       'targetblock_medium' => array(
         'label' => 'hidden',
@@ -651,7 +654,7 @@ function unfoldcompanion_field_default_field_instances() {
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 3,
+        'weight' => 6,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -725,7 +728,7 @@ function unfoldcompanion_field_default_field_instances() {
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 4,
+        'weight' => 5,
       ),
       'targetblock_medium' => array(
         'label' => 'hidden',
@@ -764,7 +767,7 @@ function unfoldcompanion_field_default_field_instances() {
           'multiple_to' => '',
         ),
         'type' => 'date_default',
-        'weight' => 2,
+        'weight' => 4,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -825,7 +828,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
         'settings' => array(),
-        'type' => 'dpi_mediabox',
+        'type' => 'links_list',
         'weight' => 6,
       ),
       'targetblock_medium' => array(
@@ -833,7 +836,7 @@ function unfoldcompanion_field_default_field_instances() {
         'module' => 'dpicontenttypes',
         'settings' => array(),
         'type' => 'dpi_simpleimg',
-        'weight' => 1,
+        'weight' => 2,
       ),
       'targetblock_red' => array(
         'label' => 'hidden',
@@ -957,13 +960,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 19,
+        'weight' => 20,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 19,
+        'weight' => 20,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -975,7 +978,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 18,
+        'weight' => 19,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1035,13 +1038,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 18,
+        'weight' => 19,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 18,
+        'weight' => 19,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1053,7 +1056,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 17,
+        'weight' => 18,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1090,22 +1093,24 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'hidden',
-        'module' => 'taxonomy',
+        'module' => 'unfoldcompanionminimal',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
+        'type' => 'term_in_red',
         'weight' => 11,
       ),
       'targetblock_big' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'unfoldcompanionminimal',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 13,
+        'type' => 'term_in_red',
+        'weight' => 7,
       ),
       'targetblock_medium' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'unfoldcompanionminimal',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 11,
+        'type' => 'term_in_red',
+        'weight' => 7,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1114,10 +1119,11 @@ function unfoldcompanion_field_default_field_instances() {
         'weight' => 11,
       ),
       'targetblock_small' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'unfoldcompanionminimal',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 10,
+        'type' => 'term_in_red',
+        'weight' => 5,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1156,20 +1162,21 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
         'settings' => array(),
-        'type' => 'dpi_mediabox',
+        'type' => 'links_list',
         'weight' => 9,
       ),
       'targetblock_big' => array(
-        'label' => 'above',
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 12,
+        'type' => 'links_list_small',
+        'weight' => 9,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 10,
+        'weight' => 13,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1181,7 +1188,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 9,
+        'weight' => 12,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1230,13 +1237,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 11,
+        'weight' => 14,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 9,
+        'weight' => 12,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1248,7 +1255,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 8,
+        'weight' => 11,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1293,13 +1300,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 9,
+        'weight' => 12,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 7,
+        'weight' => 10,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1311,7 +1318,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 6,
+        'weight' => 9,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1356,13 +1363,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 10,
+        'weight' => 13,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 8,
+        'weight' => 11,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1374,7 +1381,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 7,
+        'weight' => 10,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1417,13 +1424,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 14,
+        'weight' => 15,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 12,
+        'weight' => 14,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1435,7 +1442,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 11,
+        'weight' => 13,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1484,13 +1491,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 15,
+        'weight' => 16,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 13,
+        'weight' => 15,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1502,7 +1509,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 12,
+        'weight' => 14,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1552,7 +1559,7 @@ function unfoldcompanion_field_default_field_instances() {
           'tag' => 'span',
         ),
         'type' => 'simple_html_tag_formatter',
-        'weight' => 1,
+        'weight' => 3,
       ),
       'targetblock_medium' => array(
         'label' => 'hidden',
@@ -1562,7 +1569,7 @@ function unfoldcompanion_field_default_field_instances() {
           'tag' => 'span',
         ),
         'type' => 'simple_html_tag_formatter',
-        'weight' => 2,
+        'weight' => 3,
       ),
       'targetblock_red' => array(
         'label' => 'hidden',
@@ -1578,7 +1585,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 5,
+        'weight' => 8,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1625,16 +1632,22 @@ function unfoldcompanion_field_default_field_instances() {
         'weight' => 16,
       ),
       'targetblock_big' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 8,
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 400,
+        ),
+        'type' => 'text_trimmed',
+        'weight' => 11,
       ),
       'targetblock_medium' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 17,
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 300,
+        ),
+        'type' => 'text_trimmed',
+        'weight' => 9,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1643,10 +1656,13 @@ function unfoldcompanion_field_default_field_instances() {
         'weight' => 17,
       ),
       'targetblock_small' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 16,
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 150,
+        ),
+        'type' => 'text_trimmed',
+        'weight' => 3,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1704,13 +1720,13 @@ function unfoldcompanion_field_default_field_instances() {
           'tag' => 'div',
         ),
         'type' => 'simple_html_tag_formatter',
-        'weight' => 7,
+        'weight' => 8,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 16,
+        'weight' => 18,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1722,7 +1738,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 15,
+        'weight' => 17,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1772,13 +1788,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 16,
+        'weight' => 17,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 14,
+        'weight' => 16,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1790,7 +1806,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 13,
+        'weight' => 15,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -1837,13 +1853,13 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 17,
+        'weight' => 18,
       ),
       'targetblock_medium' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 15,
+        'weight' => 17,
       ),
       'targetblock_red' => array(
         'label' => 'above',
@@ -1855,7 +1871,7 @@ function unfoldcompanion_field_default_field_instances() {
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 14,
+        'weight' => 16,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -2957,10 +2973,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 5,
+        'type' => 'hidden',
+        'weight' => 1,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -2991,10 +3006,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 4,
+        'type' => 'hidden',
+        'weight' => 2,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3025,10 +3039,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 3,
+        'type' => 'hidden',
+        'weight' => 11,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3059,10 +3072,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 6,
+        'type' => 'hidden',
+        'weight' => 8,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3093,10 +3105,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 7,
+        'type' => 'hidden',
+        'weight' => 3,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3127,10 +3138,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 8,
+        'type' => 'hidden',
+        'weight' => 5,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3161,10 +3171,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 11,
+        'type' => 'hidden',
+        'weight' => 10,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3195,10 +3204,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 9,
+        'type' => 'hidden',
+        'weight' => 7,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3229,10 +3237,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 10,
+        'type' => 'hidden',
+        'weight' => 6,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3260,10 +3267,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 13,
+        'type' => 'hidden',
+        'weight' => 4,
       ),
     ),
     'entity_type' => 'scald_atom',
@@ -3293,10 +3299,9 @@ function unfoldcompanion_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 14,
+        'type' => 'hidden',
+        'weight' => 9,
       ),
     ),
     'entity_type' => 'scald_atom',

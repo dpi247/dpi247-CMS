@@ -78,6 +78,7 @@ function dpidestinations_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+     
       'target' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
@@ -318,3 +319,4 @@ function dpidestinations_update_7001() {
     user_role_grant_permissions($rid, $permissions);
   }
 }
+

@@ -10,6 +10,12 @@
 function unfoldcompanion_user_default_roles() {
   $roles = array();
 
+  // Exported role: Importer.
+  $roles['Importer'] = array(
+    'name' => 'Importer',
+    'weight' => 2,
+  );
+
   // Exported role: administrator.
   $roles['administrator'] = array(
     'name' => 'administrator',

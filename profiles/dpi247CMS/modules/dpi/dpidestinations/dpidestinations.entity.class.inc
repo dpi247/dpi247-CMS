@@ -53,13 +53,7 @@ class TargetBlockEntity extends Entity {
    */
   public $targetblockid;
 
-  /**
-   * The machine name.
-   *
-   * @var string
-   */
-  public $machine_name;
-
+  
   /**
    * The target reference.
    *
@@ -126,4 +120,5 @@ class TargetBlockEntity extends Entity {
   protected function defaultUri() {
     return array('path' => 'targetblock/' . $this->targetblockid);
   }
+  
 }

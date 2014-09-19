@@ -1,7 +1,8 @@
 <?php
 
 class TargetController extends EntityAPIControllerExportable{
-  public function create(array $values = array()) {
+  
+ public function create(array $values = array()) {
     $values += array(
       'targetid' => '',
       'machine_name' => '',
@@ -84,6 +85,9 @@ class TargetBlockController extends EntityAPIControllerExportable{
     return parent::create($values);
   }
 
+ 
+  
+
   //return an array keyed with tid of targetblocks that belongs to a display id
   public function load_targetblocks_by_panels_display($did) {
     $conditions = array('did' => $did);
@@ -116,6 +120,10 @@ class TargetBlockController extends EntityAPIControllerExportable{
   }
 
   public function load_targetblock_by_termid_and_target($term_id,$target_name) {
+    
+    //@todo: WARNING this function does not handle Ctols exportable ...
+    // so we are stuck right after install process :/
+    
     $did = dpidestinations_api_get_panelsdisplayid_for_sectionterm($term_id);
     return $this->load_targetblock_by_did_and_target($did, $target_name);
   }
@@ -154,7 +162,11 @@ class TargetBlockController extends EntityAPIControllerExportable{
 
   public function save($entity, DatabaseTransaction $transaction = NULL) {
     $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
-
+    
+    
+    
+    
+    
     $result=parent::save($entity);
     return $result;
   }

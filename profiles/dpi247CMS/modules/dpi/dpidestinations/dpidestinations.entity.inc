@@ -73,7 +73,7 @@ function dpidestinations_entity_info(){
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
       'id' => 'targetblockid',
-      // 'name' => 'machine_name',
+      //'name' => 'machine_name',
       'label' => 'label',
     ),
     'bundles' => array(

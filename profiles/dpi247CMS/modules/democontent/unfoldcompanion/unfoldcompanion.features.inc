@@ -67,8 +67,7 @@ function unfoldcompanion_default_targetblock() {
   $items = array();
   
   $items['1'] = entity_import('targetblock', '{
-      "targetblockid" : "1",
-      "machine_name" : null,
+      "targetblockid" : 1,
       "target" : "main_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
@@ -86,9 +85,8 @@ function unfoldcompanion_default_targetblock() {
       "rdf_mapping" : []
 }');
   $items['2'] = entity_import('targetblock', '{
-      "targetblockid" : "2",
-      "machine_name" : null,
-      "target" : "secondary_content",
+      "targetblockid" : 2,
+            "target" : "secondary_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
       "use_pager" : "0",
@@ -105,8 +103,7 @@ function unfoldcompanion_default_targetblock() {
       "rdf_mapping" : []
 }');
   $items['3'] = entity_import('targetblock', '{
-      "targetblockid" : "2",
-      "machine_name" : null,
+      "targetblockid" : "3",
       "target" : "extra_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
@@ -124,8 +121,7 @@ function unfoldcompanion_default_targetblock() {
       "rdf_mapping" : []
 }');
   $items['4'] = entity_import('targetblock', '{
-      "targetblockid" : "2",
-      "machine_name" : null,
+      "targetblockid" : "4",
       "target" : "main_content",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
@@ -143,9 +139,8 @@ function unfoldcompanion_default_targetblock() {
       "rdf_mapping" : []
 }');
   $items['5'] = entity_import('targetblock', '{
-      "targetblockid" : "2",
-      "machine_name" : null,
-      "target" : "extra_content",
+      "targetblockid" : "5",
+      //"machine_name" : "extra_content_2_0",
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
       "use_pager" : "0",
