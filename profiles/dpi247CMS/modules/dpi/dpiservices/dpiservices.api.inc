@@ -68,6 +68,26 @@ function dpiservices_packages_generate_crop_informations($sid=null, $nid=null) {
 }
 
 /**
+ * This function return all value for crop definition with url
+ * 
+ * @param string $sid
+ * @param string $nid
+ * @return array
+ */
+function dpiservices_packages_generate_crop_links($sid=null, $nid=null, $atom=null){
+  module_load_include("inc", 'dpicommons', "dpicommons.api");
+  $crop_link_definition = array ();
+  if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
+    foreach ($info as $key => $value ) {
+      $crop_link_definition [$key] = array (
+        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key),
+      );
+    }
+  }
+  return $crop_link_definition;
+}
+
+/**
  * This function return info from table product
  * 
  * @param String $label

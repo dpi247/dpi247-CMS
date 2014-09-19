@@ -10,9 +10,11 @@ module_load_include('inc', 'dpiservices', 'dpiservices.api');
  * @param integer $nid
  * @return array()
  */
-function dpiservices_wally_package_retrieve($nid) {
+function dpiservices_wally_package_retrieve($nid, $sid = null, $target = null) {
   $node = node_load ( $nid );
 
+  
+  
   $packages_return = array (
     'nid' => $node->nid,
     'comment' => $node->comment,
@@ -31,8 +33,10 @@ function dpiservices_wally_package_retrieve($nid) {
     'barette' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
     'byline' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
     'authors' => dpiservices_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
-    'qualities' => '@todo',
+    'qualities' => array(),
     'url' => drupal_get_path_alias ( 'node/' . $nid ),
+    'mainDestination' => $target,
+    'mainSection' => $sid,
     'relatedObjects' => array (
       dpiservices_wally_packages_get_all_related_object_from_node ( $node )
     ),
@@ -72,14 +76,14 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
  */
 function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline) {
   $atom = scald_atom_load ( $sid );
-  $all_crop_informations = dpiservices_packages_generate_crop_informations ( $sid, $nid );
+  $all_crop_informations = dpiservices_packages_generate_crop_links ( $sid, $nid, $atom );
 
   $formatted_atom = array (
-    'nid' => $nid,
+    'nid' => $atom->sid,
     'type' => $atom->type,
     'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
     'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
-    'crop' => $all_crop_informations[1],
+    'crop' => $all_crop_informations,
   );
 
   return $formatted_atom;

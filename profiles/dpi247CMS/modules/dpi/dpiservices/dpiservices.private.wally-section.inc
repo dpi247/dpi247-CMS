@@ -27,13 +27,13 @@ function dpiservices_wally_section_retrieve($sid, $targetblock_name){
   $json_return["copyright"] = "Copyright";
   $json_return["ttl"] = "@todo";
   $json_return["version"] = dpiservices_wally_section_get_version();
-
+  
   if(!isset($targetblock_name)){
     $json_return["items"] = dpiservices_wally_section_get_all_packages($sid);
   }else{
     $json_return["items"] = dpiservices_wally_section_get_one_packages($sid, $targetblock_name);
   }
-
+  drupal_alter('dpijson_wally_section_add_info', $json_return);
   return array("main" => $json_return);
 }
 
@@ -58,7 +58,7 @@ function dpiservices_wally_section_get_all_packages($sid){
     $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sid,  $section->target, $targetblock);
 
     foreach($targetview->result as $node_info){
-      $result[] = dpiservices_wally_package_retrieve($node_info->nid);
+      $result[] = dpiservices_wally_package_retrieve($node_info->nid, $sid, $section->target);
     }
   }
   return $result;
