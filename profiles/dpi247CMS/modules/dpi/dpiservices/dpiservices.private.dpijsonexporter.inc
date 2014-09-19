@@ -65,7 +65,8 @@ function dpiservices_dpijsonexporter_product_get_element($tree){
         'id' => $key,
         'label' => $v["link"]['link_title'],
         'original_url' => $v['link']['link_path'],
-        'feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpijson_section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpijson_packages/'.$wildcard[1].'.json' :'undifined resource')),
+        'feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-packages/'.$wildcard[1].'.json' :'undifined resource')),
+        'old_feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-packages/'.$wildcard[1].'.json' :'undifined resource')),
         'options' => array(
           //add options with hook alter
         ),

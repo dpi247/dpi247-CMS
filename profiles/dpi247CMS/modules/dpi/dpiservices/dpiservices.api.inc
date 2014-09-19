@@ -74,7 +74,7 @@ function dpiservices_packages_generate_crop_informations($sid=null, $nid=null) {
  * @return product|FALSE
  */
 function dpiservices_product_get_one_product_by_label($label = null){
-  if(isset($label) && $label!= "")
+  if(!isset($label) || $label== "")
       return FALSE;
   
   try {
