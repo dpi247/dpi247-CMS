@@ -42,6 +42,8 @@ function dpiservices_wally_package_retrieve($nid, $sid = null, $target = null) {
     ),
   );
   
+  drupal_alter('dpiservices_wally_package_info', $packages_return);
+  
   return $packages_return;
 }
 
@@ -80,11 +82,41 @@ function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline)
 
   $formatted_atom = array (
     'nid' => $atom->sid,
-    'type' => $atom->type,
-    'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
-    'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
-    'crop' => $all_crop_informations,
+    'type' => $atom->type,    
   );
+  
+  if($atom->type == "image"){
+    $formatted_atom = $formatted_atom + array(
+      'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
+      'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
+      'crop' => $all_crop_informations,
+    );
+  }else{
+    $formatted_atom = $formatted_atom + array(
+      'title' => $atom->title,
+      'links' => dpiservices_wally_get_atoms_links_list($atom),
+    );
+  }
 
   return $formatted_atom;
+}
+
+/**
+ * This function return all links info for an atom sclad_linklist
+ * 
+ * @param scald_atom $atom
+ * @return array 
+ */
+function dpiservices_wally_get_atoms_links_list($atom){
+  $return = array();
+  foreach(field_get_items('scald_atom', $atom, 'field_linkitems') as $link){
+    $return[] = array(
+                'nid' => $atom->sid,
+                'type' => $atom->type,
+                'path' => null,
+                'title' => $link['title'],
+                'url' => $link['url'],
+              );
+  }
+  return $return;
 }
