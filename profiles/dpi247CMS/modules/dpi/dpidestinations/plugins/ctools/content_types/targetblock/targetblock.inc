@@ -48,6 +48,9 @@ function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
   if($conf['use_split']!=0){
     $split='(Split)';
   }
+  else{
+    $split="";
+  }
   
   
     $block = new stdClass;
@@ -73,8 +76,9 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $block = new stdClass();
   $block->module = $module;
 
-  $did = $context['argument_destination_1']->data->handler->did;
   $destination_term_id = $context['argument_destination_1']->data->tid;
+  $did = $context['argument_destination_1']->data->handler->did;
+  
   $target_name = $subtype;
   $split_delta = $conf["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
