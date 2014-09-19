@@ -1,0 +1,37 @@
+<?php 
+
+
+module_load_include('inc', 'dpisso','pisso.api');
+module_load_include('inc', 'pisso','pisso.private');
+//module_load_include('inc', 'pisso','pisso.helpers');
+
+
+//@todo: crer un callback que le varnish appelle 
+// pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
+// Même chose pour le profile manager etc ...
+
+
+
+// getServicesForAccessToken(unitId, url, cookieId,?accessToken,?loginId)
+// getServicesForLoginId(unitId, url, cookieId,?loginId)
+// getServices()
+
+
+//See: https://api.drupal.org/api/drupal/modules%21user%21user.module/function/user_external_login_register/7
+
+/**
+ * Implementation of hook_form_alter().
+ * Change the normal form login form behaviour to allow login against the login Manager.
+ */
+function dpisso_form_user_login_alter( &$form, $form_state )
+{
+  $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
+}
+
+
+function dpisso_boot(){
+  
+  
+}
+
+
