@@ -88,6 +88,13 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
     '#default_value' => (isset($product_arg)) ? $product_arg['product_type']: '',
   );
   
+  $form['fieldset']['version'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a version'),
+    '#options' => array('dpi'=>'dpi','wally'=>'wally'),
+    '#default_value' => (isset($product_arg)) ? $product_arg['version']: '',
+  );
+  
   $form['submit'] = array(
     '#type' => 'submit',
     '#value'=>'save'
@@ -123,6 +130,7 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
             'preset' => serialize($preset_db_value),
             'product' => $form_state['values']['select_product'],
             'product_type' => $form_state['values']['select_product_type'],
+            'version' => $form_state['values']['version'],
           ))
           ->execute();
       

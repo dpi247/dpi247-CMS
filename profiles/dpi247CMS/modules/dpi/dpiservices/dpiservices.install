@@ -54,6 +54,13 @@ function dpiservices_schema(){
         'not null' => TRUE,
         'default' => '',
       ),
+      'version' => array(
+        'description' => 'json type return',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'dpi',
+      ),
     ),
     'indexes' => array(
       'aid'  => array('label'),

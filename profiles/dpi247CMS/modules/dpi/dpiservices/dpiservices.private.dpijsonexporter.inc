@@ -28,7 +28,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
   
   $tree = menu_tree_data($links);
   $array_links = array();
-  $array_links = dpiservices_dpijsonexporter_product_get_element($tree);
+  $array_links = dpiservices_dpijsonexporter_product_get_element($tree, $product_element);
 
   if(isset($tree) && empty($tree)){
     $json_export = array(
@@ -54,7 +54,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
  * @param array $tree
  * @return array:multiple
  */
-function dpiservices_dpijsonexporter_product_get_element($tree){
+function dpiservices_dpijsonexporter_product_get_element($tree, $product_element){
   if(isset($tree) && empty($tree))
     return "no_child";
 
@@ -65,13 +65,12 @@ function dpiservices_dpijsonexporter_product_get_element($tree){
         'id' => $key,
         'label' => $v["link"]['link_title'],
         'original_url' => $v['link']['link_path'],
-        'feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-packages/'.$wildcard[1].'.json' :'undifined resource')),
-        'old_feed' => ((strcmp($v['link']['router_path'], "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-section/'.$wildcard[1].'.json' : ( (strcmp($v['link']['router_path'], "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-packages/'.$wildcard[1].'.json' :'undifined resource')),
+        'feed' => dpiservices_dpijsonexporter_product_get_feed($v['link']['router_path'], $product_element, $wildcard),
         'options' => array(
           //add options with hook alter
         ),
         'childrens' => array(
-          dpiservices_dpijsonexporter_product_get_element($v['below'])
+          dpiservices_dpijsonexporter_product_get_element($v['below'], $product_element)
         ),
       );
       drupal_alter('dpijson_product_add_options', $node_links);
@@ -80,4 +79,21 @@ function dpiservices_dpijsonexporter_product_get_element($tree){
     }
   }
   return $node_links;
+}
+
+/**
+ * This function test the version for feed url
+ * 
+ * @param String $path
+ * @param product $product_element
+ * @return string
+ */
+function dpiservices_dpijsonexporter_product_get_feed($path, $product_element, $wildcard){
+  $feed;
+  if($product_element["version"]=="dpi"){
+    $feed = ((strcmp($path, "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-section/'.$wildcard[1].'.json' : ( (strcmp($path, "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-packages/'.$wildcard[1].'.json' :'undifined resource dpi'));
+  }else{
+    $feed = ((strcmp($path, "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-section/'.$wildcard[1].'.json' : ( (strcmp($path, "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-packages/'.$wildcard[1].'.json' :'undifined resource wally'));
+  }
+  return $feed;
 }
