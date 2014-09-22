@@ -100,22 +100,6 @@ function dpiservices_menu() {
     'type' => MENU_NORMAL_ITEM 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/settings'] = array (
-    'title' => 'Settings',
-    'description' => 'Settings for links creation',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array (
-      'dpiservices_pages_form_settings_form' 
-    ),
-    'access arguments' => array (
-      'administer dpiservices' 
-    ),
-    'file' => 'dpiservices.pages.settings.inc',
-    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 3 
-  );
-  
   return $items;
 }
 

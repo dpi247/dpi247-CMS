@@ -45,26 +45,86 @@ function dpiservices_packages_get_one_element_from_item_from_node($type = null, 
  * @param integer $nid
  * @return array
  */
-function dpiservices_packages_generate_crop_informations($sid=null, $nid=null) {
+function dpiservices_packages_generate_crop_informations($sid=null, $nid=null, $product_name=null) {
   $gen_value = array ();
   $crop_value = array ();
   $crop_definition_value = array ();
+  $product;
+  
+  if(isset($product_name)){
+    $product = dpiservices_product_get_one_product_by_label($product_name);   
+    $preset = unserialize($product["preset"]);
+  }
+  
+  if(isset($preset) && is_array($preset)){
+    if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
+      foreach ($info as $key => $value ) { 
+        if(dpiservices_packages_crop_in_array($key, $preset)){
+          $crop_definition_value [$key] = array (
+            'start_width' => $value [0],
+            'start_height' => $value [1],
+            'width' => $value [2],
+            'height' => $value [3],
+          );
+        }
+      }
+    }
+    $gen_value [] = $preset;
+    $gen_value [] = $crop_definition_value;    
+  }else{
+    return dpiservices_packages_generate_default_preset($nid, $sid  );
+  }
+  
+  return $gen_value;
+}
 
+/**
+ * This function return a default information about preset when product is not specified
+ * 
+ * @param integer $nid
+ * @param integer $sid
+ * @return array
+ */
+function dpiservices_packages_generate_default_preset($nid, $sid){
+  module_load_include("inc", 'dpicommons', "dpicommons.api");
+  $atom = scald_atom_load ( $sid );
+  $gen_value = array ();
+  $crop_value = array ();
+  $crop_definition_value = array ();
+  $letter = 61;
   if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
-    foreach ($info as $key => $value ) {
-      $crop_value ['_' . $value [0] . '_' . $value [1] . '_' . $value [2] . '_' . $value [3]] = $key;
+    foreach ($info as $key => $value ) { 
+      $random_id = rand(1000, 9999);
+      $crop_value[hex2bin($letter).$random_id] = $key;
       $crop_definition_value [$key] = array (
         'start_width' => $value [0],
         'start_height' => $value [1],
         'width' => $value [2],
-        'height' => $value [3]
-      );
+        'height' => $value [3],
+        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key)
+      );  
+      $letter++;
     }
   }
   $gen_value [] = $crop_value;
-  $gen_value [] = $crop_definition_value;
+  $gen_value [] = $crop_definition_value;    
 
   return $gen_value;
+}
+
+/**
+ * This function test if the value needle is present to the array
+ * 
+ * @param String $needle
+ * @param array $array
+ * @return boolean
+ */
+function dpiservices_packages_crop_in_array($needle, $array){
+  foreach ($array as $k => $v){
+    if($v == $needle)
+      return true;
+  }
+  return false;
 }
 
 /**

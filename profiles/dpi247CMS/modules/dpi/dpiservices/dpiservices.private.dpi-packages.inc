@@ -11,7 +11,7 @@ module_load_include('inc', 'dpiservices', 'dpiservices.api');
  * @param integer $nid
  * @return array()
  */
-function dpiservices_dpi_packages_retrieve($nid) {
+function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
   global $present_definition;
   $present_definition = array ();
 
@@ -44,7 +44,7 @@ function dpiservices_dpi_packages_retrieve($nid) {
       dpiservices_dpi_packages_get_all_related_object_from_node ( $node )
     ),
     'object_definitions' => array (
-      dpiservices_dpi_packages_get_all_related_object_definitions_from_node ( $node )
+      dpiservices_dpi_packages_get_all_related_object_definitions_from_node ( $node , $product_name )
     ),
     'taxonomy' => array (
       'concepts' => array (
@@ -140,10 +140,10 @@ function dpiservices_dpi_packages_generate_related_object($sid, $nid, $inline) {
  * @param node $node
  * @return array
  */
-function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($node) {
+function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($node, $product_name = NULL) {
   $table_value = array ();
   foreach ( field_get_items ( 'node', $node, 'field_embededobjects' ) as $item ) {
-    if(($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'] )) != FALSE)
+    if(($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'], $product_name )) != FALSE)
       $table_value [] = $var;
   }
   return $table_value;
@@ -158,9 +158,10 @@ function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($
  * @param string $inline
  * @return array:false
  */
-function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid, $inline) {
+function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid, $inline, $product_name = null) {
   $atom = scald_atom_load ( $sid );
-  $all_crop_informations = dpiservices_packages_generate_crop_informations ( $sid, $nid );
+  $all_crop_informations = dpiservices_packages_generate_crop_informations ( $sid, $nid, $product_name );
+  
   global $present_definition;
   if (! in_array ( dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid, $present_definition )) {
     $present_definition[] = dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid;
@@ -186,6 +187,7 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
       )
     );
   }
+  
   return (isset($val_returned)) ? $val_returned : FALSE;
 }
 

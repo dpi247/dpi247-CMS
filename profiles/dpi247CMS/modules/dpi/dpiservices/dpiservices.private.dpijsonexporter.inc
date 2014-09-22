@@ -90,10 +90,10 @@ function dpiservices_dpijsonexporter_product_get_element($tree, $product_element
  */
 function dpiservices_dpijsonexporter_product_get_feed($path, $product_element, $wildcard){
   $feed;
-  if($product_element["version"]=="dpi"){
-    $feed = ((strcmp($path, "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-section/'.$wildcard[1].'.json' : ( (strcmp($path, "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/dpi-packages/'.$wildcard[1].'.json' :'undifined resource dpi'));
+  if(is_numeric(strpos($product_element["version"], "dpi"))){
+    $feed = $product_element["version"].'/dpi-section/'.$wildcard[1].'/'.$product_element["label"].'.json';
   }else{
-    $feed = ((strcmp($path, "section/%")==0) ? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-section/'.$wildcard[1].'.json' : ( (strcmp($path, "node/%")==0)? dpi_variable_get("dpiservices_settings_link_url", "Error").'/wally-packages/'.$wildcard[1].'.json' :'undifined resource wally'));
+    $feed = $product_element["version"].'/wally-section/'.$wildcard[1].'.json';
   }
   return $feed;
 }

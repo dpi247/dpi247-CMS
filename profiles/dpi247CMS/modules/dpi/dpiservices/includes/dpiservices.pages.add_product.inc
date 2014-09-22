@@ -90,14 +90,14 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   
   $form['fieldset']['version'] = array(
     '#type' => 'select',
-    '#title' => t('Select a version'),
-    '#options' => array('dpi'=>'dpi','wally'=>'wally'),
+    '#title' => t('Select a service to be use'),
+    '#options' => dpiservices_get_services(),
     '#default_value' => (isset($product_arg)) ? $product_arg['version']: '',
   );
   
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value'=>'save'
+    '#value'=>'save',
   );
   
   return $form;
@@ -133,7 +133,7 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
             'version' => $form_state['values']['version'],
           ))
           ->execute();
-      
+          
       drupal_set_message('Modification for '.$form_state['values']['label'].' is saved');
       drupal_goto('admin/dpi247/dpijsonexporter');
     } catch (Exception $e) {
@@ -143,4 +143,24 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
   } else {
     drupal_set_message('Information is not correctly sended', 'error');
   }
+}
+
+/**
+ * This function return an array with service
+ * 
+ * @return array
+ */
+function dpiservices_get_services(){
+  $return_name = array();
+  foreach(services_endpoint_load_all() as $service){
+    $resources = $service->resources;
+    if(isset($resources['dpijsonexporter']) && !isset($resources['wallyjsonexporter'])){
+      $return_name[$service->name] = $service->name;
+    }else{
+     if(!isset($resources['dpijsonexporter']) && isset($resources['wallyjsonexporter'])){
+       $return_name[$service->name] = $service->name;
+     } 
+    }
+  }
+  return $return_name;
 }

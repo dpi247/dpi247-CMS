@@ -35,13 +35,16 @@ function dpiservices_create_table_product() {
   
   $table_rows = array ();
   foreach ( $products as $product ) {    
+    $endpoint = services_endpoint_load($product ["version"]);
+    $resource = $endpoint->resources;
+    $resource_info = (isset($resource["dpijsonexporter"])) ? "dpijsonexporter" : 'wallyjsonexporter';
     $table_rows [] = array (
       $product ['label'],
       $product ['machine_name'],
       $product ['description'],
       $product ['product'],
       $product ['product_type'],
-      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.dpi_variable_get("dpiservices_settings_link_url", "").'/dpijsonexporter/'.$product ['label'].'.json">See informations</a>',
+      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See informations</a>',
       '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a><br /><a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
     );
   }

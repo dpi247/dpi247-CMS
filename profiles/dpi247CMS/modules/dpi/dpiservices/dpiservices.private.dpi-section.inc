@@ -60,7 +60,7 @@ function dpiservices_dpi_section_get_targets($tid) {
  * @param string $targetblock          
  * @return array
  */
-function dpiservices_dpi_section_retrieve($sid, $targetblock_name) {
+function dpiservices_dpi_section_retrieve($sid, $product_name ,$targetblock_name) {
   module_load_include ( 'inc', 'dpiservices', 'dpiservices.private.dpi-packages' );
   module_load_include ( 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
   module_load_include('inc', 'dpidestinations', 'dpidestinations.controller.class');
@@ -79,7 +79,7 @@ function dpiservices_dpi_section_retrieve($sid, $targetblock_name) {
   $json_return ["version"] = dpiservices_dpi_section_get_version ();
   
   if (! isset ( $targetblock_name )) {
-    $json_return ["packages"] = dpiservices_dpi_section_get_all_packages ( $sid );
+    $json_return ["packages"] = dpiservices_dpi_section_get_all_packages ( $sid , $product_name );
   } else {
     $json_return ["packages"] = dpiservices_dpi_section_get_one_packages ( $sid, $targetblock_name );
   }
@@ -93,7 +93,7 @@ function dpiservices_dpi_section_retrieve($sid, $targetblock_name) {
  * @param integer $sid          
  * @return multitype:multitype:array()
  */
-function dpiservices_dpi_section_get_all_packages($sid) {
+function dpiservices_dpi_section_get_all_packages($sid, $product_name) {
   $section_info = dpidestinations_api_get_all_targetblocks_for_destination ( $sid );
   $result = array ();
   foreach ( $section_info as $section ) {
@@ -107,7 +107,7 @@ function dpiservices_dpi_section_get_all_packages($sid) {
   
     $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sid,  $section->target, $targetblock);
     foreach ( $targetview->result as $node_info ) {
-      $result [] = dpiservices_dpi_packages_retrieve ( $node_info->nid );
+      $result [] = dpiservices_dpi_packages_retrieve ( $node_info->nid, $product_name );
     }
   }
   return $result;
