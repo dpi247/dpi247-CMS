@@ -38,9 +38,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
     $json_export = array(
       'status' => 'success',
       'other_access' => 'N/A',
-      'main' => array(
-        $array_links
-      ),
+      'main' => $array_links,
     );
     drupal_alter('dpijson_product_add_other_access', $json_export);
   }
@@ -56,28 +54,28 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
  */
 function dpiservices_dpijsonexporter_product_get_element($tree, $product_element){
   if(isset($tree) && empty($tree))
-    return "no_child";
+    return null;
 
   foreach ($tree as $key => $v) {
     try {
       $wildcard = explode('/', $v['link']['link_path']);
       $node_links[] = array(
-        'id' => $key,
+        'id' => $wildcard[1],
         'label' => $v["link"]['link_title'],
         'original_url' => $v['link']['link_path'],
         'feed' => dpiservices_dpijsonexporter_product_get_feed($v['link']['router_path'], $product_element, $wildcard),
         'options' => array(
           //add options with hook alter
-        ),
-        'childrens' => array(
-          dpiservices_dpijsonexporter_product_get_element($v['below'], $product_element)
-        ),
-      );
-      drupal_alter('dpijson_product_add_options', $node_links);
+        ),        
+      ); 
+      if(($var = dpiservices_dpijsonexporter_product_get_element($v['below'], $product_element))!=null){
+        $node_links["childrens"] = $var;
+      }
     } catch (Exception $e) {
       return "fail";
     }
   }
+  drupal_alter('dpijson_product_add_options', $node_links);
   return $node_links;
 }
 

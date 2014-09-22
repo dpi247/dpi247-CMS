@@ -77,7 +77,7 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
  * @return array
  */
 function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline) {
-  $atom = scald_atom_load ( $sid );
+  if($atom = scald_atom_load ( $sid )){
   $all_crop_informations = dpiservices_packages_generate_crop_links ( $sid, $nid, $atom );
 
   $formatted_atom = array (
@@ -99,6 +99,9 @@ function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline)
   }
 
   return $formatted_atom;
+  }else{
+    return null;
+  }
 }
 
 /**
