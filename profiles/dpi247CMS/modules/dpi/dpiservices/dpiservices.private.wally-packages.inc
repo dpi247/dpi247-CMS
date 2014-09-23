@@ -37,9 +37,7 @@ function dpiservices_wally_package_retrieve($nid, $sid = null, $target = null) {
     'url' => drupal_get_path_alias ( 'node/' . $nid ),
     'mainDestination' => $target,
     'mainSection' => $sid,
-    'relatedObjects' => array (
-      dpiservices_wally_packages_get_all_related_object_from_node ( $node )
-    ),
+    'relatedObjects' => dpiservices_wally_packages_get_all_related_object_from_node ( $node ),
   );
   
   drupal_alter('dpiservices_wally_package_info', $packages_return);
@@ -78,27 +76,27 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
  */
 function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline) {
   if($atom = scald_atom_load ( $sid )){
-  $all_crop_informations = dpiservices_packages_generate_crop_links ( $sid, $nid, $atom );
-
-  $formatted_atom = array (
-    'nid' => $atom->sid,
-    'type' => $atom->type,    
-  );
+    $all_crop_informations = dpiservices_packages_generate_crop_links ( $sid, $nid, $atom );
   
-  if($atom->type == "image"){
-    $formatted_atom = $formatted_atom + array(
-      'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
-      'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
-      'crop' => $all_crop_informations,
+    $formatted_atom = array (
+      'nid' => $atom->sid,
+      'type' => $atom->type,    
     );
-  }else{
-    $formatted_atom = $formatted_atom + array(
-      'title' => $atom->title,
-      'links' => dpiservices_wally_get_atoms_links_list($atom),
-    );
-  }
-
-  return $formatted_atom;
+    
+    if($atom->type == "image"){
+      $formatted_atom = $formatted_atom + array(
+        'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
+        'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
+        'crop' => $all_crop_informations,
+      );
+    }else{
+      $formatted_atom = $formatted_atom + array(
+        'title' => $atom->title,
+        'links' => dpiservices_wally_get_atoms_links_list($atom),
+      );
+    }
+  
+    return $formatted_atom;
   }else{
     return null;
   }

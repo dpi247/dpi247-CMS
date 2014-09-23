@@ -18,6 +18,7 @@ dependencies[] = scald
 dependencies[] = scald_image
 dependencies[] = taxonomy
 dependencies[] = text
+dependencies[] = rules
 explanation = Field type(s) in use - see <a href="/admin/reports/fields">Field list</a>
 features[features_api][] = api:2
 features[taxonomy][] = authors

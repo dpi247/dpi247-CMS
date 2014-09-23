@@ -116,3 +116,28 @@ function dpiservices_permission() {
     ) 
   );
 }
+
+/**
+ * This function implements hook_register for dpicache
+ * 
+ * @return array
+ */
+function monmodule_dpicache_cache_entry_register(){
+   return array(
+    'dpiservices_dpijson_render' => array(
+      'callback' => 'dpiservices_services_resources', // function to call
+      'plugin' => 'dpicache_memcache', // which storage?
+      'category' => 'dpiservices', // group
+      //'category_callback' => 'dpiservices_services_category_callback', 
+      'data_type' => "object", // the callback returns a string
+      'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+      'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+      'file' => array(
+        "module" => "dpiservices",
+        "type" => "inc",
+        "name" => "dpiservices.services",
+      ),
+      'bypass' => TRUE, // Has to be set to FALSE in production environments
+    )
+  );
+}
