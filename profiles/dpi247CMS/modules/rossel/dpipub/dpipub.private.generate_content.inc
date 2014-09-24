@@ -64,15 +64,6 @@ function _pub_get_pub_content($delta, $cache_url) {
     if (isset($pub_content['meta']) && !empty($pub_content['meta']['content'])) {
       pub_add_meta($pub_content['meta']['attributes'], $pub_content['meta']['content']);
     }
-    /* GET header content */
-    if($block_settings == 'dfp'){
-      global $var;
-      if($var!=true){
-        $val = cache_get("dfp_header_".$current_page['href']);        
-        drupal_add_js($val->data,'inline');
-        $var=true;
-      }
-    }
   }
   return theme('pub_'.$block_settings.'_content', array( 'html_code' => $pub_content,'delta' => $delta));
 }

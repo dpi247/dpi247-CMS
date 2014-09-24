@@ -308,7 +308,6 @@ function dpipub_preprocess_page(&$variables) {
   $url = variable_get('dfpmodule_url_ws_header_script', '');
   if($url!='' && $dfp_viewed_link_blocks!= ''){          
     $url .= $dfp_viewed_link_blocks;
-    dsm($url);
     if(function_exists('dpi_log'))
       dpi_log('Dpipub', "threading", 'DFP - Header is generated with url : '.$url);
     $options = array(
