@@ -20,6 +20,18 @@ function _pub_get_pub_content($delta, $cache_url) {
 
   $cached_pub = cache_get('pub_'.$delta.'_temp-'.$cache_url);
   $block_settings = pub_load_block($delta);
+  
+  if($block_settings=="dfp"){
+    global $dfp_viewed_link_blocks;
+    if(!isset($dfp_viewed_link_blocks) || $dfp_viewed_link_blocks==""){
+      $webserv_req = _pub_getwebservreq($current_page['href']);
+      $website = variable_get('pub_dfp_website', '');
+      $expl_website = explode('_', $website);
+      $dfp_viewed_link_blocks = "?scriptType=DFP&site=".rawurlencode($expl_website[0])."&context=".'/'.rawurlencode($webserv_req[0])."&pageType=".rawurlencode($webserv_req[1])."&domain=".rawurlencode($_SERVER['HTTP_HOST']);
+    }
+    $dfp_viewed_link_blocks .= "&positions=".$delta;
+  }
+  
   if (!is_object($cached_pub) || !isset($cached_pub) || empty($cached_pub) || $cached_pub->expire < time()) {
     $webserv_req = _pub_getwebservreq($current_page['href']);
     switch ($block_settings) {

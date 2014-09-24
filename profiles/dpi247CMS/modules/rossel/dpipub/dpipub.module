@@ -306,8 +306,9 @@ function dpipub_preprocess_page(&$variables) {
   $variables['meta'] .= pub_get_meta();
   global $dfp_viewed_link_blocks;
   $url = variable_get('dfpmodule_url_ws_header_script', '');
-  if($url!='' && $dfp_viewed_link_blocks!= ''){      
+  if($url!='' && $dfp_viewed_link_blocks!= ''){          
     $url .= $dfp_viewed_link_blocks;
+    dsm($url);
     if(function_exists('dpi_log'))
       dpi_log('Dpipub', "threading", 'DFP - Header is generated with url : '.$url);
     $options = array(
@@ -320,27 +321,9 @@ function dpipub_preprocess_page(&$variables) {
     $content = substr($content->data, 31, -10);
     drupal_add_js($content, 'inline');
     $current_page = menu_get_item($_GET['q']);
-    cache_set('dfp_header_'.$current_page['href'], $content);
     $dfp_viewed_link_blocks = "";
   }
 }
-
-/**
- * This function is use to modify values of params for dfp integration
- *
- * @return variable:array
- */
-function dpipub_pub_params_alter(& $data , $builder){
-  if($builder=='_dfp'){
-    global $dfp_viewed_link_blocks;
-    if(!isset($dfp_viewed_link_blocks) || $dfp_viewed_link_blocks=="")
-      $dfp_viewed_link_blocks = "?scriptType=DFP&site=".rawurlencode($data['site'])."&context=".rawurlencode($data['context'])."&pageType=".rawurlencode($data['pageType'])."&domain=".rawurlencode($data['domain']);
-    $dfp_viewed_link_blocks .= "&positions=".rawurlencode($data['position']);
-    $dfp_viewed_blocks = "";    
-  }
-  return $data;
-}
-
 
 function dpipub_dpilog_register(){
   return array(
