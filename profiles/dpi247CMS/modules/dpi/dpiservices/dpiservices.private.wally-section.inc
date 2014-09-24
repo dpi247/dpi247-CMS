@@ -15,10 +15,21 @@ function dpiservices_wally_section_retrieve($sid, $targetblock_name){
   module_load_include('inc', 'dpidestinations', 'dpidestinations.controller.class');
   module_load_include('inc', 'dpiservices', 'dpiservices.private.wally-packages');
   
+  return dpicache_get_cache_entry ( 'dpiservices_wallysection_render', $sid, $targetblock_name);
+}
+
+/**
+ * This function process the json
+ * 
+ * @param integer $sid
+ * @param String $targetblock_name
+ * @return array
+ */
+function dpiservices_wally_section_retrieve_process($sid, $targetblock_name){
   global $language;
   $json_return = array();
   $sectionterm = sectionterm_load($sid);
-
+  
   $json_return["title"] = $sectionterm->name;
   $json_return["link"] = "http://".$_SERVER["SERVER_NAME"]."/section/".$sid;
   $json_return["id"] = $sid;

@@ -2,21 +2,31 @@
 /**
  * @author lba
  */
-
-module_load_include('inc', 'dpiservices', 'dpiservices.api');
+module_load_include ( 'inc', 'dpiservices', 'dpiservices.api' );
 
 /**
  * This function return a json from nid
  *
- * @param integer $nid
+ * @param integer $nid          
  * @return array()
  */
 function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
+  return dpicache_get_cache_entry ( 'dpiservices_dpijson_render', $nid, $product_name = null );
+}
+
+/**
+ * This function process the return of json
+ *
+ * @param integer $nid
+ * @param String $product
+ * @return Array
+ */
+function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
   global $present_definition;
   $present_definition = array ();
-
+  
   $node = node_load ( $nid );
-
+  
   $packages_return = array (
     'nid' => $node->nid,
     'comment' => $node->comment,
@@ -41,31 +51,31 @@ function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
     'rightOfReplyTitle' => "",
     'rightofReplyBody' => "",
     'object_relations' => array (
-      dpiservices_dpi_packages_get_all_related_object_from_node ( $node )
+      dpiservices_dpi_packages_get_all_related_object_from_node ( $node ) 
     ),
     'object_definitions' => array (
-      dpiservices_dpi_packages_get_all_related_object_definitions_from_node ( $node , $product_name )
+      dpiservices_dpi_packages_get_all_related_object_definitions_from_node ( $node, $product_name ) 
     ),
     'taxonomy' => array (
       'concepts' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_concepts' )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_concepts' ) 
       ),
       'entities' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_entities' )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_entities' ) 
       ),
       'freetags' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_freetags' )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_freetags' ) 
       ),
       'IPTC' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_iptc' )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_iptc' ) 
       ),
       'locations' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_locations' )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_locations' ) 
       ),
       'persons' => array (
-        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_persons' )
-      )
-    )
+        dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid ( 'node', $node, 'field_persons' ) 
+      ) 
+    ) 
   );
   $present_definition = null;
   return $packages_return;
@@ -74,8 +84,8 @@ function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
 /**
  * This function is use to create a table of destination for a node
  *
- * @param node $node
- * @param string $field_name
+ * @param node $node          
+ * @param string $field_name          
  * @return array
  */
 function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $field_name) {
@@ -97,7 +107,7 @@ function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $fi
 /**
  * This function is use to create a table with link and image object
  *
- * @param node $node
+ * @param node $node          
  * @return array
  */
 function dpiservices_dpi_packages_get_all_related_object_from_node($node) {
@@ -117,45 +127,44 @@ function dpiservices_dpi_packages_get_all_related_object_from_node($node) {
 /**
  * This function is use to create a table of related object with type, relation and URI
  *
- * @param integer $sid
- * @param integer $nid
- * @param string $inline
+ * @param integer $sid          
+ * @param integer $nid          
+ * @param string $inline          
  * @return array
  */
 function dpiservices_dpi_packages_generate_related_object($sid, $nid, $inline) {
   $atom = scald_atom_load ( $sid );
-
+  
   $formatted_atom = array (
     'object_type' => $atom->type,
     'relation_type' => $atom->provider,
-    'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid
+    'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid 
   );
-
+  
   return $formatted_atom;
 }
 
 /**
- * This function is use to create a table with all related object informations 
- * 
- * @param node $node
+ * This function is use to create a table with all related object informations
+ *
+ * @param node $node          
  * @return array
  */
 function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($node, $product_name = NULL) {
   $table_value = array ();
   foreach ( field_get_items ( 'node', $node, 'field_embededobjects' ) as $item ) {
-    if(($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'], $product_name )) != FALSE)
+    if (($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'], $product_name )) != FALSE)
       $table_value [] = $var;
   }
   return $table_value;
 }
 
-
 /**
  * This function is use to create a table with information about one related object
  *
- * @param integer $sid
- * @param integer $nid
- * @param string $inline
+ * @param integer $sid          
+ * @param integer $nid          
+ * @param string $inline          
  * @return array:false
  */
 function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid, $inline, $product_name = null) {
@@ -164,7 +173,7 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
   
   global $present_definition;
   if (! in_array ( dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid, $present_definition )) {
-    $present_definition[] = dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid;
+    $present_definition [] = dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid;
     $val_returned = array (
       dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid => array (
         'nid' => $nid,
@@ -174,30 +183,30 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
         'width' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'width' ),
         'height' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'height' ),
         'crops' => array (
-          $all_crop_informations [0]
+          $all_crop_informations [0] 
         ),
         'crop_definitions' => array (
-          $all_crop_informations [1]
+          $all_crop_informations [1] 
         ),
         'externalReference' => dpiproperties_load ( $nid )->external_reference,
         'filesize' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'filesize' ),
         'inline_object' => $inline,
         'url' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'uri' ),
-        'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid
-      )
+        'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid 
+      ) 
     );
   }
   
-  return (isset($val_returned)) ? $val_returned : FALSE;
+  return (isset ( $val_returned )) ? $val_returned : FALSE;
 }
 
 /**
  * This function is use to create a table with information for a taxonomy term.
  * It return name and URI
  *
- * @param string $type
- * @param object $node
- * @param string $field_name
+ * @param string $type          
+ * @param object $node          
+ * @param string $field_name          
  * @return array
  */
 function dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid($type, $node, $field_name) {
@@ -206,7 +215,7 @@ function dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid($type, $
     $term_load = taxonomy_term_load ( $item ['tid'] );
     $term [] = array (
       'name' => $term_load->name,
-      'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/taxonomy/term/' . $term_load->tid
+      'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/taxonomy/term/' . $term_load->tid 
     );
   }
   return $term;

@@ -11,9 +11,19 @@ module_load_include('inc', 'dpiservices', 'dpiservices.api');
  * @return array()
  */
 function dpiservices_wally_package_retrieve($nid, $sid = null, $target = null) {
-  $node = node_load ( $nid );
+  return dpicache_get_cache_entry ( 'dpiservices_wallypackages_render', $nid, $sid = null, $target = null);
+}
 
-  
+/**
+ * This function process json array
+ * 
+ * @param integer $nid
+ * @param string $sid
+ * @param string $target
+ * @return array
+ */
+function dpiservices_wally_package_retrieve_process($nid, $sid = null, $target = null) {
+  $node = node_load ( $nid );
   
   $packages_return = array (
     'nid' => $node->nid,

@@ -10,8 +10,17 @@
  * @return array
  */
 function dpiservices_dpijsonexporter_product_retrieve($product){
-  module_load_include("inc", 'dpiservices', 'dpiservices.api');
-  
+  module_load_include("inc", 'dpiservices', 'dpiservices.api');  
+  return dpicache_get_cache_entry ( 'dpiservices_dpijsonexporter_render', $product );
+}
+
+/**
+ * This function process the return of json
+ * 
+ * @param String $product
+ * @return Array
+ */
+function dpiservices_dpijsonexporter_product_retrieve_process($product){
   $json_export = array();
   $product_element = dpiservices_product_get_one_product_by_label($product);
   $sql = "
@@ -21,7 +30,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
     ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
   $result = db_query($sql, array(':menu' => $product_element['product_type']), array('fetch' => PDO::FETCH_ASSOC));
   $links = array();
-    
+  
   foreach ($result as $item) {
     $links[] = $item;
   }
@@ -29,7 +38,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
   $tree = menu_tree_data($links);
   $array_links = array();
   $array_links = dpiservices_dpijsonexporter_product_get_element($tree, $product_element);
-
+  
   if(isset($tree) && empty($tree)){
     $json_export = array(
       'status' => 'fail'
@@ -42,7 +51,7 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
     );
     drupal_alter('dpijson_product_add_other_access', $json_export);
   }
-
+  
   return $json_export;
 }
 

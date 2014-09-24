@@ -122,10 +122,10 @@ function dpiservices_permission() {
  * 
  * @return array
  */
-function monmodule_dpicache_cache_entry_register(){
+function dpiservices_dpicache_cache_entry_register(){
    return array(
     'dpiservices_dpijson_render' => array(
-      'callback' => 'dpiservices_services_resources', // function to call
+      'callback' => 'dpiservices_dpi_packages_retrieve_process', // function to call
       'plugin' => 'dpicache_memcache', // which storage?
       'category' => 'dpiservices', // group
       //'category_callback' => 'dpiservices_services_category_callback', 
@@ -135,9 +135,84 @@ function monmodule_dpicache_cache_entry_register(){
       'file' => array(
         "module" => "dpiservices",
         "type" => "inc",
-        "name" => "dpiservices.services",
+        "name" => "dpiservices.private.dpi-packages",
       ),
-      'bypass' => TRUE, // Has to be set to FALSE in production environments
-    )
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+     'dpiservices_dpijsonexporter_render' => array(
+       'callback' => 'dpiservices_dpijsonexporter_product_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpijsonexporter",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_dpisection_retrieve_render' => array(
+       'callback' => 'dpiservices_dpi_section_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpi-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_dpisection_index_render' => array(
+       'callback' => 'dpiservices_dpi_section_index_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpi-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_wallypackages_render' => array(
+       'callback' => 'dpiservices_wally_package_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.wally-packages",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_wallysection_render' => array(
+       'callback' => 'dpiservices_wally_section_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.wally-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     )
   );
 }

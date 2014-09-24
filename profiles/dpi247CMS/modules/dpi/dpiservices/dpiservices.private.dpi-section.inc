@@ -7,9 +7,17 @@
  * This funtion return an array with information of all section
  *
  * @return array
- *
  */
 function dpiservices_dpi_section_index() {
+  return dpicache_get_cache_entry ( 'dpiservices_dpisection_index_render' );
+}
+
+/**
+ * This function process the json
+ * 
+ * @return array
+ */
+function dpiservices_dpi_section_index_process(){
   $all_section = array ();
   foreach ( dpidestinations_api_get_all_sections_terms_hierachical_struct ( dpidestinations_api_get_sections_vocabulary_vid () ) as $section ) {
     $all_section [] = dpiservices_dpi_section_get_section_info ( $section );
@@ -65,6 +73,18 @@ function dpiservices_dpi_section_retrieve($sid, $product_name ,$targetblock_name
   module_load_include ( 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
   module_load_include('inc', 'dpidestinations', 'dpidestinations.controller.class');
   
+  return dpicache_get_cache_entry ( 'dpiservices_dpisection_retrieve_render', $sid, $product_name ,$targetblock_name);
+}
+
+/**
+ * This fonction process the json
+ * 
+ * @param integer $sid
+ * @param String $product_name
+ * @param String $targetblock_name
+ * @return array
+ */
+function dpiservices_dpi_section_retrieve_process($sid, $product_name ,$targetblock_name){
   global $language;
   $json_return = array ();
   $sectionterm = sectionterm_load ( $sid );
