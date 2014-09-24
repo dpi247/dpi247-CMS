@@ -18,7 +18,7 @@ function dpiservices_services_resources(){
             'type' => 'inc',
             'module' => 'dpiservices',
             'name' => 'dpiservices.private.dpi-packages',
-          ),
+          ), 
           'callback' => 'dpiservices_dpi_packages_retrieve',          
           'access callback' => 'dpiservices_get_permission_validity',
           'access arguments' => array('retrieve'),
