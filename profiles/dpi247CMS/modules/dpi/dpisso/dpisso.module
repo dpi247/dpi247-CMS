@@ -25,28 +25,38 @@ function dpisso_menu() {
     'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
     'description'      => t('Manage SSO&Paywall settings'),
-    'file'             => 'includes/dpisso.pages.loginmanager.admin.inc',
+    'file'             => 'includes/dpisso.pages.general.admin.inc',
    // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
   );
 
+  $items[DPI_ADMIN_PATH.'/dpisso/general'] = array(
+      'title'            => t('General Settings'),
+      'access arguments' => array('administer dpisso'),
+      'weight'           => -10,
+      'type'             => MENU_DEFAULT_LOCAL_TASK,
+      'file'             => 'includes/dpisso.pages.general.admin.inc',
+  );
+  
   $items[DPI_ADMIN_PATH.'/dpisso/loginmanager'] = array(
     'title'            => t('Login Manager'),
-    'weight'           => -10,
-    'type'             => MENU_DEFAULT_LOCAL_TASK,
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
     'file'             => 'includes/dpisso.pages.loginmanager.admin.inc',
-//    'file path' => drupal_get_path('module', 'dpisso').'/includes',
+    'weight'           => 0,
+    'type'             => MENU_LOCAL_TASK,
   );
+  
   $items[DPI_ADMIN_PATH.'/dpisso/accessmanager'] = array(
     'title'            => t('Access Manager'),
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpisso_accessmanager_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
     'file'             => 'includes/dpisso.pages.accessmanager.admin.inc',
-  //  'file path' => drupal_get_path('module', 'dpisso').'/includes',
-    
     'weight'           => 0,
     'type'             => MENU_LOCAL_TASK,
   );
+
   $items[DPI_ADMIN_PATH.'/dpisso/paywall'] = array(
     'title'            => t('Paywall'),
     'page callback'    => 'drupal_get_form',
