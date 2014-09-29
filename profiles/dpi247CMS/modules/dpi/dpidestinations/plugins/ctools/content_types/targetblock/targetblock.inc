@@ -120,7 +120,6 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
 
   if (!isset($targetviews[$destination_term_id][$target_machine_name])) {
     $targetview = $target_wrapper->targetview->value();
-
     _dpidestinations_targetview_initialize_view($targetview, $destination_term_id, $target_machine_name, $targetblock);
 
     //see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
@@ -130,7 +129,6 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
     $targetviews_values[$destination_term_id][$target_machine_name] = $targetview->result;
     $targetviews[$destination_term_id][$target_machine_name] = $targetview;
   }
-
   return $targetviews[$destination_term_id][$target_machine_name]  ;
 }
 

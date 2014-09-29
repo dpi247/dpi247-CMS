@@ -1,0 +1,8 @@
+name = DpiServices
+description = Services use to get informations in special format
+package = DPI
+core = 7.x
+dependencies[] = dpicache
+dependencies[] = services
+dependencies[] = rest_server
+files[] = dpiservices.test
