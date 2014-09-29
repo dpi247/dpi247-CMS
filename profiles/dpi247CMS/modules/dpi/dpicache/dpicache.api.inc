@@ -245,6 +245,7 @@ function dpi_variable_del_namespace($namespace, $type = 'both') {
  *
  */
 function dpi_api_system_settings_form($form) {
+  system_settings_form($form);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -273,7 +274,7 @@ function dpi_api_system_settings_form_submit($form, &$form_state) {
     if (is_array($value) && isset($form_state['values']['array_filter'])) {
       $value = array_keys(array_filter($value));
     }
-    dpi_api_variable_set($key, $value);
+    dpi_variable_set($key, $value);
   }
   drupal_set_message(t('The configuration options have been saved.'));
 }
