@@ -1,0 +1,218 @@
+<?php
+/**
+ * @author lba
+ */
+
+/**
+ * This function implements hook_ctools_plugins_api
+ *
+ * @param unknown $owner          
+ * @param unknown $api          
+ * @return multitype:number string
+ */
+function dpiservices_ctools_plugin_api($owner, $api) {
+  if ($owner == 'services' && $api == 'services') {
+    return array (
+      'version' => 3,
+      'file' => 'dpiservices.services.inc' 
+    );
+  }
+}
+
+/**
+ * This function implements hook_menu
+ *
+ * @return array
+ */
+function dpiservices_menu() {
+  $items ['admin/dpi247/dpijsonexporter'] = array (
+    'title' => 'JsonExporter',
+    'description' => 'Administer return json exporter',
+    'page callback' => 'dpiservices_pages_form_table_product_form',
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.product_panel.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/products'] = array (
+    'title' => 'Product panel',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0 
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/add'] = array (
+    'title' => 'Add product',
+    'description' => 'Manage view from dpiservices for product',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_add_or_edit_product_form' 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.add_product.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1 
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/edit/%'] = array (
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_add_or_edit_product_form',
+      4 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.add_product.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/add_map'] = array (
+    'title' => 'Add map',
+    'description' => 'Add map',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpiservices_pages_form_add_map_form' 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.addmap.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2 
+  );
+  
+  $items ['admin/dpi247/dpijsonexporter/del/%'] = array (
+    'page callback' => 'dpiservices_pages_form_delete',
+    'page arguments' => array (
+      4 
+    ),
+    'access arguments' => array (
+      'administer dpiservices' 
+    ),
+    'file' => 'dpiservices.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
+    'type' => MENU_NORMAL_ITEM 
+  );
+  
+  return $items;
+}
+
+/**
+ * This function implements hook_permission
+ *
+ * @return array
+ */
+function dpiservices_permission() {
+  return array (
+    'administer dpiservices' => array (
+      'title' => t ( 'Administer dpiservices' ),
+      'description' => t ( 'Administer dpiservices.' ) 
+    ) 
+  );
+}
+
+/**
+ * This function implements hook_register for dpicache
+ * 
+ * @return array
+ */
+function dpiservices_dpicache_cache_entry_register(){
+   return array(
+    'dpiservices_dpijson_render' => array(
+      'callback' => 'dpiservices_dpi_packages_retrieve_process', // function to call
+      'plugin' => 'dpicache_memcache', // which storage?
+      'category' => 'dpiservices', // group
+      //'category_callback' => 'dpiservices_services_category_callback', 
+      'data_type' => "object", // the callback returns a string
+      'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+      'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+      'file' => array(
+        "module" => "dpiservices",
+        "type" => "inc",
+        "name" => "dpiservices.private.dpi-packages",
+      ),
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+     'dpiservices_dpijsonexporter_render' => array(
+       'callback' => 'dpiservices_dpijsonexporter_product_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpijsonexporter",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_dpisection_retrieve_render' => array(
+       'callback' => 'dpiservices_dpi_section_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpi-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_dpisection_index_render' => array(
+       'callback' => 'dpiservices_dpi_section_index_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.dpi-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_wallypackages_render' => array(
+       'callback' => 'dpiservices_wally_package_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.wally-packages",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     ),
+     'dpiservices_wallysection_render' => array(
+       'callback' => 'dpiservices_wally_section_retrieve_process', // function to call
+       'plugin' => 'dpicache_memcache', // which storage?
+       'category' => 'dpiservices', // group
+       //'category_callback' => 'dpiservices_services_category_callback',
+       'data_type' => "object", // the callback returns a string
+       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
+       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
+       'file' => array(
+         "module" => "dpiservices",
+         "type" => "inc",
+         "name" => "dpiservices.private.wally-section",
+       ),
+       'bypass' => FALSE, // Has to be set to FALSE in production environments
+     )
+  );
+}

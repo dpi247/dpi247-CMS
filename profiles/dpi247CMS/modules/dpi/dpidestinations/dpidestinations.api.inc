@@ -273,5 +273,4 @@ function   dpidestination_api_get_category($destination){
   $did = dpidestinations_api_get_panelsdisplay_for_sectionterm($destination['tid']);
   $category = $did->did.'_'.$destination['tid'].'_'.$destination['target'];
   return $category;
-
 }
