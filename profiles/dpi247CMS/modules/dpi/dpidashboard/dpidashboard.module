@@ -1,10 +1,11 @@
 <?php 
 
 module_load_include('inc', 'dpidashboard', 'dpidashboard.private');
+module_load_include('inc', 'dpidashboard', 'dpidashboard.forms.ajax');
 
 function dpidashboard_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
-    return 'plugins/content_types';
+    return 'plugins/ctools/content_types';
   }
   
 }
@@ -13,6 +14,51 @@ function dpidashboard_ctools_plugin_api($module, $api) {
   if ($module == 'page_manager' && $api == 'pages_default') {
     return array('version' => 1);
   }
+}
+
+function dpidashboard_permission() {
+  return array(
+    'displaydashboardnode' => array(
+      'title' => t('Display dashboard for a node'),
+      'description' => t('Display dashboard for a node.'),
+    ),
+	'displaydashboardterm' => array(
+      'title' => t('Display dashboard for a term'),
+      'description' => t('Display dashboard for a term.'),
+    ),
+	'displaydashsystem' => array(
+      'title' => t('Display general dashboard'),
+      'description' => t('Display general dashboard.'),
+    ),
+    'getsocialshares' => array(
+      'title' => t('Get social shares on url'),
+      'description' => t('Get social shares on url.'),
+    ),
+  );
+}
+
+function dpidashboard_menu() {
+
+	$items = array();
+	
+	$items['dpidashboard/ajax/getsocialshares'] = array(
+		'page callback' => 'dpidashboard_get_socialshares',
+		//'access callback' => 'getsocialshares',
+		'access arguments' => array('getsocialshares'),
+		'type' => MENU_NORMAL_ITEM,
+	  );
+	
+	return $items;
+	
+}
+
+function dpidashboard_theme() {
+  return array(
+    'allcounters' => array(
+      'render element' => 'data',
+      'template' => 'templates/allcounters'
+    ),
+  );
 }
 
 function dpidashboard_default_page_manager_pages() {
