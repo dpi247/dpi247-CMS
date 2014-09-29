@@ -136,3 +136,34 @@ function dpimport_update_7000() {
 function dpimport_update_7001() {
   dpimport_create_importer_user();
 }
+
+/**
+ * This function is use into the creation for the profile
+ * 
+ * @param String $phase
+ * @return array
+ */
+function dpimport_requirements($phase){
+  $requirements = array();
+  $path = getcwd().'/sites/default/importer';
+  if ($phase == 'install') {
+    if (!is_dir($path)) {
+      $requirements['importer']['title'] = t('Directory Importer');
+      $requirements['importer']['value'] = $path;
+      $requirements['importer']['severity'] = REQUIREMENT_ERROR;
+      $requirements['importer']['description'] = t('You need to create a directory with permission 777 into \'sites/default\' folder. <br />For creating this file:<br/><ul><li>Open console and move to the directory with <i>cd /var/www/site_folder_name</i>.</li><li>Enter the command: <i>mkdir sites/default/importer</i>. </li><li>Change permission with <i>chmod 777 sites/default/importer</i></li>');
+    }
+    else {
+      if(!is_writable ($path)){
+        $requirements['importer']['title'] = t('Directory Importer');
+        $requirements['importer']['value'] = $path;
+        $requirements['importer']['severity'] = REQUIREMENT_ERROR;
+        $requirements['importer']['description'] = t('Permission is not correct. <br />For this problem:<br/><ul><li>Change permission with <i>chmod 777 sites/default/importer</i></li>');
+      }else{
+        $requirements['importer']['title'] = t('Directory Importer');
+        $requirements['importer']['value'] = t('Importer Directory is found at @filepath', array('@filepath' => $path));
+      }
+    }
+    return $requirements;
+  }
+}

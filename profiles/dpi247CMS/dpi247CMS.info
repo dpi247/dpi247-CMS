@@ -56,3 +56,4 @@ dependencies[] = dpicache
 dependencies[] = dpidestinations
 dependencies[] = dpicommons
 dependencies[] = dpilog
+dependencies[] = dpimport
