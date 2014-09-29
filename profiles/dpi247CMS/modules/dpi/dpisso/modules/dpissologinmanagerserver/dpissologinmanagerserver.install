@@ -1,0 +1,111 @@
+<?php 
+
+
+
+/**
+ * Implements hook_schema().
+ */
+function dpissologinmanagerserver_schema() {
+
+  // The table name here is plural, despite Drupal table naming standards,
+  // because "user" is a reserved word in many databases.
+  $schema['dpissologinmanager_users'] = array(
+    'description' => 'Stores user data.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique user ID.',
+        'default' => 0,
+      ),
+      'loginId' => array(
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique user name.',
+      ),
+      'mail' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => "User's e-mail address.",
+      ),
+      'pass' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "User's password (hashed).",
+      ),
+
+      'data' => array(
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of name value pairs that are related to the user. Any form values posted during user edit are stored and are loaded into the $user object during user_load(). Use of this field is discouraged and it will likely disappear in a future version of Drupal.',
+      ),
+    ),
+    'indexes' => array(
+    'mailindex' => array('mail'),
+    'loginIdindex' => array('loginId'),
+    ),
+    'unique keys' => array(
+    'loginId' => array('loginId'),
+    ),
+    'primary key' => array('id'),
+  );
+
+
+  $schema['dpissologinmanager_accesstoken'] = array(
+    'description' => 'Stores user data.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique user ID.',
+        'default' => 0,
+      ),
+      'accesstoken' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => "User's e-mail address.",
+      ),
+      'loginId' => array(
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique user name.',
+      ),
+
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for when user was created.',
+      ),
+      'access' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for previous time user accessed the site.',
+      ),
+
+    ),
+    'indexes' => array(
+      'accesstoken' => array('accesstoken'),
+      'loginId' => array('loginId'),
+    ),
+    'primary key' => array('id'),
+  );
+
+
+  return $schema;
+}

@@ -1,5 +1,6 @@
 <?php
 
+
 /*
  * Check authentification from an email and a passowrd
  * 
@@ -16,7 +17,7 @@
  * @see dpisso_login_validate()
  * 
  */
-function dpisso_authentication_api_login_manager_authenticate_user($email,$password){
+function dpisso_authentication_api_loginmanager_authenticate_user($email,$password){
   try
   {
     $result = Call_loginmanager($accessToken);
@@ -31,3 +32,21 @@ function dpisso_authentication_api_login_manager_authenticate_user($email,$passw
     return false;
   }
 }
+
+function dpisso_authentication_api_loginmanager_getIdSso(){
+  _dpisso_authentication_api_call_loginmanager('getIdSSO', $options);
+}
+function dpisso_authentication_api_loginmanager_logout(){
+  
+}
+function dpisso_authentication_api_loginmanager_login(){
+  _dpisso_authentication_api_call_loginmanager('login', $options);
+  
+}
+
+
+function dpisso_authentication_api_get_unitid(){
+  $default_value=dpi_variable_get('dpicommons_product', '')."_".dpi_variable_get('dpicommons_environment', '');
+  return dpi_variable_get('dpisso_unitid',$default_value);
+}
+
