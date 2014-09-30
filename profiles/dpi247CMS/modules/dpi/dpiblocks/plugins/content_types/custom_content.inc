@@ -39,6 +39,7 @@ function dpiblocks_custom_content_content_type_content_types(){
     $custom_content[$record->machine_name] = array(
       'title'        => t('Custom content version : '.$record->title),
       'description'  => t(''),
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/1412085754_174756.ico',
       'category'     => t('DPI Blocks'),
       'group'        => t('DPI Core'),
       'subtype'      => $record->machine_name,
