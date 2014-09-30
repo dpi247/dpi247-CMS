@@ -46,6 +46,7 @@ function dpiblocks_remotehtml_content_type_content_types(){
   $remotehtml['new_remotehtml']= array(
     'name'           => 'remotehtml',
     'title'          => t('New remote HTML'),
+    'icon'              => drupal_get_path("module", "dpiblocks").'/icons/add_content.ico',
     'top level'      => TRUE,
     'category'       => t('Custom'),
     'group'          => t('DPI Core'),
@@ -276,6 +277,21 @@ function dpiblocks_remotehtml_content_type_render($subtype, $conf, $panel_args, 
   $block->content = file_get_contents($entity->html_adresse);
 
   return $block;
+}
+
+/**
+ * 'admin info' callback for panel pane.
+ */
+function dpiblocks_remotehtml_content_type_admin_info($subtype, $conf, $contexts) {
+  if (!empty($conf)) {
+    $block = new stdClass;
+    $entity = _dpiblocks_remotehtml_get_entity_by_subtype($subtype);
+    $block->title = t($entity->title);
+    //  get html of th e url
+    $block->content = file_get_contents($entity->html_adresse);
+  
+    return $block;
+  }
 }
 
 /**

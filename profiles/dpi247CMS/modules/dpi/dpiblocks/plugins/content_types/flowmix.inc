@@ -61,6 +61,7 @@ function dpiblocks_flowmix_content_type_content_types() {
     'title'          => t('New FlowMix'),
     'top level'      => TRUE,
     'category'       => t('Custom'),
+    'icon'              => drupal_get_path("module", "dpiblocks").'/icons/add_content.ico',
     'group'          => t('DPI Core'),
     'description'    => t('Mix external flows from multiple sources.'),
     'add form' => array(
