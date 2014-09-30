@@ -8,6 +8,8 @@ dependencies[] = entity
 dependencies[] = ctools
 dependencies[] = page_manager
 dependencies[] = panels
+dependencies[] = scald
+dependencies[] = scald_image
 
 files[] = entity_controller/remotehtml.controller.class.inc
 files[] = entity_class/remotehtml.entity.class.inc
