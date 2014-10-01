@@ -97,6 +97,17 @@ function dpicontenttypes_menu(){
     'file' => 'includes/dpicontenttypes.pages.inc',
   );
 
+  $items['node/%node/dpiproperties'] = array(
+    'title' => 'DPIProperties',
+    'page callback' => 'dpicontenttypes_entity_properties',
+    'page arguments' => array('node', 1),
+    'access arguments' => array('view dpiproperties'),
+    'weight' => 3,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/dpicontenttypes.pages.inc',
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  
   return $items;
 }
 
@@ -126,20 +137,6 @@ function dpicontenttypes_permission(){
     'create dpiproperties' => array(
       'title' => t('Create DPI properties'),
     ),
-  );
-}
-
-function dpicontenttypes_menu_alter(& $items){
-  $items['node/%node/dpiproperties'] = array(
-    'title' => 'DPIProperties',
-    'page callback' => 'dpicontenttypes_entity_properties',
-    'page arguments' => array('node', 1),
-    'access arguments' => array('view dpiproperties'),
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'dpicontenttypes.pages.inc',
-    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    'weight' => 3,
   );
 }
 
@@ -422,7 +419,7 @@ function dpicontenttypes_admin_paths_alter(&$paths) {
 function dpicontenttypes_custom_theme(){
   $menu_item=menu_get_item();
   $path=$menu_item['path'];
-if(strstr($path,'node/add')){
+  if(strstr($path,'node/add')){
     if(count($_POST)==0)
     return 'shiny';
   }
@@ -436,6 +433,18 @@ if(strstr($path,'node/add')){
   }
   if(strstr($path,'admin/structure/pages')){
     return 'shiny';
+  }
+  if(strstr($path,'node/%/track')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'node/%/dpiproperties')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'dpiproperties/%')){
+    if(count($_POST)==0)
+      return 'shiny';
   }
 }
 
