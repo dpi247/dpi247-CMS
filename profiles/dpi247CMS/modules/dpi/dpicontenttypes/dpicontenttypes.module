@@ -66,18 +66,6 @@ function dpicontenttypes_menu(){
     'file' => 'dpicontenttypes.entity.inc',
   );
 
-  $items['node/%node/dpiproperties'] = array(
-    'title' => 'DPIProperties',
-    'page callback' => 'dpicontenttypes_entity_properties',
-    'page arguments' => array('node', 1),
-    'access arguments' => array('view dpiproperties'),
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'dpicontenttypes.pages.inc',
-    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    'weight' => 2,
-  );
-
   $items['atom/%scald_atom/dpiproperties'] = array(
     'title' => 'DPIProperties',
     'page callback' => 'dpicontenttypes_entity_properties',
@@ -138,6 +126,20 @@ function dpicontenttypes_permission(){
     'create dpiproperties' => array(
       'title' => t('Create DPI properties'),
     ),
+  );
+}
+
+function dpicontenttypes_menu_alter(& $items){
+  $items['node/%node/dpiproperties'] = array(
+    'title' => 'DPIProperties',
+    'page callback' => 'dpicontenttypes_entity_properties',
+    'page arguments' => array('node', 1),
+    'access arguments' => array('view dpiproperties'),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'dpicontenttypes.pages.inc',
+    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
+    'weight' => 3,
   );
 }
 

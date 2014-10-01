@@ -114,7 +114,7 @@ class DPIPropertiesTypeUIController extends EntityDefaultUIController {
     return $items;
   }
 }
-class DPIPropertiesTypeController extends EntityAPIController {
+class DPIPropertiesTypeController extends EntityAPIControllerExportable {
   public function create(array $values = array()) {
     $values += array(
       'label' => '',
