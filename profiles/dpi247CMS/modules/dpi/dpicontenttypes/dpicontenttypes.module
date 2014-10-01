@@ -72,9 +72,10 @@ function dpicontenttypes_menu(){
     'page arguments' => array('node', 1),
     'access arguments' => array('view dpiproperties'),
     'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'dpicontenttypes.pages.inc',
     'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    'weight' => 50,
+    'weight' => 2,
   );
 
   $items['atom/%scald_atom/dpiproperties'] = array(

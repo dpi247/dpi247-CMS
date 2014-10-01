@@ -458,7 +458,24 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $term_value=$term->tid;
   $target_value=$target->machine_name;
 
+  
+  //add title
+
+  $title_view_field['id'] = 'title';
+  $title_view_field['table'] = 'node';
+  $title_view_field['field'] = 'title';
+  
+  $title_view_field['label'] = '';
+  $title_view_field['alter']['word_boundary'] = FALSE;
+  $title_view_field['alter']['ellipsis'] = FALSE;
+  
+  $targetview->set_item($targetview->current_display , 'field', 'title', $title_view_field);
+  
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
+  
+  
+  
+  dsm($targetview);
   return $targetview;
 }
 

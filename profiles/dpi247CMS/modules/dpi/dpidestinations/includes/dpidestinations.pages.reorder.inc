@@ -27,7 +27,7 @@ function dpidestinations_page_targetview_reorder($term,$target){
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
   $targetview->pre_execute();
   $targetview->execute();
-  
+  dsm($targetview);
   
   $nodes=$targetview->result;
   return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
@@ -42,7 +42,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
-  
+  dsm($nodes);
   //dsm($nodes,nodes);
   foreach($nodes as $node){
     //@todo: fix this performance issues: $nodes should contain all the data such as title

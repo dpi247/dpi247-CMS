@@ -46,8 +46,8 @@ function dpicontenttypes_entity_info() {
     'exportable' => FALSE,
     'entity keys' => array(
       'id' => 'id',
-      'name' => 'type',
-      'label' => 'label',
+      'name' => 'id',
+      'label' => 'label', 
     ),
     'module' => 'dpicontenttypes',
     // Enable the entity API's admin UI.
