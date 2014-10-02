@@ -9,4 +9,40 @@ function unfoldcompanion_install() {
   variable_set('date_format_short', 'd/m/Y - H:i');
   variable_set('date_format_medium', 'j F, Y - H:i');
   variable_set('date_format_long', 'l, j F, Y - H:i');
+
+
+  drupal_set_message("UNFOLDCOMANIONISTALL");
+
+  // On install we need to ensure
+  // that sections page lives in database and not in code...
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=page_manager_cache_load('sections');
+  foreach($page->handler_info as $key=>$value){
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  page_manager_save_page_cache($page);
+
+
+}
+
+
+
+/**
+ * Implementation of hook_enable
+ *
+ */
+function unfoldcompanion_enable() {
+ 
+  drupal_set_message("UNFOLDEMO-ENABLE");
+
+  // On install we need to ensure
+  // that sections page lives in database and not in code...
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=page_manager_cache_load('sections');
+  foreach($page->handler_info as $key=>$value){
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  page_manager_save_page_cache($page);
+
+
 }

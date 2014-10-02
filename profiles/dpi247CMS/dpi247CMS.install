@@ -186,8 +186,52 @@ function dpi247CMS_install_tasks($install_state) {
     'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     'function' => 'dpi247CMS_install_demo_contents_form',
   );
+  
+  // Store variant in DB
+  $tasks['store_variant_in_db'] = array(
+    'display_name' => st('Store some variants in DB'),
+    'display' => TRUE,
+    'type' => 'normal',
+    'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+    'function' => 'dpi247CMS_store_variant_in_db',
+  );
 
   return $tasks;
+}
+
+function dpi247CMS_store_variant_in_db(){
+  drupal_set_message("DPIProfileFull");
+  
+  
+  global $user;
+  
+  drupal_flush_all_caches();
+  drupal_set_message($user->uid);
+  
+  //Special treatement for pages cuz they include several object better reliable to use the "API"
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=page_manager_cache_load('term_view');
+  foreach($page->handler_info as $key=>$value){
+    dsm('key'.$key);
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  page_manager_save_page_cache($page);
+  
+  //Special treatement for pages cuz they include several object better reliable to use the "API"
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=page_manager_cache_load('sections');
+  foreach($page->handler_info as $key=>$value){
+    dsm('key'.$key);
+    dsm(PAGE_MANAGER_CHANGED_CACHED."  Ppaemanager");
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  page_manager_save_page_cache($page);
+  
+  drupal_set_message(print_r($page,1));
+  
+  
+  
+  
 }
 
 /**
@@ -354,6 +398,8 @@ function _dpi247CMS_install_demo_contents_full() {
     }
   }
 
+  
+  
   // Activate the sections and the node pages in the page manager
   module_load_include('admin.inc', 'page_manager');
   // Load context plugin as there may be contexts cached here.
@@ -374,6 +420,10 @@ function _dpi247CMS_install_demo_contents_full() {
 
   // Set the "News" section page as home page
   variable_set('site_frontpage', 'section/1');
+  
+  
+  
+  
 }
 
 function _dpi247CMS_install_default_contents() {
