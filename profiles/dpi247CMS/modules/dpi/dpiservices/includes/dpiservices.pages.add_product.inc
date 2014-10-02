@@ -14,7 +14,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   module_load_include('inc', 'dpiservices', 'dpiservices.api');
   $form=array();
   if(isset($argument) && $argument != ''){
-    if(!$product_arg = dpiservices_product_get_one_product_by_label($argument)){
+    if(!$product_arg = dpiservices_api_product_get_one_product_by_label($argument)){
       drupal_set_message("Product cannot be loaded", 'error');
     }
   }

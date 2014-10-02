@@ -30,19 +30,19 @@ function dpiservices_wally_package_retrieve_process($nid, $sid = null, $target =
     'comment' => $node->comment,
     'title' => $node->title,
     'creationDate' => $node->created,
-    'pubDate' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_editorialpublicationdate', 'value' ),
+    'pubDate' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_editorialpublicationdate', 'value' ),
     'editorialUpdate' => $node->revision_timestamp,
     'updateDate' => $node->changed,
     'type' => $node->type,
-    'layout' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' ),
-    'chapo' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textchapo', 'value' ),
-    'freeaccess' => (dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_restrictedaccess', 'value' )) ? "true" : "false",
-    'body' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbody', 'value' ),
-    'foretitle' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textforetitle', 'value' ),
-    'subtitle' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textsubtitle', 'value' ),
-    'barette' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
-    'byline' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
-    'authors' => dpiservices_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
+    'layout' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' ),
+    'chapo' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textchapo', 'value' ),
+    'freeaccess' => (dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_restrictedaccess', 'value' )) ? "true" : "false",
+    'body' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbody', 'value' ),
+    'foretitle' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textforetitle', 'value' ),
+    'subtitle' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textsubtitle', 'value' ),
+    'barette' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
+    'byline' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
+    'authors' => dpiservices_api_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
     'qualities' => array(),
     'url' => drupal_get_path_alias ( 'node/' . $nid ),
     'mainDestination' => $target,
@@ -86,7 +86,7 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
  */
 function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline) {
   if($atom = scald_atom_load ( $sid )){
-    $all_crop_informations = dpiservices_packages_generate_crop_links ( $sid, $nid, $atom );
+    $all_crop_informations = dpiservices_api_packages_generate_crop_links ( $sid, $nid, $atom );
   
     $formatted_atom = array (
       'nid' => $atom->sid,
@@ -95,8 +95,8 @@ function dpiservices_wally_packages_generate_related_object($sid, $nid, $inline)
     
     if($atom->type == "image"){
       $formatted_atom = $formatted_atom + array(
-        'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
-        'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
+        'caption' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
+        'credit' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
         'crop' => $all_crop_informations,
       );
     }else{

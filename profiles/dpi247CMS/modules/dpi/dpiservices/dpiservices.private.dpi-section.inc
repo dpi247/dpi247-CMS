@@ -87,6 +87,7 @@ function dpiservices_dpi_section_retrieve($sid, $product_name ,$targetblock_name
 function dpiservices_dpi_section_retrieve_process($sid, $product_name ,$targetblock_name){
   global $language;
   $json_return = array ();
+  $sectionterm = new stdClass();
   $sectionterm = sectionterm_load ( $sid );
   
   $json_return ["title"] = $sectionterm->name;
