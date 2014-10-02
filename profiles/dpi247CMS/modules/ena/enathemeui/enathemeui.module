@@ -1,0 +1,50 @@
+<?php
+
+module_load_include('inc','enathemeui','enathemeui.api');
+module_load_include('inc','enathemeui','enathemeui.ressourcemanager');
+
+
+
+function enathemeui_ctools_plugin_directory($owner, $plugin_type) {
+  // Form 1 - for a module implementing only the 'content_types' plugin owned
+  // by CTools, this would cause the plugin system to search the
+  // <moduleroot>/plugins/content_types directory for .inc plugin files.
+  dsm("plugins/$owner/$plugin_type"  );
+  return "plugins/$owner/$plugin_type";
+}
+
+
+
+/**
+ * Implements hook_ctools_plugin_type() to inform CTools about the layout plugin.
+ */
+function enathemeui_ctools_plugin_type() {
+  return array( 
+    "enarenderapi" => array(
+     'use hooks' => TRUE,
+   ));
+}
+
+
+/**
+ * Implementation of hook_theme
+ */
+function enathemeui_theme() {
+	
+  return array();
+  
+}
+
+
+
+
+/**
+ * Implements hook_ctools_plugin_type() to inform CTools about the layout plugin.
+ */
+function enathemeui_form_alter(&$form, &$form_state, $form_id) {
+  
+  $active_plugins=enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$form,$form_state);  
+  $form+=enathemeui_ressource_manager_form_alter($active_plugins);
+  
+}
+

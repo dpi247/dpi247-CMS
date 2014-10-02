@@ -1,0 +1,7 @@
+core = "7.x"
+description = "Specific tools for ENA Bootstrap theme"
+name = "ENA Theme ui"
+package = "ENA"
+
+
+files[] = includes/enathemeui.enarenderapi.class.inc
