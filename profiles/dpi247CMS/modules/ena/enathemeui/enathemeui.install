@@ -1,0 +1,52 @@
+<?php 
+
+
+/**
+ * Implementation of hook_schema
+ */
+function enathemeui_schema() {
+ 
+  /**
+   * dpicache_cron() use this table to regenerate caches
+  */
+  $schemas['enathemeui_values']=array(
+    'description' => 'Each entry represent a cache entry that need to be regenerated during cron.',
+    'fields' => array(
+      'plugin_name' => array(
+        'description' => 'Entry name',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'unique_id' => array(
+        'description' => 'unique_id for a settings',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'form_values' => array(
+        'description' => 'A collection of values ',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+      
+    ),
+    'indexes' => array(
+    'name'                => array('plugin_name'),
+    'unique_id' => array('unique_id'),
+    'both' => array('plugin_name','unique_id'),
+      
+    ),
+    'primary key' => array('plugin_name','unique_id'),
+  );
+
+
+  return $schemas;
+}
+
+
+
+
+

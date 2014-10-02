@@ -9,7 +9,6 @@ function enathemeui_ctools_plugin_directory($owner, $plugin_type) {
   // Form 1 - for a module implementing only the 'content_types' plugin owned
   // by CTools, this would cause the plugin system to search the
   // <moduleroot>/plugins/content_types directory for .inc plugin files.
-  dsm("plugins/$owner/$plugin_type"  );
   return "plugins/$owner/$plugin_type";
 }
 
@@ -44,7 +43,21 @@ function enathemeui_theme() {
 function enathemeui_form_alter(&$form, &$form_state, $form_id) {
   
   $active_plugins=enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$form,$form_state);  
-  $form+=enathemeui_ressource_manager_form_alter($active_plugins);
-  
+  $form['enathemeui']=enathemeui_ressource_manager_form_alter($active_plugins);
+  $form['enathemeui']["#tree"]=TRUE;
+  $form["#submit"][]="enathemeui_form_alter_submit";
 }
 
+
+function enathemeui_form_alter_submit($form, &$form_state) {
+  foreach($form_state['values']['enathemeui'] as $plugin_name=>$values_item){
+    
+    $plugin_class=enathemeui_api_get_enarenderapi_class($plugin_name);
+    
+    $unique_id=$values_item['unique_id'];
+    unset($values_item['unique_id']);
+    
+    $plugin->save_values($plugin_name,$unique_id,$values_item);
+    
+  }
+}

@@ -23,6 +23,7 @@ function enathemeui_ressourcemanager_get_active_ressource_for_formid(){
       'enarenderapielement'=>array(
         'uniqueid callback' =>'bla bla',
         'values callback'=>'toto',
+        'values callback'=>'toto',
       ),
     ),
     'menu_edit_menu'=>array(
@@ -46,12 +47,12 @@ function enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$fo
   $plugin_mapping=enathemeui_ressourcemanager_get_active_ressource_for_formid();
 
   $active_plugins_names=$plugin_mapping[$form_id];
-  foreach($active_plugins_names as $key=>$plugin_name){
-    $plugin=enathemeui_api_get_enarenderapi_class($key);
-    $plugin->unique_id=call_user_func($plugin_name['uniqueid callback'],$form,$form_state);
-    $plugin->default_values=call_user_func($plugin_name['values callback'],$form,$form_state);
+  foreach($active_plugins_names as $plugin_name=>$plugin_info){
+    $plugin=enathemeui_api_get_enarenderapi_class($plugin_name);
+    $plugin->unique_id=call_user_func($plugin_info['uniqueid callback'],$form,$form_state);
+    $plugin->default_values=$plugin->get_values($plugin_name,$plugin->unique_id);
     
-    $active_plugins[$key]=$plugin;
+    $active_plugins[$plugin_name]=$plugin;
   }
    
   return $active_plugins;
@@ -63,18 +64,14 @@ function enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$fo
 function enathemeui_ressource_manager_form_alter($active_plugins){
   $form=array();
   foreach($active_plugins as $plugin_name=>$plugin){
-    $unique_id=$active_plugins['unique_id'];
+    $ressource_form=$plugin->settings_form();
     
-    $default_values=$active_plugins['default_values'];
-    
-    $ressource_form=$plugin->settings_form($default_values);
     $ressource_form['unique_id']=array(
       "#type"=>'value',
-      "#value"=>$unique_id
+      "#value"=>$plugin->unique_id,
       );
      $form[$plugin_name]=$ressource_form;
   }
-  dsm($form,form);
   
   return $form;
 

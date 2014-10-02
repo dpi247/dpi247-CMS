@@ -30,12 +30,10 @@ class EnaRenderApiWrapper extends EnaRenderApi {
   }
   
   
-  public function settings_form($form, $form_state){
+  public function settings_form(){
     
-    $this->unique_id=$this->get_uniqueid($form, $form_state);
-    $this->default_values=$this->get_values_for_uniqueid($form, $form_state);
     
-    $form['ena_theme_ui']['wrapper_html'] =$this->_settings_form_details();
+    $form['wrapper_html'] =$this->_settings_form_details();
 
     return $form;
     
@@ -43,8 +41,9 @@ class EnaRenderApiWrapper extends EnaRenderApi {
   
   
   
-  function _settings_form_details($default_values){
+  function _settings_form_details(){
     $default_value = $this->default_values;
+    dsm($default_value,dv);
     
     $element = array(
       '#type' => 'fieldset',
