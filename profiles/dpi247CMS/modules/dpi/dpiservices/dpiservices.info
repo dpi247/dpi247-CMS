@@ -7,4 +7,5 @@ dependencies[] = services
 dependencies[] = rest_server
 dependencies[] = scald
 dependencies[] = scald_image
+dependencies[] = dpidestinations
 files[] = dpiservices.test
