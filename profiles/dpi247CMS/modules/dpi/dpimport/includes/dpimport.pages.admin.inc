@@ -36,7 +36,7 @@ function dpimport_page_form_importer_form($form, &$form_state, $edit_id = NULL){
   ctools_include('plugins');
   $form = array();
   $form = dpimport_form_importer_get_header($form, $form_state);
-
+  
   if ($edit_id != NULL && $form_state['stage'] == 'default'){
     dpimport_form_importer_initializeform($form_state, $edit_id);
   }
@@ -83,7 +83,7 @@ function dpimport_page_form_importer_form($form, &$form_state, $edit_id = NULL){
 function dpimport_page_form_importer_form_back_after_build($form, $form_state) {
   if (isset($form_state['values']['back'])) {
     $validated_forms = &drupal_static('drupal_validate_form', array());
-    $validated_forms['dpimport_page_form_importer_form'] = TRUE;
+    $validated_forms['dpimport_page_form_importer_form_validate'] = TRUE;
   }
   return $form;
 }
@@ -185,7 +185,7 @@ function dpimport_form_importer_save($form, $form_state){
   $record['name'] = $default_values['name'];
   $record['description'] = $default_values['description'];
   $record['dispatcher'] = $importer_values['dispatcher'];
-  $record['dispatcher_settings'] = serialize($dispatcher->submitSettingsForm($dispatcher_values));
+  $record['dispatcher_settings'] = serialize($dispatcher->submitSettingsForm($dispatcher_values, $form_state['multistep_values']));
   $record['importer_settings'] = serialize($importer->submitSettingsForm($importer_values));
 
   if (is_numeric($default_values['iid'])){
@@ -516,6 +516,11 @@ function dpimport_page_form_importer_delete_form($form, &$form_state, $delete_id
   $form['message'] = array(
     '#markup' => '<p>'.t('Are you sure you want to delete the importer "@name"', array('@name' => $delete_id)).'?</p>',
   );
+  
+  $form['delete_file'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Do you want to delete file'),    
+  );
 
   $form['name'] = array(
     '#type' => 'value',
@@ -538,7 +543,16 @@ function dpimport_page_form_importer_delete_form($form, &$form_state, $delete_id
  */
 function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
   module_load_include('inc', 'dpimport','includes/dpimport.process');
-
+  
+  if($form_state['values']['delete_file']){
+    try {
+      rrmdir($_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" .$form_state['values']["name"]);
+      drupal_set_message("File is deleted");
+    } catch (Exception $e) {
+      drupal_set_message("We have encountered an error while processing", 'error');
+    }
+  }
+  
   $importer_settings = dpimport_api_get_importer_settings($form_state['values']['name']);
   $importer_plugin = _dpimport_load_importer_plugin($importer_settings->type, $importer_settings->version);
   $importer_class = $importer_plugin['versions'][$importer_settings->version]['class'];
@@ -552,4 +566,22 @@ function dpimport_page_form_importer_delete_form_submit($form, &$form_state){
   }
 
   drupal_goto(DPI_ADMIN_PATH.'/dpimport/import');
+}
+
+/**
+ * This function is use to delete directory
+ * 
+ * @param String $dir
+ */
+function rrmdir($dir) {
+  if (is_dir($dir)) {
+    $objects = scandir($dir);
+    foreach ($objects as $object) {
+      if ($object != "." && $object != "..") {
+        if (filetype($dir."/".$object) == "dir") rmdir($dir."/".$object); else unlink($dir."/".$object);
+      }
+    }
+    reset($objects);
+    rmdir($dir);
+  }
 }
