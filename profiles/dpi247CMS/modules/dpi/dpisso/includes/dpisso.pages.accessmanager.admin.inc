@@ -1,6 +1,7 @@
 <?php
 
 function dpisso_accessmanager_admin_settings_page_form(){
+
   $form=array();
   
   $form['dpisso_accessmanager_uri']=array(

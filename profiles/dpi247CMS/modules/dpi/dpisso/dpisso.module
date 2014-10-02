@@ -8,10 +8,17 @@ module_load_include('inc', 'dpisso','dpisso.api');
 module_load_include('inc', 'dpisso','dpisso.private');
 //module_load_include('inc', 'dpisso','dpisso.helpers');
 
-
 define('DPISSO_ACCESSTOKEN_COOKIE_NAME',"dpisso-access-token");
 define('DPISSO_LONTERM_COOKIE_NAME',"dpisso-longterm");
 
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function dpisso_ctools_plugin_directory($module, $plugin) {
+  if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
+    return 'plugins/paywallpolitics';
+  }
+}
 
 /**
  * Implementation of hook_menu()
@@ -62,9 +69,7 @@ function dpisso_menu() {
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
-    'file'             => 'dpisso.pages.accessmanager.admin.inc',
-    'file path' => drupal_get_path('module', 'dpisso').'/includes',
-    
+    'file'             => 'includes/dpisso.pages.paywall.admin.inc',
     'weight'           => 0,
     'type'             => MENU_LOCAL_TASK,
   );
@@ -126,6 +131,17 @@ function dpisso_theme() {
   );
 }
 
+/**
+ * Implements hook_ctools_plugin_type().
+ * Has plenty options. See ctools/help/plugins-creating.html
+ */
+function dpisso_ctools_plugin_type() {
+  return array(
+      'paywallpolitic' => array(
+          'use hooks' => TRUE,
+      ),
+  );
+}
 
 
 
