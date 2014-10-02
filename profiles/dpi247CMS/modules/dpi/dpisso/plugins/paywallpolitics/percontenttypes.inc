@@ -1,5 +1,7 @@
 <?php 
-
+/**
+ * Declare the ctools pluggin.
+ */
 $plugin = array(
     'label' => t('Per content types'),
     'handler' => array(
@@ -7,17 +9,29 @@ $plugin = array(
     ),
 );
 
-
+/**
+ * PaywallPerType - Any choosen content type will decrease the paywall counter.
+ * @author exxodus
+ *
+ */
 class PaywallPerType extends PaywallPolitics {
 
+  /**
+   * settingsform method.
+   * 
+   * @see PaywallPolitics::settingsform()
+   * 
+   * @return array A checkboxes form element with all the content types. 
+   */
   public function settingsform($form, &$form_state) {
 
-    // get all content types. 
+    // get all content types & build a options array. 
     $options_types = array(); 
     foreach (node_type_get_types() as $id=>$type) {
       $options_types[$id]=$type->name; 
     }
-    
+
+    // The checkboxes form element.
     $form = array();
     $form['PaywallPerType_types'] = array(
         '#type' => 'checkboxes',
@@ -28,7 +42,5 @@ class PaywallPerType extends PaywallPolitics {
     
     return $form;
   }
-
-    
 
 }

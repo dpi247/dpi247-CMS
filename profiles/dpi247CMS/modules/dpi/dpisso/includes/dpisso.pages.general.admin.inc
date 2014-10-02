@@ -1,8 +1,13 @@
 <?php
-
+/**
+ * Implement the hook_form
+ */
 function dpisso_loginmanager_admin_settings_page_form(){
   $form=array();
 
+  /**
+   * The unique identifier of the dpi instance in the all SSO processes & modules
+   */
   $form['dpisso_unitid']=array(
     '#type'=>'textfield',
     '#title'=>t('Unit ID'),

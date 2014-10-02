@@ -11,8 +11,11 @@ module_load_include('inc', 'dpisso','dpisso.private');
 define('DPISSO_ACCESSTOKEN_COOKIE_NAME',"dpisso-access-token");
 define('DPISSO_LONTERM_COOKIE_NAME',"dpisso-longterm");
 
+
 /**
  * Implements hook_ctools_plugin_directory().
+ * 
+ * @see dpisso_ctools_plugin_type()
  */
 function dpisso_ctools_plugin_directory($module, $plugin) {
   if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
@@ -74,7 +77,6 @@ function dpisso_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
   
-  
   $items['dpisso/login'] = array(
     'title'            => t('Login'),
     'page callback'    => '_dpisso_login_callback',
@@ -133,7 +135,9 @@ function dpisso_theme() {
 
 /**
  * Implements hook_ctools_plugin_type().
- * Has plenty options. See ctools/help/plugins-creating.html
+ * 
+ * Has plenty options. 
+ * @See ctools/help/plugins-creating.html
  */
 function dpisso_ctools_plugin_type() {
   return array(
@@ -143,27 +147,12 @@ function dpisso_ctools_plugin_type() {
   );
 }
 
-
-
-//See: https://api.drupal.org/api/drupal/modules%21user%21user.module/function/user_external_login_register/7
-
 /**
  * Implementation of hook_form_alter().
+ * 
  * Change the normal form login form behaviour to allow login against the login Manager.
  */
 function dpisso_form_user_login_alter( &$form, $form_state )
 {
   $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
 }
-
-
-/*
-
-function dpisso_boot(){
-  
-  
-}
-
-
-*/
-

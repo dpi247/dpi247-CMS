@@ -1,11 +1,11 @@
 <?php
-
 /**
- * Form constructor for General Paywall Admin form.
+ * Implement the hook_form
  */
 function dpisso_paywall_admin_settings_page_form($form, $form_state){  
 
   $form=array();
+  
   $form = array_merge($form, dpisso_paywall_admin_settings_paywallpolitic($form, &$form_state));
 
   $form['actions']['#type'] = 'actions';
@@ -17,33 +17,35 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state){
 }
 
 /**
- * Call the submit method for paywall politic.
+ * implementation du hook_form_subit
  */
 function dpisso_paywall_admin_settings_page_form_submit($form, $form_state){
-  
+
+  // get the current paywall politic & insert submit method of the current class.
   $politic = $form_state["values"]["dpisso_paywall_paywallpolitics"]; 
   if ($politic_instance = _dpisso_get_paywall_instance($politic)) {
     $politic_instance->settingsform_submit($form, &$form_state);
   }
-  
 }
 
-
 /**
- * Form constructor for Paywall politics Admin Form.
+ * Generate the specific paywall settings form.
  */
 function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
 
+  // get the list of all declared ctools 'paywallpolitic' pluggin 
   ctools_include('plugins');
   $politics = ctools_get_plugins('dpisso', 'paywallpolitic');
   $politic_options = array();
-  
+
+  // Build a options array. 
   $default_politic = FALSE;  
   foreach ($politics as $id => $politic) {
     if (!$default_politic) $default_politic = $id;
     $politic_options[$id] = $politic['label'];
   }
-  
+
+  // If no politics declared (no 'paywallpolitic' pluggin active, we quit.
   if (empty($politic_options)) {
     $form['message'] = array(
         '#markup' => t('Sorry, there is no paywall politic plugins available.'),
@@ -51,15 +53,16 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
     return $form;
   }
 
-  // Did we trigger the ajax form ?
+  // Getting the right current politic (pluggin)
   if (isset($form_state["triggering_element"])) {
-    // We did, so builf the form from triggrered politic.
+    // We triggered the ajax.
     $politic = $form_state['triggering_element']['#value'];
   } else {
+    // We just build the form, get the current politic or the default one
     $politic = dpi_variable_get('dpisso_paywall_paywallpolitics',$default_politic);
   }  
   
-  // Build a select options list from available pluggins.
+  // Build a select options list from available 'paywallpolitic' pluggins.
   $form['dpisso_paywall_paywallpolitics'] = array(
       '#type' => 'select',
       '#title' => t('Please choose a paywall politic'),
@@ -74,7 +77,7 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
       ),
   );
 
-  // Firld set for politic ctools pluggin.
+  // Fieldset for politic ctools pluggin settings.
   $form['dpisso_paywall_paywallpolitics_settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Paywall politic settings for: '.$politic_options[$politic]),
@@ -84,6 +87,7 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
       '#suffix' => '</div>',
   );
   
+  // Call the settingsform method to get the pluggins settings.
   if ($politic_instance = _dpisso_get_paywall_instance($politic)) {
     $politic_settings = $politic_instance->settingsform($form, &$form_state);
     $form['dpisso_paywall_paywallpolitics_settings'][]=$politic_instance->settingsform_getdefaultvalues($politic_settings);
@@ -92,7 +96,17 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
   return $form;
 }
 
-
+/**
+ * The call back function for the Ajax select form element: dpisso_paywall_paywallpolitics
+ * 
+ * @param Array $form
+ *   The complete settings form 
+ * @param Array $form_state
+ *   The complete settings form state
+ * 
+ * @return Array $form
+ *   The mofified element.
+ */
 function dpisso_paywall_admin_settings_paywallpolitic_callback($form, $form_state) {
   return $form['dpisso_paywall_paywallpolitics_settings'];
 }
