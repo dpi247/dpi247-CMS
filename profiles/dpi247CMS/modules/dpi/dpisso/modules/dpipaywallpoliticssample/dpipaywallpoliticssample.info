@@ -1,0 +1,4 @@
+core = "7.x"
+name = "DPI PAYWALLS POLITICS"
+description = "Sample paywall politics class."
+package = DPI
