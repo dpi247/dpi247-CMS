@@ -44,7 +44,8 @@ function dpisso_menu() {
       'access arguments' => array('administer dpisso'),
       'weight'           => -10,
       'type'             => MENU_DEFAULT_LOCAL_TASK,
-      'file'             => 'includes/dpisso.pages.general.admin.inc',
+      'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+      'file'             => 'dpisso.pages.general.admin.inc',
   );
   
   $items[DPI_ADMIN_PATH.'/dpisso/loginmanager'] = array(
@@ -52,7 +53,8 @@ function dpisso_menu() {
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
-    'file'             => 'includes/dpisso.pages.loginmanager.admin.inc',
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.loginmanager.admin.inc',
     'weight'           => 0,
     'type'             => MENU_LOCAL_TASK,
   );
@@ -62,7 +64,8 @@ function dpisso_menu() {
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpisso_accessmanager_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
-    'file'             => 'includes/dpisso.pages.accessmanager.admin.inc',
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.accessmanager.admin.inc',
     'weight'           => 0,
     'type'             => MENU_LOCAL_TASK,
   );
@@ -72,7 +75,8 @@ function dpisso_menu() {
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
     'access arguments' => array('administer dpisso'),
-    'file'             => 'includes/dpisso.pages.paywall.admin.inc',
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.paywall.admin.inc',
     'weight'           => 0,
     'type'             => MENU_LOCAL_TASK,
   );

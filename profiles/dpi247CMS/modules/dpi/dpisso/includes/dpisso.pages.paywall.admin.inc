@@ -6,7 +6,7 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state){
 
   $form=array();
   
-  $form = array_merge($form, dpisso_paywall_admin_settings_paywallpolitic($form, &$form_state));
+  $form = array_merge($form, dpisso_paywall_admin_settings_paywallpolitic($form, $form_state));
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(

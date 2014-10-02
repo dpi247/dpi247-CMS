@@ -3,7 +3,7 @@
  * Declare the ctools pluggin.
  */
 $plugin = array(
-    'label' => t('Per content types'),
+    'label' => t('Based on content types'),
     'handler' => array(
         'class' => 'PaywallPerType',
     ),
@@ -23,7 +23,7 @@ class PaywallPerType extends PaywallPolitics {
    * 
    * @return array A checkboxes form element with all the content types. 
    */
-  public function settingsform($form, &$form_state) {
+  public function settingsform($form, $form_state) {
 
     // get all content types & build a options array. 
     $options_types = array(); 
