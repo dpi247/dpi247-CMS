@@ -23,9 +23,16 @@ class RestrictedAccessField extends PaywallPolitics {
    */
   public function settingsform($form, $form_state) {
 
+    // Build a options array with all roles    
+    $roles = array_map('check_plain', user_roles(TRUE));
+    
     $form = array(); 
-    $form['message'] = array(
-        '#markup' => t('There is no specific settings for this paywall politic.'),
+    $form['restrictedaccessfieldroles'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Paywall politic bypass roles'),
+        '#description'=>t(" Choose all the roles that will bypass the paywall politic.Those roles will never decrease the paywall counter."),
+        '#options' => $roles,
+        '#access' => $roles && user_access('administer permissions'),
     );
     return $form;
   }

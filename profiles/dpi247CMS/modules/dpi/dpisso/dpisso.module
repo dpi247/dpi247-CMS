@@ -92,6 +92,18 @@ function dpisso_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
 
+  $items['dpisso/login'] = array(
+      'title'            => t('Login'),
+      'page callback'    => '_dpisso_login_callback',
+      //'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
+      'access arguments' => array('administer dpisso'),
+      'file'             => 'dpisso.pages.accessmanager.admin.inc',
+      'file path' => drupal_get_path('module', 'dpisso').'/includes',
+      'weight'           => 0,
+      'type'             => MENU_LOCAL_TASK,
+  );
+  
+  
   return $items;
 }
 
@@ -113,29 +125,16 @@ function dpisso_theme() {
   $path = drupal_get_path('module', 'dpisso');
   $base = array(
     'file' => 'theme.inc',
-    'path' => $path.'/templates',
+    'path' => $path.'/theme',
   );
   return array(
-    'dpisso_checkboxes' => $base + array(
-      'render element' => 'element',
-    ),
-    'dpisso_checkboxes_elements' => $base + array(
-      'render element' => 'element',
-    ),
-    'dpisso_taxonomy_tree' => $base + array(
-      'render element' => 'element',
-    ),
-    'dpisso_taxonomy_tree_elements' => $base + array(
-      'render element' => 'element',
-    ),
-    'dpisso_elements_select' => $base + array(
-      'render element' => 'element',
-    ),
-    'dpisso_taxonomy_tree_checkbox' => $base + array(
-      'render element' => 'element',
+    'dpissopaywallpoliticscheckboxesgrid' => $base + array(
+        'arguments' => array(),
+        'render element' => 'element',
     ),
   );
 }
+
 
 /**
  * Implements hook_ctools_plugin_type().

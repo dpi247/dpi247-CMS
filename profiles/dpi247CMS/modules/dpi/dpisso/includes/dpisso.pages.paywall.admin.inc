@@ -80,7 +80,7 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
   // Fieldset for politic ctools pluggin settings.
   $form['dpisso_paywall_paywallpolitics_settings'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Paywall politic settings for: '.$politic_options[$politic]),
+     // '#title' => t('Paywall politic settings for: '.$politic_options[$politic]),
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
       '#prefix' => '<div id="dpisso_paywall_paywallpolitics_settings_div">',

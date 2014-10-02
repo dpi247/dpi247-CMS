@@ -37,7 +37,8 @@ class PaywallPerType extends PaywallPolitics {
         '#type' => 'checkboxes',
         '#title' => t('Please choose Content Types'),
         '#options' => $options_types,
-        '#description'=>t(" Choose all the content types that will decrease the paywall counter."),
+        '#description'=>t("Choose all the content types that will decrease the paywall counter."),
+        '#theme'=>'dpissopaywallpoliticscheckboxesgrid',
     );
     
     return $form;
