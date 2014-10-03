@@ -30,10 +30,10 @@ function dpidestinations_page_targetview_reorder($term,$target){
   dsm($targetview);
   
   $nodes=$targetview->result;
+  dsm($nodes);
   return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }
-
 
 function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $sectiontid, $destination_target){
   $form['#tree'] = TRUE;
@@ -42,7 +42,6 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
-  dsm($nodes);
   //dsm($nodes,nodes);
   foreach($nodes as $node){
     //@todo: fix this performance issues: $nodes should contain all the data such as title

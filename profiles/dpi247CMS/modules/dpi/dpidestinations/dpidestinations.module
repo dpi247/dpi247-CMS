@@ -90,6 +90,29 @@ function dpidestinations_menu() {
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
+  
+  $items['admin/dpi247/dpidestinations/destinationmultiple'] = array(
+    'title' => t('Multiple Destinations'),
+    'description' => 'Create multiple destination with a simple name',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_multiple_destinations',
+    'file' => 'dpidestinations.pages.multipledestinations.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
+  $items['admin/dpi247/dpidestinations/destinationmultiple/add'] = array(
+    'title' => t('Multiple Destinations'),
+    'description' => 'Create multiple destination with a simple name',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_multiple_destinations_add',
+    'file' => 'dpidestinations.pages.multipledestinations.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
   $items['section/%section'] = array(
     'title' => 'Section term',
     'title callback' => 'taxonomy_term_title',
