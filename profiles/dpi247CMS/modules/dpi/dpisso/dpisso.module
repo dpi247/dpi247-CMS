@@ -11,7 +11,6 @@ module_load_include('inc', 'dpisso','dpisso.private');
 define('DPISSO_ACCESSTOKEN_COOKIE_NAME',"dpisso-access-token");
 define('DPISSO_LONTERM_COOKIE_NAME',"dpisso-longterm");
 
-
 /**
  * Implements hook_ctools_plugin_directory().
  * 
@@ -128,11 +127,10 @@ function dpisso_theme() {
     'path' => $path.'/theme',
   );
   return array(
-    'dpissopaywallpoliticscheckboxesgrid' => $base + array(
-        'arguments' => array(),
-        'render element' => 'element',
-    ),
-  );
+      'checkboxtable' => $base + array(
+          'render element' => 'element'
+      ),
+    );
 }
 
 
