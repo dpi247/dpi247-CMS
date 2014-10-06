@@ -29,7 +29,7 @@ function dpidestinations_page_targetview_reorder($term,$target){
   $targetview->execute();
   
   $nodes=$targetview->result;
-
+  
   return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }
@@ -37,20 +37,17 @@ function dpidestinations_page_targetview_reorder($term,$target){
 function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $sectiontid, $destination_target){
   $form['#tree'] = TRUE;
   
-  
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
   //dsm($nodes,nodes);
   foreach($nodes as $node){
-    //@todo: fix this performance issues: $nodes should contain all the data such as title
-    $node=node_load($node->nid);
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
       '#default_value' => 0,
       '#delta' => $weight_delta,
       '#title_display' => 'invisible',
-      '#title' => t('Weight for @node ', array('@node' => $node->title)),
+      '#title' => t('Weight for @node ', array('@node' => $node->node_title)),
       '#attributes'=> array('class' => array('node-weight')),
     );
     $form['nodes'][$node->nid]['original_weight'] = array(
@@ -62,17 +59,29 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
       '#value' => $node->nid,
     );
 
-    $form['nodes'][$node->nid]['nid'] = array(
-      '#type' => 'value',
-      '#value' => $node->nid,
-    );
     $original_weight++;
     $form['nodes'][$node->nid]['title'] = array(
-      '#markup' => $node->title,
+      '#markup' => $node->node_title,
     );
-  
+    
+    $str_author = "";
+    foreach($node->field_field_authors as $author){
+      $str_author .= '<a href="'.$author["rendered"]["#href"].'">'.$author["rendered"]["#title"].'</a> ';
+    }
+    $form['nodes'][$node->nid]['authors'] = array(
+      '#markup' => $str_author,
+    );
+    
+    $str_date = "";
+    foreach($node->field_field_editorialpublicationdate as $date){
+      $str_date .= $date["rendered"]["#markup"];
+    }
+    $form['nodes'][$node->nid]['field_field_editorialpublicationdate'] = array(
+      '#markup' => $str_date,
+    );
+    
     $form['nodes'][$node->nid]['edit'] = array(
-      '#markup' => $node->title,
+      '#markup' => '<a href="/node/'.$node->nid.'/edit">Edit</a>',
     );
   }
   
