@@ -27,10 +27,9 @@ function dpidestinations_page_targetview_reorder($term,$target){
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
   $targetview->pre_execute();
   $targetview->execute();
-  dsm($targetview);
   
   $nodes=$targetview->result;
-  dsm($nodes);
+
   return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }

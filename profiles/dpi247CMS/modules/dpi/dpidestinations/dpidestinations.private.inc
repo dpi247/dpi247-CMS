@@ -446,7 +446,7 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   
   $target->view_name=$targetview_reorder_view_name;
   $target->view_display=$targetview_reorder_display;
-dsm($target);
+  
   $target_wrapper = entity_metadata_wrapper('target', $target);
 
   //We use the targetview_reorder view to ensure we got the proper information.

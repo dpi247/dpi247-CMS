@@ -185,12 +185,15 @@ function dpipub_block_info(){
   }
   
   $query = db_select('zz_pub_UMI', 'p');
-  $pub_list = $query->fields('p',array('position'))->execute();
+  $pub_list = $query->fields('p',array('position', 'builder'))->execute();
   foreach ($pub_list as $row){ 
       $blocks[$row->position] = array(
         'info' => t('Pub '.$row->position),
         'cache' => DRUPAL_CACHE_PER_PAGE,
       );
+      if(isset($row->builder) && $row->builder=="dfp"){
+        $blocks[$row->position]['cache'] = DRUPAL_NO_CACHE;
+      }
   }
 
   return $blocks;
