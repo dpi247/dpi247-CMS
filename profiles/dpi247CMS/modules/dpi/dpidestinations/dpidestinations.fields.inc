@@ -160,6 +160,8 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   // Determine available options and change destination if need it
 
   $tids_options = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
+  $multi_destinations = dpidestinations_api_get_all_section_term_multi_destination_as_select_option();
+  $tids_options = array('Normal Destinations' => $tids_options, 'Multi destinations' => $multi_destinations);
   if(FALSE && !$is_update) {
     $destinations['tid'] = '';
   }
@@ -271,6 +273,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 /**
  * Element validate callback: rebuilds the form on country change and stores the current address value in the $form_state for retrieval on rebuild.
  */
+
 function dpidestinations_rebuildonchange_validate($element, &$form_state) {
   if($form_state['triggering_element']['#type'] == 'select'){
     // If the country was changed, rebuild the form.
@@ -539,7 +542,8 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
-
+  //isset($form_state['triggering_element']["#options"]["Multi destinations"][$form_state['triggering_element']["#value"]]));
+  
   // Iterate over the form parents to find the element.
   $element = $form;
   foreach ($array_parents as $name) {
@@ -553,4 +557,5 @@ function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   // by the field API.
   unset($element['_weight']);
   return $element;
+  
 }

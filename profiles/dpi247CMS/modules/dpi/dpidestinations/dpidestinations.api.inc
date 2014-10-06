@@ -187,6 +187,16 @@ function dpidestinations_api_get_all_sections_term_available_as_select_options($
   
   return $options;
 }
+function dpidestinations_api_get_all_section_term_multi_destination_as_select_option(){
+  $val = dpidestinations_api_get_all_multi_destination();
+  $options = array();
+  if(is_array($val)){
+    foreach($val as $multi_dest){
+      $options[$multi_dest['label']] = $multi_dest['label'];
+    }
+  }
+  return $options;
+}
 function dpidestinations_api_get_all_targets() {
   $query = new EntityFieldQuery ();
   
