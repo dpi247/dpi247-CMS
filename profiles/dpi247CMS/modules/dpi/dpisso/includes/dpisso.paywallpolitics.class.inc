@@ -31,23 +31,15 @@ abstract class PaywallPolitics {
    * provide a method to store the settings as variables in the dpi cache. This method
    * will return the defaults values 
    * 
-   * @param Array $politic_settings
-   *   The politic settings form
+   * @param $politic
+   *   The politic settings name
    *   
    * @return Array $politic_settings
-   *   The politic settings form with default values.
+   *   The politic settings default values.
    */
-  public function settingsform_getdefaultvalues($politic_settings) {
-    
-    foreach ($politic_settings as $key => $value) {
-      if (is_array($value)) {
-        if ($defaultvalue=dpi_variable_get($key,"void")) {
-        	$politic_settings[$key]["#default_value"]=$defaultvalue;
-        }
-      }
-    }
-    return $politic_settings;
-  }  
+  public function settingsform_getdefaultvalues($politic) {
+    return dpi_variable_get("paywallpolitic_".$politic,array());
+  }
   
   /**
    * settingsform_submit method.
@@ -55,24 +47,13 @@ abstract class PaywallPolitics {
    * If a subclass didn't implement the submit method, we provide a simple dpi settings
    * method to store settings in the dpi cache.
    * 
-   * @param Array $form
-   *   The complete settings form
-   * @param Array $form_state
-   *   The complete settings forms state
-   *   
    * @see system_settings_form_submit
    * 
   */
   public function settingsform_submit($form, $form_state) {
-
-    // Exclude unnecessary elements.
-    form_state_values_clean($form_state);
-    foreach ($form_state['values'] as $key => $value) {
-      if (is_array($value) && isset($form_state['values']['array_filter'])) {
-        $value = array_keys(array_filter($value));
-      }
-      dpi_variable_set($key, $value);
-    }
+    form_state_values_clean($form_state);     
+    dpi_variable_set('dpisso_paywall_paywallpolitics',$form_state["values"]["dpisso_paywall_paywallpolitics"]);
+    dpi_variable_set("paywallpolitic_".$form_state["values"]["dpisso_paywall_paywallpolitics"], $form_state["values"]);
     drupal_set_message(t('The configuration options have been saved.'));
   }
   

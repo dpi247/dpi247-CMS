@@ -127,7 +127,7 @@ function dpisso_theme() {
     'path' => $path.'/theme',
   );
   return array(
-      'checkboxtable' => $base + array(
+      'checkboxgrid' => $base + array(
           'render element' => 'element'
       ),
     );
@@ -153,7 +153,7 @@ function dpisso_ctools_plugin_type() {
  * 
  * Change the normal form login form behaviour to allow login against the login Manager.
  */
-function dpisso_form_user_login_alter( &$form, $form_state )
+function dpisso_form_user_login_alter( $form, $form_state )
 {
   $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
 }
