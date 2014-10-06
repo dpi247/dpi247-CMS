@@ -188,7 +188,7 @@ function dpipub_block_info(){
   $pub_list = $query->fields('p',array('position', 'builder'))->execute();
   foreach ($pub_list as $row){ 
       $blocks[$row->position] = array(
-        'info' => t('Pub '.$row->position),
+        'info' => t($row->position),
         'cache' => DRUPAL_CACHE_PER_PAGE,
       );
       if(isset($row->builder) && $row->builder=="dfp"){
