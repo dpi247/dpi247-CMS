@@ -281,10 +281,11 @@ function dpidestinations_api_del_multi_destination_by_label($label) {
     return FALSE;
   }
 }
-function dpidestinations_api_get_one_multi_destination_by_label(){
+function dpidestinations_api_get_one_multi_destination_by_label($label){
   try{
     return db_select('dpidestinations_multi_destinations', 'dmd')
               ->fields('dmd', array('destinations'))
+              ->condition('label', $label, '=')
               ->execute()
               ->fetchAssoc();
   }catch (Exception $e){

@@ -57,7 +57,7 @@ function dpidestinations_page_multiple_destinations_add($label = NULL) {
  * @param array $form_state          
  * @return array()
  */
-function dpidestinations_form_multiple_destinations_form($form, &$form_state, $label) {
+function dpidestinations_form_multiple_destinations_form($form, &$form_state, $label = NULL) {
   $form = array ();
   $form_temp = $form;
   
@@ -68,12 +68,59 @@ function dpidestinations_form_multiple_destinations_form($form, &$form_state, $l
     '#size' => 60,
     '#required' => TRUE 
   );
-  
-  $destination = new stdClass ();
+      
+  $destination = new stdClass();
   $destination->type = "package";
   field_attach_form ( 'node', $destination, $form_temp, $form_state );
   
-  $form ["field_destinations"] = $form_temp ['field_destinations'];
+  if($label!=NULL){
+    $form['label_hidden'] = array('#type' => 'hidden', '#value' => $label);
+    //step 1 : get informations
+    $multi_destinations = dpidestinations_api_get_one_multi_destination_by_label($label);
+    $destinations = unserialize($multi_destinations["destinations"]);
+    $cp_field_destination = $form_temp ['field_destinations'][$form_temp['field_destinations']["#language"]];
+    $all_destinations = array();
+    $cpt = 0;
+    
+    //step 2 create table of information
+    foreach ($destinations as $destination){
+      $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($destination['tid']);
+      $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destination['tid'], $destination['target']);
+      $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destination['tid'], $destination['target'], TRUE);
+      
+      $tmp = $cp_field_destination[0];
+      
+      $tmp["element_key"]["#value"] = $destination["element_key"];
+      
+      $tmp["#delta"] = $cpt;
+      $tmp["#prefix"] = '<div id="dropdown-target-replace_'.$cpt.'">';
+      
+      $tmp["tid"]["#default_value"] = $destination["tid"];      
+      
+      $tmp["target"]["#options"] = $target_options;
+      $tmp["target"]["#default_value"] = $destination["target"];      
+      $tmp["target"]["#ajax"]["wrapper"] = 'dropdown-target-replace_'.$cpt;
+      
+      $tmp["rank"]["#options"] = $rank_options;
+      $tmp["rank"]["#default_value"] = $destination["rank"];
+      
+      $tmp["layout"]["#options"] = $layout_options;
+      $tmp["layout"]["#default_value"] = $destination["layout"];
+      
+      $tmp["_weight"]["#delta"] = $cpt;
+      $tmp["_weight"]["#default_value"] = $cpt;
+      
+      $all_destinations[] = $tmp;
+      $cpt++;
+    }
+    
+    foreach ($all_destinations as $k => $v){
+      $form_temp ['field_destinations'][$form_temp['field_destinations']["#language"]][$k] = $v;
+    }
+     $form_temp ['field_destinations'][$form_temp['field_destinations']["#language"]]["#max_delta"] = 2;     
+  }
+
+  $form ["field_destinations"] = $form_temp ['field_destinations'];     
   
   $form ['submit'] = array (
     '#type' => 'submit',
@@ -92,24 +139,40 @@ function dpidestinations_form_multiple_destinations_form_validate($form, &$form_
 }
 
 function dpidestinations_form_multiple_destinations_form_submit($form, $form_state) {
-  try {
-    $query = db_insert ( 'dpidestinations_multi_destinations' )->fields ( array (
-      'label' => $form_state ["values"] ["label"],
-      'destinations ' => serialize ( dpidestinations_get_destinations_from_form_value ( $form_state ) ) 
-    ) )->execute ();
-    drupal_set_message ( 'Successful registration' );
-    drupal_goto ( 'admin/dpi247/dpidestinations/destinationmultiple' );
-  } catch ( Exception $e ) {
-    drupal_set_message ( 'Registration failed' );
+  if(isset($form_state["values"]["label_hidden"])){
+    try {
+      $query = db_update('dpidestinations_multi_destinations')->fields ( array (
+        'destinations ' => serialize ( dpidestinations_get_destinations_from_form_value ( $form_state ) )
+      ) )
+      ->condition('label', $form_state ["values"] ["label"], '=')
+      ->execute ();
+      drupal_set_message ( 'Successful updating' );
+      drupal_goto ( 'admin/dpi247/dpidestinations/destinationmultiple' );
+    } catch ( Exception $e ) {
+      drupal_set_message ( 'Registration failed' , 'error' );
+    }
+  }else{
+    try {
+      $query = db_insert ( 'dpidestinations_multi_destinations' )->fields ( array (
+        'label' => $form_state ["values"] ["label"],
+        'destinations ' => serialize ( dpidestinations_get_destinations_from_form_value ( $form_state ) )
+      ) )->execute ();
+      drupal_set_message ( 'Successful registration' );
+      drupal_goto ( 'admin/dpi247/dpidestinations/destinationmultiple' );
+    } catch ( Exception $e ) {
+      drupal_set_message ( 'Registration failed' , 'error' );
+    } 
   }
 }
 
-function dpidestinations_get_destinations_from_form_value($form) {
-  $array_value = current ( $form ["values"] ["field_destinations"] ); // bypass language, It's always the first array
-  if (array_pop ( $array_value ) != null) { // Pop button value to give only the destinations
-    return $array_value;
+function dpidestinations_get_destinations_from_form_value($form_state) {
+  $array_value = current ( $form_state ["values"] ["field_destinations"] ); // bypass language, It's always the first array
+  $return_val = array();
+  foreach ($array_value as $k => $v){
+    if(strcmp($k, "add_more"))
+      $return_val[$k] = $v;
   }
-  return false;
+  return $return_val;
 }
 
 function dpidestinations_page_multiple_destinations_del($label) {
