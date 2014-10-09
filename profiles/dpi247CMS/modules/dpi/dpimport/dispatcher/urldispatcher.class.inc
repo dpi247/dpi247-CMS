@@ -117,7 +117,7 @@ class UrlDispatcher extends Dispatcher {
     if (mkdir($default_path, 0777, true)) {      
       if (mkdir($default_path . "/todo", 0777 )) {
         $dispatcher_settings = parent::submitSettingsForm ( $values, $form_state_multistep );
-        $dispatcher_settings ['source_url'] = $default_path . "/todo";
+        $dispatcher_settings ['source_url'] = $form_state_multistep ["default"] ["name"] . "/todo";
         drupal_set_message("Creating : " . $default_path . "/todo");
       } else {
         drupal_set_message("Creating source folder fail", 'error');
