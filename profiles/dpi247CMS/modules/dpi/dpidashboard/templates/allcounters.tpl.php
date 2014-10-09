@@ -1,3 +1,4 @@
+<div style="overflow:hidden">
 <?php if (isset($data['#content']['nbviews'])) :?>
   <div class="dpiDashboardSocialCountAll" id="dpiDashboardSocialCountAllviews"><?php print $data['#content']['nbviews'] ?></div>
 <?php endif;?>
@@ -16,3 +17,4 @@
 <?php if (isset($data['#content']['googleplus'])) :?>
   <div class="dpiDashboardSocialCountAll" id="dpiDashboardSocialCountAllgoogleplus"><span id="dpiDashboardSocialCountAllgoogleplusDisplay"></span></div>
 <?php endif;?>
+</div>

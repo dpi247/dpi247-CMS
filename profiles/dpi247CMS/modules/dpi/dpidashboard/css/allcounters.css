@@ -4,24 +4,44 @@
 	width: 50px;
 	height: 50px;
 	float:left;
+	margin-left:5px;
+	margin-bottom:5px;
+	padding-left:5px;
+}
+
+
+#dpiDashboardSocialCountAllviews {
+	background-color:#66cc33;
+	background-image:url(../icons/badge-views.png);
+	color:#FFF;
+}
+
+#dpiDashboardSocialCountAllcomments {
+	background-color:#00bbf2;
+	background-image:url(../icons/badge-comments.png);
+	color:#FFF;
 }
 
 #dpiDashboardSocialCountAllfacebook {
 	background-color:#3b5998;
+	background-image:url(../icons/badge-facebook.png);
 	color:#FFF;
 }
 
 #dpiDashboardSocialCountAlltwitter {
 	background-color:#00aced;
+	background-image:url(../icons/badge-twitter.png);
 	color:#FFF;
 }
 
 #dpiDashboardSocialCountAllgoogleplus {
 	background-color:#dd4b39;
+	background-image:url(../icons/badge-googleplus.png);
 	color:#FFF;
 }
 
 #dpiDashboardSocialCountAlllinkedin {
 	background-color:#007bb6;
+	background-image:url(../icons/badge-linkedin.png);
 	color:#FFF;
 }

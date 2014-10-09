@@ -39,25 +39,33 @@ function vitaldashboard_admin_info($subtype, $conf, $context = NULL) {
 
 function vitaldashboard_content_type_render($subtype, $conf, $args, $context) {
 	
-  drupal_add_css('https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css', 'external');
-  //drupal_add_css('https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css', 'external');
-  drupal_add_js('https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js');
+  //drupal_add_css('https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css', 'external');
+ // drupal_add_js('https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js');
+  drupal_add_css(drupal_get_path('module', 'dpidashboard') . '/css/vitaldashboard.css');
 
   $description = (!empty($conf['description'])) ? check_plain($conf['description']) : '';
-  $title = 'Number of views';
+  $title = 'Vital dashboard';
   
   $block = new stdClass();
-  $block->module = 'viewsnode';
+  $block->module = 'vitaldashboard';
   $block->delta = $subtype;
   $block->title = $title;
   
-  $header = array(t('title'), t('status'), t('description'), t('link'));
-  $rows = array(
-  	array('11','<span class="glyphicon glyphicon-ok-sign"></span>','13','14'),
-	array('21','<span class="glyphicon glyphicon-remove-sign"></span>','23','24'),
-	array('31','<span class="glyphicon glyphicon-info-sign"></span>','33','34'),
-	array('41','<span class="glyphicon glyphicon-question-sign"></span>','43','44'),
-  );
+  $header = array(t('Title'), t('Status'), t('Description'), t('Path'));
+  
+  $dashboards = module_invoke_all('dpidashboard_status_item');
+  
+  $rows = array();
+  
+  foreach ($dashboards as $d) {
+	$row = array(
+		$d['title'],
+		'<div class="dpidashboardStatus'.$d['status'].'"></div>',
+		$d['message'],
+		'<a href="'.$d['link'].'">'.t('Edit').'</a>'
+	); 
+	$rows[] = $row; 
+  }
   
   $output = theme('table', array('header' => $header, 'rows' => $rows ));
   

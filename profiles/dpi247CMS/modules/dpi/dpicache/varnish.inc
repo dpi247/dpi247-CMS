@@ -10,6 +10,9 @@ define('VARNISH_SERVER_STATUS_UP', 1);
 define('VARNISH_BANTYPE_NORMAL', 0);
 define('VARNISH_BANTYPE_BANLURKER', 1);
 define('VARNISH_DEFAULT_BANTYPE', VARNISH_BANTYPE_NORMAL);
+define('VARNISH_SERVER_STATUS_DETAIL_UP', 1);
+define('VARNISH_SERVER_STATUS_DETAIL_STOPPED', 2);
+define('VARNISH_SERVER_STATUS_DETAIL_DOWN', 0);
 
 
 
@@ -79,6 +82,42 @@ function varnish_get_status() {
     foreach ($terminals as $terminal) {
       $stat = array_shift($status);
       $results[$terminal] = ($stat['status']['code'] == 200) ? VARNISH_SERVER_STATUS_UP : VARNISH_SERVER_STATUS_DOWN;
+    }
+  }
+  return $results;
+}
+
+/**
+ * Get the status (up/down/stopped) of each of the varnish servers.
+ *
+ * @return An array of server statuses, keyed by varnish terminal addresses.
+ * The status will be a numeric constant, either:
+ * - VARNISH_SERVER_STATUS_DETAIL_UP
+ * - VARNISH_SERVER_STATUS_DETAIL_STOPPED
+ * - VARNISH_SERVER_STATUS_DETAIL_DOWN
+ */
+function varnish_get_status_detail() {
+  // use a static-cache so this can be called repeatedly without incurring
+  // socket-connects for each call.
+  static $results = NULL;
+  if (is_null($results)) {
+    $results = array();
+    $status = _varnish_terminal_run(array('status'));
+    $terminals = explode(' ', variable_get('varnish_control_terminal', '127.0.0.1:6082'));
+    foreach ($terminals as $terminal) {
+	  if (!empty($status[$terminal])) {
+		  if ($status[$terminal]['status']['code'] == 200) {
+			  if (strpos($status[$terminal]['status']['msg'],'stop')===false) {
+				  $results[$terminal] =  VARNISH_SERVER_STATUS_DETAIL_UP; 
+			  } else {
+				  $results[$terminal] =  VARNISH_SERVER_STATUS_DETAIL_STOPPED; 
+			  }
+		  } else {
+			 $results[$terminal] =  VARNISH_SERVER_STATUS_DETAIL_DOWN;  
+		  }
+	  } else {
+			$results[$terminal] =  VARNISH_SERVER_STATUS_DETAIL_DOWN; 
+	  }
     }
   }
   return $results;

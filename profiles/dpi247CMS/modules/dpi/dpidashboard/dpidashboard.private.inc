@@ -4,8 +4,8 @@ function _dpidashboard_user_has_permission_displaydashboardnode() {
 	return user_access('displaydashboardnode');	
 }
 
-function _dpidashboard_user_has_permission_displaydashboardterm() {
-	return user_access('displaydashboardnode');	
+function _dpidashboard_user_has_permission_displaydashboardsection() {
+	return user_access('displaydashboardsection');	
 }
 
 function _dpidashboard_user_has_permission_displaydashsystem() {
@@ -74,6 +74,38 @@ function dpidashboard_get_views_node_for_periode($nid, $periode) {
 		  }
 		  
 		  $resultG = db_query('SELECT AVG('.$theField.') AS avg FROM {dpistat_node_counter} WHERE '.$theField.'>0');
+		  
+		  $statsG = $resultG->fetchAssoc();
+		  
+		  if (empty($statsG['avg'])) $statsG['avg']=0;
+		  
+		  return array(
+			'count'	=> $stats['count'],
+			'avg'	=> $statsG['avg']
+		  );
+	  
+	  } else {
+			return false;  
+	  }
+	  	
+}
+
+function dpidashboard_get_views_section_for_periode($tid, $periode) {
+
+	  $query = db_select('dpistat_term_counter', 'tc');
+	  $query->fields('tc',array('tid'))->condition('tid',$tid);
+	  
+	  if ($theField = _dpidashboard_periode_to_field($periode)) {
+	  
+		  $query->addField('tc',$theField,'count');
+		  
+		  $result = $query->execute();
+		  
+		  if (!$stats = $result->fetchAssoc()) { // stats not avaible yet !
+				return false;  
+		  }
+		  
+		  $resultG = db_query('SELECT AVG('.$theField.') AS avg FROM {dpistat_term_counter} WHERE '.$theField.'>0');
 		  
 		  $statsG = $resultG->fetchAssoc();
 		  

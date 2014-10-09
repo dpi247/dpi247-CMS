@@ -3,40 +3,9 @@
 module_load_include('inc', 'dpidashboard', 'dpidashboard.private');
 module_load_include('inc', 'dpidashboard', 'dpidashboard.forms.ajax');
 
-function dpidashboard_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' && $plugin == 'content_types') {
-    return 'plugins/ctools/content_types';
-  }
-  
-}
-
-function dpidashboard_ctools_plugin_api($module, $api) {
-  if ($module == 'page_manager' && $api == 'pages_default') {
-    return array('version' => 1);
-  }
-}
-
-function dpidashboard_permission() {
-  return array(
-    'displaydashboardnode' => array(
-      'title' => t('Display dashboard for a node'),
-      'description' => t('Display dashboard for a node.'),
-    ),
-	'displaydashboardterm' => array(
-      'title' => t('Display dashboard for a term'),
-      'description' => t('Display dashboard for a term.'),
-    ),
-	'displaydashsystem' => array(
-      'title' => t('Display general dashboard'),
-      'description' => t('Display general dashboard.'),
-    ),
-    'getsocialshares' => array(
-      'title' => t('Get social shares on url'),
-      'description' => t('Get social shares on url.'),
-    ),
-  );
-}
-
+/**
+ * Implementation of hook_menu().
+ */
 function dpidashboard_menu() {
 
 	$items = array();
@@ -52,6 +21,9 @@ function dpidashboard_menu() {
 	
 }
 
+/**
+ * Implementation of hook_theme
+ */
 function dpidashboard_theme() {
   return array(
     'allcounters' => array(
@@ -60,6 +32,62 @@ function dpidashboard_theme() {
     ),
   );
 }
+
+/**
+ * Implementation of hook_permission()
+ */
+function dpidashboard_permission() {
+  return array(
+    'displaydashboardnode' => array(
+      'title' => t('Display dashboard for a node'),
+      'description' => t('Display dashboard for a node.'),
+    ),
+	'displaydashboardsection' => array(
+      'title' => t('Display dashboard for a section'),
+      'description' => t('Display dashboard for a section.'),
+    ),
+	'displaydashsystem' => array(
+      'title' => t('Display general dashboard'),
+      'description' => t('Display general dashboard.'),
+    ),
+    'getsocialshares' => array(
+      'title' => t('Get social shares on url'),
+      'description' => t('Get social shares on url.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpidashboard_ctools_plugin_api($module, $api) {
+  if ($module == 'page_manager' && $api == 'pages_default') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function dpidashboard_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/ctools/content_types';
+  }
+  
+}
+
+/**
+ * Implementation of hook__default_page_manager_pages()
+ */
 
 function dpidashboard_default_page_manager_pages() {
   $pages = array();
@@ -74,7 +102,16 @@ function dpidashboard_default_page_manager_pages() {
 	$page->admin_description = 'DPI Dashboard';
 	$page->path = 'admin/dashboard';
 	$page->access = array(
-	  'plugins' => array(),
+	  'plugins' => array(
+		0 => array(
+		  'name' => 'perm',
+		  'settings' => array(
+			'perm' => 'displaydashsystem',
+		  ),
+		  'context' => 'logged-in-user',
+		  'not' => FALSE,
+		),
+	  ),
 	  'logic' => 'and',
 	);
 	$page->menu = array();
@@ -122,6 +159,25 @@ function dpidashboard_default_page_manager_pages() {
 	$display->content = array();
 	$display->panels = array();
 	  $pane = new stdClass();
+	  $pane->pid = 'new-bc26ff01-d4c9-4c01-8e6a-0284ca62aa40';
+	  $pane->panel = 'left';
+	  $pane->type = 'vitaldashboard';
+	  $pane->subtype = 'vitaldashboard';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array();
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = 'bc26ff01-d4c9-4c01-8e6a-0284ca62aa40';
+	  $display->content['new-bc26ff01-d4c9-4c01-8e6a-0284ca62aa40'] = $pane;
+	  $display->panels['left'][0] = 'new-bc26ff01-d4c9-4c01-8e6a-0284ca62aa40';
+	  $pane = new stdClass();
 	  $pane->pid = 'new-4751e563-bdd3-484d-87f0-cbf2f32c6a14';
 	  $pane->panel = 'left';
 	  $pane->type = 'views_panes';
@@ -130,14 +186,16 @@ function dpidashboard_default_page_manager_pages() {
 	  $pane->access = array();
 	  $pane->configuration = array();
 	  $pane->cache = array();
-	  $pane->style = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
 	  $pane->css = array();
 	  $pane->extras = array();
-	  $pane->position = 0;
+	  $pane->position = 1;
 	  $pane->locks = array();
 	  $pane->uuid = '4751e563-bdd3-484d-87f0-cbf2f32c6a14';
 	  $display->content['new-4751e563-bdd3-484d-87f0-cbf2f32c6a14'] = $pane;
-	  $display->panels['left'][0] = 'new-4751e563-bdd3-484d-87f0-cbf2f32c6a14';
+	  $display->panels['left'][1] = 'new-4751e563-bdd3-484d-87f0-cbf2f32c6a14';
 	  $pane = new stdClass();
 	  $pane->pid = 'new-b4a22c4f-9002-45d3-872a-72b115cb597d';
 	  $pane->panel = 'left';
@@ -162,14 +220,16 @@ function dpidashboard_default_page_manager_pages() {
 		'override_title_text' => '',
 	  );
 	  $pane->cache = array();
-	  $pane->style = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
 	  $pane->css = array();
 	  $pane->extras = array();
-	  $pane->position = 1;
+	  $pane->position = 2;
 	  $pane->locks = array();
 	  $pane->uuid = 'b4a22c4f-9002-45d3-872a-72b115cb597d';
 	  $display->content['new-b4a22c4f-9002-45d3-872a-72b115cb597d'] = $pane;
-	  $display->panels['left'][1] = 'new-b4a22c4f-9002-45d3-872a-72b115cb597d';
+	  $display->panels['left'][2] = 'new-b4a22c4f-9002-45d3-872a-72b115cb597d';
 	  $pane = new stdClass();
 	  $pane->pid = 'new-31db0d79-bfd2-4fa8-85c3-dd284fecbcfe';
 	  $pane->panel = 'left';
@@ -194,14 +254,16 @@ function dpidashboard_default_page_manager_pages() {
 		'override_title_text' => '',
 	  );
 	  $pane->cache = array();
-	  $pane->style = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
 	  $pane->css = array();
 	  $pane->extras = array();
-	  $pane->position = 2;
+	  $pane->position = 3;
 	  $pane->locks = array();
 	  $pane->uuid = '31db0d79-bfd2-4fa8-85c3-dd284fecbcfe';
 	  $display->content['new-31db0d79-bfd2-4fa8-85c3-dd284fecbcfe'] = $pane;
-	  $display->panels['left'][2] = 'new-31db0d79-bfd2-4fa8-85c3-dd284fecbcfe';
+	  $display->panels['left'][3] = 'new-31db0d79-bfd2-4fa8-85c3-dd284fecbcfe';
 	  $pane = new stdClass();
 	  $pane->pid = 'new-bfc11d43-4c61-401d-98ff-a20d3cce8db0';
 	  $pane->panel = 'right';
@@ -226,7 +288,9 @@ function dpidashboard_default_page_manager_pages() {
 		'override_title_text' => '',
 	  );
 	  $pane->cache = array();
-	  $pane->style = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
 	  $pane->css = array();
 	  $pane->extras = array();
 	  $pane->position = 0;
@@ -258,7 +322,9 @@ function dpidashboard_default_page_manager_pages() {
 		'override_title_text' => '',
 	  );
 	  $pane->cache = array();
-	  $pane->style = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
 	  $pane->css = array();
 	  $pane->extras = array();
 	  $pane->position = 1;
@@ -291,6 +357,454 @@ function dpidashboard_default_page_manager_pages() {
 	$page->default_handlers[$handler->name] = $handler;
 
     $pages[$page->name] = $page;
+	
+	$page = new stdClass();
+	$page->disabled = FALSE; /* Edit this to true to make a default page disabled initially */
+	$page->api_version = 1;
+	$page->name = 'section_dashboard';
+	$page->task = 'page';
+	$page->admin_title = 'Section Dashboard';
+	$page->admin_description = '';
+	$page->path = 'section/%section/dashboard';
+	$page->access = array(
+	  'plugins' => array(
+		0 => array(
+		  'name' => 'perm',
+		  'settings' => array(
+			'perm' => 'displaydashboardterm',
+		  ),
+		  'context' => 'logged-in-user',
+		  'not' => FALSE,
+		),
+	  ),
+	  'logic' => 'and',
+	);
+	$page->menu = array();
+	$page->arguments = array(
+	  'section' => array(
+		'id' => 1,
+		'identifier' => 'Taxonomy term: ID',
+		'name' => 'term',
+		'settings' => array(
+		  'input_form' => 'tid',
+		  'vids' => array(
+			3 => '3',
+			1 => 0,
+			2 => 0,
+			5 => 0,
+			4 => 0,
+			6 => 0,
+			7 => 0,
+			8 => 0,
+			9 => 0,
+			11 => 0,
+			10 => 0,
+			12 => 0,
+			13 => 0,
+		  ),
+		  'breadcrumb' => 1,
+		  'transform' => 0,
+		),
+	  ),
+	);
+	$page->conf = array(
+	  'admin_paths' => FALSE,
+	);
+	$page->default_handlers = array();
+	$handler = new stdClass();
+	$handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
+	$handler->api_version = 1;
+	$handler->name = 'page_section_dashboard_panel_context';
+	$handler->task = 'page';
+	$handler->subtask = 'section_dashboard';
+	$handler->handler = 'panel_context';
+	$handler->weight = 0;
+	$handler->conf = array(
+	  'title' => 'Panel',
+	  'no_blocks' => 0,
+	  'pipeline' => 'standard',
+	  'body_classes_to_remove' => '',
+	  'body_classes_to_add' => '',
+	  'css_id' => '',
+	  'css' => '',
+	  'contexts' => array(),
+	  'relationships' => array(),
+	);
+	$display = new panels_display();
+	$display->layout = 'twocol_66_33';
+	$display->layout_settings = array();
+	$display->panel_settings = array(
+	  'style_settings' => array(
+		'default' => NULL,
+		'left' => NULL,
+		'right' => NULL,
+		'tag1' => NULL,
+		'tag2' => NULL,
+		'tag3' => NULL,
+		'bottom' => NULL,
+	  ),
+	);
+	$display->cache = array();
+	$display->title = '';
+	$display->uuid = '2b72609f-6e2b-4d72-8f8d-673462b3f492';
+	$display->content = array();
+	$display->panels = array();
+	  $pane = new stdClass();
+	  $pane->pid = 'new-398b5893-72e6-4505-b610-41166b69d1df';
+	  $pane->panel = 'left';
+	  $pane->type = 'viewssection';
+	  $pane->subtype = 'viewssection';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array();
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = '398b5893-72e6-4505-b610-41166b69d1df';
+	  $display->content['new-398b5893-72e6-4505-b610-41166b69d1df'] = $pane;
+	  $display->panels['left'][0] = 'new-398b5893-72e6-4505-b610-41166b69d1df';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-b9f6391d-8bd2-48f0-ac64-5d95d5056d9e';
+	  $pane->panel = 'left';
+	  $pane->type = 'servertime';
+	  $pane->subtype = 'servertime';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array();
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 1;
+	  $pane->locks = array();
+	  $pane->uuid = 'b9f6391d-8bd2-48f0-ac64-5d95d5056d9e';
+	  $display->content['new-b9f6391d-8bd2-48f0-ac64-5d95d5056d9e'] = $pane;
+	  $display->panels['left'][1] = 'new-b9f6391d-8bd2-48f0-ac64-5d95d5056d9e';
+	$display->hide_title = PANELS_TITLE_FIXED;
+	$display->title_pane = '0';
+	$handler->conf['display'] = $display;
+	$page->default_handlers[$handler->name] = $handler;
+	
+	$pages[$page->name] = $page;
+	
+	$page = new stdClass();
+	$page->disabled = FALSE; /* Edit this to true to make a default page disabled initially */
+	$page->api_version = 1;
+	$page->name = 'node_dashboard';
+	$page->task = 'page';
+	$page->admin_title = 'Node dashboard';
+	$page->admin_description = '';
+	$page->path = 'node/%node/dashboard';
+	$page->access = array(
+	  'plugins' => array(
+		0 => array(
+		  'name' => 'perm',
+		  'settings' => array(
+			'perm' => 'displaydashboardnode',
+		  ),
+		  'context' => 'logged-in-user',
+		  'not' => FALSE,
+		),
+	  ),
+	  'logic' => 'and',
+	);
+	$page->menu = array();
+	$page->arguments = array(
+	  'node' => array(
+		'id' => 1,
+		'identifier' => 'Node: ID',
+		'name' => 'entity_id:node',
+		'settings' => array(),
+	  ),
+	);
+	$page->conf = array(
+	  'admin_paths' => FALSE,
+	);
+	$page->default_handlers = array();
+	$handler = new stdClass();
+	$handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
+	$handler->api_version = 1;
+	$handler->name = 'page_node_dashboard_panel_context';
+	$handler->task = 'page';
+	$handler->subtask = 'node_dashboard';
+	$handler->handler = 'panel_context';
+	$handler->weight = 0;
+	$handler->conf = array(
+	  'title' => 'Panel',
+	  'no_blocks' => 0,
+	  'pipeline' => 'standard',
+	  'body_classes_to_remove' => '',
+	  'body_classes_to_add' => '',
+	  'css_id' => '',
+	  'css' => '',
+	  'contexts' => array(),
+	  'relationships' => array(),
+	);
+	$display = new panels_display();
+	$display->layout = 'twocol_66_33';
+	$display->layout_settings = array();
+	$display->panel_settings = array(
+	  'style_settings' => array(
+		'default' => NULL,
+		'left' => NULL,
+		'right' => NULL,
+		'tag1' => NULL,
+		'tag2' => NULL,
+		'tag3' => NULL,
+		'bottom' => NULL,
+	  ),
+	);
+	$display->cache = array();
+	$display->title = '';
+	$display->uuid = 'ab4b6ca8-de04-4c6a-845a-670eb1215840';
+	$display->content = array();
+	$display->panels = array();
+	  $pane = new stdClass();
+	  $pane->pid = 'new-67d6dea4-18a1-4920-b991-cff2ad002843';
+	  $pane->panel = 'bottom';
+	  $pane->type = 'block';
+	  $pane->subtype = 'system-powered-by';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = '67d6dea4-18a1-4920-b991-cff2ad002843';
+	  $display->content['new-67d6dea4-18a1-4920-b991-cff2ad002843'] = $pane;
+	  $display->panels['bottom'][0] = 'new-67d6dea4-18a1-4920-b991-cff2ad002843';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-d9495275-7d9b-4be2-bc20-4e9ab472e53e';
+	  $pane->panel = 'bottom';
+	  $pane->type = 'views';
+	  $pane->subtype = 'dpidashboard_list_comments';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'override_pager_settings' => 0,
+		'use_pager' => 1,
+		'nodes_per_page' => '0',
+		'pager_id' => '0',
+		'offset' => '0',
+		'more_link' => 0,
+		'feed_icons' => 0,
+		'panel_args' => 0,
+		'link_to_view' => 0,
+		'args' => '%1',
+		'url' => '',
+		'display' => 'default',
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 1;
+	  $pane->locks = array();
+	  $pane->uuid = 'd9495275-7d9b-4be2-bc20-4e9ab472e53e';
+	  $display->content['new-d9495275-7d9b-4be2-bc20-4e9ab472e53e'] = $pane;
+	  $display->panels['bottom'][1] = 'new-d9495275-7d9b-4be2-bc20-4e9ab472e53e';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-80b99a8c-6809-4400-9ec1-b06ff6e33735';
+	  $pane->panel = 'left';
+	  $pane->type = 'allcounters';
+	  $pane->subtype = 'allcounters';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'options' => array(
+		  'nbviews' => 1,
+		  'nbcomments' => 1,
+		  'facebook' => 1,
+		  'twitter' => 1,
+		  'googleplus' => 1,
+		  'linkedin' => 1,
+		),
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = '80b99a8c-6809-4400-9ec1-b06ff6e33735';
+	  $display->content['new-80b99a8c-6809-4400-9ec1-b06ff6e33735'] = $pane;
+	  $display->panels['left'][0] = 'new-80b99a8c-6809-4400-9ec1-b06ff6e33735';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-46f55ca1-8303-4ac7-ae86-015e7bf36c8e';
+	  $pane->panel = 'left';
+	  $pane->type = 'comments';
+	  $pane->subtype = 'comments';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'nb' => 1,
+		'options' => array(
+		  'tops' => 1,
+		  'latest' => 0,
+		),
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 1;
+	  $pane->locks = array();
+	  $pane->uuid = '46f55ca1-8303-4ac7-ae86-015e7bf36c8e';
+	  $display->content['new-46f55ca1-8303-4ac7-ae86-015e7bf36c8e'] = $pane;
+	  $display->panels['left'][1] = 'new-46f55ca1-8303-4ac7-ae86-015e7bf36c8e';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-4d6a33e1-e7b8-4c2d-a4a1-f5840d095b29';
+	  $pane->panel = 'left';
+	  $pane->type = 'comments';
+	  $pane->subtype = 'comments';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'nb' => 0,
+		'options' => array(
+		  'tops' => 1,
+		  'latest' => 1,
+		),
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 2;
+	  $pane->locks = array();
+	  $pane->uuid = '4d6a33e1-e7b8-4c2d-a4a1-f5840d095b29';
+	  $display->content['new-4d6a33e1-e7b8-4c2d-a4a1-f5840d095b29'] = $pane;
+	  $display->panels['left'][2] = 'new-4d6a33e1-e7b8-4c2d-a4a1-f5840d095b29';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-ccd2b357-4afd-4880-a921-821cd2222113';
+	  $pane->panel = 'left';
+	  $pane->type = 'toparticles';
+	  $pane->subtype = 'toparticles';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array();
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 3;
+	  $pane->locks = array();
+	  $pane->uuid = 'ccd2b357-4afd-4880-a921-821cd2222113';
+	  $display->content['new-ccd2b357-4afd-4880-a921-821cd2222113'] = $pane;
+	  $display->panels['left'][3] = 'new-ccd2b357-4afd-4880-a921-821cd2222113';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-64d7e2f6-1c4c-4134-bdc8-9818e6bf5dc3';
+	  $pane->panel = 'left';
+	  $pane->type = 'comments';
+	  $pane->subtype = 'comments';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'nb' => 0,
+		'options' => array(
+		  'tops' => 1,
+		  'latest' => 1,
+		),
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 4;
+	  $pane->locks = array();
+	  $pane->uuid = '64d7e2f6-1c4c-4134-bdc8-9818e6bf5dc3';
+	  $display->content['new-64d7e2f6-1c4c-4134-bdc8-9818e6bf5dc3'] = $pane;
+	  $display->panels['left'][4] = 'new-64d7e2f6-1c4c-4134-bdc8-9818e6bf5dc3';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-91f78f22-7eea-450f-aec3-ed29392dfe46';
+	  $pane->panel = 'right';
+	  $pane->type = 'socialshares';
+	  $pane->subtype = 'socialshares';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array(
+		'options' => array(
+		  'facebook' => 1,
+		  'twitter' => 1,
+		  'googleplus' => 1,
+		  'linkedin' => 1,
+		),
+		'override_title' => 0,
+		'override_title_text' => '',
+	  );
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = '91f78f22-7eea-450f-aec3-ed29392dfe46';
+	  $display->content['new-91f78f22-7eea-450f-aec3-ed29392dfe46'] = $pane;
+	  $display->panels['right'][0] = 'new-91f78f22-7eea-450f-aec3-ed29392dfe46';
+	  $pane = new stdClass();
+	  $pane->pid = 'new-7783e35a-7999-43de-b56e-8e3370fe54b6';
+	  $pane->panel = 'tag1';
+	  $pane->type = 'viewsnode';
+	  $pane->subtype = 'viewsnode';
+	  $pane->shown = TRUE;
+	  $pane->access = array();
+	  $pane->configuration = array();
+	  $pane->cache = array();
+	  $pane->style = array(
+		'settings' => NULL,
+	  );
+	  $pane->css = array();
+	  $pane->extras = array();
+	  $pane->position = 0;
+	  $pane->locks = array();
+	  $pane->uuid = '7783e35a-7999-43de-b56e-8e3370fe54b6';
+	  $display->content['new-7783e35a-7999-43de-b56e-8e3370fe54b6'] = $pane;
+	  $display->panels['tag1'][0] = 'new-7783e35a-7999-43de-b56e-8e3370fe54b6';
+	$display->hide_title = PANELS_TITLE_FIXED;
+	$display->title_pane = '0';
+	$handler->conf['display'] = $display;
+	$page->default_handlers[$handler->name] = $handler;
+	
+	$pages[$page->name] = $page;
    
   return $pages;
 }
@@ -305,3 +819,18 @@ function dpidashboard_views_api() {
   );
 }
 
+/**
+ * Implementation of hook_dpidashboard_status_item().
+ */
+function dpidashboard_dpidashboard_status_item() {
+	$status = array(
+		array(
+			'title' 	=> 'DPI Dashboard',
+			'status'	=> 0,
+			'message'	=> t('Tout va bien'),
+			'link'		=> '/admin/dashboard',
+		),
+	);
+	
+	return $status;	
+}

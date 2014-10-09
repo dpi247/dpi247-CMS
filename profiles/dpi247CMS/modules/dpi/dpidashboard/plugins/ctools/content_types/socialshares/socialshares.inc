@@ -100,22 +100,47 @@ function socialshares_content_type_render($subtype, $conf, $args, $context) {
 
   $description = (!empty($conf['description'])) ? check_plain($conf['description']) : '';
   $title = 'Social Shares';
+  
+  $output = '
+  <div id="piechartSocialShare"></div>
+  <script type="text/javascript">
+  	  arraySocialShares = [
+	  	["Network", "Shares"]
+	  ];
+  	
+      dataSocialShares = google.visualization.arrayToDataTable(arraySocialShares);
+     
+      function drawChartSocialShares(data) {
 
-  $output = '';
+        var chart = new google.visualization.PieChart(document.getElementById("piechartSocialShare"));
+		
+		var options = {};
+
+
+        chart.draw(data, options);
+      }
+	  
+	  drawChartSocialShares(dataSocialShares);
+    </script>
+';
+  
   $script = '';
   
   foreach($conf['options'] as $key=>$value) {
     if ($value==1) {
-		$output.='<div id="dpiDashboardSocialCount'.$key.'">'.$key.': <span id="dpiDashboardSocialCount'.$key.'Display"></span></div>';
 		$script.="
 		jQuery.ajax({
 			url: '/dpidashboard/ajax/getsocialshares?social=".$key."&url='+document.URL,
 			cache: false,
 			success:function(result){
 				if (result.success==false) {
-					jQuery('#dpiDashboardSocialCount".$key."Display').html(result.error);
+					alert(result.error);
 				} else {
-					jQuery('#dpiDashboardSocialCount".$key."Display').html(result.count_str);
+					if (result.count_str>0) {
+						arraySocialShares.push(['".$key."',result.count_str]);
+						dataSocialShares = google.visualization.arrayToDataTable(arraySocialShares);
+						drawChartSocialShares(dataSocialShares);
+					}
 				}
 			}
 		});
@@ -123,7 +148,11 @@ function socialshares_content_type_render($subtype, $conf, $args, $context) {
 	}
   }
   
-  $output.='<script>'.$script.'</script>';
+  $values = array(
+  	'script'	=> $script
+  );
+
+  $output .= '<script>'.$script.'</script>';
 
   $block = new stdClass();
   $block->module = 'socialshares';
@@ -134,3 +163,4 @@ function socialshares_content_type_render($subtype, $conf, $args, $context) {
   return $block;
 
 }
+

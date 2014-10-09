@@ -176,6 +176,84 @@ function viewsnode_ajax_replace_form_markup_callback($form, $form_state) {
 
 }
 
+function _viewssection_form_render_form($form,&$form_state){
+  $args=$form_state["build_info"]['args'][0];
+  
+  $values = _dpidashboard_forms_ajax_get_values($form_state);
+  
+  $periodes = _dpidashboard_forms_ajax_get_perides();
+
+  $form['select']=array(
+    '#type'=>'select',
+    "#title"=>'Periode',
+    "#options"=>$periodes,
+	'#default_value' => $values['select'],
+	'#attributes'=>array(
+	  'autocomplete' => 'off',
+	),
+    '#ajax' => array(
+      'callback' => 'viewssection_ajax_replace_form_markup_callback',
+      'wrapper' => 'viewssection_markup_content',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+  
+  $stats = dpidashboard_get_views_section_for_periode($values['tid'],$values['select']);
+  
+  $markup = "
+    
+ 	<script>
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+         ['Section', 'Views'],
+         ['Current', ".$stats['count']."],            // RGB value
+         ['Average', ".$stats['avg']."],            // English color name
+      ]);
+
+        var options = {
+         
+          hAxis: {minValue: 0}
+        };
+
+        var chart = new google.visualization.BarChart(document.getElementById('viewssection_markup_content_chart'));
+
+        chart.draw(data, options);
+      }
+	  drawChart();
+	  </script>
+	 ";
+	/*
+  if ($stats) $markup = $stats['count'].' / '.$stats['avg'];
+  else $markup = 'n/a';
+  */
+
+  $form["markup"]=array(
+    '#markup'=>$markup,
+    '#prefix' => '<div id="viewssection_markup_content_chart"></div><div id="viewssection_markup_content">',
+    '#suffix' => '</div>',
+  );
+  
+  $form["tid"]=array(
+  	'#type' => 'value', 
+	'#value' => $values['tid']
+  );
+  
+  $form['#attached']['js'] = array(
+	"https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['corechart']}]}",
+  );
+  
+  return $form;
+}
+
+
+
+function viewssection_ajax_replace_form_markup_callback($form, $form_state) {
+
+  return $form['markup'];
+
+}
+
 function _dpidashboard_view_remove_item_from_periode($periode, &$view) {
   if ($periode!='1d') $view->set_item('default','field','daycount',NULL);
   
