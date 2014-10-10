@@ -18,10 +18,13 @@ function enathemeui_ctools_plugin_directory($owner, $plugin_type) {
  * Implements hook_ctools_plugin_type() to inform CTools about the layout plugin.
  */
 function enathemeui_ctools_plugin_type() {
-  return array( 
-    "enarenderapi" => array(
-     'use hooks' => TRUE,
-   ));
+  return array(
+    "enarenderoperation" => array(
+      'use hooks' => TRUE,
+        ),
+    "enarenderdefinition" => array(
+      'use hooks' => TRUE,
+        ));
 }
 
 
@@ -29,9 +32,20 @@ function enathemeui_ctools_plugin_type() {
  * Implementation of hook_theme
  */
 function enathemeui_theme() {
-	
-  return array();
-  
+
+  return array(
+    'enathemeui_theme_operation'=>array(
+      'render element' => 'elements',
+      
+      ),
+    );
+
+}
+
+function theme_enathemeui_theme_operation($variables){
+  dsm($variables,'BISON');
+//  $operation_class=enathemeui_api_get_enarenderoperation_class($render_operation_plugin_name,$unique_id);
+//  $operation_class->render_operation();
 }
 
 
@@ -41,8 +55,8 @@ function enathemeui_theme() {
  * Implements hook_ctools_plugin_type() to inform CTools about the layout plugin.
  */
 function enathemeui_form_alter(&$form, &$form_state, $form_id) {
-  
-  $active_plugins=enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$form,$form_state);  
+
+  $active_plugins=enathemeui_ressource_manager_get_active_plugin_for_form_id($form_id,$form,$form_state);
   $form['enathemeui']=enathemeui_ressource_manager_form_alter($active_plugins);
   $form['enathemeui']["#tree"]=TRUE;
   $form["#submit"][]="enathemeui_form_alter_submit";
@@ -50,14 +64,83 @@ function enathemeui_form_alter(&$form, &$form_state, $form_id) {
 
 
 function enathemeui_form_alter_submit($form, &$form_state) {
+  dsm($form_state);
   foreach($form_state['values']['enathemeui'] as $plugin_name=>$values_item){
-    
-    $plugin_class=enathemeui_api_get_enarenderapi_class($plugin_name);
-    
+
+
     $unique_id=$values_item['unique_id'];
+
     unset($values_item['unique_id']);
-    
+
+    $plugin=enathemeui_api_get_enarenderoperation_class($plugin_name,$unique_id);
+
     $plugin->save_values($plugin_name,$unique_id,$values_item);
-    
+
   }
 }
+function enathemeui_theme_registry_alter(& $registry){
+
+  dsm($registry,registry);
+  
+  $themes_operations=enathemeui_ressourcemanager_get_active_ressource_for_formid();
+  foreach($themes_operations as $theme_function=>$theme_operation){
+    foreach($theme_operation as $render_plugin_name=>$render_operation){
+      if(isset($render_operation['alter theme registry'])){
+        
+        //On appelle la fonction dynamiquement (cfr définition des render)
+        $render_operation['alter theme registry']($registry[key($render_operation['render operation'])]);
+        $registry[key($render_operation['render operation'])]['enathemeui']['operation plugin']='toto';
+        $registry[key($render_operation['render operation'])]['enathemeui']['defintition plugin']='tata';
+      }
+      foreach($render_operation['render operation'] as $key=>$function){
+        $registry[$key][key($function)][]=current($function);
+        
+      }
+    }
+
+  }
+}
+function enathemeui_preprocess_tt($variables){
+  dsm($variables,fff);
+}
+function enathemeui_preprocess_menu_tree_registry_alter($registry){
+}
+
+
+
+
+function enathemeui_ressourcemanager_get_active_ressource_for_formid(){
+  return array(
+
+    'node_form'=>array(
+      'enarenderoperationelement'=>array(
+        'uniqueid callback' =>'bla bla',
+        'values callback'=>'toto',
+        'values callback'=>'toto',
+      ),
+    ),
+    'menu_edit_menu'=>array(
+      'enarenderoperationwrapper'=>array(
+        'form uniqueid callback' =>'menu_edit_menu_get_form_uniqueid',
+        'element uniqueid callback' =>'menu_edit_menu_get_cocoid',
+
+        'alter theme registry' => 'menu_edit_menu_registry_alter',
+        'render operation'=>array(
+          'menu_tree' => array(
+            'preprocess functions'=>'mafonctiondepreprocess_menu_edit_menu'
+            ),
+        ),
+         
+      ),
+    )
+
+  );
+
+}
+
+//
+
+
+//
+
+

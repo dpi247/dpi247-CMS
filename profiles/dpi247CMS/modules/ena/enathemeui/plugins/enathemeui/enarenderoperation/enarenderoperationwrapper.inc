@@ -1,49 +1,30 @@
 <?php
 $plugin = array(
   'handler' => array(
-    'class' => 'EnaRenderApiWrapper',
+    'class' => 'EnaRenderOperationWrapper',
   ),
-  'active_hooks'=>array(
-    'hook_form_alter',
-//    'preprocess_node'
-
-    ),
+  //Sert aussi a documenter la structure a laquelle s'attend le enarenderapi plugin
+  'default_values'=>array(
+    'wrapper_html_tag'=>'h2',
+    'wrapper_html_tag_custom_class'=>'TATA',
+    )
+  ,
+ 
 );
 
 
 
-
-class EnaRenderApiWrapper extends EnaRenderApi {
+class EnaRenderOperationWrapper extends EnaRenderOperation {
   
   
   public $default_values;
   public $unique_id;
   
-  public function  get_uniqueid($form, $form_state){
-    
-    $menu_name = str_replace('_','-',$form['menu_name']['#default_value']);
-    return $menu_name;
-    
-  }
-  public function operation($a,$b){
-    return $a+$b;
-  }
-  
   
   public function settings_form(){
     
     
-    $form['wrapper_html'] =$this->_settings_form_details();
-
-    return $form;
-    
-  }
-  
-  
-  
-  function _settings_form_details(){
-    $default_value = $this->default_values;
-    dsm($default_value,dv);
+  $default_value = $this->get_values();
     
     $element = array(
       '#type' => 'fieldset',
@@ -86,6 +67,22 @@ class EnaRenderApiWrapper extends EnaRenderApi {
     );
 
     return $element;
+  }
+  
+  
+  public function render_operation($render_array){
+    
+    $default_values=$this->get_values($plugin_name, $unique_id);
+   
+    return array(
+     '#value' =>array($render_array,$render_array,$render_array,$render_array,$render_array,$render_array,$render_array),
+      '#tag' => $default_values['wrapper_html_tag'],
+      '#attributes' => array(
+      'class' => $default_values['wrapper_html_tag_custom_class'],
+      ),
+      '#theme_wrappers' => array(0 => 'ena_render_wrapper'),
+    );
+    
   }
   
 }

@@ -4,4 +4,5 @@ name = "ENA Theme ui"
 package = "ENA"
 
 
-files[] = includes/enathemeui.enarenderapi.class.inc
+files[] = includes/enathemeui.enarenderoperation.class.inc
+files[] = includes/enathemeui.enarenderdefinition.class.inc

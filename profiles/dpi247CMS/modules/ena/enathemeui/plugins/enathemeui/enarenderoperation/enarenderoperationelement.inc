@@ -1,7 +1,7 @@
 <?php
 $plugin = array(
   'handler' => array(
-    'class' => 'EnaRenderApiElement',
+    'class' => 'EnaRenderOperationElement',
   ),
 
   'active_hooks'=>array(
@@ -14,7 +14,7 @@ $plugin = array(
 
 
 
-class EnaRenderApiElement extends EnaRenderApi {
+class EnaRenderOperationElement extends EnaRenderOperation {
   
   public function operation($a,$b){
     return $a-$b;
