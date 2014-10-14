@@ -41,12 +41,10 @@ function dpicontext_api_get_one_context($id) {
       'value',
       'id' 
     ) )->execute ();
-    
     while( $row = $query->fetchAssoc () ) {
       $row ['value'] = unserialize ( $row ['value'] );
       $return = $row;
     }
-    
     return $return;
   } catch ( Exception $e ) {
     return FALSE;

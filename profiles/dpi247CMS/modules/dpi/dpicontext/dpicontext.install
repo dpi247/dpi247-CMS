@@ -7,7 +7,6 @@
  */
 function dpicontext_schema() {
   $schema = array ();
-  
   $schema ['dpi_context'] = array (
     'description' => 'dpi_context',
     'fields' => array (
@@ -41,6 +40,5 @@ function dpicontext_schema() {
       'id' 
     ) 
   );
-  
   return $schema;
 }

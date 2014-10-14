@@ -1,19 +1,35 @@
 <?php
 
+/**
+ * @author GVD - LBA
+ */
+
+/**
+ * This function is a callback from menu to add context
+ *
+ * @param integer $id          
+ * @return render(form)
+ */
 function dpicontext_add_or_edit($id = NULL) {
   return drupal_get_form ( 'dpicontext_add_form', $id );
 }
 
+/**
+ * This function generate form to add context
+ *
+ * @param array $form          
+ * @param array $form_state          
+ * @param integer $id          
+ * @return array
+ */
 function dpicontext_add_form($form, &$form_state, $id) {
   $form = array ();
   
   if (isset ( $id )) {
-    
     $form ['store'] = array (
       '#type' => 'value',
       '#value' => $id 
     );
-    
     $context = dpicontext_api_get_one_context ( $id );
     $text = "";
     if (is_array ( $context ['value'] )) {
@@ -55,7 +71,6 @@ function dpicontext_add_form($form, &$form_state, $id) {
   
   $form ['value_fieldset'] = array (
     '#title' => t ( "Input field" ),
-    
     // The prefix/suffix provide the div that we're replacing, named by
     // #ajax['wrapper'] above.
     '#prefix' => '<div id="value_field-div">',
@@ -64,7 +79,6 @@ function dpicontext_add_form($form, &$form_state, $id) {
   );
   
   // get db or default value for type
-  
   if (isset ( $form_state ['values'] ['dpicontext_types'] )) {
     $type = $form_state ['values'] ['dpicontext_types'];
   } else {
@@ -124,23 +138,31 @@ function dpicontext_add_form($form, &$form_state, $id) {
     '#type' => 'submit',
     '#value' => t ( 'Submit' ) 
   );
+  
   return $form;
 }
 
+/**
+ * This is use to return fieldset after ajax call
+ *
+ * @param array $form          
+ * @param array $form_state          
+ * @return array:form_element
+ */
 function dpicontext_ajax_typed_form($form, $form_state) {
-  
   // delete previous value when input type is changed to avoid typo
   // i.e : if previous type is date and user select type text the previous date is show in the textarea
   $form ['value_fieldset'] ['input'] ['#value'] = "";
-  
   return $form ['value_fieldset'];
 }
 
 /**
- * Validate annotation settings submission.
+ * This is use to validate form and format informations
+ *
+ * @param array $form          
+ * @param array $form_state          
  */
 function dpicontext_add_form_validate($form, &$form_state) {
-  // TODO verify label ? only string ?
   $type = $form_state ['values'] ['dpicontext_types'];
   
   if ($type == 2) {
@@ -151,30 +173,28 @@ function dpicontext_add_form_validate($form, &$form_state) {
   }
   
   if (! empty ( $value )) {
-    
     switch ($type) {
       case 0 :
-        if (! is_numeric ( $value )) {
-          form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
-        }
+          if (! is_numeric ( $value )) {
+            form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
+          }
         break;
       case 1 :
-        if (! is_string ( $value )) {
-          form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
-        } else {
-          $array_formated = array ();
-          $text = trim ( $value );
-          $textAr = explode ( "\n", $text );
-          $textAr = array_filter ( $textAr, 'trim' );
-          $form_state ['values'] ['input'] = $textAr;
-        }
+          if (! is_string ( $value )) {
+            form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
+          } else {
+            $array_formated = array ();
+            $text = trim ( $value );
+            $textAr = explode ( "\n", $text );
+            $textAr = array_filter ( $textAr, 'trim' );
+            $form_state ['values'] ['input'] = $textAr;
+          }
         break;
       case 2 :
-        if (! (strtotime ( $value [0] ) < strtotime ( $value [1] ))) {
-          form_set_error ( 'value_fieldset', t ( 'End date must be greater than start date' ) );
-        }
-        $form_state ['values'] ['input'] = $value;
-      default :
+          if (! (strtotime ( $value [0] ) < strtotime ( $value [1] ))) {
+            form_set_error ( 'value_fieldset', t ( 'End date must be greater than start date' ) );
+          }
+          $form_state ['values'] ['input'] = $value;
         break;
     }
   } else {
@@ -183,8 +203,10 @@ function dpicontext_add_form_validate($form, &$form_state) {
 }
 
 /**
- * **
- * Process form submission.
+ * Process for updating or saving informations
+ *
+ * @param array $form          
+ * @param array $form_state          
  */
 function dpicontext_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
