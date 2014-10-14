@@ -17,11 +17,11 @@ function dpicontext_settings_form($form, &$form_state) {
   $form = array ();
   $data_list = dpicontext_api_get_all_context ();
   $rows = array ();
+  
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpicontext_change_date_format ( $data_list, $v, $k );
     }
-    
     $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k );
   }
   
@@ -132,13 +132,13 @@ function dpicontext_reorder_informations_to_save($infos, $form) {
       }
     }
   }
-  
   return $return;
 }
 
 /**
  * This function create right render for the date
- *
+ * Modify date format from y-m-d to d-m-y
+ * 
  * @param array $data_list          
  * @param integer $v          
  * @param integer $k          
@@ -146,9 +146,7 @@ function dpicontext_reorder_informations_to_save($infos, $form) {
 function dpicontext_change_date_format(&$data_list, $v, $k) {
   $text = "";
   foreach ( $v ['value'] as $str ) {
-    // modify date format from y-m-d to d-m-y
     $str = date ( "d-m-Y H:i", strtotime ( $str ) );
-    
     $text .= $str . ' - ';
   }
   $text = substr ( $text, 0, - 3 );
