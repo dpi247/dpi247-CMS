@@ -1,8 +1,8 @@
-name = dpicontext
+name = Dpi context
 description = "Create customs contexts"
 package = DPI
 core = 7.x
 dependencies[] = system
+dependencies[] = dpicache
 files[]= dpicontext.module
 files[]= dpicontext.install
-files[]= dpicontext.admin.inc
