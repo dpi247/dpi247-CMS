@@ -162,7 +162,7 @@ function dpicontext_add_form_validate($form, &$form_state) {
         if (! is_string ( $value )) {
           form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
         } else {
-          $array_formated = array();
+          $array_formated = array ();
           $text = trim ( $value );
           $textAr = explode ( "\n", $text );
           $textAr = array_filter ( $textAr, 'trim' );
@@ -188,19 +188,16 @@ function dpicontext_add_form_validate($form, &$form_state) {
  */
 function dpicontext_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
-    
-    if (dpicontext_api_update ( $form_state )) {
+    if (dpicontext_api_update_context_by_id ( $form_state ['values'] ['dpicontext_label'], $form_state ['values'] ['dpicontext_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
     } else {
       drupal_set_message ( 'Error while updating data !', 'error' );
     }
   } else {
-    if (dpicontext_api_add ( $form_state )) {
+    if (dpicontext_api_add_context ( $form_state ['values'] ['dpicontext_label'], $form_state ['values'] ['dpicontext_types'], $form_state ['values'] ['input'] )) {
       drupal_set_message ( 'Data saved successfully' );
     } else {
       drupal_set_message ( 'Error while saving data !', 'error' );
     }
-    
-    drupal_goto ( 'admin/config/dpicontext/settings' );
   }
 }

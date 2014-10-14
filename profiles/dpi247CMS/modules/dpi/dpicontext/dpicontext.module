@@ -1,19 +1,17 @@
 <?php
+/**
+ * @author GVD - LBA
+ */
 module_load_include ( 'php', 'dpicontext', 'dpicontext.api' );
 
 /**
- * Implementation of a hook_menu();
- */
-
-/**
- */
-/**
+ * Implementation of hook_menu
  *
- * @param char $a          
- * @param unknown $b          
- * @return unknown
+ * @return multitype:array
  */
 function dpicontext_menu() {
+  $items = array();
+  
   $items ['admin/config/dpicontext'] = array (
     'title' => 'Create customs dpicontext',
     'description' => 'Allow admin to create specific dpicontext.',
@@ -27,7 +25,6 @@ function dpicontext_menu() {
     'file_path' => drupal_get_path ( 'module', 'system' ) 
   );
   
-  // root path for tabbed menu
   $items ['admin/config/dpicontext/settings'] = array (
     'title' => 'Customs contexts settings',
     'description' => 'Modify context\'s propreties.',
@@ -40,7 +37,6 @@ function dpicontext_menu() {
     'file path' => drupal_get_path ( 'module', 'dpicontext' ) . '/includes' 
   );
   
-  // tab 1 = settings
   $items ['admin/config/dpicontext/settings/settings'] = array (
     'title' => 'Settings',
     'description' => 'Set contexts options',
@@ -56,7 +52,6 @@ function dpicontext_menu() {
     'file path' => drupal_get_path ( 'module', 'dpicontext' ) . '/includes' 
   );
   
-  // tab2 = view
   $items ['admin/config/dpicontext/settings/view'] = array (
     'title' => 'List',
     'description' => 'View contexts',
@@ -64,7 +59,6 @@ function dpicontext_menu() {
     "weight" => - 40 
   );
   
-  // add
   $items ['admin/config/dpicontext/settings/add'] = array (
     'title' => 'Add customs contexts settings',
     'description' => 'Add context\'s propreties.',
@@ -76,7 +70,6 @@ function dpicontext_menu() {
     'file path' => drupal_get_path ( 'module', 'dpicontext' ) . '/includes' 
   );
   
-  // edit
   $items ['admin/config/dpicontext/settings/edit/%'] = array (
     'title' => 'Add customs contexts settings',
     'description' => 'Add context\'s propreties.',
@@ -91,7 +84,6 @@ function dpicontext_menu() {
     'file path' => drupal_get_path ( 'module', 'dpicontext' ) . '/includes' 
   );
   
-  // delete
   $items ['admin/config/dpicontext/settings/delete/%'] = array (
     'title' => 'Add customs contexts settings',
     'description' => 'Add context\'s propreties.',
@@ -109,6 +101,11 @@ function dpicontext_menu() {
   return $items;
 }
 
+/**
+ * Implementation of hook_permission
+ *
+ * @return multitype:array
+ */
 function dpicontext_permission() {
   return array (
     'administer dpicontext' => array (
@@ -118,12 +115,25 @@ function dpicontext_permission() {
   );
 }
 
+/**
+ * Implementation of hook_ctools_plugin_directory
+ *
+ * @param String $owner          
+ * @param String $plugin_type          
+ * @return string
+ */
 function dpicontext_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'ctools' && $plugin_type == 'access') {
     return 'plugins/' . $plugin_type;
   }
 }
 
+/**
+ * Implementation of hook_theme
+ * Use: create table form element
+ *
+ * @return multitype:array
+ */
 function dpicontext_theme($existing, $type, $theme, $path) {
   return array (
     'dpicontext_table_theme' => array (
