@@ -3,6 +3,7 @@
 /**
  * @author LBA 
  */
+define('VARIABLE_NAME', 'dpicontext_value_at_moment');
 
 /**
  * This function create form
@@ -22,7 +23,8 @@ function dpicontext_settings_form($form, &$form_state) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpicontext_change_date_format ( $data_list, $v, $k );
     }
-    $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k );
+    $val_recorded = dpi_variable_get(VARIABLE_NAME, array());
+    $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
   }
   
   $form ['table'] = array (
@@ -89,7 +91,7 @@ function dpicontext_settings_form_submit($form, & $form_state) {
     
     $val = dpicontext_reorder_informations_to_save ( $temp_form_state, $form );
     
-    dpi_variable_set('dpicontext_value_at_moment', $val);
+    dpi_variable_set(VARIABLE_NAME, $val);
     drupal_set_message ( 'Saved successfuly !' );
   } catch (Exception $e) {
     drupal_set_message ( 'An error is happened to create values' );
@@ -120,7 +122,8 @@ function dpicontext_reorder_informations_to_save($infos, $form) {
         case 1 :
           $return [$val_info [1]] = array (
             'actif' => $v,
-            'value' => $form['table']['rows']['row_'.$val_info [1]]['options_'.$val_info [1].'_1']['#options'][$infos ['options_' . $val_info [1] . '_1']],  
+            'value' => $form['table']['rows']['row_'.$val_info [1]]['options_'.$val_info [1].'_1']['#options'][$infos ['options_' . $val_info [1] . '_1']],
+            'index' =>   $infos ['options_' . $val_info [1] . '_1'],
           );
           break;
         case 2 :
@@ -161,21 +164,23 @@ function dpicontext_change_date_format(&$data_list, $v, $k) {
  * @param integer $k          
  * @return form element
  */
-function dpicontext_get_form_element_by_type($data_list, $v, $k) {
+function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
   $return = NULL;
   switch ($data_list [$k] ['type']) {
     case 0 :
       $return = array (
         'activate_' . $v . '_0' => array (
           '#type' => 'checkbox',
-          '#title' => t ( 'Active' ) 
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE, 
         ),
         'label_' . $v . '_0' => array (
           '#markup' => $data_list [$k] ['label'] 
         ),
         'options_' . $v . '_0' => array (
           '#type' => 'select',
-          '#options' => range ( 0, $data_list [$k] ['value'] ) 
+          '#options' => range ( 0, $data_list [$k] ['value'] ),
+          '#default_value' => (isset($records[$v]['value']))? $records[$v]['value'] : FALSE,
         ) 
       );
       break;
@@ -183,14 +188,16 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k) {
       $return = array (
         'activate_' . $v . '_1' => array (
           '#type' => 'checkbox',
-          '#title' => t ( 'Active' ) 
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE,
         ),
         'label_' . $v . '_1' => array (
           '#markup' => $data_list [$k] ['label'] 
         ),
         'options_' . $v . '_1' => array (
           '#type' => 'select',
-          '#options' => $data_list [$k] ['value'] 
+          '#options' => $data_list [$k] ['value'],
+          '#default_value' => (isset($records[$v]['index']))? $records[$v]['index'] : FALSE,
         ) 
       );
       break;
@@ -198,7 +205,8 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k) {
       $return = array (
         'activate_' . $v . '_2' => array (
           '#type' => 'checkbox',
-          '#title' => t ( 'Active' ) 
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE,
         ),
         'label_' . $v . '_2' => array (
           '#markup' => $data_list [$k] ['label'] 
@@ -206,7 +214,7 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k) {
         'options_' . $v . '_2' => array (
           '#markup' => t ( 'Activate context : @context for date => @date', array (
             '@context' => $data_list [$k] ['label'],
-            '@date' => $data_list [$k] ['value'] 
+            '@date' => $data_list [$k] ['value'],
           ) ) 
         ) 
       );

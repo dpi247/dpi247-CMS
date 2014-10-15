@@ -60,6 +60,10 @@ function dpicontext_api_get_one_context($id) {
 function dpicontext_api_delete_context_by_id($id) {
   try {
     $result = db_delete ( 'dpi_context' )->condition ( 'id', $id, '=' )->execute ();
+    if(($val=dpi_variable_get('dpicontext_value_at_moment', FALSE))!=FALSE && isset($val[$id])){
+      unset($val[$id]);
+      dpi_variable_set('dpicontext_value_at_moment', $val);
+    }
     return $result;
   } catch ( Exception $e ) {
     return FALSE;
