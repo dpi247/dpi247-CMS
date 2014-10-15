@@ -485,9 +485,9 @@ abstract class Dispatcher {
       'zip' => $values ['zip'],
       'cron' => $values ['cron'],
       'cron_frequency' => $values ['cron_frequency'],
-      'temp_folder' => $default_path . "/tmp",
-      'done_folder' => $default_path . "/done",
-      'error_folder' => $default_path . "/error",
+      'temp_folder' => $form_state_multistep ["default"] ["name"] . "/tmp",
+      'done_folder' => $form_state_multistep ["default"] ["name"] . "/done",
+      'error_folder' => $form_state_multistep ["default"] ["name"] . "/error",
       'ttl_folder' => $values ['ttl_folder'] 
     );
     return $dispatcher_settings;

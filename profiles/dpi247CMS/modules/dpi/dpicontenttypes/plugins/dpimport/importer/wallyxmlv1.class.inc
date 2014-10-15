@@ -13,15 +13,16 @@ class WallyXmlV1 extends PackageHelper {
 
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
-
+    
     if (!Logger::error()) {
 
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher();
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
-
       $this->savePackage($dom, $package);
+      dsm($package);
+      
     }
 
     // Set the CurrentLog to the previous one to stop children growing.

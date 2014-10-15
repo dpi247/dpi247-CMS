@@ -109,13 +109,6 @@ class FolderDispatcher extends Dispatcher {
    */
   public function getSettingsForm(&$form_state, $values){
     $form = parent::getSettingsForm($form_state, $values);
-    $form['dispatcher']['source_folder'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Source directory path'),
-      '#description' => t('This must be an existing and writable path. The Stream Wrapper is importer://'),
-      '#default_value' => isset($values['source_folder']) ? $values['source_folder'] : NULL,
-      '#required' => TRUE,
-    );
     return $form;
   }
 
@@ -126,10 +119,10 @@ class FolderDispatcher extends Dispatcher {
    */
   public function validateSettingsForm(&$form_state){
     parent::validateSettingsForm($form_state);
-    $path = 'importer://'.$form_state['values']['source_folder'];
+    /*$path = 'importer://'.$form_state['values']['source_folder'];
     if (!file_prepare_directory($path)) {
       form_set_error('source_folder', t('Source directory path : The path provided is not an existing writable directory.'));
-    }
+    }*/
   }
 
   /**
@@ -139,9 +132,23 @@ class FolderDispatcher extends Dispatcher {
    *
    * @return Array $dispatcher_settings
    */
-  public function submitSettingsForm($values){
-    $dispatcher_settings = parent::submitSettingsForm($values);
-    $dispatcher_settings['source_folder'] = $values['source_folder'];
+  public function submitSettingsForm($values, $form_state_multistep){
+    $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep ["default"] ["name"];
+    $old = umask(0);
+    
+    if (mkdir($default_path, 0777, true)) {
+      if (mkdir($default_path . "/todo", 0777 )) {
+        $dispatcher_settings = parent::submitSettingsForm($values, $form_state_multistep);
+        $dispatcher_settings ['source_url'] = $default_path . "/todo";
+        drupal_set_message("Creating : " . $default_path . "/todo");
+      } else {
+        drupal_set_message("Creating source folder fail", 'error');
+      }
+    } else {
+      drupal_set_message("File cannot be created", "error");
+    }
+    umask($old);
+    $dispatcher_settings['source_folder'] = $form_state_multistep ["default"] ["name"] . "/todo";
     return $dispatcher_settings;
   }
 

@@ -36,12 +36,10 @@ function dpiservices_clear_cache_of_json() {
   dpicache_api_regenerate_all_cache_entry_callback('dpiservices_dpisection_index_render');
   dpicache_api_regenerate_all_cache_entry_callback('dpiservices_wallypackages_render');
   dpicache_api_regenerate_all_cache_entry_callback('dpiservices_wallypackages_render');  
-  drupal_set_message("Cache is regenerated");
 }
 
 function dpiservices_clear_cache_of_section_json(){
   dpicache_api_regenerate_all_cache_entry_callback('dpiservices_wallysection_render');
   dpicache_api_regenerate_all_cache_entry_callback('dpiservices_dpijsonexporter_render');  
-  drupal_set_message("Cache is regenerated");
 }
 

@@ -8,9 +8,9 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   $form['info']=array(
     '#markup'=>'This panels is use to manage cache.'
   );
-
+  
   $form['dpicache_use'] = array(
-    '#title' => t('Utilization for caching system'),
+    '#title' => t('Utilisation for caching system'),
     '#description' => 'Check this box if you want to disable the module dpicache',
     '#type' => 'fieldset',
   );
@@ -18,10 +18,27 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   $form['dpicache_use']['dpicache_utilisation'] = array(
     '#title' => t('Disable dpicache'),
     '#type' => 'checkbox',    
-    '#default_value'=>variable_get('dpicache_disable_dpicache_utilisation', FALSE),
+    '#default_value' => variable_get('dpicache_disable_dpicache_utilisation', FALSE),
   );
   
   $form['dpicache_use']['dpicache_status'] = array(
+    '#type' => 'submit',
+    '#value'=>'Save',
+  );
+  
+  $form['dpicache_accumulation'] = array(
+    '#title' => t('Settings for caching with accumulation'),
+    '#description' => 'Check this box if you want to activate accumulation système',
+    '#type' => 'fieldset',
+  );
+  
+  $form['dpicache_accumulation']['accumulation'] = array(
+    '#title' => t('Activate accumulation système'),
+    '#type' => 'checkbox',
+    '#default_value' => dpi_variable_get('dpicache_disable_dpicache_accumulation', FALSE),
+  );
+  
+  $form['dpicache_accumulation']['dpicache_accumulation_cache'] = array(
     '#type' => 'submit',
     '#value'=>'Save',
   );
@@ -70,6 +87,10 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
  */
 function dpicache_pages_form_cache_clear_form_submit($form, &$form_state){
   switch ($form_state['triggering_element']['#parents'][0]){
+    case 'dpicache_accumulation_cache' :
+        dpi_variable_set('dpicache_disable_dpicache_accumulation', $form_state['values']['accumulation']);   
+        drupal_set_message("Settings saved");
+      break;
     case 'dpicache_status':        
         variable_set('dpicache_disable_dpicache_utilisation', $form_state['values']['dpicache_utilisation']);
         drupal_set_message("Settings saved");
