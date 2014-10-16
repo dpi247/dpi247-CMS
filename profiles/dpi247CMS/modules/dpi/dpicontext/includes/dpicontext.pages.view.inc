@@ -136,34 +136,10 @@ function dpicontext_replace_context_type_from_int_to_string(& $data_list,$k) {
  * @param integer $k
  */
 function dpicontext_add_link_for_operation(& $data_list, $k) {
-  $link_table = array (
-    'data' => array (
-      array (
-        '#type' => 'link',
-        '#title' => t ( 'Edit' ),
-        '#href' => 'admin/config/dpicontext/settings/edit/' . $data_list [$k] ["id"] 
-      ),
-      array (
-        '#type' => 'text_format',
-        '#title' => " " 
-      ),
-      array (
-        '#type' => 'link',
-        '#title' => t ( 'Delete' ),
-        '#href' => 'admin/config/dpicontext/settings/delete/' . $data_list [$k] ["id"] 
-      ),
-      array (
-        '#type' => 'text_format',
-        '#title' => " " 
-      ),
-      array (
-        '#type' => 'link',
-        '#title' => t ( 'Set value' ),
-        '#href' => 'admin/config/dpicontext/settings/settings' 
-      ) 
-    ) 
-  );
-  array_push ( $data_list [$k], $link_table );
+  $links = l('Edit', 'admin/config/dpicontext/settings/edit/' . $data_list [$k] ["id"] ). ' - '
+          .l('Delete', 'admin/config/dpicontext/settings/delete/' . $data_list [$k] ["id"] ). ' - '
+          .l('Set value', 'admin/config/dpicontext/settings/settings' );
+  array_push ( $data_list [$k], $links );
 }
 
 /**

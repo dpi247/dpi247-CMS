@@ -113,3 +113,20 @@ function dpicontext_api_add_context($label, $type, $unserialize_value) {
   }
 }
 
+/**
+ * This function create right render for the date
+ * Modify date format from y-m-d to d-m-y
+ *
+ * @param array $data_list
+ * @param integer $v
+ * @param integer $k
+ */
+function dpicontext_api_change_date_format(&$data_list, $v, $k) {
+  $text = "";
+  foreach ( $v ['value'] as $str ) {
+    $str = date ( "d-m-Y H:i", strtotime ( $str ) );
+    $text .= $str . ' - ';
+  }
+  $text = substr ( $text, 0, - 3 );
+  $data_list [$k] ['value'] = $text;
+}

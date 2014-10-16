@@ -21,7 +21,7 @@ function dpicontext_settings_form($form, &$form_state) {
   
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
-      dpicontext_change_date_format ( $data_list, $v, $k );
+      dpicontext_api_change_date_format ( $data_list, $v, $k );
     }
     $val_recorded = dpi_variable_get(VARIABLE_NAME, array());
     $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
@@ -136,24 +136,6 @@ function dpicontext_reorder_informations_to_save($infos, $form) {
     }
   }
   return $return;
-}
-
-/**
- * This function create right render for the date
- * Modify date format from y-m-d to d-m-y
- * 
- * @param array $data_list          
- * @param integer $v          
- * @param integer $k          
- */
-function dpicontext_change_date_format(&$data_list, $v, $k) {
-  $text = "";
-  foreach ( $v ['value'] as $str ) {
-    $str = date ( "d-m-Y H:i", strtotime ( $str ) );
-    $text .= $str . ' - ';
-  }
-  $text = substr ( $text, 0, - 3 );
-  $data_list [$k] ['value'] = $text;
 }
 
 /**
