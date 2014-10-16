@@ -60,9 +60,9 @@ function dpicontext_api_get_one_context($id) {
 function dpicontext_api_delete_context_by_id($id) {
   try {
     $result = db_delete ( 'dpi_context' )->condition ( 'id', $id, '=' )->execute ();
-    if(($val=dpi_variable_get('dpicontext_value_at_moment', FALSE))!=FALSE && isset($val[$id])){
-      unset($val[$id]);
-      dpi_variable_set('dpicontext_value_at_moment', $val);
+    if (($val = dpi_variable_get ( 'dpicontext_value_at_moment', FALSE )) != FALSE && isset ( $val [$id] )) {
+      unset ( $val [$id] );
+      dpi_variable_set ( 'dpicontext_value_at_moment', $val );
     }
     return $result;
   } catch ( Exception $e ) {
@@ -102,12 +102,11 @@ function dpicontext_api_update_context_by_id($label, $type, $unserialize_value, 
  */
 function dpicontext_api_add_context($label, $type, $unserialize_value) {
   try {
-    $result = db_insert ( 'dpi_context' )->fields ( array (
+    return $result = db_insert ( 'dpi_context' )->fields ( array (
       'label' => $label,
       'type' => $type,
       'value' => serialize ( $unserialize_value ) 
     ) )->execute ();
-    return TRUE;
   } catch ( Exception $e ) {
     return FALSE;
   }
@@ -117,9 +116,9 @@ function dpicontext_api_add_context($label, $type, $unserialize_value) {
  * This function create right render for the date
  * Modify date format from y-m-d to d-m-y
  *
- * @param array $data_list
- * @param integer $v
- * @param integer $k
+ * @param array $data_list          
+ * @param integer $v          
+ * @param integer $k          
  */
 function dpicontext_api_change_date_format(&$data_list, $v, $k) {
   $text = "";

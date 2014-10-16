@@ -1,0 +1,44 @@
+<?php 
+/**
+ * This test class is for tools file
+ * pub_taxonomy_get_path_by_tid_or_term is not possible to test 
+ * 
+ * @author lba@audaxis.com
+ */
+class SimpleTestDpiContextToolsTestCase extends DrupalWebTestCase{
+  
+  public static function getInfo(){
+    return array(
+      'name' => 'Api unit test',
+      'description' => 'Unit test for context.api',
+      'group' => 'Dpicontext',
+    );
+  }  
+  
+  function setUp() {
+    $this->setup = TRUE;
+  }
+  
+  function tearDown() { }
+  
+  function testDpicontextApiDbCrudFunction(){
+    $transaction = db_transaction();
+    try {
+      $id = dpicontext_api_add_context('info_dpicontext', 0, '20');
+      $this->assertTrue($id!=FALSE,'Insertion success', 'DpiContext');
+      $value = dpicontext_api_get_one_context($id);
+      $this->assertTrue($value!=FALSE && !empty($value), "récupération d'un élément par la fonction dpicontext_api_get_one_context", 'Dpicontext');
+      $value = dpicontext_api_get_all_context();
+      $this->assertTrue($value!=FALSE && !empty($value), "récupération d'un élément par la fonction dpicontext_api_get_all_context", 'Dpicontext');
+      dpicontext_api_update_context_by_id('info_dpicontext', 0, '10', $id);
+      $val = dpicontext_api_get_one_context($id);
+      $this->assertTrue($val['value'] == 10, 'Mise à jour fonctionnel dpicontext_api_update_context_by_id', 'Dpicontext');
+      $this->assertTrue(dpicontext_api_delete_context_by_id($id), 'Delete success dpicontext_api_delete_context_by_id', 'Dpicontext');
+    } catch (Exception $e) {
+      $transaction->rollback();
+      $this->assertTrue(FALSE, 'Problem occured during transaction', 'Dpicontext');
+    }
+  }
+  
+}
+
