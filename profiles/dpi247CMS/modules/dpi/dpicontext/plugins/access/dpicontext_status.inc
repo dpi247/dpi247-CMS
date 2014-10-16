@@ -17,7 +17,12 @@ $plugin = array (
 );
 
 /**
- * Settings form for the 'by role' access plugin.
+ * This function is use to create form about view settings
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @param array $conf
+ * @return multiple:array
  */
 function dpicontext_status_ctools_access_settings($form, &$form_state, $conf) {
   module_load_include ( 'php', 'dpicontext', 'dpicontext.api' );
@@ -46,12 +51,18 @@ function dpicontext_status_ctools_access_settings($form, &$form_state, $conf) {
 }
 
 /**
- * Check for access.
+ * This function Check if element can be view
+ * 
+ * @param array $conf
+ * @param string $context
+ * @return boolean
  */
 function dpicontext_status_ctools_access_check($conf, $context = NULL) {
+  module_load_include ( 'php', 'dpicontext', 'dpicontext.api' );
+  module_load_include ( 'inc', 'dpicontext', 'plugins/access/dpicontext_status' );
   $general_value = dpi_variable_get ( 'dpicontext_value_at_moment', NULL );
   $access = FALSE;
-  
+  $cpt_activity = 0;
   if (isset ( $general_value )) {
     foreach ( $conf as $elem_key => $elem_val ) {
       $id = explode ( '_', $elem_key );
@@ -63,59 +74,130 @@ function dpicontext_status_ctools_access_check($conf, $context = NULL) {
         
         switch (intval ( $first_key [2] )) {
           case 0 : // case of numeric
-            $second = array_slice ( $elem_val, 1, 1 );
-            switch (array_slice ( $elem_val, 2, 1 )) {
-              case '=' :
-                  if (intval ( $second ) == intval ( $general_value [$id] ['value'] )) {
-                    $access = TRUE;
-                  }
-                break;
-              case '>' :
-                  if (intval ( $second ) > intval ( $general_value [$id] ['value'] )) {
-                    $access = TRUE;
-                  }
-                break;
-              case '<' :
-                  if (intval ( $second ) < intval ( $general_value [$id] ['value'] )) {
-                    $access = TRUE;
-                  }
-                break;
+            if (($var = dpicontext_get_access_for_numeric_type ( $general_value, $id, $elem_val )) == - 1) {
+              return FALSE;
+            } elseif ($var == 1) {
+              $access = TRUE;
             }
             break;
           case 1 : // case of text
-            $second = array_slice ( $elem_val, 1, 1 );
-            if (intval ( $second ) == intval ( $general_value [$id] ['index'] )) {
+            if (($var = dpicontext_get_access_for_text_type ( $general_value, $elem_val, $id )) == - 1) {
+              return FALSE;
+            } elseif ($var == 1) {
               $access = TRUE;
             }
             break;
           case 2 : // case of date
-              
+            if(($var = dpicontext_get_access_for_date_type($elem_val, $id)) == -1){
+              return FALSE;
+            }elseif ($var == 1){
+              $access = TRUE;
+            }
             break;
         }
+        $cpt_activity ++;
       }
     }
+  }
+  
+  if ($cpt_activity == 0) {
+    $access = TRUE;
   }
   
   return $access;
 }
 
-function dpicontext_get_access_for_numeric_type($general_value, $elem_val, & $access) {
-  $access = true;
-}
-
-function dpicontext_get_access_for_text_type($general_value, $elem_val, & $access) {
-  $access = true;
-}
-
-function dpicontext_get_access_for_date_type($general_value, $elem_val, & $access) {
-  $access = true;
+/**
+ * This function is use to know for a numeric element if it can be view
+ * 
+ * @param array $general_value
+ * @param integer $id
+ * @param array $elem_val
+ * @return number
+ */
+function dpicontext_get_access_for_numeric_type($general_value, $id, $elem_val) {
+  $access = 0;
+  switch ($elem_val ['operation_' . $id . '_0']) {
+    case '=' :
+      if (intval ( $elem_val ['options_' . $id . '_0'] ) == intval ( $general_value [$id] ['value'] )) {
+        $access = 1;
+      } else {
+        return - 1;
+      }
+      break;
+    case '>' :
+      if (intval ( $elem_val ['options_' . $id . '_0'] ) < intval ( $general_value [$id] ['value'] )) {
+        $access = 1;
+      } else {
+        return - 1;
+      }
+      break;
+    case '<' :
+      if (intval ( $elem_val ['options_' . $id . '_0'] ) > intval ( $general_value [$id] ['value'] )) {
+        $access = 1;
+      } else {
+        return - 1;
+      }
+      break;
+  }
+  return $access;
 }
 
 /**
- * Provide a summary description based upon the checked roles.
+ * This function is use to know if an element can be viewed by text condition
+ * 
+ * @param array $general_value
+ * @param array $elem_val
+ * @param integer $id
+ * @return number
+ */
+function dpicontext_get_access_for_text_type($general_value, $elem_val, $id) {
+  $access = 0;
+  if (intval ( $elem_val ['options_' . $id . '_1'] ) == intval ( $general_value [$id] ['index'] )) {
+    $access = 1;
+  } else {
+    $access = - 1;
+  }
+  return $access;
+}
+
+/**
+ * This function is use to know if an element can be viewed by date condition
+ * 
+ * @param array $elem_val
+ * @param integer $id
+ * @return number
+ */
+function dpicontext_get_access_for_date_type($elem_val, $id) {
+  $access = 0;
+  $result = dpicontext_api_get_one_context ( $id );
+  switch ($elem_val ['operation_' . $id . '_2']) {
+    case 'outside' :
+      if (strtotime ( $result ['value'] [0] ) > time () || time () > strtotime ( $result ['value'] [1] )) {
+        $access = 1;
+      } else {
+        $access = - 1;
+      }
+      break;
+    case 'inside' :
+      if (strtotime ( $result ['value'] [0] ) < time () && time () < strtotime ( $result ['value'] [1] )) {
+        $access = 1;
+      } else {
+        $access = - 1;
+      }
+      break;
+  }
+  return $access;
+}
+
+/**
+ * This function return a simple sentence to pin up the rules
+ * 
+ * @param array $conf
+ * @param array $context
+ * @return String
  */
 function dpicontext_status_ctools_access_summary($conf, $context) {
-  dsm ( $conf );
   return t ( 'Dpicontext has defined rules' );
 }
 
