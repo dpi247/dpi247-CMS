@@ -1,7 +1,6 @@
 <?php 
 /**
- * This test class is for tools file
- * pub_taxonomy_get_path_by_tid_or_term is not possible to test 
+ * This test class is for api
  * 
  * @author lba@audaxis.com
  */
