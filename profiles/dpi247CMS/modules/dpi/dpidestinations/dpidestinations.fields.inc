@@ -121,8 +121,8 @@ function dpidestinations_field_attach_form($entity_type, $entity, &$form, &$form
   $form['field_destinations']['#prefix'] = '<div id="dropdown-destination-all">';
   $form['field_destinations']['#suffix'] = '</div>';
   
-  dsm($form);
-  dsm($form_state);
+  //dsm($form);
+  //dsm($form_state);
 }
 
 /**
