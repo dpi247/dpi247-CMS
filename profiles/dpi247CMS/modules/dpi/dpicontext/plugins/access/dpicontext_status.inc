@@ -60,7 +60,7 @@ function dpicontext_status_ctools_access_settings($form, &$form_state, $conf) {
 function dpicontext_status_ctools_access_check($conf, $context = NULL) {
   module_load_include ( 'php', 'dpicontext', 'dpicontext.api' );
   module_load_include ( 'inc', 'dpicontext', 'plugins/access/dpicontext_status' );
-  $general_value = dpi_variable_get ( 'dpicontext_value_at_moment', NULL );
+  $general_value = variable_get ( 'dpicontext_value_at_moment', NULL );
   $access = FALSE;
   $cpt_activity = 0;
   if (isset ( $general_value )) {

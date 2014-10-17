@@ -23,7 +23,7 @@ function dpicontext_settings_form($form, &$form_state) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpicontext_api_change_date_format ( $data_list, $v, $k );
     }
-    $val_recorded = dpi_variable_get(VARIABLE_NAME, array());
+    $val_recorded = variable_get(VARIABLE_NAME, array());
     $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
   }
   
@@ -91,7 +91,7 @@ function dpicontext_settings_form_submit($form, & $form_state) {
     
     $val = dpicontext_reorder_informations_to_save ( $temp_form_state, $form );
     
-    dpi_variable_set(VARIABLE_NAME, $val);
+    variable_set(VARIABLE_NAME, $val);
     drupal_set_message ( 'Saved successfuly !' );
   } catch (Exception $e) {
     drupal_set_message ( 'An error is happened to create values' );
