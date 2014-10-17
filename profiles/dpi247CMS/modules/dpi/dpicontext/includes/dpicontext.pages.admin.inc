@@ -154,7 +154,7 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
         'activate_' . $v . '_0' => array (
           '#type' => 'checkbox',
           '#title' => t ( 'Active' ),
-          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE, 
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE, 
         ),
         'label_' . $v . '_0' => array (
           '#markup' => $data_list [$k] ['label'] 
@@ -171,7 +171,7 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
         'activate_' . $v . '_1' => array (
           '#type' => 'checkbox',
           '#title' => t ( 'Active' ),
-          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE,
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE,
         ),
         'label_' . $v . '_1' => array (
           '#markup' => $data_list [$k] ['label'] 
@@ -188,7 +188,7 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
         'activate_' . $v . '_2' => array (
           '#type' => 'checkbox',
           '#title' => t ( 'Active' ),
-          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : FALSE,
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE,
         ),
         'label_' . $v . '_2' => array (
           '#markup' => $data_list [$k] ['label'] 
