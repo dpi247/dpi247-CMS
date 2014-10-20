@@ -1,0 +1,103 @@
+<?php 
+
+/**
+ * Implements hook_elements().
+ */
+function checkboxgrid_element_info() {
+  return array(
+      'checkboxgrid' => array(
+          '#input' => TRUE,
+//          '#title_display' => 'after',
+          '#return_value' => TRUE,
+          '#process' => array('form_process_checkboxgrid'),
+          '#theme' => array('checkboxgrid_element'),
+//          '#theme_wrappers' => array('form_element'),
+          
+          '#theme_wrappers' => array('form_element'),
+//          '#pre_render' => array('form_pre_render_conditional_form_checkboxgrid_element'),
+          
+          //'#value_callback' => 'form_element_checkboxgrid_value',
+      ),
+  );
+}
+
+
+
+
+function form_process_checkboxgrid($element) {
+  
+  // @todo: gérer les values multiples.
+  $value = is_array($element['#value']) ? $element['#value'] : array();
+
+  $element['#tree'] = TRUE;
+  
+  if (count($element['#options_row']) > 0 && count($element['#options_column']) >0) {
+
+    $weight = 0;
+    foreach ($element['#options_row'] as $rkey => $rchoice) {
+      $element += array($rkey => array());
+
+      $element[$rkey]['#tree'] = TRUE;
+      $element[$rkey]['#title'] = "dla title".$rchoice;
+      
+      foreach ($element['#options_column'] as $ckey => $cchoice) {
+
+        $weight += 0.001;
+        $element[$rkey][$ckey] = array(
+          '#type' => 'checkbox',
+          '#title' => "",
+          '#return_value' => "[".$rkey."][".$ckey."]",
+//          '#default_value' => isset($value[$key]) ? $key : NULL,
+          '#attributes' => $element['#attributes'],
+          '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+          '#weight' => $weight,
+          );  
+      }
+    }
+  }
+  return $element;
+}
+
+function checkboxgrid_theme() {
+  return array(
+      'checkboxgrid_element' => array(
+          'render element' => 'element',
+      ),
+  );
+}
+
+
+
+function theme_checkboxgrid_element($variables) {
+
+  $element = $variables['element'];
+
+  $header = array();
+  $header[] = "";
+  foreach ($element["#options_column"] as $ck=>$col) {
+    $header[]=$col;
+  }
+  
+  
+  $rows = array();
+  foreach (element_children($element) as $key) {
+    $child = $element[$key];
+    $cols = array();
+    $cols[]= array('data' => $element["#options_row"][$key]);
+    foreach (element_children($child) as $keyitem) {
+      $item = $child[$keyitem]; 
+      $cols[] = array('data' => render($item));
+    }
+    $rows[]=$cols;
+  }
+  
+return theme('table', array('header' => $header, 'rows' => $rows));
+  
+  
+//  $element = $variables['element'];
+
+//  dsm($element,"theme"); 
+  
+  
+
+}

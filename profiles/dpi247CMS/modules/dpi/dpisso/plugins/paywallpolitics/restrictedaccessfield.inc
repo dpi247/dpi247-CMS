@@ -32,7 +32,6 @@ class RestrictedAccessField extends PaywallPolitics {
         '#title' => t('Paywall politic bypass roles'),
         '#description'=>t(" Choose all the roles that will bypass the paywall politic.Those roles will never decrease the paywall counter."),
         '#options' => $roles,
-        '#access' => $roles && user_access('administer permissions'),
     );
     return $form;
   }
