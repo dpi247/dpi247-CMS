@@ -13,11 +13,10 @@ function dpissologinmanagerserver_schema() {
     'description' => 'Stores user data.',
     'fields' => array(
       'id' => array(
-        'type' => 'int',
+        'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'description' => 'Primary Key: Unique user ID.',
-        'default' => 0,
       ),
       'loginId' => array(
         'type' => 'varchar',
@@ -70,7 +69,7 @@ function dpissologinmanagerserver_schema() {
         'description' => 'Primary Key: Unique user ID.',
         'default' => 0,
       ),
-      'accesstoken' => array(
+      'logintoken' => array(
         'type' => 'varchar',
         'length' => 254,
         'not null' => FALSE,
@@ -100,7 +99,7 @@ function dpissologinmanagerserver_schema() {
 
     ),
     'indexes' => array(
-      'accesstoken' => array('accesstoken'),
+      'logintoken' => array('logintoken'),
       'loginId' => array('loginId'),
     ),
     'primary key' => array('id'),
