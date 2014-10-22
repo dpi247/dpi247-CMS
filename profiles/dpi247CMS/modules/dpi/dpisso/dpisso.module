@@ -157,3 +157,34 @@ function dpisso_form_user_login_alter( &$form, $form_state )
 {
   $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
 }
+
+
+
+
+/**
+ * Implements hook_libraries_info().
+ *
+ * For defining external libraries.
+ */
+function dpisso_libraries_info() {
+  $libraries['dpissolibraries'] = array(
+    'name' => 'Dpisso library',
+    'vendor url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'download url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'version callback' => 'dpisso_tinymce_get_version',
+    'version arguments' => array(
+      'file' => 'dpissolib.readme',
+      'pattern' => '/Version (\d+)/',
+      'lines' => 5,
+    ),
+    'files' => array(
+      'php' => array('SsoSession.class.php'),
+    ),
+  );
+  return $libraries;
+}
+
+function dpisso_tinymce_get_version(){
+  return TRUE;
+}
+

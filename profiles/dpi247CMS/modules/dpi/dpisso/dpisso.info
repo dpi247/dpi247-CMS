@@ -4,3 +4,5 @@ description = "DPI SSO include the sso authentification, the access manager,the 
 package = DPI
 
 files[] = includes/dpisso.paywallpolitics.class.inc
+
+files[php][] = SsoSession.class.php
