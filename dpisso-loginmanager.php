@@ -1,6 +1,18 @@
 <?php
 
-//http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginTokenValidity=%22Coco%22&longTerm=tata&longTermValidity=tutu&returnPage=francois.be&unitId=dpi_audaxis&loginToken=c094c2e2abcc7d24c63dd4fb8db643e47c28455708cc8b4f6c3ee8e1e9a8aedb
+//SANS hops
+//http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginToken=c083264f7a4fa40b4210e20e2d8d33342702f0863b24322835c5b83222d34392&loginTokenValidity=Coco&longTerm=tata&longTermValidity=tutu&returnPage=http://francois.be
+
+
+//Avec HOP ET RETURN PAGE
+//http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginToken=c083264f7a4fa40b4210e20e2d8d33342702f0863b24322835c5b83222d34392&hops[]=http://one.com&hops[]=http://two.com&loginTokenValidity=Coco&longTerm=tata&longTermValidity=tutu&returnPage=francois.be
+
+
+function pprint($toPrint){
+
+
+  print "<pre>".print_r($toPrint,1)."</pre>";
+}
 
 /**
  * @file
@@ -33,7 +45,6 @@ if(!isset($_COOKIE['monsitedpi7'])){
   setcookie ( "monsitedpi7", md5(uniqid(rand(), true)), time()+3600*24*3);
 }
 
-pprint($_GET);
 $SsoSession= new SsoSession();
 $redirect_url=$SsoSession->processLoginManagerUrl();
 
@@ -54,10 +65,12 @@ if($login_id=$SsoSession->getLoginId()){
 }
 //We are on the logout operation
 else{
-  user_logout();
-  //@todo: should i call the Login manager ?
-  $redirect_url=LoginManager::logout($SsoSession);
+   user_logout();
+   //@todo: should i call the Login manager ?
+  //$redirect_url=LoginManager::logout($SsoSession);
 }
+
+pprint($redirect_url);
 
 //Process to redirect
 header("Location: $redirect_url"."?status=".LoginManager::$error_code."&message=".LoginManager::$error_message);
