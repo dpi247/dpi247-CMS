@@ -1,11 +1,6 @@
 <?php
 
 //http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginTokenValidity=%22Coco%22&longTerm=tata&longTermValidity=tutu&returnPage=francois.be&unitId=dpi_audaxis&loginToken=c094c2e2abcc7d24c63dd4fb8db643e47c28455708cc8b4f6c3ee8e1e9a8aedb
-function pprint($toPrint){
-  
-  
-  print "<pre>".print_r($toPrint,1)."</pre>";
-}
 
 /**
  * @file
@@ -30,9 +25,6 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
-require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/third/libraries/libraries.module';
-
-
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 
 $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
@@ -52,10 +44,8 @@ if($login_id=$SsoSession->getLoginId()){
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles();
   
-  
   $sso_user_infos['mail']=$profile['mail'];
   $sso_user_infos['name']=$profile['cn'];
-
   
   //@todo: sync roles with existing ones
   $user->roles=$roles;
