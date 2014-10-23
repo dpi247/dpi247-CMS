@@ -10,8 +10,8 @@
  * @param string $id
  * @return render(form)
  */
-function dpicontext_delete($id = NULL) {
-  return drupal_get_form ( 'dpicontext_delete_form', $id );
+function dpistate_delete($id = NULL) {
+  return drupal_get_form ( 'dpistate_delete_form', $id );
 }
 
 /**
@@ -23,7 +23,7 @@ function dpicontext_delete($id = NULL) {
  * @param integer $id          
  * @return multitype:string The
  */
-function dpicontext_delete_form($form, &$form_state, $id) {
+function dpistate_delete_form($form, &$form_state, $id) {
   if (isset ( $id )) {
     $form ['store'] = array (
       '#type' => 'value',
@@ -32,7 +32,7 @@ function dpicontext_delete_form($form, &$form_state, $id) {
   }
   
   $form ['add'] = array (
-    '#title' => t ( 'Are you sure that you want to delete context ?' ),
+    '#title' => t ( 'Are you sure that you want to delete state ?' ),
     '#type' => 'fieldset' 
   );
   
@@ -54,13 +54,13 @@ function dpicontext_delete_form($form, &$form_state, $id) {
  * @param unknown $form          
  * @param unknown $form_state          
  */
-function dpicontext_delete_form_submit($form, $form_state) {
+function dpistate_delete_form_submit($form, $form_state) {
   if ($form_state ['values'] ['op'] == 'Submit') {
-    if (dpicontext_api_delete_context_by_id ( $form_state ['values'] ['store'] )) {
+    if (dpistate_api_delete_state_by_id ( $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data deleted successfully' );
     } else {
       drupal_set_message ( 'Error while deleting data', 'error' );
     }
   }
-  drupal_goto ( 'admin/config/dpicontext/settings' );
+  drupal_goto ( 'admin/config/dpistate/settings' );
 }

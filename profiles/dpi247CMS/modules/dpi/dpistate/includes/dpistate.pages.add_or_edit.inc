@@ -5,24 +5,24 @@
  */
 
 /**
- * This function is a callback from menu to add context
+ * This function is a callback from menu to add state
  *
  * @param integer $id          
  * @return render(form)
  */
-function dpicontext_add_or_edit($id = NULL) {
-  return drupal_get_form ( 'dpicontext_add_form', $id );
+function dpistate_add_or_edit($id = NULL) {
+  return drupal_get_form ( 'dpistate_add_form', $id );
 }
 
 /**
- * This function generate form to add context
+ * This function generate form to add state
  *
  * @param array $form          
  * @param array $form_state          
  * @param integer $id          
  * @return array
  */
-function dpicontext_add_form($form, &$form_state, $id) {
+function dpistate_add_form($form, &$form_state, $id) {
   $form = array ();
   
   if (isset ( $id )) {
@@ -30,39 +30,39 @@ function dpicontext_add_form($form, &$form_state, $id) {
       '#type' => 'value',
       '#value' => $id 
     );
-    $context = dpicontext_api_get_one_context ( $id );
+    $state = dpistate_api_get_one_state ( $id );
     $text = "";
-    if (is_array ( $context ['value'] )) {
-      foreach ( $context ['value'] as $str ) {
-        $text .= $str;
+    if ($state['type']==1) {
+      foreach ( $state ['value'] as $str ) {
+        $text .= $str."\r\n";
       }
-      $context ['value'] = $text;
+      $state ['value'] = $text;
     }
   }
   
-  $form ['dpicontext_label'] = array (
+  $form ['dpistate_label'] = array (
     
     '#type' => 'textfield',
-    '#title' => t ( 'Enter your context name here' ),
-    '#default_value' => (isset ( $context ['label'] )) ? $context ['label'] : "",
+    '#title' => t ( 'Enter your state name here' ),
+    '#default_value' => (isset ( $state ['label'] )) ? $state ['label'] : "",
     '#size' => 60,
     '#maxlength' => 128,
     '#required' => TRUE 
   );
   
-  $form ['dpicontext_types'] = array (
+  $form ['dpistate_types'] = array (
     '#type' => 'radios',
-    '#title' => t ( 'Context\'s type' ),
+    '#title' => t ( 'State\'s type' ),
     '#options' => array (
       0 => t ( 'Numeric' ),
       1 => t ( 'Text' ),
       2 => t ( 'Date' ) 
     ),
-    '#default_value' => (isset ( $context ['type'] )) ? $context ['type'] : 0,
+    '#default_value' => (isset ( $state ['type'] )) ? $state ['type'] : 0,
     '#multiple' => FALSE,
-    '#description' => t ( 'Select a context type' ),
+    '#description' => t ( 'Select a state type' ),
     '#ajax' => array (
-      'callback' => 'dpicontext_ajax_typed_form',
+      'callback' => 'dpistate_ajax_typed_form',
       'wrapper' => 'value_field-div',
       'method' => 'replace',
       'effect' => 'fade' 
@@ -79,10 +79,10 @@ function dpicontext_add_form($form, &$form_state, $id) {
   );
   
   // get db or default value for type
-  if (isset ( $form_state ['values'] ['dpicontext_types'] )) {
-    $type = $form_state ['values'] ['dpicontext_types'];
+  if (isset ( $form_state ['values'] ['dpistate_types'] )) {
+    $type = $form_state ['values'] ['dpistate_types'];
   } else {
-    $type = (isset ( $context ['type'] )) ? $context ['type'] : 0;
+    $type = (isset ( $state ['type'] )) ? $state ['type'] : 0;
   }
   
   switch ($type) {
@@ -90,7 +90,7 @@ function dpicontext_add_form($form, &$form_state, $id) {
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Numeric values only' ),
         '#type' => 'textfield',
-        '#default_value' => (isset ( $context ['value'] )) ? $context ['value'] : "",
+        '#default_value' => (isset ( $state ['value'] )) ? $state ['value'] : "",
         '#description' => t ( 'I.e if input = 20 you would have 0 to 20 values' ) 
       );
       
@@ -99,21 +99,25 @@ function dpicontext_add_form($form, &$form_state, $id) {
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Text only' ),
         '#type' => 'textarea',
-        '#default_value' => (isset ( $context ['value'] )) ? $context ['value'] : "",
+        '#default_value' => (isset ( $state ['value'] )) ? $state ['value'] : "",
         '#description' => t ( 'Each string should be separated with a line break' ) 
       );
       
       break;
     case 2 :
-      
-      $date = format_date ( REQUEST_TIME, 'custom', 'd-m-Y H:i' );
       $format = 'd-m-Y H:i';
+	  if (isset ( $state['value'] )) {
+		 $date_start =  $state['value'][0].':00';
+		 $date_end = $state['value'][1].':00';
+	  } else {
+      	$date_start = $date_end = format_date ( REQUEST_TIME, 'custom', $format );
+	  }
       
       $form ['value_fieldset'] ['input'] ['date_start'] = array (
         '#description' => t ( 'Select a start/end date' ),
         '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
         '#title' => t ( 'Select start date' ),
-        '#default_value' => $date,
+        '#default_value' => $date_start,
         '#date_format' => $format,
         '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
         '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
@@ -124,7 +128,7 @@ function dpicontext_add_form($form, &$form_state, $id) {
         '#description' => t ( 'Select a start/end date' ),
         '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
         '#title' => t ( 'Select end date' ),
-        '#default_value' => $date,
+        '#default_value' => $date_end,
         '#date_format' => $format,
         '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
         '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
@@ -149,7 +153,7 @@ function dpicontext_add_form($form, &$form_state, $id) {
  * @param array $form_state          
  * @return array:form_element
  */
-function dpicontext_ajax_typed_form($form, $form_state) {
+function dpistate_ajax_typed_form($form, $form_state) {
   // delete previous value when input type is changed to avoid typo
   // i.e : if previous type is date and user select type text the previous date is show in the textarea
   $form ['value_fieldset'] ['input'] ['#value'] = "";
@@ -162,8 +166,8 @@ function dpicontext_ajax_typed_form($form, $form_state) {
  * @param array $form          
  * @param array $form_state          
  */
-function dpicontext_add_form_validate($form, &$form_state) {
-  $type = $form_state ['values'] ['dpicontext_types'];
+function dpistate_add_form_validate($form, &$form_state) {
+  $type = $form_state ['values'] ['dpistate_types'];
   
   if ($type == 2) {
     $value [] = $form_state ['values'] ['date_start'];
@@ -185,7 +189,7 @@ function dpicontext_add_form_validate($form, &$form_state) {
           } else {
             $array_formated = array ();
             $text = trim ( $value );
-            $textAr = explode ( "\n", $text );
+            $textAr = explode ( "\r\n", $text );
             $textAr = array_filter ( $textAr, 'trim' );
             $form_state ['values'] ['input'] = $textAr;
           }
@@ -208,16 +212,18 @@ function dpicontext_add_form_validate($form, &$form_state) {
  * @param array $form          
  * @param array $form_state          
  */
-function dpicontext_add_form_submit($form, $form_state) {
+function dpistate_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
-    if (dpicontext_api_update_context_by_id ( $form_state ['values'] ['dpicontext_label'], $form_state ['values'] ['dpicontext_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
+    if (dpistate_api_update_state_by_id ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
+	  drupal_goto('admin/config/dpistate/settings');
     } else {
       drupal_set_message ( 'Error while updating data !', 'error' );
     }
   } else {
-    if (dpicontext_api_add_context ( $form_state ['values'] ['dpicontext_label'], $form_state ['values'] ['dpicontext_types'], $form_state ['values'] ['input'] )) {
+    if (dpistate_api_add_state ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'] )) {
       drupal_set_message ( 'Data saved successfully' );
+	  drupal_goto('admin/config/dpistate/settings');
     } else {
       drupal_set_message ( 'Error while saving data !', 'error' );
     }

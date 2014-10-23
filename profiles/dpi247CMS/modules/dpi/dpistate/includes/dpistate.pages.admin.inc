@@ -3,36 +3,37 @@
 /**
  * @author LBA 
  */
-define('VARIABLE_NAME', 'dpicontext_value_at_moment');
 
 /**
  * This function create form
  * The render of the form table is create by the theme
- * into the function dpicontext_table_theme
+ * into the function dpistate_table_theme
  *
  * @param array $form          
  * @param array $form_state          
  * @return multitype:array
  */
-function dpicontext_settings_form($form, &$form_state) {
+function dpistate_settings_form($form, &$form_state) {
   $form = array ();
-  $data_list = dpicontext_api_get_all_context ();
+  $data_list = dpistate_api_get_all_states();
   $rows = array ();
   
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
-      dpicontext_api_change_date_format ( $data_list, $v, $k );
+      dpistate_api_change_date_format ( $data_list, $v, $k );
     }
     $val_recorded = variable_get(VARIABLE_NAME, array());
-    $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
+	
+   // $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
+	$rows ['row_' . $v['id']] = dpistate_get_settings_row_data($v,isset($val_recorded[$v['id']])?$val_recorded[$v['id']]:array());
   }
   
   $form ['table'] = array (
-    '#theme' => 'dpicontext_table_theme',
+    '#theme' => 'dpistate_table_theme',
     '#header' => array (
-      t ( 'Activation' ),
       t ( 'Name' ),
-      t ( 'Options' ) 
+      t ( 'Options' ) ,
+	  t ( 'Active' )
     ),
     'rows' => $rows 
   );
@@ -51,7 +52,7 @@ function dpicontext_settings_form($form, &$form_state) {
  * @param array:form $variables          
  * @return render
  */
-function theme_dpicontext_table_theme($variables) {
+function theme_dpistate_table_theme($variables) {
   $form = $variables ['element'];
   $rows = $form ['rows'];
   $header = $form ['#header'];
@@ -80,7 +81,7 @@ function theme_dpicontext_table_theme($variables) {
  * @param array $form          
  * @param array $form_state          
  */
-function dpicontext_settings_form_submit($form, & $form_state) {
+function dpistate_settings_form_submit($form, & $form_state) {
   try {
     $temp_form_state = $form_state ['values'];
     unset ( $temp_form_state ['submit'] );
@@ -89,7 +90,7 @@ function dpicontext_settings_form_submit($form, & $form_state) {
     unset ( $temp_form_state ['form_id'] );
     unset ( $temp_form_state ['op'] );
     
-    $val = dpicontext_reorder_informations_to_save ( $temp_form_state, $form );
+    $val = dpistate_reorder_informations_to_save ( $temp_form_state, $form );
     
     variable_set(VARIABLE_NAME, $val);
     drupal_set_message ( 'Saved successfuly !' );
@@ -100,13 +101,13 @@ function dpicontext_settings_form_submit($form, & $form_state) {
 
 /**
  * This function réorder informations to create a table
- * that we can use to compare with view context
+ * that we can use to compare with view state
  * 
  * @param array $infos
  * @param array $form
  * @return multiple:array
  */
-function dpicontext_reorder_informations_to_save($infos, $form) {
+function dpistate_reorder_informations_to_save($infos, $form) {
   $return = array ();
   foreach ( $infos as $k => $v ) {
     $val_info = explode ( '_', $k );
@@ -146,16 +147,11 @@ function dpicontext_reorder_informations_to_save($infos, $form) {
  * @param integer $k          
  * @return form element
  */
-function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
+function dpistate_get_form_element_by_type($data_list, $v, $k, $records) {
   $return = NULL;
   switch ($data_list [$k] ['type']) {
     case 0 :
       $return = array (
-        'activate_' . $v . '_0' => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE, 
-        ),
         'label_' . $v . '_0' => array (
           '#markup' => $data_list [$k] ['label'] 
         ),
@@ -163,16 +159,17 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
           '#type' => 'select',
           '#options' => range ( 0, $data_list [$k] ['value'] ),
           '#default_value' => (isset($records[$v]['value']))? $records[$v]['value'] : FALSE,
-        ) 
+        ) ,
+		
+        'activate_' . $v . '_0' => array (
+          '#type' => 'checkbox',
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE, 
+        ),
       );
       break;
     case 1 :
       $return = array (
-        'activate_' . $v . '_1' => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE,
-        ),
         'label_' . $v . '_1' => array (
           '#markup' => $data_list [$k] ['label'] 
         ),
@@ -180,28 +177,78 @@ function dpicontext_get_form_element_by_type($data_list, $v, $k, $records) {
           '#type' => 'select',
           '#options' => $data_list [$k] ['value'],
           '#default_value' => (isset($records[$v]['index']))? $records[$v]['index'] : FALSE,
-        ) 
+        ),
+		'activate_' . $v . '_1' => array (
+          '#type' => 'checkbox',
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE,
+        ), 
       );
       break;
     case 2 :
       $return = array (
+        'label_' . $v . '_2' => array (
+          '#markup' => $data_list [$k] ['label'] 
+        ),
+        'options_' . $v . '_2' => array (
+          '#markup' => t ( 'Activate state : @state for date => @date', array (
+            '@state' => $data_list [$k] ['label'],
+            '@date' => $data_list [$k] ['value'],
+          ) ) 
+        ) ,
         'activate_' . $v . '_2' => array (
           '#type' => 'checkbox',
           '#title' => t ( 'Active' ),
           '#default_value' => (isset($records[$v]['actif']))? $records[$v]['actif'] : TRUE,
         ),
-        'label_' . $v . '_2' => array (
-          '#markup' => $data_list [$k] ['label'] 
-        ),
-        'options_' . $v . '_2' => array (
-          '#markup' => t ( 'Activate context : @context for date => @date', array (
-            '@context' => $data_list [$k] ['label'],
-            '@date' => $data_list [$k] ['value'],
-          ) ) 
-        ) 
       );
       break;
   }
   return $return;
 }
 
+function dpistate_get_settings_row_data($row, $values) {
+	$options = array();
+	
+	switch ($row['type']) {
+		case 0:
+			$options = array (
+			  '#type' => 'select',
+			  '#options' => range ( 0, $row['value'] ),
+			  '#default_value' => (isset($values['value']))? $values['value'] : FALSE,
+			);
+			break;
+		case 1:
+			$options = array (
+			  '#type' => 'select',
+			  '#options' => $row['value'],
+			  '#default_value' => (isset($values['index']))? $values['index'] : FALSE,
+			);
+			break;
+		case 2:
+			//echo "ici<pre>".print_r($row['value'],true);die();
+			$date_start = date('d/m/Y H:i',strtotime($row['value'][0]));
+			$date_end = date('d/m/Y H:i',strtotime($row['value'][1]));
+			$options = array (
+				  '#markup' => t ( 'Activate state : @state for date => @datestart to @dateend', array (
+					'@state' => $row['label'],
+					'@datestart' => $date_start,
+					'@dateend' => $date_end,
+				  )));
+			break;	
+	}
+	
+	$return = array (
+        'label_' . $row['id'] . '_' . $row['type'] => array (
+          '#markup' => $row['label'] 
+        ),
+        'options_' . $row['id'] . '_' . $row['type'] => $options,
+        'activate_' . $row['id'] . '_' . $row['type'] => array (
+          '#type' => 'checkbox',
+          '#title' => t ( 'Active' ),
+          '#default_value' => (isset($values['actif']))? $values['actif'] : TRUE,
+        ),
+      );
+	  
+	 return $return;
+}

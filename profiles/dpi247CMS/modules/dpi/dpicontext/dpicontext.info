@@ -1,8 +1,0 @@
-name = Dpi context
-description = "Create customs contexts"
-package = DPI
-core = 7.x
-dependencies[] = system
-files[]= dpicontext.module
-files[]= dpicontext.install
-files[]= dpicontext.test

@@ -5,10 +5,10 @@
  * 
  * @return multitype:array
  */
-function dpicontext_schema() {
+function dpistate_schema() {
   $schema = array ();
-  $schema ['dpi_context'] = array (
-    'description' => 'dpi_context',
+  $schema ['dpi_state'] = array (
+    'description' => 'dpi_state',
     'fields' => array (
       'label' => array (
         'description' => 'label for this field',
