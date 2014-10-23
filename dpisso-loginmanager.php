@@ -41,21 +41,18 @@ if(!isset($_COOKIE['monsitedpi7'])){
   setcookie ( "monsitedpi7", md5(uniqid(rand(), true)), time()+3600*24*3);
 }
 
+pprint($_GET);
 $SsoSession= new SsoSession();
-print "1";
 $redirect_url=$SsoSession->processLoginManagerUrl();
-print "2";
 
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
   global $user;
-  print "3";
   
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles();
   
   
-  pprint($profile);
   $sso_user_infos['mail']=$profile['mail'];
   $sso_user_infos['name']=$profile['cn'];
 
@@ -73,5 +70,5 @@ else{
 }
 
 //Process to redirect
-//header("Location: $redirect_url"."?status=".LoginManager::$error_code."&message=".LoginManager::$error_message);
+header("Location: $redirect_url"."?status=".LoginManager::$error_code."&message=".LoginManager::$error_message);
 die();

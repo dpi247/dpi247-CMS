@@ -91,7 +91,6 @@ function dpisso_user_external_login_register($name, $module,$sso_user_infos) {
     );
     $userinfo=array_merge($userinfo,$sso_user_infos);
   
-    pprint($userinfo);
     $account = user_save(drupal_anonymous_user(), $userinfo);
     // Terminate if an error occurred during user_save().
     if (!$account) {
