@@ -128,10 +128,15 @@ function dpisso_block_view($delta=''){
   return $block;
 }
 
-function dpisso_get_connect_form(){
+function dpisso_get_connect_form(){  
   libraries_load('ssophptoolbox');
   $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-  return l('Connexion', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+  if(user_is_anonymous()){
+    $return = l('Login', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+  }else{
+    $return = l('Logout', "dpi-loginmanager-logout.php?operation=logout", array('attributes' => array('class' => 'btn blue')));
+  }
+  return $return;
 }
 
 /**
