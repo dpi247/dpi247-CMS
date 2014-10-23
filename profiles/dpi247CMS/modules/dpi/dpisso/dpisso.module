@@ -106,6 +106,34 @@ function dpisso_menu() {
   return $items;
 }
 
+function dpisso_block_info(){
+  $blocks = array();
+  $blocks['dpisso_connect'] = array(
+    'info' => t('dpisso_connect'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+function dpisso_block_view($delta=''){
+  $block;
+  switch($delta){
+    case 'dpisso_connect':
+        $block = array(
+          'subject' => t('dpisso_content'),
+          'content' => dpisso_get_connect_form(),
+        );
+      break;
+  }
+  return $block;
+}
+
+function dpisso_get_connect_form(){
+  libraries_load('ssophptoolbox');
+  $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
+  return l('Connexion', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+}
+
 /**
  * Implementation of hook_permission()
  */
