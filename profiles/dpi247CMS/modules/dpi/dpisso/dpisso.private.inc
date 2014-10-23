@@ -69,3 +69,41 @@ function dpisso_login_validate( $form, &$form_state )
 
 
 
+
+
+
+
+/**
+ * Helper function for authentication modules. Either logs in or registers
+ * the current user, based on username. Either way, the global $user object is
+ * populated and login tasks are performed.
+ */
+function dpisso_user_external_login_register($name, $module,$sso_user_infos) {
+  $account = user_external_load($name);
+  if (!$account) {
+    // Register this new user.
+    $userinfo = array(
+      'name' => $name,
+      'pass' => user_password(),
+      'init' => $name,
+      'status' => 1,
+      'access' => REQUEST_TIME
+    );
+    $userinfo=array_merge($userinfo,$sso_user_infos);
+  
+    pprint($userinfo);
+    $account = user_save(drupal_anonymous_user(), $userinfo);
+    // Terminate if an error occurred during user_save().
+    if (!$account) {
+      drupal_set_message(t("Error saving user account."), 'error');
+      return;
+    }
+    user_set_authmaps($account, array("authname_$module" => $name));
+  }
+
+  // Log user in.
+  $form_state['uid'] = $account->uid;
+  user_login_submit(array(), $form_state);
+}
+
+
