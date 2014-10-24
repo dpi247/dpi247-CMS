@@ -31,17 +31,16 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
+require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
 
 $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
 
 if(!isset($_COOKIE['monsitedpi7'])){
   setcookie ( "monsitedpi7", md5(uniqid(rand(), true)), time()+3600*24*3);
 }
-
 $SsoSession= new SsoSession();
 $redirect_url=$SsoSession->processLoginManagerUrl();
 //We are on the login operation
-print_r($redirect_url);
 if($login_id=$SsoSession->getLoginId()){
   global $user;
   
@@ -51,14 +50,15 @@ if($login_id=$SsoSession->getLoginId()){
   $sso_user_infos['mail']=$profile->mail;
   $sso_user_infos['name']=$profile->cn;
   $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
+
   //@todo: sync roles with existing ones
   dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);  
 }
 //We are on the logout operation
 else{
+   $redirect_url=LoginManager::logout($SsoSession);
    user_logout();
    //@todo: should i call the Login manager ?
-  //$redirect_url=LoginManager::logout($SsoSession);
 }
 
 //Process to redirect

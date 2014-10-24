@@ -134,7 +134,7 @@ function dpisso_get_connect_form(){
   if(user_is_anonymous()){
     $return = l('Login', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
   }else{
-    $return = l('Logout', "dpi-loginmanager-logout.php?operation=logout", array('attributes' => array('class' => 'btn blue')));
+    $return = l('Logout', $config['ssoServer_url'].'/html/logout?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
   }
   return $return;
 }
