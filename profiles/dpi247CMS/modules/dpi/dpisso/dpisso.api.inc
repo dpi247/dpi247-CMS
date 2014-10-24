@@ -71,7 +71,7 @@ function dpisso_api_parse_array_to_role_array($aSimpleArray){
   $return = array();
   foreach ($aSimpleArray as $role){
     if(($var = user_role_load_by_name($role))!=FALSE)
-      $return[$var->rid] = $rid->name;
+      $return[$var->rid] = $var->name;
   }
   return $return;
 }
