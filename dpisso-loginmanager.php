@@ -61,5 +61,5 @@ else{
 }
 
 //Process to redirect
-header("Location: $redirect_url"."?status=".LoginManager::$error_code."&message=".LoginManager::$error_message);
+header("Location: $redirect_url");
 die();
