@@ -56,7 +56,7 @@ if($login_id=$SsoSession->getLoginId()){
 }
 //We are on the logout operation
 else{
-   $redirect_url=LoginManager::logout($SsoSession);
+   $redirect_url=LoginManager::processUrlLogout($SsoSession);
    user_logout();
    //@todo: should i call the Login manager ?
 }
