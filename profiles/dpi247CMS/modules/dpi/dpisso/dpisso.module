@@ -128,13 +128,33 @@ function dpisso_block_view($delta=''){
   return $block;
 }
 
+
+function dpidashboard_dpidashboard_status_item() {
+	$status = array(
+			array(
+					'title' => 'DPI Dashboard',
+					'status' => 0,
+					'message' => t('Tout va bien'),
+					'link' => '/admin/dashboard',
+			),
+			array(
+					'title' => 'Autre status',
+					'status' => 2,
+					'message' => t('Problème dans le module'),
+					'link' => '/admin/dashboard',
+			)
+	);
+
+	return $status;
+}
+
 function dpisso_get_connect_form(){  
   libraries_load('ssophptoolbox');
   $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
   if(user_is_anonymous()){
     $return = l('Login', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
   }else{
-    $return = l('Logout', $config['ssoServer_url'].'/html/logout?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+    $return = l('Logout', "dpi-loginmanager-logout.php?operation=logout", array('attributes' => array('class' => 'btn blue')));
   }
   return $return;
 }
@@ -221,6 +241,64 @@ function dpisso_libraries_info() {
   );
   return $libraries;
 }
+
+/*
+ * Implement the dashboard status item hook.
+ * 
+ * Check if ssoclient config file is correct. 
+ */
+function dpisso_dpidashboard_status_item() {
+  
+  // Get ssoClient config from file.
+  $ssoconfig = dpisso_get_config();
+	 
+  // If no accessmanager nor invalid uri diseable the send button.
+  if (!isset($ssoconfig["ssoServer_url"]) || !valid_url($ssoconfig["ssoServer_url"])) {
+	
+  	$status = array(
+	  'title' => 'ssoConfig File',
+	  'status' => 2,
+	  'message' => t('There is no config file for ssoCLient.'),
+	  'link' => '/admin/dpi247/dpisso',
+	);
+  } else {
+  	$response = drupal_http_request($ssoconfig["ssoServer_url"]);
+	if ($response->code == "200") {
+		$status = array(
+				'title' => 'ssoConfig File',
+				'status' => 0,
+				'message' => t('Current ssoCLient server url is :'.$ssoconfig["ssoServer_url"]),
+				'link' => '/admin/dpi247/dpisso',
+		);
+	} else {
+		$status = array(
+				'title' => 'ssoConfig File',
+				'status' => 2,
+				'message' => t('Current ssoCLient server is note responding :'.$ssoconfig["ssoServer_url"]),
+				'link' => '/admin/dpi247/dpisso',
+		);		
+	}
+  }
+  return $status;
+}
+
+/*
+ * Get the ssoCLient Config from file.
+*
+* @return array All the configuration elements.
+*/
+function dpisso_get_config() {
+	libraries_load("ssophptoolbox");
+	if (!is_file(dpi_variable_get('ssoClienInitFile',''))) {
+		$ssoconfig = array();
+	} else {
+		$ini_file = dpi_variable_get('ssoClienInitFile','');
+		$ssoconfig = Config::getInstance($ini_file)->getConfigurationInstance();
+	}
+	return($ssoconfig);
+}
+
+
 
 function dpisso_get_version(){
   return TRUE;
