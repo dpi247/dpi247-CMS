@@ -303,4 +303,3 @@ function dpisso_get_config() {
 function dpisso_get_version(){
   return TRUE;
 }
-
