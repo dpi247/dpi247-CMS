@@ -1,0 +1,228 @@
+<?php 
+
+//@todo: crer un callback que le varnish appelle
+// pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
+// Même chose pour le profile manager etc ...
+
+module_load_include('inc', 'dpisso','dpisso.api');
+module_load_include('inc', 'dpisso','dpisso.private');
+//module_load_include('inc', 'dpisso','dpisso.helpers');
+
+define('DPISSO_ACCESSTOKEN_COOKIE_NAME',"dpisso-access-token");
+define('DPISSO_LONTERM_COOKIE_NAME',"dpisso-longterm");
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ * 
+ * @see dpisso_ctools_plugin_type()
+ */
+function dpisso_ctools_plugin_directory($module, $plugin) {
+  if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
+    return 'plugins/paywallpolitics';
+  }
+}
+
+/**
+ * Implementation of hook_menu()
+ */
+function dpisso_menu() {
+  $items = array();
+
+  $items[DPI_ADMIN_PATH.'/dpisso'] = array(
+    'title'            => t('DPI SSo Settings'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'description'      => t('Manage SSO&Paywall settings'),
+    'file'             => 'includes/dpisso.pages.general.admin.inc',
+   // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
+  );
+
+  $items[DPI_ADMIN_PATH.'/dpisso/general'] = array(
+      'title'            => t('General Settings'),
+      'access arguments' => array('administer dpisso'),
+      'weight'           => -10,
+      'type'             => MENU_DEFAULT_LOCAL_TASK,
+      'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+      'file'             => 'dpisso.pages.general.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/dpisso/loginmanager'] = array(
+    'title'            => t('Login Manager'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.loginmanager.admin.inc',
+    'weight'           => 0,
+    'type'             => MENU_LOCAL_TASK,
+  );
+  
+  $items[DPI_ADMIN_PATH.'/dpisso/accessmanager'] = array(
+    'title'            => t('Access Manager'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_accessmanager_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.accessmanager.admin.inc',
+    'weight'           => 0,
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  $items[DPI_ADMIN_PATH.'/dpisso/paywall'] = array(
+    'title'            => t('Paywall'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+    'file'             => 'dpisso.pages.paywall.admin.inc',
+    'weight'           => 0,
+    'type'             => MENU_LOCAL_TASK,
+  );
+  
+  $items['dpisso/login'] = array(
+    'title'            => t('Login'),
+    'page callback'    => '_dpisso_login_callback',
+    //'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'file'             => 'dpisso.pages.accessmanager.admin.inc',
+    'file path' => drupal_get_path('module', 'dpisso').'/includes',
+    'weight'           => 0,
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  $items['dpisso/login'] = array(
+      'title'            => t('Login'),
+      'page callback'    => '_dpisso_login_callback',
+      //'page arguments'   => array('dpisso_paywall_admin_settings_page_form'),
+      'access arguments' => array('administer dpisso'),
+      'file'             => 'dpisso.pages.accessmanager.admin.inc',
+      'file path' => drupal_get_path('module', 'dpisso').'/includes',
+      'weight'           => 0,
+      'type'             => MENU_LOCAL_TASK,
+  );
+  
+  
+  return $items;
+}
+
+function dpisso_block_info(){
+  $blocks = array();
+  $blocks['dpisso_connect'] = array(
+    'info' => t('dpisso_connect'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+function dpisso_block_view($delta=''){
+  $block;
+  switch($delta){
+    case 'dpisso_connect':
+        $block = array(
+          'subject' => t('dpisso_content'),
+          'content' => dpisso_get_connect_form(),
+        );
+      break;
+  }
+  return $block;
+}
+
+function dpisso_get_connect_form(){  
+  libraries_load('ssophptoolbox');
+  $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
+  if(user_is_anonymous()){
+    $return = l('Login', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+  }else{
+    $return = l('Logout', "dpi-loginmanager-logout.php?operation=logout", array('attributes' => array('class' => 'btn blue')));
+  }
+  return $return;
+}
+
+/**
+ * Implementation of hook_permission()
+ */
+function dpisso_permission(){
+  return array(
+    'administer dpisso' =>  array(
+      'title' => t('Administer DPISSO'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpisso_theme() {
+  $path = drupal_get_path('module', 'dpisso');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => $path.'/theme',
+  );
+  return array(
+      'checkboxtable' => $base + array(
+          'render element' => 'element'
+      ),
+    );
+}
+
+
+/**
+ * Implements hook_ctools_plugin_type().
+ * 
+ * Has plenty options. 
+ * @See ctools/help/plugins-creating.html
+ */
+function dpisso_ctools_plugin_type() {
+  return array(
+      'paywallpolitic' => array(
+          'use hooks' => TRUE,
+      ),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ * 
+ * Change the normal form login form behaviour to allow login against the login Manager.
+ */
+function dpisso_form_user_login_alter( &$form, $form_state )
+{
+ // $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
+}
+
+
+
+
+/**
+ * Implements hook_libraries_info().
+ *
+ * For defining external libraries.
+ */
+function dpisso_libraries_info() {
+  $libraries['ssophptoolbox'] = array(
+    'name' => 'Dpisso library',
+    'vendor url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'download url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'version callback' => 'dpisso_get_version',
+    'version arguments' => array(
+      'file' => 'dpissolib.readme',
+      'pattern' => '/Version (\d+)/',
+      'lines' => 5,
+    ),
+    'files' => array(
+      'php' => array('SsoSession.class.php'),
+      'php' => array('LoginManager.class.php'),
+      'php' => array('AccessManager.class.php'),
+      'php' => array('SsoComponent.class.php'),
+      'php' => array('SsoException.class.php'),
+      'php' => array('Config.class.php'),
+    ),
+  );
+  return $libraries;
+}
+
+function dpisso_get_version(){
+  return TRUE;
+}
+

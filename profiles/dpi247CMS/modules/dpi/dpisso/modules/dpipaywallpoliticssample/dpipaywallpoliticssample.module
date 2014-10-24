@@ -1,0 +1,13 @@
+<?php
+/**
+ * Module exemple d'implémentation d'un pluggin de payawall.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function dpipaywallpoliticssample_ctools_plugin_directory($module, $plugin) {
+    if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
+    return 'plugins/paywallpolitics';
+  }
+}
