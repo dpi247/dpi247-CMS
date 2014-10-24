@@ -106,6 +106,39 @@ function dpisso_menu() {
   return $items;
 }
 
+function dpisso_block_info(){
+  $blocks = array();
+  $blocks['dpisso_connect'] = array(
+    'info' => t('dpisso_connect'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+function dpisso_block_view($delta=''){
+  $block;
+  switch($delta){
+    case 'dpisso_connect':
+        $block = array(
+          'subject' => t('dpisso_content'),
+          'content' => dpisso_get_connect_form(),
+        );
+      break;
+  }
+  return $block;
+}
+
+function dpisso_get_connect_form(){  
+  libraries_load('ssophptoolbox');
+  $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
+  if(user_is_anonymous()){
+    $return = l('Login', $config['ssoServer_url'].'/html/login?unitId='.$config['unitId'].'&returnPage='.urlencode(dpisso_api_get_current_url()), array('attributes' => array('class' => 'btn blue')));
+  }else{
+    $return = l('Logout', "dpi-loginmanager-logout.php?operation=logout", array('attributes' => array('class' => 'btn blue')));
+  }
+  return $return;
+}
+
 /**
  * Implementation of hook_permission()
  */
@@ -155,5 +188,41 @@ function dpisso_ctools_plugin_type() {
  */
 function dpisso_form_user_login_alter( $form, $form_state )
 {
-  $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
+ // $form['#validate'] = array(  'user_login_name_validate', '_dpisso_login_validate', 'user_login_final_validate' );
 }
+
+
+
+
+/**
+ * Implements hook_libraries_info().
+ *
+ * For defining external libraries.
+ */
+function dpisso_libraries_info() {
+  $libraries['ssophptoolbox'] = array(
+    'name' => 'Dpisso library',
+    'vendor url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'download url' => 'https://gitlab.audaxis.com/dpi247/ssophptoolbox.git',
+    'version callback' => 'dpisso_get_version',
+    'version arguments' => array(
+      'file' => 'dpissolib.readme',
+      'pattern' => '/Version (\d+)/',
+      'lines' => 5,
+    ),
+    'files' => array(
+      'php' => array('SsoSession.class.php'),
+      'php' => array('LoginManager.class.php'),
+      'php' => array('AccessManager.class.php'),
+      'php' => array('SsoComponent.class.php'),
+      'php' => array('SsoException.class.php'),
+      'php' => array('Config.class.php'),
+    ),
+  );
+  return $libraries;
+}
+
+function dpisso_get_version(){
+  return TRUE;
+}
+

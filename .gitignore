@@ -6,10 +6,12 @@ sites/*/files
 sites/*/private
 sites/*/modules
 sites/*/importer
+sites/all/libraries
 
 #ignore eclipse settings
 .settings/*
 .project
+.gitignore
 
 /.htaccess
 /robots.txt
