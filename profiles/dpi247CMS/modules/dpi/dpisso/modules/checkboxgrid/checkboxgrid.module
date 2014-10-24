@@ -46,7 +46,7 @@ function form_process_checkboxgrid($element) {
         $element[$rkey][$ckey] = array(
           '#type' => 'checkbox',
           '#title' => "",
-          '#return_value' => "[".$rkey."][".$ckey."]",
+          '#return_value' => json_encode(array($rkey,$ckey)),
 //          '#default_value' => isset($value[$key]) ? $key : NULL,
           '#attributes' => $element['#attributes'],
           '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,

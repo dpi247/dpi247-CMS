@@ -87,12 +87,20 @@ function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
       '#suffix' => '</div>',
   );
   
-  // Call the settingsform method to get the pluggins settings.
   if ($politic_instance = _dpisso_get_paywall_instance($politic)) {
-    $politic_settings = $politic_instance->settingsform($form, &$form_state);
-    $form['dpisso_paywall_paywallpolitics_settings'][]=$politic_instance->settingsform_getdefaultvalues($politic_settings);
-  }
-  
+
+    // Call the getdefaultvalues method to get the pluggins default values.
+    $default_values=$politic_instance->settingsform_getdefaultvalues($politic);
+    
+    // Call the settingsform method to get the pluggins settings
+    $politic_settings = $politic_instance->settingsform($default_values);
+    // We try to put default values on settings, in case the settingsform did not dit it. 
+    foreach($politic_settings as $k=>$setting) {
+      $politic_settings[$k]["#default_value"]=$default_values[$k];
+    }
+    // Prepare the form.
+    $form['dpisso_paywall_paywallpolitics_settings'][]=$politic_settings;
+  }  
   return $form;
 }
 

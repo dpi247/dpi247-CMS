@@ -24,13 +24,13 @@ class PaywallPerType extends PaywallPolitics {
    * @return array A checkboxes form element with all the content types. 
    */
   
-  public function settingsform_submit($form, $form_state) {
-    dsm($form_state); 
-  }
+  //public function settingsform_submit($form, $form_state) {
+  //  dsm($form_state); 
+  //}
   
   
-  public function settingsform($form, $form_state) {
-
+  public function settingsform($politic_settings_default_values) {
+        
     // get all content types & build a options array. 
     $options_types = array(); 
     foreach (node_type_get_types() as $id=>$type) {
@@ -42,31 +42,41 @@ class PaywallPerType extends PaywallPolitics {
     $options_types["4"]="row type 4";
     $options_types["5"]="row type 5";
     
-    
     // Build a options array with all roles
     $roles = array_map('check_plain', user_roles(TRUE));
     
-    $form = array();
-    $form['PaywallPerType_types'] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Please choose Content Types'),
-        '#options' => $options_types,
-        '#description'=>t("Choose all the content types that will decrease the paywall counter."),
-    );
+    $element = array(); 
+    $element['#tree'] = TRUE;
+    $element['#title'] = t('Please choose Content Types');
+    $element['#theme'] = array('checkboxgrid');
+    $element['#options_row'] = $options_types;
+    $element['#options_col'] = $roles;
+    $element['#theme_wrappers'] = array('form_element');
     
-    $form['typesroles'] = array(
-        '#type' => 'checkboxgrid',
-        '#title' => t('Please choose Content Types'),
-        '#options_row' => $options_types,
-        '#options_column' => $roles,
-        '#description'=>t("tst"),
-    );
+    foreach ($options_types as $rkey => $rchoice) {
+      $element += array($rkey => array());
+      $element[$rkey]['#tree'] = TRUE;
+      $element[$rkey]['#title'] = $rchoice;
+      
+      $weight = 0.0;
+      foreach ($roles as $ckey => $cchoice) {
+        $weight += 0.001;
+        $element[$rkey][$ckey] = array(
+          '#type' => 'checkbox',
+          '#title' => "",
+          '#return_value' => array($rkey,$ckey),
+          '#weight' => $weight,
+          '#default_value' => $politic_settings_default_values['typesparroles'][$rkey][$ckey]
+        );
+      }
+    }
     
+    $form['typesparroles'] = $element;
+
     return $form;
     
   }
-
-  
-  
   
 }
+
+
