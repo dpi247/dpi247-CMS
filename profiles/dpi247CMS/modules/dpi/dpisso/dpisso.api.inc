@@ -75,3 +75,10 @@ function dpisso_api_parse_array_to_role_array($aSimpleArray){
   }
   return $return;
 }
+
+function dpisso_api_user_logout(){
+  global $user;  
+  watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
+  module_invoke_all('user_logout', $user);
+  session_destroy();
+}

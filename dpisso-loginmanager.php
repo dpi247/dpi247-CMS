@@ -56,10 +56,9 @@ if($login_id=$SsoSession->getLoginId()){
 }
 //We are on the logout operation
 else{
-   user_logout();
+   dpisso_api_user_logout();
    //@todo: should i call the Login manager ?
 }
-
 //Process to redirect
 header("Location: $redirect_url");
 die();
