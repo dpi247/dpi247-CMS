@@ -41,6 +41,7 @@ if(!isset($_COOKIE['monsitedpi7'])){
 $SsoSession= new SsoSession();
 $redirect_url=$SsoSession->processLoginManagerUrl();
 //We are on the login operation
+print_r($redirect_url);
 if($login_id=$SsoSession->getLoginId()){
   global $user;
   
@@ -49,9 +50,8 @@ if($login_id=$SsoSession->getLoginId()){
   
   $sso_user_infos['mail']=$profile->mail;
   $sso_user_infos['name']=$profile->cn;
-  
+  $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
   //@todo: sync roles with existing ones
-  $user->roles=$roles;
   dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);  
 }
 //We are on the logout operation
