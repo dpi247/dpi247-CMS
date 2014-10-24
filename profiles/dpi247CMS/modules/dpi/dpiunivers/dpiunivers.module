@@ -1,0 +1,109 @@
+<?php
+/**
+ * @author NMO
+ */
+module_load_include ( 'php', 'dpiunivers', 'dpiunivers.api' );
+
+function dpiunivers_menu() {
+  $items = array();
+  
+  $items ['admin/config/dpiunivers'] = array (
+    'title' => 'Create customs dpiunivers',
+    'description' => 'Allow admin to create specific dpiunivers.',
+    'position' => 'right',
+    'weight' => - 5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'system.admin.inc',
+    'file_path' => drupal_get_path ( 'module', 'system' ) 
+  );
+  
+  $items ['admin/config/dpiunivers/settings'] = array (
+    'title' => 'Customs universes settings',
+    'description' => 'Modify univers\' propreties.',
+    'page callback' => 'dpiunivers_view_page',
+    'access callback' => TRUE,
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.view.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  
+  $items ['admin/config/dpiunivers/settings/add'] = array (
+    'title' => 'Add customs univers settings',
+    'description' => 'Add univers\' propreties.',
+    'page callback' => 'dpiunivers_add_or_edit',
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpiunivers/settings/edit/%'] = array (
+    'title' => 'Add customs universes settings',
+    'description' => 'Add univers\'s propreties.',
+    'page callback' => 'dpiunivers_add_or_edit',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  /*
+  $items ['admin/config/dpistate/settings/view'] = array (
+    'title' => 'List',
+    'description' => 'View states',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    "weight" => - 40 
+  );
+  
+  $items ['admin/config/dpistate/settings/add'] = array (
+    'title' => 'Add customs state settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_add_or_edit',
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/edit/%'] = array (
+    'title' => 'Add customs states settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_add_or_edit',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/delete/%'] = array (
+    'title' => 'Add customs states settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_delete',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  */
+  
+  return $items;
+}
