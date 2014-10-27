@@ -79,3 +79,17 @@ function dpiunivers_menu() {
   
   return $items;
 }
+
+/**
+ * Implementation of hook_permission
+ *
+ * @return multitype:array
+ */
+function dpiunivers_permission() {
+  return array (
+    'administer dpiuniver' => array (
+      'title' => t ( 'Administer dpiuniver' ),
+      'description' => t ( 'Perform administration tasks for dpiuniver module.' ) 
+    ) 
+  );
+}
