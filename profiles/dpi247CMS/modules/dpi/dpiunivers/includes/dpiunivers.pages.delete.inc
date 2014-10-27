@@ -1,7 +1,7 @@
 
 <?php
 /**
- * @author GVD - LBA
+ * @author NMO
  */
 
 /**
