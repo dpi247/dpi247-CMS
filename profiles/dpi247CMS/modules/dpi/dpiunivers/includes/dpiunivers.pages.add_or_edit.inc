@@ -76,9 +76,15 @@ function dpiunivers_add_form($form, &$form_state, $id) {
   return $form;
 }
 
+/**
+ * Process for updating or saving informations
+ *
+ * @param array $form          
+ * @param array $form_state          
+ */
 function dpiunivers_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
-    if (dpiunivers_api_update_dpiunivers_by_id ( $form_state ['values'] ['dpiunivers_label'], $form_state ['values'] ['dpiunivers_theme'],  $form_state ['values'] ['dpiunivers_menu'], $form_state ['values'] ['store'] )) {
+    if (dpiunivers_api_update_univers_by_id ( $form_state ['values'] ['dpiunivers_label'], $form_state ['values'] ['dpiunivers_theme'],  $form_state ['values'] ['dpiunivers_menu'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
 	  drupal_goto('admin/config/dpiunivers/settings');
     } else {

@@ -4,6 +4,11 @@
  */
 module_load_include ( 'php', 'dpiunivers', 'dpiunivers.api' );
 
+/**
+ * Implementation of hook_menu
+ *
+ * @return multitype:array
+ */
 function dpiunivers_menu() {
   $items = array();
   
@@ -57,53 +62,20 @@ function dpiunivers_menu() {
     'file' => 'dpiunivers.pages.add_or_edit.inc',
     'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
   );
-  /*
-  $items ['admin/config/dpistate/settings/view'] = array (
-    'title' => 'List',
-    'description' => 'View states',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    "weight" => - 40 
-  );
   
-  $items ['admin/config/dpistate/settings/add'] = array (
-    'title' => 'Add customs state settings',
+  $items ['admin/config/dpiunivers/settings/delete/%'] = array (
+    'title' => 'Delete univers',
     'description' => 'Add state\'s propreties.',
-    'page callback' => 'dpistate_add_or_edit',
-    'access arguments' => array (
-      'administer dpistate' 
-    ),
-    'file' => 'dpistate.pages.add_or_edit.inc',
-    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
-  );
-  
-  $items ['admin/config/dpistate/settings/edit/%'] = array (
-    'title' => 'Add customs states settings',
-    'description' => 'Add state\'s propreties.',
-    'page callback' => 'dpistate_add_or_edit',
+    'page callback' => 'dpiunivers_delete',
     'page arguments' => array (
       5 
     ),
     'access arguments' => array (
       'administer dpistate' 
     ),
-    'file' => 'dpistate.pages.add_or_edit.inc',
-    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+    'file' => 'dpiunivers.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
   );
-  
-  $items ['admin/config/dpistate/settings/delete/%'] = array (
-    'title' => 'Add customs states settings',
-    'description' => 'Add state\'s propreties.',
-    'page callback' => 'dpistate_delete',
-    'page arguments' => array (
-      5 
-    ),
-    'access arguments' => array (
-      'administer dpistate' 
-    ),
-    'file' => 'dpistate.pages.delete.inc',
-    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
-  );
-  */
   
   return $items;
 }
