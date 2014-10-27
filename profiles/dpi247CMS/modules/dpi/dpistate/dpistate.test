@@ -4,13 +4,13 @@
  * This test class is for api
  * @author lba@audaxis.com
  */
-class SimpleTestDpiContextApiToolsTestCase extends DrupalWebTestCase {
+class SimpleTestDpiStateApiToolsTestCase extends DrupalWebTestCase {
 
   public static function getInfo() {
     return array (
       'name' => 'Api unit test',
-      'description' => 'Unit test for context.api',
-      'group' => 'Dpicontext' 
+      'description' => 'Unit test for state.api',
+      'group' => 'Dpistate' 
     );
   }
 
@@ -21,22 +21,22 @@ class SimpleTestDpiContextApiToolsTestCase extends DrupalWebTestCase {
   function tearDown() {
   }
 
-  function testDpicontextApiDbCrudFunction() {
+  function testDpistateApiDbCrudFunction() {
     $transaction = db_transaction ();
     try {
-      $id = dpicontext_api_add_context ( 'info_dpicontext', 0, '20' );
-      $this->assertTrue ( $id != FALSE, 'Insertion success', 'DpiContext' );
-      $value = dpicontext_api_get_one_context ( $id );
-      $this->assertTrue ( $value != FALSE && ! empty ( $value ), "récupération d'un élément par la fonction dpicontext_api_get_one_context", 'Dpicontext' );
-      $value = dpicontext_api_get_all_context ();
-      $this->assertTrue ( $value != FALSE && ! empty ( $value ), "récupération d'un élément par la fonction dpicontext_api_get_all_context", 'Dpicontext' );
-      dpicontext_api_update_context_by_id ( 'info_dpicontext', 0, '10', $id );
-      $val = dpicontext_api_get_one_context ( $id );
-      $this->assertTrue ( $val ['value'] == 10, 'Mise à jour fonctionnel dpicontext_api_update_context_by_id', 'Dpicontext' );
-      $this->assertTrue ( dpicontext_api_delete_context_by_id ( $id ), 'Delete success dpicontext_api_delete_context_by_id', 'Dpicontext' );
+      $id = dpistate_api_add_state ( 'info_dpistate', 0, '20' );
+      $this->assertTrue ( $id != FALSE, 'Insertion success', 'DpiState' );
+      $value = dpistate_api_get_one_state ( $id );
+      $this->assertTrue ( $value != FALSE && ! empty ( $value ), "récupération d'un élément par la fonction dpistate_api_get_one_state", 'Dpistate' );
+      $value = dpistate_api_get_all_states ();
+      $this->assertTrue ( $value != FALSE && ! empty ( $value ), "récupération d'un élément par la fonction dpistate_api_get_all_states", 'Dpistate' );
+      dpistate_api_update_state_by_id ( 'info_dpistate', 0, '10', $id );
+      $val = dpistate_api_get_one_state ( $id );
+      $this->assertTrue ( $val ['value'] == 10, 'Mise à jour fonctionnel dpistate_api_update_state_by_id', 'Dpistate' );
+      $this->assertTrue ( dpistate_api_delete_state_by_id ( $id ), 'Delete success dpistate_api_delete_state_by_id', 'Dpistate' );
     } catch ( Exception $e ) {
       $transaction->rollback ();
-      $this->assertTrue ( FALSE, 'Problem occured during transaction', 'Dpicontext' );
+      $this->assertTrue ( FALSE, 'Problem occured during transaction', 'Dpistate' );
     }
   }
 }
@@ -47,7 +47,7 @@ class SimpleTestDpiContextApiToolsTestCase extends DrupalWebTestCase {
  *
  * @author lba
  */
-class SimpleTestDpiContextAccessToolsTestCase extends DrupalWebTestCase {
+class SimpleTestDpiStateAccessToolsTestCase extends DrupalWebTestCase {
 
   public $old_value;
 
@@ -55,12 +55,12 @@ class SimpleTestDpiContextAccessToolsTestCase extends DrupalWebTestCase {
     return array (
       'name' => 'Access plugins testing',
       'description' => 'Test reaction about access function',
-      'group' => 'Dpicontext' 
+      'group' => 'Dpistate' 
     );
   }
 
   function setUp() {
-    module_load_include ( 'inc', 'dpicontext', 'plugins/access/dpicontext_status' );
+    module_load_include ( 'inc', 'dpistate', 'plugins/access/dpistate_status' );
     module_load_include ( 'inc', 'dpicache', 'dpicache.api' );
     $this->setup = TRUE;
   }
@@ -134,71 +134,71 @@ class SimpleTestDpiContextAccessToolsTestCase extends DrupalWebTestCase {
     );
   }
 
-  function testDpicontextAccessNumericLowerThanFunction() {
+  function testDpistateAccessNumericLowerThanFunction() {
     $gen_val = $this->get_default_value ( 3, 'Pâques', 1 );
     // $this->set_new_default_value ( $gen_val, TRUE );
-    $this->old_value = variable_get ( 'dpicontext_value_at_moment', NULL );
-    variable_set ( 'dpicontext_value_at_moment', $gen_val );
+    $this->old_value = variable_get ( 'dpistate_value_at_moment', NULL );
+    variable_set ( 'dpistate_value_at_moment', $gen_val );
     
     $conf = $this->get_conf_array ( 1, 4, '<', 0, 'inside', 0, 1, '=' );
-    $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), ' 3 < 4 return true value', 'Dpicontext-access' );
+    $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), ' 3 < 4 return true value', 'Dpistate-access' );
     
     $conf = $this->get_conf_array ( 1, 3, '<', 0, 'inside', 0, 1, '=' );
-    $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), ' 3 < 3 return false value', 'Dpicontext-access' );
+    $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), ' 3 < 3 return false value', 'Dpistate-access' );
     
-    variable_set ( 'dpicontext_value_at_moment', $this->old_value );
+    variable_set ( 'dpistate_value_at_moment', $this->old_value );
   }
 
-  function testDpicontextAccessNumericBiggerThanFunction() {
+  function testDpistateAccessNumericBiggerThanFunction() {
     $gen_val = $this->get_default_value ( 3, 'Pâques', 1 );
     // $this->set_new_default_value ( $gen_val, TRUE );
-    $this->old_value = variable_get ( 'dpicontext_value_at_moment', NULL );
-    variable_set ( 'dpicontext_value_at_moment', $gen_val );
+    $this->old_value = variable_get ( 'dpistate_value_at_moment', NULL );
+    variable_set ( 'dpistate_value_at_moment', $gen_val );
     
     $conf = $this->get_conf_array ( 1, 2, '>', 0, 'inside', 0, 1, '=' );
-    $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), ' 2 < 3 return true value', 'Dpicontext-access' );
+    $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), ' 2 < 3 return true value', 'Dpistate-access' );
     
     $conf = $this->get_conf_array ( 1, 4, '>', 0, 'inside', 0, 1, '=' );
-    $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), ' 4 > 3 return false value', 'Dpicontext-access' );
+    $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), ' 4 > 3 return false value', 'Dpistate-access' );
     
-    variable_set ( 'dpicontext_value_at_moment', $this->old_value );
+    variable_set ( 'dpistate_value_at_moment', $this->old_value );
   }
 
-  function testDpicontextAccessNumericEqualsFunction() {
+  function testDpistateAccessNumericEqualsFunction() {
     $gen_val = $this->get_default_value ( 3, 'Pâques', 1 );
     // $this->set_new_default_value ( $gen_val, TRUE );
-    $this->old_value = variable_get ( 'dpicontext_value_at_moment', NULL );
-    variable_set ( 'dpicontext_value_at_moment', $gen_val );
+    $this->old_value = variable_get ( 'dpistate_value_at_moment', NULL );
+    variable_set ( 'dpistate_value_at_moment', $gen_val );
     
     $conf = $this->get_conf_array ( 1, 3, '=', 0, 'inside', 0, 1, '=' );
-    $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), ' 3 = 3 return true value', 'Dpicontext-access' );
+    $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), ' 3 = 3 return true value', 'Dpistate-access' );
     
     $conf = $this->get_conf_array ( 1, 4, '=', 0, 'inside', 0, 1, '=' );
-    $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), ' 4 = 3 return false value', 'Dpicontext-access' );
+    $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), ' 4 = 3 return false value', 'Dpistate-access' );
     
-    variable_set ( 'dpicontext_value_at_moment', $this->old_value );
+    variable_set ( 'dpistate_value_at_moment', $this->old_value );
   }
 
-  function testDpicontextAccessTextFunction() {
+  function testDpistateAccessTextFunction() {
     $gen_val = $this->get_default_value ( 3, 'Pâques', 1 );
     // $this->set_new_default_value ( $gen_val, TRUE );
-    $this->old_value = variable_get ( 'dpicontext_value_at_moment', NULL );
-    variable_set ( 'dpicontext_value_at_moment', $gen_val );
+    $this->old_value = variable_get ( 'dpistate_value_at_moment', NULL );
+    variable_set ( 'dpistate_value_at_moment', $gen_val );
     
     $conf = $this->get_conf_array ( 0, 3, '=', 0, 'inside', 1, 1, '=' );
-    $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), ' Element selected in the list is the same - return true value', 'Dpicontext-access' );
+    $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), ' Element selected in the list is the same - return true value', 'Dpistate-access' );
     
     $conf = $this->get_conf_array ( 0, 4, '=', 0, 'inside', 1, 2, '=' );
-    $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), ' Element selected is not the same - return false value', 'Dpicontext-access' );
+    $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), ' Element selected is not the same - return false value', 'Dpistate-access' );
     
-    variable_set ( 'dpicontext_value_at_moment', $this->old_value );
+    variable_set ( 'dpistate_value_at_moment', $this->old_value );
   }
 
-  function testDpicontextAccessDateFunction() {
+  function testDpistateAccessDateFunction() {
     $transaction = db_transaction ();
     try {
       // prépare value needed to be tested
-      $id = dpicontext_api_add_context ( 'dpicontext_test_simple_test_date', 2, array (
+      $id = dpistate_api_add_state ( 'dpistate_test_simple_test_date', 2, array (
         $this->get_date_before_to_test ( 1 ),
         $this->get_date_after_to_test ( 1 ) 
       ) );
@@ -208,32 +208,32 @@ class SimpleTestDpiContextAccessToolsTestCase extends DrupalWebTestCase {
           'value' => 'Valeur Date' 
         ) 
       );
-      $this->old_value = variable_get ( 'dpicontext_value_at_moment', NULL );
-      variable_set ( 'dpicontext_value_at_moment', $gen_val );
+      $this->old_value = variable_get ( 'dpistate_value_at_moment', NULL );
+      variable_set ( 'dpistate_value_at_moment', $gen_val );
       
       $conf = $this->get_conf_date($id, 'inside');
-      $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), 'date into the value is inside the general value - return true', 'Dpicontext-access' );
+      $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), 'date into the value is inside the general value - return true', 'Dpistate-access' );
       
       $conf = $this->get_conf_date($id, 'outside');
-      $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), 'date into the value is not outside the general value - return false', 'Dpicontext-access' );
+      $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), 'date into the value is not outside the general value - return false', 'Dpistate-access' );
       
       // change value to test with value outside
-      dpicontext_api_update_context_by_id ( 'dpicontext_test_simple_test_date', 2, array (
+      dpistate_api_update_state_by_id ( 'dpistate_test_simple_test_date', 2, array (
         $this->get_date_before_to_test ( 2 ),
         $this->get_date_before_to_test ( 1 ) 
       ), $id );
       
       $conf = $this->get_conf_date($id, 'inside');
-      $this->assertFalse ( dpicontext_status_ctools_access_check ( $conf ), 'date into the value is not inside the general value - return false', 'Dpicontext-access' );
+      $this->assertFalse ( dpistate_status_ctools_access_check ( $conf ), 'date into the value is not inside the general value - return false', 'Dpistate-access' );
       
       $conf = $this->get_conf_date($id, 'outside');
-      $this->assertTrue ( dpicontext_status_ctools_access_check ( $conf ), 'date into the value is outside the general value - return true', 'Dpicontext-access' );
+      $this->assertTrue ( dpistate_status_ctools_access_check ( $conf ), 'date into the value is outside the general value - return true', 'Dpistate-access' );
       
-      variable_set ( 'dpicontext_value_at_moment', $this->old_value );
-      dpicontext_api_delete_context_by_id ( $id );
+      variable_set ( 'dpistate_value_at_moment', $this->old_value );
+      dpistate_api_delete_state_by_id ( $id );
     } catch ( Exception $e ) {
       $transaction->rollback ();
-      $this->assertTrue ( FALSE, 'Problem occured during transaction', 'Dpicontext' );
+      $this->assertTrue ( FALSE, 'Problem occured during transaction', 'Dpistate' );
     }
   }
 }
