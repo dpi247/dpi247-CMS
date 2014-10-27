@@ -229,6 +229,25 @@ function dpidestinations_schema() {
      'primary key' => array('targetblockid'),
    );
   */
+  
+  $schema["dpidestinations_multi_destinations"] = array(
+    'description' => 'The target entity table',
+    'fields' => array(      
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'label to find element',
+      ),
+      'destinations' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 1000,
+        'description' => 'Array value serialize',
+      )
+    ),
+    'primary key' => array('label'),
+  );
 
   return $schema;
 }
@@ -318,5 +337,30 @@ function dpidestinations_update_7001() {
   foreach ($rids as $rid) {
     user_role_grant_permissions($rid, $permissions);
   }
+}
+
+/**
+ * add table dpidestinations
+ */
+function dpidestinations_update_7002(){
+  $schema["dpidestinations_multi_destinations"] = array(
+    'description' => 'The target entity table',
+    'fields' => array(      
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'label to find element',
+      ),
+      'destinations' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 1000,
+        'description' => 'Array value serialize',
+      )
+    ),
+    'primary key' => array('label'),
+  );
+  db_create_table('dpidestinations_multi_destinations', $schema['dpidestinations_multi_destinations']);
 }
 

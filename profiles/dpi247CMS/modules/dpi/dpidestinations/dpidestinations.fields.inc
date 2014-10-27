@@ -19,6 +19,112 @@ function dpidestinations_field_info() {
   );
 }
 
+
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * Provides the description of the field.
+ */
+function dpidestinations_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode){
+  
+  if(isset($form_state['destinationsfield'])){
+    $field_elements = $form_state['destinationsfield'];
+    $multi_destinations = dpidestinations_api_get_all_multi_destination();
+    $new_field_destination_form = array();
+    $new_field_destination_form_status = array();
+    $cpt_element = 0;
+    
+    foreach($field_elements as $k => $v){
+      $info_multi_destinations = dpidestinations_api_get_one_multi_destination_by_label($v['tid']);
+      $wayto = explode('|', $k);
+      
+      //cas d'une destination multiple
+      if($info_multi_destinations!=null && $info_multi_destinations!=FALSE){        
+        $info_multi_destinations = unserialize($info_multi_destinations["destinations"]);
+    
+        $array_all_field = $form[$wayto[2]][$wayto[3]];
+        
+        foreach ($info_multi_destinations as $dest_infos){
+          
+          $default_value_field = $form[$wayto[2]][$wayto[3]][$wayto[4]];
+          $tmp_element_key = $wayto;
+          $tmp_element_key[4] = $cpt_element;
+          $tmp_dest_infos = $dest_infos;
+          $tmp_dest_infos["element_key"] = implode("|", $tmp_element_key);
+          
+          $new_field_destination_form_status[implode("|", $tmp_element_key)] = $tmp_dest_infos;        
+          
+          $default_value_field["element_key"]["#value"] = implode("|", $tmp_element_key);
+    
+          $default_value_field["temp_db_value"]["#value"]["tid"] = $dest_infos["temp_db_value"]["tid"];
+          $default_value_field["temp_db_value"]["#value"]["target"] = $dest_infos["temp_db_value"]["target"];
+    
+          $default_value_field["#delta"] = $cpt_element;
+          $default_value_field["#prefix"] = ' <div id="dropdown-target-replace_'.$cpt_element.'">';
+
+          $default_value_field["tid"]["#default_value"] = $dest_infos["tid"];
+          $default_value_field["target"]["#default_value"] = $dest_infos["target"];
+          
+          $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($dest_infos["tid"]);
+          $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($dest_infos["tid"], $dest_infos["target"]);
+          $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($dest_infos["tid"], $dest_infos["target"], TRUE);          
+          
+          
+          $default_value_field["target"]["#options"] = $target_options;
+          $default_value_field["rank"]["#default_value"] = $dest_infos["rank"];
+          $default_value_field["rank"]["#options"] = $rank_options;
+          $default_value_field["layout"]["#default_value"] = $dest_infos["layout"];
+          $default_value_field["layout"]["#options"] = $layout_options;
+          
+          $default_value_field["_weight"]["#default_value"] = $cpt_element;
+    
+          $new_field_destination_form[] = $default_value_field;
+    
+          $cpt_element++;
+        }
+            
+      }else{ //cas d'une destination simple
+        $array_all_field = $form[$wayto[2]][$wayto[3]];
+                
+        $tmp_element_key = $wayto;
+        $tmp_element_key[4] = $cpt_element;
+        $tmp_dest_infos = $form_state["destinationsfield"][$k];
+        $tmp_dest_infos["element_key"] = implode("|", $tmp_element_key);
+        
+        $new_field_destination_form_status[implode("|", $tmp_element_key)] = $tmp_dest_infos;
+        
+        $default_value_field["element_key"]["#value"] = implode("|", $tmp_element_key);
+        
+        $default_value_field = $form[$wayto[2]][$wayto[3]][$wayto[4]];
+        
+        $default_value_field["#delta"] = $cpt_element;
+        $default_value_field["#prefix"] = ' <div id="dropdown-target-replace_'.$cpt_element.'">';
+        
+        $default_value_field["_weight"]["#default_value"] = $cpt_element;
+        
+        $new_field_destination_form[] = $default_value_field;
+        
+        $cpt_element++;
+      }
+      
+    }
+
+    foreach ($new_field_destination_form as $k => $v){
+      $form[$wayto[2]][$wayto[3]][$k] = $v; 
+    }
+    
+    $form[$wayto[2]]['#max_delta']=$cpt_element-1;
+    $form_state["destinationsfield"] = $new_field_destination_form_status;
+    
+  }
+  $form['field_destinations']['#prefix'] = '<div id="dropdown-destination-all">';
+  $form['field_destinations']['#suffix'] = '</div>';
+  
+  //dsm($form);
+  //dsm($form_state);
+}
+
 /**
  * Implements hook_field_validate().
  *
@@ -155,11 +261,17 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
       $destinations['temp_db_value']['target'] == $destinations['target']) {
     $is_update = TRUE;
   }
+  
+  
+  
 
   // STEP 2:
   // Determine available options and change destination if need it
 
   $tids_options = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
+  $multi_destinations = dpidestinations_api_get_all_section_term_multi_destination_as_select_option();
+  $tids_options = array('Normal Destinations' => $tids_options, 'Multi destinations' => $multi_destinations);
+  
   if(FALSE && !$is_update) {
     $destinations['tid'] = '';
   }
@@ -179,6 +291,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
   if(!isset($rank_options[$destinations['rank']])) {
     $destinations['rank'] = current($rank_options);
   }
+  
 
   // STEP 3:
   // buid the form
@@ -209,12 +322,14 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           // select elements), but valid values include any jQuery event,
           // most notably 'mousedown', 'blur', and 'submit'.
           // 'event' => 'change',
-          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
+          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown_all',
+          'wrapper' => 'dropdown-destination-all',
           'method' => 'replace',
+          'effect' => 'fade',
+          'speed' => 1200,
         ),
       );
-
+      
       $widget['target'] = array(
         '#type' => 'select',
         '#options' => $target_options,
@@ -271,6 +386,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 /**
  * Element validate callback: rebuilds the form on country change and stores the current address value in the $form_state for retrieval on rebuild.
  */
+
 function dpidestinations_rebuildonchange_validate($element, &$form_state) {
   if($form_state['triggering_element']['#type'] == 'select'){
     // If the country was changed, rebuild the form.
@@ -536,9 +652,31 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
   return $element;
 }
 
+function dpidestinations_ajax_callback_dependent_dropdown_all($form, $form_state) {
+  $array_parents = $form_state['triggering_element']['#array_parents'];
+  array_pop($array_parents);
+  //isset($form_state['triggering_element']["#options"]["Multi destinations"][$form_state['triggering_element']["#value"]]));
+  
+  // Iterate over the form parents to find the element.
+  $element = $form;
+  foreach ($array_parents as $name) {    
+    $element = &$element[$name];
+    if (!empty($element['#dpidestinationsfield'])) {
+      break;
+    }
+  }
+
+  // Return the address block, but remove the '_weight' element inserted
+  // by the field API.
+  unset($element['_weight']);
+  
+  return $form['field_destinations'];  
+}
+
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
+  //isset($form_state['triggering_element']["#options"]["Multi destinations"][$form_state['triggering_element']["#value"]]));
 
   // Iterate over the form parents to find the element.
   $element = $form;
@@ -552,5 +690,6 @@ function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   // Return the address block, but remove the '_weight' element inserted
   // by the field API.
   unset($element['_weight']);
+  
   return $element;
 }

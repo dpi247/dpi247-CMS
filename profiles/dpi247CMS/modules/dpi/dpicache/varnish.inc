@@ -22,7 +22,14 @@ function varnish_purge_all_pages() {
   varnish_purge($host, $path);
 }
 
-
+/**
+ * return host url
+ */
+function _varnish_get_host() {
+  global $base_url;
+  $parts = parse_url($base_url);
+  return $parts['host'];
+}
 
 /**
  * Helper function to purge items for a host that matches the provided pattern.

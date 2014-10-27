@@ -69,8 +69,7 @@ function dpiservices_dpi_section_get_targets($tid) {
  * @return array
  */
 function dpiservices_dpi_section_retrieve($sid, $product_name ,$targetblock_name) {
-  module_load_include ( 'inc', 'dpiservices', 'dpiservices.private.dpi-packages' );
-  module_load_include ( 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
+  module_load_include ( 'inc', 'dpiservices', 'dpiservices.private.dpi-packages' );  
   module_load_include('inc', 'dpidestinations', 'dpidestinations.controller.class');
   
   return dpicache_get_cache_entry ( 'dpiservices_dpisection_retrieve_render', $sid, $product_name ,$targetblock_name);
@@ -85,8 +84,10 @@ function dpiservices_dpi_section_retrieve($sid, $product_name ,$targetblock_name
  * @return array
  */
 function dpiservices_dpi_section_retrieve_process($sid, $product_name ,$targetblock_name){
+  module_load_include ( 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
   global $language;
   $json_return = array ();
+  $sectionterm = new stdClass();
   $sectionterm = sectionterm_load ( $sid );
   
   $json_return ["title"] = $sectionterm->name;

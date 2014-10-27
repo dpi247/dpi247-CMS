@@ -216,7 +216,6 @@ function ctools_get_plugins($module, $type, $id = NULL) {
   // lookups everytime.
   $plugins = &drupal_static('ctools_plugins', array());
   $info = ctools_plugin_get_plugin_type_info();
-
   // Bail out noisily if an invalid module/type combination is requested.
   if (!isset($info[$module][$type])) {
     watchdog('ctools', 'Invalid plugin module/type combination requested: module @module and type @type', array('@module' => $module, '@type' => $type), WATCHDOG_ERROR);

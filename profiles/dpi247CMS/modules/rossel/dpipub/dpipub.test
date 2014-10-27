@@ -44,6 +44,23 @@ class SimpleTestDpiPubToolsTestCase extends DrupalWebTestCase{
       $transact->rollback();
     }
   }
+  
+  function testPubBlockTypeOfCache(){
+    $array_value = dpipub_block_info();
+    $array_test = array();
+    $query = db_select('zz_pub_UMI', 'p')
+    ->fields('p', array('builder ', 'position'))
+    ->condition('builder', 'dfp', '=')
+    ->execute();
+    foreach ($query as $row){
+      $array_test[] = $row->position;
+    }
+  
+    foreach ($array_value as $element){
+      if(in_array($element["info"], $array_test))
+        $this->assertTrue($element["cache"]==-1, "Dfp block have right cache arguments", 'DpiPub');
+    }
+  }
 
   function testPubTaxonomyGetPathByTidOrTerm(){
     /* create schema in taxonymy News/World/Belgium to test function */

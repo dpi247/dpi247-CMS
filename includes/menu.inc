@@ -463,12 +463,12 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
     $ancestors = menu_get_ancestors($parts);
     $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
-
     if ($router_item) {
       // Allow modules to alter the router item before it is translated and
       // checked for access.
+      
       drupal_alter('menu_get_item', $router_item, $path, $original_map);
-
+      
       $map = _menu_translate($router_item, $original_map);
       $router_item['original_map'] = $original_map;
       if ($map === FALSE) {
@@ -761,6 +761,7 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
   if (!empty($router_item['load_functions']) && !_menu_load_objects($router_item, $map)) {
     // An error occurred loading an object.
     $router_item['access'] = FALSE;
+    
     return FALSE;
   }
 

@@ -39,6 +39,7 @@ function dpiblocks_flowmix_content_type_content_types() {
     $flowmixes[$record->machine_name] = array(
       'title'        => t('FlowMix : '.$record->title),
       'machine_name' => $record->machine_name,
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/1412085106_104485.ico',
       'description'  => t(''),
       'add form'     => array(
         'dpiblocks_flowmix_content_type_form_summary_form'        => t('Summary'),
@@ -61,6 +62,7 @@ function dpiblocks_flowmix_content_type_content_types() {
     'title'          => t('New FlowMix'),
     'top level'      => TRUE,
     'category'       => t('Custom'),
+    'icon'              => drupal_get_path("module", "dpiblocks").'/icons/add_content.ico',
     'group'          => t('DPI Core'),
     'description'    => t('Mix external flows from multiple sources.'),
     'add form' => array(

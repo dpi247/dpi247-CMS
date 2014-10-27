@@ -43,17 +43,18 @@ function dpicontenttypes_entity_info() {
     'base table' => 'dpicontenttypes_properties_type',
     'fieldable' => TRUE,
     'bundle of' => 'dpiproperties',
-    'exportable' => FALSE,
+    'exportable' => TRUE,
+    'uri callback' => 'entity_class_uri',    
     'entity keys' => array(
       'id' => 'id',
       'name' => 'type',
-      'label' => 'label',
+      'label' => 'label', 
     ),
     'module' => 'dpicontenttypes',
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'path' => 'admin/structure/dpiproperties-types',
-      'file' => 'dpicontenttypes.entity.inc',
+      'file' => 'dpicontenttypes.controller.class.inc',
       'controller class' => 'DPIPropertiesTypeUIController',
     ),
     'access callback' => 'dpiproperties_type_access_admin_callback',
@@ -94,7 +95,7 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     );
   }
   
-  $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
+  $entity_info['scald_atom']['save callback'] = 'scald_atom_save';  
 }
 
 

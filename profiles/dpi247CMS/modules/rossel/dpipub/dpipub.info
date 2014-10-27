@@ -1,4 +1,4 @@
-name = "dpipub"
+name = "Dpi Pub"
 description = "Pub blocks gestion."
 core = "7.x"
 package = "Rossel"

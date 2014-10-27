@@ -26,6 +26,7 @@ function dpidestinations_targetblock_content_type_content_types($plugin) {
       'title' => check_plain($target->machine_name),
       'subtype' => $target->machine_name,
       'description' => check_plain($target->description),
+      'icon'  =>  drupal_get_path("module", "dpidestinations").'/images/1412086058_93156.ico',
       //'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t('Target'),
       'group' => t('DPI Core'),

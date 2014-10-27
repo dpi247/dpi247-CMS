@@ -443,9 +443,10 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 
   $target=$targetblock_wrapper->target->value();
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
+  
   $target->view_name=$targetview_reorder_view_name;
   $target->view_display=$targetview_reorder_display;
-
+  
   $target_wrapper = entity_metadata_wrapper('target', $target);
 
   //We use the targetview_reorder view to ensure we got the proper information.
@@ -457,8 +458,9 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 
   $term_value=$term->tid;
   $target_value=$target->machine_name;
-
+  
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
+  
   return $targetview;
 }
 
