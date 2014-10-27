@@ -1,0 +1,7 @@
+name = DPI Dashboard
+description = Dashboard for DPI
+package = DPI
+core = 7.x
+
+dependencies[] = ctools
+dependencies[] = panels

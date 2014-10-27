@@ -552,4 +552,54 @@ function varnish_requirements($phase) {
   }
 }
 
-
+/**
+ * Implementation of hook_dpidashboard_status_item().
+ *
+ * @return array
+ *   An array containing associative arrays with statuses
+ */
+function dpicache_dpidashboard_status_item() {
+	if(!variable_get('dpicache_disable_esi', FALSE)){ 
+		$dpicachestatus = 0;
+		$dpicachemessage = t('Cache is enabled');
+	} else {
+		$dpicachestatus = 3;
+		$dpicachemessage = t('Cache is disabled');
+	}
+	
+	$status = array(
+		array(
+			'title' 	=> 'DPI Cache ESI',
+			'status'	=> $dpicachestatus,
+			'message'	=> $dpicachemessage,
+			'link'		=> 'admin/dpi247/dpicache/esi',
+		)
+	);
+	
+	$vstatus = varnish_get_status_detail();
+	
+	while (list($server,$stat) = each($vstatus)) {
+		switch($stat) {
+			case VARNISH_SERVER_STATUS_DETAIL_UP:
+				$vanishstatus = 0;
+				$varnishmessage = t('Server is up and running');
+				break;	
+			case VARNISH_SERVER_STATUS_DETAIL_STOPPED:
+				$vanishstatus = 2;
+				$varnishmessage = t('Server is up but STOPPED');
+				break;	
+			default:
+				$vanishstatus = 3;
+				$varnishmessage = t('Server is not responding');
+		}
+		$status[] = 	
+		array(
+			'title'		=> 'Varnish ['.$server.'] status',
+			'status'	=> $vanishstatus,
+			'message'	=> $varnishmessage,
+			'link'		=> '/admin/dpi247/dpicache'
+		);
+	}
+	
+	return $status;	
+}
