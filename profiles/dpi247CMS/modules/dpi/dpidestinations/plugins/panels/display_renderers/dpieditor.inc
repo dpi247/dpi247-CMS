@@ -1,7 +1,13 @@
 <?php
 
+
+require_once(DRUPAL_ROOT."/profiles/dpi247CMS/modules/third/panels/plugins/display_renderers/panels_renderer_standard.class.php");
+require_once(DRUPAL_ROOT."/profiles/dpi247CMS/modules/third/panels/plugins/display_renderers/panels_renderer_editor.class.php");
+
+
 $plugin = array(
   'renderer' => 'dpidestinations_renderer_dpieditor',
+  
 );
 
 

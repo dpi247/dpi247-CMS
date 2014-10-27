@@ -65,3 +65,68 @@ function dpicommons_admin_settings_form_validate($form, &$form_state){
     form_set_error('dpicommons_http_request_retry', t('HTTP Request retry must be an integer.'));
   }
 }
+
+
+
+
+
+
+/**
+ * Finalize install process
+ * 
+ * Save section variant in DB at the end of the install process
+ * We need to do this here since it is not possible to do it in the install.php front controller due to
+ * Some specific setup during install (DrupalFakeCache caching, mecanisme etc)
+ * 
+ */
+function _dpicommons_finalize_install_process(){
+
+  if(!variable_get("dpicommons_finalize_install",FALSE)){
+    
+    //Special treatement for pages cuz they include several object better reliable to use the "API"
+    module_load_include('inc', 'page_manager', 'page_manager.admin');
+    $page=_dpicommons_build_page_manager_cache_load('sections');
+    foreach($page->handler_info as $key=>$value){
+      $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+    }
+    page_manager_save_page_cache($page);
+    $return=t("Finalize process done");
+    variable_set("dpicommons_finalize_install",TRUE);
+  }
+  echo "info:".$return; 
+}
+
+
+
+function _dpicommons_build_page_manager_cache_load($task_name){
+  $cache = new stdClass();
+  $cache->task_name = $task_name;
+  list($cache->task_id, $cache->subtask_id) = page_manager_get_task_id($cache->task_name);
+
+  $cache->task = page_manager_get_task($cache->task_id);
+  if (empty($cache->task)) {
+    return FALSE;
+  }
+
+  if ($cache->subtask_id) {
+    $cache->subtask = page_manager_get_task_subtask($cache->task, $cache->subtask_id);
+    if (empty($cache->subtask)) {
+      return FALSE;
+    }
+  }
+  else {
+    $cache->subtask = $cache->task;
+    $cache->subtask['name'] = '';
+  }
+
+  $cache->handlers = page_manager_load_sorted_handlers($cache->task, $cache->subtask_id);
+  $cache->handler_info = array();
+  foreach ($cache->handlers as $id => $handler) {
+    $cache->handler_info[$id] = array(
+      'weight' => $handler->weight,
+      'changed' => FALSE,
+      'name' => $id,
+    );
+  }
+  return $cache;
+}
