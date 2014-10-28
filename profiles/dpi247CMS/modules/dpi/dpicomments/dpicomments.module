@@ -1,0 +1,184 @@
+<?php 
+
+/* Include theme */
+include_once(drupal_get_path('module', 'dpicomments') . '/theme/theme.inc');
+
+/* Include userfull functions */
+include_once(drupal_get_path('module', 'dpicomments') . '/includes/dpicomments.functions.inc');
+
+/**
+ * Implementing hook_permission()
+ */
+function dpicomments_permission() {
+    return array(
+    	// Report abuse comments access permission
+        'report abuse' => array(
+            'title' => t('Report comment abuse'),
+            'description' => t('Allow users to report the abusive comments.'),
+            'restrict access' => TRUE,
+        ),
+    );
+}
+
+/**
+ * Implementation of hook_menu
+*/
+function dpicomments_menu() {
+  $items = array();
+
+  // General settings for dpi comments
+  $items[DPI_ADMIN_PATH.'/dpicomments'] = array(
+    'title' => 'DPI Comments',
+    'description' => 'Administer DPI247 comments settings.',
+    'weight' => 0,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicomments_settings'),
+    'access arguments' => array('access administration pages'),
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
+  // Menu callback for setting report comment abuse
+  $items['report-abuse/report/%/%'] = array(
+    'title' => 'Vote',
+    'page callback' => 'dpicomments_reportabuse_vote',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'dpicomments_user_access',
+    'access arguments' => array('report abuse'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // Menu callback for cancelled report comment abuse
+  $items['report-abuse/undo-report/%/%'] = array(
+    'title' => 'Undo vote',
+    'page callback' => 'dpicomments_reportabuse_undo_vote',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'dpicomments_user_access',
+    'access arguments' => array('report abuse'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Custom access function, works with array of permissions.
+ */
+function dpicomments_user_access() {
+  global $user;
+  $permissions = func_get_args();
+  if ($user->uid == 1) {
+    return TRUE;
+  }
+  foreach ($permissions as $perm) {
+    if (user_access($perm))
+      return TRUE;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpicomments_theme() {
+  return array(
+    'dpicomments_reportabuse_widget' => array(
+      'variables' => array(
+        'logged_in' => FALSE,
+        'is_author' => FALSE,
+        'voted' => FALSE,
+        'vote_link' => NULL,
+        'undo_vote_link' => NULL,
+        'link_query' => array(),
+        'can_vote' => NULL,
+        'can_undo_vote' => NULL,
+        'undo_vote_text' => NULL,
+        'vote_text' => NULL,
+        'score' => 0,
+      ),
+      'template' => 'dpicomments-reportabuse-widget',
+      'path' => drupal_get_path('module', 'dpicomments') . '/theme',
+    ),
+    'dpicomments_reportabuse_json_response' => array(
+      'variables' => array('entity_type' => NULL, 'entity_id' => NULL, 'tag' => NULL, 'score' => NULL, 'vote_type' => NULL),
+    ),
+  );
+}
+
+
+
+/**
+ * Create report abuse voting widget to display on the webpage.
+ */
+function dpicomments_reportabuse_build_comment_jquery_widget($entity_id, $tag = 'dpicomments_comment_vote') {
+  global $user;
+  $comment = comment_load($entity_id);
+  $score = dpicomments_reportabuse_get_score('comment', $comment->cid, $tag);
+  $logged_in = $user->uid > 0;
+  $is_author = $comment->uid == $user->uid;
+  $voted = dpicomments_reportabuse_get_votes('comment', $comment->cid, $user->uid, $tag);
+  $build = array(
+    '#theme' => 'dpicomments_reportabuse_widget__comment__' . $tag,
+    '#logged_in' => $logged_in,
+    '#is_author' => $is_author,
+    '#voted' => $voted,
+    '#vote_link' => 'report-abuse/report/comment/' . $comment->cid . '/' . $tag,
+    '#undo_vote_link' => 'report-abuse/undo-report/comment/' . $comment->cid . '/' . $tag,
+    '#link_query' => array('token' => drupal_get_token($comment->cid), dpicomments_reportabuse_get_cleared_destination()),
+    '#can_vote' => user_access('report abuse'),
+    '#can_undo_vote' => variable_get('dpicomments_comment_undo_vote', 0),
+    '#undo_vote_text' => check_plain(variable_get('dpicomments_comment_undo_vote_text', "")),
+    '#vote_text' => check_plain(variable_get('dpicomments_comment_vote_text', t('Vote'))),
+    '#score' => $score,
+  );
+  if (variable_get('dpicomments_add_js', 1)) {
+    $build['#attached']['js'][] = drupal_get_path('module', 'dpicomments') . '/js/jquery.dpicomments.js';
+  }
+  return $build;
+}
+
+
+/**
+ * Implements hook_comment_view().
+ */
+function dpicomments_comment_view($comment, $view_mode, $langcode) {
+  if (variable_get('dpicomments_comment_widget_show', 0) && !isset($comment->in_preview)) {
+    $comment->content['dpicomments_reportabuse_widget'] = dpicomments_reportabuse_build_comment_jquery_widget($comment->cid);
+  }
+}
+
+/**
+ * Implements hook_comment_delete().
+ */
+function dpicomments_comment_delete($comment) {
+  $criteria['entity_id'] = $comment->cid;
+  $criteria['entity_type'] = 'comment';
+  $votes = votingapi_select_votes($criteria);
+  // Suppression du commentaire dans VotingAPI
+  votingapi_delete_votes($votes);
+}
+
+/**
+ * Implements hook_votingapi_metadata_alter().
+ */
+function dpicomments_votingapi_metadata_alter(&$data) {
+  // Document several custom tags for rating restaurants and meals.
+  $data['tags']['dpicomments_comment_vote'] = array(
+    'name' => t('Report abuse comment vote'),
+    'description' => t('Dpicomments report abuse votes for comments.'),
+    'module' => 'dpicomments',
+  );
+}
+
+/**
+ * This hook is called when user votes on some content.
+ * @param  $vote_type
+ *    Vote type, "vote" or "undo_vote"
+ * @param  $entity_type
+ *    Entity type, node, comment etc.
+ * @param  $entity_id
+ * @param  $tag
+ * @param  $score
+ * @param  $user
+ * @return void
+ */
+function hook_dpicomments_voted($vote_type, $entity_type, $entity_id, $tag, $score, $user) {
+}
