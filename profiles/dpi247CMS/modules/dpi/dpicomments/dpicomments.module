@@ -182,3 +182,25 @@ function dpicomments_votingapi_metadata_alter(&$data) {
  */
 function hook_dpicomments_voted($vote_type, $entity_type, $entity_id, $tag, $score, $user) {
 }
+
+
+
+/*************************************/
+/**** Rules integration (Trigger) ****/
+/*************************************/
+
+/**
+ * Implements hook_trigger_info().
+ */
+function dpicomments_trigger_info() {
+  return array(
+    'comment' => array(
+      'report_abuse_after_posted' => array(
+        'label' => "When a user report an abusive comment",
+      ),
+      'report_abuse_after_undo_posted' => array(
+        'label' => "When a user cancelled its report of an abusive comment",
+      ),
+    ),
+  );
+}

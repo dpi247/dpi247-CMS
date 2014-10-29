@@ -35,6 +35,10 @@ function dpicomments_reportabuse_vote($entity_type, $entity_id, $tag = 'dpicomme
       'vote_source' => $vote_source,
     );
     votingapi_set_votes($votes);
+
+    /* Trigger Comment : When a user report an abusive comment */
+    _trigger_comment($votes, 'report_abuse_after_posted');
+
     $criteria = array(
       'entity_type' => $entity_type,
       'entity_id' => $entity_id,
@@ -85,6 +89,9 @@ function dpicomments_reportabuse_undo_vote($entity_type, $entity_id, $tag = 'dpi
     $votes = votingapi_select_votes($criteria);
     votingapi_delete_votes($votes);
     votingapi_recalculate_results($entity_type, $entity_id, TRUE);
+
+    /* Trigger Comment : When a user cancelled its report of an abusive comment */
+    _trigger_comment($criteria, 'report_abuse_after_undo_posted');
 
     $criteria = array(
       'entity_type' => $entity_type,
