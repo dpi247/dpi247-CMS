@@ -25,7 +25,9 @@ function dpidestinations_page_targetview_reorder($term,$target){
   $targetblock->offset=0;
 
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
-  $targetview->pre_execute();
+  $targetview->dom_id = uniqid();
+  
+  //$targetview->pre_execute();
   $targetview->execute();
   
   $nodes=$targetview->result;
@@ -40,7 +42,6 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
-  //dsm($nodes,nodes);
   foreach($nodes as $node){
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
@@ -112,7 +113,6 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $new_values[$nid]=$t['weight'];
     $old_values[$nid]=$t['original_weight'];
   }
-
     
   $order_by_weight = array();
   foreach($form_state['values']['nodes'] as $key => $data) {
@@ -122,7 +122,6 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   foreach( $order_by_weight as $weight=>$data){
     $order_by_new_rank[]=$data;
   }
-  
   /*
    * les changements dans le reorder se traduisent par le fait que la somme des
    * old_rank et des new_rank ne sont pas égale à boundaries.
@@ -145,9 +144,7 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     }
     if($sum<$boundary){
       $greater_than_boundary[$rank]=$data;
-      
     }
-    
   }
   
   if(count($greater_than_boundary)<count($smaller_than_boundary)){
@@ -155,8 +152,6 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   }else{
     $nodes_to_process=$smaller_than_boundary;
   }
-  
-  
   
   $term_id= $form_state["values"]['sectiontid'];
   $target_name= $form_state["values"]['destination_targetname'];
@@ -166,10 +161,9 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
     _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
   }
-  
-  
+  module_load_include("inc", "dpidestinations", "dpidestinations.rules");
+  dpidestinations_clear_cache_of_one_destination($term_id, $target_name);
 }
-
 
 
 

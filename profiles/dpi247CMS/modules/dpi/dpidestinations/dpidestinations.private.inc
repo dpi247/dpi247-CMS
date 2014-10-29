@@ -98,9 +98,7 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
 
     $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
-
     $display = panels_panel_context_get_display($handler);
-
     $displays[$term_id] = $display;
   }
   return $displays[$term_id];

@@ -76,12 +76,10 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $module = 'dpidestinations';
   $block = new stdClass();
   $block->module = $module;
-
   $destination_term_id = $context['argument_destination_1']->data->tid;
   $did = $context['argument_destination_1']->data->handler->did;
-  
   $target_name = $subtype;
-  $split_delta = $conf["split_delta"];
+  $split_delta = $conf["split_delta"];  
   $title = _dpidestinations_targetblock_content_type_helper_get_title($conf);
   return dpicache_get_cache_entry('dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta,$title);
 }
@@ -115,11 +113,11 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
   $target=$targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
-
   $targetviews = &drupal_static('dpidestinations_targetviews');
   $targetviews_values = &drupal_static('dpidestinations_targetview_valuess');
 
   if (!isset($targetviews[$destination_term_id][$target_machine_name])) {
+    dsm($target_wrapper->targetview->value());
     $targetview = $target_wrapper->targetview->value();
     _dpidestinations_targetview_initialize_view($targetview, $destination_term_id, $target_machine_name, $targetblock);
 

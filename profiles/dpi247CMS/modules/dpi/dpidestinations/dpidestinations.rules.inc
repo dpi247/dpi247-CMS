@@ -252,7 +252,24 @@ function dpidestinations_rules_action_info() {
       'callbacks' => array (
         'execute' => 'dpidestinations_clear_cache_of_node_content' 
       ) 
-    ) 
+    ),
+    'refresh_destination_cash' => array (
+      'label' => t ( 'Refresh destination cache' ),
+      'parameter' => array (
+        'tid' => array (
+          'type' => 'integer',
+          'label' => t ( 'dpidestination_tid' )
+        ),
+        'target' => array (
+          'type' => 'string',
+          'label' => t ( 'dpidestination_target' )
+        )
+      ),
+      'group' => t ( 'Dpi Actions Rules' ),
+      'callbacks' => array (
+        'execute' => 'dpidestinations_clear_cache_of_one_destination'
+      )
+    )
   );
 }
 
@@ -294,3 +311,13 @@ function dpidestinations_clear_cache_of_node_content($node) {
   dpicache_api_manage_varnish_clear_cache_for_node($node);
 }
 
+/**
+ * This function invalide cache for one destination
+ * 
+ * @param integer $tid
+ * @param string $target
+ */
+function dpidestinations_clear_cache_of_one_destination( $tid, $target){
+  $category = dpidestination_api_get_category (array( 'tid' => $tid, 'target' => $target));
+  dpicache_api_manage_regeneration_all_cache_entry($tid, $category);
+}
