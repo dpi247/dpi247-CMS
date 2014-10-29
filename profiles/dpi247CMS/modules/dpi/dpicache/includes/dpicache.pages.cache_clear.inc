@@ -18,12 +18,12 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   $form['dpicache_use']['dpicache_utilisation'] = array(
     '#title' => t('Disable dpicache'),
     '#type' => 'checkbox',    
-    '#default_value' => variable_get('dpicache_disable_dpicache_utilisation', FALSE),
+    '#default_value' => dpi_variable_get('dpicache_disable_dpicache_utilisation', FALSE),
   );
   
   $form['dpicache_use']['dpicache_status'] = array(
     '#type' => 'submit',
-    '#value'=>'Save',
+    '#value'=>'Save Dpicache',
   );
   
   $form['dpicache_accumulation'] = array(
@@ -40,7 +40,7 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   
   $form['dpicache_accumulation']['dpicache_accumulation_cache'] = array(
     '#type' => 'submit',
-    '#value'=>'Save',
+    '#value'=>'Save Dpicache Accumulation',
   );
   
   $form['dpicache_cache_varnish'] = array(
@@ -91,8 +91,8 @@ function dpicache_pages_form_cache_clear_form_submit($form, &$form_state){
         dpi_variable_set('dpicache_disable_dpicache_accumulation', $form_state['values']['accumulation']);   
         drupal_set_message("Settings saved");
       break;
-    case 'dpicache_status':        
-        variable_set('dpicache_disable_dpicache_utilisation', $form_state['values']['dpicache_utilisation']);
+    case 'dpicache_status': 
+        dpi_variable_set('dpicache_disable_dpicache_utilisation', $form_state['values']['dpicache_utilisation']);
         drupal_set_message("Settings saved");
       break;
     case 'varnish_clean_cache':

@@ -106,13 +106,6 @@ class TargetBlockEntity extends Entity {
    * @var boolean
    */
   public $use_split;
-  
-  /**
-   * Is this targetblock instance part of a splitted targetblock
-   *
-   * @var boolean
-   */
-  public $rank_max_value;
   /**
    * The order of the splitted targetblockinstance
    *
