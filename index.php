@@ -17,13 +17,6 @@
 
 define('DRUPAL_ROOT', getcwd());
 
-require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
-require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
-$config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-if(isset($_COOKIE[$config['longterm_cookie_name']]) && strcmp($_COOKIE[$config['longterm_cookie_name']], 'true')==0 && !isset($_COOKIE[$config['loginToken_cookie_name']])){
-  $redirect_url = $config["ssoServer_url"].'/html/login?unitId='.$config["unitId"]."&returnPage=".urlencode(dpisso_api_get_current_url())."&bypassForm=true";
-  header("Location: $redirect_url");
-}
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
