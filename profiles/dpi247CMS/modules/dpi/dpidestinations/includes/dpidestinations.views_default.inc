@@ -26,7 +26,7 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['style_plugin'] = 'list';
   $handler->display->display_options['style_options']['row_class'] = 'article-inline';
   $handler->display->display_options['style_options']['class'] = 'article-group';
-  $handler->display->display_options['row_plugin'] = 'fields';
+  $handler->display->display_options['row_plugin'] = 'targetblock_node_row';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
@@ -45,12 +45,10 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'targetblock_node_row';
 
-  /* Display: Block */
-  $handler = $view->new_display('block', 'Block', 'block_1');
 
   $views[$view->name] = $view;
   // At the end, return array of default views.
-  
+
   $view = new view();
   $view->name = 'targetview_reorder_default';
   $view->description = '';
@@ -60,7 +58,7 @@ function dpidestinations_views_default_views() {
   $view->core = 7;
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
-  
+
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['use_more_always'] = FALSE;
@@ -103,7 +101,7 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['table'] = 'field_data_field_destinations';
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['field'] = 'field_destinations_virtual_rank';
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['order'] = 'DESC';
-  
+
   /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -118,7 +116,7 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['filters']['type']['value'] = array(
     'package' => 'package',
   );
-  
+
   $views[$view->name] = $view;
 
   return $views;
