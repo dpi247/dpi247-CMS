@@ -94,6 +94,8 @@ function dpiservices_wally_section_get_one_packages($sectionid, $targetblock_nam
   $target = $targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
 
+  
+  module_load_include('inc', 'dpidestinations','plugins/ctools/content_types/targetblock/targetblock');
   $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sectionid,  $section->target, $targetblock);
 
   foreach($targetview->result as $node_info){
