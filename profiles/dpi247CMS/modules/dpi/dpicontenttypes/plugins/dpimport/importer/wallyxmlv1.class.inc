@@ -13,7 +13,6 @@ class WallyXmlV1 extends PackageHelper {
 
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
-    
     if (!Logger::error()) {
 
       // Allow to alter entity before save
@@ -94,9 +93,15 @@ class WallyXmlV1 extends PackageHelper {
 
   protected function setPackageAttributes($dom, $wrapper, $entity) {
     // Language
-    $wrapper->language->set($dom->getAttributeNode('Language')->value);
+    
+    //@todo: use global lang
+    if($dom->getAttributeNode('Language')->value!=""){
+      $wrapper->language->set($dom->getAttributeNode('Language')->value);
+    }
+    else{
+      $wrapper->language->set("fr");
+    }
     // @todo path_autho check alias
-  
     $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
     $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
     $this->buildAutopublishDate($dom, $wrapper, $entity);
@@ -705,6 +710,7 @@ class WallyXmlV1 extends PackageHelper {
     switch ($parsedurl['scheme']){
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
+        
         switch ($entity->type){
           case 'image':
             $wrapper->scald_thumbnail->set((array) $file);
