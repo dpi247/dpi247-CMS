@@ -133,6 +133,8 @@ class FolderDispatcher extends Dispatcher {
    * @return Array $dispatcher_settings
    */
   public function submitSettingsForm($values, $form_state_multistep){
+    $dispatcher_settings = parent::submitSettingsForm($values);
+    
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep ["default"] ["name"];
     $old = umask(0);
     
