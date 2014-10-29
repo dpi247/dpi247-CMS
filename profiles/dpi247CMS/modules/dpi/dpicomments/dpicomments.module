@@ -140,6 +140,18 @@ function dpicomments_reportabuse_build_comment_jquery_widget($entity_id, $tag = 
  * Implements hook_comment_view().
  */
 function dpicomments_comment_view($comment, $view_mode, $langcode) {
+
+	// Signature : soit le pseudo, soit nom+prenom
+	$signature = $comment->field_signature['und'][0]['safe_value'];
+
+	if (isset($signature) && !empty($signature)) {
+		$comment->content['comment_body']['#object']->name = $signature;
+	} else {
+		// Il faudrait récupérer le nom et le prenom ici meme
+		$comment->content['comment_body']['#object']->name = 'TODO nom+prenom';
+	}
+
+	// Signaler un abus
   if (variable_get('dpicomments_comment_widget_show', 0) && !isset($comment->in_preview)) {
     $comment->content['dpicomments_reportabuse_widget'] = dpicomments_reportabuse_build_comment_jquery_widget($comment->cid);
   }
