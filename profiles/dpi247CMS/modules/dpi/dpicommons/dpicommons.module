@@ -32,9 +32,22 @@ function dpicommons_menu() {
     'file path' => drupal_get_path('module', 'dpicommons').'/includes',
     'weight' => -1,
   );
+  
+  $items['finalize_install_process'] = array(
+    'title' => 'DPI247 Finalize install process',
+    'description' => 'Save section page manager tasks in DB',
+    'page callback' => '_dpicommons_finalize_install_process',
+    'access arguments' => TRUE,
+    'type'=>MENU_CALLBACK,
+    'file' => 'dpicommons.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpicommons').'/includes',
+    'weight' => -1,
+  );
 
   return $items;
 }
+
+
 
 /**
  * Implementation of hook_theme()

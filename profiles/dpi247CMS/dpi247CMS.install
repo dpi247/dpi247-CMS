@@ -186,9 +186,69 @@ function dpi247CMS_install_tasks($install_state) {
     'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     'function' => 'dpi247CMS_install_demo_contents_form',
   );
+  
+  // Store variant in DB
+  $tasks['store_variant_in_db'] = array(
+    'display_name' => st('Store some variants in DB'),
+    'display' => TRUE,
+    'type' => 'normal',
+    'run' => INSTALL_TASK_RUN_IF_NOT_COMPLETED,
+    'function' => 'dpi247CMS_store_variant_in_db',
+  );
 
   return $tasks;
 }
+
+/**
+ * @see _dpicommons_finalize_install_process
+ */
+function dpi247CMS_store_variant_in_db(){
+  
+  
+  drupal_set_message("DPIProfileFull");
+  /*
+  global $conf;
+  
+  module_load_all(DRUPAL_BOOTSTRAP_FULL);
+  
+  
+  //$conf['cache_default_class'] ="DrupalDatabaseCache";
+  drupal_flush_all_caches();
+  drupal_static_reset("ctools_export_load_object");
+  drupal_static_reset("ctools_export_load_object_table_exists");
+  drupal_static_reset("ctools_export_load_object_all");
+  drupal_static_reset("_ctools_export_get_defaults");
+  drupal_static_reset("ctools_object_cache_get");
+  
+  
+  
+  //Special treatement for pages cuz they include several object better reliable to use the "API"
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=dpi247CMS_build_page_manager_cache_load('term_view');
+  foreach($page->handler_info as $key=>$value){
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  dsm($page);
+  page_manager_save_page_cache($page);
+  
+  //Special treatement for pages cuz they include several object better reliable to use the "API"
+  module_load_include('inc', 'page_manager', 'page_manager.admin');
+  $page=dpi247CMS_build_page_manager_cache_load('sections');
+  foreach($page->handler_info as $key=>$value){
+    dsm('key'.$key);
+    $page->handler_info[$key]['changed'] = PAGE_MANAGER_CHANGED_CACHED;
+  }
+  
+  $conf['toto']="toto";
+  page_manager_save_page_cache($page);
+
+  $conf['toto']="tata";
+  */
+  
+  
+  
+}
+
 
 /**
  * Set the taxonomy vid into dpi_variable
@@ -354,6 +414,8 @@ function _dpi247CMS_install_demo_contents_full() {
     }
   }
 
+  
+  
   // Activate the sections and the node pages in the page manager
   module_load_include('admin.inc', 'page_manager');
   // Load context plugin as there may be contexts cached here.
@@ -374,6 +436,10 @@ function _dpi247CMS_install_demo_contents_full() {
 
   // Set the "News" section page as home page
   variable_set('site_frontpage', 'section/1');
+  
+  
+  
+  
 }
 
 function _dpi247CMS_install_default_contents() {
@@ -441,4 +507,30 @@ function _dpi247CMS_taxonomy_menu_vocab_submit($form, &$form_state) {
     variable_set($variable_name, $value);
   }
 
+}
+
+function dpi247CMS_install_tasks_alter(&$tasks, $install_state){
+  
+ //print "<pre>".print_r($tasks,1)."</pre>";
+ unset($tasks['install_finished']);
+ 
+ $tasks['dpi247CMS_install_finished']=array("display_name"=>"finished");
+ 
+}
+
+/**
+ * Finishes importing files at end of installation.
+ *
+ * @param $install_state
+ *   An array of information about the current installation state.
+ *
+ * @return
+ *   A message informing the user that the installation is complete.
+ */
+function dpi247CMS_install_finished(&$install_state) {
+  $output=install_finished($install_state);
+  
+   $output.='<iframe src="/finalize_install_process"></iframe>';
+
+  return $output;
 }

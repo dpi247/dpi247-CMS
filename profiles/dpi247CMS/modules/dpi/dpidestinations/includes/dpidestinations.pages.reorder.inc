@@ -108,7 +108,6 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   
   $old_values=array();
- 
   foreach($form_state["values"]['nodes'] as $nid=>$t){
     $new_values[$nid]=$t['weight'];
     $old_values[$nid]=$t['original_weight'];
@@ -122,6 +121,7 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   foreach( $order_by_weight as $weight=>$data){
     $order_by_new_rank[]=$data;
   }
+
   /*
    * les changements dans le reorder se traduisent par le fait que la somme des
    * old_rank et des new_rank ne sont pas égale à boundaries.
@@ -136,6 +136,11 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
    * 
    * 
    */
+  
+  /*
+   * 
+    THIS IS PURE BULLSHIT
+*/
   $boundary=count($form_state["values"]['nodes']);
   foreach($order_by_new_rank as $rank=>$data){
     $sum=abs($data['weight'])+abs($data['original_weight']);
@@ -159,7 +164,12 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $position=$new_rank+1;
     $nid=$data['nid'];
     $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
+    $destinations_to_update[$nid]=$virtual_rank;
+    
+  }
+  foreach($destinations_to_update as $nid=>$virtual_rank){
     _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
+    
   }
   module_load_include("inc", "dpidestinations", "dpidestinations.rules");
   dpidestinations_clear_cache_of_one_destination($term_id, $target_name);
