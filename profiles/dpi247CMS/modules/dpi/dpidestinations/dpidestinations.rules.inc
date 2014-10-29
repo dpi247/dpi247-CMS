@@ -228,7 +228,7 @@ function dpidestinations_rules_condition_has_section_and_target($node, $sections
 function dpidestinations_rules_action_info() {
   return array (
     'regenerate_node' => array (
-      'label' => t ( 'Refresh content' ),
+      'label' => t ( 'Refresh targetblocks associated to the node' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
@@ -241,7 +241,7 @@ function dpidestinations_rules_action_info() {
       ) 
     ),
     'refresh_node_cash' => array (
-      'label' => t ( 'Refresh node content' ),
+      'label' => t ( 'Refresh node page' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
