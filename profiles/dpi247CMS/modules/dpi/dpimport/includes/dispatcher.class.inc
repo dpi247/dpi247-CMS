@@ -460,6 +460,8 @@ abstract class Dispatcher {
    * @return Array $dispatcher_settings
    */
   public function submitSettingsForm($values, $form_state_multistep) {
+    dsm($values);
+    dsm($form_state_multistep);
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep["default"] ["name"];
     $old = umask ( 0 );
     if (mkdir ( $default_path . "/done", 0777, true )) {
