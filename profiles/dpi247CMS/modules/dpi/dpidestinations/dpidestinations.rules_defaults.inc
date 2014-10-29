@@ -5,6 +5,8 @@
  *
  * @return multitype:RulesPlugin
  */
+
+/*
 function dpidestinations_default_rules_configuration() {
   $configs = array ();
   $rule = '{ "rules_refresh_content_rules" : {
@@ -26,3 +28,4 @@ function dpidestinations_default_rules_configuration() {
   $configs ['rules_regenerate_cache_node'] = rules_import ( $rule );
   return $configs;
 }
+*/
