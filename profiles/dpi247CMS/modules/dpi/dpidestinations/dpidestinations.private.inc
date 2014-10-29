@@ -98,7 +98,9 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
 
     $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
+
     $display = panels_panel_context_get_display($handler);
+
     $displays[$term_id] = $display;
   }
   return $displays[$term_id];
@@ -441,10 +443,9 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 
   $target=$targetblock_wrapper->target->value();
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
-  
   $target->view_name=$targetview_reorder_view_name;
   $target->view_display=$targetview_reorder_display;
-  
+
   $target_wrapper = entity_metadata_wrapper('target', $target);
 
   //We use the targetview_reorder view to ensure we got the proper information.
@@ -456,9 +457,25 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 
   $term_value=$term->tid;
   $target_value=$target->machine_name;
+
+  
+  //add title
+
+  $title_view_field['id'] = 'title';
+  $title_view_field['table'] = 'node';
+  $title_view_field['field'] = 'title';
+  
+  $title_view_field['label'] = '';
+  $title_view_field['alter']['word_boundary'] = FALSE;
+  $title_view_field['alter']['ellipsis'] = FALSE;
+  
+  $targetview->set_item($targetview->current_display , 'field', 'title', $title_view_field);
   
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
   
+  
+  
+  dsm($targetview);
   return $targetview;
 }
 

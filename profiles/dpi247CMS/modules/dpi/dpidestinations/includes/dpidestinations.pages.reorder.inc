@@ -25,30 +25,34 @@ function dpidestinations_page_targetview_reorder($term,$target){
   $targetblock->offset=0;
 
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
-  $targetview->dom_id = uniqid();
-  
-  //$targetview->pre_execute();
+  $targetview->pre_execute();
   $targetview->execute();
+  dsm($targetview);
   
   $nodes=$targetview->result;
-  
   return drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target);
   
 }
 
+
 function dpidestinations_page_targetview_reorder_form($form, &$form_state, $nodes, $sectiontid, $destination_target){
   $form['#tree'] = TRUE;
+  
   
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
+  dsm($nodes);
+  //dsm($nodes,nodes);
   foreach($nodes as $node){
+    //@todo: fix this performance issues: $nodes should contain all the data such as title
+    $node=node_load($node->nid);
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
       '#default_value' => 0,
       '#delta' => $weight_delta,
       '#title_display' => 'invisible',
-      '#title' => t('Weight for @node ', array('@node' => $node->node_title)),
+      '#title' => t('Weight for @node ', array('@node' => $node->title)),
       '#attributes'=> array('class' => array('node-weight')),
     );
     $form['nodes'][$node->nid]['original_weight'] = array(
@@ -60,29 +64,17 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
       '#value' => $node->nid,
     );
 
+    $form['nodes'][$node->nid]['nid'] = array(
+      '#type' => 'value',
+      '#value' => $node->nid,
+    );
     $original_weight++;
     $form['nodes'][$node->nid]['title'] = array(
-      '#markup' => $node->node_title,
+      '#markup' => $node->title,
     );
-    
-    $str_author = "";
-    foreach($node->field_field_authors as $author){
-      $str_author .= '<a href="/'.$author["rendered"]["#href"].'">'.$author["rendered"]["#title"].'</a> ';
-    }
-    $form['nodes'][$node->nid]['authors'] = array(
-      '#markup' => $str_author,
-    );
-    
-    $str_date = "";
-    foreach($node->field_field_editorialpublicationdate as $date){
-      $str_date .= $date["rendered"]["#markup"];
-    }
-    $form['nodes'][$node->nid]['field_field_editorialpublicationdate'] = array(
-      '#markup' => $str_date,
-    );
-    
+  
     $form['nodes'][$node->nid]['edit'] = array(
-      '#markup' => '<a href="/node/'.$node->nid.'/edit">Edit</a>',
+      '#markup' => $node->title,
     );
   }
   
@@ -108,10 +100,12 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   
   $old_values=array();
+ 
   foreach($form_state["values"]['nodes'] as $nid=>$t){
     $new_values[$nid]=$t['weight'];
     $old_values[$nid]=$t['original_weight'];
   }
+
     
   $order_by_weight = array();
   foreach($form_state['values']['nodes'] as $key => $data) {
@@ -121,7 +115,7 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   foreach( $order_by_weight as $weight=>$data){
     $order_by_new_rank[]=$data;
   }
-
+  
   /*
    * les changements dans le reorder se traduisent par le fait que la somme des
    * old_rank et des new_rank ne sont pas égale à boundaries.
@@ -136,11 +130,6 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
    * 
    * 
    */
-  
-  /*
-   * 
-    THIS IS PURE BULLSHIT
-*/
   $boundary=count($form_state["values"]['nodes']);
   foreach($order_by_new_rank as $rank=>$data){
     $sum=abs($data['weight'])+abs($data['original_weight']);
@@ -149,7 +138,9 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     }
     if($sum<$boundary){
       $greater_than_boundary[$rank]=$data;
+      
     }
+    
   }
   
   if(count($greater_than_boundary)<count($smaller_than_boundary)){
@@ -158,22 +149,20 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $nodes_to_process=$smaller_than_boundary;
   }
   
+  
+  
   $term_id= $form_state["values"]['sectiontid'];
   $target_name= $form_state["values"]['destination_targetname'];
   foreach($nodes_to_process as $new_rank=>$data){
     $position=$new_rank+1;
     $nid=$data['nid'];
     $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
-    $destinations_to_update[$nid]=$virtual_rank;
-    
-  }
-  foreach($destinations_to_update as $nid=>$virtual_rank){
     _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
-    
   }
-  module_load_include("inc", "dpidestinations", "dpidestinations.rules");
-  dpidestinations_clear_cache_of_one_destination($term_id, $target_name);
+  
+  
 }
+
 
 
 

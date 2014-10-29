@@ -252,24 +252,7 @@ function dpidestinations_rules_action_info() {
       'callbacks' => array (
         'execute' => 'dpidestinations_clear_cache_of_node_content' 
       ) 
-    ),
-    'refresh_destination_cash' => array (
-      'label' => t ( 'Refresh destination cache' ),
-      'parameter' => array (
-        'tid' => array (
-          'type' => 'integer',
-          'label' => t ( 'dpidestination_tid' )
-        ),
-        'target' => array (
-          'type' => 'string',
-          'label' => t ( 'dpidestination_target' )
-        )
-      ),
-      'group' => t ( 'Dpi Actions Rules' ),
-      'callbacks' => array (
-        'execute' => 'dpidestinations_clear_cache_of_one_destination'
-      )
-    )
+    ) 
   );
 }
 
@@ -286,17 +269,22 @@ function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
   $_GET ['q'] = $_GET ['destination'];
   drupal_static ( 'drupal_get_destination', '', TRUE );
   unset ( $_GET ['destination'] );
-
-  entity_get_controller('node')->resetCache(array($node->nid));
-  $field_node_destinations = field_get_items ( 'node', $node, 'field_destinations' );
-  if(is_array($field_node_destinations)){
-    foreach ($field_node_destinations as $destination ) {
-      if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {
-        $category = dpidestination_api_get_category ( $destination );        
-        dpicache_api_manage_regeneration_all_cache_entry($destination ['tid'], $category);
-      } else {
-        drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
+  
+  entity_get_controller ( 'node' )->resetCache ( array (
+    $node->nid 
+  ) );
+  foreach ( field_get_items ( 'node', $node, 'field_destinations' ) as $destination ) {
+    if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {
+      $category = dpidestination_api_get_category ( $destination );
+      // Clean dpicache for targetblocks
+      dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );
+      
+      // clean varnish for argetblocks
+      foreach ( dpicommons_api_get_all_path_alias_for_taxonomy ( $destination ['tid'] ) as $url_alias ) {
+        dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
       }
+    } else {
+      drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
     }
   }
 }
@@ -308,16 +296,8 @@ function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
  */
 function dpidestinations_clear_cache_of_node_content($node) {
   // Clean varnish for node
-  dpicache_api_manage_varnish_clear_cache_for_node($node);
+  foreach ( dpicommons_api_get_all_path_alias_for_node ( $node ) as $url_alias ) {
+    dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
+  }
 }
 
-/**
- * This function invalide cache for one destination
- * 
- * @param integer $tid
- * @param string $target
- */
-function dpidestinations_clear_cache_of_one_destination( $tid, $target){
-  $category = dpidestination_api_get_category (array( 'tid' => $tid, 'target' => $target));
-  dpicache_api_manage_regeneration_all_cache_entry($tid, $category);
-}
