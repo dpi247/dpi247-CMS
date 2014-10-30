@@ -7,6 +7,7 @@ stylesheets[screen][] = css/style.css
 stylesheets[screen][] = css/contrib.css
 ; Install and Maintenance Pages
 stylesheets[all][] = css/shiny.css
+stylesheets[all][] = css/dpi-additions.css
 
 settings[shortcut_module_link] = 1
 regions[content] = Content
