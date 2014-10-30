@@ -151,7 +151,8 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
 		$comment->content['comment_body']['#object']->name = $signature;
 	} else {
 		// Mais, on ne sait jamais :(
-		$comment->content['comment_body']['#object']->name = 'TODO nom+prenom';
+    global $user;
+		$comment->content['comment_body']['#object']->name = isset($user)?$user->name:'Votre nom';
 	}
 
 	// Signaler un abus
@@ -187,8 +188,9 @@ function dpicomments_votingapi_metadata_alter(&$data) {
  * Implements hook_form_comment_form_alter().
  */
 function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
-  // Settingss default value signature
-  $form['field_signature']['und'][0]['value']['#default_value'] = 'Nom + prénom (TODO)';
+  // Setting default signature value
+  global $user;
+  $form['field_signature']['und'][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 }
 
 /**
