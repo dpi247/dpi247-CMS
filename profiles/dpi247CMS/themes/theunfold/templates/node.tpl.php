@@ -1,4 +1,4 @@
-ddddd<?php print drupal_render($content['field_iptc']);?>
+<?php print drupal_render($content['field_iptc']);?>
 <?php print $content['#prefix'];?>
 <h2>
     <?php print drupal_render($content["field_displaytitle"])?>	
