@@ -474,8 +474,6 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
   
   
-  
-  dsm($targetview);
   return $targetview;
 }
 
