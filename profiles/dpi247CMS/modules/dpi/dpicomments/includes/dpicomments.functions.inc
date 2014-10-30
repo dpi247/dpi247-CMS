@@ -40,6 +40,13 @@ function dpicomments_reportabuse_vote($entity_type, $entity_id, $tag = 'dpicomme
     $comment = comment_load($entity_id);
     _trigger_comment($comment, 'report_abuse_after_posted');
 
+    /* Trigger Comment : When n users report an abusive comment */
+    $score = dpicomments_reportabuse_get_score($entity_type, $entity_id, $tag);
+    $score_max_before_second_trigger = intval(variable_get('dpicomments_comment_nb_abuse_before_seccond_trigger',5));
+    if ($score >= $score_max_before_second_trigger) {
+      _trigger_comment($comment, 'report_abuse_after_n_posted');
+    }
+
     $criteria = array(
       'entity_type' => $entity_type,
       'entity_id' => $entity_id,

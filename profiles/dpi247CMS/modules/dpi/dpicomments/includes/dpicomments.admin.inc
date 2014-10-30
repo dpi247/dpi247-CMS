@@ -60,6 +60,13 @@ function dpicomments_settings() {
     ),
   );
 
+  $form['dpicomments_comment_widget_settings']['dpicomments_comment_nb_abuse_before_seccond_trigger'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Number of reports of abuse before the comment unpublication"),
+    '#default_value' => variable_get('dpicomments_comment_nb_abuse_before_seccond_trigger', 5),
+    '#description' => t('Enter a number.'),
+  );
+
   $form['array_filter'] = array('#type' => 'hidden');
 
   return system_settings_form($form);
@@ -148,7 +155,7 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
 
     // Remove the first node title from the node_titles array and attach to
     // the comment.
-//todo    $comment->node_title = array_shift($node_titles);
+//TODO (titre du node dans l'admin abuse)    $comment->node_title = array_shift($node_titles);
     $comment_body = field_get_items('comment', $comment, 'comment_body');
     $options[$comment->cid] = array(
       'subject' => array(

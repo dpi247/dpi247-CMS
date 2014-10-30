@@ -235,6 +235,9 @@ function dpicomments_trigger_info() {
       'report_abuse_after_posted' => array(
         'label' => "When a user report an abusive comment",
       ),
+      'report_abuse_after_n_posted' => array(
+        'label' => "When " . variable_get('dpicomments_comment_nb_abuse_before_seccond_trigger',5) . " users report an abusive comment",
+      ),
       'report_abuse_after_undo_posted' => array(
         'label' => "When a user cancelled its report of an abusive comment",
       ),
