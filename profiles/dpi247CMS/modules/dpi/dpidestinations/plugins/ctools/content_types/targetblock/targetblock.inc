@@ -179,15 +179,15 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form['targetblok_instance_settings'] = array(
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
-    '#title' => t('TargetBlock instance settings'),
+    '#title' => t('TargetBlock settings'),
   );
 
   $form['targetblok_instance_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
     '#default_value' => $targetblock->node_count_for_targetblockinstance,
-    '#title' => t('Node count for this targetblock instance'),
+    '#title' => t('Number of items'),
     '#size' => 4,
-    '#description' => t('The node count for this targetblock instance.'),
+    '#description' => t('Number of element displayed on this block'),
   );
 
 
@@ -219,7 +219,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#description'=>t('Thoses settings will be shared across all the same targetblock instances on the page'),
     '#collapsible' => TRUE,
     "#collapsed"=>TRUE,
-    '#title' => t('Global targetBlock settings (Advanced)'),
+    '#title' => t('Advanced settings'),
   );
 
 
