@@ -185,9 +185,9 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form['targetblok_instance_settings']['node_count_for_targetblockinstance'] = array(
     '#type' => 'textfield',
     '#default_value' => $targetblock->node_count_for_targetblockinstance,
-    '#title' => t('Number of items'),
+    '#title' => t('Number of item(s)'),
     '#size' => 4,
-    '#description' => t('Number of element displayed on this block'),
+    '#description' => t('Number of element(s) displayed on this block'),
   );
 
 

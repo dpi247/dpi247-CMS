@@ -9,10 +9,20 @@ margin-right: 5em;
 div.ctools-modal-content legend{
 	text-align: left;
 }
-div.ctools-modal-content  .filter-wrapper,div.ctools-modal-content  fieldset.form-wrapper ,div.ctools-modal-content .filter-wrapper, div.ctools-modal-content .form-wrapper{	
+div.ctools-modal-content  .filter-wrapper,div.ctools-modal-content  fieldset.form-wrapper {	
 	border-top: 1px  solid #ccc !important;
 	margin-top: 10px;
+	width: 100%;
+margin-left: 0;
+margin-right: 0;
+padding-right: 0;
+padding-right: 0;
 	
+}
+
+div.ctools-modal-content  .filter-wrapper legend ,div.ctools-modal-content  fieldset.form-wrapper legend{	
+	top:0;
+	position: absolute;
 	
 }
 
