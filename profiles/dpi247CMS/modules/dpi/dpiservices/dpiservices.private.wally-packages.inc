@@ -69,7 +69,7 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
 
   }
   if(count($table_value)==0){
-    $table_value=dpiservices_wally_packages_get_default_related_object_from_node($node);
+    $table_value [] = dpiservices_wally_packages_get_default_related_object_from_node($node);
   }
 
   foreach ( field_get_items ( 'node', $node, 'field_linkslists' ) as $item ) {
