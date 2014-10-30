@@ -303,7 +303,6 @@ abstract class Importer {
   protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
-
     $entity = $this->createOrLoadEntity($dom);
     if (!Logger::error()) {
       // Initialize the entity
