@@ -27,3 +27,7 @@ color: #666;
 clear: both;
 width: 100%;
 }
+
+div.ctools-modal-content, div.ctools-modal-content legend{
+font-family: sans-serif !important;
+}
