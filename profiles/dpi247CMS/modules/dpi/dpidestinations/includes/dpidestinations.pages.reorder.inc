@@ -40,7 +40,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
-  dsm($nodes,nodes);
+  //dsm($nodes,nodes);
   foreach($nodes as $node){
     $form['nodes'][$node->nid]['weight'] = array(
       '#type' => 'weight',
