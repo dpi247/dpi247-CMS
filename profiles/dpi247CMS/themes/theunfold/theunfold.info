@@ -10,6 +10,7 @@ stylesheets[screen][] = css/screen.css
 stylesheets[screen][] = css/block-slidepic.css
 stylesheets[screen][] = css/custo-dpi.css
 stylesheets[all][] = css/modal.css
+stylesheets[all][] = css/dpi-additions.css
 
 regions[content] = 'content'
 regions[toolbarRight] = ToolbarRight
