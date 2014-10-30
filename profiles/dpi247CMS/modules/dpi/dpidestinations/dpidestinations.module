@@ -5,6 +5,7 @@ module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
 module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
+module_load_include('inc', 'dpidestinations','dpidestinations.rules');
 
 /**
  * Implementation of hook_menu()
@@ -527,6 +528,10 @@ function dpidestinations_views_plugins() {
 /*
  * Implementation of hook_contextual_links_view_alter
  */
+
+/*
+We dont need this naymore since the targetblock contextual link are now working ...
+This should be removed soon
 function dpidestinations_contextual_links_view_alter(&$element, $items){
   
   //make sure we override contextual links for a view
@@ -543,7 +548,7 @@ function dpidestinations_contextual_links_view_alter(&$element, $items){
     }
   }
 }
-
+*/
 
 /*
  * Implementation of hook_admin_paths_alter
@@ -652,6 +657,9 @@ function dpidestinations_dpicache_category_callback($cachedefinition = '', $argu
   }
   return $retour;
 }
+
+
+
 
 
 
