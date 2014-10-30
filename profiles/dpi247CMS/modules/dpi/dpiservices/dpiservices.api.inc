@@ -139,7 +139,7 @@ function dpiservices_api_packages_generate_crop_links($sid=null, $nid=null, $ato
   $crop_link_definition = array ();
   
   foreach(image_styles() as $preset_name=>$preset_info){
-    $crop_link_definition [$preset_info] = array (
+    $crop_link_definition [$preset_name] = array (
       'url' => dpiflexiscald_api_get_path_for_atom($atom, $preset_name),
     );
   }
