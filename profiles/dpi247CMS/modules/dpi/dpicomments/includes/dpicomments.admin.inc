@@ -64,3 +64,129 @@ function dpicomments_settings() {
 
   return system_settings_form($form);
 }
+
+/**
+ * Menu callback; present an administrative comment listing.
+ * Base on comment module
+ */
+function dpicomments_admin($type = 'abusive') {
+  $edit = $_POST;
+
+  if (isset($edit['operation']) && ($edit['operation'] == 'delete') && isset($edit['comments']) && $edit['comments']) {
+    return drupal_get_form('comment_multiple_delete_confirm');
+  }
+  else {
+    return drupal_get_form('dpicomments_admin_overview', $type);
+  }
+}
+
+
+/**
+ * Form builder for the comment overview administration form.
+ *
+ * @param $arg
+ *   Current path's fourth component: the type of overview form ('approval' or
+ *   'new').
+ *
+ * @ingroup forms
+ * @see comment_admin_overview_validate()
+ * @see comment_admin_overview_submit()
+ * @see theme_comment_admin_overview()
+ */
+function dpicomments_admin_overview($form, &$form_state, $arg) {
+  // Build an 'Update options' form.
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#attributes' => array('class' => array('container-inline')),
+  );
+
+  $options['unpublish'] = t('Unpublish the selected comments');
+  $options['delete'] = t('Delete the selected comments');
+
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#title' => t('Operation'),
+    '#title_display' => 'invisible',
+    '#options' => $options,
+    '#default_value' => 'publish',
+  );
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  $header = array(
+    'subject' => array('data' => t('Subject'), 'field' => 'subject'),
+    'author' => array('data' => t('Author'), 'field' => 'name'),
+    'posted_in' => array('data' => t('Posted in'), 'field' => 'node_title'),
+    'changed' => array('data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc'),
+    'operations' => array('data' => t('Operations')),
+  );
+
+  // Load the comments that need to be displayed.
+  // From VotingAPI
+  $criteria['entity_type'] = 'comment';
+  $criteria['tag'] = 'dpicomments_comment_vote';
+  $results = votingapi_select_votes($criteria);
+
+  $cids = array();
+
+  // We collect a sorted list of node_titles during the query to attach to the
+  // comments later.
+  foreach ($results as $row) {
+    $cids[] = $row['entity_id'];
+//    $node_titles[] = $row->node_title;
+  }
+  $comments = comment_load_multiple($cids);
+
+  // Build a table listing the appropriate comments.
+  $options = array();
+  $destination = drupal_get_destination();
+
+  foreach ($comments as $comment) {
+
+    // Remove the first node title from the node_titles array and attach to
+    // the comment.
+//todo    $comment->node_title = array_shift($node_titles);
+    $comment_body = field_get_items('comment', $comment, 'comment_body');
+    $options[$comment->cid] = array(
+      'subject' => array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $comment->subject,
+          '#href' => 'comment/' . $comment->cid,
+          '#options' => array('attributes' => array('title' => truncate_utf8($comment_body[0]['value'], 128)), 'fragment' => 'comment-' . $comment->cid),
+        ),
+      ),
+      'author' => theme('username', array('account' => $comment)),
+      'posted_in' => array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $comment->node_title,
+          '#href' => 'node/' . $comment->nid,
+        ),
+      ),
+      'changed' => format_date($comment->changed, 'short'),
+      'operations' => array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => t('edit'),
+          '#href' => 'comment/' . $comment->cid . '/edit',
+          '#options' => array('query' => $destination),
+        ),
+      ),
+    );
+  }
+
+  $form['comments'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#empty' => t('No comments available.'),
+  );
+
+  $form['pager'] = array('#theme' => 'pager');
+
+  return $form;
+}

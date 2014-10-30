@@ -57,6 +57,18 @@ function dpicomments_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  // Report abusive comment 
+  $items['admin/content/comment/abusive'] = array(
+    'title' => 'Abusive comments',
+    //'title callback' => 'comment_count_abusive',
+    'page callback' => 'dpicomments_admin',
+    'page arguments' => array('abusive'),
+    'access arguments' => array('administer comments'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
   return $items;
 }
 
