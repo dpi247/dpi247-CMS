@@ -84,10 +84,10 @@ function dpiservices_wally_packages_get_all_related_object_from_node($node) {
 function dpiservices_wally_packages_get_default_related_object_from_node($node){
 
   $image=array(
-    'nid'=>1,
+    'nid'=>(string) rand(),
     'type'=>'image',
-    'caption'=>FALSE,
-    'credit'=>FALSE,
+    'caption'=>uniqid(),
+    'credit'=>uniqid(),
     
 
   );
