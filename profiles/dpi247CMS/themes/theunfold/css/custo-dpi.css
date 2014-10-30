@@ -51,3 +51,8 @@ figure.no_width{
 .twitter-timeline{
 	width:100% !important; 
 }
+
+
+div.block-slidepic iframe{
+	width:100%;
+}
