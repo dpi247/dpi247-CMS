@@ -32,7 +32,7 @@ function dpiblocks_remotehtml_content_type_content_types(){
     $remotehtml[$record->machine_name]= array(
       'title'        => t('Remote HTML : '.$record->title),
       'machine_name' => $record->machine_name,
-      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/1412085584_111017.ico',
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/server.png',
       'description'  => t(''),
       'add form'     => array(
         'dpiblocks_remotehtml_content_type_view_form'=>'view remotehtml',
