@@ -260,9 +260,21 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
  * Return all node type that have a field_destination
  */
 function dpidestinations_api_get_node_type_with_destination_field(){
-  return array(
-    'package'=>'package'
-  );
+  
+  $types=node_type_get_types();
+  $destination_content_type=array();
+  foreach($types as $type){
+    $fields_instance_infos= field_info_instances("node", $type->type);
+    foreach($fields_instance_infos as $field_instance){
+      $field_info=field_info_field($field_instance['field_name']);
+  
+      if($field_info['type']=="destination"){
+        $destination_content_type[$type->type]=$type->type;
+      }
+    }
+  }
+  return $destination_content_type;
+  
 }
 
 

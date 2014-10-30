@@ -113,10 +113,7 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
-  $handler->display->display_options['filters']['type']['value'] = array(
-    'package' => 'package',
-  );
-
+  
   $views[$view->name] = $view;
 
   return $views;
