@@ -340,10 +340,6 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
  *          the category of cache
  */
 function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category = NULL) {
-  drupal_set_message ( t ( "Manual cache regeneration: @cache_name, category: @category", array (
-    '@cache_name' => $cache_type,
-    '@category' => $category 
-  ) ) );
   dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category", array (
     '@cache_name' => $cache_type,
     '@category' => $category 
