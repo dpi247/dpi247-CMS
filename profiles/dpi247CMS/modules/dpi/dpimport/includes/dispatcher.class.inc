@@ -158,6 +158,7 @@ abstract class Dispatcher {
         if ($child->nodeName != '#text') {
           $explore_child = TRUE;
           $callback = $importer->getCallback ( $child );
+          dsm($callback);
           $method_name = 'build' . $callback;
           // Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists ( $importer, $method_name )) {
@@ -188,6 +189,7 @@ abstract class Dispatcher {
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
         $callback = $importer->getCallback ( $child );
+        dsm($callback);
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
           $importer->$method_name ( $child, $object, $object2 );
@@ -488,9 +490,9 @@ abstract class Dispatcher {
       'zip' => $values ['zip'],
       'cron' => $values ['cron'],
       'cron_frequency' => $values ['cron_frequency'],
-      'temp_folder' =>  "tmp",
-      'done_folder' => "done",
-      'error_folder' =>"error",
+      'temp_folder' =>  $form_state_multistep ["default"] ["name"] . "/tmp",
+      'done_folder' => $form_state_multistep ["default"] ["name"] . "/done",
+      'error_folder' =>$form_state_multistep ["default"] ["name"] . "/error",
       'ttl_folder' => $values ['ttl_folder'] 
     );
     return $dispatcher_settings;
