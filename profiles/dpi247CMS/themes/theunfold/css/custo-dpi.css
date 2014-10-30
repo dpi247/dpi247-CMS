@@ -55,4 +55,5 @@ figure.no_width{
 
 div.block-slidepic iframe{
 	width:100%;
+	height:auto;
 }
