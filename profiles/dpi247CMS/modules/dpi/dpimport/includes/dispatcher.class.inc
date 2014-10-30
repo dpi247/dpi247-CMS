@@ -158,7 +158,6 @@ abstract class Dispatcher {
         if ($child->nodeName != '#text') {
           $explore_child = TRUE;
           $callback = $importer->getCallback ( $child );
-          dsm($callback);
           $method_name = 'build' . $callback;
           // Search for a function named with node name, if the function return FALSE, it does not explode the children of the node.
           if (method_exists ( $importer, $method_name )) {
@@ -189,7 +188,6 @@ abstract class Dispatcher {
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
         $callback = $importer->getCallback ( $child );
-        dsm($callback);
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
           $importer->$method_name ( $child, $object, $object2 );
@@ -462,8 +460,6 @@ abstract class Dispatcher {
    * @return Array $dispatcher_settings
    */
   public function submitSettingsForm($values, $form_state_multistep) {
-    dsm($values);
-    dsm($form_state_multistep);
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep["default"] ["name"];
     $old = umask ( 0 );
     if (mkdir ( $default_path . "/done", 0777, true )) {
@@ -482,9 +478,7 @@ abstract class Dispatcher {
         rmdir ( $pathname . "/tmp" );
       }
     }
-    
     umask ( $old );
-    
     
     $dispatcher_settings = array (
       'zip' => $values ['zip'],
@@ -495,6 +489,7 @@ abstract class Dispatcher {
       'error_folder' =>$form_state_multistep ["default"] ["name"] . "/error",
       'ttl_folder' => $values ['ttl_folder'] 
     );
+    
     return $dispatcher_settings;
   }
   

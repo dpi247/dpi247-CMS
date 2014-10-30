@@ -92,6 +92,13 @@ class UrlDispatcher extends Dispatcher {
    */
   public function getSettingsForm(&$form_state, $values) {
     $form = parent::getSettingsForm ( $form_state, $values );
+    $form['dispatcher']['source_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Source URL'),
+      '#description' => t('The URL to process.'),
+      '#default_value' => isset($values['source_url']) ? $values['source_url'] : NULL,
+      '#required' => TRUE,
+    );
     return $form;
   }
   
@@ -102,6 +109,10 @@ class UrlDispatcher extends Dispatcher {
    */
   public function validateSettingsForm(&$form_state) {
     parent::validateSettingsForm ( $form_state );
+    $path = $form_state['values']['source_url'];
+    if (!_dpimport_checkurlresponse($path)){
+      form_set_error('source_url', t('The source URL does not responds.'));
+    }
   }
   
   /**
@@ -111,22 +122,8 @@ class UrlDispatcher extends Dispatcher {
    * @return Array $dispatcher_settings
    */
   public function submitSettingsForm($values, $form_state_multistep) {
-    $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep ["default"] ["name"];
-    $old = umask(0);
-    
-    if (mkdir($default_path, 0777, true)) {      
-      if (mkdir($default_path . "/todo", 0777 )) {
-        $dispatcher_settings = parent::submitSettingsForm ( $values, $form_state_multistep );
-        $dispatcher_settings ['source_url'] = $form_state_multistep ["default"] ["name"] . "/todo";
-        drupal_set_message("Creating : " . $default_path . "/todo");
-      } else {
-        drupal_set_message("Creating source folder fail", 'error');
-      }
-    } else {
-      drupal_set_message("File cannot be created", "error");
-    }
-    umask($old);
-    
+    $dispatcher_settings = parent::submitSettingsForm($values, $form_state_multistep);
+    $dispatcher_settings['source_url'] = $values['source_url']; 
     return $dispatcher_settings;
   }
   
