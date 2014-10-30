@@ -137,13 +137,14 @@ function dpiservices_api_packages_crop_in_array($needle, $array){
 function dpiservices_api_packages_generate_crop_links($sid=null, $nid=null, $atom=null){
   module_load_include("inc", 'dpicommons', "dpicommons.api");
   $crop_link_definition = array ();
-  if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
-    foreach ($info as $key => $value ) {
-      $crop_link_definition [$key] = array (
-        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key),
-      );
-    }
+  
+  foreach(image_styles() as $preset_name=>$preset_info){
+    $crop_link_definition [$key] = array (
+      'url' => dpiflexiscald_api_get_path_for_atom($atom, $preset_name),
+    );
   }
+  
+  
   return $crop_link_definition;
 }
 
