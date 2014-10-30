@@ -6,10 +6,12 @@ margin-left: 1em;
 margin-right: 5em;
 }
 
-
-div.ctools-modal-content  .filter-wrapper,div.ctools-modal-content  .form-wrapper{	
+div.ctools-modal-content legend{
+	text-align: left;
+}
+div.ctools-modal-content  .filter-wrapper,div.ctools-modal-content  fieldset.form-wrapper ,div.ctools-modal-content .filter-wrapper, div.ctools-modal-content .form-wrapper{	
 	border-top:1px  solid #ccc;
-		margin-top:10px;
+	margin-top:10px;
 	
 }
 
