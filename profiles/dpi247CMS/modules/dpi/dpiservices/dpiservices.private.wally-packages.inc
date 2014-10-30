@@ -92,7 +92,7 @@ function dpiservices_wally_packages_get_default_related_object_from_node($node){
 
   );
   $background_index=rand(1,14);
-  $background_folder="sites/default/files/default_background/";
+  $background_folder="public://default_background/";
   $background_path=$background_folder.$background_index.".png";
   foreach(image_styles() as $preset_name=>$preset_info){
     $image['crop'][$preset_name]['url']=image_style_url($preset_name, $background_path);
