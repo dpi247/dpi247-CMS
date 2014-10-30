@@ -144,10 +144,13 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
 	// Signature : soit le pseudo, soit nom+prenom
 	$signature = $comment->field_signature['und'][0]['safe_value'];
 
+  // La signature est devenu un champ obligatoire, et initialisé au nom+prenom de la personne
+  // Le test ci dessous ne va donc -en theorie- plus servir.
 	if (isset($signature) && !empty($signature)) {
+    // On devrait toujours tombé dans ce cas.
 		$comment->content['comment_body']['#object']->name = $signature;
 	} else {
-		// Il faudrait récupérer le nom et le prenom ici meme
+		// Mais, on ne sait jamais :(
 		$comment->content['comment_body']['#object']->name = 'TODO nom+prenom';
 	}
 
@@ -178,6 +181,14 @@ function dpicomments_votingapi_metadata_alter(&$data) {
     'description' => t('Dpicomments report abuse votes for comments.'),
     'module' => 'dpicomments',
   );
+}
+
+/**
+ * Implements hook_form_comment_form_alter().
+ */
+function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
+  // Settingss default value signature
+  $form['field_signature']['und'][0]['value']['#default_value'] = 'Nom + prénom (TODO)';
 }
 
 /**
