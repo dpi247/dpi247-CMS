@@ -32,7 +32,7 @@ drupal_add_js(drupal_get_path('module', 'block') . '/block.js');
 
 drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
 
-?>ddd
+?>
 <table id="targetview" class="sticky-enabled">
   <thead>
     <tr>
