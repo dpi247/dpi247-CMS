@@ -60,9 +60,11 @@ function dpicomments_settings() {
     ),
   );
 
+  // TODO : verification champs INT
   $form['dpicomments_comment_widget_settings']['dpicomments_comment_nb_abuse_before_seccond_trigger'] = array(
     '#type' => 'textfield',
     '#title' => t("Number of reports of abuse before the comment unpublication"),
+    '#size' => 4,
     '#default_value' => variable_get('dpicomments_comment_nb_abuse_before_seccond_trigger', 5),
     '#description' => t('Enter a number.'),
   );
@@ -135,15 +137,32 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
   // From VotingAPI
   $criteria['entity_type'] = 'comment';
   $criteria['tag'] = 'dpicomments_comment_vote';
-  $results = votingapi_select_votes($criteria);
+  $results_voting = votingapi_select_votes($criteria);
 
-  $cids = array();
+  $cids_results = array();
+  foreach ($results_voting as $row) {
+     $cids_results[] = $row['entity_id'];
+  }
+
+  // Load the comments (and node title) that need to be displayed.
+  $query = db_select('comment', 'c')->extend('PagerDefault')->extend('TableSort');
+  $query->join('node', 'n', 'n.nid = c.nid');
+  $query->addField('n', 'title', 'node_title');
+  $query->addTag('node_access');
+  $result = $query
+    ->fields('c', array('cid', 'subject', 'name', 'changed')) 
+    ->condition('c.cid', $cids_results, 'IN')
+    ->limit(50)
+    ->orderByHeader($header)
+    ->execute();
+
 
   // We collect a sorted list of node_titles during the query to attach to the
   // comments later.
-  foreach ($results as $row) {
-    $cids[] = $row['entity_id'];
-//    $node_titles[] = $row->node_title;
+  $cids = array();
+  foreach ($result as $row) {
+    $cids[] = $row->cid;
+    $node_titles[] = $row->node_title;
   }
   $comments = comment_load_multiple($cids);
 
@@ -155,7 +174,7 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
 
     // Remove the first node title from the node_titles array and attach to
     // the comment.
-//TODO (titre du node dans l'admin abuse)    $comment->node_title = array_shift($node_titles);
+    $comment->node_title = array_shift($node_titles);
     $comment_body = field_get_items('comment', $comment, 'comment_body');
     $options[$comment->cid] = array(
       'subject' => array(
