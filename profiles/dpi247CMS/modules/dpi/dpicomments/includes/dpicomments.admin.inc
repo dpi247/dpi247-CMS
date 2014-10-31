@@ -113,7 +113,12 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
     '#attributes' => array('class' => array('container-inline')),
   );
 
-  $options['unpublish'] = t('Unpublish the selected comments');
+  if ($arg == 'abusive_unpublish') {
+    $options['publish'] = t('Publish the selected comments');
+  }
+  else {
+    $options['unpublish'] = t('Unpublish the selected comments');
+  }
   $options['delete'] = t('Delete the selected comments');
 
   $form['options']['operation'] = array(
@@ -147,6 +152,8 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
      $cids_results[] = $row['entity_id'];
   }
 
+  $status = ($arg == 'abusive_unpublish') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
+
   // Load the comments (and node title) that need to be displayed.
   $query = db_select('comment', 'c')->extend('PagerDefault')->extend('TableSort');
   $query->join('node', 'n', 'n.nid = c.nid');
@@ -155,6 +162,7 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
   $result = $query
     ->fields('c', array('cid', 'subject', 'name', 'changed')) 
     ->condition('c.cid', $cids_results, 'IN')
+    ->condition('c.status', $status)
     ->limit(50)
     ->orderByHeader($header)
     ->execute();
@@ -215,7 +223,7 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
     '#empty' => t('No comments available.'),
   );
 
-  $form['pager'] = array('#theme' => 'pager');
+  $form['pager'] = array('#theme' => 'pager'); 
 
   return $form;
 }
@@ -240,5 +248,10 @@ function dpicomments_admin_overview_validate($form, &$form_state) {
 function dpicomments_admin_overview_submit($form, &$form_state) {
   module_load_include('inc', 'comment', 'comment.admin');
   comment_admin_overview_submit($form, $form_state);
-  $form_state['redirect'] = 'admin/content/comment/abusive';
+  //url de retour
+  if (isset($form['options']['operation']['#options']['publish']))
+    $url_ret = 'admin/content/comment/abusive_unpublish';
+  else
+    $url_ret = 'admin/content/comment/abusive';
+  $form_state['redirect'] = $url_ret;
 }

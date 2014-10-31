@@ -57,15 +57,27 @@ function dpicomments_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // Report abusive comment 
+  // Report abusive comment (publish)
   $items['admin/content/comment/abusive'] = array(
-    'title' => 'Abusive comments',
+    'title' => 'Abusive comments yet publish',
     //'title callback' => 'comment_count_abusive',
     'page callback' => 'dpicomments_admin',
     'page arguments' => array('abusive'),
     'access arguments' => array('administer comments'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
+  // Report abusive comment (unpublish)
+  $items['admin/content/comment/abusive_unpublish'] = array(
+    'title' => 'Unpublished abusive comments',
+    //'title callback' => 'comment_count_abusive',
+    'page callback' => 'dpicomments_admin',
+    'page arguments' => array('abusive_unpublish'),
+    'access arguments' => array('administer comments'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
     'file' => 'includes/dpicomments.admin.inc',
   );
 
