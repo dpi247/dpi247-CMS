@@ -21,8 +21,11 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
  * @return Array
  */
 function dpiservices_dpijsonexporter_product_retrieve_process($product){
+  
+  module_load_include("inc", 'dpiservices', 'dpiservices.api');  
+    
   $json_export = array();
-  $product_element = dpiservices_product_get_one_product_by_label($product);
+  $product_element = dpiservices_api_product_get_one_product_by_label($product);
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path

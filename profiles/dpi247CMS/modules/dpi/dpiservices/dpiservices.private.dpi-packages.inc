@@ -17,8 +17,8 @@ function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
 /**
  * This function process the return of json
  *
- * @param integer $nid
- * @param String $product
+ * @param integer $nid          
+ * @param String $product          
  * @return Array
  */
 function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
@@ -32,17 +32,17 @@ function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
     'comment' => $node->comment,
     'title' => $node->title,
     'creationDate' => $node->created,
-    'pubDate' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_editorialpublicationdate', 'value' ),
+    'pubDate' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_editorialpublicationdate', 'value' ),
     'type' => $node->type,
-    'layout' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' ),
-    'chapo' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textchapo', 'value' ),
-    'freeaccess' => (dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_restrictedaccess', 'value' )) ? "true" : "false",
-    'body' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbody', 'value' ),
-    'foretitle' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textforetitle', 'value' ),
-    'subtitle' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textsubtitle', 'value' ),
-    'barette' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
-    'byline' => dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
-    'authors' => dpiservices_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
+    'layout' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' ),
+    'chapo' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textchapo', 'value' ),
+    'freeaccess' => (dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_restrictedaccess', 'value' )) ? "true" : "false",
+    'body' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbody', 'value' ),
+    'foretitle' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textforetitle', 'value' ),
+    'subtitle' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textsubtitle', 'value' ),
+    'barette' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
+    'byline' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
+    'authors' => dpiservices_api_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
     'qualities' => '@todo',
     'url' => drupal_get_path_alias ( 'node/' . $nid ),
     'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/node/' . $nid,
@@ -112,13 +112,18 @@ function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $fi
  */
 function dpiservices_dpi_packages_get_all_related_object_from_node($node) {
   $table_value = array ();
+  $var_embeded_object = field_get_items ( 'node', $node, 'field_embededobjects' );
+  $var_link_list = field_get_items ( 'node', $node, 'field_linkslists' );
   
-  foreach ( field_get_items ( 'node', $node, 'field_embededobjects' ) as $item ) {
-    $table_value [] = dpiservices_dpi_packages_generate_related_object ( $item ['sid'], $node->nid, $item ['inline'] );
+  if (is_array ( $var_embeded_object )) {
+    foreach ( $var_embeded_object as $item ) {
+      $table_value [] = dpiservices_dpi_packages_generate_related_object ( $item ['sid'], $node->nid, $item ['inline'] );
+    }
   }
-  
-  foreach ( field_get_items ( 'node', $node, 'field_linkslists' ) as $item ) {
-    $table_value [] = dpiservices_dpi_packages_generate_related_object ( $item ['sid'], $node->nid, $item ['inline'] );
+  if (is_array ( $var_link_list )) {
+    foreach ( $var_link_list as $item ) {
+      $table_value [] = dpiservices_dpi_packages_generate_related_object ( $item ['sid'], $node->nid, $item ['inline'] );
+    }
   }
   
   return $table_value;
@@ -152,9 +157,13 @@ function dpiservices_dpi_packages_generate_related_object($sid, $nid, $inline) {
  */
 function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($node, $product_name = NULL) {
   $table_value = array ();
-  foreach ( field_get_items ( 'node', $node, 'field_embededobjects' ) as $item ) {
-    if (($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'], $product_name )) != FALSE)
-      $table_value [] = $var;
+  $var_embeded_object = field_get_items ( 'node', $node, 'field_embededobjects' );
+  
+  if (is_array ( $var_embeded_object )) {
+    foreach ( $var_embeded_object as $item ) {
+      if (($var = dpiservices_dpi_packages_generate_related_object_definitions ( $item ['sid'], $node->nid, $item ['inline'], $product_name )) != FALSE)
+        $table_value [] = $var;
+    }
   }
   return $table_value;
 }
@@ -169,7 +178,7 @@ function dpiservices_dpi_packages_get_all_related_object_definitions_from_node($
  */
 function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid, $inline, $product_name = null) {
   $atom = scald_atom_load ( $sid );
-  $all_crop_informations = dpiservices_packages_generate_crop_informations ( $sid, $nid, $product_name );
+  $all_crop_informations = dpiservices_api_packages_generate_crop_informations ( $sid, $nid, $product_name );
   
   global $present_definition;
   if (! in_array ( dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid, $present_definition )) {
@@ -178,10 +187,10 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
       dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid => array (
         'nid' => $nid,
         'type' => $atom->type,
-        'caption' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
-        'credit' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
-        'width' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'width' ),
-        'height' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'height' ),
+        'caption' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_caption', 'value' ),
+        'credit' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'field_copyright', 'value' ),
+        'width' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'width' ),
+        'height' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'height' ),
         'crops' => array (
           $all_crop_informations [0] 
         ),
@@ -189,9 +198,9 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
           $all_crop_informations [1] 
         ),
         'externalReference' => dpiproperties_load ( $nid )->external_reference,
-        'filesize' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'filesize' ),
+        'filesize' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'filesize' ),
         'inline_object' => $inline,
-        'url' => dpiservices_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'uri' ),
+        'url' => dpiservices_api_packages_get_field_element_by_search_value ( 'scald_atom', $atom, 'scald_thumbnail', 'uri' ),
         'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/atom/' . $sid 
       ) 
     );
@@ -211,12 +220,18 @@ function dpiservices_dpi_packages_generate_related_object_definitions($sid, $nid
  */
 function dpiservices_dpi_packages_generate_taxonomy_name_and_uri_by_tid($type, $node, $field_name) {
   $term = array ();
-  foreach ( field_get_items ( $type, $node, $field_name ) as $item ) {
-    $term_load = taxonomy_term_load ( $item ['tid'] );
-    $term [] = array (
-      'name' => $term_load->name,
-      'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/taxonomy/term/' . $term_load->tid 
-    );
+  $var_name = field_get_items ( $type, $node, $field_name );
+  
+  if (is_array ( $var_name )) {
+  foreach ( $var_name as $item ) 
+    {
+      $term_load = taxonomy_term_load ( $item ['tid'] );
+      $term [] = array (
+        'name' => $term_load->name,
+        'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/taxonomy/term/' . $term_load->tid 
+      );
+    }
   }
+  
   return $term;
 }

@@ -43,9 +43,9 @@ class SimpleTestDpiServicesTestCase extends DrupalWebTestCase{
   }
   
   /**
-   * This function test function dpiservices_packages_get_field_element_by_search_value from dpiservices.api
+   * This function test function dpiservices_api_packages_get_field_element_by_search_value from dpiservices.api
    */
-  function test_dpiservices_packages_get_field_element_by_search_value(){
+  function test_dpiservices_api_packages_get_field_element_by_search_value(){
     /**
      *  create a simple test with node element 
      *  First time, we create a test for node load
@@ -55,45 +55,45 @@ class SimpleTestDpiServicesTestCase extends DrupalWebTestCase{
     $this->assertTrue($load, "chargement du noeud réussis (Create a node if this test is unsuccess !)", 'DpiSetUp');
     
     if($load){      
-      $test = dpiservices_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' );
-      $this->assertFalse(is_bool($test) , 'Function dpiservices_packages_get_field_element_by_search_value return other than false' , 'Dpiservices.api');
+      $test = dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_destinations', 'layout' );
+      $this->assertFalse(is_bool($test) , 'Function dpiservices_api_packages_get_field_element_by_search_value return other than false' , 'Dpiservices.api');
     }
   }
   
   /**
-   * This function test dpiservices_packages_get_one_element_from_item_from_node from dpiservices.api
+   * This function test dpiservices_api_packages_get_one_element_from_item_from_node from dpiservices.api
    */
-  function test_dpiservices_packages_get_one_element_from_item_from_node(){    
+  function test_dpiservices_api_packages_get_one_element_from_item_from_node(){    
     if(get_class($node = $this->generate_node())== "stdClass"){
-      $test = dpiservices_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' );
-      $this->assertTrue(is_array($test), 'Function dpiservices_packages_get_one_element_from_item_from_node return an array', 'Dpiservices.api');      
+      $test = dpiservices_api_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' );
+      $this->assertTrue(is_array($test), 'Function dpiservices_api_packages_get_one_element_from_item_from_node return an array', 'Dpiservices.api');      
     }
   }
   
   /**
-   * This function test dpiservices_packages_generate_crop_informations from dpiservices.api
+   * This function test dpiservices_api_packages_generate_crop_informations from dpiservices.api
    */
-  function test_dpiservices_packages_generate_crop_informations(){    
+  function test_dpiservices_api_packages_generate_crop_informations(){    
     if(get_class($node = $this->generate_node())== "stdClass"){
-      $test = dpiservices_packages_generate_crop_informations(rand(0,9),rand(0,9));
-      $this->assertTrue(is_array($test), 'Function dpiservices_packages_generate_crop_informations return an array all the time', 'Dpiservices.api');
+      $test = dpiservices_api_packages_generate_crop_informations(rand(0,9),rand(0,9));
+      $this->assertTrue(is_array($test), 'Function dpiservices_api_packages_generate_crop_informations return an array all the time', 'Dpiservices.api');
       
-      $test = dpiservices_packages_generate_crop_informations();
-      $this->assertTrue(is_array($test), 'Function dpiservices_packages_generate_crop_informations return an array without parameter', 'Dpiservices.api');
-      $this->assertTrue(empty($test[0])&&empty($test[1]), 'Function dpiservices_packages_generate_crop_informations return an empty array', 'Dpiservices.api');       
+      $test = dpiservices_api_packages_generate_crop_informations();
+      $this->assertTrue(is_array($test), 'Function dpiservices_api_packages_generate_crop_informations return an array without parameter', 'Dpiservices.api');
+      $this->assertTrue(empty($test[0])&&empty($test[1]), 'Function dpiservices_api_packages_generate_crop_informations return an empty array', 'Dpiservices.api');       
     }
   }
   
   /**
-   * This function test dpiservices_product_get_one_product_by_label from dpiservices.api
+   * This function test dpiservices_api_product_get_one_product_by_label from dpiservices.api
    */
-  function test_dpiservices_product_get_one_product_by_label(){
+  function test_dpiservices_api_product_get_one_product_by_label(){
     if(get_class($node = $this->generate_node())== "stdClass"){
-      $test = dpiservices_product_get_one_product_by_label('osef');
-      $this->assertFalse(!is_bool($test), 'Function dpiservices_product_get_one_product_by_label return true value', 'Dpiservices.api');
+      $test = dpiservices_api_product_get_one_product_by_label('osef');
+      $this->assertFalse(!is_bool($test), 'Function dpiservices_api_product_get_one_product_by_label return true value', 'Dpiservices.api');
       
-      $test = dpiservices_product_get_one_product_by_label();
-      $this->assertFalse($test, 'Function dpiservices_product_get_one_product_by_label without argument return false', 'Dpiservices.api');
+      $test = dpiservices_api_product_get_one_product_by_label();
+      $this->assertFalse($test, 'Function dpiservices_api_product_get_one_product_by_label without argument return false', 'Dpiservices.api');
     }
   }
   

@@ -12,7 +12,7 @@
  * @param string $search_value name of the value in your field
  * @return (true)?string:false 
  */
-function dpiservices_packages_get_field_element_by_search_value($type = null, $node = null, $field_name = null, $search_value = null) {
+function dpiservices_api_packages_get_field_element_by_search_value($type = null, $node = null, $field_name = null, $search_value = null) {
   if($info = field_get_items ( $type, $node, $field_name )){
     $element = current($info);
   }
@@ -28,7 +28,7 @@ function dpiservices_packages_get_field_element_by_search_value($type = null, $n
  * @param string $search_value name of the value in your field
  * @return (true)?array:null
  */
-function dpiservices_packages_get_one_element_from_item_from_node($type = null, $node = null, $field_name = null, $search_value = null, $get_item = null) {
+function dpiservices_api_packages_get_one_element_from_item_from_node($type = null, $node = null, $field_name = null, $search_value = null, $get_item = null) {
   $authors = array ();
   if($var = field_get_items ( $type, $node, $field_name )){
     foreach ($var  as $items ) {
@@ -45,21 +45,21 @@ function dpiservices_packages_get_one_element_from_item_from_node($type = null, 
  * @param integer $nid
  * @return array
  */
-function dpiservices_packages_generate_crop_informations($sid=null, $nid=null, $product_name=null) {
+function dpiservices_api_packages_generate_crop_informations($sid=null, $nid=null, $product_name=null) {
   $gen_value = array ();
   $crop_value = array ();
   $crop_definition_value = array ();
   $product;
   
   if(isset($product_name)){
-    $product = dpiservices_product_get_one_product_by_label($product_name);   
+    $product = dpiservices_api_product_get_one_product_by_label($product_name);   
     $preset = unserialize($product["preset"]);
   }
   
   if(isset($preset) && is_array($preset)){
     if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
       foreach ($info as $key => $value ) { 
-        if(dpiservices_packages_crop_in_array($key, $preset)){
+        if(dpiservices_api_packages_crop_in_array($key, $preset)){
           $crop_definition_value [$key] = array (
             'start_width' => $value [0],
             'start_height' => $value [1],
@@ -72,7 +72,7 @@ function dpiservices_packages_generate_crop_informations($sid=null, $nid=null, $
     $gen_value [] = $preset;
     $gen_value [] = $crop_definition_value;    
   }else{
-    return dpiservices_packages_generate_default_preset($nid, $sid  );
+    return dpiservices_api_packages_generate_default_preset($nid, $sid  );
   }
   
   return $gen_value;
@@ -85,7 +85,7 @@ function dpiservices_packages_generate_crop_informations($sid=null, $nid=null, $
  * @param integer $sid
  * @return array
  */
-function dpiservices_packages_generate_default_preset($nid, $sid){
+function dpiservices_api_packages_generate_default_preset($nid, $sid){
   module_load_include("inc", 'dpicommons', "dpicommons.api");
   $atom = scald_atom_load ( $sid );
   $gen_value = array ();
@@ -119,7 +119,7 @@ function dpiservices_packages_generate_default_preset($nid, $sid){
  * @param array $array
  * @return boolean
  */
-function dpiservices_packages_crop_in_array($needle, $array){
+function dpiservices_api_packages_crop_in_array($needle, $array){
   foreach ($array as $k => $v){
     if($v == $needle)
       return true;
@@ -134,16 +134,17 @@ function dpiservices_packages_crop_in_array($needle, $array){
  * @param string $nid
  * @return array
  */
-function dpiservices_packages_generate_crop_links($sid=null, $nid=null, $atom=null){
+function dpiservices_api_packages_generate_crop_links($sid=null, $nid=null, $atom=null){
   module_load_include("inc", 'dpicommons', "dpicommons.api");
   $crop_link_definition = array ();
-  if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
-    foreach ($info as $key => $value ) {
-      $crop_link_definition [$key] = array (
-        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key),
-      );
-    }
+  
+  foreach(image_styles() as $preset_name=>$preset_info){
+    $crop_link_definition [$preset_name] = array (
+      'url' => dpiflexiscald_api_get_path_for_atom($atom, $preset_name),
+    );
   }
+  
+  
   return $crop_link_definition;
 }
 
@@ -153,7 +154,7 @@ function dpiservices_packages_generate_crop_links($sid=null, $nid=null, $atom=nu
  * @param String $label
  * @return product|FALSE
  */
-function dpiservices_product_get_one_product_by_label($label = null){
+function dpiservices_api_product_get_one_product_by_label($label = null){
   if(!isset($label) || $label== "")
       return FALSE;
   
