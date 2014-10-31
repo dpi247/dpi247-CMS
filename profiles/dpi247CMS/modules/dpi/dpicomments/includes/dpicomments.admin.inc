@@ -238,26 +238,7 @@ function dpicomments_admin_overview_validate($form, &$form_state) {
  * publishing, unpublishing or deleting.
  */
 function dpicomments_admin_overview_submit($form, &$form_state) {
-  $operation = $form_state['values']['operation'];
-  $cids = $form_state['values']['comments'];
-
-  if ($operation == 'delete') {
-    comment_delete_multiple($cids);
-  }
-  else {
-    foreach ($cids as $cid => $value) {
-      $comment = comment_load($value);
-
-      if ($operation == 'unpublish') {
-        $comment->status = COMMENT_NOT_PUBLISHED;
-      }
-      elseif ($operation == 'publish') {
-        $comment->status = COMMENT_PUBLISHED;
-      }
-      comment_save($comment);
-    }
-  }
-  drupal_set_message(t('The update has been performed.'));
+  module_load_include('inc', 'comment', 'comment.admin');
+  comment_admin_overview_submit($form, $form_state);
   $form_state['redirect'] = 'admin/content/comment/abusive';
-  cache_clear_all();
 }
