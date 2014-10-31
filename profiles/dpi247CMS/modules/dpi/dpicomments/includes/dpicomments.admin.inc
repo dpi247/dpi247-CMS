@@ -81,6 +81,9 @@ function dpicomments_settings() {
 function dpicomments_admin($type = 'abusive') {
   $edit = $_POST;
 
+  // On charge comment.admin pour avoir acces à la suppréssion multiple des commentaires
+  module_load_include('inc', 'comment', 'comment.admin');
+
   if (isset($edit['operation']) && ($edit['operation'] == 'delete') && isset($edit['comments']) && $edit['comments']) {
     return drupal_get_form('comment_multiple_delete_confirm');
   }
@@ -215,4 +218,46 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
   $form['pager'] = array('#theme' => 'pager');
 
   return $form;
+}
+
+/**
+ * Validate comment_admin_overview form submissions.
+ */
+function dpicomments_admin_overview_validate($form, &$form_state) {
+  $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
+  // We can't execute any 'Update options' if no comments were selected.
+  if (count($form_state['values']['comments']) == 0) {
+    form_set_error('', t('Select one or more comments to perform the update on.'));
+  }
+}
+
+/**
+ * Process comment_admin_overview form submissions.
+ *
+ * Execute the chosen 'Update option' on the selected comments, such as
+ * publishing, unpublishing or deleting.
+ */
+function dpicomments_admin_overview_submit($form, &$form_state) {
+  $operation = $form_state['values']['operation'];
+  $cids = $form_state['values']['comments'];
+
+  if ($operation == 'delete') {
+    comment_delete_multiple($cids);
+  }
+  else {
+    foreach ($cids as $cid => $value) {
+      $comment = comment_load($value);
+
+      if ($operation == 'unpublish') {
+        $comment->status = COMMENT_NOT_PUBLISHED;
+      }
+      elseif ($operation == 'publish') {
+        $comment->status = COMMENT_PUBLISHED;
+      }
+      comment_save($comment);
+    }
+  }
+  drupal_set_message(t('The update has been performed.'));
+  $form_state['redirect'] = 'admin/content/comment/abusive';
+  cache_clear_all();
 }
