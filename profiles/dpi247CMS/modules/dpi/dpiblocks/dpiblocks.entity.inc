@@ -44,7 +44,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'remotehtml_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/remotehtml',
+      'path' => DPI_ADMIN_PATH.'/remotehtml',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/remotehtml.admin.inc',
     ),
@@ -86,7 +86,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'custom_content_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/custom_content',
+      'path' => DPI_ADMIN_PATH.'/custom_content',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/custom_content.admin.inc',
     ),
@@ -126,7 +126,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'flowmix_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/flowmix',
+      'path' => DPI_ADMIN_PATH.'/flowmix',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/flowmix.admin.inc',
     ),
