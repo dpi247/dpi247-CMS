@@ -218,6 +218,34 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
+ * Implements hook_form_ctools_node_comments_content_type_edit_form_alter().
+ * > Formulaire settings des commentaire dans panel
+ * > Modifie le champ comments_per_page pour être désormais un textfield plutot qu'un select
+ * > Permet de saisir n'importe quel nombre
+ */
+function dpicomments_form_ctools_node_comments_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Type textfield (older type is select)
+  $form['comments_per_page']['#type'] = 'textfield';
+  $form['comments_per_page']['#size'] = 5;
+  $form['comments_per_page']['#title'] = t('Number of comments to display');
+  //Unsetting options
+  unset($form['comments_per_page']['#options']);
+
+  // Adding validate
+  $form['#validate'][] = 'dpicomments_form_ctools_node_comments_content_type_edit_form_validate';
+}
+
+/**
+ * Implements hook_form_ctools_node_comments_content_type_edit_form_validate().
+ * Test si le nombre de commentaires par page est bien un entier
+ */
+function dpicomments_form_ctools_node_comments_content_type_edit_form_validate(&$form, &$form_state, $form_id) {
+  if (!is_numeric($form['comments_per_page']['#value'])) {
+     form_set_error('Number of comments to display', 'Number of comments to display must be a number');
+  }
+}
+
+/**
  * This hook is called when user votes on some content.
  * @param  $vote_type
  *    Vote type, "vote" or "undo_vote"
