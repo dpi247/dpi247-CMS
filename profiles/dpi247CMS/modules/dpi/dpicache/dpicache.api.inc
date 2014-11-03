@@ -29,7 +29,7 @@ function dpicache_get_cache_entry($cache_name) {
   }
   
   // fetch cache from ad hoc storage
-  if (($content = dpicache_fetch_cache ( $cache_name, $hash )) && (! isset ( $cache_definition ['bypass'] ) || $cache_definition ['bypass'] !== TRUE) && ! variable_get ( 'dpicache_disable_dpicache_utilisation', FALSE )) {
+  if (($content = dpicache_fetch_cache ( $cache_name, $hash )) && (! isset ( $cache_definition ['bypass'] ) || $cache_definition ['bypass'] !== TRUE) && ! dpi_variable_get ( 'dpicache_disable_dpicache_utilisation', FALSE )) {
     // cache available
     dpi_log ( 'dpicache', "cache_hit", t ( "Cache hit : name = !cache_name, hash = !hash", array (
       "!cache_name" => $cache_name,
@@ -254,7 +254,7 @@ function dpi_variable_del_namespace($namespace, $type = 'both') {
  * @see system_settings_form()
  *
  */
-function dpi_api_system_settings_form($form) {
+function dpi_system_settings_form($form) {
   system_settings_form ( $form );
   $form ['actions'] ['#type'] = 'actions';
   $form ['actions'] ['submit'] = array (
@@ -264,7 +264,7 @@ function dpi_api_system_settings_form($form) {
   if (! empty ( $_POST ) && form_get_errors ()) {
     drupal_set_message ( t ( 'The settings have not been saved because of the errors.' ), 'error' );
   }
-  $form ['#submit'] [] = 'dpi_api_system_settings_form_submit';
+  $form ['#submit'] [] = 'dpi_system_settings_form_submit';
   // By default, render the form using theme_system_settings_form().
   if (! isset ( $form ['#theme'] )) {
     $form ['#theme'] = 'system_settings_form';
@@ -277,7 +277,7 @@ function dpi_api_system_settings_form($form) {
  *
  * @see system_settings_form_submit()
  */
-function dpi_api_system_settings_form_submit($form, &$form_state) {
+function dpi_system_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   form_state_values_clean ( $form_state );
   foreach ( $form_state ['values'] as $key => $value ) {
@@ -340,10 +340,6 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
  *          the category of cache
  */
 function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category = NULL) {
-  drupal_set_message ( t ( "Manual cache regeneration: @cache_name, category: @category", array (
-    '@cache_name' => $cache_type,
-    '@category' => $category 
-  ) ) );
   dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category", array (
     '@cache_name' => $cache_type,
     '@category' => $category 

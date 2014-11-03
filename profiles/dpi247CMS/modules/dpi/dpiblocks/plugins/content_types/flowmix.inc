@@ -39,7 +39,7 @@ function dpiblocks_flowmix_content_type_content_types() {
     $flowmixes[$record->machine_name] = array(
       'title'        => t('FlowMix : '.$record->title),
       'machine_name' => $record->machine_name,
-      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/1412085106_104485.ico',
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/rss.png',
       'description'  => t(''),
       'add form'     => array(
         'dpiblocks_flowmix_content_type_form_summary_form'        => t('Summary'),

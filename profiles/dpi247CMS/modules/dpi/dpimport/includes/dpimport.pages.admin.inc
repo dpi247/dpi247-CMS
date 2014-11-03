@@ -104,7 +104,7 @@ function dpimport_page_form_importer_form($form, &$form_state, $edit_id = NULL) 
 function dpimport_page_form_importer_form_back_after_build($form, $form_state) {
   if (isset ( $form_state ['values'] ['back'] )) {
     $validated_forms = &drupal_static ( 'drupal_validate_form', array () );
-    $validated_forms ['dpimport_page_form_importer_form_validate'] = TRUE;
+    $validated_forms ['dpimport_page_form_importer_form'] = TRUE;
   }
   return $form;
 }

@@ -21,6 +21,9 @@ function dpiservices_dpijsonexporter_product_retrieve($product){
  * @return Array
  */
 function dpiservices_dpijsonexporter_product_retrieve_process($product){
+  
+  module_load_include("inc", 'dpiservices', 'dpiservices.api');  
+    
   $json_export = array();
   $product_element = dpiservices_api_product_get_one_product_by_label($product);
   $sql = "

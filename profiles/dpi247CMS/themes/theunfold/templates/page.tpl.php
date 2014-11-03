@@ -28,7 +28,7 @@
 			</div>
 			<!-- /toolbar -->
 			<div id="logo">
-				<?php if ($logo) : print '<img src="'.check_url($logo).'" alt="'.$site_name.'" id="logo" />'; endif; ?>
+				<?php if (FALSE & $logo) : print '<img src="'.check_url($logo).'" alt="'.$site_name.'" id="logo" />'; endif; ?>
 				<h1>
 					<a id="branding" href="/"> <?php if ($site_name): print $site_name; endif; ?>
 					</a>
