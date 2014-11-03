@@ -60,7 +60,6 @@ function dpicomments_settings() {
     ),
   );
 
-  // TODO : verification champs INT
   $form['dpicomments_comment_widget_settings']['dpicomments_comment_nb_abuse_before_seccond_trigger'] = array(
     '#type' => 'textfield',
     '#title' => t("Number of reports of abuse before the comment unpublication"),
@@ -69,9 +68,21 @@ function dpicomments_settings() {
     '#description' => t('Enter a number.'),
   );
 
+  // Validate form
+  $form['#validate'][] = 'dpicomments_settings_validate';
+
   $form['array_filter'] = array('#type' => 'hidden');
 
   return system_settings_form($form);
+}
+
+/**
+ * Validate dpicomments_settings_validate form submissions.
+ */
+function dpicomments_settings_validate($form, &$form_state) {
+  if (!is_numeric($form['dpicomments_comment_widget_settings']['dpicomments_comment_nb_abuse_before_seccond_trigger']['#value'])) {
+    form_set_error('Number of reports of abuse before the comment unpublication ', 'Number of reports of abuse before the comment unpublication  must be a number');
+  }
 }
 
 /**
@@ -229,7 +240,7 @@ function dpicomments_admin_overview($form, &$form_state, $arg) {
 }
 
 /**
- * Validate comment_admin_overview form submissions.
+ * Validate dpicomments_admin_overview form submissions.
  */
 function dpicomments_admin_overview_validate($form, &$form_state) {
   $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
@@ -240,7 +251,7 @@ function dpicomments_admin_overview_validate($form, &$form_state) {
 }
 
 /**
- * Process comment_admin_overview form submissions.
+ * Process dpicomments_admin_overview form submissions.
  *
  * Execute the chosen 'Update option' on the selected comments, such as
  * publishing, unpublishing or deleting.
