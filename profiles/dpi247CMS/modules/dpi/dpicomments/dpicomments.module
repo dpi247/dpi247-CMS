@@ -168,6 +168,24 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
 	// Signature : soit le pseudo, soit nom+prenom
 	$signature = $comment->field_signature['und'][0]['safe_value'];
 
+  $allow_reply_comment = variable_get('dpicomments_comment_reply_com_limite', 1);
+
+  // Interdiction de commenter les commentaire 
+  // (On peu faire ca ici car le commentaire 'parent' est chargé > on a donc facilement son PID)
+  // > Si ce n'est pas autorisé en back office
+  // > Ou si c'est authorisé, on limite a 1 le niveau de descendance
+  if (arg(0) == "comment" && arg(1) == "reply") {
+    if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
+      // Commentaire non authorisé > redirection vers l'article
+      drupal_goto('node/'.arg(2));
+    }
+  }
+
+  // Supprésion du lien "reply" pour un commentaire "non commentable"
+  if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
+    unset($comment->content['links']['comment']['#links']['comment-reply']);
+  }
+
   // La signature est devenu un champ obligatoire, et initialisé au nom+prenom de la personne
   // Le test ci dessous ne va donc -en theorie- plus servir.
 	if (isset($signature) && !empty($signature)) {
@@ -185,7 +203,7 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
   }
 }
 
-/**
+ /**
  * Implements hook_comment_delete().
  */
 function dpicomments_comment_delete($comment) {

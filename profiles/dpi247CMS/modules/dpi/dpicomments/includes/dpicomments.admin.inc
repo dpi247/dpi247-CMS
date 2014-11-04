@@ -68,6 +68,12 @@ function dpicomments_settings() {
     '#description' => t('Enter a number.'),
   );
 
+  $form['dpicomments_comment_widget_settings']['dpicomments_comment_reply_com_limite'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow one level of comment response'),
+    '#default_value' => variable_get('dpicomments_comment_reply_com_limite', 1),
+  );
+
   // Validate form
   $form['#validate'][] = 'dpicomments_settings_validate';
 
