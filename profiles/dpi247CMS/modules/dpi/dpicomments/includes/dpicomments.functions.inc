@@ -209,3 +209,25 @@ function dpicomments_reportabuse_get_cleared_destination() {
   $clear_destination = array('destination' => $path);
   return $clear_destination;
 }
+
+/**
+ * Delete votes for a comment
+ *
+ * @param $comment
+ * A comment
+ * @param $tag
+ * Delete the votes with this tag;
+ * If does not exist, deleting all votes for this comment
+ *
+ */
+function dpicomments_delete_votes_comment_abusive($comment, $tag = NULL) {
+  $criteria['entity_type'] = 'comment';
+  $criteria['entity_id'] = $comment->cid;
+  if ($tag != null) {
+    $criteria['tag'] = 'dpicomments_comment_vote';
+  }
+  // Select votes
+  $votes = votingapi_select_votes($criteria);
+  // Delete votes
+  votingapi_delete_votes($votes);
+}
