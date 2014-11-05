@@ -177,7 +177,7 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
   if (arg(0) == "comment" && arg(1) == "reply") {
     if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
       // Commentaire non authorisé > redirection vers l'article
-      drupal_goto('node/'.arg(2));
+      drupal_goto(drupal_get_path_alias('node/'.arg(2)));
     }
   }
 
@@ -211,6 +211,23 @@ function dpicomments_comment_delete($comment) {
   $criteria['entity_type'] = 'comment';
   $votes = votingapi_select_votes($criteria);
   // Suppression du commentaire dans VotingAPI
+  votingapi_delete_votes($votes);
+}
+
+ /**
+ * Implements hook_comment_publish().
+ */
+function dpicomments_comment_publish($comment) {
+  // Lorsqu'un admin publie un commentaire, on supprime les votes effectué dessus
+  // Cela empeche un commentaire qui a été automatiquement dépublié apres X signalement d'abus d'etre re-dépublié au prochain signalement
+  $criteria['entity_type'] = 'comment';
+  $criteria['entity_id'] = $comment->cid;
+  $criteria['value_type'] = 'points';
+  $criteria['tag'] = 'dpicomments_comment_vote';
+
+  // Select votes
+  $votes = votingapi_select_votes($criteria);
+  // Delete votes
   votingapi_delete_votes($votes);
 }
 
