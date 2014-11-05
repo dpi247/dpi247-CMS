@@ -307,3 +307,33 @@ function dpicomments_trigger_info() {
     ),
   );
 }
+
+/**
+ * Implements hook_action_info().
+ */
+function dpicomments_action_info() {
+  return array(
+    // Dépublication d'un' commentaire
+    'custom_unpublish_comment' => array(
+      'label' => t('Unpublish comment'),
+      'type' => 'comment',
+      'configurable' => FALSE,
+      'triggers' => array('report_abuse_after_posted', 'report_abuse_after_n_posted'),
+    ),
+  );
+}
+
+/**
+ * Action for unpublish a comment
+ *
+ * @param object
+ * A comment
+ * @param context
+ * the context
+ */
+function custom_unpublish_comment($object, $context=array()) {
+  if (isset($object->cid)) {
+    $object->status = COMMENT_NOT_PUBLISHED;
+    comment_save($object);
+  }
+}
