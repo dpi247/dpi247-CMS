@@ -28,6 +28,7 @@ function dpisso_ctools_plugin_directory($module, $plugin) {
 function dpisso_menu() {
   $items = array();
 
+  
   $items[DPI_ADMIN_PATH.'/dpisso'] = array(
     'title'            => t('DPI SSo Settings'),
     'page callback'    => 'drupal_get_form',
@@ -297,7 +298,6 @@ function dpisso_get_config() {
 	}
 	return($ssoconfig);
 }
-
 
 
 function dpisso_get_version(){
