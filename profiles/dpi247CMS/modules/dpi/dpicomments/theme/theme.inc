@@ -60,3 +60,31 @@ function theme_dpicomments_reportabuse_json_response($variables) {
       break;
   }
 }
+
+
+function theme_dpicomments_comment_wrapper($variables){
+  $element=$variables['element'];
+  dsm($element);
+  $pager=$element['pager'];
+  unset($element['pager']);
+
+  foreach(element_children($element) as $key){
+    $items[]=drupal_render($element[$key]);
+  }
+
+  $item_list['#items']= $items;
+  $item_list['#type']='ol';
+  $item_list['#theme']='item_list';
+
+  $output['item_list']=array(
+    'type'=>'markup',
+    '#markup'=>drupal_render($item_list),
+    );
+
+  $output['links']=array(
+    'type'=>'markup',
+    '#markup'=>l('Plus de commentaires','/'),
+    );
+  
+  return drupal_render($output);
+}

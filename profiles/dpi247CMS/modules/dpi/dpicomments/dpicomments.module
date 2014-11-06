@@ -124,6 +124,10 @@ function dpicomments_theme() {
     'dpicomments_reportabuse_json_response' => array(
       'variables' => array('entity_type' => NULL, 'entity_id' => NULL, 'tag' => NULL, 'score' => NULL, 'vote_type' => NULL),
     ),
+
+    'dpicomments_comment_wrapper' => array(
+      'render element' => 'element',
+    ),
   );
 }
 
@@ -268,6 +272,21 @@ function dpicomments_form_ctools_node_comments_content_type_edit_form_validate(&
   }
 }
 
+// /**
+//  * Implements hook_ctools_render_alter().
+//  */
+// function dpicomments_ctools_render_alter(&$info, &$page, &$context) {
+//   foreach ($context['handler']->conf['display']->content as $bloc) {
+//     if ($bloc->type == "node_comments") {
+//       $comments_per_page = $bloc->configuration['comments_per_page'];
+//       break;
+//     }
+//   }
+//   // print '<pre>';
+//   // print_r($context);
+//   // print '</pre>';
+// }
+
 /**
  * This hook is called when user votes on some content.
  * @param  $vote_type
@@ -284,6 +303,39 @@ function hook_dpicomments_voted($vote_type, $entity_type, $entity_id, $tag, $sco
 }
 
 
+function dpicomments_panels_pane_content_alter(& $content, $pane, $args, $contexts) {
+  
+  if($pane->type=='node_comments'){
+  
+
+    $conf=$pane->configuration;
+    $node=$contexts[$conf['context']]->data;
+
+
+    $output = '';
+    if (user_access('access comments') || !$node->comment) {
+      
+
+      $mode = $conf['mode'];
+      $comments_per_page = $conf['comments_per_page'];
+
+      $cids = comment_get_thread($node, $mode, $comments_per_page);
+      $comments = comment_load_multiple($cids);
+
+      if ($comments) {
+        drupal_add_css(drupal_get_path('module', 'comment') . '/comment.css');
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        $build['pager']['#theme'] = 'pager';
+        dsm($build);
+        $build["#theme"]='dpicomments_comment_wrapper';
+        $output =  drupal_render($build);
+      }
+    }
+    $content->content=$output;
+  }
+  // Don't display titles.
+}
 
 /*************************************/
 /**** Rules integration (Trigger) ****/
