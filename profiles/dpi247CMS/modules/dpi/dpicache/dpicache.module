@@ -560,19 +560,33 @@ function varnish_requirements($phase) {
  */
 function dpicache_dpidashboard_status_item() {
 	if(!variable_get('dpicache_disable_esi', FALSE)){ 
-		$dpicachestatus = 0;
-		$dpicachemessage = t('Cache is enabled');
+		$dpicacheblockstatus = 0;
+		$dpicacheblockmessage = t('Cache is enabled');
 	} else {
-		$dpicachestatus = 3;
-		$dpicachemessage = t('Cache is disabled');
+		$dpicacheblockstatus = 3;
+		$dpicacheblockmessage = t('Cache is disabled');
+	}
+	
+	if(dpi_variable_get('dpicache_disable_dpicache_utilisation', 0)==0){ 
+		$dpicachesystemstatus = 0;
+		$dpicachesystemmessage = t('Cache is enabled');
+	} else {
+		$dpicachesystemstatus = 3;
+		$dpicachesystemmessage = t('Cache is disabled');
 	}
 	
 	$status = array(
 		array(
-			'title' 	=> 'DPI Cache ESI',
-			'status'	=> $dpicachestatus,
-			'message'	=> $dpicachemessage,
-			'link'		=> 'admin/dpi247/dpicache/esi',
+			'title' 	=> t('DPI Cache ESI block'),
+			'status'	=> $dpicacheblockstatus,
+			'message'	=> $dpicacheblockmessage,
+			'link'		=> '/admin/dpi247/dpicache/esi',
+		),
+		array(
+			'title' 	=> t('DPI Cache ESI caching system'),
+			'status'	=> $dpicachesystemstatus,
+			'message'	=> $dpicachesystemmessage,
+			'link'		=> '/admin/dpi247/dpicache/dpicache_clear',
 		)
 	);
 	
