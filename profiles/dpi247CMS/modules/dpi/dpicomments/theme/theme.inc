@@ -61,19 +61,24 @@ function theme_dpicomments_reportabuse_json_response($variables) {
   }
 }
 
-
+/**
+ * Theming function for comment wrapper
+ * @param  $variables
+ * @return string
+ *
+ * Returns theming comment wrapper
+ */
 function theme_dpicomments_comment_wrapper($variables){
   $element=$variables['element'];
-  dsm($element);
   $pager=$element['pager'];
-  unset($element['pager']);
+  // unset($element['pager']);
 
   foreach(element_children($element) as $key){
     $items[]=drupal_render($element[$key]);
   }
 
   $item_list['#items']= $items;
-  $item_list['#type']='ol';
+  $item_list['#type']='ul';
   $item_list['#theme']='item_list';
 
   $output['item_list']=array(
@@ -81,10 +86,14 @@ function theme_dpicomments_comment_wrapper($variables){
     '#markup'=>drupal_render($item_list),
     );
 
-  $output['links']=array(
-    'type'=>'markup',
-    '#markup'=>l('Plus de commentaires','/'),
-    );
-  
+  if ($element['show_more_comment_link']) {
+    $output['links']=array(
+      'type'=>'markup',
+      '#markup'=>l('Plus de commentaires','node/'.$element['nid'].'/comments'),
+      );
+  }
+
+  dsm($output, outu);
+
   return drupal_render($output);
 }
