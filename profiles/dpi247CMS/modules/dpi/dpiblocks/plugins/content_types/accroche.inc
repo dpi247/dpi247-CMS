@@ -182,13 +182,7 @@ function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
  * @return multitype:string
  */
 function _dpiblocks_accroche_get_all_teaser() {
-  return array (
-    'accroche_small' => 'targetblock_small',
-    'accroche_big' => 'targetblock_big',
-    'accroche_medium' => 'targetblock_medium',
-    'accroche_color_red' => 'targetblock_red',
-    'accroche_background_red' => 'targetblock_red',
-  );
+  return variable_get('dpiblocks_accroche_settings');
 }
 
 function _dpiblocks_accroche_get_view_name() {

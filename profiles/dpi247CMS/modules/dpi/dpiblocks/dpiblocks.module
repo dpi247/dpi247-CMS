@@ -101,6 +101,14 @@ function dpiblocks_menu() {
     'type' => MENU_CALLBACK
   );
   
+  $items[DPI_ADMIN_PATH.'/accroche'] = array(
+    'title' => 'Manage accroche',
+    'description' => 'Create a new accroche type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_accroche_admin_add_form'),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
   
   return $items;
 }
