@@ -53,3 +53,4 @@ function dpiblocks_api_get_plugin_by_name($plugin_name) {
   $plugin = ctools_get_plugins($module, $type, $plugin_name);
   return $plugin;
 }
+
