@@ -1,9 +1,10 @@
 <?php
 $plugin = array (
-  'title' => t ( 'Teaser' ),
+  'title' => t ( 'Accroche' ),
   'description' => t ( 'Display a list of the newest nodes' ),
   'edit form' => 'dpiblocks_accroche_plugin_edit_form',
   'render callback' => 'dpiblocks_accroche_render',
+  'admin info' => 'dpiblocks_accroche_admin_info',
   'category' => t ( 'Accroche' ),
   'group' => t ( 'DPI Core' ),
   'all contexts' => TRUE 
@@ -14,9 +15,9 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   $layouts = _dpiblocks_accroche_get_all_teaser ();
   foreach ( $layouts as $key => $layout ) {
     $types [$key] = array (
-      'title' => check_plain ( $key ),
+      'title' => check_plain ( $layout[0] ),
       'subtype' => $key,
-      'description' => check_plain ( $layout ),
+      'description' => check_plain ( $layout[0] ),
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
       'category' => t ( 'Accroche' ),
       'group' => t ( 'DPI Core' ) 
@@ -194,7 +195,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   /* Prepare element for view */
   $elements = array ();
   $teasers = _dpiblocks_accroche_get_all_teaser();
-  $elements ["layout"] = $teasers[$conf ["layout"]];
+  $elements ["layout"] = $teasers[$conf ["layout"]][1];
   if(isset($conf["type"]) && $conf["type"]=="node"){
     $elements ["node_id"] = explode ( ";", $conf ["node"] );
   }elseif(isset($conf["type"]) && $conf["type"]=="destination"){
@@ -226,8 +227,15 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   
   /* Prepare render element and return it */
   $block = new stdClass ();
-  $block->title = (isset ( $conf ["url"] )) ? l ( $conf ["title"], $conf ["url"] ) : $conf ["title"];
+  $block->title = (isset ( $conf ["url"] ) && $conf["url"]!="") ? l ( $conf ["title"], $conf ["url"] ) : $conf ["title"];
   $block->content = $view->render ();
   $block->admin_links = array ();
+  return $block;
+}
+
+function dpiblocks_accroche_admin_info($subtype, $conf, $contexts){
+  $block = new stdClass();
+  $block->title = $conf['override_title'] ? $conf['override_title_text'] : $conf["title"];
+  $block->content = t('Accroche key : @accroche_key<br />Title : @title<br />Type : @type', array('@accroche_key'=>$subtype, '@title' => $conf["title"], "@type" => $conf["type"]));
   return $block;
 }

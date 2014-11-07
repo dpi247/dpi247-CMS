@@ -1,7 +1,7 @@
-<div id="ena-style-list-items">
+<div class="panel panel-default">
 <?php
 foreach ( $variables ["list_node"] as $node ) {
-  print render ( $node );
+  '<div class="media">'.print render ( $node ).'</div>';
 }
 ?>
 </div>
