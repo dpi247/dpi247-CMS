@@ -16,7 +16,6 @@ require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.ap
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
 require_once DRUPAL_ROOT . '/includes/common.inc';
 
-
 drupal_load('module', 'ctools');
 ctools_include('plugins');
 
@@ -40,32 +39,27 @@ $operation=check_plain($_GET["operation"]);
 $url_arguments=$_GET;
 if(!isset($operation)){
   print "ERROR No operation";
-  header('HTTP/1.1 403 Forbidden', true, 403);
+  header('HTTP/1.1 403 Forbidden', NULL, 403);
 } else {
-  $return = FALSE;
   switch($operation){
-    case "is_secure_page" :
+    
+  	case "is_secure_page" :
     	if (isset($_GET["url"]) && is_array(json_decode($_GET["services"]))) {
     		$return = $politic_instance->issecurepage($_GET["url"], json_decode($_GET["services"]));
-
-    		print "dla  ";
-    		var_dump($return);  
-    		
     	}
     	break;
+    	
     default:
-      print "Invalid operation";
-      header('HTTP/1.1 403 Forbidden', true, 403);
+	  print "Invalid operation";
+      header('HTTP/1.1 405 invalid Operation', null, 405);
+      die(); 
       break;
+
   }
 
-  // Print the results.
-  if ($return===FALSE || $return===NULL) {
-  	$return["unitId"]=dpisso_authentication_api_get_unitid();
-    _dpissoaccessmanager_return_json($return, 200);
-  } else {
-    _dpissoaccessmanager_return_json(FALSE, 403, "Forbidden");
-  }
+  // Print the results of a valid operation & die.
+  _dpissoaccessmanager_return_json($return["data"], $return["code"]);
+
 }
 
 /**
@@ -74,10 +68,12 @@ if(!isset($operation)){
 function _dpissoaccessmanager_return_json($data, $httperror, $httperrormessage="") {
   if ($httperror!=200) {
     header('HTTP/1.1 '.$httperror.' '.$httperrormessage, true, $httperror);
+    echo json_encode($data);
     die(); 
   } else {
     header('Content-Type: application/json');
     echo json_encode($data);
+    die();
   }
 }
 
