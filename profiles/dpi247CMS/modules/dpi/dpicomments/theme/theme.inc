@@ -93,7 +93,5 @@ function theme_dpicomments_comment_wrapper($variables){
       );
   }
 
-  dsm($output, outu);
-
   return drupal_render($output);
 }
