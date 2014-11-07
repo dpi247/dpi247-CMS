@@ -231,3 +231,55 @@ function dpicomments_delete_votes_comment_abusive($comment, $tag = NULL) {
   // Delete votes
   votingapi_delete_votes($votes);
 }
+
+/**
+ * Retrieve comments for a thread.
+ * Function issued from comment.module
+ *
+ * @param $node
+ *   The node whose comment(s) needs rendering.
+ * @param $mode
+ *   The comment display mode; COMMENT_MODE_FLAT or COMMENT_MODE_THREADED.
+ * @param $comments_per_page
+ *   The amount of comments to display per page.
+ *
+ * @see comment_get_thread
+ *
+ */
+function dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page) {
+  $query = db_select('comment', 'c')->extend('PagerDefault');
+  $query->addField('c', 'cid');
+  $query
+    ->condition('c.nid', $node->nid)
+    ->addTag('node_access')
+    ->addTag('comment_filter')
+    ->addMetaData('node', $node)
+    ->limit($comments_per_page);
+  $count_query = db_select('comment', 'c');
+  $count_query->addExpression('COUNT(*)');
+  $count_query
+    ->condition('c.nid', $node->nid)
+    ->addTag('node_access')
+    ->addTag('comment_filter')
+    ->addMetaData('node', $node);
+
+  if (!user_access('administer comments')) {
+    $query->condition('c.status', COMMENT_PUBLISHED);
+    $count_query->condition('c.status', COMMENT_PUBLISHED);
+  }
+  if ($mode === COMMENT_MODE_FLAT) {
+    $query->orderBy('c.cid', 'ASC');
+  }
+  else {
+    // See comment above. Analysis reveals that this doesn't cost too
+    // much. It scales much much better than having the whole comment
+    // structure.
+    $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
+    $query->orderBy('torder', 'ASC');
+  }
+  $query->setCountQuery($count_query);
+  // Juste cette ligne change par rapport à la version 'normale' de cette fonction dans le module comment.
+  $query->element(0);
+  $cids = $query->execute()->fetchCol();
+  return $cids;
+}

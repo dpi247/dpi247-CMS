@@ -301,7 +301,7 @@ function dpicomments_panels_pane_content_alter(& $content, $pane, $args, $contex
       $mode = $conf['mode'];
       $comments_per_page = $conf['comments_per_page'];
 
-      $cids = comment_get_thread($node, $mode, $comments_per_page);
+      $cids = dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page);
       $comments = comment_load_multiple($cids);
       if ($comments) {
         drupal_add_css(drupal_get_path('module', 'comment') . '/comment.css');
