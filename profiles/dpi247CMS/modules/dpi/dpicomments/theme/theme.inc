@@ -74,7 +74,23 @@ function theme_dpicomments_comment_wrapper($variables){
   // unset($element['pager']);
 
   foreach(element_children($element) as $key){
-    $items[]=drupal_render($element[$key]);
+    $render = drupal_render($element[$key]);
+    // Bien dégueu, mais lorsqu'un commentaire est indenté,
+    // La balise div ouvrante (div suplémentaire pour class=indented) est dans le commentaire indenté
+    // Et la balise fermante dans le commentaire suivant ...
+    // Du coup le ul/li ne fonctionne pas.
+    if (substr($render, 0, 5) == "<div>") {
+      // Si on ouvre la div, on la fere dans le meme render.
+      $render.="</div>";
+    }
+    elseif (substr($render, 0, 6) == "</div>") {
+      // Si le render du commentaire commence par une balise fermante, on la supprime
+      $render = substr($render, 6);
+    }
+    
+    if (strlen($render)>0) {
+      $items[]=$render;
+    }
   }
 
   $item_list['#items']= $items;
