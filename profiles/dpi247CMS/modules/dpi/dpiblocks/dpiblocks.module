@@ -102,10 +102,36 @@ function dpiblocks_menu() {
   );
   
   $items[DPI_ADMIN_PATH.'/accroche'] = array(
+    'title' => 'View accroche',
+    'description' => 'Create a new accroche type',
+    'page callback' => 'dpiblocks_get_accroche_info',
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/add'] = array(
     'title' => 'Manage accroche',
     'description' => 'Create a new accroche type',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpiblocks_accroche_admin_add_form'),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/add/%'] = array(
+    'title' => 'Update accroche',
+    'description' => 'Update accroche type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_accroche_admin_add_form', 4),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/del/%'] = array(
+    'title' => 'Delete accroche',
+    'description' => 'delete accroche type',
+    'page callback' => 'dpiblocks_accroche_admin_del',
+    'page arguments' => array(4),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
   );
