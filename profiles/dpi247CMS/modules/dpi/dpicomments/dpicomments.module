@@ -307,14 +307,16 @@ function dpicomments_panels_pane_content_alter(& $content, $pane, $args, $contex
         drupal_add_css(drupal_get_path('module', 'comment') . '/comment.css');
         comment_prepare_thread($comments);
         $build = comment_view_multiple($comments, $node);
-          
+        if (arg(2) == "comments") {
+          // Ajout d'un pager sur la page de tous les commentaires
+          $build['pager']['#theme'] = 'pager';
+        }
+
         // Est-ce qu'on ajoute un lien + de com?
         if (count($cids) != $node->comment_count && arg(2)!="comments") {
           $build['show_more_comment_link'] = true;
         } else {
           $build['show_more_comment_link'] = false;
-          // Pager uniquement sur la page de tous les commentaire, sans lien "plus de commentaires"
-          $build['pager']['#theme'] = 'pager';
         }
         $build['nid'] = intval($node->nid);
         $build["#theme"]='dpicomments_comment_wrapper';
