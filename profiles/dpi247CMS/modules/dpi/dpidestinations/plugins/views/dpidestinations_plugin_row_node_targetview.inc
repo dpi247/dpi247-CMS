@@ -17,11 +17,23 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
   function render($row) {
     if (isset($this->nodes[$row->{$this->field_alias}])) {
       $node = $this->nodes[$row->{$this->field_alias}];
+      $view_mode='teaser';
       if($destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->targetview_tid)){
         $view_mode=$destination['layout'];
       }
       else{
-        $view_mode='teaser';  
+        $index=0;
+        foreach($this->view->argument as $argument_name=>$argument_object){
+          if($argument_name=="field_destinations_tid"){
+            $destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->args[$index]);
+            $view_mode=$destination['layout'];
+
+          }
+          $index++;
+
+          ;
+        }
+
       }
       $node->view = $this->view;
       //@todo: Documenter le fait qu'il y ai un $node->targetview_destination 
