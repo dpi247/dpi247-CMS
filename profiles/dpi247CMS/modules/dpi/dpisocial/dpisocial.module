@@ -1,0 +1,38 @@
+<?php 
+/**
+ * @author NMO
+ */
+module_load_include ( 'php', 'dpisocial', 'dpisocial.api' );
+
+function dpisocial_menu() {
+  $items = array();
+  
+  $items['admin/config/dpisocial/comments'] = array (
+    'title' => 'Configure social shares on comments',
+    'description' => 'Select on which social networks comments can be shared.',
+    'page callback' => 'dpisocial_comments_view_page',
+    'access callback' => TRUE,
+    'access arguments' => array (
+      'administer dpisocial' 
+    ),
+    'file' => 'dpisocial.pages.comments.inc',
+    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
+  );
+  
+  return $items;
+ 
+}
+
+/**
+ * Implementation of hook_permission
+ *
+ * @return multitype:array
+ */
+function dpisocial_permission() {
+  return array (
+    'administer dpisocial' => array (
+      'title' => t ( 'Administer dpisocial' ),
+      'description' => t ( 'Perform administration tasks for dpisocial module.' ) 
+    ) 
+  );
+}
