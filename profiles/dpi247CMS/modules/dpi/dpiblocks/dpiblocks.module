@@ -4,6 +4,8 @@ module_load_include('inc', 'dpiblocks','dpiblocks.api');
 module_load_include('inc', 'dpiblocks','dpiblocks.private');
 // Load all entity function for remotehtml and custom content
 module_load_include('inc', 'dpiblocks','dpiblocks.entity');
+module_load_include ( 'inc', 'dpidestinations', 'dpidestinations.api' );
+
 
 /**
  * Implementation of hook_menu()
@@ -19,6 +21,15 @@ function dpiblocks_menu() {
     'file' => 'includes/dpiblocks.pages.flow.inc',
   );
 
+  $items['dpiblocks/ajax/define_target_from_form'] = array(
+    'title callback' => 'remotehtml_view',
+    'title arguments' => array(1),
+    'page callback' => 'remotehtml_view',
+    'page arguments' => array(1),
+    'access arguments' => array('view remotehtml'),
+    'type' => MENU_CALLBACK,
+  );
+  
   $items['remotehtml/%remotehtml'] = array(
     'title callback' => 'remotehtml_view',
     'title arguments' => array(1),
@@ -83,7 +94,111 @@ function dpiblocks_menu() {
     'page arguments'   => array(3),
   );
 
+  $items ["package/autocomplete/%"] = array (
+    'title' => 'Get title list',
+    'page callback' => 'dpiblocks_get_title_ajax',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche'] = array(
+    'title' => 'View accroche',
+    'description' => 'Create a new accroche type',
+    'page callback' => 'dpiblocks_get_accroche_info',
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/add'] = array(
+    'title' => 'Manage accroche',
+    'description' => 'Create a new accroche type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_accroche_admin_add_form'),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/add/%'] = array(
+    'title' => 'Update accroche',
+    'description' => 'Update accroche type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_accroche_admin_add_form', 4),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/del/%'] = array(
+    'title' => 'Delete accroche',
+    'description' => 'delete accroche type',
+    'page callback' => 'dpiblocks_accroche_admin_del',
+    'page arguments' => array(4),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+  );
+  
   return $items;
+}
+
+function dpiblocks_preprocess_accroche_custom_theme(& $variables) {
+  $args = $variables ['view']->args;
+  $list_node_render = array ();
+  if (isset ( $args ["node_id"] )) {
+    $node_ids = $args ['node_id'];
+    foreach ( $node_ids as $node_id ) {
+      if (isset ( $node_id ) && $node_id != "") {
+        $node_id = intval ( $node_id );
+        if (is_numeric ( $node_id )) {
+          $node = node_load ( $node_id );
+          $list_node_render [] = node_view ( $node, $args ['layout'] );
+        }
+      }
+    }
+  } else {
+    foreach ( $args ["destination"] as $destination ) {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( intval ( $destination ["section"] ), $destination ["target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
+      $target = $targetblock_wrapper->target->value ();
+      $target_wrapper = entity_metadata_wrapper ( 'target', $target );
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        $node = node_load ( $val_view [$i]->nid );
+        $list_node_render [] = node_view ( $node, $args ['layout'] );
+      }
+    }
+  }
+  $variables["list_node"] = $list_node_render;
+}
+
+function dpiblocks_get_title_ajax($string = "") {
+  // clean other node present to the string
+  if (isset ( $string ) && $string != "") {
+    $array_string = explode ( ';', $string );
+    $string = $array_string [count ( $array_string ) - 1];
+    unset ( $array_string [count ( $array_string ) - 1] );
+    $other_response = implode ( ";", $array_string );
+  }
+  $matches = array ();
+  if ($string) {
+    $result = db_select ( 'node', 'n' )->fields ( 'n', array (
+      'nid',
+      'title'
+    ) )->condition ( 'title', db_like ( $string ) . '%', 'LIKE' )->range ( 0, 10 )->execute ();
+    if (isset ( $other_response ) && $other_response != "") {
+      foreach ( $result as $user ) {
+        $matches [$other_response . ";" . $user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
+      }
+    } else {
+      foreach ( $result as $user ) {
+        $matches [$user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
+      }
+    }
+  }
+  drupal_json_output ( $matches );
 }
 
 /**
@@ -397,4 +512,15 @@ function dpiblocks_get_entity_form($form_id,$form_state,$entity){
   unset($form['submit']);
 
   return $form;
+}
+
+
+/**
+ * Implements hook_views_api().
+ */
+function dpiblocks_views_api() {
+  return array (
+    'api' => 3,
+    'path' => drupal_get_path ( 'module', 'dpiblocks' ) . '/includes/views',
+  );
 }

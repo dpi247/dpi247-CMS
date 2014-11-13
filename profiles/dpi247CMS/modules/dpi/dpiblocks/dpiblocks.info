@@ -17,3 +17,5 @@ files[] = entity_controller/custom_content.controller.class.inc
 files[] = entity_class/custom_content.entity.class.inc
 files[] = entity_controller/flowmix.controller.class.inc
 files[] = entity_class/flowmix.entity.class.inc
+files[] = includes/views/dpiblocks.views.inc
+files[] = includes/views/accroche_teaser_plugin_style.inc
