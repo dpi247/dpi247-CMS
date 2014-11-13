@@ -18,22 +18,25 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
     if (isset($this->nodes[$row->{$this->field_alias}])) {
       $node = $this->nodes[$row->{$this->field_alias}];
       $view_mode='teaser';
-      if($destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->targetview_tid)){
-        $view_mode=$destination['layout'];
-      }
-      else{
-        $index=0;
-        foreach($this->view->argument as $argument_name=>$argument_object){
-          if($argument_name=="field_destinations_tid"){
-            $destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->args[$index]);
-            $view_mode=$destination['layout'];
-
-          }
-          $index++;
-
-          ;
+      if(isset($row->view_mode)){
+        $view_mode=$row->view_mode;
+        $destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->targetview_tid);
+      }else{
+        if($destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->targetview_tid)){
+          $view_mode=$destination['layout'];
         }
-
+        else{
+          $index=0;
+          dsm($this, 'LALALAL');
+          foreach($this->view->argument as $argument_name=>$argument_object){
+            if($argument_name=="field_destinations_tid"){
+              $destination=dpidestinations_api_get_destination_from_node_for_tid($node,$this->view->args[$index]);
+              $view_mode=$destination['layout'];
+        
+            }
+            $index++;
+          }
+        }
       }
       $node->view = $this->view;
       //@todo: Documenter le fait qu'il y ai un $node->targetview_destination 
@@ -48,6 +51,7 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
     $options = parent::option_definition();
 
     unset($options['view_mode']);
+    $options['politique_rendu'] = array('default' => 'layout');
     $options['links'] = array('default' => TRUE, 'bool' => TRUE);
     $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
   
@@ -60,6 +64,16 @@ class dpidestinations_plugin_row_node_targetview extends views_plugin_row_node_v
     $options = $this->options_form_summary_options();
     //We don't need the view mode since the target layout will be used
     unset( $form['view_mode']);
+    
+    $form['politique_rendu'] = array(
+      '#type' => 'select',
+      '#options' => array(
+        'layout' => 'Chosen by layout',
+        'rank' => 'Chosen by rank',
+      ),
+      '#default_value' => $this->options['politique_rendu'],
+    );
+    
     $form['links'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display links'),
