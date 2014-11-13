@@ -16,6 +16,14 @@ function dpicomments_settings() {
     '#collapsed' => FALSE,
   );
 
+  $form['dpicomments_global_settings']['dpicomments_comment_limite_nb_caractere'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Maximum number of character by comment"),
+    '#size' => 4,
+    '#default_value' => variable_get('dpicomments_comment_limite_nb_caractere', 500),
+    '#description' => t('Enter a number.'),
+  );
+
   $form['dpicomments_global_settings']['dpicomments_add_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Include standard dpicomments js file.'),
@@ -88,6 +96,10 @@ function dpicomments_settings() {
 function dpicomments_settings_validate($form, &$form_state) {
   if (!is_numeric($form['dpicomments_comment_widget_settings']['dpicomments_comment_nb_abuse_before_seccond_trigger']['#value'])) {
     form_set_error('Number of reports of abuse before the comment unpublication ', 'Number of reports of abuse before the comment unpublication  must be a number');
+  }
+
+  if (!is_numeric($form['dpicomments_global_settings']['dpicomments_comment_limite_nb_caractere']['#value'])) {
+    form_set_error('Maximum number of character by comment ', 'Maximum number of character by comment must be a number');
   }
 }
 
