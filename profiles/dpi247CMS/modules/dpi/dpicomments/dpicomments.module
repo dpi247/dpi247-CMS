@@ -185,10 +185,11 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
     }
   }
 
+
   // Supprésion du lien "reply" pour un commentaire "non commentable"
   if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
     unset($comment->content['links']['comment']['#links']['comment-reply']);
-  }
+  } 
 
   // La signature est devenu un champ obligatoire, et initialisé au nom+prenom de la personne
   // Le test ci dessous ne va donc -en theorie- plus servir.
@@ -243,6 +244,16 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $form['field_signature']['und'][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 
+  // Adding javascript to check max limit of character
+  $form['comment_body']['und'][0]['value']['#attached'] ['js'][] = array(
+    'data' => drupal_get_path('module', 'dpicomments').'/js/dpicomments.form.functions.js',
+    'type' => 'file'
+  );
+
+  // onKeyPress : check if user can add character
+  $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
+  $form['comment_body']['und'][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
+  
   // Adding validate
   $form['#validate'][] = 'dpicomments_form_comment_form_validate';
 }
