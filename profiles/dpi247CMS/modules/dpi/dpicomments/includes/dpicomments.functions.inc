@@ -263,6 +263,8 @@ function dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page)
     ->addTag('comment_filter')
     ->addMetaData('node', $node);
 
+
+  $order = variable_get('dpicomments_comment_order', 'DESC');
   if (!user_access('administer comments')) {
     $query->condition('c.status', COMMENT_PUBLISHED);
     $count_query->condition('c.status', COMMENT_PUBLISHED);
@@ -275,7 +277,7 @@ function dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page)
     // much. It scales much much better than having the whole comment
     // structure.
     $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
-    $query->orderBy('torder', 'ASC');
+    $query->orderBy('torder', $order);
   }
   $query->setCountQuery($count_query);
   // Juste cette ligne change par rapport à la version 'normale' de cette fonction dans le module comment.

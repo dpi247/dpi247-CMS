@@ -24,6 +24,17 @@ function dpicomments_settings() {
     '#description' => t('Enter a number.'),
   );
 
+  $form['dpicomments_global_settings']['dpicomments_comment_order'] = array(
+    '#type' => 'select',
+    '#options' => array (
+      'ASC' => t('Oldest first'),
+      'DESC' => t('Newest first'),
+    ),
+    '#required' => TRUE,
+    '#default_value' => variable_get('dpicomments_comment_order', 'ASC'),
+    '#title' => t('Order'),
+  );
+
   $form['dpicomments_global_settings']['dpicomments_add_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Include standard dpicomments js file.'),
