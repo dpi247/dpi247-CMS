@@ -1,0 +1,7 @@
+name = "Google Tag Manager"
+description = "This module enables you to easily integrate and configure Google's Tag Manager service for your website."
+core = "7.x"
+version = "7.x-1.0"
+package = "Google Tag Manager"
+
+configure = admin/config/googletagmanager

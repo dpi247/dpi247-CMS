@@ -13,5 +13,10 @@ sites/all/libraries
 .project
 .gitignore
 
-/.htaccess
-/robots.txt
+.htaccess
+robots.txt
+
+.idea
+nbproject
+
+

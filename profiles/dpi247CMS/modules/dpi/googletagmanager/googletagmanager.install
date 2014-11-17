@@ -1,0 +1,33 @@
+<?php
+/**
+ * @file
+ * Installator for the Google Tag Manager
+ * 
+ * @author  Maximilien Richard <mri@audaxis.com>
+ * @package Google Tag Manager
+ * @version  1.0
+ */
+
+/**
+ * Implements hook_install()
+ */
+function googletagmanager_install(){
+  db_query("UPDATE {system} SET weight = 9999 WHERE type = 'module' AND name = 'googletagmanager'");
+
+  // Create variables defined in our module
+  variable_set('googletagmanager_account',"GTM-");
+  variable_set('googletagmanager_visibility', 0);
+  variable_set('googletagmanager_pages', "admin\nadmin/*\nbatch\nnode/add*\nnode/*/*\nuser/*/*");
+  variable_set('googletagmanager_custom_var', array());
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function googletagmanager_uninstall(){
+  // Remove variables which is defined in our module
+  variable_del('googletagmanager_account');
+  variable_del('googletagmanager_visibility');
+  variable_del('googletagmanager_pages');
+  variable_del('googletagmanager_custom_var');
+}
