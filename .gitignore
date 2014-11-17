@@ -15,3 +15,5 @@ sites/all/libraries
 
 /.htaccess
 /robots.txt
+.idea
+nbproject
