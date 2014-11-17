@@ -4,14 +4,4 @@ sites/*/settings*.php
 # Ignore paths that contain user-generated content.
 sites/*/files
 sites/*/private
-sites/*/modules
-sites/*/importer
-sites/all/libraries
-
-#ignore eclipse settings
-.settings/*
-.project
-.gitignore
-
-/.htaccess
-/robots.txt
+sites
