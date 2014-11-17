@@ -1,12 +1,12 @@
 <?php
 $plugin = array (
-  'title' => t ( 'Accroche' ),
-  'description' => t ( 'Display a list of the newest nodes' ),
+  'title' => 'Accroche',
+  'description' => 'Display a list of the newest nodes',
   'edit form' => 'dpiblocks_accroche_plugin_edit_form',
   'render callback' => 'dpiblocks_accroche_render',
   'admin info' => 'dpiblocks_accroche_admin_info',
-  'category' => t ( 'Accroche' ),
-  'group' => t ( 'DPI Core' ),
+  'category' => 'Accroche',
+  'group' => 'DPI Core',
   'all contexts' => TRUE 
 );
 
@@ -19,8 +19,9 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
       'subtype' => $key,
       'description' => check_plain ( $layout [0] ),
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
-      'category' => t ( 'Accroche' ),
-      'group' => t ( 'DPI Core' ) 
+      'category' => 'Accroche',
+      'group' => 'DPI Core', 
+      'all contexts' => TRUE
     );
   }
   return $types;

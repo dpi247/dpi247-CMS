@@ -241,7 +241,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form ['form_targetblock'] ['field_settings_rank'] ["targetblock_rank_settings"] = array (
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
-    '#title' => t ( 'TargetBlock rank settings' ),
+    '#title' => t ( 'Override destination layout' ),
     '#tree' => TRUE,
     '#states' => array (
       'visible' => array ( // action to take.
@@ -250,7 +250,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
         )
       )
     ),
-    '#description' => t('aaa'),
+    '#description' => t('You can enter numbers from X to Y. These numbers X and Y will be included in it. If you do not specify the number Y, all nodes take the following layout chosen.<br />AAA<br />'),
   );
   
   $nb = 1;
