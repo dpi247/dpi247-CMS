@@ -91,10 +91,10 @@ function _dpidestinations_targetblock_content_type_render_process($did, $destina
   $target = $targetblock_wrapper->target->value ();
   $target_wrapper = entity_metadata_wrapper ( 'target', $target );
   $conf_val = NULL;
-  if (isset($conf['override_by_rank']) && $conf['override_by_rank']==TRUE && isset ( $conf ['targetblock_rank_settings'] )) {
+  if (isset ( $conf ['override_by_rank'] ) && $conf ['override_by_rank'] == TRUE && isset ( $conf ['targetblock_rank_settings'] )) {
     $conf_val = $conf;
   }
-  $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( $destination_term_id, $target_name, $targetblock);
+  $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( $destination_term_id, $target_name, $targetblock );
   $targetview->dpidestinations ['conf'] = $conf_val;
   $targetview_clone = _dpidestinations_targetblock_content_type_helper_get_local_targetview ( $targetblock, $targetview );
   
@@ -181,95 +181,95 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#suffix' => '</div>' 
   );
   
-  if (isset ( $view->style_plugin->row_plugin->options ['politique_rendu'] ) && $view->style_plugin->row_plugin->options ['politique_rendu'] == "rank") {
-    drupal_add_css ( drupal_get_path ( 'module', 'dpidestinations' ) . "/css/dpidestination_global.css" );
-    form_load_include ( $form_state, 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
-    $form ['form_targetblock'] ["override_by_rank"] = array (
-      '#type' => 'checkbox',
-      '#title' => t ( 'Override by rank' ),
-      '#default_value' => isset ( $form_state ['conf'] ['override_by_rank'] ) ? $form_state ['conf'] ['override_by_rank'] : FALSE 
-    );
-    
-    $form ['form_targetblock'] ["targetblock_rank_settings"] = array (
-      '#type' => 'fieldset',
-      '#collapsible' => FALSE,
-      '#title' => t ( 'TargetBlock rank settings' ),
-      '#tree' => TRUE,
-      '#states' => array (
-        'visible' => array ( // action to take.
-          ':input[name="override_by_rank"]' => array('checked' => TRUE),
+  drupal_add_css ( drupal_get_path ( 'module', 'dpidestinations' ) . "/css/dpidestination_global.css" );
+  form_load_include ( $form_state, 'inc', 'dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock' );
+  $form ['form_targetblock'] ["override_by_rank"] = array (
+    '#type' => 'checkbox',
+    '#title' => t ( 'Override by rank' ),
+    '#default_value' => isset ( $form_state ['conf'] ['override_by_rank'] ) ? $form_state ['conf'] ['override_by_rank'] : FALSE 
+  );
+  
+  $form ['form_targetblock'] ["targetblock_rank_settings"] = array (
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => t ( 'TargetBlock rank settings' ),
+    '#tree' => TRUE,
+    '#states' => array (
+      'visible' => array ( // action to take.
+        ':input[name="override_by_rank"]' => array (
+          'checked' => TRUE 
         ) 
       ) 
-    );
-    
-    $nb = 1;
-    if (isset ( $form_state ['values'] ['targetblock_rank_settings'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && $form_state ['triggering_element'] ["#value"] == "Add more") {
-      $nb = count ( $form_state ['values'] ['targetblock_rank_settings'] );
-    } elseif (isset ( $form_state ['values'] ['targetblock_rank_settings'] )) {
-      $nb = count ( $form_state ['values'] ['targetblock_rank_settings'] ) - 1;
-    } else if (isset ( $form_state ['conf'] ['targetblock_rank_settings'] )) {
-      $nb = count ( $form_state ['conf'] ['targetblock_rank_settings'] );
-    }
-    
-    if (isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && $form_state ['triggering_element'] ["#value"] == "Delete") {
-      if ($nb > 1) {
-        unset ( $form ['form_targetblock'] ['targetblock_rank_settings'] [$nb - 1] );
-        unset ( $form_state ['values'] ['targetblock_rank_settings'] [$nb - 1] );
-        $nb --;
-      }
-    }
-    
-    for($i = 0; $i < $nb; $i ++) {
-      $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] = array (
-        '#prefix' => '<div id="targetblock_rank_row_' . $i . '" class="container-inline" >',
-        '#suffix' => '</div>' 
-      );
-      
-      $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['from'] = array (
-        '#title' => 'From',
-        '#type' => 'textfield',
-        '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['from'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['from'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['from'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['from'] : '0',
-        '#size' => 1 
-      );
-      
-      $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['to'] = array (
-        '#title' => 'to',
-        '#type' => 'textfield',
-        '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['to'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['to'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['to'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['to'] : '0',
-        '#size' => 1 
-      );
-      
-      $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['view_modes'] = array (
-        '#type' => 'select',
-        '#title' => 'with view mode',
-        '#options' => dpidestinations_get_all_view_mode_name (),
-        '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['view'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['view'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['view_modes'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['view_modes'] : '0' 
-      );
-      
-      if ($i == $nb - 1 && $nb > 1) {
-        $form ['form_targetblock'] ['targetblock_rank_settings'] [$i] ['remove'] = array (
-          '#type' => 'button',
-          '#value' => 'Delete',
-          '#name' => $i,
-          '#ajax' => array (
-            'callback' => 'dpidestinations_ajax_callback_del_row_define_rank',
-            'wrapper' => 'form_targetblock',
-            'method' => 'replace' 
-          ) 
-        );
-      }
-    }
-    
-    $form ['form_targetblock'] ["targetblock_rank_settings"] ["add_more"] = array (
-      '#type' => 'button',
-      '#value' => 'Add more',
-      '#ajax' => array (
-        'callback' => 'dpidestinations_ajax_callback_get_row_define_rank',
-        'wrapper' => 'form_targetblock',
-        'method' => 'replace' 
-      ) 
-    );
+    ) 
+  );
+  
+  $nb = 1;
+  if (isset ( $form_state ['values'] ['targetblock_rank_settings'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && $form_state ['triggering_element'] ["#value"] == "Add more") {
+    $nb = count ( $form_state ['values'] ['targetblock_rank_settings'] );
+  } elseif (isset ( $form_state ['values'] ['targetblock_rank_settings'] )) {
+    $nb = count ( $form_state ['values'] ['targetblock_rank_settings'] ) - 1;
+  } else if (isset ( $form_state ['conf'] ['targetblock_rank_settings'] )) {
+    $nb = count ( $form_state ['conf'] ['targetblock_rank_settings'] );
   }
+  
+  if (isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && $form_state ['triggering_element'] ["#value"] == "Delete") {
+    if ($nb > 1) {
+      unset ( $form ['form_targetblock'] ['targetblock_rank_settings'] [$nb - 1] );
+      unset ( $form_state ['values'] ['targetblock_rank_settings'] [$nb - 1] );
+      $nb --;
+    }
+  }
+  
+  for($i = 0; $i < $nb; $i ++) {
+    $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] = array (
+      '#prefix' => '<div id="targetblock_rank_row_' . $i . '" class="container-inline" >',
+      '#suffix' => '</div>' 
+    );
+    
+    $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['from'] = array (
+      '#title' => 'From',
+      '#type' => 'textfield',
+      '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['from'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['from'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['from'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['from'] : '0',
+      '#size' => 1 
+    );
+    
+    $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['to'] = array (
+      '#title' => 'to',
+      '#type' => 'textfield',
+      '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['to'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['to'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['to'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['to'] : '0',
+      '#size' => 1 
+    );
+    
+    $form ['form_targetblock'] ["targetblock_rank_settings"] [$i] ['view_modes'] = array (
+      '#type' => 'select',
+      '#title' => 'with view mode',
+      '#options' => dpidestinations_get_all_view_mode_name (),
+      '#default_value' => (isset ( $form_state ['values'] ['targetblock_rank_settings'] [$i] ['view'] )) ? $form_state ['values'] ['targetblock_rank_settings'] [$i] ['view'] : (isset ( $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['view_modes'] )) ? $form_state ['conf'] ['targetblock_rank_settings'] [$i] ['view_modes'] : '0' 
+    );
+    
+    if ($i == $nb - 1 && $nb > 1) {
+      $form ['form_targetblock'] ['targetblock_rank_settings'] [$i] ['remove'] = array (
+        '#type' => 'button',
+        '#value' => 'Delete',
+        '#name' => $i,
+        '#ajax' => array (
+          'callback' => 'dpidestinations_ajax_callback_del_row_define_rank',
+          'wrapper' => 'form_targetblock',
+          'method' => 'replace' 
+        ) 
+      );
+    }
+  }
+  
+  $form ['form_targetblock'] ["targetblock_rank_settings"] ["add_more"] = array (
+    '#type' => 'button',
+    '#value' => 'Add more',
+    '#ajax' => array (
+      'callback' => 'dpidestinations_ajax_callback_get_row_define_rank',
+      'wrapper' => 'form_targetblock',
+      'method' => 'replace' 
+    ) 
+  );
   
   $form ['form_targetblock'] ['targetblok_instance_settings'] = array (
     '#type' => 'fieldset',
@@ -426,7 +426,7 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   }
   
   /* Rank value saved */
-  $form_state['conf']['override_by_rank'] = $form_state ['values'] ['override_by_rank'];
+  $form_state ['conf'] ['override_by_rank'] = $form_state ['values'] ['override_by_rank'];
   if (isset ( $form_state ['values'] ['override_by_rank'] ) && $form_state ['values'] ['override_by_rank'] == TRUE) {
     if (isset ( $form_state ['values'] ['targetblock_rank_settings'] )) {
       $val_rank_tmp = $form_state ['values'] ['targetblock_rank_settings'];
@@ -437,11 +437,9 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
       }
       unset ( $val_rank_tmp );
     }
-  }/*else{
-    if(isset($form_state ['conf'] ['targetblock_rank_settings'])){
-      unset($form_state ['conf'] ['targetblock_rank_settings']);
-    }
-  }*/
+  } /*
+     * else{ if(isset($form_state ['conf'] ['targetblock_rank_settings'])){ unset($form_state ['conf'] ['targetblock_rank_settings']); } }
+     */
   
   // We log the change to allow override when edit of another pane before page is saved
   // @see: dpidestinations_targetblock_content_type_edit_form()
