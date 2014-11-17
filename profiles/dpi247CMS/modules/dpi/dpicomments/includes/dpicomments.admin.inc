@@ -35,6 +35,35 @@ function dpicomments_settings() {
     '#title' => t('Order'),
   );
 
+  $form['dpicomments_global_settings']['dpicomments_add_terms_of_use_link'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Add terms of use"),
+    '#default_value' => variable_get('dpicomments_add_terms_of_use_link', 0),
+  );
+
+  $form['dpicomments_global_settings']['dpicomments_terms_of_use_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Terms of use link"),
+    '#default_value' => variable_get('dpicomments_terms_of_use_link', ''),
+    '#description' => t('Enter reltive or contextual link'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="dpicomments_add_terms_of_use_link"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['dpicomments_global_settings']['dpicomments_terms_of_use_target_blank'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Open terms of use in new tab"),
+    '#default_value' => variable_get('dpicomments_terms_of_use_target_blank', 0),
+    '#states' => array(
+      'visible' => array(
+        'input[name="dpicomments_add_terms_of_use_link"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
   $form['dpicomments_global_settings']['dpicomments_add_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Include standard dpicomments js file.'),

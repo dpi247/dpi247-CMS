@@ -250,10 +250,22 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
     'type' => 'file'
   );
 
+  // Adding term of use (if exists)
+  if (variable_get('dpicomments_add_terms_of_use_link', 0)) {
+    $options = array();
+    if (variable_get('dpicomments_terms_of_use_target_blank', 0)) {
+      $options['attributes'] = array('target' => '_blank');
+    }
+    $form['terms'] = array(
+      '#markup' => l(t('Terms of use'),variable_get('dpicomments_terms_of_use_link', ''), $options),
+      '#weight' => 10,
+    );
+  }
+
   // onKeyPress : check if user can add character
   $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
   $form['comment_body']['und'][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
-  
+
   // Adding validate
   $form['#validate'][] = 'dpicomments_form_comment_form_validate';
 }
