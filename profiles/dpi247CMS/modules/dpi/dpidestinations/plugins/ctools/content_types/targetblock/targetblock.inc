@@ -250,7 +250,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
         )
       )
     ),
-    '#description' => t('You can enter numbers from X to Y. These numbers X and Y will be included in it. If you do not specify the number Y, all nodes take the following layout chosen.<br />AAA<br />'),
+    '#description' => t('You can enter numbers from X to Y. These numbers X and Y will be included in it. If you do not specify the number Y, all nodes take the following layout chosen.<br />Example :<br /> From 1 to 1 take juste one element;<br /> From 1 to 3 take element 1,2 and 3;<br /> From 3 to nothing (just let the white box), it will give the layout at all next node from the node 3 . <br /><br />'),
   );
   
   $nb = 1;
