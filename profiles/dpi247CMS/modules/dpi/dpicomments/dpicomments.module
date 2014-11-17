@@ -323,7 +323,9 @@ function dpicomments_form_ctools_node_comments_content_type_edit_form_validate(&
 function hook_dpicomments_voted($vote_type, $entity_type, $entity_id, $tag, $score, $user) {
 }
 
-
+/**
+ * Implements hook_panels_pane_content_alter().
+ */
 function dpicomments_panels_pane_content_alter(& $content, $pane, $args, $contexts) {
   
   if($pane->type=='node_comments'){
