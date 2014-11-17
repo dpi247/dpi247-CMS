@@ -40,3 +40,8 @@ a.dpiblocks_buton:active {
 	position:relative;
 	top:1px;
 }
+
+div.container-inline{
+	display: inline;
+  	margin: 10px;
+}
