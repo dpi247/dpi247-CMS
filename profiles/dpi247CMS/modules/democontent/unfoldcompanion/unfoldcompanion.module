@@ -12,6 +12,5 @@ module_load_include('entity.inc', 'unfoldcompanion');
 
 
 function unfoldcompanion_post_features_enable_feature($component) { 
-  drupal_set_message('Feature-hooj');
-  drupal_set_message(print_r($component,1));
+ 
 }

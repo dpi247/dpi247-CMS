@@ -529,8 +529,6 @@ function dpi247CMS_install_tasks_alter(&$tasks, $install_state){
  */
 function dpi247CMS_install_finished(&$install_state) {
   $output=install_finished($install_state);
-  
-   $output.='<iframe src="/finalize_install_process"></iframe>';
-
+  $output.='<iframe src="/finalize_install_process"></iframe>';
   return $output;
 }

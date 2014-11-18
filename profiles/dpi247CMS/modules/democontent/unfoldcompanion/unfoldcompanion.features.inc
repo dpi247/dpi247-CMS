@@ -140,7 +140,7 @@ function unfoldcompanion_default_targetblock() {
 }');
   $items['5'] = entity_import('targetblock', '{
       "targetblockid" : "5",
-      //"machine_name" : "extra_content_2_0",
+      "target" : "extra_content", 
       "page_manager_handlers_did" : null,
       "node_count_for_targetblockinstance" : "10",
       "use_pager" : "0",
@@ -155,7 +155,6 @@ function unfoldcompanion_default_targetblock() {
       "pager_type" : "mini",
       "rank_max_value" : "5",
       "rdf_mapping" : []
-}');
-  
+}'); //"machine_name" : "extra_content_2_0",
   return $items;
 }
