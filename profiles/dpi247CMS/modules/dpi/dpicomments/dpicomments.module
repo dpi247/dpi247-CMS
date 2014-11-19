@@ -170,7 +170,7 @@ function dpicomments_reportabuse_build_comment_jquery_widget($entity_id, $tag = 
 function dpicomments_comment_view($comment, $view_mode, $langcode) {
 
 	// Signature : soit le pseudo, soit nom+prenom
-	$signature = $comment->field_signature['und'][0]['safe_value'];
+  $signature = field_get_items('comment', $comment, 'field_signature');
 
   $allow_reply_comment = variable_get('dpicomments_comment_reply_com_limite', 1);
 
@@ -242,6 +242,7 @@ function dpicomments_votingapi_metadata_alter(&$data) {
 function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   // Setting default signature value
   global $user;
+
   $form['field_signature']['und'][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 
   // Adding javascript to check max limit of character
@@ -249,6 +250,8 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
     'data' => drupal_get_path('module', 'dpicomments').'/js/dpicomments.form.functions.js',
     'type' => 'file'
   );
+
+  dsm($form);
 
   // Adding term of use (if exists)
   if (variable_get('dpicomments_add_terms_of_use_link', 0)) {
