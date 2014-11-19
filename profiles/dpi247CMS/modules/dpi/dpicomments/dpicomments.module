@@ -170,7 +170,7 @@ function dpicomments_reportabuse_build_comment_jquery_widget($entity_id, $tag = 
 function dpicomments_comment_view($comment, $view_mode, $langcode) {
 
 	// Signature : soit le pseudo, soit nom+prenom
-  $signature = field_get_items('comment', $comment, 'field_signature');
+  $signature = field_get_items('comment', $comment, 'field_signature')[0]['value'];
 
   $allow_reply_comment = variable_get('dpicomments_comment_reply_com_limite', 1);
 
