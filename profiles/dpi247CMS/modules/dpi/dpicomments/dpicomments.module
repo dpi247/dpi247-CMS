@@ -251,8 +251,6 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
     'type' => 'file'
   );
 
-  dsm($form);
-
   // Adding term of use (if exists)
   if (variable_get('dpicomments_add_terms_of_use_link', 0)) {
     $options = array();

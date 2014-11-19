@@ -276,11 +276,11 @@ function dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page)
     // See comment above. Analysis reveals that this doesn't cost too
     // much. It scales much much better than having the whole comment
     // structure.
-    $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
+    $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread)))', 'torder');
     $query->orderBy('torder', $order);
   }
   $query->setCountQuery($count_query);
-  // Juste cette ligne change par rapport à la version 'normale' de cette fonction dans le module comment.
+
   $query->element(0);
   $cids = $query->execute()->fetchCol();
   return $cids;
