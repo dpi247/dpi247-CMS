@@ -243,10 +243,11 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   // Setting default signature value
   global $user;
 
-  $form['field_signature']['und'][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
+  $language = $form['field_signature']['#language'];
+  $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 
   // Adding javascript to check max limit of character
-  $form['comment_body']['und'][0]['value']['#attached'] ['js'][] = array(
+  $form['comment_body'][$language][0]['value']['#attached'] ['js'][] = array(
     'data' => drupal_get_path('module', 'dpicomments').'/js/dpicomments.form.functions.js',
     'type' => 'file'
   );
@@ -265,7 +266,8 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
 
   // onKeyPress : check if user can add character
   $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
-  $form['comment_body']['und'][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
+  $language = $form['comment_body']['#language'];
+  $form['comment_body'][$language][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
 
   // Adding validate
   $form['#validate'][] = 'dpicomments_form_comment_form_validate';
@@ -276,7 +278,8 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
  */
 function dpicomments_form_comment_form_validate(&$form, &$form_state, $form_id) {
   // Limite un commentaire à X caractères
-  if (strlen($form['comment_body']['und'][0]['value']['#value']) > variable_get('dpicomments_comment_limite_nb_caractere', 500)){
+  $language = $form['comment_body']['#language'];
+  if (strlen($form['comment_body'][$language][0]['value']['#value']) > variable_get('dpicomments_comment_limite_nb_caractere', 500)){
     form_set_error(t('Maximum character number is'), t('Maximum character number is'));
   }
 }
