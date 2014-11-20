@@ -169,15 +169,13 @@ function unfoldcompanion_default_page_manager_handlers() {
   $handler = new stdClass();
   $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
-  $handler->export_type=EXPORT_IN_DATABASE;
-
   $handler->name = 'sections_dpisectionspanels_context';
   $handler->task = 'sections';
   $handler->subtask = '';
-  $handler->handler = 'destination_context';
+  $handler->handler = 'dpisectionspanels_context';
   $handler->weight = -30;
   $handler->conf = array(
-    'title' => 'Finance',
+    'title' => 'News',
     'no_blocks' => 0,
     'pipeline' => 'dpiviewer',
     'body_classes_to_remove' => '',
@@ -213,7 +211,6 @@ function unfoldcompanion_default_page_manager_handlers() {
           'not' => FALSE,
         ),
       ),
-      'logic' => 'and',
     ),
   );
   $display = new panels_display();
@@ -223,57 +220,22 @@ function unfoldcompanion_default_page_manager_handlers() {
     'style_settings' => array(
       'default' => NULL,
       'contenttop' => NULL,
-      'mainContent' => NULL,
+      'maincontentleft' => NULL,
+      'maincontentright' => NULL,
       'complementary' => NULL,
       'subcontentleft' => NULL,
       'subcontentright' => NULL,
       'contentbottom' => NULL,
-      'maincontentleft' => NULL,
-      'maincontentright' => NULL,
     ),
   );
   $display->cache = array();
   $display->title = '';
-  $display->uuid = '367d75b6-fe8b-41fb-a103-bf7f042d6473';
+  $display->uuid = 'f9275173-65f4-4861-8c58-cb0c8f8578aa';
   $display->content = array();
   $display->panels = array();
   $pane = new stdClass();
-  $pane->pid = 'new-e282bfa3-d2a8-46b0-9128-763def3dcb48';
-  $pane->panel = 'contentbottom';
-  $pane->type = 'targetblock';
-  $pane->subtype = 'extra_content';
-  $pane->shown = TRUE;
-  $pane->access = array();
-  $pane->configuration = array(
-    'override_title' => 0,
-    'node_count_for_targetblockinstance' => '5',
-    'use_pager' => 0,
-    'use_split' => 0,
-    'node_count_for_targetblock' => NULL,
-    'offset' => NULL,
-    'split_delta' => '',
-    'hide_pager' => 0,
-    'pager_id' => NULL,
-    'pager_type' => 'mini',
-    'rank_max_value' => '5',
-    'template_rule' => NULL,
-    '' => NULL,
-    'override_title_text' => '',
-  );
-  $pane->cache = array();
-  $pane->style = array(
-    'settings' => NULL,
-  );
-  $pane->css = array();
-  $pane->extras = array();
-  $pane->position = 0;
-  $pane->locks = array();
-  $pane->uuid = 'e282bfa3-d2a8-46b0-9128-763def3dcb48';
-  $display->content['new-e282bfa3-d2a8-46b0-9128-763def3dcb48'] = $pane;
-  $display->panels['contentbottom'][0] = 'new-e282bfa3-d2a8-46b0-9128-763def3dcb48';
-  $pane = new stdClass();
-  $pane->pid = 'new-3dcbd178-8633-4ef6-9048-ac8f702601ef';
-  $pane->panel = 'subcontentleft';
+  $pane->pid = 'new-db0797e2-e85b-46dd-bbe8-39459549c16d';
+  $pane->panel = 'maincontentleft';
   $pane->type = 'targetblock';
   $pane->subtype = 'main_content';
   $pane->shown = TRUE;
@@ -292,6 +254,7 @@ function unfoldcompanion_default_page_manager_handlers() {
     'rank_max_value' => '5',
     'template_rule' => NULL,
     '' => NULL,
+    'override_by_rank' => 0,
     'override_title_text' => '%destination:name',
   );
   $pane->cache = array();
@@ -302,22 +265,32 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->extras = array();
   $pane->position = 0;
   $pane->locks = array();
-  $pane->uuid = '3dcbd178-8633-4ef6-9048-ac8f702601ef';
-  $display->content['new-3dcbd178-8633-4ef6-9048-ac8f702601ef'] = $pane;
-  $display->panels['subcontentleft'][0] = 'new-3dcbd178-8633-4ef6-9048-ac8f702601ef';
+  $pane->uuid = 'db0797e2-e85b-46dd-bbe8-39459549c16d';
+  $display->content['new-db0797e2-e85b-46dd-bbe8-39459549c16d'] = $pane;
+  $display->panels['maincontentleft'][0] = 'new-db0797e2-e85b-46dd-bbe8-39459549c16d';
   $pane = new stdClass();
-  $pane->pid = 'new-b1fc2383-e105-48c9-af5b-6302c1c7cad9';
-  $pane->panel = 'subcontentright';
-  $pane->type = 'custom_content';
-  $pane->subtype = 'stock_chart';
+  $pane->pid = 'new-b19dda35-4ab0-41ed-a627-fa865c3597e0';
+  $pane->panel = 'subcontentleft';
+  $pane->type = 'targetblock';
+  $pane->subtype = 'extra_content';
   $pane->shown = TRUE;
   $pane->access = array();
   $pane->configuration = array(
-    'admin_title' => '',
-    'title' => '',
-    'body' => '',
-    'format' => 'filtered_html',
-    'substitute' => TRUE,
+    'override_title' => 1,
+    'node_count_for_targetblockinstance' => '10',
+    'use_pager' => 0,
+    'use_split' => 0,
+    'node_count_for_targetblock' => NULL,
+    'offset' => NULL,
+    'split_delta' => '0',
+    'hide_pager' => 0,
+    'pager_id' => NULL,
+    'pager_type' => 'mini',
+    'rank_max_value' => '5',
+    'template_rule' => NULL,
+    '' => NULL,
+    'override_by_rank' => 0,
+    'override_title_text' => '%destination:name: A voir aussi',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -327,70 +300,24 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->extras = array();
   $pane->position = 0;
   $pane->locks = array();
-  $pane->uuid = 'b1fc2383-e105-48c9-af5b-6302c1c7cad9';
-  $display->content['new-b1fc2383-e105-48c9-af5b-6302c1c7cad9'] = $pane;
-  $display->panels['subcontentright'][0] = 'new-b1fc2383-e105-48c9-af5b-6302c1c7cad9';
-  $pane = new stdClass();
-  $pane->pid = 'new-f9b2d8f0-1313-4323-a9e4-d9af4c909e5e';
-  $pane->panel = 'subcontentright';
-  $pane->type = 'views';
-  $pane->subtype = 'most_view';
-  $pane->shown = TRUE;
-  $pane->access = array();
-  $pane->configuration = array(
-    'override_pager_settings' => 0,
-    'use_pager' => 0,
-    'nodes_per_page' => '5',
-    'pager_id' => '0',
-    'offset' => '0',
-    'more_link' => 0,
-    'feed_icons' => 0,
-    'panel_args' => 0,
-    'link_to_view' => 0,
-    'args' => '',
-    'url' => '',
-    'display' => 'default',
-    'override_title' => 0,
-    'override_title_text' => '',
-  );
-  $pane->cache = array();
-  $pane->style = array(
-    'settings' => NULL,
-  );
-  $pane->css = array();
-  $pane->extras = array();
-  $pane->position = 1;
-  $pane->locks = array();
-  $pane->uuid = 'f9b2d8f0-1313-4323-a9e4-d9af4c909e5e';
-  $display->content['new-f9b2d8f0-1313-4323-a9e4-d9af4c909e5e'] = $pane;
-  $display->panels['subcontentright'][1] = 'new-f9b2d8f0-1313-4323-a9e4-d9af4c909e5e';
+  $pane->uuid = 'b19dda35-4ab0-41ed-a627-fa865c3597e0';
+  $display->content['new-b19dda35-4ab0-41ed-a627-fa865c3597e0'] = $pane;
+  $display->panels['subcontentleft'][0] = 'new-b19dda35-4ab0-41ed-a627-fa865c3597e0';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
   $handler->conf['display'] = $display;
   $export['sections_dpisectionspanels_context'] = $handler;
 
-
-
-
-
-
-
-
-
-
-
-
-
   $handler = new stdClass();
   $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;
-  $handler->name = 'sections_dpisectionspanels_context';
+  $handler->name = 'sections_dpisectionspanels_context_2';
   $handler->task = 'sections';
   $handler->subtask = '';
   $handler->handler = 'dpisectionspanels_context';
   $handler->weight = -29;
   $handler->conf = array(
-    'title' => 'Dpi Section Panels',
+    'title' => 'Dpi Section Panels Blank',
     'no_blocks' => 0,
     'pipeline' => 'dpiviewer',
     'body_classes_to_remove' => '',
@@ -418,11 +345,11 @@ function unfoldcompanion_default_page_manager_handlers() {
   );
   $display->cache = array();
   $display->title = '';
-  $display->uuid = 'f8fdf884-f8da-48d0-b7e4-42dc43f39d06';
+  $display->uuid = 'f9275173-65f4-4861-8c58-cb0c8f8578aa';
   $display->content = array();
   $display->panels = array();
   $pane = new stdClass();
-  $pane->pid = 'new-d4213a77-76db-4bd8-9804-e51a1f5db9da';
+  $pane->pid = 'new-a2ef808d-6c4d-4e71-b2ec-cce016bba6ba';
   $pane->panel = 'complementary';
   $pane->type = 'targetblock';
   $pane->subtype = 'secondary_content';
@@ -430,7 +357,7 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->access = array();
   $pane->configuration = array(
     'override_title' => 1,
-    'node_count_for_targetblockinstance' => '5',
+    'node_count_for_targetblockinstance' => '10',
     'use_pager' => 0,
     'use_split' => 0,
     'node_count_for_targetblock' => NULL,
@@ -442,7 +369,8 @@ function unfoldcompanion_default_page_manager_handlers() {
     'rank_max_value' => '5',
     'template_rule' => NULL,
     '' => NULL,
-    'override_title_text' => 'BNP s\'implique',
+    'override_by_rank' => 0,
+    'override_title_text' => 'Dpi247 Votre partenaire',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -452,11 +380,11 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->extras = array();
   $pane->position = 0;
   $pane->locks = array();
-  $pane->uuid = 'd4213a77-76db-4bd8-9804-e51a1f5db9da';
-  $display->content['new-d4213a77-76db-4bd8-9804-e51a1f5db9da'] = $pane;
-  $display->panels['complementary'][0] = 'new-d4213a77-76db-4bd8-9804-e51a1f5db9da';
+  $pane->uuid = 'a2ef808d-6c4d-4e71-b2ec-cce016bba6ba';
+  $display->content['new-a2ef808d-6c4d-4e71-b2ec-cce016bba6ba'] = $pane;
+  $display->panels['complementary'][0] = 'new-a2ef808d-6c4d-4e71-b2ec-cce016bba6ba';
   $pane = new stdClass();
-  $pane->pid = 'new-ef72555d-9dd9-405c-ab3d-0201e6fa99f1';
+  $pane->pid = 'new-db0797e2-e85b-46dd-bbe8-39459549c16d';
   $pane->panel = 'maincontentleft';
   $pane->type = 'targetblock';
   $pane->subtype = 'main_content';
@@ -476,6 +404,7 @@ function unfoldcompanion_default_page_manager_handlers() {
     'rank_max_value' => '5',
     'template_rule' => NULL,
     '' => NULL,
+    'override_by_rank' => 0,
     'override_title_text' => '%destination:name',
   );
   $pane->cache = array();
@@ -486,36 +415,11 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->extras = array();
   $pane->position = 0;
   $pane->locks = array();
-  $pane->uuid = 'ef72555d-9dd9-405c-ab3d-0201e6fa99f1';
-  $display->content['new-ef72555d-9dd9-405c-ab3d-0201e6fa99f1'] = $pane;
-  $display->panels['maincontentleft'][0] = 'new-ef72555d-9dd9-405c-ab3d-0201e6fa99f1';
+  $pane->uuid = 'db0797e2-e85b-46dd-bbe8-39459549c16d';
+  $display->content['new-db0797e2-e85b-46dd-bbe8-39459549c16d'] = $pane;
+  $display->panels['maincontentleft'][0] = 'new-db0797e2-e85b-46dd-bbe8-39459549c16d';
   $pane = new stdClass();
-  $pane->pid = 'new-4f74a812-8068-46d4-bc26-4e3e0cb504ef';
-  $pane->panel = 'maincontentright';
-  $pane->type = 'custom_content';
-  $pane->subtype = 'bnp_on_twitter';
-  $pane->shown = TRUE;
-  $pane->access = array();
-  $pane->configuration = array(
-    'admin_title' => '',
-    'title' => '',
-    'body' => '',
-    'format' => 'filtered_html',
-    'substitute' => TRUE,
-  );
-  $pane->cache = array();
-  $pane->style = array(
-    'settings' => NULL,
-  );
-  $pane->css = array();
-  $pane->extras = array();
-  $pane->position = 1;
-  $pane->locks = array();
-  $pane->uuid = '4f74a812-8068-46d4-bc26-4e3e0cb504ef';
-  $display->content['new-4f74a812-8068-46d4-bc26-4e3e0cb504ef'] = $pane;
-  $display->panels['maincontentright'][0] = 'new-4f74a812-8068-46d4-bc26-4e3e0cb504ef';
-  $pane = new stdClass();
-  $pane->pid = 'new-642ece8d-f68b-4713-b810-426496552a1a';
+  $pane->pid = 'new-b19dda35-4ab0-41ed-a627-fa865c3597e0';
   $pane->panel = 'subcontentleft';
   $pane->type = 'targetblock';
   $pane->subtype = 'extra_content';
@@ -535,6 +439,7 @@ function unfoldcompanion_default_page_manager_handlers() {
     'rank_max_value' => '5',
     'template_rule' => NULL,
     '' => NULL,
+    'override_by_rank' => 0,
     'override_title_text' => '%destination:name: A voir aussi',
   );
   $pane->cache = array();
@@ -545,15 +450,14 @@ function unfoldcompanion_default_page_manager_handlers() {
   $pane->extras = array();
   $pane->position = 0;
   $pane->locks = array();
-  $pane->uuid = '642ece8d-f68b-4713-b810-426496552a1a';
-  $display->content['new-642ece8d-f68b-4713-b810-426496552a1a'] = $pane;
-  $display->panels['subcontentleft'][0] = 'new-642ece8d-f68b-4713-b810-426496552a1a';
+  $pane->uuid = 'b19dda35-4ab0-41ed-a627-fa865c3597e0';
+  $display->content['new-b19dda35-4ab0-41ed-a627-fa865c3597e0'] = $pane;
+  $display->panels['subcontentleft'][0] = 'new-b19dda35-4ab0-41ed-a627-fa865c3597e0';
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = '0';
-
   $handler->conf['display'] = $display;
-  $export['sections_dpisectionspanels_context'] = $handler;
-
+  $export['sections_dpisectionspanels_context_2'] = $handler;
+  
   $handler = new stdClass();
   $handler->disabled = FALSE; /* Edit this to true to make a default handler disabled initially */
   $handler->api_version = 1;

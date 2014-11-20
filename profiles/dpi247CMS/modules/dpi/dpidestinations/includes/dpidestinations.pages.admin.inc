@@ -119,7 +119,6 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
 
     ctools_include('export');
     $handlers = ctools_export_load_object('page_manager_handlers');
-
     $rows = array();
     $additional_rows = array(
       t('Variant') => '',
@@ -131,11 +130,10 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     );
     foreach ($entities as $entity) {
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($entity->did);
-
       $title = t('undefined');
-      if(isset($handlers[$page_manager_handler_name])) {
-        $title_text = $handlers[$page_manager_handler_name]->conf['title'];
-        $title_link = "admin/structure/pages/nojs/operation/destinations/handlers/".$page_manager_handler_name."/content";
+      if(isset($page_manager_handler_name->name) && isset($handlers[$page_manager_handler_name->name])) {
+        $title_text = $handlers[$page_manager_handler_name->name]->conf['title'];
+        $title_link = "admin/structure/pages/nojs/operation/sections/handlers/".$page_manager_handler_name->name."/content";
         $title = l($title_text, $title_link);
       }
 
@@ -323,12 +321,14 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     $handlers = ctools_export_load_object('page_manager_handlers');
 
     $targetblocks = dpidestinations_api_get_all_targetblocks();
-
     $variants_options = array();
     foreach($targetblocks as $targetblock) {
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($targetblock->did);
-      $title_text=$handlers[$page_manager_handler_name]->conf['title'];
-
+      if (isset($page_manager_handler_name->name)){
+        $title_text=$handlers[$page_manager_handler_name->name]->conf['title'];
+      }else{
+        $title_text = "Undefined";
+      }
       $variants_options[$targetblock->did] = $title_text;
     }
 
