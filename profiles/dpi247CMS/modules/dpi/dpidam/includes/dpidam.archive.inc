@@ -117,7 +117,10 @@ function dpidam_is_archive_available_for_ip() {
  */
 function dpidam_archive_get_package_from_url($url, &$last_alias) {
   // Call to the DAM
+
+  $time_start = microtime(true);
   $file_name = dpidam_archive_get_url($url, $result);
+  $dpidam_archive_geturl = microtime(true) - $time_start;
 
   $return = array(
     'content' => '',
@@ -132,6 +135,8 @@ function dpidam_archive_get_package_from_url($url, &$last_alias) {
       //Import the zip
 
       $node = dpidam_archive_import_node($importer_name, $file_name);
+
+      $node->stat["dpipdam_archive_geturl"]=$dpidam_archive_geturl;
 
       if ($node) {
         //Render node
@@ -229,6 +234,9 @@ function dpidam_archive_get_url($url, &$result){
  * @return A node object or FALSE if the import fails
  */
 function dpidam_archive_import_node($importer_name, $file_name) {
+
+  $time_start = microtime(true);
+
   $node = FALSE;
 
   if ($importer_name = dpi_variable_get('dpidam_archive_importer', '')) {
@@ -270,6 +278,8 @@ function dpidam_archive_import_node($importer_name, $file_name) {
       }
     }
   }
+
+  $node->stat["dpidam_archive_importnode - Process ZIP"] = microtime(true) - $time_start;
 
   return $node;
 }

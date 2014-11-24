@@ -47,11 +47,12 @@ function _dpidamwidgets_generate_advanced_search_form(&$form, $profile) {
  */
 function _dpidamwidgets_generate_simple_search_form(&$form, $profile) {
   $sort_options = array();
+  $q = isset($_GET['word']) ? str_replace("&amp;","&",filter_xss($_GET['word'])) : '';
 
   $form['word'] = array(
     '#type' => 'textfield',
     '#title' => '',
-    '#default_value' => isset($_GET['word']) ? filter_xss($_GET['word']) : '',
+    '#default_value' => $q,
   );
 
   if(isset($profile["settings"]["sort"]["weight"])) {
@@ -281,7 +282,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
   $prev = array();
   $next= array();
 
-  $argtemporigin = _filter_xss_array($_GET);
+  $argtemporigin = $_GET;
 
   foreach($pagination[0]->pages as $kpage=>$page){
     $p[$kpage]['number']=$page;
@@ -289,7 +290,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
     $argtemp = $argtemporigin;
     unset($argtemp['q']);
     $argtemp['start']= $p[$kpage]['offset'];
-    $p[$kpage]['url'] = '?'. urldecode(http_build_query($argtemp,'','&'));
+    $p[$kpage]["url"] = "?". http_build_query($argtemp,"","&");
   }
   $pagination[0]->pages = $p;
 
@@ -298,7 +299,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
   $argtemp = $argtemporigin;
   unset($argtemp['q']);
   $argtemp['start']= $last['offset'];
-  $last['url'] = '?'. urldecode(http_build_query($argtemp,'','&'));
+  $last["url"] = "?". http_build_query($argtemp,"","&");
   $pagination[0]->last = $last;
 
   $first['offset']=($pagination[0]->first-1)*$pagination[0]->rowsPerPage;
@@ -306,7 +307,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
   $argtemp = $argtemporigin;
   unset($argtemp['q']);
   $argtemp['start']= $first['offset'];
-  $first['url'] = '?'. urldecode(http_build_query($argtemp,'','&'));
+  $first["url"] = "?". http_build_query($argtemp,"","&");
   $pagination[0]->first = $first;
 
   if($pagination[0]->current<$last['number']) {
@@ -315,7 +316,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
     $argtemp = $argtemporigin;
     unset($argtemp['q']);
     $argtemp['start']= $next['offset'];
-    $next['url'] = '?'. urldecode(http_build_query($argtemp,'','&'));
+    $next["url"] = "?". http_build_query($argtemp,"","&");
     $pagination[0]->next = $next;
   }	else {
     unset($pagination[0]->last);
@@ -327,7 +328,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
     $argtemp = $argtemporigin;
     unset($argtemp['q']);
     $argtemp['start']= $prev['offset'];
-    $prev['url'] = '?'. urldecode(http_build_query($argtemp,'','&'));
+    $prev["url"] = "?". http_build_query($argtemp,"","&");
     $pagination[0]->prev = $prev;
   }	else {
     unset($pagination[0]->first);
@@ -338,7 +339,7 @@ function _dpidamwidgets_compute_pagination_url(&$pagination){
  * Build the facets URLs
  */
 function _dpidamwidgets_compute_facet_url(&$facets) {
-  $argtemporigin = _filter_xss_array($_GET);
+  $argtemporigin = $_GET;
   $get_facets = isset($_GET['facets']) ? $_GET['facets'] : '';
 
   foreach ($facets as $fkey => &$facet) {
@@ -375,7 +376,7 @@ function _dpidamwidgets_compute_facet_url(&$facets) {
       unset($argtemp['q']);
       unset($argtemp['start']);
       $argtemp['facets' ]= $term->url['arg'];
-      $term->url['url'] = check_url('?'. urldecode(http_build_query($argtemp, '', '&')));
+      $term->url["url"] = check_url("?". http_build_query($argtemp,"","&"));
     }
 
     /* Urls of Facets - ALL or NONE */
@@ -395,7 +396,7 @@ function _dpidamwidgets_compute_facet_url(&$facets) {
     unset($argtemp['start']);
 
     $argtemp['facets'] = $facet->url['arg'];
-    $facet->url['url'] = '?'. urldecode(http_build_query($argtemp, '', '&'));
+    $facet->url["url"] = "?". http_build_query($argtemp,"","&");
   }
 }
 
@@ -469,6 +470,16 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
   $search = new DAMSearch($profile['pid']);
   $search_query = $search->getSearchQuery();
 
+  // Check optionsal parameters.
+  
+  if ($profile["settings"]["defaultoperant"] == "AND") {
+    $search_query->setQueryParameter("mm", "100%");
+  }
+  
+  if ($profile["settings"]["minimumcharcount"] > 0) {
+    $search_query->setQueryParameter("min:nCh", $profile["settings"]["minimumcharcount"]);
+  }
+
   foreach ($words as $word) {
     $word = check_plain(trim($word));
     $search_query->addReqWord($word);
@@ -498,8 +509,10 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
       $search_query->setOption('sort', check_plain($sort[0]));
     }
   }
-
+  $time_start = microtime(true);
   $search->executeQuery();
+  $time_end = microtime(true);
+  $timeexecuteQuery = $time_end - $time_start;
 
   $errorLogs = $search->getErrorLogs();
   $results = array(
@@ -509,12 +522,19 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
 
   if (!$errorLogs) {
     $rawResults = $search->getRawResults();
+    $time_start = microtime(true);
     _dpidamwidgets_compute_search_results($results, $rawResults);
+    $time_end = microtime(true);
+    $timewallydamwidgets_compute = $time_end - $time_start;
   } else {
     foreach ($errorLogs as $errorLog) {
       $results['errors'][] = $errorLog['location'];
     }
   }
+
+  // Results Stats.
+  $results["stat"]["executeQuery"]=$timeexecuteQuery; 
+  $results["stat"]["wallydamwidgets_compute_search_result"]=$timewallydamwidgets_compute;
 
   return $results;
 }
