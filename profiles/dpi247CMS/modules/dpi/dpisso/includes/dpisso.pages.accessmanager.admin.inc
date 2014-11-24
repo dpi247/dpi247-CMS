@@ -2,9 +2,9 @@
 function dpisso_accessmanager_admin_settings_page_form() {
 	
 	// Get ssoClient config from file.
+	$AccessId = LoginManager::getAccessId();
 	$ssoconfig = dpisso_get_config ();
-	
-	if (isset ( $ssoconfig ['unitId'] )) {
+	if (isset ( $AccessId )) {
 		$response = AccessManager::getRemoteWhiteList ();
 	}
 	
@@ -67,6 +67,28 @@ function dpisso_accessmanager_admin_settings_page_form() {
 	);
 	$form ['lists'] ['dpisso_accessmanager_send'] = array_merge ( $form ['lists'] ['dpisso_accessmanager_send'], $dpisso_accessmanager_send );
 	
+	$form ['update_role'] = array (
+	  '#type' => 'fieldset',
+	  '#title' => t ( 'Roles settings' ),
+	  '#collapsible' => TRUE,
+	  '#collapsed' => FALSE,
+	  "#description" => t(''),
+	);
+	
+	$form ['update_role'] ['dpisso_role_add_cron'] = array (
+      '#type' => 'checkbox',
+      '#title' => t('Run the cron automatically.'),
+	  '#default_value' => variable_get('dpisso_role_run_cron', FALSE),
+	);
+	
+	$form ['update_role'] ['dpisso_role_add_cron_submit'] = array (
+	  '#type' => 'submit',
+	  '#submit' => array (
+	    'dpisso_accessmanager_send_form_role_submit'
+	  ),
+	  '#value' => t ( 'Update role' )
+	);
+	
 	return $form;
 }
 
@@ -74,9 +96,9 @@ function dpisso_accessmanager_admin_settings_page_form() {
  *
  */
 function dpisso_accessmanager_send_form_submit($form, &$form_state) {
-	$config = dpisso_get_config ();
+	$AccessId = LoginManager::getAccessId();
 	$postDatas = array ();
-	$postDatas['unitId'] = $config ['unitId'];
+	$postDatas['unitId'] = $AccessId;
 	$postDatas['whiteList'] = array(); 
 	$postDatas['blackList'] = array(); 
 	
@@ -90,9 +112,27 @@ function dpisso_accessmanager_send_form_submit($form, &$form_state) {
     		if (!in_array(trim($v),$postDatas['blackList'])) { $postDatas['blackList'][]=trim($v); } 
     	}
     }
-
+    
 	if (isset ( $postDatas ['unitId'] )) {
-		$response = AccessManager::sendWhiteList ( $postDatas );
+		if($response = AccessManager::sendWhiteList ( $postDatas )){
+		  drupal_set_message(t('Update success'));
+		}else{
+		  drupal_set_message(t('A problem occurred'), 'error');
+		}
 	}
-	return ($response);
+	return $response;
+}
+
+function dpisso_accessmanager_send_form_role_submit($form, &$form_state){
+  if(isset($form_state['values']['dpisso_role_add_cron'])){
+    variable_set('dpisso_role_run_cron', $form_state['values']['dpisso_role_add_cron']);
+    if($form_state['values']['dpisso_role_add_cron'] == TRUE){
+      drupal_set_message("Role cron activated");
+    }
+  }
+  if(dpisso_update_role_for_access_manager_to_drupal()){
+    drupal_set_message(t("Roles updated"));
+  }else{
+    drupal_set_message(t("A problem occurred while updating the roles"), 'error');
+  }
 }

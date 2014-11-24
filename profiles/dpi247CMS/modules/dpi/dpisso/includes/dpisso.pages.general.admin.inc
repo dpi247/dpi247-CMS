@@ -3,7 +3,6 @@
  * Implement the hook_form
  */
 function dpisso_loginmanager_admin_settings_page_form(){
-
   // Get ssoClient config from file.
   $config = dpisso_get_config(); 
 	
@@ -39,7 +38,7 @@ function dpisso_loginmanager_admin_settings_page_form(){
     '#markup' => theme('table', array('header' => $headers, 'rows' => $rows))
   );
   
-  return dpi_api_system_settings_form($form);
+  return dpi_system_settings_form($form);
 }
 
 /*
