@@ -59,7 +59,7 @@ function dpicomments_menu() {
 
   // Report abusive comment (publish)
   $items['admin/content/comment/abusive'] = array(
-    'title' => 'Abusive comments yet publish',
+    'title' => 'Abusive comments already publish',
     //'title callback' => 'comment_count_abusive',
     'page callback' => 'dpicomments_admin',
     'page arguments' => array('abusive'),
