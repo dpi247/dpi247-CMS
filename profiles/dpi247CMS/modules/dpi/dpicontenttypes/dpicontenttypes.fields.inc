@@ -205,6 +205,7 @@ function dpicontenttypes_field_is_empty($item, $field) {
  * Implements hook_field_formatter_info().
  */
 function dpicontenttypes_field_formatter_info() {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
   // Expose all the Scald Contexts as formatters for the Atom Reference field.
   $formatters = array();
   
@@ -212,9 +213,6 @@ function dpicontenttypes_field_formatter_info() {
     'label' => t('Premier élément'),
     'field types' => array('dpiatom_reference'),
     'settings'  => array( 
-      'type_image' => FALSE,
-      'type_video' => FALSE,
-      'type_link' => FALSE,
       'context' => 'full', 
     ),
   );
@@ -225,13 +223,15 @@ function dpicontenttypes_field_formatter_info() {
     'settings'  => array(
       'type_number' => 'all',
       'value_number' => '1',
-      'type_image' => FALSE,
-      'type_video' => FALSE,
-      'type_link' => FALSE,
       'context' => 'full',
     ),
   );
 
+  foreach(dpicontenttypes_get_scald_types() as $type){
+    $formatters['first_element']['settings']['type_'.$type] = FALSE;
+    $formatters['media_box']['settings']['type_'.$type] = FALSE;
+  }
+  
   $formatters['simple_html_tag_formatter'] = array( // Machine name of the formatter
     'label' => t('Simple HTML Tag'),
     'field types' => array('text', 'text_long'), // This will only be available to fields of these types

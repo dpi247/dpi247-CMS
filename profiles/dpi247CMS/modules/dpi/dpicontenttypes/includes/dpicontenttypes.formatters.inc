@@ -102,12 +102,10 @@ function dpicontenttypes_test_scald_item_validity($item, $settings){
     $atom = scald_atom_load($item['sid']);
     $item['type']=$atom->type;
   }
-  if($settings['type_image']==TRUE && $item['type']=="image")
-    $return = TRUE;
-  if($settings['type_video']==TRUE && $item['type']=="video")
-    $return = TRUE;
-  if($settings['type_link']==TRUE && $item['type']=="links_list")
-    $return = TRUE;
+  foreach(dpicontenttypes_get_scald_types() as $type){
+    if(isset($settings['type_'.$type]) && $settings['type_'.$type]==TRUE && $item['type']==$type)
+      return TRUE;
+  }
   return $return;
 }
 
@@ -197,13 +195,7 @@ function dpicontenttypes_field_formatter_settings_form_first_element_formatter($
   // Initialize the element variable
   $element = array();
   
-  $type_radioboxes = array(
-    'image' => 'image',
-    'video' => 'video',
-    'link'  => 'link',
-  );
-  
-  foreach($type_radioboxes as $k => $v){
+  foreach(dpicontenttypes_get_scald_types() as $k => $v){
     $element['type_'.$k] = array(
       '#type' => 'checkbox',
       '#title' => $v,
@@ -248,6 +240,14 @@ function dpicontenttypes_field_formatter_settings_form_first_element_formatter($
   return $element;
 }
 
+function dpicontenttypes_get_scald_types(){
+  $return = array();
+  foreach(scald_types() as $type){
+    $return[$type->type] = $type->type;
+  }
+  return $return;
+}
+
 function dpicontenttypes_field_formatter_get_context(){
   $contexts = scald_contexts();
   $return = array();
@@ -262,17 +262,15 @@ function dpicontenttypes_field_formatter_get_context(){
 function dpicontenttypes_field_formatter_settings_summary_first_element_formatter($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $type = "";
-  if($settings['type_image']==TRUE)
-    $type.= ", image";
-  if($settings['type_video']==TRUE)
-    $type.= ", video";
-  if($settings['type_link']==TRUE)
-    $type.= ", link";
-  $type = substr($type, 2);
+  $elem_type = "";
+  foreach(dpicontenttypes_get_scald_types() as $type){
+    if(isset($settings['type_'.$type]) && $settings['type_'.$type] == TRUE)
+      $elem_type .= ", ".$type;
+  }
+  $elem_type = substr($elem_type, 2);
   
   $summary = t('Use a type "@type" with context "@context"', array(
-    '@type' => $type,
+    '@type' => $elem_type,
     '@context'  => $settings['context'],
   )); // we use t() for translation and placeholders to guard against attacks
 
