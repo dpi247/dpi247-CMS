@@ -15,3 +15,11 @@
 	border: 1px dashed gray;
 	padding: 10px;
 }
+
+#textfieldFloatLeft{
+	display: inline;
+}
+
+#textfieldFloatLeft label{
+	display: inline;
+}
