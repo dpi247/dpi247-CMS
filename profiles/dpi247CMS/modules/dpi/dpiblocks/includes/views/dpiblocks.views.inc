@@ -22,7 +22,7 @@ function dpiblocks_views_plugins() {
         'uses grouping' => FALSE,
         'type' => 'normal',
         'theme' => 'accroche_custom_theme',
-        'theme path' => drupal_get_path("module", 'dpiblocks')."/includes/views",
+        'theme path' => drupal_get_path("module", 'dpiblocks')."/theme",
       )
     )
   );
