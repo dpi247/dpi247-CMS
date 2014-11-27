@@ -526,7 +526,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
     default:
       // If this is a custom context created through the UI, we use a special
       // render.
-      $dpi_contexts = dpicontenttypes_scald_contexts();
+      $dpi_contexts = scald_contexts();
       if(array_key_exists($context, $dpi_contexts)) {
         if (isset($options['entity'])) {
           // Replace the image style rendered image with our own
