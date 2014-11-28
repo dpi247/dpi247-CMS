@@ -77,6 +77,15 @@ class PaywallPerType extends PaywallPolitics {
     
   }
   
+  /**
+   * The list of module to be loaded in accesscontroller controler.
+   * @see PaywallPolitics::getmodulelist()
+   */
+  public function getmodulelist() {
+  	return array("node","dla");
+  }
+  
+  
 }
 
 

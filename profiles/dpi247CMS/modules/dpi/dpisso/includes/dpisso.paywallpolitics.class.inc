@@ -57,4 +57,29 @@ abstract class PaywallPolitics {
     drupal_set_message(t('The configuration options have been saved.'));
   }
   
+  /**
+   * issecurepage method.
+   *
+   * Check if the page is secured (available or not for specifics roles.
+   * 
+   * @param url The url of the page to check.
+   * @param roles An array of drupal roles.
+   * 
+   * @return boolean Granted access (or not) to the page.
+   */
+  public function issecurepage($url, $roles) {
+  	return false;
+  }
+  
+  /**
+   * getmodulelist method.
+   *
+   * Return the mandatory module list for the politics. Needed to "bootstrap/module_load" in @see dpisso-accessmanager.php
+   * 
+   * @return Array An array of module.
+   */
+  public function getmodulelist() {
+  	return array();
+  }
+  
 }

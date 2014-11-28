@@ -25,33 +25,29 @@ function dpisso_ctools_plugin_directory($module, $plugin) {
  * Implementation of hook_menu()
  */
 function dpisso_menu() {
-  $items = array ();
+
+  $items = array();
+
   
-  $items [DPI_ADMIN_PATH . '/dpisso'] = array (
-    'title' => t ( 'DPI SSo Settings' ),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array (
-      'dpisso_loginmanager_admin_settings_page_form' 
-    ),
-    'access arguments' => array (
-      'administer dpisso' 
-    ),
-    'description' => t ( 'Manage SSO&Paywall settings' ),
-    'file' => 'includes/dpisso.pages.general.admin.inc' 
-  // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
-    );
-  
-  $items [DPI_ADMIN_PATH . '/dpisso/general'] = array (
-    'title' => t ( 'General Settings' ),
-    'access arguments' => array (
-      'administer dpisso' 
-    ),
-    'weight' => - 10,
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'file path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes',
-    'file' => 'dpisso.pages.general.admin.inc' 
+  $items[DPI_ADMIN_PATH.'/dpisso'] = array(
+    'title'            => t('DPI SSo Settings'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
+    'access arguments' => array('administer dpisso'),
+    'description'      => t('Manage SSO&Paywall settings'),
+    'file'             => 'includes/dpisso.pages.general.admin.inc',
+   // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
   );
-  
+
+  $items[DPI_ADMIN_PATH.'/dpisso/general'] = array(
+      'title'            => t('General Settings'),
+      'access arguments' => array('administer dpisso'),
+      'weight'           => -10,
+      'type'             => MENU_DEFAULT_LOCAL_TASK,
+      'file path'        => drupal_get_path('module', 'dpisso').'/includes',
+      'file'             => 'dpisso.pages.general.admin.inc',
+  );
+
   $items [DPI_ADMIN_PATH . '/dpisso/loginmanager'] = array (
     'title' => t ( 'Login Manager' ),
     'page callback' => 'drupal_get_form',
@@ -136,7 +132,6 @@ function dpisso_block_info() {
 }
 
 function dpisso_block_view($delta = '') {
-  $block;
   switch ($delta) {
     case 'dpisso_connect' :
       $block = array (
@@ -338,7 +333,7 @@ function dpisso_get_federation() {
   return ($ssoFederationConfig);
 }
 
-function dpisso_get_version() {
+function dpisso_get_version(){
   return TRUE;
 }
 
