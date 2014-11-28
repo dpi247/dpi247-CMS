@@ -15,7 +15,7 @@ define ( 'DRUPAL_ROOT', getcwd () );
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
 
-if(is_array(libraries_load ( 'ssophptoolbox' ))){
+if(function_exists('libraries_load') && is_array(libraries_load ( 'ssophptoolbox' ))){
   if(file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc') && file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module') && file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
