@@ -143,24 +143,6 @@ function dpisso_block_view($delta = '') {
   return $block;
 }
 
-function dpidashboard_dpidashboard_status_item() {
-  $status = array (
-    array (
-      'title' => 'DPI Dashboard',
-      'status' => 0,
-      'message' => t ( 'Tout va bien' ),
-      'link' => '/admin/dashboard' 
-    ),
-    array (
-      'title' => 'Autre status',
-      'status' => 2,
-      'message' => t ( 'Problème dans le module' ),
-      'link' => '/admin/dashboard' 
-    ) 
-  );
-  
-  return $status;
-}
 
 function dpisso_get_connect_form() {
   libraries_load ( 'ssophptoolbox' );
