@@ -19,12 +19,12 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state){
 /**
  * implementation du hook_form_subit
  */
-function dpisso_paywall_admin_settings_page_form_submit($form, $form_state){
+function dpisso_paywall_admin_settings_page_form_submit($form,& $form_state){
 
   // get the current paywall politic & insert submit method of the current class.
   $politic = $form_state["values"]["dpisso_paywall_paywallpolitics"]; 
   if ($politic_instance = _dpisso_get_paywall_instance($politic)) {
-    $politic_instance->settingsform_submit($form, &$form_state);
+    $politic_instance->settingsform_submit($form, $form_state);
   }
 }
 
