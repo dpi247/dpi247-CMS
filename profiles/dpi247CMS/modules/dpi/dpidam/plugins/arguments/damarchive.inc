@@ -66,7 +66,7 @@ function dpidam_argument_damarchive_context($arg = NULL, $conf = NULL, $empty = 
     if ($importer_name = dpi_variable_get('dpidam_archive_importer', '')) {
       $importer = dpimport_api_get_importer_settings($importer_name);
       $dispatcher_settings = unserialize($importer->dispatcher_settings);
-      $tmp_file_name = 'dam_archive_'.rand().'.zip';
+      $tmp_file_name = 'dam_archive_'.rand().'_'.$arg.'.zip';
       $temp_path = 'importer://'.$dispatcher_settings['source_folder'].'/'.$tmp_file_name;
       // Save the file in the importer folder
       if (file_put_contents($temp_path, $result->data)) {
