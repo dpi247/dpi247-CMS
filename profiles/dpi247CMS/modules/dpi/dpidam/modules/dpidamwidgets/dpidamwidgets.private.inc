@@ -116,7 +116,8 @@ function _dpidamwidgets_perform_result_and_display($profile) {
         }
       }
     }
-    if (empty($messages)) {
+    $parameters = drupal_get_query_parameters();
+    if (empty($messages) && isset($parameters['word']) && !empty($parameters['word'])) {
       $messages[] = t('Your research yields to no results.');
     }
     $return = _dpidamwidgets_render_empty_results($profile, $messages);
