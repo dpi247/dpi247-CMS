@@ -1,0 +1,14 @@
+@CHARSET "UTF-8";
+
+.dpi-inline{
+	display: inline-block;
+}
+
+.dpi-inline div{
+	display: inline-block;
+	width: auto;
+}
+
+.dpi-color-inline{
+	color: #DB1702;
+}
