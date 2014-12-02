@@ -593,7 +593,9 @@ function _dpidamwidgets_damsearch_interpret_message_type($error) {
       break;
 
     case 'results':
-      $message = t('Your research yields to no results.');
+      if (isset($parameters['word']) && !empty($parameters['word'])) {
+        $message = t('Your research yields to no results.');
+      }
       break;
 
     default:
