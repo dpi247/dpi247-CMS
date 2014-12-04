@@ -257,7 +257,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $view->accroche_view_mode = $elements ["layout"];
 
   /* set arguments and execute view */
-  $view->set_arguments ( array("nid" => $string_element) );
+  $view->set_arguments ( array($string_element) );
   $view->pre_execute ();
   $view->execute ();
 
