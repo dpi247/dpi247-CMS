@@ -259,7 +259,7 @@ function dpidam_archive_import_node($importer_name, $file_name) {
         }
         $returns = array();
 
-        if (lock_acquire('dpimport_'.$importer->getName(), $dispatcher->getLockTimeout())) {
+        if (lock_acquire('dpimport_'.$importer->getName().'_'.$file_name, $dispatcher->getLockTimeout())) {
           $importer->dpimport_preview = TRUE;
           $importer->dpimport_preview_norender = TRUE;
 
