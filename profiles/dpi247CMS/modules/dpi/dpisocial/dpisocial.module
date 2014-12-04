@@ -200,11 +200,11 @@ function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
 	if ($form_state['values']['dpisocial_facebook_share_comment']==1) {
 		if ($form_state['redirect']==NULL) {
 			$url = current_path();
-			$query['share_comment_facebook']=1;
+			$query['share_comment']=1;
 			$form_state['redirect'] = array($url, array('query'=>$query));
 		} else {
-			if (empty($form_state['redirect'][1]['query'])) $form_state['redirect'][1]['query'] = array('share_comment_facebook'=>1);
-			else $form_state['redirect'][1]['query']['share_comment_facebook']=1;
+			if (empty($form_state['redirect'][1]['query'])) $form_state['redirect'][1]['query'] = array('share_comment'=>1);
+			else $form_state['redirect'][1]['query']['share_comment']=1;
 		}
 	}
 }
