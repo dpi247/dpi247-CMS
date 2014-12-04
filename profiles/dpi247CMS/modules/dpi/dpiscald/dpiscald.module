@@ -488,6 +488,7 @@ function dpiscald_menu_alter(&$items){
   $items['admin/dpi247/mediacontext/management'] = array(
     'title' => 'Manage Context Element',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array(TRUE),
   );
 }
 
@@ -503,14 +504,37 @@ function dpiscald_field_attach_view_alter(&$output, $context){
     foreach ($fields as $name => $field) {
       if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
         foreach (element_children($output[$name]) as $key) {
-          $info_context = dpiscald_get_media_context_from_view_mode("","", "");
-          $output[$name][$key]['#markup'] = scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true);
+          $info_context = 'full';
+          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode']);
         }
       }
     }
   }
 }
 
+function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL) {
+  if (empty($context)) {
+    $context = 'title';
+  }
+  
+  preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
+  $atoms_info = array();
+  $cpt = 0;
+  if(is_array($matches[0]) && is_array($matches[1])){
+    foreach($matches[1] as $id){
+      if(($atom = scald_atom_load( intval($matches[1])))!=false){
+        $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
+        $atoms_info[] = scald_render($id, $tmp_context);
+      }else{
+        $atoms_info[] = scald_render($id, $matches[2][$cpt]);
+      }        
+      $cpt++;
+    }
+    $string_updated = str_replace($matches[0], $atoms_info, $string);
+  }
+  
+  return $string_updated;
+}
 
 /**
  *
@@ -518,6 +542,6 @@ function dpiscald_field_attach_view_alter(&$output, $context){
  * @param unknown $context
  */
 function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
-  $new_scald_context="dpi_simpleimg";
-  return $new_scald_context;
+  $val_context = variable_get("dpiscald_media_context_table_value", NULL);
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
 }
