@@ -106,7 +106,7 @@ class dpisocial_facebook_social_network extends dpisocial_social_network {
 		if ($this->isActionActivated('share_comment')) { // ajout poster les commentaires
 			$func = "
 			var url = window.location.href;
-			if (url.indexOf('share_comment=1')) {
+			if (url.indexOf('share_comment=1')>0) {
 				url = url.replace(/share_comment=1/gi, '')
 				FB.ui({
 				  method: 'feed',
