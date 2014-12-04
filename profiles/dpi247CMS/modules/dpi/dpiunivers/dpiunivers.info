@@ -1,0 +1,7 @@
+name = Dpi univers
+description = "Create customs universes"
+package = DPI
+core = 7.x
+dependencies[] = system
+files[]= dpiunivers.module
+files[]= dpiunivers.install

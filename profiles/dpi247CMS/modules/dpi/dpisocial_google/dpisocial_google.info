@@ -1,0 +1,9 @@
+name = DPI Social Google
+description = Google interactions for DPI
+package = DPI
+core = 7.x
+
+dependencies[] = ctools
+dependencies[] = dpisocial
+
+files[] = dpisocial_google_social_network.inc
