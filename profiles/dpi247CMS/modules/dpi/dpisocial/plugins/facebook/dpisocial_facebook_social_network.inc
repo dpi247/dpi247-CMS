@@ -104,11 +104,16 @@ class dpisocial_facebook_social_network extends dpisocial_social_network {
 		//$asyncfunc.='FB.login();';
 		
 		if ($this->isActionActivated('share_comment')) { // ajout poster les commentaires
-			$func = "FB.ui({
-  method: 'feed',
-  link: 'http://www.sudinfo.be/1160409/article/2014-12-01/david-beckham-victime-d-un-impressionnant-accident',
-  caption: 'J\'ai commenté cet article'
-}, function(response){});";
+			$func = "
+			var url = window.location.href;
+			if (url.indexOf('share_comment=1')) {
+				url = url.replace(/share_comment=1/gi, '')
+				FB.ui({
+				  method: 'feed',
+				  link: url,
+				  caption: 'J\'ai commenté cet article'
+				}, function(response){});
+			}";
 			$asyncfunc.=$func;	
 		}
 		
@@ -132,7 +137,7 @@ class dpisocial_facebook_social_network extends dpisocial_social_network {
 				 var js, fjs = d.getElementsByTagName(s)[0];
 				 if (d.getElementById(id)) {return;}
 				 js = d.createElement(s); js.id = id;
-				 js.src = '//connect.facebook.net/en_US/sdk.js';
+				 js.src = '//connect.facebook.net/fr_FR/sdk.js';
 				 fjs.parentNode.insertBefore(js, fjs);
 			   }(document, 'script', 'facebook-jssdk'));";
 		
