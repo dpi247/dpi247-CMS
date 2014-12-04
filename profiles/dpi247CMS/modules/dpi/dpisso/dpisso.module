@@ -377,9 +377,9 @@ function dpisso_cron(){
 
 
 function dpisso_boot(){
-  drupal_load('module', 'dpisso');
-  drupal_load('module', 'libraries');
-  libraries_load("ssophptoolbox");
-  $access = new AccessManager();
+//   drupal_load('module', 'dpisso');
+//   drupal_load('module', 'libraries');
+//   libraries_load("ssophptoolbox");
+//   $access = new AccessManager();
   
 }
