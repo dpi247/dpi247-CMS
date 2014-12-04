@@ -497,7 +497,6 @@ function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, 
 
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
-
   if($targetblock->use_pager){
     $pager =  $targetview->display_handler->get_option('pager');
     $pager['type'] = $targetblock->pager_type;

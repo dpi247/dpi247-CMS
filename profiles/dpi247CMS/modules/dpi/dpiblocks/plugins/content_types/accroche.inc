@@ -1,12 +1,12 @@
 <?php
 $plugin = array (
-  'title' => t ( 'Accroche' ),
-  'description' => t ( 'Display a list of the newest nodes' ),
+  'title' => 'Accroche',
+  'description' => 'Display a list of the newest nodes',
   'edit form' => 'dpiblocks_accroche_plugin_edit_form',
   'render callback' => 'dpiblocks_accroche_render',
   'admin info' => 'dpiblocks_accroche_admin_info',
-  'category' => t ( 'Accroche' ),
-  'group' => t ( 'DPI Core' ),
+  'category' => 'Accroche',
+  'group' => 'DPI Core',
   'all contexts' => TRUE 
 );
 
@@ -19,8 +19,9 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
       'subtype' => $key,
       'description' => check_plain ( $layout [0] ),
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
-      'category' => t ( 'Accroche' ),
-      'group' => t ( 'DPI Core' ) 
+      'category' => 'Accroche',
+      'group' => 'DPI Core', 
+      'all contexts' => TRUE
     );
   }
   return $types;
@@ -237,34 +238,55 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $elements ["layout"] = $teasers [$conf ["layout"]] [1];
   if (isset ( $conf ["type"] ) && $conf ["type"] == "node") {
     $elements ["node_id"] = explode ( ";", $conf ["node"] );
+    $string_element = "";
+    $vals = explode ( ";", $conf ["node"] );
+    foreach ($vals as $val){
+      if(isset($val) && $val != ""){
+        $string_element .= $val."+";
+      }
+    }
+    $string_element = substr($string_element,0,-1);
   } elseif (isset ( $conf ["type"] ) && $conf ["type"] == "destination") {
     $elements ["destination"] = $conf ["destination"];
+    $string_element = dpiblocks_define_node_element_string($conf["destination"]);
   }
-  
-  /*
-   * @todo la view est déjà prête à recevoir plusieurs destination il suffit de renvoyer un array sous le format array( array( "section" => 1, "target" => "main_content", "nb_element" => 5 ), array( "section" => 3, "target" => "secodnary_content", "nb_element" => 2 ), )
-   */
-  
   /* create view */
   $view_name = _dpiblocks_accroche_get_view_name ();
   $view = views_get_view ( $view_name );
-  $view->set_display ( 'dpiblocks_accroche_default' );
-  /* unset pager */
-  $pager = $view->display_handler->get_option ( 'pager' );
-  $pager ['type'] = 'none';
-  $view->display_handler->set_option ( 'pager', $pager );
-  
+  $view->set_display ( $view_name );
+  $view->accroche_view_mode = $elements ["layout"];
+
   /* set arguments and execute view */
-  $view->set_arguments ( $elements );
+  $view->set_arguments ( array("nid" => $string_element) );
   $view->pre_execute ();
   $view->execute ();
-  
+
   /* Prepare render element and return it */
   $block = new stdClass ();
   $block->title = (isset ( $conf ["url"] ) && $conf ["url"] != "") ? l ( $conf ["title"], $conf ["url"] ) : $conf ["title"];
   $block->content = $view->render ();
   $block->admin_links = array ();
   return $block;
+}
+
+function dpiblocks_define_node_element_string($dest){
+  $string = "";  
+  foreach ( $dest as $destination ) {
+    $targetBlockController = new TargetBlockController ( 'targetblock' );
+    $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( intval ( $destination ["section"] ), $destination ["target"], 0 );
+    $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
+    $target = $targetblock_wrapper->target->value ();
+    $target_wrapper = entity_metadata_wrapper ( 'target', $target );
+    $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
+    $val_view = $targetview->result;
+    $cpt = $destination ["nb_element"];
+    if ($cpt > count ( $val_view ))
+      $cpt = count ( $val_view );
+    for($i = 0; $i < $cpt; $i ++) {
+      $string .= $val_view [$i]->nid.'+';
+    }
+  }
+  return substr($string, 0 , -1);
 }
 
 function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {

@@ -114,7 +114,7 @@ class TargetBlockEntity extends Entity {
   public $split_delta;
 
   protected function defaultLabel() {
-    return $this->machine_name;
+    return (isset($this->machine_name))? $this->machine_name : 'undefined';
   }
 
   protected function defaultUri() {

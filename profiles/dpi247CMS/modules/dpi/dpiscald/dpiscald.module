@@ -98,6 +98,7 @@ function dpiscald_menu(){
     $function_name='dpiscald_'.$type.'_menu';
     $function_name($items);
   }
+  
   return $items;
 }
 
@@ -114,6 +115,7 @@ function dpiscald_theme(){
     $themeReturn = $function_name();
     $theme = array_merge($theme,$themeReturn);
   }
+  
   return $theme;
 }
 
@@ -444,4 +446,74 @@ function dpiscald_menu_alter(&$items){
     'file' => '/'.drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
     'type' => MENU_CALLBACK,
   );
+  
+  $items['admin/dpi247/mediacontext'] = array(
+    'title' => 'Manage mediaContext',
+    'description'=>'You can define different element for media context',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiscald_media_context_admin_form'),
+    'access arguments' => array(TRUE),
+    'file'=>'dpiscald.admin.mediacontext.inc',
+    'file path' => drupal_get_path('module', 'dpiscald').'/includes',
+  );
+  
+  $items['admin/dpi247/mediacontext/management'] = array(
+    'title' => 'Manage Context Element',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array(TRUE),
+  );
+}
+
+/**
+ *
+ * @param unknown $output
+ * @param unknown $context
+ */
+function dpiscald_field_attach_view_alter(&$output, $context){
+  if (variable_get('mee_store_sas', TRUE)) {
+    list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+    $fields = field_info_instances($context['entity_type'], $bundle);
+    foreach ($fields as $name => $field) {
+      if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
+        foreach (element_children($output[$name]) as $key) {
+          $info_context = 'full';
+          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode']);
+        }
+      }
+    }
+  }
+}
+
+function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL) {
+  if (empty($context)) {
+    $context = 'title';
+  }
+  
+  preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
+  $atoms_info = array();
+  $cpt = 0;
+  if(is_array($matches[0]) && is_array($matches[1])){
+    foreach($matches[1] as $id){
+      if(($atom = scald_atom_load( intval($matches[1])))!=false){
+        $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
+        $atoms_info[] = scald_render($id, $tmp_context);
+      }else{
+        $atoms_info[] = scald_render($id, $matches[2][$cpt]);
+      }        
+      $cpt++;
+    }
+    $string_updated = str_replace($matches[0], $atoms_info, $string);
+  }
+  
+  return $string_updated;
+}
+
+/**
+ *
+ * @param unknown $output
+ * @param unknown $context
+ */
+function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
+  $val_context = variable_get("dpiscald_media_context_table_value", NULL);
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
 }

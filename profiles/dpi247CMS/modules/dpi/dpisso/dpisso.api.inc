@@ -81,3 +81,15 @@ function dpisso_api_user_logout(){
   module_invoke_all('user_logout', $user);
   session_destroy();
 }
+
+function dpisso_api_get_paywall_info(){
+  libraries_load('ssophptoolbox');
+  return AccessManager::getPaywallInfo();
+}
+
+function dpisso_api_set_paywall_info($info){
+  libraries_load("ssophptoolbox");
+  return AccessManager::setPaywallInfo($info);
+}
+
+

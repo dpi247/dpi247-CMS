@@ -56,7 +56,9 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
   }
 
   $image_uri = $scheme . '://' . $target;
-
+  $image_uri = explode('?', $image_uri);
+  $image_uri = $image_uri[0];
+  
   $derivative_uri = _dpicontenttypes_image_style_path($style['name'], $entity->entity_id, $atom->sid, $image_uri);
 
   // If using the private scheme, let other modules provide headers and

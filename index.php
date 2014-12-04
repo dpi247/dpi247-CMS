@@ -10,20 +10,24 @@
  * All Drupal code is released under the GNU General Public License.
  * See COPYRIGHT.txt and LICENSE.txt.
  */
-
-/**
- * Root directory of Drupal installation.
- */
-
-define('DRUPAL_ROOT', getcwd());
-
+define ( 'DRUPAL_ROOT', getcwd () );
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
 
-/**
- * Test des cookies pour login
- */
+if(function_exists('libraries_load') && is_array(libraries_load ( 'ssophptoolbox' ))){
+  if(file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc') && file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module') && file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
+    require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
+    require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
+    $config = Config::getInstance ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )->getConfigurationInstance();
+    if (isset ( $_COOKIE [$config ['longterm_cookie_name']] ) && strcmp ( $_COOKIE [$config ['longterm_cookie_name']], 'true' ) == 0 && ! isset ( $_COOKIE [$config ['loginToken_cookie_name']] )) {
+      $string = file_get_contents ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoFederationConfig.json' );
+      $ssoFederationConfig = json_decode ( $string, true );
+      $unitId = LoginManager::getUnitId ( $ssoFederationConfig );
+      $redirect_url = $config ["ssoServer_url"] . '/html/login?unitId=' . $unitId . "&returnPage=" . urlencode ( dpisso_api_get_current_url () ) . "&bypassForm=true";
+      header ( "Location: $redirect_url" );
+    }
+  }
+}
 
-
-menu_execute_active_handler();
+menu_execute_active_handler ();

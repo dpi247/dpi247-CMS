@@ -66,7 +66,7 @@ class PaywallPerType extends PaywallPolitics {
           '#title' => "",
           '#return_value' => array($rkey,$ckey),
           '#weight' => $weight,
-          '#default_value' => $politic_settings_default_values['typesparroles'][$rkey][$ckey]
+          '#default_value' => (isset($politic_settings_default_values['typesparroles'][$rkey][$ckey]))? $politic_settings_default_values['typesparroles'][$rkey][$ckey] : false,
         );
       }
     }
@@ -76,6 +76,15 @@ class PaywallPerType extends PaywallPolitics {
     return $form;
     
   }
+  
+  /**
+   * The list of module to be loaded in accesscontroller controler.
+   * @see PaywallPolitics::getmodulelist()
+   */
+  public function getmodulelist() {
+  	return array("node","dla");
+  }
+  
   
 }
 
