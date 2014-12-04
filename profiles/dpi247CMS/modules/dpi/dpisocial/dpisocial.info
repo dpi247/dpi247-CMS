@@ -2,3 +2,7 @@ name = DPI Social
 description = Social Networks interactions for DPI
 package = DPI
 core = 7.x
+
+dependencies[] = ctools
+
+files[] = social_network.inc

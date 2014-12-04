@@ -1,26 +1,124 @@
 <?php 
 /**
  * @author NMO
+ *
+ * check : http://ygerasimov.com/ctools-plugins-system
+ *
  */
 module_load_include ( 'php', 'dpisocial', 'dpisocial.api' );
 
 function dpisocial_menu() {
   $items = array();
   
-  $items['admin/config/dpisocial/comments'] = array (
+  $items['admin/config/dpisocial/networks'] = array (
     'title' => 'Configure social shares on comments',
     'description' => 'Select on which social networks comments can be shared.',
-    'page callback' => 'dpisocial_comments_view_page',
+    'page callback' => 'dpisocial_listplugin',
     'access callback' => TRUE,
+	'page arguments' => array(4),
     'access arguments' => array (
       'administer dpisocial' 
-    ),
-    'file' => 'dpisocial.pages.comments.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
+    ), 
   );
   
   return $items;
  
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Has plenty options. See ctools/help/plugins-creating.html
+ */
+function dpisocial_ctools_plugin_type() {
+  return array(
+    'social_network' => array(
+      'use hooks' => TRUE,
+    ),
+  );
+}
+
+function dpisocial_ctools_plugin_directory($module, $plugin) {
+  if (($module == 'dpisocial') && ($plugin == 'social_network')) {
+    return 'plugins';
+  }
+}
+
+function dpisocial_adminplugin($network) {
+	return $network;
+}
+
+function dpisocial_listplugin($network) {
+  $output = '';
+  ctools_include('plugins');
+  $social_network = ctools_get_plugins('dpisocial', 'social_network');
+  
+  if ($network) {
+	  
+	  $class = false;
+	  
+	  foreach ($social_network as $snetwork) {
+		  if ($snetwork['type']==$network) $class=$snetwork['handler']['class'];
+	  }
+
+	  if ($class) {
+		
+		$form_state['class'] = $class;
+		  
+		$form = drupal_get_form('social_network_settings_form',$form_state);
+		
+		$output = drupal_render($form);  
+	  } else {
+		$output = 'Plugin Not Found';  
+	  }
+  } else {
+	  foreach ($social_network as $snetwork) {
+		  $output.='<a href="./'.$snetwork['type'].'">'.$snetwork['label'].'</a><br />';
+	  }
+	   dpm(dpisocial_getListActions());
+  }
+  
+  return $output;	
+}
+
+function dpisocial_getListActions() {
+	$actions = array(
+		'share_comment'
+	);	
+	
+	drupal_alter('dpisocial_list_actions', $actions);
+	
+	return $actions;	
+}
+
+function social_network_settings_form($form, &$form_state) {
+	
+	$class = $form_state['build_info']['args'][0]['class'];
+	
+	$nclass = new $class;
+	
+	$form['social_network_in_use']= array(
+		'#title' => t('Utiliser ce réseau sur le site'),
+		'#type' => 'checkbox',
+		'#default_value'=>$nclass->isNetworkInUse()
+	);
+	
+	$form += $nclass->configForm();
+	
+	return $form;
+}
+
+function social_network_settings_form_submit($form, &$form_state) {
+	
+	$class = $form_state['build_info']['args'][0]['class'];
+	
+	$nclass = new $class;
+	
+	//sauvegarde l'activation du réseau
+	$nclass->setNetworkInUse($form_state['values']['social_network_in_use']);
+	
+	$nclass->saveConfigForm($form_state);
+	
 }
 
 /**
@@ -35,4 +133,73 @@ function dpisocial_permission() {
       'description' => t ( 'Perform administration tasks for dpisocial module.' ) 
     ) 
   );
+}
+
+function dpisocial_page_alter(&$page) {
+  ctools_include('plugins');
+  $social_network = ctools_get_plugins('dpisocial', 'social_network');
+  
+  foreach ($social_network as $snetwork) {
+	 $class = $snetwork['handler']['class'];
+	 $nclass = new $class();
+	 
+	 if ($nclass->isNetworkInUse()) {
+		 $html = $nclass->getSocialHTML();
+		  
+		 if ($html!=NULL) {
+			$page['content']['dpisocial'][$nclass->whoAmI] = $html;	 
+		 }
+		 
+		 $js = $nclass->getSocialJS();
+		 
+		 if ($js!=NULL) {
+			foreach($js as $s) {
+				drupal_add_js($s['script'],array('type'=>$s['type'], 'scope'=>$s['scope']));
+			}
+		 }
+	 }
+  }
+}
+
+function dpisocial_form_comment_form_alter(&$form, &$form_state, $form_id) {
+  ctools_include('plugins');
+  $social_network = ctools_get_plugins('dpisocial', 'social_network');
+  
+  foreach ($social_network as $snetwork) {
+	  $class = $snetwork['handler']['class'];
+	  $nclass = new $class();
+	  
+	  if (($nclass->isNetworkInUse()) && ($nclass->isActionActivated('share_comment'))) {
+		  $nclass->addCheckboxShareComment($form);
+	  }
+	 
+  } 	
+}
+
+/*
+function dpisocial_form_alter(&$form, &$form_state, $form_id) {
+  ctools_include('plugins');
+  $social_network = ctools_get_plugins('dpisocial', 'social_network');
+  
+  foreach ($social_network as $snetwork) {
+	  $class = $snetwork['handler']['class'];
+	  $nclass = new $class();
+	  
+	  if ($nclass->isActionActivated('share_comment')) {
+		  $nclass->addCheckboxShareComment($form);
+	  }
+	 
+  }    
+}
+*/
+
+function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
+    if ($form_state['redirect']==NULL) {
+		$url = current_path();
+		$query['share_comment']=1;
+		$form_state['redirect'] = array($url, array('query'=>$query));
+	} else {
+		if (empty($form_state['redirect']['query'])) $form_state['redirect']['query'] = array('share_comment'=>1);
+		else $form_state['redirect']['query']['share_comment']=1;
+	}
 }

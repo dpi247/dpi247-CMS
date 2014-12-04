@@ -12,10 +12,16 @@ function dpisocial_api_get_avaible_social_for_function($function) {
 function dpisocial_api_get_selected_social_for_function($function) {
 	switch ($function) {
 		case 'share comment': 
-			return variable_get('dpisocial_comments_share_networks', array());
+			return dpi_variable_get('dpisocial_comments_share_networks', array());
 		default:
 			return array();	
 	}
+}
+
+function dpisocial_api_is_function_activated($function, $network) {
+	$networks_avaible = dpisocial_api_get_selected_social_for_function($function);
+	
+	return in_array($network, $networks_avaible);
 }
 
 function dpisocial_api_get_share_url($social, $url) {
