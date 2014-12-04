@@ -116,35 +116,7 @@ function dpiscald_theme(){
     $theme = array_merge($theme,$themeReturn);
   }
   
-  $theme['formtable_form_table'] =  array(
-    'render element' => 'form',
-  );
-  
   return $theme;
-}
-
-/**
- * Theme callback for the form table.
- */
-function theme_formtable_form_table(&$variables) {
-  $form = $variables['form'];
-  $rows = $form['rows'];
-  $header = $form['#header'];
-
-  $content = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => array(),
-  );
-
-  foreach (element_children($rows) as $row_index) {
-    $row = array();
-    foreach (element_children($rows[$row_index]) as $col_index) {
-      $row[] = drupal_render($rows[$row_index][$col_index]);
-    }
-    $content['#rows'][] = $row;
-  }
-  return drupal_render($content);
 }
 
 /**
