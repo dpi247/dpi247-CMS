@@ -146,6 +146,14 @@ function dpiblocks_preprocess_node(& $vars){
   $vars['view_mode'] = $view_mode;
 }
 
+function dpiblocks_preprocess_panels_pane(& $vars){
+  if($vars['pane']->type == "accroche"){
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche";
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$vars['pane']->subtype;
+    $vars["theme_hook_suggestions"][] = "accroche__".$vars['pane']->subtype;
+  }
+}
+
 function dpiblocks_get_title_ajax($string = "") {
   // clean other node present to the string
   if (isset ( $string ) && $string != "") {
