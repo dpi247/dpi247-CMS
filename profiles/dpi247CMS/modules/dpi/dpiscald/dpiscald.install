@@ -41,6 +41,11 @@ function dpiscald_install() {
   }
   $requete.=' false';
   db_query ( $requete );
+  
+  $sql = "UPDATE {system}
+          SET weight = '-1'
+          WHERE name = 'dpiscald'";
+  db_query($sql);
 }
 
 /**
@@ -77,4 +82,15 @@ function dpiscald_uninstall() {
  */
 function dpiscald_enable() {
   drupal_set_message(t('To see the list of supported providers for embed.ly,  go to : <a href="@url">@url</a>', array('@url' => 'http://embed.ly/providers')));
+}
+
+/**
+ * Update from 0.1
+ */
+function dpiscald_update_7001() {
+  //Downcrease module weight to prevent compatibility issues.
+    $sql = "UPDATE {system}
+            SET weight = '-1'
+            WHERE name = 'dpiscald'";
+  db_query($sql);
 }
