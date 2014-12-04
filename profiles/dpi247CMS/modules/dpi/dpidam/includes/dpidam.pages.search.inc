@@ -374,6 +374,22 @@ function dpidam_page_admin_search_edit_profile_form($form, $form_state, $pid) {
     '#description' => t('Date Filter options.<br>'),
   );
    
+  $form['defaultoperant'] = array(
+      '#type' => 'select',
+      '#title' => t('Default operant for multiple word search.'),
+      '#options' => array("OR"=>t("OR"), "AND"=>t("AND")),
+      '#default_value' => $default_values['defaultoperant'],
+      '#description' => t('Default operator for multiple words search.<br>'),
+  );
+
+  $form['minimumcharcount'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum caracter in results'),
+      '#description' => t('The number of minimal caraters for counting as a result by the DAM.'),
+      '#default_value' => $default_values['minimumcharcount'],
+      '#required' => TRUE,
+  );
+  
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $pid,
@@ -424,6 +440,8 @@ function dpidam_page_admin_search_edit_profile_form_submit($form, &$form_state) 
   $settings['level'] = $values['level'];
   $settings['sort'] = $values['sort'];
   $settings['datefilter'] = $values['datefilter'];
+  $settings['defaultoperant'] = $values['defaultoperant'];
+  $settings['minimumcharcount'] = $values['minimumcharcount'];
 
   $profile = array(
     'pid' => $values['pid'],
@@ -526,6 +544,8 @@ function _dpidam_page_admin_search_get_default_values() {
     'level' => 1,
     'sort' => 'none',
     'datefilter' => 'none',
+    'minimumcharcount' => 0,
+    'defaultoperant' => "AND",
     'withthumbs' => 0,
   );
 }
