@@ -586,10 +586,9 @@ function dpidestinations_preprocess_views_view_field(&$vars) {
 }
 
 function dpidestinations_preprocess_node(&$vars) {
-  //Remove this suggestion... useless
+  //Remove this suggestion... useless  
   unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
-
-  if (isset($vars['elements']['#entity_type'])) {
+  /*if (isset($vars['elements']['#entity_type'])) {
     $entity_type = $vars['elements']['#entity_type'];
     if (isset($vars[$entity_type])) {
       $entity = $vars[$entity_type];
@@ -603,30 +602,7 @@ function dpidestinations_preprocess_node(&$vars) {
         }
       }
     }
-  }
-
-  // The 'view' attribute of the node is added in views_preprocess_node()
-
-
-  /*
-   * Still Need to provide some overiding patterns
-  if (!empty($vars['node']->view) && !empty($vars['node']->view->display_handler->plugin_name) && $vars['node']->view->display_handler->plugin_name=="targetview") {
-  dsm(($vars['node']->view));
-  $vars['view'] = $vars['node']->view;
-
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
-  if (!empty($vars['node']->view->current_display)) {
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
-
-  // If a node is being rendered in a view, and the view does not have a path,
-  // prevent drupal from accidentally setting the $page variable:
-  if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
-  $vars['page'] = FALSE;
-  }
-  }
-  }
-  */
-
+  }*/
 }
 
 function dpidestinations_dpicache_cache_entry_register() {

@@ -19,7 +19,7 @@ abstract class PaywallPolitics {
    * @return Array
    *   A form array with paywall politics settings.
    */
-  public function settingsform($form, $form_state) {
+  public function settingsform($defaul_val) {
     $politic_settings = array();
     return $politic_settings;
   }
@@ -80,6 +80,10 @@ abstract class PaywallPolitics {
    */
   public function getmodulelist() {
   	return array();
+  }
+  
+  public function haveAccess(){
+    return false;
   }
   
 }

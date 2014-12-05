@@ -220,7 +220,12 @@ function dpisso_theme() {
   return array (
     'checkboxgrid' => $base + array (
       'render element' => 'element' 
-    ) 
+    ),
+    'formtable_form_table' => array(
+      'render element' => 'form',
+      'file' => 'dpisso.pages.paywall.admin.inc',
+      'path' => drupal_get_path('module', 'dpisso').'/includes',
+    ),
   );
 }
 
@@ -396,3 +401,11 @@ function dpisso_cron(){
   }
 }
 
+
+function dpisso_boot(){
+//   drupal_load('module', 'dpisso');
+//   drupal_load('module', 'libraries');
+//   libraries_load("ssophptoolbox");
+//   $access = new AccessManager();
+  
+}

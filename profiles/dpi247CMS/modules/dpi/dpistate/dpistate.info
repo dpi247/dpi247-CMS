@@ -1,0 +1,8 @@
+name = Dpi state
+description = "Create customs states"
+package = DPI
+core = 7.x
+dependencies[] = system
+files[]= dpistate.module
+files[]= dpistate.install
+files[]= dpistate.test

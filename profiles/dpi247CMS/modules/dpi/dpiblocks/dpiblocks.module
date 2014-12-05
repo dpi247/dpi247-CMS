@@ -139,39 +139,21 @@ function dpiblocks_menu() {
   return $items;
 }
 
-function dpiblocks_preprocess_accroche_custom_theme(& $variables) {
-  $args = $variables ['view']->args;
-  $list_node_render = array ();
-  if (isset ( $args ["node_id"] )) {
-    $node_ids = $args ['node_id'];
-    foreach ( $node_ids as $node_id ) {
-      if (isset ( $node_id ) && $node_id != "") {
-        $node_id = intval ( $node_id );
-        if (is_numeric ( $node_id )) {
-          $node = node_load ( $node_id );
-          $list_node_render [] = node_view ( $node, $args ['layout'] );
-        }
-      }
-    }
-  } else {
-    foreach ( $args ["destination"] as $destination ) {
-      $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( intval ( $destination ["section"] ), $destination ["target"], 0 );
-      $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
-      $target = $targetblock_wrapper->target->value ();
-      $target_wrapper = entity_metadata_wrapper ( 'target', $target );
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
-      $val_view = $targetview->result;
-      $cpt = $destination ["nb_element"];
-      if ($cpt > count ( $val_view ))
-        $cpt = count ( $val_view );
-      for($i = 0; $i < $cpt; $i ++) {
-        $node = node_load ( $val_view [$i]->nid );
-        $list_node_render [] = node_view ( $node, $args ['layout'] );
-      }
-    }
+function dpiblocks_preprocess_node(& $vars){
+  if(isset($vars["view_mode"])){
+    $view_mode = $vars["view_mode"];
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode.'__'.$vars['type'];
+    $vars['view_mode'] = $view_mode;
   }
-  $variables["list_node"] = $list_node_render;
+}
+
+function dpiblocks_preprocess_panels_pane(& $vars){
+  if($vars['pane']->type == "accroche"){
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche";
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$vars['pane']->subtype;
+    $vars["theme_hook_suggestions"][] = "accroche__".$vars['pane']->subtype;
+  }
 }
 
 function dpiblocks_get_title_ajax($string = "") {
@@ -228,7 +210,7 @@ function dpiblocks_theme(&$var) {
   $path = drupal_get_path('module', 'dpiblocks');
   $base = array(
     'file' => 'theme.inc',
-    'path' => "$path/theme",
+    'path' => "$path/themes",
   );
 
   return array(
@@ -521,6 +503,6 @@ function dpiblocks_get_entity_form($form_id,$form_state,$entity){
 function dpiblocks_views_api() {
   return array (
     'api' => 3,
-    'path' => drupal_get_path ( 'module', 'dpiblocks' ) . '/includes/views',
+    'path' => drupal_get_path('module', 'dpiblocks')."/themes",
   );
 }

@@ -1,0 +1,7 @@
+name = DPI Comments
+description = Module comments
+package = DPI
+core = 7.x
+
+dependencies[] = comment
+dependencies[] = votingapi
