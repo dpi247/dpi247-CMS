@@ -96,6 +96,30 @@ function dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entit
   return $element;
 }
 
+/**
+ * Mediabox formatter view
+ */
+function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context) {
+  $element = array();
+  $settings = $display['settings'];
+  $nb = dpicontenttypes_define_nb_items($render_context, count($items), $settings);
+  $count = 1;
+  foreach ($items as $delta => $item) {
+    if(dpicontenttypes_test_scald_item_validity($item, $settings)){
+      $sid = $item['sid'];
+      $entity_ids = entity_extract_ids($entity_type, $entity);
+      $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
+      $element[$delta] = array('#markup' => scald_render($sid, $settings['context'], json_encode($options)));
+      if(isset($nb) && $nb==$count){
+        break;
+      }
+      $count++;
+    }
+  }
+
+  return $element;
+}
+
 function dpicontenttypes_test_scald_item_validity($item, $settings){
   $return = FALSE;
   if(!isset($item['type']) || $item['type']==""){

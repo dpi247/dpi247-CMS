@@ -269,7 +269,7 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
     case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       $element = dpicontenttypes_field_formatter_view_simple_html_tag_formatter($entity_type, $entity, $field, $instance, $langcode, $items, $display);
-      break;
+      break;  
     case 'dpiatom_reference':
       $render_context = $display['type'];
       $contexts = scald_contexts();
@@ -277,8 +277,13 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
       $element = array();
 
       if (!empty($contexts[$settings['context']])) {
-        module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
-        $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
+        if($contexts[$settings['context']]['title'] == 'ENA Mediabox') {
+          module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+          $element = dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
+        } else {
+          module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+          $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
+        }
       }
       break;
     default:
