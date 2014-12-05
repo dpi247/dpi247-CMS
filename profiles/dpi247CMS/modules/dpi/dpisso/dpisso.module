@@ -1,5 +1,29 @@
 <?php
 
+
+function dpisso_boot(){
+  drupal_load('module', 'user');
+  global $user;
+  
+  
+  print_r( user_get_authmaps($user->init));
+  
+  if($user->uid>0){
+    $external_auth=user_get_authmaps($user->init);
+    if(isset($external_auth['dpisso'])){
+      $loginId=$external_auth['dpisso'];
+    }
+  }
+  print_r($user);
+/*
+  $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
+  $SsoSession= new SsoSession();
+  //$SsoSession->getLoginId();
+  $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
+  dsm($roles,roles);
+  */
+}
+
 // @todo: crer un callback que le varnish appelle
 // pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
 // Même chose pour le profile manager etc ...
@@ -142,6 +166,8 @@ function dpisso_block_view($delta = '') {
   }
   return $block;
 }
+
+
 
 
 function dpisso_get_connect_form() {
