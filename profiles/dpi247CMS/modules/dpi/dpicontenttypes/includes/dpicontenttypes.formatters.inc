@@ -104,19 +104,98 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
   $settings = $display['settings'];
   $nb = dpicontenttypes_define_nb_items($render_context, count($items), $settings);
   $count = 1;
+  $thumb = 0;
   foreach ($items as $delta => $item) {
     if(dpicontenttypes_test_scald_item_validity($item, $settings)){
       $sid = $item['sid'];
       $entity_ids = entity_extract_ids($entity_type, $entity);
       $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
-      $element[$delta] = array('#markup' => scald_render($sid, $settings['context'], json_encode($options)));
+//      $element[$delta] = array('#markup' => scald_render($sid, $settings['context'], json_encode($options)));
+      $atom = scald_atom_load($sid);
+
+      if ($count == 1) {
+        $principale = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('thumbnail embed-responsive embed-responsive-16by9 '),
+            'id' => 'image-gallery-launch',
+          ),
+        );
+        $principale[$delta]['photo'] = array(
+          '#theme' => 'image',
+          '#path' => file_create_url($atom->file_source),
+          //'#style_name' => 'ena_16_9_extra_big',
+          '#attributes' => array(
+            'class' => 'embed-responsive-item gr-content-image',
+            'alt' => 'Responsive image',
+            'title' => file_create_url($atom->file_source),
+          ),
+        );
+        $principale[$delta]['caption'] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('gr-caption'),
+          ),
+
+          'content-caption' => array(
+            '#type' => 'markup',
+            '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+          ),
+        );
+
+      } else {
+
+        if ($count == 2) {
+          $secondaires = array(
+            '#type' => 'container',
+            '#attributes' => array(
+              'class' => array('gr-gallery-thumbnails'),
+              'id' => 'gr-gallery-thumbnails',
+            ),
+          );
+        }
+        $secondaires[$thumb] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
+          ),
+        );
+
+        $secondaires[$thumb][0] = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('gr-caption'),
+          ),
+          'content-caption' => array(
+            '#type' => 'markup',
+            '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+          ),
+        );
+
+        $secondaires[$thumb][1] = array(
+          '#type' => 'markup',
+          '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery=""><img src="'.file_create_url($atom->file_source).'"></a>',
+        );
+
+        $thumb++;
+      }
+
+      $element = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('media'),
+          ),
+      );
+
+      $element[0] = $principale;
+      $element[1] = $secondaires;
+
       if(isset($nb) && $nb==$count){
         break;
       }
       $count++;
     }
   }
-
   return $element;
 }
 
