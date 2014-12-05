@@ -133,6 +133,8 @@ abstract class PackageHelper extends Importer {
     $atom = scald_atom_defaults('image');
     $atom->provider = 'scald_image';
     $atom->type = 'image';
+    $atom->field_external_reference = $external_reference;
+    $atom->external_reference_set = TRUE;
 
     return $this->_createOrLoadEntityScaldAtom($dom, $external_reference, $atom);
   }
