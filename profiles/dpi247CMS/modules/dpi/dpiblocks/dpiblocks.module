@@ -140,10 +140,12 @@ function dpiblocks_menu() {
 }
 
 function dpiblocks_preprocess_node(& $vars){
-  $view_mode = $vars["view_mode"];
-  $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
-  $vars['theme_hook_suggestions'][] = 'node__'.$view_mode.'__'.$vars['type'];
-  $vars['view_mode'] = $view_mode;
+  if(isset($vars["view_mode"])){
+    $view_mode = $vars["view_mode"];
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode.'__'.$vars['type'];
+    $vars['view_mode'] = $view_mode;
+  }
 }
 
 function dpiblocks_preprocess_panels_pane(& $vars){

@@ -12,10 +12,14 @@
  */
 define ( 'DRUPAL_ROOT', getcwd () );
 
+global $user;
+
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
 
-if(function_exists('libraries_load') && is_array(libraries_load ( 'ssophptoolbox' ))){
+
+//@todo: Attention au cas ou je suis logué sur le Drupal Mais je n'ai pas les cookies longterm_cookie_name et longterm_cookie_name
+if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'))){
   if(file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc') && file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module') && file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
@@ -28,6 +32,11 @@ if(function_exists('libraries_load') && is_array(libraries_load ( 'ssophptoolbox
       header ( "Location: $redirect_url" );
     }
   }
+
+
+
+
 }
+
 
 menu_execute_active_handler ();

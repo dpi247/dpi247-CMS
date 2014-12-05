@@ -29,20 +29,18 @@ require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
+require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
+require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.private.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
 
 $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
 
-if(!isset($_COOKIE['monsitedpi7'])){
-  setcookie ( "monsitedpi7", md5(uniqid(rand(), true)), time()+3600*24*3);
-}
 $SsoSession= new SsoSession();
 $redirect_url=$SsoSession->processLoginManagerUrl();
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
-  
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
   $sso_user_infos['mail']=$profile->mail;

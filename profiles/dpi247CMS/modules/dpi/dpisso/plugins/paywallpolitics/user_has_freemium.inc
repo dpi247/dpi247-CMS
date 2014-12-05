@@ -23,4 +23,13 @@ class UserHasFreemium extends PaywallPolitics{
     return $form;
   }
   
+  public function haveAccess(){
+    global $user;
+    $return = false;
+    if(isset($user->accessmanager["freemium_counter"]) && $user->accessmanager["freemium_counter"]){
+      $return = true;
+    }
+    return $return;
+  }
+  
 }

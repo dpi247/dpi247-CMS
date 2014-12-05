@@ -82,4 +82,8 @@ abstract class PaywallPolitics {
   	return array();
   }
   
+  public function haveAccess(){
+    return false;
+  }
+  
 }
