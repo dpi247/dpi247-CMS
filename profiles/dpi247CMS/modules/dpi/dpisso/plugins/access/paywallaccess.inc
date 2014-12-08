@@ -14,10 +14,15 @@ $plugin = array(
   'description' => t('Test if the user have more than 0 freemium'),
   'callback' => 'dpisso_check_if_user_has_freemium',
   'summary' => 'dpisso_paywall_access_ctools_access_summary',
+    'settings form' => 'dpisso_paywall_access_ctools_access_settings_form',
     'all contexts' => TRUE,
 );
 
+function dpisso_paywall_access_ctools_access_settings_form()&$form, &$form_state, $conf) {
+    $form=array();
 
+    return $form;
+}
 /**
  * Check for access.
  */
