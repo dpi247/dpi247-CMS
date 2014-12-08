@@ -16,22 +16,10 @@ $plugin = array(
   'default' => array(
     'equality' => 1,
   ),
-  'settings form' => 'dpisso_paywall_access_users_settings',
-  'summary' => 'ctools_compare_users_ctools_access_summary',
-    'required context' => new ctools_context_required(t('Context'), 'any', TRUE),
+  'summary' => 'dpisso_paywall_access_ctools_access_summary',
+  'required context' => new ctools_context_required(t('Context'), 'any', TRUE),
 );
 
-/**
- * Settings form for the 'by perm' access plugin
- */
-function ctools_compare_users_settings($form, &$form_state, $conf) {
-  $form['settings']['helptext'] = array(
-    '#type' => 'markup',
-    '#value' => '<div>' . t('Coucou.') . '</div>',
-  );
-  
-  return $form;
-}
 
 /**
  * Check for access.
@@ -45,6 +33,6 @@ function dpisso_compare_users_access_check($conf, $context) {
  * Describe an instance of this plugin.
  */
 function dpisso_paywall_access_ctools_access_summary($conf, $context) {
-  $comparison = !empty($conf['equality']) ? "is" : 'is not';
-  return t('@id1 @comp @id2', array('@comp' => $comparison, '@id1' => $context[0]->identifier, '@id2' => $context[1]->identifier));
+
+  return t('Match if user has no more freemium credits');
 }
