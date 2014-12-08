@@ -26,13 +26,18 @@ function dpisso_compare_users_access_check($conf, $context) {
   global $user;
 
     global $dpisso;
-
+    drupal_set_message('ooo');
+    drupal_set_message(print_r($dpisso));
     if(isset($dpisso['accessmanager']['freemium']) && $dpisso['accessmanager']['freemium']){
         dsm("TRUE DPISSOACCESS");
+        drupal_set_message('rr');
         return TRUE;
     }
     else{
         dsm("FALSE DPISSOACCESS");
+        drupal_set_message('aaa');
+
+
         return FALSE;
     }
 }
