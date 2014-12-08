@@ -18,7 +18,7 @@ $plugin = array(
     'required context' => new ctools_context_required(t('Node'), 'node'),
 );
 
-function dpisso_paywall_access_ctools_access_settings_form()&$form, &$form_state, $conf) {
+function dpisso_paywall_access_ctools_access_settings_form(&$form, &$form_state, $conf) {
     $form=array();
 
     return $form;
