@@ -13,7 +13,6 @@ $plugin = array(
   'title' => t("Dpisso: paywall access"),
   'description' => t('Test if the user have more than 0 freemium'),
   'callback' => 'dpisso_check_if_user_has_freemium',
-  'default' => array(),
   'summary' => 'dpisso_paywall_access_ctools_access_summary',
   'required context' => new ctools_context_required(t('Context'), 'any', TRUE),
 );
@@ -23,8 +22,7 @@ $plugin = array(
  * Check for access.
  */
 function dpisso_check_if_user_has_freemium($conf, $context) {
-  global $user;
-
+return TRUE;
     global $dpisso;
     drupal_set_message('ooo');
     drupal_set_message(print_r($dpisso));
