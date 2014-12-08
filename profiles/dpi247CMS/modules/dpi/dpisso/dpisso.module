@@ -58,19 +58,6 @@ module_load_include ( 'inc', 'dpisso', 'dpisso.private' );
 define ( 'DPISSO_ACCESSTOKEN_COOKIE_NAME', "dpisso-access-token" );
 define ( 'DPISSO_LONTERM_COOKIE_NAME', "dpisso-longterm" );
 
-/**
- * Implements hook_ctools_plugin_directory().
- *
- * @see dpisso_ctools_plugin_type()
- */
-function dpisso_ctools_plugin_directory($module, $plugin) {
-  if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
-    return 'plugins/paywallpolitics';
-  }
-  if(($module == 'dpisso') && ($plugin == 'access')){
-    return 'plugins/access';
-  }
-}
 
 /**
  * Implementation of hook_menu()
@@ -271,6 +258,21 @@ function dpisso_ctools_plugin_type() {
   );
 }
 
+
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * @see dpisso_ctools_plugin_type()
+ */
+function dpisso_ctools_plugin_directory($module, $plugin) {
+    if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
+        return 'plugins/paywallpolitics';
+    }
+    if(($module == 'ctools') && ($plugin == 'access')){
+        return 'plugins/access';
+    }
+}
 
 
 /**
