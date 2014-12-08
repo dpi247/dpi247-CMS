@@ -12,7 +12,6 @@
  */
 define ( 'DRUPAL_ROOT', getcwd () );
 
-global $user;
 global $dpisso;
 
 if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
@@ -20,7 +19,7 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/AccessManager.class.php';
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
-  
+
     $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
 
     $SsoSession = new SsoSession();
