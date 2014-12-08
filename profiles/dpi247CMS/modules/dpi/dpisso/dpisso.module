@@ -271,6 +271,18 @@ function dpisso_ctools_plugin_type() {
   );
 }
 
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function dpisso_ctools_plugin_directory($module, $plugin) {
+
+    if ($module == 'ctools' && $plugin == 'access') {
+        return 'plugins/ctools/access';
+    }
+
+}
+
 /**
  * Implementation of hook_form_alter().
  *
