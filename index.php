@@ -35,11 +35,11 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
         )
     );
 }
-var_dump($dpisso);
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
 
+drupal_set_message("Freemium count: ".$dpisso["accessmanager"]["freemium_count"]);
 
 //@todo: Attention au cas ou je suis logué sur le Drupal Mais je n'ai pas les cookies longterm_cookie_name et longterm_cookie_name
 if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'))){
