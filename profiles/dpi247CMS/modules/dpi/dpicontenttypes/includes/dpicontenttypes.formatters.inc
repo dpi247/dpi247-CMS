@@ -122,13 +122,13 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
           ),
         );
         $principale[$delta]['photo'] = array(
-          '#theme' => 'image',
-          '#path' => file_create_url($atom->file_source),
-          //'#style_name' => 'ena_16_9_extra_big',
+          '#theme' => 'image_style',
+          '#path' => $atom->file_source,
+          '#style_name' => 'ena_16_9_extra_big',
           '#attributes' => array(
             'class' => 'embed-responsive-item gr-content-image',
             'alt' => 'Responsive image',
-            'title' => file_create_url($atom->file_source),
+            'title' => $atom->field_caption['und'][0]['safe_value'],
           ),
         );
         $principale[$delta]['caption'] = array(
@@ -174,7 +174,7 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
 
         $secondaires[$thumb][1] = array(
           '#type' => 'markup',
-          '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery=""><img src="'.file_create_url($atom->file_source).'"></a>',
+          '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source) . '</a>',
         );
 
         $thumb++;
