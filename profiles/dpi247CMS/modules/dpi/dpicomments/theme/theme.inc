@@ -109,5 +109,13 @@ function theme_dpicomments_comment_wrapper($variables){
       );
   }
 
-  return drupal_render($output);
+  $wrapper = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('gr-article-content'),
+    ),
+  );
+  $wrapper['items'] = $output;
+
+  return drupal_render($wrapper);
 }

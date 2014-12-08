@@ -272,7 +272,8 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
   $language = $form['comment_body']['#language'];
   $form['comment_body'][$language][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
-
+  $form['#prefix'] = '<div class="row comment-wrapper gr-article-content" id="comments">';
+  $form['#suffix'] = '</div>';
   // Adding validate
   $form['#validate'][] = 'dpicomments_form_comment_form_validate';
 }
