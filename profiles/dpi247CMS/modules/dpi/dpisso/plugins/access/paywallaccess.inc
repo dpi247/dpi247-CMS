@@ -18,10 +18,7 @@ $plugin = array(
   ),
   'settings form' => 'dpisso_paywall_access_users_settings',
   'summary' => 'ctools_compare_users_ctools_access_summary',
-  'required context' => array(
-    new ctools_context_required(t('First User'), 'user'),
-    new ctools_context_required(t("Second User"), 'user')
-  ),
+  
 );
 
 /**
