@@ -26,7 +26,7 @@ function dpisso_compare_users_access_check($conf, $context) {
   global $user;
 
     global $dpisso;
-
+dsm($dpisso);
     return (isset($dpisso['accessmanager']['freemium']) && $dpisso['accessmanager']['freemium']) ? true : false;
 }
 
