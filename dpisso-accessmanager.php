@@ -10,7 +10,7 @@
 define ( 'DRUPAL_ROOT', getcwd () );
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-drupal_bootstrap ( DRUPAL_BOOTSTRAP_SESSION );
+drupal_bootstrap (DRUPAL_BOOTSTRAP_FULL );
 
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
@@ -33,6 +33,7 @@ $cctools = ctools_get_plugins ( 'ctools', 'content_types'  );
 $politic = dpi_variable_get ( 'dpisso_paywall_paywallpolitics', null );
 
 if ($politic) {
+  ctools_get_plugins ( 'dpisso', 'paywallpolitic'  );
   $plugin = ctools_get_plugins ( 'dpisso', 'paywallpolitic'  , $politic);
   if ($class = ctools_plugin_get_class ( $plugin, 'handler' )) {
     $politic_instance = new $class ();
