@@ -13,6 +13,33 @@
 define ( 'DRUPAL_ROOT', getcwd () );
 
 global $user;
+global $dpisso;
+
+if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/Config.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/AccessManager.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/includes/common.inc';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/includes/session.inc';
+
+    $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
+
+    $SsoSession = new SsoSession();
+    $context = $_SERVER ["REQUEST_URI"];
+    if ($context[0] == '/') {
+        $context = substr($context, 1);
+    }
+    $rolesd = $SsoSession->getFreemiumInfo($context);
+    $dpisso = array(
+        'accessmanager' => array(
+            'freemium' => ($rolesd->nbFreemium) ? true : false,
+            'freemium_count' => $rolesd->nbFreemium
+        )
+    );
+}
+
+var_dump($dpisso);
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );

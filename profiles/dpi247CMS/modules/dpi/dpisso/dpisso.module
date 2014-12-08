@@ -1,5 +1,5 @@
 <?php
-
+/*
 function dpisso_boot() {
   
     drupal_load ( 'module', 'user' );
@@ -47,7 +47,7 @@ function dpisso_boot() {
     }
     
 }
-
+*/
 // @todo: crer un callback que le varnish appelle
 // pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
 // Même chose pour le profile manager etc ...
