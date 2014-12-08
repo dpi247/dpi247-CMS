@@ -13,7 +13,7 @@ $plugin = array(
   'title' => t("Dpisso: paywall access"),
   'description' => t('Test if the user have more than 0 freemium'),
   'callback' => 'dpisso_compare_users_access_check',
-  'defaults' => array('operator' => '='),
+  'default' => array('operator' => '='),
   'summary' => 'dpisso_paywall_access_ctools_access_summary',
   'required context' => new ctools_context_required(t('Context'), 'any', TRUE),
 );
