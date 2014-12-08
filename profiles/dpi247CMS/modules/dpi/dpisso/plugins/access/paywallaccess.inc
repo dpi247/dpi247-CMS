@@ -24,7 +24,10 @@ $plugin = array(
  */
 function dpisso_compare_users_access_check($conf, $context) {
   global $user;
-  return (isset($user->dpisso['accessmanager']['freemium']) && $user->dpisso['accessmanager']['freemium']) ? true : false;
+
+    global $dpisso;
+
+    return (isset($dpisso['accessmanager']['freemium']) && $dpisso['accessmanager']['freemium']) ? true : false;
 }
 
 /**
