@@ -1,27 +1,47 @@
 <?php
 
-
-function dpisso_boot(){
-  drupal_load('module', 'user');
-  global $user;
+function dpisso_init() {
   
-  
-  print_r( user_get_authmaps($user->init));
-  
-  if($user->uid>0){
-    $external_auth=user_get_authmaps($user->init);
-    if(isset($external_auth['dpisso'])){
-      $loginId=$external_auth['dpisso'];
+    drupal_load ( 'module', 'user' );
+    drupal_register_shutdown_function('devel_shutdown');
+    
+    
+    if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
+      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/Config.class.php';
+      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/AccessManager.class.php';
+      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
+      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
+      require_once $_SERVER ['DOCUMENT_ROOT'] . '/includes/common.inc';
+      
+      $config = Config::getInstance ( $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' );
+     
+      
+      
+      global $user;
+      if ($user->uid > 0) {
+        $external_auth = user_get_authmaps ( $user->init );
+        if (isset ( $external_auth ['dpisso'] )) {
+          $loginId = $external_auth ['dpisso'];
+          $SsoSession = new SsoSession ( $loginId );
+        }
+        else{
+          $SsoSession = new SsoSession ();
+        
+        }
+      }else{
+        $SsoSession = new SsoSession ();
+        
+      }
+       $rolesd = $SsoSession->getFreemiumInfo ( $_SERVER ["REQUEST_URI"] );
+       var_dump($rolesd);
+      $user->dpisso = array (
+        'accessmanager' => array (
+          'freemium' => ($rolesd->nbFreemium) ? true : false,
+          'freemium_count' => $rolesd->nbFreemium 
+        ) 
+      );
     }
-  }
-  print_r($user);
-/*
-  $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
-  $SsoSession= new SsoSession();
-  //$SsoSession->getLoginId();
-  $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
-  dsm($roles,roles);
-  */
+    
 }
 
 // @todo: crer un callback que le varnish appelle
@@ -43,35 +63,42 @@ function dpisso_ctools_plugin_directory($module, $plugin) {
   if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
     return 'plugins/paywallpolitics';
   }
+  if(($module == 'dpisso') && ($plugin == 'access')){
+    return 'plugins/access';
+  }
 }
 
 /**
  * Implementation of hook_menu()
  */
 function dpisso_menu() {
-
-  $items = array();
-
+  $items = array ();
   
-  $items[DPI_ADMIN_PATH.'/dpisso'] = array(
-    'title'            => t('DPI SSo Settings'),
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
-    'access arguments' => array('administer dpisso'),
-    'description'      => t('Manage SSO&Paywall settings'),
-    'file'             => 'includes/dpisso.pages.general.admin.inc',
-   // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
+  $items [DPI_ADMIN_PATH . '/dpisso'] = array (
+    'title' => t ( 'DPI SSo Settings' ),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpisso_loginmanager_admin_settings_page_form' 
+    ),
+    'access arguments' => array (
+      'administer dpisso' 
+    ),
+    'description' => t ( 'Manage SSO&Paywall settings' ),
+    'file' => 'includes/dpisso.pages.general.admin.inc' 
+  // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
+    );
+  
+  $items [DPI_ADMIN_PATH . '/dpisso/general'] = array (
+    'title' => t ( 'General Settings' ),
+    'access arguments' => array (
+      'administer dpisso' 
+    ),
+    'weight' => - 10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes',
+    'file' => 'dpisso.pages.general.admin.inc' 
   );
-
-  $items[DPI_ADMIN_PATH.'/dpisso/general'] = array(
-      'title'            => t('General Settings'),
-      'access arguments' => array('administer dpisso'),
-      'weight'           => -10,
-      'type'             => MENU_DEFAULT_LOCAL_TASK,
-      'file path'        => drupal_get_path('module', 'dpisso').'/includes',
-      'file'             => 'dpisso.pages.general.admin.inc',
-  );
-
+  
   $items [DPI_ADMIN_PATH . '/dpisso/loginmanager'] = array (
     'title' => t ( 'Login Manager' ),
     'page callback' => 'drupal_get_form',
@@ -167,32 +194,29 @@ function dpisso_block_view($delta = '') {
   return $block;
 }
 
-
-
-
 function dpisso_get_connect_form() {
   libraries_load ( 'ssophptoolbox' );
-  if(file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
-    $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-    if($unitId = LoginManager::getUnitId()){
+  if (file_exists ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )) {
+    $config = Config::getInstance ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )->getConfigurationInstance ();
+    if ($unitId = LoginManager::getUnitId ()) {
       if (user_is_anonymous ()) {
-        $return = l ( 'Login', $config['ssoServer_url'] . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Login', $config ['ssoServer_url'] . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
-            'class' => 'btn blue'
-          )
+            'class' => 'btn blue' 
+          ) 
         ) );
       } else {
-        $return = l ( 'Logout', $config['ssoServer_url'] . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Logout', $config ['ssoServer_url'] . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
-            'class' => 'btn blue'
-          )
+            'class' => 'btn blue' 
+          ) 
         ) );
       }
-    }else{
-      $return = t('Connexion service not available');
+    } else {
+      $return = t ( 'Connexion service not available' );
     }
-  }else{
-    $return = t('Connexion service not available, install libraries to use it.');
+  } else {
+    $return = t ( 'Connexion service not available, install libraries to use it.' );
   }
   return $return;
 }
@@ -221,11 +245,11 @@ function dpisso_theme() {
     'checkboxgrid' => $base + array (
       'render element' => 'element' 
     ),
-    'formtable_form_table' => array(
+    'formtable_form_table' => array (
       'render element' => 'form',
       'file' => 'dpisso.pages.paywall.admin.inc',
-      'path' => drupal_get_path('module', 'dpisso').'/includes',
-    ),
+      'path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes' 
+    ) 
   );
 }
 
@@ -346,18 +370,18 @@ function dpisso_get_federation() {
   return ($ssoFederationConfig);
 }
 
-function dpisso_get_version(){
+function dpisso_get_version() {
   return TRUE;
 }
 
-function dpisso_update_role_for_access_manager_to_drupal(){
+function dpisso_update_role_for_access_manager_to_drupal() {
   $return = FALSE;
-  if(is_array(libraries_load ( "ssophptoolbox" ))){
-    $roles = AccessManager::getRoleList();
-    if(isset($roles)){
-      if(dpisso_accessmanager_synchro_roles($roles->services)){
+  if (is_array ( libraries_load ( "ssophptoolbox" ) )) {
+    $roles = AccessManager::getRoleList ();
+    if (isset ( $roles )) {
+      if (dpisso_accessmanager_synchro_roles ( $roles->services )) {
         $return = TRUE;
-      }  
+      }
     }
   }
   return $return;
@@ -367,23 +391,24 @@ function dpisso_update_role_for_access_manager_to_drupal(){
  * This function create role is not exist.
  * Parameter is a simple array with all informtions.
  *
- * @param array $roles - array with new roles
+ * @param array $roles
+ *          - array with new roles
  */
-function dpisso_accessmanager_synchro_roles($roles){
-  if(is_array($roles)){
+function dpisso_accessmanager_synchro_roles($roles) {
+  if (is_array ( $roles )) {
     try {
-      foreach($roles as $role){
-        if(user_role_load_by_name($role)==FALSE){
-          $new_role = new stdClass();
+      foreach ( $roles as $role ) {
+        if (user_role_load_by_name ( $role ) == FALSE) {
+          $new_role = new stdClass ();
           $new_role->name = $role;
-          user_role_save($new_role);
+          user_role_save ( $new_role );
         }
       }
-      return TRUE;  
-    } catch (Exception $e) {
+      return TRUE;
+    } catch ( Exception $e ) {
       return FALSE;
     }
-  }else{
+  } else {
     return FALSE;
   }
 }
@@ -391,21 +416,12 @@ function dpisso_accessmanager_synchro_roles($roles){
 /**
  * Implements cron function
  */
-function dpisso_cron(){
-  if(variable_get('dpisso_role_run_cron', FALSE)){
-    if(dpisso_update_role_for_access_manager_to_drupal()){
-      watchdog('dpisso_role', 'Dpisso role updated');
-    }else{
-      watchdog('dpisso_role', 'Dpisso role update occured an error');
+function dpisso_cron() {
+  if (variable_get ( 'dpisso_role_run_cron', FALSE )) {
+    if (dpisso_update_role_for_access_manager_to_drupal ()) {
+      watchdog ( 'dpisso_role', 'Dpisso role updated' );
+    } else {
+      watchdog ( 'dpisso_role', 'Dpisso role update occured an error' );
     }
   }
-}
-
-
-function dpisso_boot(){
-//   drupal_load('module', 'dpisso');
-//   drupal_load('module', 'libraries');
-//   libraries_load("ssophptoolbox");
-//   $access = new AccessManager();
-  
 }
