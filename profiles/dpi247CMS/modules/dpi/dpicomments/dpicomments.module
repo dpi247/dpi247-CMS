@@ -265,8 +265,8 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
     );
   }
 
-  // Suppresion du premier champ avec le nom de l'auteur
-  unset($form['author']);
+  // Suppresion de l'affichage du premier champ avec le nom de l'auteur
+  $form['author']['#type'] = 'hidden';
 
   // onKeyPress : check if user can add character
   $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
