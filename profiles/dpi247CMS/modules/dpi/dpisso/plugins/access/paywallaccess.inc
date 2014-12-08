@@ -14,7 +14,7 @@ $plugin = array(
   'description' => t('Test if the user have more than 0 freemium'),
   'callback' => 'dpisso_check_if_user_has_freemium',
   'summary' => 'dpisso_paywall_access_ctools_access_summary',
-  'required context' => new ctools_context_required(t('Context'), 'any', TRUE),
+    'all contexts' => TRUE,
 );
 
 
