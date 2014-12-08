@@ -32,8 +32,11 @@ function dpisso_boot() {
         $SsoSession = new SsoSession ();
         
       }
-       $rolesd = $SsoSession->getFreemiumInfo ( $_SERVER ["REQUEST_URI"] );
-       var_dump($rolesd);
+      $context = $_SERVER ["REQUEST_URI"];
+      if($context[0]=='/'){
+        $context = substr($context, 1);
+      }
+      $rolesd = $SsoSession->getFreemiumInfo ( $context );
       $user->dpisso = array (
         'accessmanager' => array (
           'freemium' => ($rolesd->nbFreemium) ? true : false,
