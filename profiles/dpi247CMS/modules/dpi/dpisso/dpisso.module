@@ -1,6 +1,6 @@
 <?php
 
-function dpisso_init() {
+function dpisso_boot() {
   
     drupal_load ( 'module', 'user' );
     drupal_register_shutdown_function('devel_shutdown');
