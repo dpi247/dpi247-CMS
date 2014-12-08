@@ -27,6 +27,7 @@ function dpisso_paywall_access_ctools_access_settings_form()&$form, &$form_state
  * Check for access.
  */
 function dpisso_check_if_user_has_freemium($conf, $context) {
+    die();
 return TRUE;
     global $dpisso;
     drupal_set_message('ooo');
