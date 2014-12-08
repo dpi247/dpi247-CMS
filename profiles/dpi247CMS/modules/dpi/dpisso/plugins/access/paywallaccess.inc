@@ -29,10 +29,10 @@ function dpisso_paywall_access_ctools_access_settings_form(&$form, &$form_state,
 function dpisso_paywallaccess_ctools_access_check($conf, $context) {
     global $dpisso;
     if(isset($dpisso['accessmanager']['freemium']) && $dpisso['accessmanager']['freemium']){
-        return TRUE;
+        return FALSE;
     }
     else{
-        return FALSE;
+        return TRUE;
     }
 }
 
