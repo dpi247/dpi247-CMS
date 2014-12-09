@@ -34,10 +34,7 @@ class UserHasFreemium extends PaywallPolitics{
    * @return boolean Granted access (or not) to the page.
    */
   public function issecurepage($url, $roles) {
-    
-    
     global $user;
-    print_r($user);
     return array('code'=>403,'data'=>"Access denied by default pawall politic plugin");
   }
   
