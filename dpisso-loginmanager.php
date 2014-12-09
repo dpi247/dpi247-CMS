@@ -55,7 +55,6 @@ else{
    dpisso_api_user_logout();
    //@todo: should i call the Login manager ?
 }
-print_r($redirect_url);
 //Process to redirect
 header("Location: $redirect_url");
 die();
