@@ -70,8 +70,6 @@ function theme_dpicomments_reportabuse_json_response($variables) {
  */
 function theme_dpicomments_comment_wrapper($variables){
   $element=$variables['element'];
-  $pager=$element['pager'];
-  // unset($element['pager']);
 
   foreach(element_children($element) as $key){
     $render = drupal_render($element[$key]);

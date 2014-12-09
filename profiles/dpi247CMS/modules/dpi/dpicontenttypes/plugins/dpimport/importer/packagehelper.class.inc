@@ -106,6 +106,8 @@ abstract class PackageHelper extends Importer {
   protected function _createOrLoadEntityScaldAtom($dom, $external_reference, $atom) {
     if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
       $atom = $temp_atom;
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $atom_wrapper->field_external_reference->set($external_reference);
     } else {
       $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
       $atom_wrapper->field_external_reference->set($external_reference);
@@ -133,6 +135,8 @@ abstract class PackageHelper extends Importer {
     $atom = scald_atom_defaults('image');
     $atom->provider = 'scald_image';
     $atom->type = 'image';
+    $atom->field_external_reference = $external_reference;
+    $atom->external_reference_set = TRUE;
 
     return $this->_createOrLoadEntityScaldAtom($dom, $external_reference, $atom);
   }
