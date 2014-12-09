@@ -41,9 +41,9 @@ class IsNodeRestricted extends PaywallPolitics {
     
     $urls = explode ( '/', $url );
     
-    if ($urls [0] == 'node' and ! isset ( $urls [2] )) {
+    if ($urls [1] == 'node' and ! isset ( $urls [3] )) {
       $is_restricted = db_query ( 'SELECT field_restrictedaccess_value FROM {field_data_field_restrictedaccess} as m WHERE  m.entity_id = :nid', array (
-        ':nid' => $urls [1] 
+        ':nid' => $urls [2] 
       ) )->fetchField ();
       
       // Fetch next row as a stdClass object.

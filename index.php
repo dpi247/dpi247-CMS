@@ -20,20 +20,28 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
 
-    $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
-
-    $SsoSession = new SsoSession();
-    $context = $_SERVER ["REQUEST_URI"];
-    if ($context[0] == '/') {
-        $context = substr($context, 1);
+    $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
+    
+    $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']]);
+    if(isset($loginId) && isset($_COOKIE['dpisso_is_connected']) && $_COOKIE['dpisso_is_connected'] == true){
+      $SsoSession = new SsoSession ( $loginId );
+    }else{
+      $SsoSession = new SsoSession (  );
     }
-    $rolesd = $SsoSession->getFreemiumInfo($context);
-    $dpisso = array(
+
+    $context = $_SERVER ["REQUEST_URI"];
+    preg_match('/\badmin/i', $context, $matches);
+    if(!isset($matches[0])){
+      $rolesd = $SsoSession->getFreemiumInfo($context);
+      $dpisso = array(
         'accessmanager' => array(
-            'freemium' => ($rolesd->nbFreemium) ? true : false,
-            'freemium_count' => $rolesd->nbFreemium
+          'freemium' => ($rolesd->nbFreemium) ? true : false,
+          'freemium_count' => $rolesd->nbFreemium
         )
-    );
+      );
+    }else{
+      print_r('Bypass freemium'); 
+    } 
 }
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
