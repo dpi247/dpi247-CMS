@@ -12,17 +12,42 @@
  */
 define ( 'DRUPAL_ROOT', getcwd () );
 
-global $user;
+global $dpisso;
+
+if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/Config.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/AccessManager.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
+    require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
+
+    $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
+
+    $SsoSession = new SsoSession();
+    $context = $_SERVER ["REQUEST_URI"];
+    if ($context[0] == '/') {
+        $context = substr($context, 1);
+    }
+    $rolesd = $SsoSession->getFreemiumInfo($context);
+    $dpisso = array(
+        'accessmanager' => array(
+            'freemium' => ($rolesd->nbFreemium) ? true : false,
+            'freemium_count' => $rolesd->nbFreemium
+        )
+    );
+}
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
 
+drupal_set_message("Freemium count: ".$dpisso["accessmanager"]["freemium_count"]);
 
 //@todo: Attention au cas ou je suis logué sur le Drupal Mais je n'ai pas les cookies longterm_cookie_name et longterm_cookie_name
 if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'))){
   if(file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc') && file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module') && file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
+    require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
+    require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
     $config = Config::getInstance ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )->getConfigurationInstance();
     if (isset ( $_COOKIE [$config ['longterm_cookie_name']] ) && strcmp ( $_COOKIE [$config ['longterm_cookie_name']], 'true' ) == 0 && ! isset ( $_COOKIE [$config ['loginToken_cookie_name']] )) {
       $string = file_get_contents ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoFederationConfig.json' );
@@ -32,10 +57,6 @@ if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'
       header ( "Location: $redirect_url" );
     }
   }
-
-
-
-
 }
 
 

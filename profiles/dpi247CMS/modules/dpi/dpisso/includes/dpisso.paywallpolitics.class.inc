@@ -67,8 +67,8 @@ abstract class PaywallPolitics {
    * 
    * @return boolean Granted access (or not) to the page.
    */
-  public function issecurepage($url, $roles) {
-  	return false;
+  public function issecurepage($url, $roles = null) {
+    return array('code'=>403,'data'=>"Access denied by default pawall politic plugin");
   }
   
   /**
