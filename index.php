@@ -11,7 +11,7 @@
  * See COPYRIGHT.txt and LICENSE.txt.
  */
 define ( 'DRUPAL_ROOT', getcwd () );
-
+ 
 global $dpisso;
 
 if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
