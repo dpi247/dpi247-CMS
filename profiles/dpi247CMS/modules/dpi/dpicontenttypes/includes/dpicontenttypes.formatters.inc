@@ -338,7 +338,12 @@ function dpicontenttypes_field_formatter_settings_summary_first_element_formatte
   return $summary;
 }
 
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom) {
+function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom) {  
+  $language = $atom->language;
+  if (!isset($language) || empty($language)){
+    $language = 'und';
+  }
+
   $principale = array(
     '#type' => 'container',
     '#attributes' => array(
@@ -353,7 +358,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
     '#attributes' => array(
       'class' => 'embed-responsive-item gr-content-image',
       'alt' => 'Responsive image',
-      'title' => $atom->field_caption['und'][0]['safe_value'],
+      'title' => $atom->field_caption[$language][0]['safe_value'],
     ),
   );
   $principale[$delta]['caption'] = array(
@@ -364,7 +369,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
 
     'content-caption' => array(
       '#type' => 'markup',
-      '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+      '#markup' => '<p>'.$atom->field_caption[$language][0]['safe_value'].'</p>',
     ),
   );
 
@@ -372,6 +377,10 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
 }
 
 function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom) {
+  $language = $atom->language;
+  if (!isset($language) || empty($language)){
+    $language = 'und';
+  }
   $secondaire = array(
     '#type' => 'container',
     '#attributes' => array(
@@ -386,7 +395,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire(
     ),
     'content-caption' => array(
       '#type' => 'markup',
-      '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+      '#markup' => '<p>'.$atom->field_caption[$language][0]['safe_value'].'</p>',
     ),
   );
 
