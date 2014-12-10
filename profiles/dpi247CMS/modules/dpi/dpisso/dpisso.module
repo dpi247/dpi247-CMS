@@ -1,28 +1,26 @@
 <?php
 
 
-function dpisso_boot(){
-  drupal_load('module', 'user');
-  global $user;
+// function dpisso_boot(){
+//   drupal_load('module', 'user');
+//   global $user;
   
   
-  print_r( user_get_authmaps($user->init));
   
-  if($user->uid>0){
-    $external_auth=user_get_authmaps($user->init);
-    if(isset($external_auth['dpisso'])){
-      $loginId=$external_auth['dpisso'];
-    }
-  }
-  print_r($user);
-/*
-  $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
-  $SsoSession= new SsoSession();
-  //$SsoSession->getLoginId();
-  $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
-  dsm($roles,roles);
-  */
-}
+//   if($user->uid>0){
+//     $external_auth=user_get_authmaps($user->init);
+//     if(isset($external_auth['dpisso'])){
+//       $loginId=$external_auth['dpisso'];
+//     }
+//   }
+// /*
+//   $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
+//   $SsoSession= new SsoSession();
+//   //$SsoSession->getLoginId();
+//   $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
+//   dsm($roles,roles);
+//   */
+// }
 
 // @todo: crer un callback que le varnish appelle
 // pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
@@ -399,13 +397,4 @@ function dpisso_cron(){
       watchdog('dpisso_role', 'Dpisso role update occured an error');
     }
   }
-}
-
-
-function dpisso_boot(){
-//   drupal_load('module', 'dpisso');
-//   drupal_load('module', 'libraries');
-//   libraries_load("ssophptoolbox");
-//   $access = new AccessManager();
-  
 }
