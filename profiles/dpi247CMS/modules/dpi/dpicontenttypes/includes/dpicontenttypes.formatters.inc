@@ -145,9 +145,8 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
 
   $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
 
-  $element[0] = $principale;
-  $element[1] = $thumbnails;
-  $element[2] = $wrapper_full_screen;
+  // Assemblage des 3 elements qui vont former la mediabox
+  $element[0] = array($principale, $thumbnails, $wrapper_full_screen);
 
   return $element;
 }
