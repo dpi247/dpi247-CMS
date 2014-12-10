@@ -407,7 +407,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($
 
   $thumbnail[1] = array(
     '#type' => 'markup',
-    '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
+    '#markup' => '<a href="'.image_style_url('ena_16_9_extra_big', $atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
   );
 
   return $thumbnail;
