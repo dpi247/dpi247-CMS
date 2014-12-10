@@ -448,5 +448,6 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_ful
         </div>
     </div>
 </div>',
-  )
+  );
+  return $wrapper;
 }
