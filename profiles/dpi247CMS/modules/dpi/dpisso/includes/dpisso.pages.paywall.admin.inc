@@ -233,6 +233,7 @@ function theme_formtable_form_table(&$variables) {
  */
 function dpisso_paywall_admin_settings_page_form_submit($form, & $form_state) {
   /* set variable of choice */
+  module_load_include('inc', 'dpisso', 'dpisso.private');
   variable_set ( "dpisso_paywall_get_type_of_paywall", $form_state ["values"] ["choose"] );
   
   /* send value */
@@ -285,7 +286,7 @@ function dpisso_set_array_info($validityCookie, $validityTypeCookie, $nbViewCook
  * Generate the specific paywall settings form.
  */
 function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
-  
+  module_load_include('inc', 'dpisso', 'dpisso.private');
   // get the list of all declared ctools 'paywallpolitic' pluggin
   ctools_include ( 'plugins' );
   $politics = ctools_get_plugins ( 'dpisso', 'paywallpolitic' );

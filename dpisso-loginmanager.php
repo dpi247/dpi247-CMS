@@ -34,6 +34,7 @@ require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.privat
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
+require_once DRUPAL_ROOT . '/includes/common.inc';
 
 $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
 

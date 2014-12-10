@@ -270,6 +270,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
 }
 
 function dpiblocks_define_node_element_string($dest){
+  module_load_include('inc','dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
   $string = "";  
   foreach ( $dest as $destination ) {
     $targetBlockController = new TargetBlockController ( 'targetblock' );
