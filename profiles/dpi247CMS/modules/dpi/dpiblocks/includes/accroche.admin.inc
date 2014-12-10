@@ -11,7 +11,7 @@ function dpiblocks_get_accroche_info() {
   drupal_add_css(drupal_get_path('module', 'dpiblocks')."/css/dpiblocks.css");
   
   $render = l('Add accroche', 'admin/dpi247/accroche/add', array('attributes' => array('class' => 'dpiblocks_buton')));
-  
+  $rows = array();
   $header = array (
     array ('data' => t ( 'Readable name' )),
     array ('data' => t ( 'Machine name' )),
