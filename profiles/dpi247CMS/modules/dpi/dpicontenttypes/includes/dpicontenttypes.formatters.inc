@@ -116,7 +116,7 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
       if ($count == 1) {
         $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
 
-        $secondaires = array(
+        $thumbnails = array(
           '#type' => 'container',
           '#attributes' => array(
             'class' => array('gr-gallery-thumbnails'),
@@ -125,9 +125,8 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
         );
 
       }
-
-      $secondaires[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom, $thumb);
-    
+      
+      $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
       $thumb++;
 
       if(isset($nb) && $nb==$count){
@@ -147,9 +146,8 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
   $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
 
   $element[0] = $principale;
-  $element[1] = $secondaires;
+  $element[1] = $thumbnails;
   $element[2] = $wrapper_full_screen;
-
 
   return $element;
 }
@@ -381,12 +379,12 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
   return $principale;
 }
 
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom, $thumb) {
+function _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb) {
   $language = $atom->language;
   if (!isset($language) || empty($language)){
     $language = 'und';
   }
-  $secondaire = array(
+  $thumbnail = array(
     '#type' => 'container',
     '#attributes' => array(
       'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
@@ -394,10 +392,10 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire(
   );
 
   if ($thumb == 0) {
-    $secondaire['#attributes']['style'] = 'display: none;';
+    $thumbnail['#attributes']['style'] = 'display: none;';
   }
 
-  $secondaire[0] = array(
+  $thumbnail[0] = array(
     '#type' => 'container',
     '#attributes' => array(
       'class' => array('gr-caption'),
@@ -408,12 +406,12 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire(
     ),
   );
 
-  $secondaire[1] = array(
+  $thumbnail[1] = array(
     '#type' => 'markup',
     '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
   );
 
-  return $secondaire;
+  return $thumbnail;
 }
 
 function _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen() {
