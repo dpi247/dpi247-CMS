@@ -130,22 +130,24 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
         $thumb++;
       }
 
-      $element = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('media'),
-          ),
-      );
-
-      $element[0] = $principale;
-      $element[1] = $secondaires;
-
       if(isset($nb) && $nb==$count){
         break;
       }
       $count++;
     }
   }
+
+  $element = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('media'),
+      ),
+  );
+
+  $element[0] = $principale;
+  $element[1] = $secondaires;
+
+      
   return $element;
 }
 
