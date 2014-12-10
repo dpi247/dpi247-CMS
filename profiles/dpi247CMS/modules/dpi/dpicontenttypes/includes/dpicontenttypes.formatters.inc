@@ -115,20 +115,20 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
 
       if ($count == 1) {
         $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
-      } else {
 
-        if ($count == 2) {
-          $secondaires = array(
-            '#type' => 'container',
-            '#attributes' => array(
-              'class' => array('gr-gallery-thumbnails'),
-              'id' => 'gr-gallery-thumbnails',
-            ),
-          );
-        }
-        $secondaires[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom);
-        $thumb++;
+        $secondaires = array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array('gr-gallery-thumbnails'),
+            'id' => 'gr-gallery-thumbnails',
+          ),
+        );
+
       }
+
+      $secondaires[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom, $thumb);
+    
+      $thumb++;
 
       if(isset($nb) && $nb==$count){
         break;
@@ -381,7 +381,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
   return $principale;
 }
 
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom) {
+function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom, $thumb) {
   $language = $atom->language;
   if (!isset($language) || empty($language)){
     $language = 'und';
@@ -392,6 +392,10 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire(
       'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
     ),
   );
+
+  if ($thumb == 0) {
+    $secondaire['#attributes']['style'] = 'display: none;';
+  }
 
   $secondaire[0] = array(
     '#type' => 'container',
