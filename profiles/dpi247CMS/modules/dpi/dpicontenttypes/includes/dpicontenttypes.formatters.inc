@@ -114,35 +114,7 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
       $atom = scald_atom_load($sid);
 
       if ($count == 1) {
-        $principale = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('thumbnail embed-responsive embed-responsive-16by9 '),
-            'id' => 'image-gallery-launch',
-          ),
-        );
-        $principale[$delta]['photo'] = array(
-          '#theme' => 'image_style',
-          '#path' => $atom->file_source,
-          '#style_name' => 'ena_16_9_extra_big',
-          '#attributes' => array(
-            'class' => 'embed-responsive-item gr-content-image',
-            'alt' => 'Responsive image',
-            'title' => $atom->field_caption['und'][0]['safe_value'],
-          ),
-        );
-        $principale[$delta]['caption'] = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('gr-caption'),
-          ),
-
-          'content-caption' => array(
-            '#type' => 'markup',
-            '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
-          ),
-        );
-
+        $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
       } else {
 
         if ($count == 2) {
@@ -154,29 +126,7 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
             ),
           );
         }
-        $secondaires[$thumb] = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
-          ),
-        );
-
-        $secondaires[$thumb][0] = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('gr-caption'),
-          ),
-          'content-caption' => array(
-            '#type' => 'markup',
-            '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
-          ),
-        );
-
-        $secondaires[$thumb][1] = array(
-          '#type' => 'markup',
-          '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
-        );
-
+        $secondaires[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom);
         $thumb++;
       }
 
@@ -386,4 +336,64 @@ function dpicontenttypes_field_formatter_settings_summary_first_element_formatte
   }
   
   return $summary;
+}
+
+function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom) {
+  $principale = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('thumbnail embed-responsive embed-responsive-16by9 '),
+      'id' => 'image-gallery-launch',
+    ),
+  );
+  $principale[$delta]['photo'] = array(
+    '#theme' => 'image_style',
+    '#path' => $atom->file_source,
+    '#style_name' => 'ena_16_9_extra_big',
+    '#attributes' => array(
+      'class' => 'embed-responsive-item gr-content-image',
+      'alt' => 'Responsive image',
+      'title' => $atom->field_caption['und'][0]['safe_value'],
+    ),
+  );
+  $principale[$delta]['caption'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('gr-caption'),
+    ),
+
+    'content-caption' => array(
+      '#type' => 'markup',
+      '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+    ),
+  );
+
+  return $principale;
+}
+
+function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire($atom) {
+  $secondaire = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
+    ),
+  );
+
+  $secondaire[0] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('gr-caption'),
+    ),
+    'content-caption' => array(
+      '#type' => 'markup',
+      '#markup' => '<p>'.$atom->field_caption['und'][0]['safe_value'].'</p>',
+    ),
+  );
+
+  $secondaire[1] = array(
+    '#type' => 'markup',
+    '#markup' => '<a href="'.file_create_url($atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
+  );
+
+  return $secondaire;
 }
