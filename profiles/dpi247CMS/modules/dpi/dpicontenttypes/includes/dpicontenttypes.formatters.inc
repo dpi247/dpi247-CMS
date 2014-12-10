@@ -125,7 +125,7 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
         );
 
       }
-      
+
       $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
       $thumb++;
 
@@ -359,7 +359,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
     '#path' => $atom->file_source,
     '#style_name' => 'ena_16_9_extra_big',
     '#attributes' => array(
-      'class' => 'embed-responsive-item gr-content-image',
+      'class' => 'embed-responsive-item',
       'alt' => 'Responsive image',
       'title' => $atom->field_caption[$language][0]['safe_value'],
     ),
