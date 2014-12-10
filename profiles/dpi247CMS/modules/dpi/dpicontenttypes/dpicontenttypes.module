@@ -217,6 +217,9 @@ function dpicontenttypes_theme() {
       'template' => 'atom-links-list',
     ),
     'mediabox_wrapper_full_screen' => $base + array(
+      'variables' => array(
+        'content' => NULL,
+      ),
       'template' => 'mediabox-wrapper-full-screen',
     ),
     'dpicontenttypes_image_style' => $base + array(

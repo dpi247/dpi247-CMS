@@ -419,7 +419,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_secondaire(
 function _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen() {
   $wrapper = array(
     '#type' => 'markup',
-    '#markup' => theme('mediabox_wrapper_full_screen'),
+    '#markup' => theme('mediabox_wrapper_full_screen', array('content' => NULL)),
   );
   return $wrapper;
 }
