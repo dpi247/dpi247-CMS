@@ -72,6 +72,10 @@ function theme_dpicomments_comment_wrapper($variables){
   $element=$variables['element'];
 
   foreach(element_children($element) as $key){
+    // Lorsqu'il y a plusieurs réponse, on place les class 'indented' sur toutes
+    if ($element[$key]['comment_body']['#object']->pid > 0 && !strstr($element[$key]['#prefix'], 'indented')) {
+      $element[$key]['#prefix'] = '<div class="indented">' . $element[$key]['#prefix'];
+    }
     $render = drupal_render($element[$key]);
     // Bien dégueu, mais lorsqu'un commentaire est indenté,
     // La balise div ouvrante (div suplémentaire pour class=indented) est dans le commentaire indenté

@@ -139,7 +139,8 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
   $element = array(
       '#type' => 'container',
       '#attributes' => array(
-        'class' => array('media'),
+        'class' => array('gr-media', 'gr-media-image'),
+        'id' => array('gr-main-media'),
       ),
   );
 
