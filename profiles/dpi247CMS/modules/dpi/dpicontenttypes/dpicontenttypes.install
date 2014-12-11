@@ -69,11 +69,11 @@ function dpicontenttypes_field_schema($field) {
       'type' => array(
         'type' => 'varchar',
         'not null' => FALSE,
-        'length' => '255',
+        'length' => 255,
       ),
       'provider' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
       ),
       'inline' => array(
         'type' => 'int',
@@ -195,7 +195,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The ID of the prenode',
       ),
@@ -207,7 +207,7 @@ function dpicontenttypes_schema() {
       ),
       'title' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
         'description' => 'Title',
       ),
     ),
@@ -220,7 +220,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -245,7 +245,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -336,8 +336,8 @@ function dpicontenttypes_schema() {
       ),
       'uri' => array(
         'description' => 'URI of the original file',
-        'type' => 'varchar',
-        'length' => 510,
+				'type' => 'varchar',
+				'length' => 512,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -357,7 +357,7 @@ function dpicontenttypes_schema() {
       ),
     ),
     'indexes' => array(
-      'uri' => array('uri'),
+      'uri' => array(array('uri',200)),
     ),
     'primary key' => array('eid'),
   );
