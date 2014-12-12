@@ -39,8 +39,6 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
           'freemium_count' => $rolesd->nbFreemium
         )
       );
-    }else{
-      print_r('Bypass freemium'); 
     } 
 }
 
@@ -54,9 +52,6 @@ if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'
   if(file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc') && file_exists(DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module') && file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
-    require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
-    require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
-    $config = Config::getInstance ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )->getConfigurationInstance();
     if (isset ( $_COOKIE [$config ['longterm_cookie_name']] ) && strcmp ( $_COOKIE [$config ['longterm_cookie_name']], 'true' ) == 0 && ! isset ( $_COOKIE [$config ['loginToken_cookie_name']] )) {
       $string = file_get_contents ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoFederationConfig.json' );
       $ssoFederationConfig = json_decode ( $string, true );
