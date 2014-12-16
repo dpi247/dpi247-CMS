@@ -310,23 +310,24 @@ abstract class Importer {
 
       // Allow to alter entity before process
       module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
+      print_r($entity);
       // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
       if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
-
+      print_r($entity);
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-
+      
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
 
       if (Logger::error()) {
         return NULL;
       }
-
+      print_r($entity);
+      die();
       // Save entity
       if ($save) {
         // Allow to alter entity before save

@@ -99,8 +99,6 @@ abstract class PackageHelper extends Importer {
       $node_wrapper = entity_metadata_wrapper('node', $node);
       $node_wrapper->field_external_reference->set($external_reference);
     }
-    print_r($node);
-    die();
     return $node;
   }
 
