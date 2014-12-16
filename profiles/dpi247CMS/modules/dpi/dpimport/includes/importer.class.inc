@@ -304,11 +304,11 @@ abstract class Importer {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
     $entity = $this->createOrLoadEntity($dom);
+    dsm($entity, 'return');
     if (!Logger::error()) {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-      print_r($entity);
-      die();
+      dsm($entity, 'after metadata');
       // Allow to alter entity before process
       module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
       // Set attributes
@@ -316,12 +316,13 @@ abstract class Importer {
       if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
+      dsm($entity, 'after attribute set');
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-      
+      dsm($entity, 'after children');
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
+      die();
       if (Logger::error()) {
         return NULL;
       }
