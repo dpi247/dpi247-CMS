@@ -307,7 +307,7 @@ abstract class Importer {
     if (!Logger::error()) {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-      print_r($entity_wrapper);
+      print_r($entity);
       die();
       // Allow to alter entity before process
       module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
