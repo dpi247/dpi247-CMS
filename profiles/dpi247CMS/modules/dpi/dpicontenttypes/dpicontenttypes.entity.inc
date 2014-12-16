@@ -78,12 +78,19 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
   );
 
   $dpiproperties_types = dpiproperties_types();
+  
   $package_type_info = new stdClass();
   $package_type_info->label = 'Package';
   $dpiproperties_types['package'] = $package_type_info;
+  
   $scald_atom_type_info = new stdClass();
   $scald_atom_type_info->label = 'Scald Atom';
   $dpiproperties_types['scald_atom'] = $scald_atom_type_info;
+  
+  $package_gallery_type_info = new stdClass();
+  $package_gallery_type_info->label = 'Package-gallery';
+  $dpiproperties_types['package-gallery'] = $package_gallery_type_info;
+  
   foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,

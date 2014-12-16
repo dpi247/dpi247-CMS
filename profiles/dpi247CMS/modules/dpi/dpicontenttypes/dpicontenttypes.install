@@ -42,6 +42,14 @@ function dpicontenttypes_install() {
     }
   }
 
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+  
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+  
   // Hide author and date information for packages by default
   variable_set('node_submitted_package', FALSE);
 }
@@ -454,4 +462,15 @@ function dpicontenttypes_update_7007() {
     ->fields(array('type' => 'scald_atom'))
     ->condition('entity', 'scald_atom')
     ->execute();
+}
+
+function dpicontenttypes_update_7008(){
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+  
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
 }
