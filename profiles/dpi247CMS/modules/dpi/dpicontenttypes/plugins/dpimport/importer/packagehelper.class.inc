@@ -31,8 +31,6 @@ abstract class PackageHelper extends Importer {
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
-    dsm($package, "construct package 2");
-    die();
     return $package;
   }
 
