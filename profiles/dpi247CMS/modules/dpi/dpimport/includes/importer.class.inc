@@ -305,8 +305,6 @@ abstract class Importer {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
     $entity = $this->createOrLoadEntity($dom);
-    dsm($entity, 'just returned');
-    die();
     if (!Logger::error()) {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
