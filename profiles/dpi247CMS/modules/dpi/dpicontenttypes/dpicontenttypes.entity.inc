@@ -88,8 +88,8 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
   $dpiproperties_types['scald_atom'] = $scald_atom_type_info;
   
   $package_gallery_type_info = new stdClass();
-  $package_gallery_type_info->label = 'Package-gallery';
-  $dpiproperties_types['package-gallery'] = $package_gallery_type_info;
+  $package_gallery_type_info->label = 'Package_gallery';
+  $dpiproperties_types['package_gallery'] = $package_gallery_type_info;
   
   foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
@@ -157,6 +157,12 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
   $info['node']['bundles']['package']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
+  //Set to the package
+  $info['node']['bundles']['package_gallery']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['node']['bundles']['package_gallery']['properties']['field_source'] = $source;
+  
   //Set to the atoms image
   if (isset($info['scald_atom']['bundles']['image'])){
     $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
