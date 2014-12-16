@@ -48,6 +48,8 @@ abstract class PackageHelper extends Importer {
     $node = new stdClass();
     $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
     $node->type = 'package';
+    print_r($type_xml_info);
+    die();
     if($type_xml_info == "package_gallery"){
       $node->type = $type_xml_info;
     }
