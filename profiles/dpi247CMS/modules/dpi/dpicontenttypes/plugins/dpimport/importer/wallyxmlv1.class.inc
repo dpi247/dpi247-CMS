@@ -15,8 +15,7 @@ class WallyXmlV1 extends PackageHelper {
     $package = $this->constructPackage($dom);
     if (!Logger::error()) {
       // Allow to alter entity before save
-      dsm($package);
-      print_r($package);
+      dsm($package, 'build package');
       die();
       $dispatcher = $this->getDispatcher();
       $package_wrapper = entity_metadata_wrapper('node', $package);
