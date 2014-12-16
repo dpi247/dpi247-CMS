@@ -226,7 +226,6 @@ abstract class Importer {
       Logger::logError('importer', 0, 'unknowmethod_001', t('The method !method doesn\'t exist.', array('!method' => $create_or_load_method)));
     }
     dsm($entity, 'return');
-    die();
     return $entity;
   }
 
