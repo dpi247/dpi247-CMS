@@ -251,7 +251,8 @@ function dpidestinations_install(){
   $field_info=_dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
   _dpidestination_attach_field_destination_to_bundle('node', 'package');
-
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+  
   // Add "view section" permission to anonymous and authenticated user roles
   $rids = array(1, 2);
   $permissions = array('view section');
@@ -320,3 +321,6 @@ function dpidestinations_update_7001() {
   }
 }
 
+function dpidestinations_update_7001() {
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+}
