@@ -321,6 +321,6 @@ function dpidestinations_update_7001() {
   }
 }
 
-function dpidestinations_update_7001() {
+function dpidestinations_update_7002() {
   _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
 }
