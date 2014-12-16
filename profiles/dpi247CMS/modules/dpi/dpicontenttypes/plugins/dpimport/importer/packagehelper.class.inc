@@ -51,8 +51,6 @@ abstract class PackageHelper extends Importer {
     if($type_xml_info == "package_gallery"){
       $node->type = $type_xml_info;
     }
-    print_r($node);
-    die();
     $node->is_new = TRUE;
     node_object_prepare($node);
     if($type_xml_info == "package_gallery"){
