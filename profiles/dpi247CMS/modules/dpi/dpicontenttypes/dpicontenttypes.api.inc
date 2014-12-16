@@ -400,6 +400,7 @@ function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE,
 function dpicontenttypes_api_getdpicontenttypes() {
   return array(
     'package',
+    'package_gallery'
   );
 }
 

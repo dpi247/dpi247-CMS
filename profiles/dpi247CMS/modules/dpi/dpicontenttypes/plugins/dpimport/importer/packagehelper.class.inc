@@ -21,7 +21,6 @@ abstract class PackageHelper extends Importer {
     $package = $this->createOrLoadEntity($dom);
     $package_wrapper = entity_metadata_wrapper('node', $package);
     if (!Logger::error()) {
-      dsm($package, "construct package 0");
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_beforeprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
 
@@ -29,7 +28,6 @@ abstract class PackageHelper extends Importer {
       if (!Logger::error()) {
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
-      dsm($package, "construct package 1");
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
