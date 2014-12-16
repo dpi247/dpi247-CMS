@@ -46,7 +46,11 @@ abstract class PackageHelper extends Importer {
    */
   protected function _createOrLoadEntityPackage($dom, $external_reference, $action) {
     $node = new stdClass();
+    $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
     $node->type = 'package';
+    if($type_xml_info == "package_gallery"){
+      $node->type = $type_xml_info;
+    }
     $node->is_new = TRUE;
     node_object_prepare($node);
     $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');

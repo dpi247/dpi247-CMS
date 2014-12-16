@@ -386,7 +386,7 @@ function dpisso_get_version() {
 
 function dpisso_update_role_for_access_manager_to_drupal() {
   $return = FALSE;
-  if (is_array ( libraries_load ( "ssophptoolbox" ) )) {
+  if (is_array ( libraries_load ( "ssophptoolbox" ) ) && file_exists(DRUPAL_ROOT . "/sites/all/libraries/ssophptoolbox/AccessManager.class.php")) {
     $roles = AccessManager::getRoleList ();
     if (isset ( $roles )) {
       if (dpisso_accessmanager_synchro_roles ( $roles->services )) {
