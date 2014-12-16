@@ -19,10 +19,7 @@ abstract class PackageHelper extends Importer {
   protected function constructPackage($dom) {
     $dispatcher = $this->getDispatcher();
     $package = $this->createOrLoadEntity($dom);
-    dsm($package, 'returned info');
     $package_wrapper = entity_metadata_wrapper('node', $package);
-    dsm($package_wrapper, 'returned wrapper');
-    die();
     if (!Logger::error()) {
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_beforeprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
@@ -35,6 +32,8 @@ abstract class PackageHelper extends Importer {
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
+    dsm($package);
+    die();
     return $package;
   }
 
