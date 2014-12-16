@@ -48,14 +48,18 @@ abstract class PackageHelper extends Importer {
     $node = new stdClass();
     $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
     $node->type = 'package';
-    print_r($type_xml_info);
-    die();
     if($type_xml_info == "package_gallery"){
       $node->type = $type_xml_info;
     }
+    print_r($node);
+    die();
     $node->is_new = TRUE;
     node_object_prepare($node);
-    $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
+    if($type_xml_info == "package_gallery"){
+      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package_gallery'), 'dpiproperties');
+    }else{
+      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
+    }
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
     if ($dpiproperties !== FALSE){
