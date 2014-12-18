@@ -21,6 +21,7 @@ function dpicontenttypes_install() {
   dpiproperties_type_save($dpipropertiestype);
 
   scald_add_type('links_list', 'Links List', 'Links List');
+  scald_add_type('atom_package', 'Atom package', 'Resource atom package');
 
   // Create base fields
   module_load_include('field_base.inc', 'dpicontenttypes');
