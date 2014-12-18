@@ -22,7 +22,10 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
 
     $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
     
-    $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']]);
+    if(isset($_COOKIE[$config['loginToken_cookie_name']])){
+      $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']]);
+    }
+    
     if(isset($loginId) && isset($_COOKIE['dpisso_is_connected']) && $_COOKIE['dpisso_is_connected'] == true){
       $SsoSession = new SsoSession ( $loginId );
     }else{
@@ -35,8 +38,8 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
       $rolesd = $SsoSession->getFreemiumInfo($context);
       $dpisso = array(
         'accessmanager' => array(
-          'freemium' => ($rolesd->nbFreemium) ? true : false,
-          'freemium_count' => $rolesd->nbFreemium
+          'freemium' => (isset($rolesd->nbFreemium) && $rolesd->nbFreemium) ? true : false,
+          'freemium_count' => (isset($rolesd->nbFreemium)) ? $rolesd->nbFreemium : 0,
         )
       );
     } 
