@@ -38,8 +38,8 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
       $rolesd = $SsoSession->getFreemiumInfo($context);
       $dpisso = array(
         'accessmanager' => array(
-          'freemium' => ($rolesd->nbFreemium) ? true : false,
-          'freemium_count' => $rolesd->nbFreemium
+          'freemium' => (isset($rolesd->nbFreemium) && $rolesd->nbFreemium) ? true : false,
+          'freemium_count' => (isset($rolesd->nbFreemium)) ? $rolesd->nbFreemium : 0,
         )
       );
     } 
