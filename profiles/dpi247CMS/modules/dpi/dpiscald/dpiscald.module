@@ -494,7 +494,7 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
   $cpt = 0;
   if(is_array($matches[0]) && is_array($matches[1])){
     foreach($matches[1] as $id){
-      if(($atom = scald_atom_load( intval($matches[1])))!=false){
+      if(($atom = scald_atom_load( intval($id)))!=false){
         $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
         $atoms_info[] = scald_render($id, $tmp_context);
       }else{
