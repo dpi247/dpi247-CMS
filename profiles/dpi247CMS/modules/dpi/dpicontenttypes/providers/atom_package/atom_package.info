@@ -1,0 +1,5 @@
+name = Dpi atom package Providers
+description = Provides for atom package.
+package = Scald Providers
+core = 7.x
+dependencies[] = scald

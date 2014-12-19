@@ -471,12 +471,15 @@ function dpicontenttypes_scald_transcoders_alter(&$transcoders) {
  */
 function dpicontenttypes_scald_atom_providers() {
   return array(
-    'links_list' => 'Links lists'
+    'links_list' => 'Links lists',
   );
 }
 
+function dpicontenttypes_scald_atom_providers_alter(&$types){
+}
+
 function dpicontenttypes_scald_add_form(&$form, &$form_state) {
-  return array();
+    return array();
 }
 
 function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
