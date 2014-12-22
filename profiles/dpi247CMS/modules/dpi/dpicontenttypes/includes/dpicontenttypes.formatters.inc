@@ -355,9 +355,8 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale(
     ),
   );
   $principale[$delta]['photo'] = array(
-    '#theme' => 'image_style',
-    '#path' => $atom->file_source,
-    '#style_name' => 'ena_16_9_extra_big',
+    '#theme' => 'image',
+    '#path' => dpicontenttypes_api_image_style_url('ena_16_9_extra_big', $atom->type, $atom->sid, $atom->file_source),
     '#attributes' => array(
       'class' => 'embed-responsive-item',
       'alt' => 'Responsive image',
@@ -408,7 +407,7 @@ function _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($
 
   $thumbnail[1] = array(
     '#type' => 'markup',
-    '#markup' => '<a href="'.image_style_url('ena_16_9_extra_big', $atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image_style(array('style_name' => 'ena_16_9_medium', 'path' => $atom->file_source)) . '</a>',
+    '#markup' => '<a href="'.dpicontenttypes_api_image_style_url('ena_16_9_extra_big', $atom->type, $atom->sid, $atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image(array('path' => dpicontenttypes_api_image_style_url('ena_16_9_medium', $atom->type, $atom->sid, $atom->file_source), 'alt'=>$atom->title)) . '</a>',
   );
 
   return $thumbnail;
