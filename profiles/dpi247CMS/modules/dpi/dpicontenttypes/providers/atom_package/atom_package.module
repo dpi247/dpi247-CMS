@@ -21,10 +21,35 @@ function atom_package_scald_add_form(&$form, &$form_state){
   );
 }
 
-function atom_package_scald_add_form_fill(&$atom, $form, $form_state){
-  dsm($atom, 'coucou');
+function atom_package_scald_add_form_fill(&$atom, $form, $form_state){  
+  $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
+  $atom->scald_thumbnail[$langcode][0] = array('public://styles/Library/public/icon_package.png');
+  $atom->scald_authors = $atom->data['author'];
+}
+
+function atom_package_scald_fetch($atom, $type) {
+  $atom->file_source = $atom->thumbnail_source = 'public://styles/Library/public/icon_package.png';
 }
 
 function atom_package_scald_prerender($atom, $context, $options, $mode) {
-  dsm($atom);
+  if ($mode == 'atom') {
+    $atom->rendered->player = theme('atom_package_player',
+      array('vars' =>
+        array(
+          'node'    => node_load($atom->data['nid']),
+          'thumbnail' => $atom->rendered->thumbnail_source_url,
+        ),
+        'atom' => $atom,
+      )
+    );
+  }
+}
+
+function atom_package_theme(){
+  return array(
+    'atom_package_player' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'atom_package_player'
+    ),
+  );
 }

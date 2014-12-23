@@ -9,6 +9,8 @@
  * Implements hook_install().
  */
 function atom_package_gallery_install() {
+  copy($_SERVER['DOCUMENT_ROOT'] .'/'. drupal_get_path('module', 'dpicontenttypes').'/providers/atom_package/icons/icon_package.png', 'public://styles/Library/public/icon_package.png');
+  copy($_SERVER['DOCUMENT_ROOT'] .'/'. drupal_get_path('module', 'dpicontenttypes').'/providers/atom_package/icons/icone_atom_package.png', 'public://styles/Library/public/icone_atom_package.png');
   scald_add_type('atom_package', 'Atom package', 'Atom for package');
 }
 
