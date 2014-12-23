@@ -3,3 +3,4 @@ description = Provides for atom package gallery.
 package = Scald Providers
 core = 7.x
 dependencies[] = scald
+stylesheets[all][] = atom_package_gallery.css
