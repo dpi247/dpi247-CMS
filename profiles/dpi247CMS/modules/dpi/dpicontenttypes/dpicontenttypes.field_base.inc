@@ -1130,5 +1130,47 @@ function dpicontenttypes_field_default_field_bases() {
     'type' => 'text_long',
   );
 
+  // Exported field_base: 'field_embededobjects'
+  $field_bases['field_atompackage'] = array(
+    'active' => 1,
+    'cardinality' => -1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_atompackage',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'sid' => array(
+        0 => 'sid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'dpicontenttypes',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'dpiatom_reference',
+  );
+  
   return $field_bases;
 }
+
+function dpicontenttypes_field_default_field_base_atom_package(){
+  return array(
+    'active' => 1,
+    'cardinality' => -1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_atompackage',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'sid' => array(
+        0 => 'sid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'dpicontenttypes',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'dpiatom_reference',
+  );
+}
+

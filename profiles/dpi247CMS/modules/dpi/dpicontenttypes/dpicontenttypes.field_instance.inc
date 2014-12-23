@@ -3532,3 +3532,91 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
   
   return $field_instances;
 }
+
+function dpicontenttypes_field_default_field_atom_package(){
+  $field_instances = array();
+  
+  // Exported field_instance: 'node-package-field_atompackage'
+  $field_instances['node-package-field_atompackage'] = array(
+    'bundle' => 'package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 30,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_atompackage',
+    'label' => 'Atom package',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'atom_package' => 'atom_package',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 7,
+    ),
+  );
+  
+  // Exported field_instance: 'node-package-field_atompackage'
+  $field_instances['node-package_gallery-field_atompackage'] = array(
+    'bundle' => 'package_gallery',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 30,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_atompackage',
+    'label' => 'Atom package',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'atom_package' => 'atom_package',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 7,
+    ),
+  );
+  
+  return $field_instances;
+}
