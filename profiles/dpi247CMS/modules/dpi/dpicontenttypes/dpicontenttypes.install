@@ -48,7 +48,7 @@ function dpicontenttypes_install() {
     }
   }
 
-  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+  if ($instances = dpicontenttypes_field_default_field_atom_package()) {
     field_info_cache_clear();
   
     foreach ($instances as $field_instance) {
