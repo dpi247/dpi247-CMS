@@ -129,16 +129,22 @@ function dpiscald_spotify_theme() {
  * Get media infos from url.
  */
 function dpiscald_spotify_get_media_infos_from_url($url) {
-  // $api_url = 'http://api.storify.com/v1/stories/';
-  // $url = $api_url . $url;
-  // $response = drupal_http_request($url);
-  // if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
-  //   $infos = json_decode($response->data);
-  //   return $infos;
-  // }
-  // else {
+  $api_url = 'https://api.spotify.com/v1/tracks/';
+
+  $url_e = explode(':', $url);
+  $id_track = $url_e[count($url_e)-1];
+
+  $url = $api_url . $url;
+  $response = drupal_http_request($url);
+  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
+    $infos = json_decode($response->data);
+    dsm($infos);
+    return $infos;
+  }
+  else {
+    dsm('false');
     return FALSE;
-  // }
+  }
 }
 
 /**
