@@ -87,10 +87,10 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_spotify_scald_fetch($atom, $type) {
-  // $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  // if (file_exists($file)) {
-  //   $atom->file_source = $atom->thumbnail_source = $file;
-  // }
+  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+  if (file_exists($file)) {
+    $atom->file_source = $atom->thumbnail_source = $file;
+  }
 }
 
 /**
@@ -103,7 +103,7 @@ function dpiscald_spotify_scald_prerender($atom, $context, $options, $mode) {
         array(
           'base_url'      => $atom->data['url'],
           'title'         => $atom->title,
-          //'thumbnail'     => $atom->rendered->thumbnail_source_url,
+          'thumbnail'     => $atom->rendered->thumbnail_source_url,
         ),
         'atom' => $atom,
       )
