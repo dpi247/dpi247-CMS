@@ -11,7 +11,7 @@
 function dpiscald_spotify_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('Storify URL'),
+    '#title' => t('Spotify URL'),
     '#element_validate' => array('dpiscald_spotify_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
@@ -29,20 +29,20 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
   $url = $form_state['values']['identifier'];
   
   if (startsWith($url,'https')){
-    $url = explode('https://storify.com/',$url);
+    $url = explode('https://embed.spotify.com/',$url);
   } else {
-    $url = explode('http://storify.com/',$url);
+    $url = explode('http://embed.spotify.com/',$url);
   }
   $url = $url[1];
   
   // Get media infos.
-  $infos = dpiscald_spotify_get_media_infos_from_url($url);
+//TODO  $infos = dpiscald_spotify_get_media_infos_from_url($url);
   
   $atom->base_id = md5($url);
   
-  $infos = $infos->content;
+//TODO  $infos = $infos->content;
 
-  $atom->title = $infos->title;
+  $atom->title = 'Titre spotify'; //TODO $infos->title;
 
   $atom->data['url'] = $url;
   // Prefill the author
@@ -61,36 +61,37 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
     );
   }
 
-  if (!empty($infos->thumbnail)) {
-    // Download a copy of the media thumbnail. This makes it possible
-    // to do interesting manipulation with image styles presets.
-    $thumb = drupal_http_request($infos->thumbnail);
-    $dir = 'public://storify';
-    if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
-      $dest = $dir . '/' . $atom->base_id . '.jpg';
-      $file = file_save_data($thumb->data, $dest);
+//TODO :
+  // if (!empty($infos->thumbnail)) {
+  //   // Download a copy of the media thumbnail. This makes it possible
+  //   // to do interesting manipulation with image styles presets.
+  //   $thumb = drupal_http_request($infos->thumbnail);
+  //   $dir = 'public://storify';
+  //   if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+  //     $dest = $dir . '/' . $atom->base_id . '.jpg';
+  //     $file = file_save_data($thumb->data, $dest);
 
-      if ($file) {
-        // Set the file status to temporary.
-        $query = db_update('file_managed')
-          ->condition('fid', $file->fid)
-          ->fields(array('status' => 0))
-          ->execute();
+  //     if ($file) {
+  //       // Set the file status to temporary.
+  //       $query = db_update('file_managed')
+  //         ->condition('fid', $file->fid)
+  //         ->fields(array('status' => 0))
+  //         ->execute();
 
-        $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
-      }
-    }
-  }
+  //       $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+  //     }
+  //   }
+  // }
 }
 
 /**
  * Implements hook_scald_fetch().
  */
 function dpiscald_spotify_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
-  }
+  // $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+  // if (file_exists($file)) {
+  //   $atom->file_source = $atom->thumbnail_source = $file;
+  // }
 }
 
 /**
@@ -103,7 +104,7 @@ function dpiscald_spotify_scald_prerender($atom, $context, $options, $mode) {
         array(
           'base_url'      => $atom->data['url'],
           'title'         => $atom->title,
-          'thumbnail'     => $atom->rendered->thumbnail_source_url,
+          //'thumbnail'     => $atom->rendered->thumbnail_source_url,
         ),
         'atom' => $atom,
       )
@@ -118,7 +119,7 @@ function dpiscald_spotify_theme() {
   return array(
       'dpiscald_spotify_player' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
-          'template' => 'providers/storify/dpiscald_spotify_player'
+          'template' => 'providers/spotify/dpiscald_spotify_player'
       ),
   );
 }
@@ -128,16 +129,16 @@ function dpiscald_spotify_theme() {
  * Get media infos from url.
  */
 function dpiscald_spotify_get_media_infos_from_url($url) {
-  $api_url = 'http://api.storify.com/v1/stories/';
-  $url = $api_url . $url;
-  $response = drupal_http_request($url);
-  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
-    $infos = json_decode($response->data);
-    return $infos;
-  }
-  else {
+  // $api_url = 'http://api.storify.com/v1/stories/';
+  // $url = $api_url . $url;
+  // $response = drupal_http_request($url);
+  // if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
+  //   $infos = json_decode($response->data);
+  //   return $infos;
+  // }
+  // else {
     return FALSE;
-  }
+  // }
 }
 
 /**
@@ -164,9 +165,9 @@ function dpiscald_spotify_validate_id($element, &$form_state) {
     form_error($element, t('Invalid media url, you must specify an absolute url.'));
   }
   if (startsWith($url,'https')){
-    $url = explode('https://storify.com/',$url);
+    $url = explode('https://embed.spotify.com/',$url);
   } else {
-    $url = explode('http://storify.com/',$url);
+    $url = explode('http://embed.spotify.com/',$url);
   }
   $url = $url[1];
   $id = md5($url);
