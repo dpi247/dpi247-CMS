@@ -134,7 +134,7 @@ function dpiscald_spotify_get_media_infos_from_url($url) {
   $url_e = explode(':', $url);
   $id_track = $url_e[count($url_e)-1];
 
-  $url = $api_url . $url;
+  $url = $api_url . $id_track;
   $response = drupal_http_request($url);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
@@ -142,7 +142,6 @@ function dpiscald_spotify_get_media_infos_from_url($url) {
     return $infos;
   }
   else {
-    dsm('false');
     return FALSE;
   }
 }
