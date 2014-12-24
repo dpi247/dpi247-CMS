@@ -1,7 +1,11 @@
 <?php
 /**
  * @file
- *   Default theme implementation for the Scald Youtube Player
+ *   Default theme implementation for the Scald Storify Player
  */
 ?>
-<iframe width="<?php print $vars['video_width'] ?>" height="<?php print $vars['video_height'] ?>" src="http://www.youtube.com/embed/<?php print $vars['video_id'] ?>" frameborder="0" allowfullscreen></iframe>
+<div class="storify">
+<iframe  width="435" height="326" src="//storify.com/<?php print $vars['base_url'] ?>/embed?border=false&template=slideshow"
+frameborder=no allowtransparency=true></iframe><script 
+src="//storify.com/<?php print $vars['base_url'] ?>.js?border=false&template=slideshow"></script>
+<noscript>[<a href="//storify.com/<?php print $vars['base_url'] ?>" target="_blank">View the story "<?php print $vars['title'] ?>" on Storify</a>]</noscript></div>
