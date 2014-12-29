@@ -135,7 +135,6 @@ function dpiscald_spotify_get_media_infos_from_url($url) {
   $response = drupal_http_request($url);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
-    dsm($infos);
     return $infos;
   }
   else {
