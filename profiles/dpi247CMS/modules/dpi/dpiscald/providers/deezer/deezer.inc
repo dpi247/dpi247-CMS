@@ -163,25 +163,29 @@ function dpiscald_deezer_already_imported($id) {
   return scald_search($query, FALSE, TRUE);
 }
 
+function dpiscald_deezer_build_url($type, $id) {
+  $url = 
+}
+
 /**
  * Form element validation handler for media url.
  */
 function dpiscald_deezer_form_validate(&$form, &$form_state) {
-  dsm($form, 'form');
-  dsm($form_state, 'form_state');
+  $type = $form_state['values']['type_deezer'];
+  $id = $form_state['values']['id_deezer'];
 
-  // $url = $form_state['values']['identifier'];
-  // if (!valid_url($url, TRUE)) {
-  //   form_error($element, t('Invalid media url, you must specify an absolute url.'));
-  // }
-  // if (startsWith($url,'https')){
-  //   $url = explode('https://embed.spotify.com/',$url);
-  // } else {
-  //   $url = explode('http://embed.spotify.com/',$url);
-  // }
-  // $url = $url[1];
-  // $id = md5($url);
-  // if (dpiscald_deezer_already_imported($id)) {
-  //   form_error($element, t('Media already imported.'));
-  // }
+  if (!in_array($type, array('tracks', 'album', 'playlist'))) {
+    form_error($form, t('Type is not defined'));
+  }
+
+  if (!isset($id) || empty($id)) {
+    form_error($form, t('Please enter an identifier'));
+  }
+
+  $url = 'http://www.deezer.com/plugins/player?type=' . $type . '&id=' . $id;
+
+  $id = md5($url);
+  if (dpiscald_deezer_already_imported($id)) {
+    form_error($form, t('Media already imported.'));
+  }
 }
