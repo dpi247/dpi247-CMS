@@ -11,7 +11,7 @@
 function dpiscald_deezer_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('Spotify URL'),
+    '#title' => t('Deezer URL'),
     '#element_validate' => array('dpiscald_deezer_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
@@ -63,7 +63,7 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
     // Download a copy of the media thumbnail. This makes it possible
     // to do interesting manipulation with image styles presets.
     $thumb = drupal_http_request($infos->album->images[2]->url);
-    $dir = 'public://spotify';
+    $dir = 'public://deezer';
     if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
       $dest = $dir . '/' . $atom->base_id . '.jpg';
       $file = file_save_data($thumb->data, $dest);
