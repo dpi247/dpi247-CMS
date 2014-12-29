@@ -31,18 +31,11 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   
   $atom = is_array($atoms) ? reset($atoms) : $atoms;
 
-  // Get the URL.
-  $url = $form_state['values']['identifier'];
-  
-  if (startsWith($url,'https')){
-    $url = explode('https://embed.spotify.com/',$url);
-  } else {
-    $url = explode('http://embed.spotify.com/',$url);
-  }
-  $url = $url[1];
-  
+  $type = $form_state['values']['type_deezer'];
+  $id = $form_state['values']['id_deezer'];
+
   // Get media infos.
-  $infos = dpiscald_deezer_get_media_infos_from_url($url);
+  $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
   
   $atom->base_id = md5($url);
 
@@ -131,7 +124,7 @@ function dpiscald_deezer_theme() {
 /**
  * Get media infos from url.
  */
-function dpiscald_deezer_get_media_infos_from_url($url) {
+function dpiscald_deezer_get_media_infos_from_url($type, $id) {
   $api_url = 'https://api.spotify.com/v1/tracks/';
 
   $url_e = explode(':', $url);
@@ -164,6 +157,21 @@ function dpiscald_deezer_already_imported($id) {
 }
 
 /**
+ * Build url player
+ *
+ * @param array $form_state
+ *
+ * @return string url
+ */
+function dpiscald_deezer_build_url($form_state) {
+  $type = $form_state['values']['type_deezer'];
+  $id = $form_state['values']['id_deezer'];
+  $url = 'http://www.deezer.com/plugins/player?type=' . $type . '&id=' . $id;
+
+  return $url;
+}
+
+/**
  * Form element validation handler for media url.
  */
 function dpiscald_deezer_form_validate(&$form, &$form_state) {
@@ -178,7 +186,7 @@ function dpiscald_deezer_form_validate(&$form, &$form_state) {
     form_error($form, t('Please enter an identifier'));
   }
 
-  $url = 'http://www.deezer.com/plugins/player?type=' . $type . '&id=' . $id;
+  $url = dpiscald_deezer_build_url($form_state);
 
   $id = md5($url);
   if (dpiscald_deezer_already_imported($id)) {
