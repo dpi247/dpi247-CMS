@@ -46,18 +46,9 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
-      // 'tid' => 0,
-      // 'taxonomy_term' => (object)(array('name' => $infos->author->username))
+      'tid' => 0,
+      'taxonomy_term' => (object)(array('name' => $type=="playlist"?$infos->creator->name:$infos->artist->name))
   );
-  
-  // Prefill tags
-  // $langcode = field_language('scald_atom', $atom, 'scald_tags');
-  // foreach ($infos->meta->hashtags as $index => $tag) {
-  //   $atom->scald_tags[$langcode][$index] = array(
-  //       'tid' => $index,  // Beware, this is not a real tid, it's just an index
-  //       'taxonomy_term' => (object)(array('name' => $tag))
-  //   );
-  // }
 
   if ($type == "tracks") {
    $thumbnail_url =  $infos->album->cover;
