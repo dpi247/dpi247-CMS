@@ -9,19 +9,13 @@
  * Implements hook_scald_add_form().
  */
 function dpiscald_deezer_scald_add_form(&$form, &$form_state) {
-  $form['playlist_id'] = array(
+  $form['type_deezer'] = array(
     '#type' => 'textfield',
-    '#title' => t('Playlist ID'),
-    '#default_value' => '',
-    '#maxlength' => 1000
+    'type' => 'select',
+    '#description' => 'Select the desired item',
+     '#options' => array('tracks' => t('Track'), 'album' => t('Album'), 'playlist' => t('Playlist')),
   );
-  $form['album_id'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Or Album ID'),
-    '#default_value' => '',
-    '#maxlength' => 1000
-  );
-  $form['track_id'] = array(
+  $form['id_deezer'] = array(
     '#type' => 'textfield',
     '#title' => t('Or Track ID'),
     '#default_value' => '',
@@ -175,6 +169,7 @@ function dpiscald_deezer_already_imported($id) {
 function dpiscald_deezer_form_validate(&$form, &$form_state) {
   dsm($form, 'form');
   dsm($form_state, 'form_state');
+
   // $url = $form_state['values']['identifier'];
   // if (!valid_url($url, TRUE)) {
   //   form_error($element, t('Invalid media url, you must specify an absolute url.'));
