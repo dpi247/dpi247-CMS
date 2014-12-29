@@ -163,10 +163,6 @@ function dpiscald_deezer_already_imported($id) {
   return scald_search($query, FALSE, TRUE);
 }
 
-function dpiscald_deezer_build_url($type, $id) {
-  $url = 
-}
-
 /**
  * Form element validation handler for media url.
  */
