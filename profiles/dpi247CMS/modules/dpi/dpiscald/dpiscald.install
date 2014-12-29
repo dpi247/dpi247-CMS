@@ -76,6 +76,7 @@ function dpiscald_uninstall() {
   scald_remove_type('coveritlive');
   scald_remove_type('picktochart');
   scald_remove_type('scribblelive');
+  scald_remove_type('spotify');
 }
 
 /**
