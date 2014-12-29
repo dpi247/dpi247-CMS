@@ -17,8 +17,8 @@ class WallyXmlV1 extends PackageHelper {
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher();
       
-      /* Replace atom package from field_embededobjects to field_atompackage */
-      $package = $this->_buildFieldAtompackage($package);
+//       /* Replace atom package from field_embededobjects to field_atompackage */
+//       $package = $this->_buildFieldAtompackage($package);
       
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);

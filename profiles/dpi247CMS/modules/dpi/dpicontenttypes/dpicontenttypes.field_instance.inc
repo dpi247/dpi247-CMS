@@ -445,6 +445,7 @@ function dpicontenttypes_field_default_field_instances() {
       'referencable_types' => array(
         'image' => 'image',
         'video' => 'video',
+        'atom_package' => 'atom_package',
       ),
       'user_register_form' => FALSE,
     ),
@@ -755,15 +756,19 @@ function dpicontenttypes_field_default_field_instances() {
   );
   $field_instances['node-package-field_packagetype'] = array(
     'bundle' => 'package',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
+        'module' => 'list',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
+        'type' => 'list_default',
         'weight' => 34,
       ),
       'teaser' => array(
@@ -775,7 +780,7 @@ function dpicontenttypes_field_default_field_instances() {
     ),
     'entity_type' => 'node',
     'field_name' => 'field_packagetype',
-    'label' => 'Package Type',
+    'label' => 'Type de package, hors text ?',
     'required' => 1,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -784,8 +789,8 @@ function dpicontenttypes_field_default_field_instances() {
       'active' => 1,
       'module' => 'options',
       'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 25,
+      'type' => 'options_select',
+      'weight' => 27,
     ),
   );
 
@@ -3203,17 +3208,21 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
       'weight' => 17,
     ),
   );
-  $field_instances['node-package_gallery-field_packagetype'] = array(
+  $field_instances['node-package_gallery-field_packagetype'] = array(    
     'bundle' => 'package_gallery',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'taxonomy',
+        'module' => 'list',
         'settings' => array(),
-        'type' => 'taxonomy_term_reference_link',
+        'type' => 'list_default',
         'weight' => 34,
       ),
       'teaser' => array(
@@ -3225,7 +3234,7 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
     ),
     'entity_type' => 'node',
     'field_name' => 'field_packagetype',
-    'label' => 'package_gallery Type',
+    'label' => 'Package type',
     'required' => 1,
     'settings' => array(
       'user_register_form' => FALSE,
@@ -3234,8 +3243,8 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
       'active' => 1,
       'module' => 'options',
       'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 25,
+      'type' => 'options_select',
+      'weight' => 27,
     ),
   );
   
@@ -3533,90 +3542,3 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
   return $field_instances;
 }
 
-function dpicontenttypes_field_default_field_atom_package(){
-  $field_instances = array();
-  
-  // Exported field_instance: 'node-package-field_atompackage'
-  $field_instances['node-package-field_atompackage'] = array(
-    'bundle' => 'package',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 30,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_atompackage',
-    'label' => 'Atom package',
-    'required' => 0,
-    'settings' => array(
-      'field_to_analyse' => 'field_textbody',
-      'referencable_types' => array(
-        'atom_package' => 'atom_package',
-      ),
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 0,
-      'module' => 'dpicontenttypes',
-      'settings' => array(),
-      'type' => 'dpiatom_reference_textfield',
-      'weight' => 7,
-    ),
-  );
-  
-  // Exported field_instance: 'node-package-field_atompackage'
-  $field_instances['node-package_gallery-field_atompackage'] = array(
-    'bundle' => 'package_gallery',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 30,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_atompackage',
-    'label' => 'Atom package',
-    'required' => 0,
-    'settings' => array(
-      'field_to_analyse' => 'field_textbody',
-      'referencable_types' => array(
-        'atom_package' => 'atom_package',
-      ),
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 0,
-      'module' => 'dpicontenttypes',
-      'settings' => array(),
-      'type' => 'dpiatom_reference_textfield',
-      'weight' => 7,
-    ),
-  );
-  
-  return $field_instances;
-}

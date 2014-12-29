@@ -867,6 +867,7 @@ function unfoldcompanion_field_default_field_instances() {
       'referencable_types' => array(
         'image' => 'image',
         'video' => 'video',
+        'atom_package' => 'atom_package',
       ),
       'user_register_form' => FALSE,
     ),
@@ -1349,7 +1350,11 @@ function unfoldcompanion_field_default_field_instances() {
   // Exported field_instance: 'node-package-field_packagetype'
   $field_instances['node-package-field_packagetype'] = array(
     'bundle' => 'package',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -1401,7 +1406,7 @@ function unfoldcompanion_field_default_field_instances() {
       'active' => 1,
       'module' => 'options',
       'settings' => array(),
-      'type' => 'options_buttons',
+      'type' => 'options_select',
       'weight' => 25,
     ),
   );
@@ -2724,6 +2729,7 @@ function unfoldcompanion_field_default_field_instances() {
     'referencable_types' => array(
     'image' => 'image',
     'video' => 'video',
+    'atom_package' => 'atom_package',
     ),
     'user_register_form' => FALSE,
     ),
@@ -3206,7 +3212,11 @@ function unfoldcompanion_field_default_field_instances() {
   // Exported field_instance: 'node-package-field_packagetype'
   $field_instances['node-package_gallery-field_packagetype'] = array(
     'bundle' => 'package_gallery',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -3255,11 +3265,11 @@ function unfoldcompanion_field_default_field_instances() {
     'user_register_form' => FALSE,
     ),
     'widget' => array(
-    'active' => 1,
-    'module' => 'options',
-    'settings' => array(),
-    'type' => 'options_buttons',
-    'weight' => 25,
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 27,
     ),
   );
   
