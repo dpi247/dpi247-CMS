@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-spotify {
+ background: url('icons/spotify-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-spotify:hover {
+ background-image: url('icons/spotify-large-color.png');
+}
+.dnd-library-wrapper .editor-item .meta.type-spotify {
+ background-image: url('icons/spotify-large-inverted.png');
+}
