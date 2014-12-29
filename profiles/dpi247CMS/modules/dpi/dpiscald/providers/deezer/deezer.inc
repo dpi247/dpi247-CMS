@@ -36,34 +36,41 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get media infos.
   $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
-
-  dsm($infos, 'infos');
   
+  $url = dpiscald_deezer_build_url($form_state);
   $atom->base_id = md5($url);
 
-  $atom->title = $infos->name;
+  $atom->title = $infos->title;
 
   $atom->data['url'] = $url;
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
-      'tid' => 0,
-      'taxonomy_term' => (object)(array('name' => $infos->author->username))
+      // 'tid' => 0,
+      // 'taxonomy_term' => (object)(array('name' => $infos->author->username))
   );
   
   // Prefill tags
-  $langcode = field_language('scald_atom', $atom, 'scald_tags');
-  foreach ($infos->meta->hashtags as $index => $tag) {
-    $atom->scald_tags[$langcode][$index] = array(
-        'tid' => $index,  // Beware, this is not a real tid, it's just an index
-        'taxonomy_term' => (object)(array('name' => $tag))
-    );
+  // $langcode = field_language('scald_atom', $atom, 'scald_tags');
+  // foreach ($infos->meta->hashtags as $index => $tag) {
+  //   $atom->scald_tags[$langcode][$index] = array(
+  //       'tid' => $index,  // Beware, this is not a real tid, it's just an index
+  //       'taxonomy_term' => (object)(array('name' => $tag))
+  //   );
+  // }
+
+  if ($type == "track") {
+   $thumbnail_url =  $infos->album->cover;
+  } elseif ($type == "album") {
+    $thumbnail_url ⁼ $infos->cover;
+  } else {
+    $thumbnail_url = $infos->picture;
   }
 
-  if (!empty($infos->album->images[2]->url)) {
+  if (!empty($thumbnail_url) {
     // Download a copy of the media thumbnail. This makes it possible
     // to do interesting manipulation with image styles presets.
-    $thumb = drupal_http_request($infos->album->images[2]->url);
+    $thumb = drupal_http_request($thumbnail_url);
     $dir = 'public://deezer';
     if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
       $dest = $dir . '/' . $atom->base_id . '.jpg';
@@ -135,7 +142,6 @@ function dpiscald_deezer_get_media_infos_from_url($type, $id) {
 
   $url = $api_url . $type . '/' . $id;
 
-  $url = $api_url . $id_track;
   $response = drupal_http_request($url);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
