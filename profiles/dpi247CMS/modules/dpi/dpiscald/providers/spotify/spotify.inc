@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Kewego include
+ * Spotify include
  */
 
 /**
@@ -39,8 +39,6 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
   $infos = dpiscald_spotify_get_media_infos_from_url($url);
   
   $atom->base_id = md5($url);
-  
-//TODO  $infos = $infos->content;
 
   $atom->title = $infos->name;
 
