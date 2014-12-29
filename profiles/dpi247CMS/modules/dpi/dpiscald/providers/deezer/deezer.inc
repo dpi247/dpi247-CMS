@@ -59,7 +59,7 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   //   );
   // }
 
-  if ($type == "track") {
+  if ($type == "tracks") {
    $thumbnail_url =  $infos->album->cover;
   } elseif ($type == "album") {
     $thumbnail_url = $infos->cover;
