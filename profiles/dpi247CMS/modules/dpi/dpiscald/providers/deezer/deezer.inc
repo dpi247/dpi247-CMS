@@ -67,7 +67,7 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
     $thumbnail_url = $infos->picture;
   }
 
-  if (!empty($thumbnail_url) {
+  if (!empty($thumbnail_url)) {
     // Download a copy of the media thumbnail. This makes it possible
     // to do interesting manipulation with image styles presets.
     $thumb = drupal_http_request($thumbnail_url);
