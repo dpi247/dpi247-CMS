@@ -9,13 +9,25 @@
  * Implements hook_scald_add_form().
  */
 function dpiscald_deezer_scald_add_form(&$form, &$form_state) {
-  $form['identifier'] = array(
+  $form['playlist_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('Deezer URL'),
-    '#element_validate' => array('dpiscald_deezer_validate_id'),
+    '#title' => t('Playlist ID'),
     '#default_value' => '',
     '#maxlength' => 1000
   );
+  $form['album_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Or Album ID'),
+    '#default_value' => '',
+    '#maxlength' => 1000
+  );
+  $form['track_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Or Track ID'),
+    '#default_value' => '',
+    '#maxlength' => 1000
+  );
+  $form['#validate'][] = 'dpiscald_deezer_form_validate'; 
 }
 
 /**
@@ -160,19 +172,21 @@ function dpiscald_deezer_already_imported($id) {
 /**
  * Form element validation handler for media url.
  */
-function dpiscald_deezer_validate_id($element, &$form_state) {
-  $url = $form_state['values']['identifier'];
-  if (!valid_url($url, TRUE)) {
-    form_error($element, t('Invalid media url, you must specify an absolute url.'));
-  }
-  if (startsWith($url,'https')){
-    $url = explode('https://embed.spotify.com/',$url);
-  } else {
-    $url = explode('http://embed.spotify.com/',$url);
-  }
-  $url = $url[1];
-  $id = md5($url);
-  if (dpiscald_deezer_already_imported($id)) {
-    form_error($element, t('Media already imported.'));
-  }
+function dpiscald_deezer_form_validate(&$form, &$form_state) {
+  dsm($form, 'form');
+  dsm($form_state, 'form_state');
+  // $url = $form_state['values']['identifier'];
+  // if (!valid_url($url, TRUE)) {
+  //   form_error($element, t('Invalid media url, you must specify an absolute url.'));
+  // }
+  // if (startsWith($url,'https')){
+  //   $url = explode('https://embed.spotify.com/',$url);
+  // } else {
+  //   $url = explode('http://embed.spotify.com/',$url);
+  // }
+  // $url = $url[1];
+  // $id = md5($url);
+  // if (dpiscald_deezer_already_imported($id)) {
+  //   form_error($element, t('Media already imported.'));
+  // }
 }
