@@ -10,14 +10,14 @@
  */
 function dpiscald_deezer_scald_add_form(&$form, &$form_state) {
   $form['type_deezer'] = array(
-    '#type' => 'textfield',
-    'type' => 'select',
+    '#title' => t('Select item type'),
+    '#type' => 'select',
     '#description' => 'Select the desired item',
-     '#options' => array('tracks' => t('Track'), 'album' => t('Album'), 'playlist' => t('Playlist')),
+    '#options' => array('tracks' => t('Track'), 'album' => t('Album'), 'playlist' => t('Playlist')),
   );
   $form['id_deezer'] = array(
     '#type' => 'textfield',
-    '#title' => t('Or Track ID'),
+    '#title' => t('ID Deezer'),
     '#default_value' => '',
     '#maxlength' => 1000
   );
