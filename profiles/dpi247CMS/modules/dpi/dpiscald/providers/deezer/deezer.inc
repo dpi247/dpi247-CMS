@@ -36,6 +36,8 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get media infos.
   $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
+
+  dsm($infos, 'infos');
   
   $atom->base_id = md5($url);
 
@@ -125,10 +127,13 @@ function dpiscald_deezer_theme() {
  * Get media infos from url.
  */
 function dpiscald_deezer_get_media_infos_from_url($type, $id) {
-  $api_url = 'https://api.spotify.com/v1/tracks/';
+  $api_url = 'http://api.deezer.com/';
 
-  $url_e = explode(':', $url);
-  $id_track = $url_e[count($url_e)-1];
+  if ($type == 'tracks') {
+    $type = 'track';
+  }
+
+  $url = $api_url . $type . '/' . $id;
 
   $url = $api_url . $id_track;
   $response = drupal_http_request($url);
