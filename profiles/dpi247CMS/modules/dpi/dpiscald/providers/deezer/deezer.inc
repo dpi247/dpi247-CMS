@@ -116,7 +116,7 @@ function dpiscald_deezer_theme() {
   return array(
       'dpiscald_deezer_player' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
-          'template' => 'providers/spotify/dpiscald_deezer_player'
+          'template' => 'providers/deezer/dpiscald_deezer_player'
       ),
   );
 }
