@@ -14,19 +14,6 @@ if (! (defined ( 'YOUTUBE_WEB' ) && defined ( 'YOUTUBE_OEMBED' ) && defined ( 'Y
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some video atoms.
- */
-function dpiscald_youtube_scald_atom_providers() {
-  return array(
-    'video' => 'Video hosted on YouTube'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Video hosted on YouTube');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_youtube_scald_add_form(&$form, &$form_state) {
@@ -52,6 +39,9 @@ function dpiscald_youtube_scald_add_form_fill(&$atom, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'youtube';
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
