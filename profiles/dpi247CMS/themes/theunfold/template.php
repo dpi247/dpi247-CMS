@@ -22,7 +22,16 @@ function theunfold_theme() {
     'theme_package_top_items' => array(
       'arguments' => array('variable' => array()),
     ),
-
+    'theme_package_hors_text' => array(
+      'arguments' => array('articles' => array()),
+      'template' => 'node--hors-text',
+      'path' => $path.'/templates',
+    ),
+    'theme_package_article_secondaire' => array(
+      'arguments' => array('articles' => array()),
+      'template' => 'node--article-secondaire',
+      'path' => $path.'/templates',
+    ),
   );
 }
 function theunfold_preprocess_($variables, $base_theme){
