@@ -148,10 +148,9 @@ function dpicontenttypes_permission(){
 function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
-
+    _dpicontenttypes_entityinsertscaldatom($node);
     if(function_exists("rules_invoke_event")){
-    
-    rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
+      rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
     }
   }
 }
@@ -163,10 +162,9 @@ function dpicontenttypes_node_insert($node) {
  */
 function dpicontenttypes_node_create($node) {
   if(function_exists("rules_invoke_event")){
-  
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
-    rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
-  }
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+    }
   }
 }
 
@@ -177,9 +175,9 @@ function dpicontenttypes_node_create($node) {
  */
 function dpicontenttypes_node_presave($node) {
   if(function_exists("rules_invoke_event")){
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
-    rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
-  }
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
+    }
   }
 }
 
@@ -190,7 +188,7 @@ function dpicontenttypes_node_presave($node) {
  */
 function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
-  
+  _dpicontenttypes_entitydeletescaldatom($node, 'node', $node->nid);
   if(function_exists("rules_invoke_event")){
   
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
@@ -471,12 +469,15 @@ function dpicontenttypes_scald_transcoders_alter(&$transcoders) {
  */
 function dpicontenttypes_scald_atom_providers() {
   return array(
-    'links_list' => 'Links lists'
+    'links_list' => 'Links lists',
   );
 }
 
+function dpicontenttypes_scald_atom_providers_alter(&$types){
+}
+
 function dpicontenttypes_scald_add_form(&$form, &$form_state) {
-  return array();
+    return array();
 }
 
 function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
@@ -710,4 +711,6 @@ function typed_entity_load($typed_id) {
   return NULL;
 }
 
-
+function dpicontenttypes_insert($node){
+  dsm($node , 'insert');
+}

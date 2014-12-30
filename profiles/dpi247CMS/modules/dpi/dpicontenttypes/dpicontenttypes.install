@@ -21,30 +21,25 @@ function dpicontenttypes_install() {
   dpiproperties_type_save($dpipropertiestype);
 
   scald_add_type('links_list', 'Links List', 'Links List');
-
   // Create base fields
   module_load_include('field_base.inc', 'dpicontenttypes');
   if ($fields = dpicontenttypes_field_default_field_bases()) {
     field_info_cache_clear();
-
     foreach ($fields as $field) {
       field_create_field($field);
     }
   }
-
+  
   // Create base fields instances
   module_load_include('field_instance.inc', 'dpicontenttypes');
   if ($instances = dpicontenttypes_field_default_field_instances()) {
     field_info_cache_clear();
-
     foreach ($instances as $field_instance) {
       field_create_instance($field_instance);
     }
   }
-
   if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
     field_info_cache_clear();
-  
     foreach ($instances as $field_instance) {
       field_create_instance($field_instance);
     }
@@ -469,6 +464,20 @@ function dpicontenttypes_update_7008(){
   if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
     field_info_cache_clear();
   
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+}
+
+function dpicontenttypes_update_7009(){
+  module_load_include('field_base.inc', 'dpicontenttypes');
+  if($fields = dpicontenttypes_field_default_field_base_atom_package()){
+    field_create_field($fields);
+  }
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
     foreach ($instances as $field_instance) {
       field_create_instance($field_instance);
     }

@@ -157,7 +157,7 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
   $info['node']['bundles']['package']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
-  //Set to the package
+  //Set to the package_gallery
   $info['node']['bundles']['package_gallery']['properties']['field_product_id'] = $product_id;
   $info['node']['bundles']['package_gallery']['properties']['field_external_reference'] = $external_reference;
   $info['node']['bundles']['package_gallery']['properties']['field_external_reference_2'] = $external_reference_2;
