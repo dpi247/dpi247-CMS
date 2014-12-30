@@ -54,11 +54,3 @@ function atom_package_theme(){
     ),
   );
 }
-
-function atom_package_preprocess_node(&$node){
-  dsm($node);
-  if(isset($node->type) && ($node->type == 'package' || $node->type == 'package_gallery')){
-    $field_atompackage = array();
-    $field_atomHorsText = array();
-  }
-}
