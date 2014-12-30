@@ -104,30 +104,37 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
   $settings = $display['settings'];
   $nb = dpicontenttypes_define_nb_items($render_context, count($items), $settings);
   $count = 1;
-  $thumb = 0;
+//   $thumb = 0;
   foreach ($items as $delta => $item) {
     if(dpicontenttypes_test_scald_item_validity($item, $settings)){
       $sid = $item['sid'];
       $entity_ids = entity_extract_ids($entity_type, $entity);
       $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
-//      $element[$delta] = array('#markup' => scald_render($sid, $settings['context'], json_encode($options)));
       $atom = scald_atom_load($sid);
-
+      $field_description = field_get_items('scald_atom', $atom, 'field_caption');
+      $element[$delta]=array(
+        'title' => $atom->title,
+        'description' => $field_description[0]['value'],
+        'type' => $atom->type, 
+        'sid' => $atom->sid,
+        'file_source' => $atom->file_source,
+        'atom' => $atom,
+      );
       if ($count == 1) {
         $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
 
-        $thumbnails = array(
-          '#type' => 'container',
-          '#attributes' => array(
-            'class' => array('gr-gallery-thumbnails'),
-            'id' => 'gr-gallery-thumbnails',
-          ),
-        );
+//         $thumbnails = array(
+//           '#type' => 'container',
+//           '#attributes' => array(
+//             'class' => array('gr-gallery-thumbnails'),
+//             'id' => 'gr-gallery-thumbnails',
+//           ),
+//         );
 
       }
 
-      $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
-      $thumb++;
+//       $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
+//       $thumb++;
 
       if(isset($nb) && $nb==$count){
         break;
@@ -136,19 +143,18 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
     }
   }
 
-  $element = array(
-      '#type' => 'container',
-      '#attributes' => array(
-        'class' => array('gr-media', 'gr-media-image'),
-        'id' => array('gr-main-media'),
-      ),
-  );
+//   $element = array(
+//       '#type' => 'container',
+//       '#attributes' => array(
+//         'class' => array('gr-media', 'gr-media-image'),
+//         'id' => array('gr-main-media'),
+//       ),
+//   );
 
-  $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
+//   $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
 
   // Assemblage des 3 elements qui vont former la mediabox
-  $element[0] = array($principale, $thumbnails, $wrapper_full_screen);
-
+//   $element[0] = array($principale, $thumbnails, $wrapper_full_screen);
   return $element;
 }
 
