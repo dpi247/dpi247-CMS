@@ -1,9 +1,0 @@
-.scald-menu .add-buttons .add-deezer {
- background: url('icons/deezer-large-inverted.png') 50% 50% no-repeat;
-}
-.scald-menu .add-buttons .add-deezer:hover {
- background-image: url('icons/deezer-large-color.png');
-}
-.dnd-library-wrapper .editor-item .meta.type-deezer {
- background-image: url('icons/deezer-large-inverted.png');
-}
