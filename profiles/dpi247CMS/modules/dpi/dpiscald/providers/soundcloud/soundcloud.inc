@@ -15,19 +15,6 @@ if (! (defined ('SOUNDCLOUD_ID_REGEXP') && defined('SOUNDCLOUD_WEB_REGEXP') && d
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some audio atoms.
- */
-function dpiscald_soundcloud_scald_atom_providers() {
-  return array(
-    'audio' => 'Audio hosted on SoundCloud'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Audio hosted on SoundCloud');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_soundcloud_scald_add_form(&$form, &$form_state) {
@@ -54,6 +41,9 @@ function dpiscald_soundcloud_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'soundcloud';
 
   // Prefill the author
   $atom->scald_authors[LANGUAGE_NONE][0] = array(
