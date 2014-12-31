@@ -42,6 +42,9 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->title = $infos->name;
 
+  $atom->provider = 'dpiscald';
+  $atom->type = 'spotify';
+
   $atom->data['url'] = $url;
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');

@@ -14,7 +14,6 @@ function dpiscald_scald_atom_providers() {
     'coveritlive' => 'DPI Media hosted on CoveritLive',
     'picktochart' => 'DPI Media hosted on Picktochart',
     'scribblelive' => 'DPI Media hosted on Scribblelive',
-    'spotify' => 'DPI Spotify ressources hosted on Spotify',
   );
 }
 
@@ -28,6 +27,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   //audios
   $types['audio']['dpiscald_soundcloud'] ='DPI Sounds on Soundcloud';
   $types['audio']['dpiscald_deezer'] = 'DPI Sounds on Deezer';
+  $types['audio']['dpiscald_spotify'] = 'DPI Sounds on Spotify';
   //videos
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';

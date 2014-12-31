@@ -12,7 +12,6 @@ stylesheets[all][] = providers/googlemap/googlemap.css
 stylesheets[all][] = providers/coveritlive/coveritlive.css
 stylesheets[all][] = providers/scribblelive/scribblelive.css
 stylesheets[all][] = providers/spotify/spotify.css
-stylesheets[all][] = providers/deezer/deezer.css
 stylesheets[all][] = dpiscald.css
 
 files[] = includes/dpiscald_plugin_display_library.inc
