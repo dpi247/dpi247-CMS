@@ -120,21 +120,6 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
         'file_source' => $atom->file_source,
         'atom' => $atom,
       );
-      if ($count == 1) {
-        $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
-
-//         $thumbnails = array(
-//           '#type' => 'container',
-//           '#attributes' => array(
-//             'class' => array('gr-gallery-thumbnails'),
-//             'id' => 'gr-gallery-thumbnails',
-//           ),
-//         );
-
-      }
-
-//       $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
-//       $thumb++;
 
       if(isset($nb) && $nb==$count){
         break;
@@ -142,19 +127,6 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
       $count++;
     }
   }
-
-//   $element = array(
-//       '#type' => 'container',
-//       '#attributes' => array(
-//         'class' => array('gr-media', 'gr-media-image'),
-//         'id' => array('gr-main-media'),
-//       ),
-//   );
-
-//   $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
-
-  // Assemblage des 3 elements qui vont former la mediabox
-//   $element[0] = array($principale, $thumbnails, $wrapper_full_screen);
   return $element;
 }
 
@@ -345,84 +317,4 @@ function dpicontenttypes_field_formatter_settings_summary_first_element_formatte
   }
   
   return $summary;
-}
-
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom) {  
-  $language = $atom->language;
-  if (!isset($language) || empty($language)){
-    $language = 'und';
-  }
-
-  $principale = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('thumbnail embed-responsive embed-responsive-16by9 '),
-      'id' => 'image-gallery-launch',
-    ),
-  );
-  $principale[$delta]['photo'] = array(
-    '#theme' => 'image',
-    '#path' => dpicontenttypes_api_image_style_url('ena_16_9_extra_big', $atom->type, $atom->sid, $atom->file_source),
-    '#attributes' => array(
-      'class' => 'embed-responsive-item',
-      'alt' => 'Responsive image',
-      'title' => $atom->field_caption[$language][0]['safe_value'],
-    ),
-  );
-  $principale[$delta]['caption'] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('gr-caption'),
-    ),
-
-    'content-caption' => array(
-      '#type' => 'markup',
-      '#markup' => '<p>'.$atom->field_caption[$language][0]['safe_value'].'</p>',
-    ),
-  );
-
-  return $principale;
-}
-
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb) {
-  $language = $atom->language;
-  if (!isset($language) || empty($language)){
-    $language = 'und';
-  }
-  $thumbnail = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('col-xs-6 col-md-3 thumbnail gr-gallery-thumbnail embed-responsive-16by9'),
-    ),
-  );
-
-  if ($thumb == 0) {
-    $thumbnail['#attributes']['style'] = 'display: none;';
-  }
-
-  $thumbnail[0] = array(
-    '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('gr-caption'),
-    ),
-    'content-caption' => array(
-      '#type' => 'markup',
-      '#markup' => '<p>'.$atom->field_caption[$language][0]['safe_value'].'</p>',
-    ),
-  );
-
-  $thumbnail[1] = array(
-    '#type' => 'markup',
-    '#markup' => '<a href="'.dpicontenttypes_api_image_style_url('ena_16_9_extra_big', $atom->type, $atom->sid, $atom->file_source).'" title="'.$atom->title.'" data-gallery="">' . theme_image(array('path' => dpicontenttypes_api_image_style_url('ena_16_9_medium', $atom->type, $atom->sid, $atom->file_source), 'alt'=>$atom->title)) . '</a>',
-  );
-
-  return $thumbnail;
-}
-
-function _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen() {
-  $wrapper = array(
-    '#type' => 'markup',
-    '#markup' => theme('mediabox_wrapper_full_screen', array()),
-  );
-  return $wrapper;
 }
