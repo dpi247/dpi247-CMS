@@ -691,17 +691,19 @@ function dpicontenttypes_api_define_hors_text($elements_outembed){
   $others = array();
   foreach($elements_outembed as $elem){
     $scald_info_from_atom = scald_atom_load($elem['sid']);
-    if($scald_info_from_atom->type == "atom_package"){
-      $node_info_from_atom = node_load($scald_info_from_atom->data['nid']);
-      $field = field_get_items('node', $node_info_from_atom, 'field_packagetype');
-      $taxonomy_term = taxonomy_term_load(intval($field[0]['tid']));
-      if($taxonomy_term->name == "Hors-texte"){
-        $hors_text[] = $scald_info_from_atom;
+    if(isset($elem['inline']) && $elem['inline']!='1'){
+      if($scald_info_from_atom->type == "atom_package"){
+        $node_info_from_atom = node_load($scald_info_from_atom->data['nid']);
+        $field = field_get_items('node', $node_info_from_atom, 'field_packagetype');
+        $taxonomy_term = taxonomy_term_load(intval($field[0]['tid']));
+        if($taxonomy_term->name == "Hors-texte"){
+          $hors_text[] = $scald_info_from_atom;
+        }else{
+          $others[] = $scald_info_from_atom;
+        }
       }else{
         $others[] = $scald_info_from_atom;
       }
-    }else{
-      $others[] = $scald_info_from_atom;
     }
   }
   return array('hors_texte' => $hors_text, 'other' => $others);
