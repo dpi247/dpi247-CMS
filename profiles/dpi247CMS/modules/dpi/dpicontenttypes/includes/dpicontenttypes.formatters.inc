@@ -96,40 +96,6 @@ function dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entit
   return $element;
 }
 
-/**
- * Mediabox formatter view
- */
-function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context) {
-  $element = array();
-  $settings = $display['settings'];
-  $nb = dpicontenttypes_define_nb_items($render_context, count($items), $settings);
-  $count = 1;
-//   $thumb = 0;
-  foreach ($items as $delta => $item) {
-    if(dpicontenttypes_test_scald_item_validity($item, $settings)){
-      $sid = $item['sid'];
-      $entity_ids = entity_extract_ids($entity_type, $entity);
-      $options = array('entity' => array('type' => $entity_type, 'bundle' => $entity_ids[2], 'id' => $entity_ids[0], 'vid' => $entity_ids[1]));
-      $atom = scald_atom_load($sid);
-      $field_description = field_get_items('scald_atom', $atom, 'field_caption');
-      $element[$delta]=array(
-        'title' => $atom->title,
-        'description' => $field_description[0]['value'],
-        'type' => $atom->type, 
-        'sid' => $atom->sid,
-        'file_source' => $atom->file_source,
-        'atom' => $atom,
-      );
-
-      if(isset($nb) && $nb==$count){
-        break;
-      }
-      $count++;
-    }
-  }
-  return $element;
-}
-
 function dpicontenttypes_test_scald_item_validity($item, $settings){
   $return = FALSE;
   if(!isset($item['type']) || $item['type']==""){
