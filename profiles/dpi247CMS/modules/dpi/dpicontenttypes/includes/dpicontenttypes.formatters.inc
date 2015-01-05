@@ -92,7 +92,6 @@ function dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entit
       $count++;
     }
   }
-
   return $element;
 }
 
@@ -104,7 +103,6 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
   $settings = $display['settings'];
   $nb = dpicontenttypes_define_nb_items($render_context, count($items), $settings);
   $count = 1;
-//   $thumb = 0;
   foreach ($items as $delta => $item) {
     if(dpicontenttypes_test_scald_item_validity($item, $settings)){
       $sid = $item['sid'];
@@ -122,39 +120,13 @@ function dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $f
       );
       if ($count == 1) {
         $principale = _dpicontenttypes_field_formatter_view_mediabox_render_array_principale($atom);
-
-//         $thumbnails = array(
-//           '#type' => 'container',
-//           '#attributes' => array(
-//             'class' => array('gr-gallery-thumbnails'),
-//             'id' => 'gr-gallery-thumbnails',
-//           ),
-//         );
-
       }
-
-//       $thumbnails[$thumb] = _dpicontenttypes_field_formatter_view_mediabox_render_array_thumbnail($atom, $thumb);
-//       $thumb++;
-
       if(isset($nb) && $nb==$count){
         break;
       }
       $count++;
     }
   }
-
-//   $element = array(
-//       '#type' => 'container',
-//       '#attributes' => array(
-//         'class' => array('gr-media', 'gr-media-image'),
-//         'id' => array('gr-main-media'),
-//       ),
-//   );
-
-//   $wrapper_full_screen = _dpicontenttypes_field_formatter_view_mediabox_render_array_wrapper_full_screen();
-
-  // Assemblage des 3 elements qui vont former la mediabox
-//   $element[0] = array($principale, $thumbnails, $wrapper_full_screen);
   return $element;
 }
 

@@ -623,3 +623,106 @@ function dpicontenttypes_api_image_path_flush($path) {
   // Throw event to allow specific actions on a path flush
   module_invoke_all('dpistyles_path_flush', $path);
 }
+
+function dpicontenttypes_api_modify_embedded_objects(& $node, $langcode, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options = null){
+  if(!isset($node->$updated_field[$langcode]))
+    $langcode = 'und';
+  $field_element = $node->$updated_field;
+  if(!empty($field_element[$langcode])){
+    $settings = field_info_instance('node', $updated_field, $node->type);
+    $setting_full = $settings['display']['default']['settings'];
+    dpicontenttypes_api_define_element_without_mediabox($node, $langcode, $setting_full, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options);
+  }
+}
+
+function dpicontenttypes_api_define_element_without_mediabox(& $node, $langcode, $setting_full, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options){
+  $elements_embed = array();
+  $elements_outembed = array();
+  $type_nb = dpicontenttypes_api_define_nb_items_and_type($setting_full);
+  if(!isset($options)){
+    $options = dpicontenttypes_api_get_default_extra_embedded_objects_render();
+  }
+  foreach(field_get_items('node', $node, $updated_field) as $element){
+    if(in_array($element['type'], $type_nb['type']) && ($type_nb['nb']>0 || $type_nb['nb']==-1)){
+      $elements_embed[] = $element;
+      if($type_nb['nb']!=-1)
+        $type_nb['nb']--;
+    }else{
+      $elements_outembed[] = $element;
+    }
+  }
+  
+  $node->$updated_field = $elements_embed;
+  $vars_out_embed = dpicontenttypes_api_define_hors_text($elements_outembed);
+  $node->$bottom_box_field_name = $vars_out_embed['other'];
+  $node->content[$bottom_box_field_name] = array();
+  $tmp = $node->$bottom_box_field_name;
+  foreach($tmp as $elm){
+    $node->content[$bottom_box_field_name][] = array(
+      '#markup' => scald_render($elm->sid, (isset($options[$elm->type])) ? $options[$elm->type] : 'full')
+    );
+  }
+  $node->$hors_text_field_name = $vars_out_embed['hors_texte'];
+  $tmp = $node->$hors_text_field_name;
+  foreach($tmp as $elem){
+    $node->content[$hors_text_field_name][] = array(
+      '#markup' => scald_render($elem->sid, (isset($options[$elem->type]))? $options[$elem->type] : 'full')
+    );
+  }
+}
+
+function dpicontenttypes_api_define_nb_items_and_type($setting_full){
+  $return = array('type' => array(), 'nb' => 0);
+  if($setting_full['type_number']=='all'){
+    $return['nb'] = -1;
+  }else{
+    $return['nb'] = $setting_full['value_number'];
+  }
+  foreach($setting_full as $k => $v){
+    if(strstr($k, 'type_') && $v && !is_string($v)){
+      $return['type'][] = substr($k, 5);
+    }
+  }
+  return $return;
+}
+
+function dpicontenttypes_api_define_hors_text($elements_outembed){
+  $hors_text = array();
+  $others = array();
+  foreach($elements_outembed as $elem){
+    $scald_info_from_atom = scald_atom_load($elem['sid']);
+    if($scald_info_from_atom->type == "atom_package"){
+      $node_info_from_atom = node_load($scald_info_from_atom->data['nid']);
+      $field = field_get_items('node', $node_info_from_atom, 'field_packagetype');
+      $taxonomy_term = taxonomy_term_load(intval($field[0]['tid']));
+      if($taxonomy_term->name == "Hors-texte"){
+        $hors_text[] = $scald_info_from_atom;
+      }else{
+        $others[] = $scald_info_from_atom;
+      }
+    }else{
+      $others[] = $scald_info_from_atom;
+    }
+  }
+  return array('hors_texte' => $hors_text, 'other' => $others);
+}
+
+function dpicontenttypes_api_get_default_extra_embedded_objects_render(){
+  $return = array();
+  $providers = scald_atom_providers();
+  foreach($providers as $kprov => $provider){
+    foreach($provider as $ktype => $type){
+      if($ktype == 'dpiscald' || $ktype == 'dpicontenttypes'){
+        $k = $kprov;
+      }else{
+        $k = $ktype;
+      }
+      if(strstr($k, 'scald_')!=FALSE){
+        $tmp = explode('_', $k);
+        $k = (isset($tmp[1]))? $tmp[1] : '$k';
+      }
+      $return[$k] = 'full';
+    }
+  }
+  return $return;
+}
