@@ -15,10 +15,9 @@ function atom_package_scald_atom_providers() {
 
 function atom_package_scald_add_form(&$form, &$form_state){
   $form["test"] = array(
-    '#type' => 'textfield',
-    '#title' => t('Test atom packages providers llalalal'),
-    '#default_value' => '',
+    '#markup' => t("L'atom package sera automatiquement créer lors de la création du contenu"),
   );
+  unset($form['buttons']['next']);
 }
 
 function atom_package_scald_add_form_fill(&$atom, $form, $form_state){  

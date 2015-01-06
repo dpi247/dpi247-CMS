@@ -60,3 +60,4 @@ files[] = plugins/dpimport/importer/wallyxmlv1.class.inc
 files[] = plugins/dpimport/importer/wallyxmlpreview.class.inc
 files[] = includes/prenode.class.inc
 stylesheets[all][] = css/dpiatom_reference.css
+stylesheets[all][] = providers/atom_package/atom_package.css

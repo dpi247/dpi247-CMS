@@ -398,7 +398,6 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
     $function($form, $form_state);
   }
   else {
-    dsm('nok');
     $form['error'] = array(
       '#markup' => 'Import without form; does it makes sense ?',
     );
