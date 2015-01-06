@@ -120,12 +120,12 @@ function dpiscald_theme(){
   
   $theme['atom_package_inline'] = array(
     'variables' => array('atom' => NULL),
-    'template' => 'templates/atom-package--inline'
+    'template' => 'templates/atom-package-inline'
   );
   
   $theme['atom_package_gallery_inline'] = array(
     'variables' => array('atom' => NULL),
-    'template' => 'templates/atom-package-gallery--inline'
+    'template' => 'templates/atom-package-gallery-inline'
   );
   
   return $theme;
