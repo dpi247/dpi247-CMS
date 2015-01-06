@@ -95,6 +95,10 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
       module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
       dpiscald_youtube_build_render($atom, $context, $options, $mode, $config);
       break;
+    case "dpidailymotion" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_dailymotion_player');
+      dpiscald_dailymotion_build_render($atom, $context, $options, $mode, $config);
+      break;
   }
 }
 
