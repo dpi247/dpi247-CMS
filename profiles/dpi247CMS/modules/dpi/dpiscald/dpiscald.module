@@ -87,6 +87,15 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
   if (!isset($atom->rendered->player)) {
     _dpiscald_image_prerender($atom, $context, $options, $mode);
   }
+
+  $config = scald_context_config_load($context);
+  $player = $config->player[$atom->type];
+  switch ($player["*"]) {
+    case "dpiyoutube" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
+      dpiscald_youtube_build_render($atom, $context, $options, $mode, $config);
+      break;
+  }
 }
 
 /**
@@ -519,4 +528,28 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
 function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
   $val_context = variable_get("dpiscald_media_context_table_value", NULL);
   return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
+}
+
+/**
+ * Implements hook_scald_player().
+ */
+function dpiscald_scald_player() {
+  $players = array();
+
+  module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
+  $players['dpiyoutube'] = dpiscald_youtube_player();
+    
+  return $players;
+}
+
+/**
+ * Implements hook_scald_player_settings_form().
+ */
+function dpiscald_scald_player_settings_form($form, &$form_state) {
+  $element = array();
+
+  module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
+  dpiscald_youtube_player_settings_form($form, $form_state, $element);
+
+  return $element;
 }
