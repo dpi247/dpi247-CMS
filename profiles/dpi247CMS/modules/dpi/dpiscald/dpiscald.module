@@ -32,8 +32,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
   $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
-  $types['video']['dpiscald_apt-
-  '] = 'DPI Videos on Vimeo';
+  $types['video']['dpiscald_vimeo'] = 'DPI Videos on Vimeo';
   $types['video']['dpiscald_youtube'] ='DPI Videos on Youtube';
 }
 
