@@ -557,8 +557,13 @@ function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type
 function dpiscald_scald_player() {
   $players = array();
 
-  module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
-  $players['dpiyoutube'] = dpiscald_youtube_player();
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player';
+    $players['dpi'.$type] = $function_name();
+  }
     
   return $players;
 }
@@ -569,8 +574,17 @@ function dpiscald_scald_player() {
 function dpiscald_scald_player_settings_form($form, &$form_state) {
   $element = array();
 
-  module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
-  dpiscald_youtube_player_settings_form($form, $form_state, $element);
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player_settings_form';
+    $function_name($form, $form_state, $element);
+  }
 
   return $element;
+}
+
+function _dpiscald_get_type_with_a_dpiplayer() {
+  return array('youtube');
 }
