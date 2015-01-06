@@ -653,7 +653,7 @@ function dpicontenttypes_api_define_element_without_mediabox(& $node, $langcode,
   }
   
   $node->$updated_field = $elements_embed;
-  $vars_out_embed = dpicontenttypes_api_define_hors_text($elements_outembed);
+  $vars_out_embed = dpicontenttypes_api_define_hors_text($elements_outembed, $options);
   $node->$bottom_box_field_name = $vars_out_embed['other'];
   $node->content[$bottom_box_field_name] = array();
   $tmp = $node->$bottom_box_field_name;
@@ -686,9 +686,9 @@ function dpicontenttypes_api_define_nb_items_and_type($setting_full){
   return $return;
 }
 
-function dpicontenttypes_api_define_hors_text($elements_outembed){
+function dpicontenttypes_api_define_hors_text($elements_outembed, $options){
   $hors_text = array();
-  $others = array();
+  $others = dpicontenttypes_api_create_default_table_options($options);
   foreach($elements_outembed as $elem){
     $scald_info_from_atom = scald_atom_load($elem['sid']);
     if(isset($elem['inline']) && $elem['inline']!='1'){
@@ -699,14 +699,41 @@ function dpicontenttypes_api_define_hors_text($elements_outembed){
         if($taxonomy_term->name == "Hors-texte"){
           $hors_text[] = $scald_info_from_atom;
         }else{
-          $others[] = $scald_info_from_atom;
+          $var = dpicontenttypes_api_get_provider_without($scald_info_from_atom->provider);
+          if(isset($var) && isset($others[$var])){
+            $others[$scald_info_from_atom->provider][] = $scald_info_from_atom;
+          }else{
+            $others['elem_other'][] = $scald_info_from_atom;
+          }
         }
       }else{
-        $others[] = $scald_info_from_atom;
+        $var = dpicontenttypes_api_get_provider_without($scald_info_from_atom->provider);
+        if(isset($var) && isset($others[$var])){
+          $others[$var][] = $scald_info_from_atom;
+        }else{
+          $others['elem_other'][] = $scald_info_from_atom;
+        }
       }
     }
   }
+  dsm($others);
+  $tmp_others = array();
+  foreach($others as $other){
+    foreach($other as $element){
+      $tmp_others[] = $element;
+    }
+  }
+  $others = $tmp_others;
   return array('hors_texte' => $hors_text, 'other' => $others);
+}
+
+function dpicontenttypes_api_get_provider_without($provider){
+  $return = $provider;
+  if(strstr($provider, 'scald_')!=FALSE || strstr($provider, 'dpiscald_')!=FALSE){
+    $tmp = explode('_', $provider);
+    $return = (isset($tmp[1]))? $tmp[1] : $provider;
+  }
+  return $return;
 }
 
 function dpicontenttypes_api_get_default_extra_embedded_objects_render(){
@@ -721,10 +748,19 @@ function dpicontenttypes_api_get_default_extra_embedded_objects_render(){
       }
       if(strstr($k, 'scald_')!=FALSE){
         $tmp = explode('_', $k);
-        $k = (isset($tmp[1]))? $tmp[1] : '$k';
+        $k = (isset($tmp[1]))? $tmp[1] : $k;
       }
       $return[$k] = 'full';
     }
   }
+  return $return;
+}
+
+function dpicontenttypes_api_create_default_table_options($options = array()){
+  $return = array();
+  foreach($options as $k => $v){
+    $return[$k] = array();
+  }
+  $return['elem_other'] = array();
   return $return;
 }
