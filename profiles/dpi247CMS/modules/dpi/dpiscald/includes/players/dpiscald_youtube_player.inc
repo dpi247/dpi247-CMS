@@ -40,7 +40,7 @@ function dpiscald_youtube_player_settings_form($form, &$form_state, &$element) {
 
 function dpiscald_youtube_build_render(&$atom, $context, $options, $mode, $config) {
 	$theme_parameters = dpiscald_youtube_get_theme_parameters($atom, $context, $options, $mode, $config);
-	$atom->rendered->player = theme('dpiscald_youtube_player', $theme_parameters);
+	$atom->rendered->player = theme('dpiscald_youtube_player_html5', $theme_parameters);
 }
 
 function dpiscald_youtube_get_theme_parameters($atom, $context, $options, $mode, $config) {
