@@ -47,8 +47,8 @@ function dpiscald_youtube_get_theme_parameters($atom, $context, $options, $mode,
 	return array( 
 		'video_id' => $atom->base_id, 
 		'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
-		'width' => $config->player['video']['settings']['width'], 
-		'height' => $config->player['video']['settings']['height'], 
+		'width' => $config->player['dpiyoutube']['settings']['width'], 
+		'height' => $config->player['dpiyoutube']['settings']['height'], 
 		'origin' => current_path()
 	);
 }
