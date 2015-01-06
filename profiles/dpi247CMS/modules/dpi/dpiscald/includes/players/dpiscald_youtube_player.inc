@@ -1,7 +1,7 @@
 <?php
 /**
 * @file
-* ena_scald_player_videos_html5.inc
+* dpiscald_youtube_player.inc
 */
 
 function dpiscald_youtube_player() {
