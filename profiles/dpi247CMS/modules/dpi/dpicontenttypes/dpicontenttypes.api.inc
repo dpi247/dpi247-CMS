@@ -716,7 +716,6 @@ function dpicontenttypes_api_define_hors_text($elements_outembed, $options){
       }
     }
   }
-  dsm($others);
   $tmp_others = array();
   foreach($others as $other){
     foreach($other as $element){
