@@ -133,6 +133,10 @@ function dpiscald_soundcloud_theme() {
       'variables' => array('vars' => NULL),
       'template' => 'providers/soundcloud/dpiscald_soundcloud_player'
     ),
+    'dpiscald_soundcloud_player_html5' => array(
+      'variables' => array( 'sound_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_soundcloud_player_html5'
+    ),
   );
 }
 
