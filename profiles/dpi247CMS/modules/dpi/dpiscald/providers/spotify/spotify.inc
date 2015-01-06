@@ -121,6 +121,10 @@ function dpiscald_spotify_theme() {
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/spotify/dpiscald_spotify_player'
       ),
+      'dpiscald_spotify_player_html5' => array(
+          'variables' => array( 'base_url' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+          'template' => 'templates/players/dpiscald_spotify_player_html5'
+      ),
   );
 }
 
