@@ -127,6 +127,16 @@ function dpiscald_theme(){
     $theme = array_merge($theme,$themeReturn);
   }
   
+  $theme['atom_package_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-inline'
+  );
+  
+  $theme['atom_package_gallery_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-gallery-inline'
+  );
+  
   return $theme;
 }
 
@@ -500,7 +510,6 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
   if (empty($context)) {
     $context = 'title';
   }
-  
   preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
   $atoms_info = array();
   $cpt = 0;
@@ -508,7 +517,20 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
     foreach($matches[1] as $id){
       if(($atom = scald_atom_load( intval($id)))!=false){
         $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
-        $atoms_info[] = scald_render($id, $tmp_context);
+        switch($atom->provider){
+          case 'atom_package':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_inline', array('node' => $node));
+            break;
+          case 'atom_package_gallery':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+            break;
+          default:
+              $atoms_info[] = scald_render($id, $tmp_context);
+            break;
+        }
+        
       }else{
         $atoms_info[] = scald_render($id, $matches[2][$cpt]);
       }        
@@ -516,7 +538,6 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
     }
     $string_updated = str_replace($matches[0], $atoms_info, $string);
   }
-  
   return $string_updated;
 }
 
@@ -527,7 +548,7 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
  */
 function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
   $val_context = variable_get("dpiscald_media_context_table_value", NULL);
-  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context;
 }
 
 /**
