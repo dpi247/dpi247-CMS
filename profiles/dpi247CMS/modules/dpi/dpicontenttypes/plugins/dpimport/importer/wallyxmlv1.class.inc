@@ -14,14 +14,15 @@ class WallyXmlV1 extends PackageHelper {
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
     if (!Logger::error()) {
-
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher();
+      
+//       /* Replace atom package from field_embededobjects to field_atompackage */
+//       $package = $this->_buildFieldAtompackage($package);
+      
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
       $this->savePackage($dom, $package);
-      dsm($package);
-      
     }
 
     // Set the CurrentLog to the previous one to stop children growing.
@@ -777,10 +778,27 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity
    */
   public function buildLink($dom, $package_wrapper, $entity){
-    Logger::logExecution('linkbojecttype', TRUE);
-    $atom = $this->constructEntity($dom, 'scald_atom');
-    Logger::setCurrentToPreviousExecution();
-    return $atom;
+    $uri_info = $dom->getElementsByTagName('URI')->item(0)->nodeValue; 
+    if(strstr($uri_info, 'extref://')!=FALSE){
+      $tmpExternalRef = substr($uri_info, 9);
+      $query = "SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref ) LIMIT 1";
+      $args = array(
+        ':extref' => $tmpExternalRef
+      );
+      $result = db_query($query, $args)->fetchField();
+      if(isset($result) && $var = scald_atom_load(intval($result))){
+        $atom = new stdClass();
+        $atom->sid = $result;
+        $atom->type = $var->type;
+        $atom->provider = $var->provider;
+        return $atom;
+      }
+    }else{
+      Logger::logExecution('linkbojecttype', TRUE);
+      $atom = $this->constructEntity($dom, 'scald_atom');
+      Logger::setCurrentToPreviousExecution();
+      return $atom;
+    }
   }
 
   /**
@@ -796,4 +814,35 @@ class WallyXmlV1 extends PackageHelper {
     Logger::setCurrentToPreviousExecution();
     //return $atom;
   }
+  
+  /**
+   * This function is use to reorder different element for field_atompackage
+   * XML specification
+   * 
+   * @param unknown $package
+   * @return unknown
+   */
+  public function _buildFieldAtompackage($package){
+    $field_embededobjects = array();
+    $field_atompackage = array();
+    foreach($package->field_embededobjects as $klang => $elements){
+      foreach($elements as $element){
+        if($element['type'] == "atom_package"){
+          if(!isset($field_atompackage[$klang]))
+            $field_atompackage[$klang] = array();
+          $field_atompackage[$klang][] = $element;
+        }else{
+          if(!isset($field_embededobjects[$klang]))
+            $field_embededobjects[$klang] = array();
+          $field_embededobjects[$klang][] = $element;
+        }
+      }
+    }
+    if(!empty($field_embededobjects))
+      $package->field_embededobjects = $field_embededobjects;
+    if(!empty($field_atompackage))
+      $package->field_atompackage = $field_atompackage;
+    return $package;
+  }
 }
+

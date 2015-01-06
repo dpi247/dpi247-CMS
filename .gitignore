@@ -12,7 +12,7 @@ sites/all/libraries
 .settings/*
 .project
 .gitignore
-
+.buildpath
 .htaccess
 robots.txt
 

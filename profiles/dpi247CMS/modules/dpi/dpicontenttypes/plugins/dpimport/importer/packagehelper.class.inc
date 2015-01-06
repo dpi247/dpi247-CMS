@@ -28,7 +28,6 @@ abstract class PackageHelper extends Importer {
       if (!Logger::error()) {
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
-
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
@@ -46,10 +45,18 @@ abstract class PackageHelper extends Importer {
    */
   protected function _createOrLoadEntityPackage($dom, $external_reference, $action) {
     $node = new stdClass();
+    $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
     $node->type = 'package';
+    if($type_xml_info == "package_gallery"){
+      $node->type = $type_xml_info;
+    }
     $node->is_new = TRUE;
     node_object_prepare($node);
-    $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
+    if($type_xml_info == "package_gallery"){
+      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package_gallery'), 'dpiproperties');
+    }else{
+      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
+    }
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
     if ($dpiproperties !== FALSE){
@@ -91,7 +98,6 @@ abstract class PackageHelper extends Importer {
       $node_wrapper = entity_metadata_wrapper('node', $node);
       $node_wrapper->field_external_reference->set($external_reference);
     }
-
     return $node;
   }
 

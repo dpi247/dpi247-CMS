@@ -1,0 +1,56 @@
+<?php 
+
+/**
+ * Implements hook_scald_atom_providers().
+ * Tell Scald that we'll be providing some video atoms.
+ */
+function atom_package_scald_atom_providers() {
+  return array(
+    'atom_package' => 'Atom package provider'
+  );
+  // This code will never be hit, but is necessary to mark the string
+  // for translation on localize.d.o
+  t('Atom package provider');
+}
+
+function atom_package_scald_add_form(&$form, &$form_state){
+  $form["test"] = array(
+    '#type' => 'textfield',
+    '#title' => t('Test atom packages providers llalalal'),
+    '#default_value' => '',
+  );
+}
+
+function atom_package_scald_add_form_fill(&$atom, $form, $form_state){  
+  $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
+  $atom->scald_thumbnail[$langcode][0] = array('public://styles/Library/public/icon_package.png');
+  $atom->scald_authors = $atom->data['author'];
+}
+
+function atom_package_scald_fetch($atom, $type) {
+  $atom->file_source = $atom->thumbnail_source = 'public://styles/Library/public/icon_package.png';
+}
+
+function atom_package_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    $node_info = node_load($atom->data['nid']);
+    $node_info->field_atompackage = array();
+    $atom->rendered->player = theme('atom_package_player',
+      array('vars' =>
+        array(
+          'node'    => node_view($node_info),
+        ),
+        'atom' => $atom, 
+      )
+    );
+  }
+}
+
+function atom_package_theme(){
+  return array(
+    'atom_package_player' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'atom_package_player'
+    ),
+  );
+}

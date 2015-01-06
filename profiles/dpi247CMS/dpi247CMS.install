@@ -262,6 +262,7 @@ function dpi247CMS_install_set_taxonomy_variables() {
   dpi247CMS_install_set_a_taxonomy_variable("iptc");
   dpi247CMS_install_set_a_taxonomy_variable("locations");
   dpi247CMS_install_set_a_taxonomy_variable("packagelayout");
+  dpi247CMS_install_set_a_taxonomy_variable("package_type");
   dpi247CMS_install_set_a_taxonomy_variable("persons");
   dpi247CMS_install_set_a_taxonomy_variable("rating");
 }
@@ -399,7 +400,7 @@ function _dpi247CMS_install_demo_contents_full() {
 
   // Add default destinations terms
   $packlayout_voc = 'packagelayout';
-  $packlayout_vid = dpi_variable_get('dpi_packagelayout', 0);;
+  $packlayout_vid = dpi_variable_get('dpi_packagelayout', 0);
   if ($packlayout_vid) {
     $base_term = new stdClass();
     $base_term->vid = $packlayout_vid;
@@ -437,8 +438,23 @@ function _dpi247CMS_install_demo_contents_full() {
   // Set the "News" section page as home page
   variable_set('site_frontpage', 'section/1');
   
+  // Add default destinations terms
+  $dest_voc = 'package_type';
+  $dest_vid = _dpidestinations_variable_get('dpi_package_type', 0);
+  if ($dest_vid) {
+    $base_term = new stdClass();
+    $base_term->vid = $dest_vid;
+    $base_term->weight = 0;
+    $base_term->vocabulary_machine_name = $dest_voc;
+    $terms = array('Hors texte', 'Article inférieur');
+    foreach ($terms as $term) {
+      $base_term->weight++;
+      $copied_term = clone $base_term;
+      $copied_term->name = $term;
+      taxonomy_term_save($copied_term);
+    }
   
-  
+  }
   
 }
 

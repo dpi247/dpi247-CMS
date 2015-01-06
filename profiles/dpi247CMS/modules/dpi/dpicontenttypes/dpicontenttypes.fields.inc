@@ -277,13 +277,8 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
       $element = array();
 
       if (!empty($contexts[$settings['context']])) {
-        if($contexts[$settings['context']]['title'] == 'ENA Mediabox') {
-          module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
-          $element = dpicontenttypes_field_formatter_view_mediabox($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
-        } else {
-          module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
-          $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
-        }
+        module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+        $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
       }
       break;
     default:

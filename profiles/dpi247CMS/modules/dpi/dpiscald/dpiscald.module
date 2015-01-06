@@ -13,7 +13,8 @@ function dpiscald_scald_atom_providers() {
     'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
     'coveritlive' => 'DPI Media hosted on CoveritLive',
     'picktochart' => 'DPI Media hosted on Picktochart',
-    'scribblelive' => 'DPI Media hosted on Scribblelive'
+    'scribblelive' => 'DPI Media hosted on Scribblelive',
+    'spotify' => 'DPI Spotify ressources hosted on Spotify',
   );
 }
 
@@ -26,6 +27,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   $types['image']['dpiscald_flickr'] ='DPI Images on Flickr';
   //audios
   $types['audio']['dpiscald_soundcloud'] ='DPI Sounds on Soundcloud';
+  $types['audio']['dpiscald_deezer'] = 'DPI Sounds on Deezer';
   //videos
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
@@ -108,13 +110,23 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'coveritlive','picktochart','scribblelive');
+    'coveritlive','picktochart','scribblelive', 'spotify', 'deezer');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
     $themeReturn = $function_name();
     $theme = array_merge($theme,$themeReturn);
   }
+  
+  $theme['atom_package_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package--inline'
+  );
+  
+  $theme['atom_package_gallery_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-gallery--inline'
+  );
   
   return $theme;
 }
@@ -345,6 +357,7 @@ function dpiscald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {
  * Add form. And then call the right fonction on submit.
  */
 function dpiscald_atom_add_form_add($form, &$form_state) {
+  dsm('impossible');
   $scald = $form_state['scald'];
   if (startsWith($scald['source'], 'dpiscald_')){
     $tmp=explode('_', $scald['source']);
@@ -357,16 +370,16 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
     $scald['source'] = 'dpiscald_'.$tmp;
   }
   $function = $scald['source'] . '_scald_add_form';
-
+  dsm($function);
   if (function_exists($function)) {
     $function($form, $form_state);
   }
   else {
+    dsm('nok');
     $form['error'] = array(
       '#markup' => 'Import without form; does it makes sense ?',
     );
   }
-
   return $form;
 }
 
@@ -488,15 +501,27 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
   if (empty($context)) {
     $context = 'title';
   }
-  
   preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
   $atoms_info = array();
   $cpt = 0;
   if(is_array($matches[0]) && is_array($matches[1])){
     foreach($matches[1] as $id){
-      if(($atom = scald_atom_load( intval($matches[1])))!=false){
+      if(($atom = scald_atom_load( intval($id)))!=false){
         $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
-        $atoms_info[] = scald_render($id, $tmp_context);
+        switch($atom->provider){
+          case 'atom_package':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_inline', array('node' => $node));
+            break;
+          case 'atom_package_gallery':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+            break;
+          default:
+              $atoms_info[] = scald_render($id, $tmp_context);
+            break;
+        }
+        
       }else{
         $atoms_info[] = scald_render($id, $matches[2][$cpt]);
       }        
@@ -504,7 +529,6 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
     }
     $string_updated = str_replace($matches[0], $atoms_info, $string);
   }
-  
   return $string_updated;
 }
 
@@ -515,5 +539,5 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
  */
 function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
   $val_context = variable_get("dpiscald_media_context_table_value", NULL);
-  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context;
 }

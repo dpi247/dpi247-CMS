@@ -36,6 +36,9 @@ function dpiscald_kewego_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->title = $infos->title;
 
+  $atom->provider = 'dpiscald';
+  $atom->type = 'kewego';
+
   $atom->data['html'] = $infos->html;
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');

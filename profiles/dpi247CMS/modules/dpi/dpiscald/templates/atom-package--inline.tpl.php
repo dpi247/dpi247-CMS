@@ -1,0 +1,1 @@
+Implementer le template atom-package--inline.tpl.php

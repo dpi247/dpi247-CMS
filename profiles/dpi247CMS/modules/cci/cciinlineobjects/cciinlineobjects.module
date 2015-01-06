@@ -8,7 +8,7 @@ module_load_include('inc', 'cciinlineobjects', 'cciinlineobjects.private');
  * Transform CCI Inline Objects tags into ScalD tags
  */
 function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, $entity_type, $importer, $dispatcher) {
-  if ($entity_type == 'node' && $entity->type = 'package') {
+  if ($entity_type == 'node' && in_array($entity->type, dpicontenttypes_api_getdpicontenttypes())) {
     $embed_objects = $entity_wrapper->field_embededobjects->value(array('identifier' => TRUE));
     if ($embed_objects && !empty($embed_objects)) {
       $embed_objects_by_ext_ref = array();
