@@ -116,6 +116,10 @@ function dpiscald_vimeo_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/vimeo/dpiscald_vimeo_player'
     ),
+    'dpiscald_vimeo_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_vimeo_player_html5'
+    ),
   );
 }
 

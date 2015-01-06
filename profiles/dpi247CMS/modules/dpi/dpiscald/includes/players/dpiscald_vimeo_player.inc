@@ -1,14 +1,14 @@
 <?php
 /**
 * @file
-* dpiscald_dailymotion_player.inc
+* dpiscald_vimeo_player.inc
 */
 
-function dpiscald_dailymotion_player() {
+function dpiscald_vimeo_player() {
 	return array(
-		'name' => 'DPI Dailymotion HTLM5 player',
-		'description' => 'The HTML5 Dailymotion player',
-		'type' => array('dailymotion'),
+		'name' => 'DPI Vimeo HTLM5 player',
+		'description' => 'The HTML5 Vimeo player',
+		'type' => array('vimeo'),
 		'settings' => array(
 			'width' => 640,
 			'height' => 400,
@@ -17,7 +17,7 @@ function dpiscald_dailymotion_player() {
     );
 }
 
-function dpiscald_dailymotion_player_settings_form($form, &$form_state, &$element) {
+function dpiscald_vimeo_player_settings_form($form, &$form_state, &$element) {
 	$element['width'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Width'),
@@ -38,17 +38,17 @@ function dpiscald_dailymotion_player_settings_form($form, &$form_state, &$elemen
 	);
 }
 
-function dpiscald_dailymotion_build_render(&$atom, $context, $options, $mode, $config) {
-	$theme_parameters = dpiscald_dailymotion_get_theme_parameters($atom, $context, $options, $mode, $config);
-	$atom->rendered->player = theme('dpiscald_dailymotion_player_html5', $theme_parameters);
+function dpiscald_vimeo_build_render(&$atom, $context, $options, $mode, $config) {
+	$theme_parameters = dpiscald_vimeo_get_theme_parameters($atom, $context, $options, $mode, $config);
+	$atom->rendered->player = theme('dpiscald_vimeo_player_html5', $theme_parameters);
 }
 
-function dpiscald_dailymotion_get_theme_parameters($atom, $context, $options, $mode, $config) {
+function dpiscald_vimeo_get_theme_parameters($atom, $context, $options, $mode, $config) {
 	return array( 
 		'video_id' => $atom->base_id, 
 		'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
-		'width' => $config->player['dailymotion']['settings']['width'], 
-		'height' => $config->player['dailymotion']['settings']['height'], 
+		'width' => $config->player['vimeo']['settings']['width'], 
+		'height' => $config->player['vimeo']['settings']['height'], 
 		'origin' => current_path()
 	);
 }
