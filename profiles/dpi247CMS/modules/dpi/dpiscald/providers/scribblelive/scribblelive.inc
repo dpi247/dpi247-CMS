@@ -97,6 +97,10 @@ function dpiscald_scribblelive_theme() {
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/scribblelive/dpiscald_scribblelive_player'
       ),
+      'dpiscald_scribblelive_player_html5' => array(
+        'variables' => array( 'id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+        'template' => 'templates/players/dpiscald_scribblelive_player_html5'
+    ),
   );
 }
 
