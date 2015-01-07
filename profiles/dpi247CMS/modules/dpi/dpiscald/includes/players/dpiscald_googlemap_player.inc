@@ -45,7 +45,7 @@ function dpiscald_googlemap_build_render(&$atom, $context, $options, $mode, $con
 
 function dpiscald_googlemap_get_theme_parameters($atom, $context, $options, $mode, $config) {
 	return array( 
-		'urlN' => $atom->data['url'],
+		'urlN' => $atom->data['urlN'],
 		'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
 		'width' => $config->player['googlemap']['settings']['width'], 
 		'height' => $config->player['googlemap']['settings']['height'], 
