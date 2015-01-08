@@ -14,7 +14,7 @@ module_load_include ( 'inc', 'dpidestinations', 'dpidestinations.api' );
 */
 function dpiblocks_menu() {
   $items[DPI_ADMIN_PATH.'/dpiblocks/flowplugins'] = array(
-    'title' => 'Flow plugins',
+    'title' => 'DPI blocks Flow plugins',
     'description' => 'Gives informations about existing flow plugins',
     'page callback' => 'dpiblocks_page_flow_plugins',
     'access arguments' => array('manage flow plugins'),
@@ -102,7 +102,7 @@ function dpiblocks_menu() {
   );
   
   $items[DPI_ADMIN_PATH.'/accroche'] = array(
-    'title' => 'View accroche',
+    'title' => 'DPI blocks Accroche',
     'description' => 'Create a new accroche type',
     'page callback' => 'dpiblocks_get_accroche_info',
     'access arguments' => array('manage flow plugins'),

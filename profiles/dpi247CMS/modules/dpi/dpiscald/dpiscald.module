@@ -458,7 +458,7 @@ function dpiscald_menu_alter(&$items){
   );
   
   $items['admin/dpi247/mediacontext'] = array(
-    'title' => 'Manage mediaContext',
+    'title' => 'DPI Scald : manage mediaContext',
     'description'=>'You can define different element for media context',
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpiscald_media_context_admin_form'),

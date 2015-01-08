@@ -18,7 +18,7 @@ function dpicontenttypes_menu(){
   $items = array();
 
   $items['admin/dpi247/external-files'] = array(
-    'title' => 'External files management',
+    'title' => 'DPI content types : External files management',
     'description' => 'This concerns files fetched from external services, like RSS feeds',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpicontenttypes_form_page_external_files_form'),

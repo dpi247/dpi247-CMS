@@ -12,7 +12,7 @@ function dpiblocks_entity_info(){
 
   // Remote HTML
   $entities['remotehtml'] = array(
-    'label' => t('Remote Html'),
+    'label' => t('DPI Remote Html'),
     'entity class' => 'RemoteHtmlEntity',
     'controller class' => 'RemotehtmlController',
     'base table' => 'dpiblocks_remotehtml',
@@ -52,7 +52,7 @@ function dpiblocks_entity_info(){
 
   // Custom content
   $entities['custom_content'] = array(
-    'label' => t('Custom content'),
+    'label' => t('DPI Custom content'),
     'entity class' => 'Custom_contentEntity',
     'controller class' => 'Custom_contentController',
     'base table' => 'dpiblocks_custom_content',
@@ -94,7 +94,7 @@ function dpiblocks_entity_info(){
 
   // FlowMix
   $entities['flowmix'] = array(
-    'label' => t('FlowMix'),
+    'label' => t('Dpi FlowMix'),
     'entity class' => 'FlowMixEntity',
     'controller class' => 'FlowMixController',
     'base table' => 'dpiblocks_flowmix',

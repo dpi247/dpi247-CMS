@@ -10,7 +10,7 @@ function dpidam_menu() {
   $items = array();
 
   $items['admin/dpi247/dpidam'] = array(
-    'title' => t('DPI DAM Settings'),
+    'title' => t('DPI Dam Settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpidam_page_admin_packages_sync_form'),
     'access arguments' => array('administer dam interactions'),

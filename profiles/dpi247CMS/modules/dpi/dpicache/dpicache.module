@@ -35,7 +35,7 @@ function dpicache_menu(){
    * Administration of dpicache
    */
   $items['admin/dpi247/dpicache'] = array(  
-    'title' => 'Manage Cache',           
+    'title' => 'DPI cache',           
     'description'=>'Administer dpicache settings, desactivate esi renderding,...',
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpicache_pages_form_esi_settings_form'),

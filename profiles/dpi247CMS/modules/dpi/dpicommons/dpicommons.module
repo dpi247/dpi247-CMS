@@ -23,7 +23,7 @@ function dpicommons_menu() {
   );
 
   $items[DPI_ADMIN_PATH.'/general-settings'] = array(
-    'title' => 'DPI247 Settings',
+    'title' => 'DPI Settings',
     'description' => 'General settings for DPI247',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpicommons_admin_settings_form'),
