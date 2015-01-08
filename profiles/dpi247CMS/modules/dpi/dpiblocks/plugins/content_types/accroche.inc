@@ -30,10 +30,12 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
 function dpiblocks_accroche_plugin_edit_form($form, &$form_state) {
   $form_temp = $form;
   $conf = $form_state ['conf'];
-  if (isset ( $conf ["destination"] )) {
-    $form_state ['values'] ['accroche'] ['type'] = "destination";
-  } elseif (isset ( $conf ["node"] )) {
-    $form_state ['values'] ['accroche'] ['type'] = "node";
+  if(!isset($form_state ['values'] ['accroche'] ['type'])){
+    if (isset ( $conf ["destination"] )) {
+      $form_state ['values'] ['accroche'] ['type'] = "destination";
+    } elseif (isset ( $conf ["node"] )) {
+      $form_state ['values'] ['accroche'] ['type'] = "node";
+    }
   }
   
   $form ['accroche'] = array (
@@ -83,7 +85,7 @@ function dpiblocks_accroche_plugin_edit_form($form, &$form_state) {
       'method' => 'replace' 
     ) 
   );
-  
+
   if (! strcmp ( $form_state ['values'] ['accroche'] ['type'], 'node' )) {
     $form ['accroche'] ['node'] = array (
       '#type' => 'textfield',
