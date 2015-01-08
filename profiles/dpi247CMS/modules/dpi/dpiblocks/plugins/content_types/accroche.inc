@@ -273,18 +273,21 @@ function dpiblocks_define_node_element_string($dest){
   module_load_include('inc','dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
   $string = "";  
   foreach ( $dest as $destination ) {
-    $targetBlockController = new TargetBlockController ( 'targetblock' );
-    $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( intval ( $destination ["section"] ), $destination ["target"], 0 );
-    $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
-    $target = $targetblock_wrapper->target->value ();
-    $target_wrapper = entity_metadata_wrapper ( 'target', $target );
-    $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
-    $val_view = $targetview->result;
-    $cpt = $destination ["nb_element"];
-    if ($cpt > count ( $val_view ))
-      $cpt = count ( $val_view );
-    for($i = 0; $i < $cpt; $i ++) {
-      $string .= $val_view [$i]->nid.'+';
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        $string .= $val_view [$i]->nid.'+';
+      }
+    } catch (Exception $e) {
     }
   }
   return substr($string, 0 , -1);
