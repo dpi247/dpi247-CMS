@@ -714,3 +714,56 @@ function typed_entity_load($typed_id) {
 function dpicontenttypes_insert($node){
   dsm($node , 'insert');
 }
+
+function dpicontenttypes_token_info() {
+  $info['tokens']['user']['connectionStatus'] = array(
+    'name' => t('Connection status'),
+    'description' => t('Return the status about connection'),
+  );
+  $info['tokens']['node']['firstImageUrl'] = array(
+    'name' => t('First Image Url'),
+    'description' => t('Return the first image url'),
+  );
+  return $info;
+}
+
+function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'connectionStatus':
+          $name = 'nonconnecté';
+          if(user_is_logged_in()){
+            $name = 'connecté';
+          }
+          $replacements[$original] = $name;
+          break;        
+      }
+    }
+  }
+  if($type == 'node'){
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'firstImageUrl':
+          $name = '';
+          if(isset($data['node'])){
+            $embeddedObjects = field_get_items('node', $data['node'], 'field_embededobjects');
+            foreach($embeddedObjects as $embed){
+              if($embed['type'] == 'image'){
+                  module_load_include('inc', 'dpicommons', 'dpicommons.api');
+                  $atom = scald_atom_load($embed['sid']);
+                  $preset = "500x500";
+                  drupal_alter('dpicontenttypes_tokens_preset', $embed, $atom, $preset);                  
+                  $name = dpiflexiscald_api_get_path_for_atom($atom, $preset);
+                break;
+              }
+            }
+          }
+          $replacements[$original] = $name;
+          break;
+      }
+    }  
+  }
+  return $replacements;
+}
