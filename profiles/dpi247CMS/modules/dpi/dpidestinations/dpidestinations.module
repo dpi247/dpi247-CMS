@@ -636,6 +636,43 @@ function dpidestinations_dpicache_category_callback($cachedefinition = '', $argu
 
 
 
+function dpidestinations_token_info() {
+  $info['tokens']['node']['maindestid'] = array(
+    'name' => t('Main destination Id'),
+    'description' => t('Return the main destination about node'),
+  );
+  $info['tokens']['node']['pageType'] = array(
+    'name' => t('Page type information'),
+    'description' => t('Return the type about the node page info'),
+  );
+  return $info;
+}
+
+function dpidestinations_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'node') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'maindestid':
+            $name = '';
+            if(isset($data['node'])){
+              $info = current(field_get_items('node', $data['node'], 'field_destinations'));
+              $name = $info["tid"];
+            }
+            $replacements[$original] = $name;
+          break;
+        case 'pageType':
+            $name = '';
+            if(isset($data['node'])){
+              $name = $data['node']->type;
+            }
+            $replacements[$original] = $name;
+          break;
+      }
+    }
+  }
+  return $replacements;
+}
 
 
 
