@@ -42,6 +42,9 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->title = $infos->name;
 
+  $atom->provider = 'dpiscald';
+  $atom->type = 'spotify';
+
   $atom->data['url'] = $url;
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
@@ -117,6 +120,10 @@ function dpiscald_spotify_theme() {
       'dpiscald_spotify_player' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/spotify/dpiscald_spotify_player'
+      ),
+      'dpiscald_spotify_player_html5' => array(
+          'variables' => array( 'base_url' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+          'template' => 'templates/players/dpiscald_spotify_player_html5'
       ),
   );
 }

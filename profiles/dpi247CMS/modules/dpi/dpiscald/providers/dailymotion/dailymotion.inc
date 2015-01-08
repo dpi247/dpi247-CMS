@@ -138,6 +138,10 @@ function dpiscald_dailymotion_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/dailymotion/dpiscald_dailymotion_player'
     ),
+    'dpiscald_dailymotion_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_dailymotion_player_html5'
+    ),
     'dpiscald_dailymotion_imports_table' => array(
       'render element' => 'form',
       'file' => 'providers/dailymotion/dpiscald_dailymotion.admin.inc'

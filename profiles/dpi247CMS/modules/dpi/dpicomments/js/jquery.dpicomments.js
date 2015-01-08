@@ -7,7 +7,7 @@
         dpicomments_reportabsue_widget.find('.reportabuse-link').attr('href', function(){ return $(this).attr('href') + '&json=true'; }).click(function(){
           $.getJSON($(this).attr('href'), function(json){
             if (json) {
-              var newWidget = $(json.widget);
+              var newWidget = $($.parseHTML(json.widget.trim()));
               newWidget.hide();
               dpicomments_reportabsue_widget.replaceWith(newWidget);
               newWidget.fadeIn('slow');

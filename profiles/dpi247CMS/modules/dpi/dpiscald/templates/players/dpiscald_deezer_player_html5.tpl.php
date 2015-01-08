@@ -1,0 +1,1 @@
+<iframe scrolling="no" frameborder="0" allowTransparency="true" src="<?=$base_url?>" width="<?=$width?>" height="<?=$height?>"></iframe>

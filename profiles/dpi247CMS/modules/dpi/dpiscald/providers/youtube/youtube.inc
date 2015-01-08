@@ -124,6 +124,10 @@ function dpiscald_youtube_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/youtube/dpiscald_youtube_player'
     ),
+    'dpiscald_youtube_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_youtube_player_html5'
+    ),
   );
 }
 

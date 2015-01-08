@@ -119,6 +119,10 @@ function dpiscald_googlemap_theme() {
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/googlemap/dpiscald_googlemap_player'
       ),
+      'dpiscald_googlemap_player_html5' => array(
+        'variables' => array( 'urlN' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+        'template' => 'templates/players/dpiscald_googlemap_player_html5'
+      ),
   );
 }
 
