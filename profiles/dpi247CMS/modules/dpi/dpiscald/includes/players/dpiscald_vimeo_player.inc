@@ -30,12 +30,6 @@ function dpiscald_vimeo_player_settings_form($form, &$form_state, &$element) {
 		'#size' => 4,
 		'#default_value' => $form['#scald']['player_settings']['height'],
 	);
-	$element['caption'] = array(
-		'#type' => 'textfield',
-		'#title' => t('Text pattern used for caption'),
-		'#size' => 40,
-		'#default_value' => $form['#scald']['player_settings']['caption'],
-	);
 }
 
 function dpiscald_vimeo_build_render(&$atom, $context, $options, $mode, $config) {
