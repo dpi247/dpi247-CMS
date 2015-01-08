@@ -122,7 +122,7 @@ class TargetBlockController extends EntityAPIControllerExportable {
   public function load_targetblock_by_did_target_and_splitdelta($did, $target_name, $split_delta) {
     $conditions = array (
       'did' => $did,
-      ' target' => $target_name,
+      'target' => $target_name,
       'split_delta' => $split_delta 
     );
     $results = targetblock_load_multiple ( FALSE, $conditions );
