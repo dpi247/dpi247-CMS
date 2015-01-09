@@ -21,7 +21,6 @@ $plugin = array (
 function dpidestinations_targetblock_content_type_content_types($plugin) {
   $types = array ();
   $targets = target_load_multiple ( FALSE );
-  dsm($targets);
   foreach ( $targets as $target ) {
     $types [$target->machine_name] = array (
       'title' => check_plain ( $target->label ),
