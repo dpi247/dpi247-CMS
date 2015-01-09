@@ -238,7 +238,7 @@ class WallyXmlV1 extends PackageHelper {
       $dest = array();
       $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
       $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
-      if ($terms) {
+      if ($terms && $destination->hasAttribute("Position") && $destination->hasAttribute("DocumentLayout") && $destination->hasAttribute("DestinationRank")) {
         $dest['tid'] = $terms[0]->tid;
         if ($destination->hasAttribute("Position")) {
           $dest['target'] = $destination->getAttributeNode("Position")->value;
@@ -274,23 +274,26 @@ class WallyXmlV1 extends PackageHelper {
    * @param EntityDrupalWrapper $wrapper
    * @param Object $entity
    */
-  public function buildDestinations($dom, $wrapper, $entity){
+  public function buildDestinations($dom, $wrapper, $entity, $globalDom){
     // @todo s'occuper des destinations multiples
     $term = array();
     $result = array();
     $vid = _dpidestinations_variable_get('dpidestinations_section_vid', NULL);
-    if ($vid) {
-      $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
-
-      if (count($destination_list)) {
-        // Add destinations to the package
-        $wrapper->field_destinations->set($destination_list);
+    $package_type = $globalDom->getElementsByTagName('PackageLayout')->item(0)->nodeValue;
+    if($package_type == 'Article' || !isset($package_type)){      
+      if ($vid) {
+          $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
+      
+          if (count($destination_list)) {
+            // Add destinations to the package
+            $wrapper->field_destinations->set($destination_list);
+          } else {
+            // If no destinations at all > Package can't be created
+            Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+          }
       } else {
-        // If no destinations at all > Package can't be created
-        Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+        Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
       }
-    } else {
-      Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
     }
   }
 
