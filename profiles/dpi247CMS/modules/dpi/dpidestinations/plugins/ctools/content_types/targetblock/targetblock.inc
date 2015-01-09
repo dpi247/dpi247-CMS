@@ -157,7 +157,7 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
   $targetblockController = new TargetBlockController ( 'targetblock' );
   $targetController = new TargetController ( 'target' );
-  
+  dsm($form_state['conf']);
   $targetblock = $targetblockController->load_targetblock_by_panels_panelpid ( $form_state ['pane']->pid );
   // This is a new targetblock
   if ($targetblock == FALSE) {
@@ -336,7 +336,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#type' => 'select',
     '#title' => t ( 'Number of reserved position' ),
     '#options' => range ( 0, _dpidestinations_variable_get ( 'dpidestination_max_reserved_position', 10 ) ),
-    '#default_value' => isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 ) 
+    '#default_value' => ($form_state['conf']['rank_max_value']) ? $form_state['conf']['rank_max_value'] : isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 ) 
   );
   
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] = array (
@@ -346,7 +346,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] ['use_pager'] = array (
     '#type' => 'checkbox',
     '#title' => t ( 'Use pager' ),
-    '#default_value' => $targetblock->use_pager 
+    '#default_value' => ($form_state['conf']['use_pager']) ? $form_state['conf']['use_pager'] : $targetblock->use_pager 
   );
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] ['pager_type'] = array (
     '#type' => 'select',
@@ -355,7 +355,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       'mini' => t ( "Mini Pager" ),
       'full' => t ( 'full' ) 
     ),
-    '#default_value' => 'mini',
+    '#default_value' => ($form_state['conf']['pager_type']) ? $form_state['conf']['pager_type'] : 'mini',
     '#states' => array (
       'visible' => array ( // action to take.
         ':input[name="use_pager"]' =>         // element to evaluate condition on
@@ -376,12 +376,12 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Override split Delta' ),
     '#description' => t ( 'Manually define the order across each targetblock instances.
         The default behavior is to use the date of creation of the targetblock instance to define the order.' ),
-    '#default_value' => $targetblock->use_split 
+    '#default_value' => ($form_state['conf']['use_split']) ? $form_state['conf']['use_split'] : $targetblock->use_split 
   );
   
   $form ['form_targetblock'] ['targetblok_settings'] ['split_settings'] ['split_delta'] = array (
     '#type' => 'textfield',
-    '#default_value' => $targetblock->split_delta,
+    '#default_value' => ($form_state['conf']['split_delta']) ? $form_state['conf']['split_delta'] : $targetblock->split_delta,
     '#title' => t ( 'Override targetblock instance order' ),
     '#size' => 4,
     '#description' => t ( 'Define the order across splitted redacblock
