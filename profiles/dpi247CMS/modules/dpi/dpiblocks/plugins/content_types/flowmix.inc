@@ -497,10 +497,9 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
  */
 function dpiblocks_flowmix_content_type_form_summary_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
-
   // Check that the given URL responds
   if (!empty($values['url'])) {
-    $check_url = drupal_http_request($file_uri, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)));
+    $check_url = drupal_http_request($values['url'], array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 30)));
     module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
     if (!dpicommons_is_http_request_successfull($check_url)) {
       form_set_error('url', t('The URL doesn\'t respond.'));
