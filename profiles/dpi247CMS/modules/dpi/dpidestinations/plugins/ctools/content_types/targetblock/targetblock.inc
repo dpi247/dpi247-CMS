@@ -21,9 +21,10 @@ $plugin = array (
 function dpidestinations_targetblock_content_type_content_types($plugin) {
   $types = array ();
   $targets = target_load_multiple ( FALSE );
+  dsm($targets);
   foreach ( $targets as $target ) {
     $types [$target->machine_name] = array (
-      'title' => check_plain ( $target->machine_name ),
+      'title' => check_plain ( $target->label ),
       'subtype' => $target->machine_name,
       'description' => check_plain ( $target->description ),
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
