@@ -13,32 +13,55 @@ class dpisocial_google_social_network extends dpisocial_social_network {
 	var $whoAmI = 'google';
 	
 	public function configForm() {
-		
-		  $form['google_share_article'] = array (
+		  
+		  $form['google_share_article'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Share articles'),
+			//'#description' => t('This will permanently remove the log messages from the database.'),
+			'#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+			'#states' => array(
+			  'visible' => array(
+				':input[name="social_network_in_use"]' => array('checked' => true),
+			  ),
+			),
+		  );
+		  
+		  $form['google_share_article']['google_share_article'] = array (
 			'#title' => t('Partager les articles'),
 			'#type' => 'checkbox',
 			'#default_value'=>$this->isActionActivated('share_article'),
+			'#states' => array(
+			  'visible' => array(
+				':input[name="social_network_in_use"]' => array('checked' => true),
+			  ),
+			),
 		  );
 		  
-		  $form['google_share_article_method'] = array(
+		  $form['google_share_article']['google_share_article_method'] = array(
 		  	'#type' => 'radios',
 			'#title' => t('Button de partage'),
 			'#maxlength' => 1,
 			'#description' => t('Sélectionner si vous voulez utiliser le bouton classique ou une version personnalisée'),
 			'#options' => array( 'c' => 'Classique', 'p' => 'Personnalisé'),
 			'#default_value' => dpi_variable_get('google_share_article_method', 'c'),
+			'#states' => array(
+			  'visible' => array(
+				':input[name="social_network_in_use"]' => array('checked' => true),
+			  ),
+			),
 		  );
 		  
-		  $form['google_share_article_position'] = array(
+		  $form['google_share_article']['google_share_article_position'] = array(
 		  	'#type' => 'textfield',
 			'#title' => t('Position bouton de partage'),
 			'#description' => t('Sélectionner la position du bouton de partage'),
 			'#default_value' => dpi_variable_get('google_share_article_position', 0),
-		  );
-		  
-		  $form['submit'] = array (
-			'#type' => 'submit',
-			'#value' => t ( 'Submit' ) 
+			'#states' => array(
+			  'visible' => array(
+				':input[name="social_network_in_use"]' => array('checked' => true),
+			  ),
+			),
 		  );
 		  
 		  return $form;
