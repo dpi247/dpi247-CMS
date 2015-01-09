@@ -354,7 +354,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state) {
         The importer is also responsible for the creation of entities, it could create nodes or atoms for example, or it could produce nodes without saving them (it is the case for a preview importer for example).' ),
     '#required' => TRUE,
     '#options' => $options,
-    '#default_value' => isset ( $values ['type'] ) ? $values ['type'] : NULL,
+    '#default_value' => isset ( $values ['type'] ) ? $values ['type'] : (isset($options[0])) ? $options[0] : NULL,
     '#ajax' => array (
       'event' => 'change',
       'wrapper' => 'importer-version',
