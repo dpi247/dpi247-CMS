@@ -157,7 +157,6 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
   $targetblockController = new TargetBlockController ( 'targetblock' );
   $targetController = new TargetController ( 'target' );
-  dsm($form_state['conf']);
   $targetblock = $targetblockController->load_targetblock_by_panels_panelpid ( $form_state ['pane']->pid );
   // This is a new targetblock
   if ($targetblock == FALSE) {
