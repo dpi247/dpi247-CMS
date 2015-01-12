@@ -103,7 +103,7 @@ function dpistat_theme() {
  * Implementation of hook_cron()
  */
 function dpistat_cron(){
-  print t('DPI Stats started : @date', array('@date' => date('Y-m-d H:i:s'))).'<br/>';
+  dpi_log('dpistat', 'record', 'DPI Stats started : '.date('Y-m-d H:i:s'));
 
   if (lock_acquire('dpistat_cron_semaphore', 1200)) {
     module_load_include('inc', 'dpistat', 'includes/dpistat.process');
@@ -114,10 +114,10 @@ function dpistat_cron(){
     // Call the function calling the flows
     dpistat_process_cron();
   } else {
-    print t('Process already running.');
+    dpi_log('dpistat', 'record', 'Process already running.');
   }
-
-  print t('DPI Stats finished : @date', array('@date' => date('Y-m-d H:i:s'))).'<br/>';
+  
+  dpi_log('dpistat', 'record', 'DPI Stats finished : '.date('Y-m-d H:i:s'));
 }
 
 /**
