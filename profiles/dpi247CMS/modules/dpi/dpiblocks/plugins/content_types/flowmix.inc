@@ -317,7 +317,6 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
     // If we didn't do that there would be a confusion between the cached pane and the current pane
     // after the submission of a new flow (when the "OK" button is pressed on the "plugin" form)
     $current_pane = $form_state['pane'];
-        dsm('test');
     if ($current_pane->subtype != 'new_flowmix') {
       $default_settings = dpiblocks_flowmix_content_type_generate_settings_for_subtype($current_pane->subtype);
     } else {
