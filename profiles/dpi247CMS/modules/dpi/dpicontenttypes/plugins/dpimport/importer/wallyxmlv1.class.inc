@@ -19,7 +19,7 @@ class WallyXmlV1 extends PackageHelper {
       
 //       /* Replace atom package from field_embededobjects to field_atompackage */
 //       $package = $this->_buildFieldAtompackage($package);
-      
+
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
       $this->savePackage($dom, $package);
@@ -353,13 +353,20 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity
    */
   public function buildPackageLayout($dom, $wrapper, $entity){
-    $value = $dom->nodeValue;
+      $value = $dom->nodeValue;
     $vid = dpi_variable_get('dpi_packagelayout', NULL);
     $vocabulary = taxonomy_vocabulary_load($vid);
     $vocabulary_name = $vocabulary->machine_name;
+    if($value == 'Hors-texte'){
+      $vocabulary_name = "package_type";
+    }
     $item = taxonomy_get_term_by_name($value, $vocabulary_name);
     if (!empty($item)){
-      $wrapper->field_packagelayout->set(array_shift($item));
+      if($dom->nodeValue == "Hors-texte"){
+        $wrapper->field_packagetype->set(array_shift($item));
+      }else{
+        $wrapper->field_packagelayout->set(array_shift($item));
+      }      
     } else {
       Logger::logWarning('importer', 2, 'packagelayout', t('The package layout !package_layout can not be found', array('!package_layout' => $value)));
     }
