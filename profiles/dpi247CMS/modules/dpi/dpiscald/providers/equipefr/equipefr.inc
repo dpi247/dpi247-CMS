@@ -38,6 +38,9 @@ function dpiscald_equipefr_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->data['id'] = $infos['id'];
 
+  $atom->provider = 'dpiscald';
+  $atom->type = 'equipefr';
+
   if (!empty($infos['thumbnail_url'])) {
     // Download a copy of the media thumbnail. This makes it possible
     // to do interesting manipulation with image styles presets.

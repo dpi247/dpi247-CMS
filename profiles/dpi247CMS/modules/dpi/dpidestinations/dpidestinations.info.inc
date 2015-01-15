@@ -91,10 +91,10 @@ class DpiDestinationsTargetMetadataController extends EntityDefaultMetadataContr
     // Initialize values to prevent WSOD, no certain cases of clear cache.
     $properties = !empty($properties) ? $properties : array();
     $properties += array(
-      'entity_type' => array('label' => ''),
-      'group_type' => array('label' => ''),
-      'field_name' => array('label' => ''),
-      'language' => array('label' => ''),
+      'entity_type' => array('label' => 'Entity type'),
+      'group_type' => array('label' => 'Groupe Type'),
+      'field_name' => array('label' => 'Field Name'),
+      'language' => array('label' => 'Language'),
     );
     $properties['available_targetlayouts']['getter callback'] = '_target_metadata_getter';
     $properties['available_targetlayouts']['setter callback'] = '_target_metadata_setter';

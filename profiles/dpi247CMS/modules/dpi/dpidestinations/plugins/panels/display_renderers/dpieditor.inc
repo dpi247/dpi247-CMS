@@ -267,7 +267,8 @@ class dpidestinations_renderer_ipe extends dpidestinations_renderer_dpieditor {
     }
     // Ensure that empty panes have some content.
     if (empty($content) || empty($content->content)) {
-      if (empty($content)) {
+      $test = new stdClass();
+      if (empty($content) || !($content instanceof $test)) {
         $content = new stdClass();
       }
 

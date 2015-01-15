@@ -303,31 +303,24 @@ abstract class Importer {
   protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
-
     $entity = $this->createOrLoadEntity($dom);
     if (!Logger::error()) {
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-
       // Allow to alter entity before process
       module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
       // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
       if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
-
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
       if (Logger::error()) {
         return NULL;
       }
-
       // Save entity
       if ($save) {
         // Allow to alter entity before save

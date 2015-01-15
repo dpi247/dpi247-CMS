@@ -637,31 +637,23 @@ function unfoldcompanion_field_default_field_bases() {
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_packagetype',
-    'foreign keys' => array(
-      'tid' => array(
-        'columns' => array(
-          'tid' => 'tid',
-        ),
-        'table' => 'taxonomy_term_data',
-      ),
-    ),
+    'foreign keys' => array(),
     'indexes' => array(
-      'tid' => array(
-        0 => 'tid',
+      'value' => array(
+        0 => 'value',
       ),
     ),
     'locked' => 0,
-    'module' => 'taxonomy',
+    'module' => 'list',
     'settings' => array(
       'allowed_values' => array(
-        0 => array(
-          'vocabulary' => 'package_type',
-          'parent' => 0,
-        ),
+        0 => 'Non',
+        1 => 'Oui',
       ),
+      'allowed_values_function' => '',
     ),
     'translatable' => 0,
-    'type' => 'taxonomy_term_reference',
+    'type' => 'list_text',
   );
 
   // Exported field_base: 'field_person_phonenumber'

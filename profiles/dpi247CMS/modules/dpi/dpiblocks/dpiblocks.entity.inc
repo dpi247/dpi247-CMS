@@ -12,7 +12,7 @@ function dpiblocks_entity_info(){
 
   // Remote HTML
   $entities['remotehtml'] = array(
-    'label' => t('Remote Html'),
+    'label' => t('DPI Remote Html'),
     'entity class' => 'RemoteHtmlEntity',
     'controller class' => 'RemotehtmlController',
     'base table' => 'dpiblocks_remotehtml',
@@ -44,7 +44,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'remotehtml_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/remotehtml',
+      'path' => DPI_ADMIN_PATH.'/remotehtml',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/remotehtml.admin.inc',
     ),
@@ -52,7 +52,7 @@ function dpiblocks_entity_info(){
 
   // Custom content
   $entities['custom_content'] = array(
-    'label' => t('Custom content'),
+    'label' => t('DPI Custom content'),
     'entity class' => 'Custom_contentEntity',
     'controller class' => 'Custom_contentController',
     'base table' => 'dpiblocks_custom_content',
@@ -86,7 +86,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'custom_content_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/custom_content',
+      'path' => DPI_ADMIN_PATH.'/custom_content',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/custom_content.admin.inc',
     ),
@@ -94,7 +94,7 @@ function dpiblocks_entity_info(){
 
   // FlowMix
   $entities['flowmix'] = array(
-    'label' => t('FlowMix'),
+    'label' => t('Dpi FlowMix'),
     'entity class' => 'FlowMixEntity',
     'controller class' => 'FlowMixController',
     'base table' => 'dpiblocks_flowmix',
@@ -126,7 +126,7 @@ function dpiblocks_entity_info(){
     'access callback' => 'flowmix_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      'path' => 'admin/structure/flowmix',
+      'path' => DPI_ADMIN_PATH.'/flowmix',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/flowmix.admin.inc',
     ),

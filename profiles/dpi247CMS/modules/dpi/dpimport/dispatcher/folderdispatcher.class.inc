@@ -21,7 +21,6 @@ class FolderDispatcher extends Dispatcher {
    * @return String $source_folder
    */
   public function getSourceFolder(){
-    dsm( 'importer://'.$this->source_folder);
     return 'importer://'.$this->source_folder;
   }
 
@@ -133,19 +132,17 @@ class FolderDispatcher extends Dispatcher {
    * @return Array $dispatcher_settings
    */
   public function submitSettingsForm($values, $form_state_multistep){
+    $dispatcher_settings = parent::submitSettingsForm($values,$form_state_multistep);
+    
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep ["default"] ["name"];
     $old = umask(0);
     
-    if (mkdir($default_path, 0777, true)) {
-      if (mkdir($default_path . "/todo", 0777 )) {
-        $dispatcher_settings = parent::submitSettingsForm($values, $form_state_multistep);
-        $dispatcher_settings ['source_url'] = $default_path . "/todo";
-        drupal_set_message("Creating : " . $default_path . "/todo");
-      } else {
-        drupal_set_message("Creating source folder fail", 'error');
-      }
+    if (mkdir($default_path . "/todo", 0777 )) {
+      $dispatcher_settings = parent::submitSettingsForm($values, $form_state_multistep);
+      $dispatcher_settings ['source_url'] = $default_path . "/todo";
+      drupal_set_message("Creating : " . $default_path . "/todo");
     } else {
-      drupal_set_message("File cannot be created", "error");
+      drupal_set_message("Creating source folder fail", 'error');
     }
     umask($old);
     $dispatcher_settings['source_folder'] = $form_state_multistep ["default"] ["name"] . "/todo";

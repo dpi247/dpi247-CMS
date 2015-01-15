@@ -12,7 +12,6 @@ function dpiexport_page_admin_general_settings_form($form, $form_state) {
     '#default_value' => dpi_variable_get('dpiexport_admin_dest', ''),
     '#required' => TRUE,
   );
-
   return dpi_system_settings_form($form);
 }
 

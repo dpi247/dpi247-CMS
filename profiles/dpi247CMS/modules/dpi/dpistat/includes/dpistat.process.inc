@@ -48,7 +48,7 @@ function dpistat_process_cron() {
           dpistat_process_entry($res, $term_counts, $node_counts, $current_tstamp);
           $entries_count++;
         } else {
-          print t('Memory over %memory_limit%, process stopped. %entries_count entries processed', array('%memory_limit' => $cron_memory_limit, '%entries_count' => $entries_count)).'<br>';
+          dpi_log('dpistat', 'record', 'Memory over '.$cron_memory_limit.'%, process stopped. '.$entries_count.' entries processed');
           break;
         }
       }
@@ -66,7 +66,7 @@ function dpistat_process_cron() {
         $res = (array)$res;
         dpistat_process_entry($res, $term_counts, $node_counts, $current_tstamp);
       } else {
-        print t('Memory over %memory_limit%, process stopped. %entries_count entries processed', array('%memory_limit' => $cron_memory_limit, '%entries_count' => $entries_count)).'<br>';
+        dpi_log('dpistat', 'record', 'Memory over '.$cron_memory_limit.'%, process stopped. '.$entries_count.' entries processed');
         break;
       }
     }
@@ -103,7 +103,7 @@ function dpistat_counters_reset($current_tstamp) {
       $string_placeholders[] = $column.' = '.$value;
     }
     $string_placeholder = implode(', ', $string_placeholders);
-    print t('Updated : !placeholder for !table', array('!placeholder' => $string_placeholder, '!table' => 'dpistat_node_counter')).'<br/>';
+    dpi_log('dpistat', 'record', 'Updated : '.$string_placeholder.' for dpistat_node_counter');
   }
 
   // Reset term counters
@@ -126,7 +126,7 @@ function dpistat_counters_reset($current_tstamp) {
       $string_placeholders[] = $column.' = '.$value;
     }
     $string_placeholder = implode(', ', $string_placeholders);
-    print t('Updated : !placeholder for !table', array('!placeholder' => $string_placeholder, '!table' => 'dpistat_term_counter')).'<br/>';
+    dpi_log('dpistat', 'record', 'Updated : '.$string_placeholder.' for dpistat_term_counter');
   }
 }
 

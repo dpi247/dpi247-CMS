@@ -13,16 +13,16 @@ class WallyXmlV1 extends PackageHelper {
 
     Logger::logExecution('package', TRUE);
     $package = $this->constructPackage($dom);
-    
     if (!Logger::error()) {
-
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher();
+      
+//       /* Replace atom package from field_embededobjects to field_atompackage */
+//       $package = $this->_buildFieldAtompackage($package);
+      
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
       $this->savePackage($dom, $package);
-      dsm($package);
-      
     }
 
     // Set the CurrentLog to the previous one to stop children growing.
@@ -94,9 +94,15 @@ class WallyXmlV1 extends PackageHelper {
 
   protected function setPackageAttributes($dom, $wrapper, $entity) {
     // Language
-    $wrapper->language->set($dom->getAttributeNode('Language')->value);
+    
+    //@todo: use global lang
+    if($dom->getAttributeNode('Language')->value!=""){
+      $wrapper->language->set($dom->getAttributeNode('Language')->value);
+    }
+    else{
+      $wrapper->language->set("fr");
+    }
     // @todo path_autho check alias
-  
     $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
     $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
     $this->buildAutopublishDate($dom, $wrapper, $entity);
@@ -232,7 +238,7 @@ class WallyXmlV1 extends PackageHelper {
       $dest = array();
       $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
       $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
-      if ($terms) {
+      if ($terms && $destination->hasAttribute("Position") && $destination->hasAttribute("DocumentLayout") && $destination->hasAttribute("DestinationRank")) {
         $dest['tid'] = $terms[0]->tid;
         if ($destination->hasAttribute("Position")) {
           $dest['target'] = $destination->getAttributeNode("Position")->value;
@@ -268,23 +274,26 @@ class WallyXmlV1 extends PackageHelper {
    * @param EntityDrupalWrapper $wrapper
    * @param Object $entity
    */
-  public function buildDestinations($dom, $wrapper, $entity){
+  public function buildDestinations($dom, $wrapper, $entity, $globalDom){
     // @todo s'occuper des destinations multiples
     $term = array();
     $result = array();
     $vid = _dpidestinations_variable_get('dpidestinations_section_vid', NULL);
-    if ($vid) {
-      $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
-
-      if (count($destination_list)) {
-        // Add destinations to the package
-        $wrapper->field_destinations->set($destination_list);
+    $package_type = $globalDom->getElementsByTagName('PackageLayout')->item(0)->nodeValue;
+    if($package_type == 'Article' || !isset($package_type)){      
+      if ($vid) {
+          $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
+      
+          if (count($destination_list)) {
+            // Add destinations to the package
+            $wrapper->field_destinations->set($destination_list);
+          } else {
+            // If no destinations at all > Package can't be created
+            Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+          }
       } else {
-        // If no destinations at all > Package can't be created
-        Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+        Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
       }
-    } else {
-      Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
     }
   }
 
@@ -705,6 +714,7 @@ class WallyXmlV1 extends PackageHelper {
     switch ($parsedurl['scheme']){
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
+        
         switch ($entity->type){
           case 'image':
             $wrapper->scald_thumbnail->set((array) $file);
@@ -771,10 +781,27 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity
    */
   public function buildLink($dom, $package_wrapper, $entity){
-    Logger::logExecution('linkbojecttype', TRUE);
-    $atom = $this->constructEntity($dom, 'scald_atom');
-    Logger::setCurrentToPreviousExecution();
-    return $atom;
+    $uri_info = $dom->getElementsByTagName('URI')->item(0)->nodeValue; 
+    if(strstr($uri_info, 'extref://')!=FALSE){
+      $tmpExternalRef = substr($uri_info, 9);
+      $query = "SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref ) LIMIT 1";
+      $args = array(
+        ':extref' => $tmpExternalRef
+      );
+      $result = db_query($query, $args)->fetchField();
+      if(isset($result) && $var = scald_atom_load(intval($result))){
+        $atom = new stdClass();
+        $atom->sid = $result;
+        $atom->type = $var->type;
+        $atom->provider = $var->provider;
+        return $atom;
+      }
+    }else{
+      Logger::logExecution('linkbojecttype', TRUE);
+      $atom = $this->constructEntity($dom, 'scald_atom');
+      Logger::setCurrentToPreviousExecution();
+      return $atom;
+    }
   }
 
   /**
@@ -790,4 +817,35 @@ class WallyXmlV1 extends PackageHelper {
     Logger::setCurrentToPreviousExecution();
     //return $atom;
   }
+  
+  /**
+   * This function is use to reorder different element for field_atompackage
+   * XML specification
+   * 
+   * @param unknown $package
+   * @return unknown
+   */
+  public function _buildFieldAtompackage($package){
+    $field_embededobjects = array();
+    $field_atompackage = array();
+    foreach($package->field_embededobjects as $klang => $elements){
+      foreach($elements as $element){
+        if($element['type'] == "atom_package"){
+          if(!isset($field_atompackage[$klang]))
+            $field_atompackage[$klang] = array();
+          $field_atompackage[$klang][] = $element;
+        }else{
+          if(!isset($field_embededobjects[$klang]))
+            $field_embededobjects[$klang] = array();
+          $field_embededobjects[$klang][] = $element;
+        }
+      }
+    }
+    if(!empty($field_embededobjects))
+      $package->field_embededobjects = $field_embededobjects;
+    if(!empty($field_atompackage))
+      $package->field_atompackage = $field_atompackage;
+    return $package;
+  }
 }
+

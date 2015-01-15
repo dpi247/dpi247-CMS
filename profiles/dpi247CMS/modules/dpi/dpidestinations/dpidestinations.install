@@ -229,25 +229,6 @@ function dpidestinations_schema() {
      'primary key' => array('targetblockid'),
    );
   */
-  
-  $schema["dpidestinations_multi_destinations"] = array(
-    'description' => 'The target entity table',
-    'fields' => array(      
-      'label' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'description' => 'label to find element',
-      ),
-      'destinations' => array(
-        'type' => 'varchar',
-        'not null' => TRUE,
-        'length' => 1000,
-        'description' => 'Array value serialize',
-      )
-    ),
-    'primary key' => array('label'),
-  );
 
   return $schema;
 }
@@ -270,7 +251,8 @@ function dpidestinations_install(){
   $field_info=_dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
   _dpidestination_attach_field_destination_to_bundle('node', 'package');
-
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+  
   // Add "view section" permission to anonymous and authenticated user roles
   $rids = array(1, 2);
   $permissions = array('view section');
@@ -339,28 +321,6 @@ function dpidestinations_update_7001() {
   }
 }
 
-/**
- * add table dpidestinations
- */
-function dpidestinations_update_7002(){
-  $schema["dpidestinations_multi_destinations"] = array(
-    'description' => 'The target entity table',
-    'fields' => array(      
-      'label' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'description' => 'label to find element',
-      ),
-      'destinations' => array(
-        'type' => 'varchar',
-        'not null' => TRUE,
-        'length' => 1000,
-        'description' => 'Array value serialize',
-      )
-    ),
-    'primary key' => array('label'),
-  );
-  db_create_table('dpidestinations_multi_destinations', $schema['dpidestinations_multi_destinations']);
+function dpidestinations_update_7002() {
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
 }
-

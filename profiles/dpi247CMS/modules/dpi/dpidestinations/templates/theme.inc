@@ -87,7 +87,6 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
   // Add each block in the form to the appropriate place in the block listing.
   foreach (element_children($variables['form']['nodes']) as $i) {
     $node = &$variables['form']['nodes'][$i];
-    
     // Set special classes needed for table drag and drop.
     $node['weight']['#attributes']['class'] = array('node-weight', 'node-weight');
     $block['weight']['#attributes']['class'] = array('block-weight', 'block-weight');
@@ -96,10 +95,10 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
     $variables['node_listing'][$i]->row_class = 'node-weight';
     $variables['node_listing'][$i]->weight_select = drupal_render($node['weight']);
     $variables['node_listing'][$i]->node_title = drupal_render($node['title']);
-    $variables['node_listing'][$i]->author = drupal_render($node['authors']);
-    $variables['node_listing'][$i]->publication_date = drupal_render($node['field_field_editorialpublicationdate']);
-    $variables['node_listing'][$i]->actions = drupal_render($node['edit']);
+    $variables['node_listing'][$i]->actions = drupal_render($node['edit']).' ,'. !empty($node['delete']) ? drupal_render($node['delete']) : '';
     $variables['node_listing'][$i]->printed = FALSE;
+    $variables['node_listing'][$i]->author = drupal_render($node['authors']);
+    $variables['node_listing'][$i]->publication_date = drupal_render($node["field_field_editorialpublicationdate"]);
   }
   $variables['form_submit'] = drupal_render_children($variables['form']);
 }

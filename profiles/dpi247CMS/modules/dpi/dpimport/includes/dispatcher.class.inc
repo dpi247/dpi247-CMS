@@ -190,7 +190,11 @@ abstract class Dispatcher {
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
-          $importer->$method_name ( $child, $object, $object2 );
+          if($method_name == 'builddestinations'){
+            $importer->$method_name ( $child, $object, $object2, $dom );
+          }else{
+            $importer->$method_name ( $child, $object, $object2 );
+          }          
         }
       }
     }
@@ -478,18 +482,18 @@ abstract class Dispatcher {
         rmdir ( $pathname . "/tmp" );
       }
     }
-    
     umask ( $old );
     
     $dispatcher_settings = array (
       'zip' => $values ['zip'],
       'cron' => $values ['cron'],
       'cron_frequency' => $values ['cron_frequency'],
-      'temp_folder' => $form_state_multistep ["default"] ["name"] . "/tmp",
+      'temp_folder' =>  $form_state_multistep ["default"] ["name"] . "/tmp",
       'done_folder' => $form_state_multistep ["default"] ["name"] . "/done",
-      'error_folder' => $form_state_multistep ["default"] ["name"] . "/error",
+      'error_folder' =>$form_state_multistep ["default"] ["name"] . "/error",
       'ttl_folder' => $values ['ttl_folder'] 
     );
+    
     return $dispatcher_settings;
   }
   

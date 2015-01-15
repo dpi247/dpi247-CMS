@@ -14,19 +14,6 @@ if (! (defined ( 'DAILYMOTION_RSS' ) && defined ( 'DAILYMOTION_WEB' ) && defined
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some video atoms.
- */
-function dpiscald_dailymotion_scald_atom_providers() {
-  return array(
-    'video' => 'Video hosted on Dailymotion'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Video hosted on Dailymotion');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_dailymotion_scald_add_form(&$form, &$form_state) {
@@ -69,6 +56,9 @@ function dpiscald_dailymotion_scald_add_form_fill(&$atom, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'dailymotion';
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
@@ -147,6 +137,10 @@ function dpiscald_dailymotion_theme() {
     'dpiscald_dailymotion_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/dailymotion/dpiscald_dailymotion_player'
+    ),
+    'dpiscald_dailymotion_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_dailymotion_player_html5'
     ),
     'dpiscald_dailymotion_imports_table' => array(
       'render element' => 'form',

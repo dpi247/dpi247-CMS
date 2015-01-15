@@ -22,11 +22,20 @@ function theunfold_theme() {
     'theme_package_top_items' => array(
       'arguments' => array('variable' => array()),
     ),
-    
+    'theme_package_hors_text' => array(
+      'arguments' => array('articles' => array()),
+      'template' => 'node--hors-text',
+      'path' => $path.'/templates',
+    ),
+    'theme_package_article_secondaire' => array(
+      'arguments' => array('articles' => array()),
+      'template' => 'node--article-secondaire',
+      'path' => $path.'/templates',
+    ),
   );
 }
 function theunfold_preprocess_($variables, $base_theme){
-  
+
 }
 
 function theunfold_preprocess_page(&$vars) {
@@ -69,7 +78,7 @@ function theunfold_preprocess_page(&$vars) {
  * Hook preprocess_page
  */
 function theunfold_process_page(&$vars) {
-  
+
 }
 
 /**
@@ -142,23 +151,23 @@ function theunfold_preprocess_field(&$variables) {
   $element = $variables['element'];
   switch ($element['#field_name']) {
     /*
-    case 'field_textchapo':
-      $variables['classes_array'][] = 'heading';
-      break;
-*/
+     case 'field_textchapo':
+    $variables['classes_array'][] = 'heading';
+    break;
+    */
     case 'field_textbody':
       break;
-    case 'field_linkslists':      
+    case 'field_linkslists':
       $variables['classes_array'][] = 'article-body';
       if($element['#formatter'] == 'links_list_small'){
         $variables['theme_hook_suggestions'][] = 'field__field_linkslists_small__package';
       }
       break;
-/*
-    case 'field_textbarette':
+      /*
+       case 'field_textbarette':
       $variables['classes_array'][] = 'cat';
       break;
-*/
+      */
     case 'field_copyright':
       $variables['classes_array'][] = 'meta';
       break;
@@ -213,44 +222,60 @@ function _theunfold_set_js() {
     //'type' => 'theme',
     'scope' => 'footer',
   );
-  
-  
+
+
   /*
-  drupal_add_js('http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js', $js_options);
+   drupal_add_js('http://cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/script.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/swipe.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/ticker.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/jquery.easing.1.3.js', $js_options);
   drupal_add_js($path.'/scripts/mylibs/jquery.elastislide.js', $js_options);
-*/
-  
-  
-  
+  */
+
+
+
   // Add js to the header
   drupal_add_js($path.'/scripts/vendor/modernizr-2.6.1.min.js');
   drupal_add_js("
-    (function(doc) {
-    var addEvent = 'addEventListener',
-        type = 'gesturestart',
-        qsa = 'querySelectorAll',
-        scales = [1, 1],
-        meta = qsa in doc ? doc[qsa]('meta[name=viewport]') : [];
+      (function(doc) {
+      var addEvent = 'addEventListener',
+      type = 'gesturestart',
+      qsa = 'querySelectorAll',
+      scales = [1, 1],
+      meta = qsa in doc ? doc[qsa]('meta[name=viewport]') : [];
 
       function fix() {
-        meta.content = 'width=device-width,minimum-scale=' + scales[0] + ',maximum-scale=' + scales[1];
-        doc.removeEventListener(type, fix, true);
-      }
+      meta.content = 'width=device-width,minimum-scale=' + scales[0] + ',maximum-scale=' + scales[1];
+      doc.removeEventListener(type, fix, true);
+}
 
       if ((meta = meta[meta.length - 1]) && addEvent in doc) {
-        fix();
-        scales = [.25, 1.6];
-        doc[addEvent](type, fix, true);
-      }
+      fix();
+      scales = [.25, 1.6];
+      doc[addEvent](type, fix, true);
+}
 
-    }(document));
-", 'inline');
-/*
-  $vars['scripts'] = drupal_get_js(); // necessary in D7?
+}(document));
+      ", 'inline');
+  /*
+   $vars['scripts'] = drupal_get_js(); // necessary in D7?
   $vars['closure'] = theme('closure'); // necessary in D7?
-*/
+  */
+}
+
+
+
+function theunfold_css_alter(&$css) {
+  if(arg(0)=='panels' and arg(1)=='ajax'){
+    $exclude = array(
+      'profiles/dpi247CMS/themes/theunfold/css/screen.css' => FALSE,
+      'profiles/dpi247CMS/themes/theunfold/css/block-slidepic.css' => FALSE,
+      'profiles/dpi247CMS/themes/theunfold/css/custo-dpi.css' => FALSE,
+      'profiles/dpi247CMS/themes/theunfold/css/modal.css' => TRUE,
+      'profiles/dpi247CMS/themes/theunfold/css/dpi-additions.css' => TRUE,
+      
+    );
+    $css = array_diff_key($css, $exclude);
+  }
 }

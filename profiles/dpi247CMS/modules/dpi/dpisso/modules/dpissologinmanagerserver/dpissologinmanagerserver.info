@@ -1,0 +1,4 @@
+core = "7.x"
+name = "DPI SSO Login Manager Server"
+description = "DPI SSO include the sso authentification, the access manager,the profile manager..."
+package = DPI

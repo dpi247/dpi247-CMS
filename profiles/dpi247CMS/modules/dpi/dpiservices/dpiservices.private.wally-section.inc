@@ -55,6 +55,10 @@ function dpiservices_wally_section_retrieve_process($sid, $targetblock_name){
  * @return multitype:multitype:array()
  */
 function dpiservices_wally_section_get_all_packages($sid){ 
+  module_load_include('inc', 'dpidestinations','plugins/ctools/content_types/targetblock/targetblock');
+  module_load_include('inc', 'dpiservices','dpiservices.private.wally-packages');
+  
+  
   $section_info = dpidestinations_api_get_all_targetblocks_for_destination($sid);
   $result = array();
   foreach ($section_info as $section){
@@ -65,7 +69,8 @@ function dpiservices_wally_section_get_all_packages($sid){
 
     $target = $targetblock_wrapper->target->value();
     $target_wrapper = entity_metadata_wrapper('target', $target);
-
+    
+    
     $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sid,  $section->target, $targetblock);
 
     foreach($targetview->result as $node_info){
@@ -83,6 +88,8 @@ function dpiservices_wally_section_get_all_packages($sid){
  * @return multitype:multitype:array()
  */
 function dpiservices_wally_section_get_one_packages($sectionid, $targetblock_name){
+  module_load_include('inc', 'dpidestinations','plugins/ctools/content_types/targetblock/targetblock');
+  
   $section_info = dpidestinations_api_get_all_targetblocks_from_target_for_destination($targetblock_name, $sectionid);
   $section = current($section_info);
   $result = array();
@@ -94,6 +101,7 @@ function dpiservices_wally_section_get_one_packages($sectionid, $targetblock_nam
   $target = $targetblock_wrapper->target->value();
   $target_wrapper = entity_metadata_wrapper('target', $target);
 
+  
   $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview($sectionid,  $section->target, $targetblock);
 
   foreach($targetview->result as $node_info){

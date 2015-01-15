@@ -5,6 +5,7 @@ module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
 module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
+module_load_include('inc', 'dpidestinations','dpidestinations.rules');
 
 /**
  * Implementation of hook_menu()
@@ -90,47 +91,6 @@ function dpidestinations_menu() {
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
-  
-  $items['admin/dpi247/dpidestinations/destinationmultiple'] = array(
-    'title' => t('Multiple Destinations'),
-    'description' => 'Create multiple destination with a simple name',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 1,
-    'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_multiple_destinations',
-    'file' => 'dpidestinations.pages.multipledestinations.inc',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-  );
-  
-  $items['admin/dpi247/dpidestinations/destinationmultiple/add'] = array(
-    'title' => t('Multiple Destinations'),
-    'description' => 'Create multiple destination with a simple name',
-    'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_multiple_destinations_add',
-    'file' => 'dpidestinations.pages.multipledestinations.inc',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-  );
-  
-  $items['admin/dpi247/dpidestinations/destinationmultiple/edit/%'] = array(
-    'title' => t('Multiple Destinations'),
-    'description' => 'Create multiple destination with a simple name',
-    'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_multiple_destinations_add',
-    'page arguments' => array(5),
-    'file' => 'dpidestinations.pages.multipledestinations.inc',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-  );
-  
-  $items['admin/dpi247/dpidestinations/destinationmultiple/del/%'] = array(
-    'title' => t('Delete information'),
-    'description' => 'delete multiple destination by label',
-    'access arguments' => array('administer targets'),
-    'page callback' => 'dpidestinations_page_multiple_destinations_del',
-    'page arguments' => array(5),
-    'file' => 'dpidestinations.pages.multipledestinations.inc',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-  );
-  
   $items['section/%section'] = array(
     'title' => 'Section term',
     'title callback' => 'taxonomy_term_title',
@@ -143,6 +103,10 @@ function dpidestinations_menu() {
 
   return $items;
 }
+function toto($r){
+  return 'coou';
+}
+
 
 /**
  * Implementation of hook_theme()
@@ -564,6 +528,10 @@ function dpidestinations_views_plugins() {
 /*
  * Implementation of hook_contextual_links_view_alter
  */
+
+/*
+We dont need this naymore since the targetblock contextual link are now working ...
+This should be removed soon
 function dpidestinations_contextual_links_view_alter(&$element, $items){
   
   //make sure we override contextual links for a view
@@ -580,7 +548,7 @@ function dpidestinations_contextual_links_view_alter(&$element, $items){
     }
   }
 }
-
+*/
 
 /*
  * Implementation of hook_admin_paths_alter
@@ -618,10 +586,9 @@ function dpidestinations_preprocess_views_view_field(&$vars) {
 }
 
 function dpidestinations_preprocess_node(&$vars) {
-  //Remove this suggestion... useless
+  //Remove this suggestion... useless  
   unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
-
-  if (isset($vars['elements']['#entity_type'])) {
+  /*if (isset($vars['elements']['#entity_type'])) {
     $entity_type = $vars['elements']['#entity_type'];
     if (isset($vars[$entity_type])) {
       $entity = $vars[$entity_type];
@@ -635,30 +602,7 @@ function dpidestinations_preprocess_node(&$vars) {
         }
       }
     }
-  }
-
-  // The 'view' attribute of the node is added in views_preprocess_node()
-
-
-  /*
-   * Still Need to provide some overiding patterns
-  if (!empty($vars['node']->view) && !empty($vars['node']->view->display_handler->plugin_name) && $vars['node']->view->display_handler->plugin_name=="targetview") {
-  dsm(($vars['node']->view));
-  $vars['view'] = $vars['node']->view;
-
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
-  if (!empty($vars['node']->view->current_display)) {
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
-
-  // If a node is being rendered in a view, and the view does not have a path,
-  // prevent drupal from accidentally setting the $page variable:
-  if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
-  $vars['page'] = FALSE;
-  }
-  }
-  }
-  */
-
+  }*/
 }
 
 function dpidestinations_dpicache_cache_entry_register() {
@@ -688,6 +632,46 @@ function dpidestinations_dpicache_category_callback($cachedefinition = '', $argu
     $retour = $arguments[0].'_'.$arguments[1].'_'.$arguments[2];
   }
   return $retour;
+}
+
+
+
+function dpidestinations_token_info() {
+  $info['tokens']['node']['maindestid'] = array(
+    'name' => t('Main destination Id'),
+    'description' => t('Return the main destination about node'),
+  );
+  $info['tokens']['node']['pageType'] = array(
+    'name' => t('Page type information'),
+    'description' => t('Return the type about the node page info'),
+  );
+  return $info;
+}
+
+function dpidestinations_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'node') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'maindestid':
+            $name = '';
+            if(isset($data['node'])){
+              $info = current(field_get_items('node', $data['node'], 'field_destinations'));
+              $name = $info["tid"];
+            }
+            $replacements[$original] = $name;
+          break;
+        case 'pageType':
+            $name = '';
+            if(isset($data['node'])){
+              $name = $data['node']->type;
+            }
+            $replacements[$original] = $name;
+          break;
+      }
+    }
+  }
+  return $replacements;
 }
 
 

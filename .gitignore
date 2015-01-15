@@ -6,10 +6,17 @@ sites/*/files
 sites/*/private
 sites/*/modules
 sites/*/importer
+sites/all/libraries
 
 #ignore eclipse settings
 .settings/*
 .project
+.gitignore
+.buildpath
+.htaccess
+robots.txt
 
-/.htaccess
-/robots.txt
+.idea
+nbproject
+
+

@@ -35,6 +35,7 @@ function unfoldcompanionminimal_default_page_manager_handlers() {
           'settings' => array(
             'type' => array(
               'package' => 'package',
+              'package_gallery' => 'package_gallery',
             ),
           ),
           'context' => 'argument_node_edit_1',
@@ -315,6 +316,56 @@ function unfoldcompanionminimal_default_page_manager_handlers() {
     $pane->uuid = '2d5a2b54-dc28-4ff9-92e1-4fe46eab0051';
     $display->content['new-2d5a2b54-dc28-4ff9-92e1-4fe46eab0051'] = $pane;
     $display->panels['left'][8] = 'new-2d5a2b54-dc28-4ff9-92e1-4fe46eab0051';
+    $pane = new stdClass();
+    $pane->pid = 'new-4920be7f-f3d2-49ac-9a0e-a2fa89d414cb';
+    $pane->panel = 'left';
+    $pane->type = 'entity_form_field';
+    $pane->subtype = 'node:field_copyright';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'label' => '',
+      'formatter' => '',
+      'context' => 'argument_node_edit_1',
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 9;
+    $pane->locks = array();
+    $pane->uuid = '4920be7f-f3d2-49ac-9a0e-a2fa89d414cb';
+    $display->content['new-4920be7f-f3d2-49ac-9a0e-a2fa89d414cb'] = $pane;
+    $display->panels['left'][9] = 'new-4920be7f-f3d2-49ac-9a0e-a2fa89d414cb';
+    $pane = new stdClass();
+    $pane->pid = 'new-3d85dff5-0c42-42ba-bd26-3baa98c39a15';
+    $pane->panel = 'left';
+    $pane->type = 'entity_form_field';
+    $pane->subtype = 'node:field_packagelayout';
+    $pane->shown = TRUE;
+    $pane->access = array();
+    $pane->configuration = array(
+      'label' => '',
+      'formatter' => '',
+      'context' => 'argument_node_edit_1',
+      'override_title' => 0,
+      'override_title_text' => '',
+    );
+    $pane->cache = array();
+    $pane->style = array(
+      'settings' => NULL,
+    );
+    $pane->css = array();
+    $pane->extras = array();
+    $pane->position = 10;
+    $pane->locks = array();
+    $pane->uuid = '3d85dff5-0c42-42ba-bd26-3baa98c39a15';
+    $display->content['new-3d85dff5-0c42-42ba-bd26-3baa98c39a15'] = $pane;
+    $display->panels['left'][10] = 'new-3d85dff5-0c42-42ba-bd26-3baa98c39a15';
     $pane = new stdClass();
     $pane->pid = 'new-e4f2ced3-001f-45d2-b93e-81a02e82518f';
     $pane->panel = 'right';
@@ -693,6 +744,7 @@ function unfoldcompanionminimal_default_page_manager_handlers() {
   $display->hide_title = PANELS_TITLE_FIXED;
   $display->title_pane = 'new-ffa29c66-7eeb-45c5-be81-e2b9453aaefb';
   $handler->conf['display'] = $display;
+    
   $export['node_edit_dpipanels_context'] = $handler;
 
   return $export;

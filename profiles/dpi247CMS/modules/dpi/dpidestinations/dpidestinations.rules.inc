@@ -36,39 +36,33 @@ function dpidestinations_rules_event_info() {
       'module' => 'dpidestinations',
       'group' => 'DPI247 Destinations',
       'variables' => rules_events_node_variables ( t ( 'updated content' ), TRUE ) 
-    )
-    ,
+    ),
     'dpidestinations_rules_event_package_deleted' => array (
       'label' => t ( 'After a node type with field destination is deleted' ),
       'module' => 'dpidestinations',
       'group' => 'DPI247 Destinations',
       'variables' => rules_events_node_variables ( t ( 'delete content' ), TRUE ) 
-    )
-    ,
+    ),
     'dpidestinations_rules_event_targetblock_created_on_panel' => array (
       'label' => t ( 'After a targetblock is created on a panel' ),
       'module' => 'dpidestinations',
       'group' => 'DPI247 Destinations' 
     // @todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-        )
-
-    ,
+        ),
+    
     'dpidestinations_rules_event_targetblock_edited_on_panel' => array (
       'label' => t ( 'After a targetblock is edited on a panel' ),
       'module' => 'dpidestinations',
       'group' => 'DPI247 Destinations' 
     // @todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-        )
-
-    ,
+        ),
+    
     'dpidestinations_rules_event_targetblock_removed_on_panel' => array (
       'label' => t ( 'After a targetblock is removed from a panel' ),
       'module' => 'dpidestinations',
       'group' => 'DPI247 Destinations' 
     // @todo: define variables 'variables' => rules_events_node_variables(t('delete content'), TRUE),
-        )
-
-     
+        ) 
   )
   ;
 }
@@ -181,6 +175,7 @@ function dpidestinations_rules_condition_info() {
   
   return $items;
 }
+
 function dpidestinations_rules_condition_has_section($node, $sections) {
   $destinations = field_get_items ( 'node', $node, 'field_destinations', $langcode );
   $return = FALSE;
@@ -192,17 +187,20 @@ function dpidestinations_rules_condition_has_section($node, $sections) {
   
   return $return;
 }
+
 function dpidestinations_rules_condition_has_main_section($node, $sections) {
   $destinations = field_get_items ( 'node', $node, 'field_destinations', $langcode );
   $main_section = $destinations ['0'] ['tid'];
   
   return in_array ( $main_section, $sections );
 }
+
 function dpidestinations_rules_condition_has_main_target($node, $targets) {
   $destinations = field_get_items ( 'node', $node, 'field_destinations', $langcode );
   $main_section = $destinations ['0'] ['target'];
   return in_array ( $main_section, $sections );
 }
+
 function dpidestinations_rules_condition_has_target($node, $targets) {
   $destinations = field_get_items ( 'node', $node, 'field_destinations', $langcode );
   $return = FALSE;
@@ -213,9 +211,11 @@ function dpidestinations_rules_condition_has_target($node, $targets) {
   }
   return $return;
 }
+
 function dpidestinations_rules_condition_has_main_section_and_main_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_main_section ( $node, $sections ) & dpidestinations_rules_condition_has_main_target ( $node, $targets );
 }
+
 function dpidestinations_rules_condition_has_section_and_target($node, $sections, $targets) {
   return dpidestinations_rules_condition_has_section ( $node, $sections ) & dpidestinations_rules_condition_has_target ( $node, $targets );
 }
@@ -228,7 +228,7 @@ function dpidestinations_rules_condition_has_section_and_target($node, $sections
 function dpidestinations_rules_action_info() {
   return array (
     'regenerate_node' => array (
-      'label' => t ( 'Refresh content' ),
+      'label' => t ( 'Refresh targetblocks associated to the node' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
@@ -241,7 +241,7 @@ function dpidestinations_rules_action_info() {
       ) 
     ),
     'refresh_node_cash' => array (
-      'label' => t ( 'Refresh node content' ),
+      'label' => t ( 'Refresh node page' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
@@ -266,20 +266,25 @@ function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
    * Invalidation cache for this node because the pre_render of
    * dpidestinations_plugin_row_node_targetview give the precedent node
    */
-  $_GET ['q'] = $_GET ['destination'];
+  if (isset ( $_GET ['destination'] )) {
+    $_GET ['q'] = $_GET ['destination'];
+    unset ( $_GET ['destination'] );
+  }
   drupal_static ( 'drupal_get_destination', '', TRUE );
-  unset ( $_GET ['destination'] );
-
-  entity_get_controller('node')->resetCache(array($node->nid));
-  $field_node_destinations = field_get_items ( 'node', $node, 'field_destinations' );
-  if(is_array($field_node_destinations)){
-    foreach ($field_node_destinations as $destination ) {
-      if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {
-        $category = dpidestination_api_get_category ( $destination );        
-        dpicache_api_manage_regeneration_all_cache_entry($destination ['tid'], $category);
-      } else {
-        drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
+  
+  entity_get_controller('node')->resetCache(array ( $node->nid));
+  foreach ( field_get_items ( 'node', $node, 'field_destinations' ) as $destination ) {
+    if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {
+      $category = dpidestination_api_get_category ( $destination );
+      // Clean dpicache for targetblocks
+      dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );
+      
+      // clean varnish for argetblocks
+      foreach ( dpicommons_api_get_all_path_alias_for_taxonomy ( $destination ['tid'] ) as $url_alias ) {
+        dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
       }
+    } else {
+      drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
     }
   }
 }
@@ -291,6 +296,7 @@ function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
  */
 function dpidestinations_clear_cache_of_node_content($node) {
   // Clean varnish for node
-  dpicache_api_manage_varnish_clear_cache_for_node($node);
+  foreach ( dpicommons_api_get_all_path_alias_for_node ( $node ) as $url_alias ) {
+    dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
+  }
 }
-

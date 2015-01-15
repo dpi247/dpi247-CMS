@@ -35,7 +35,7 @@ function dpicache_menu(){
    * Administration of dpicache
    */
   $items['admin/dpi247/dpicache'] = array(  
-    'title' => 'Manage Cache',           
+    'title' => 'DPI cache',           
     'description'=>'Administer dpicache settings, desactivate esi renderding,...',
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpicache_pages_form_esi_settings_form'),
@@ -552,4 +552,68 @@ function varnish_requirements($phase) {
   }
 }
 
-
+/**
+ * Implementation of hook_dpidashboard_status_item().
+ *
+ * @return array
+ *   An array containing associative arrays with statuses
+ */
+function dpicache_dpidashboard_status_item() {
+	if(!variable_get('dpicache_disable_esi', FALSE)){ 
+		$dpicacheblockstatus = 0;
+		$dpicacheblockmessage = t('Cache is enabled');
+	} else {
+		$dpicacheblockstatus = 3;
+		$dpicacheblockmessage = t('Cache is disabled');
+	}
+	
+	if(dpi_variable_get('dpicache_disable_dpicache_utilisation', 0)==0){ 
+		$dpicachesystemstatus = 0;
+		$dpicachesystemmessage = t('Cache is enabled');
+	} else {
+		$dpicachesystemstatus = 3;
+		$dpicachesystemmessage = t('Cache is disabled');
+	}
+	
+	$status = array(
+		array(
+			'title' 	=> t('DPI Cache ESI block'),
+			'status'	=> $dpicacheblockstatus,
+			'message'	=> $dpicacheblockmessage,
+			'link'		=> '/admin/dpi247/dpicache/esi',
+		),
+		array(
+			'title' 	=> t('DPI Cache ESI caching system'),
+			'status'	=> $dpicachesystemstatus,
+			'message'	=> $dpicachesystemmessage,
+			'link'		=> '/admin/dpi247/dpicache/dpicache_clear',
+		)
+	);
+	
+	$vstatus = varnish_get_status_detail();
+	
+	while (list($server,$stat) = each($vstatus)) {
+		switch($stat) {
+			case VARNISH_SERVER_STATUS_DETAIL_UP:
+				$vanishstatus = 0;
+				$varnishmessage = t('Server is up and running');
+				break;	
+			case VARNISH_SERVER_STATUS_DETAIL_STOPPED:
+				$vanishstatus = 2;
+				$varnishmessage = t('Server is up but STOPPED');
+				break;	
+			default:
+				$vanishstatus = 3;
+				$varnishmessage = t('Server is not responding');
+		}
+		$status[] = 	
+		array(
+			'title'		=> 'Varnish ['.$server.'] status',
+			'status'	=> $vanishstatus,
+			'message'	=> $varnishmessage,
+			'link'		=> '/admin/dpi247/dpicache'
+		);
+	}
+	
+	return $status;	
+}

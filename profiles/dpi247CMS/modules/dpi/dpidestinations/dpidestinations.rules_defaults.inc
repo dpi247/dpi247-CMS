@@ -5,6 +5,8 @@
  *
  * @return multitype:RulesPlugin
  */
+
+
 function dpidestinations_default_rules_configuration() {
   $configs = array ();
   $rule = '{ "rules_refresh_content_rules" : {

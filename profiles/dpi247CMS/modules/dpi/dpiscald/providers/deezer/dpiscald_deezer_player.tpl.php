@@ -1,0 +1,1 @@
+<iframe scrolling="no" frameborder="0" allowTransparency="true" src="<?php print $vars['base_url'] ?>" width="700" height="240"></iframe>

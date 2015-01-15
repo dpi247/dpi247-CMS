@@ -11,19 +11,6 @@ if (! (defined ( 'VIMEO_ID_REGEXP' ) && defined ( 'VIMEO_WEB_REGEXP' ) && define
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some video atoms.
- */
-function dpiscald_vimeo_scald_atom_providers() {
-  return array(
-    'video' => 'Video hosted on Vimeo'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Video hosted on Vimeo');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_vimeo_scald_add_form(&$form, &$form_state) {
@@ -49,6 +36,9 @@ function dpiscald_vimeo_scald_add_form_fill(&$atom, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'vimeo';
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
@@ -125,6 +115,10 @@ function dpiscald_vimeo_theme() {
     'dpiscald_vimeo_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/vimeo/dpiscald_vimeo_player'
+    ),
+    'dpiscald_vimeo_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_vimeo_player_html5'
     ),
   );
 }

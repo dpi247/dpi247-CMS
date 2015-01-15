@@ -18,7 +18,7 @@ function dpicontenttypes_menu(){
   $items = array();
 
   $items['admin/dpi247/external-files'] = array(
-    'title' => 'External files management',
+    'title' => 'DPI content types : External files management',
     'description' => 'This concerns files fetched from external services, like RSS feeds',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpicontenttypes_form_page_external_files_form'),
@@ -148,10 +148,9 @@ function dpicontenttypes_permission(){
 function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
-
+    _dpicontenttypes_entityinsertscaldatom($node);
     if(function_exists("rules_invoke_event")){
-    
-    rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
+      rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
     }
   }
 }
@@ -163,10 +162,9 @@ function dpicontenttypes_node_insert($node) {
  */
 function dpicontenttypes_node_create($node) {
   if(function_exists("rules_invoke_event")){
-  
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
-    rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
-  }
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+    }
   }
 }
 
@@ -177,9 +175,9 @@ function dpicontenttypes_node_create($node) {
  */
 function dpicontenttypes_node_presave($node) {
   if(function_exists("rules_invoke_event")){
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
-    rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
-  }
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
+    }
   }
 }
 
@@ -190,7 +188,7 @@ function dpicontenttypes_node_presave($node) {
  */
 function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
-  
+  _dpicontenttypes_entitydeletescaldatom($node, 'node', $node->nid);
   if(function_exists("rules_invoke_event")){
   
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
@@ -215,6 +213,9 @@ function dpicontenttypes_theme() {
         'content' => NULL,
       ),
       'template' => 'atom-links-list',
+    ),
+    'mediabox_wrapper_full_screen' => $base + array(
+      'template' => 'mediabox-wrapper-full-screen',
     ),
     'dpicontenttypes_image_style' => $base + array(
       'variables' => array(
@@ -468,12 +469,15 @@ function dpicontenttypes_scald_transcoders_alter(&$transcoders) {
  */
 function dpicontenttypes_scald_atom_providers() {
   return array(
-    'links_list' => 'Links lists'
+    'links_list' => 'Links lists',
   );
 }
 
+function dpicontenttypes_scald_atom_providers_alter(&$types){
+}
+
 function dpicontenttypes_scald_add_form(&$form, &$form_state) {
-  return array();
+    return array();
 }
 
 function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
@@ -526,7 +530,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
     default:
       // If this is a custom context created through the UI, we use a special
       // render.
-      $dpi_contexts = dpicontenttypes_scald_contexts();
+      $dpi_contexts = scald_contexts();
       if(array_key_exists($context, $dpi_contexts)) {
         if (isset($options['entity'])) {
           // Replace the image style rendered image with our own
@@ -707,4 +711,59 @@ function typed_entity_load($typed_id) {
   return NULL;
 }
 
+function dpicontenttypes_insert($node){
+  dsm($node , 'insert');
+}
 
+function dpicontenttypes_token_info() {
+  $info['tokens']['user']['connectionStatus'] = array(
+    'name' => t('Connection status'),
+    'description' => t('Return the status about connection'),
+  );
+  $info['tokens']['node']['firstImageUrl'] = array(
+    'name' => t('First Image Url'),
+    'description' => t('Return the first image url'),
+  );
+  return $info;
+}
+
+function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'connectionStatus':
+          $name = 'nonconnecté';
+          if(user_is_logged_in()){
+            $name = 'connecté';
+          }
+          $replacements[$original] = $name;
+          break;        
+      }
+    }
+  }
+  if($type == 'node'){
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'firstImageUrl':
+          $name = '';
+          if(isset($data['node'])){
+            $embeddedObjects = field_get_items('node', $data['node'], 'field_embededobjects');
+            foreach($embeddedObjects as $embed){
+              if($embed['type'] == 'image'){
+                  module_load_include('inc', 'dpicommons', 'dpicommons.api');
+                  $atom = scald_atom_load($embed['sid']);
+                  $preset = "500x500";
+                  drupal_alter('dpicontenttypes_tokens_preset', $embed, $atom, $preset);                  
+                  $name = dpiflexiscald_api_get_path_for_atom($atom, $preset);
+                break;
+              }
+            }
+          }
+          $replacements[$original] = $name;
+          break;
+      }
+    }  
+  }
+  return $replacements;
+}

@@ -21,27 +21,30 @@ function dpicontenttypes_install() {
   dpiproperties_type_save($dpipropertiestype);
 
   scald_add_type('links_list', 'Links List', 'Links List');
-
   // Create base fields
   module_load_include('field_base.inc', 'dpicontenttypes');
   if ($fields = dpicontenttypes_field_default_field_bases()) {
     field_info_cache_clear();
-
     foreach ($fields as $field) {
       field_create_field($field);
     }
   }
-
+  
   // Create base fields instances
   module_load_include('field_instance.inc', 'dpicontenttypes');
   if ($instances = dpicontenttypes_field_default_field_instances()) {
     field_info_cache_clear();
-
     foreach ($instances as $field_instance) {
       field_create_instance($field_instance);
     }
   }
-
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+  
   // Hide author and date information for packages by default
   variable_set('node_submitted_package', FALSE);
 }
@@ -69,11 +72,11 @@ function dpicontenttypes_field_schema($field) {
       'type' => array(
         'type' => 'varchar',
         'not null' => FALSE,
-        'length' => '255',
+        'length' => 255,
       ),
       'provider' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
       ),
       'inline' => array(
         'type' => 'int',
@@ -182,22 +185,7 @@ function dpicontenttypes_schema() {
         'size' => 'medium',
         'translatable' => TRUE,
       ),
-    ),
-    'status' => array(
-      'type' => 'int',
-      'not null' => TRUE,
-      // Set the default to ENTITY_CUSTOM without using the constant as it is
-      // not safe to use it at this point.
-      'default' => 0x01,
-      'size' => 'tiny',
-      'description' => 'The exportable status of the entity.',
-    ),
-    'module' => array(
-      'description' => 'The name of the providing module if the entity has been defined in code.',
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-    ),
+    ) + entity_exportable_schema_fields(),
     'primary key' => array('id'),
     'unique keys' => array(
       'type' => array('type'),
@@ -210,7 +198,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The ID of the prenode',
       ),
@@ -222,7 +210,7 @@ function dpicontenttypes_schema() {
       ),
       'title' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
         'description' => 'Title',
       ),
     ),
@@ -235,7 +223,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -260,7 +248,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -351,8 +339,8 @@ function dpicontenttypes_schema() {
       ),
       'uri' => array(
         'description' => 'URI of the original file',
-        'type' => 'varchar',
-        'length' => 510,
+				'type' => 'varchar',
+				'length' => 512,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -372,7 +360,7 @@ function dpicontenttypes_schema() {
       ),
     ),
     'indexes' => array(
-      'uri' => array('uri'),
+      'uri' => array(array('uri',200)),
     ),
     'primary key' => array('eid'),
   );
@@ -469,4 +457,29 @@ function dpicontenttypes_update_7007() {
     ->fields(array('type' => 'scald_atom'))
     ->condition('entity', 'scald_atom')
     ->execute();
+}
+
+function dpicontenttypes_update_7008(){
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+  
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+}
+
+function dpicontenttypes_update_7009(){
+  module_load_include('field_base.inc', 'dpicontenttypes');
+  if($fields = dpicontenttypes_field_default_field_base_atom_package()){
+    field_create_field($fields);
+  }
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
 }

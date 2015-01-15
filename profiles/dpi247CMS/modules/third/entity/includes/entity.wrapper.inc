@@ -79,7 +79,6 @@ abstract class EntityMetadataWrapper {
    *    an entity is available but the property is not set, NULL is returned.
    */
   public function value(array $options = array()) {
-    
     if (!$this->dataAvailable() && isset($this->info['parent'])) {
       throw new EntityMetadataWrapperException('Missing data values.');
     }

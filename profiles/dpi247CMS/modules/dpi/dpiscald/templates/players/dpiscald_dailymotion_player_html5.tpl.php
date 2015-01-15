@@ -1,0 +1,1 @@
+<iframe src="//www.dailymotion.com/embed/video/<?=$video_id?>?html=1" width="<?=$width?>" height="<?=$height?>" frameborder="0" allowfullscreen></iframe>

@@ -107,7 +107,6 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   
   $old_values=array();
- 
   foreach($form_state["values"]['nodes'] as $nid=>$t){
     $new_values[$nid]=$t['weight'];
     $old_values[$nid]=$t['original_weight'];
@@ -123,6 +122,7 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $order_by_new_rank[]=$data;
   }
   
+  
   /*
    * les changements dans le reorder se traduisent par le fait que la somme des
    * old_rank et des new_rank ne sont pas égale à boundaries.
@@ -137,6 +137,11 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
    * 
    * 
    */
+  
+  /*
+   * 
+    THIS IS PURE BULLSHIT
+
   $boundary=count($form_state["values"]['nodes']);
   foreach($order_by_new_rank as $rank=>$data){
     $sum=abs($data['weight'])+abs($data['original_weight']);
@@ -156,17 +161,46 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
     $nodes_to_process=$smaller_than_boundary;
   }
   
+  $nodes_to_process=array_merge($smaller_than_boundary,$greater_than_boundary);
+  */
   
-  
-  $term_id= $form_state["values"]['sectiontid'];
-  $target_name= $form_state["values"]['destination_targetname'];
-  foreach($nodes_to_process as $new_rank=>$data){
-    $position=$new_rank+1;
-    $nid=$data['nid'];
-    $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
-    _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
+$boundary=count($form_state["values"]['nodes']);
+  foreach($order_by_new_rank as $rank=>$data){
+    if(!($data['weight']==$data['original_weight'] and  $data['original_weight']==0)){
+      $sum=abs($data['weight'])+abs($data['original_weight']);
+      if($sum>$boundary){
+        $nodes_to_process[$rank]=$data;
+      }
+      if($sum<$boundary){
+        $nodes_to_process[$rank]=$data;
+
+      }
+    }
   }
-  
+  if(count($nodes_to_process)>0){
+
+    $term_id= $form_state["values"]['sectiontid'];
+    $target_name= $form_state["values"]['destination_targetname'];
+    foreach($nodes_to_process as $new_rank=>$data){
+      $position=$new_rank+1;
+      $nid=$data['nid'];
+      $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
+      $destinations_to_update[$nid]=$virtual_rank;
+
+    }
+    foreach($destinations_to_update as $nid=>$virtual_rank){
+      //@todo: LE faire en une seule querry avec l'invalidation du cache une seule fois par nid
+      _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
+
+    }
+    $destination['tid']=$form_state['values']['sectiontid'];
+    $destination['target']=$form_state['values']['destination_targetname'];
+    $category = dpidestination_api_get_category ( $destination );
+    dpicache_api_manage_regeneration_all_cache_entry($destination ['tid'], $category);
+  }
+  else{
+    drupal_set_message(t("Nothing to reorder"));
+  }
   
 }
 

@@ -26,7 +26,7 @@ function dpiservices_ctools_plugin_api($owner, $api) {
  */
 function dpiservices_menu() {
   $items ['admin/dpi247/dpijsonexporter'] = array (
-    'title' => 'JsonExporter',
+    'title' => 'Dpi Services',
     'description' => 'Administer return json exporter',
     'page callback' => 'dpiservices_pages_form_table_product_form',
     'access arguments' => array (

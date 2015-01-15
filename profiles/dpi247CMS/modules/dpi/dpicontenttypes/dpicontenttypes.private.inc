@@ -92,12 +92,16 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
 
 
 function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
-
-  $language=$form["language"]["#value"];
+  $language=$form['language']['#value'];
   if(!isset($language) or $language==''){
     $language='und';
   }
-  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
+  if(isset($form_state['values']['field_displaytitle'][$language][0]['value'])){
+    $strip = $form_state['values']['field_displaytitle'][$language][0]['value'];
+  }else{
+    $strip = $form_state['values']['field_displaytitle']['und'][0]['value'];
+  }
+  $form_state['values']['title']=strip_tags($strip);
 }
 
 /**
@@ -192,6 +196,39 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
   dpiproperties_save($dpiproperties);
 }
 
+function _dpicontenttypes_entityinsertscaldatom($node){
+  switch ($node->type){
+    case 'package':
+        $atom = new ScaldAtom('atom_package', 'atom_package', array(          
+          'title' => $node->title,
+          'data' => array(
+            'nid' => $node->nid,
+            'author' => $node->field_authors,
+          ),
+        ));
+        if($atomId = scald_atom_save($atom)){
+          drupal_set_message('Atom package '.$atomId.' created !');
+        }else{
+          drupal_set_message('Atom package not created !', 'error');
+        }
+      break;
+    case 'package_gallery':
+        $atom = new ScaldAtom('atom_package', 'atom_package_gallery', array(
+          'title' => $node->title,
+          'data' => array(
+            'nid' => $node->nid,
+            'author' => (isset($node->field_authors))?$node->field_authors: array(),
+          ),
+        ));
+        if($atomId = scald_atom_save($atom)){
+          drupal_set_message('Atom package gallery '.$atomId.' created !');
+        }else{
+          drupal_set_message('Atom package gallery not created !', 'error');
+        }
+      break;
+  }
+}
+
 /**
  * Delete dpiproperties from the database
  * 
@@ -203,6 +240,10 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
 function _dpicontenttypes_entitydeletedpiproperties($object, $entity, $eid) {
   $condition = db_and()->condition('id', $eid)->condition('entity', $entity);
   db_delete('dpicontenttypes_properties')->condition($condition)->execute();
+}
+
+function _dpicontenttypes_entitydeletescaldatom($object, $entity, $nid){
+  db_delete('scald_atoms')->condition('title', $object->title)->execute();
 }
 
 /**

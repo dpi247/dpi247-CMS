@@ -106,13 +106,6 @@ class TargetBlockEntity extends Entity {
    * @var boolean
    */
   public $use_split;
-  
-  /**
-   * Is this targetblock instance part of a splitted targetblock
-   *
-   * @var boolean
-   */
-  public $rank_max_value;
   /**
    * The order of the splitted targetblockinstance
    *
@@ -121,7 +114,7 @@ class TargetBlockEntity extends Entity {
   public $split_delta;
 
   protected function defaultLabel() {
-    return $this->machine_name;
+    return (isset($this->machine_name))? $this->machine_name : 'undefined';
   }
 
   protected function defaultUri() {
