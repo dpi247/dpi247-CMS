@@ -238,7 +238,7 @@ class WallyXmlV1 extends PackageHelper {
       $dest = array();
       $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
       $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
-      if ($terms && $destination->hasAttribute("Position") && $destination->hasAttribute("DocumentLayout") && $destination->hasAttribute("DestinationRank")) {
+      if ($terms && $destination->hasAttribute("DocumentLayout")) {
         $dest['tid'] = $terms[0]->tid;
         if ($destination->hasAttribute("Position")) {
           $dest['target'] = $destination->getAttributeNode("Position")->value;
