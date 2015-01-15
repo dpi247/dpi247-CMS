@@ -184,6 +184,7 @@ abstract class Dispatcher {
    */
   function processChildren($dom, $object, $object2) {
     $importer = $this->getImporter ();
+    
     foreach ( $dom->childNodes as $child ) {
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {

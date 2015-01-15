@@ -185,14 +185,16 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildExternalReference($dom, $wrapper, $entity){
     $value = $dom->nodeValue;
-    // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
-    if (!isset($entity->external_reference_set)){
-      $wrapper->field_external_reference->set($value);
-      Logger::logExecution('external_reference', FALSE, 1, '000', $value);
-      $entity->external_reference_set = TRUE;
-    } else {
-      $wrapper->field_external_reference_2->set($value);
-      Logger::logExecution('external_reference_2', FALSE, 1, '000', $value);
+    if(!isset($entity->provider)){
+      // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
+      if (!isset($entity->external_reference_set)){
+        $wrapper->field_external_reference->set($value);
+        Logger::logExecution('external_reference', FALSE, 1, '000', $value);
+        $entity->external_reference_set = TRUE;
+      } else {
+        $wrapper->field_external_reference_2->set($value);
+        Logger::logExecution('external_reference_2', FALSE, 1, '000', $value);
+      } 
     }
   }
 
@@ -689,10 +691,14 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity
    */
   public function buildTitle($dom, $wrapper, $entity){
-    $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat();
-    $wrapper->title->set($this->filterHtmlTags($value));
-    $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+    try {
+      $value = $dom->nodeValue;
+      $format = $this->getDefaultTextFormat();
+      $wrapper->title->set($this->filterHtmlTags($value));
+      $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+    } catch (Exception $e) {
+      $e->getMessage();
+    }
   }
 
   /**
@@ -721,7 +727,6 @@ class WallyXmlV1 extends PackageHelper {
     switch ($parsedurl['scheme']){
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
-        
         switch ($entity->type){
           case 'image':
             $wrapper->scald_thumbnail->set((array) $file);
@@ -733,7 +738,7 @@ class WallyXmlV1 extends PackageHelper {
             break;
         }
         break;
-      case 'http' :
+      case 'http' || 'https' :
         // Look for a provider for URL
         $function_parse_id = $entity->provider.'_parse_id';
         if (function_exists($function_parse_id)){
@@ -748,7 +753,21 @@ class WallyXmlV1 extends PackageHelper {
             Logger::logWarning('importer', 2, 'thumbnail', t('The thumbnail can not be loaded !uri', array('!uri' => $value)));
           }
         } else {
-          Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array('!uri' => $value)));
+          module_load_include('inc' , $entity->provider, 'providers/'.$entity->type.'/'.$entity->type);
+          $function_parse_id = $entity->provider.'_'.$entity->type.'_parse_id';
+          if (function_exists($function_parse_id)){
+            $value = str_replace('\\', '', $value);
+            $id = $function_parse_id($value, FALSE);
+            $wrapper->base_id->set($id);
+            $function_info = $entity->provider.'_'.$entity->type.'_video';
+            if (function_exists($function_info)){
+              $info = $function_info($id);
+              $file = $this->createFile($info->thumbnail['src'], scald_atom_thumbnail_path($entity->type));
+              $wrapper->scald_thumbnail->set((array) $file);
+            }
+          }else{
+            Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array('!uri' => $value)));
+          }          
         }
         break;
     }
@@ -810,7 +829,7 @@ class WallyXmlV1 extends PackageHelper {
       return $atom;
     }
   }
-
+  
   /**
    * Set AudioObjectType
    *

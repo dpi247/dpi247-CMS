@@ -47,12 +47,12 @@ abstract class PackageHelper extends Importer {
     $node = new stdClass();
     $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
     $node->type = 'package';
-    if($type_xml_info == "package_gallery"){
-      $node->type = $type_xml_info;
+    if($type_xml_info == "GalleryPackageType"){
+      $node->type = 'package_gallery';
     }
     $node->is_new = TRUE;
     node_object_prepare($node);
-    if($type_xml_info == "package_gallery"){
+    if($type_xml_info == "GalleryPackageType"){
       $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package_gallery'), 'dpiproperties');
     }else{
       $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
@@ -274,15 +274,15 @@ abstract class PackageHelper extends Importer {
     $uri = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
     $provider = dpicontenttypes_api_getprovider($uri);
     if ($provider == NULL){
-      Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
+      Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri createOrLoadEntityLink', array('!uri' => $uri)));
     } else {
       $atom = scald_atom_defaults($provider['type']);
       $atom->provider = $provider['name'];
-      $atom->type = $provider['type'];
+      $atom->type = $provider['type'];      
       $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
       if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
         $atom = $temp_atom;
-      }
+      }      
     }
     return $atom;
   }

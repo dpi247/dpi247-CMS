@@ -218,7 +218,7 @@ abstract class Importer {
    */
   protected function createOrLoadEntity($dom){
     $callback = $this->getCallback($dom);
-    $create_or_load_method = 'createOrLoadEntity'.$callback;
+    $create_or_load_method = 'createOrLoadEntity'.$callback;    
     if (method_exists($this, $create_or_load_method)){
       $entity = $this->$create_or_load_method($dom);
     } else {
@@ -303,8 +303,8 @@ abstract class Importer {
   protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
-    $entity = $this->createOrLoadEntity($dom);
-    if (!Logger::error()) {
+    $entity = $this->createOrLoadEntity($dom);    
+    if (!Logger::error()) {      
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
       // Allow to alter entity before process
@@ -316,6 +316,7 @@ abstract class Importer {
       }
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
+            
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
       if (Logger::error()) {
@@ -325,9 +326,8 @@ abstract class Importer {
       if ($save) {
         // Allow to alter entity before save
         module_invoke_all('dpimport_entity_presave', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
-        $this->saveEntity($dom, $entity_type, $entity);
-      }
+          $this->saveEntity($dom, $entity_type, $entity);
+       }
     }
 
     return $entity;
