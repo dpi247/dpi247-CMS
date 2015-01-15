@@ -324,7 +324,7 @@ function dpisocial_field_extra_fields() {
   $extrafields = field_extra_fields_get_display('node', $node->type, $view_mode);
   
   $urlToShare = $base_url.'/node/'.$node->nid; // lien 'systeme'
-  $urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
+  //$urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
 
   $extrafield_name_share_article = 'dpisocial_share';
   $extrafield_name_mail_article = 'dpisocial_mail';
