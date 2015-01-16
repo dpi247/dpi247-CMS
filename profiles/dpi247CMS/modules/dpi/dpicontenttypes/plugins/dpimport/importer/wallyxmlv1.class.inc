@@ -282,7 +282,7 @@ class WallyXmlV1 extends PackageHelper {
     $result = array();
     $vid = _dpidestinations_variable_get('dpidestinations_section_vid', NULL);
     $package_type = $globalDom->getElementsByTagName('PackageLayout')->item(0)->nodeValue;
-    if($package_type == 'Article' || !isset($package_type)){      
+    if($package_type != 'Hors-texte' || !isset($package_type)){      
       if ($vid) {
           $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
       
