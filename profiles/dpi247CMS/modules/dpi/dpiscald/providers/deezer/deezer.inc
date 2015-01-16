@@ -202,3 +202,35 @@ function dpiscald_deezer_form_validate(&$form, &$form_state) {
     form_error($form, t('Media already imported.'));
   }
 }
+
+/**
+ * Parse an deezer ID and check validity
+ *
+ */
+function dpiscald_deezer_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    if (preg_match('#http?://www\.deezer\.com/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
+      // This string os a full dailymotion URL
+      $id = array( $m[1], $m[2]);
+    }
+    elseif (preg_match('#^https://www.deezer.com/([a-zA-Z0-9]+)(_.*)?$#', $string, $m)) {
+      // This string os a full dailymotion URL
+      $id = array( $m[1], $m[2]);
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_deezer_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+ 
+  return $id;
+}

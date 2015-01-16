@@ -673,19 +673,24 @@ function dpicontenttypes_library() {
  * @return Array $provider
  */
 function dpicontenttypes_dpicontenttypes_provider($uri){
+  $types = scald_types();
+  $values = array_keys($types);
   $provider = NULL;
-
-  if (module_exists('scald_youtube') && scald_youtube_parse_id($uri, FALSE)){
-    //Youtube
-    $provider = array('name' => 'scald_youtube', 'type' => 'video');
-  } elseif (module_exists('scald_vimeo') && scald_vimeo_parse_id($uri, FALSE)){
-    //Vimeo
-    $provider = array('name' => 'scald_vimeo', 'type' => 'video');
-  } elseif (module_exists('scald_dailymotion') &&scald_dailymotion_parse_id($uri, FALSE)){
-    //Dailymotion
-    $provider = array('name' => 'scald_dailymotion', 'type' => 'video');
+  foreach($values as $prov) {
+    if(strstr($uri, $prov)!==FALSE){
+        $request = drupal_http_request($uri);
+        /*  -1002 simple hack for spotify because redirect */
+        if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+          $provider = array('name' => $types[$prov]->provider, 'type' => $types[$prov]->type);
+      break;
+    }
   }
-
+  /* modifier le nom partout et enlever le if */
+  if(strstr($uri, 'magic.piktochart')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+          $provider = array('name' => $types['picktochart']->provider, 'type' => $types['picktochart']->type);
+  }
   return array('dpicontenttypes' => $provider);
 }
 

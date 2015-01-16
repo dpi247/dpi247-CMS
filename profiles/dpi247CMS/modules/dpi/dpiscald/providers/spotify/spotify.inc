@@ -12,7 +12,7 @@ function dpiscald_spotify_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
     '#title' => t('Spotify URL'),
-    '#element_validate' => array('dpiscald_spotify_validate_id'),
+    //'#element_validate' => array('dpiscald_spotify_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
   );
@@ -28,12 +28,12 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
   // Get the URL.
   $url = $form_state['values']['identifier'];
   
-  if (startsWith($url,'https')){
-    $url = explode('https://embed.spotify.com/',$url);
-  } else {
-    $url = explode('http://embed.spotify.com/',$url);
+  if(startsWith($url, 'https')){
+    $url = explode('https://play.spotify.com/', $url);
+  }else{
+    $url = explode('http://play.spotify.com/', $url);
   }
-  $url = $url[1];
+  $url = explode('/', $url[1]);
   
   // Get media infos.
   $infos = dpiscald_spotify_get_media_infos_from_url($url);
@@ -45,7 +45,7 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
   $atom->provider = 'dpiscald';
   $atom->type = 'spotify';
 
-  $atom->data['url'] = $url;
+  $atom->data['url'] = 'spotify:'.implode(':', $url);
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
@@ -132,11 +132,15 @@ function dpiscald_spotify_theme() {
 /**
  * Get media infos from url.
  */
-function dpiscald_spotify_get_media_infos_from_url($url) {
+function dpiscald_spotify_get_media_infos_from_url($url, $id_elem = NULL) {
   $api_url = 'https://api.spotify.com/v1/tracks/';
 
   $url_e = explode(':', $url);
-  $id_track = $url_e[count($url_e)-1];
+  if(isset($id_elem)){
+    $id_track = $id_elem;
+  }else{
+    $id_track = $url_e[count($url_e)-1];
+  }  
 
   $url = $api_url . $id_track;
   $response = drupal_http_request($url);
@@ -173,13 +177,45 @@ function dpiscald_spotify_validate_id($element, &$form_state) {
     form_error($element, t('Invalid media url, you must specify an absolute url.'));
   }
   if (startsWith($url,'https')){
-    $url = explode('https://embed.spotify.com/',$url);
+    $url = explode('https://play.spotify.com/',$url);
   } else {
-    $url = explode('http://embed.spotify.com/',$url);
+    $url = explode('http://play.spotify.com/',$url);
   }
   $url = $url[1];
   $id = md5($url);
   if (dpiscald_spotify_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
+}
+
+/**
+ * Parse an spotify ID and check validity
+ *
+ */
+function dpiscald_spotify_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {    
+    // The string ID is not easy to parse, let's try to analyze it
+    if (preg_match('/^(http\:\/\/)?(play|open).spotify.com\/(track|album|artist)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
+      // This string os a full dailymotion URL
+      $id = $m;
+    }
+    elseif (preg_match('/^(https\:\/\/)?(play|open).spotify.com\/(track|album|artist)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
+      // This string os a full dailymotion URL
+      $id = $m;
+    }
+    elseif (preg_match("/^http/", $string)) {      
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_spotify_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
 }

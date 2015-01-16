@@ -120,7 +120,7 @@ function dpiscald_scribblelive_get_media_infos_from_url($url) {
       preg_match('/<meta property="og:image" content="(.*?)" \/>/', $response->data, $thumb);
     }
     $infos = array(
-        'id' => $id[1],
+        'id' => $url,
         'title' => $title[1],
         'thumbnail_url' => $thumb[1]
     );
@@ -158,4 +158,32 @@ function dpiscald_scribblelive_validate_id($element, &$form_state) {
   elseif (dpiscald_scribblelive_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
+}
+
+/**
+ * Parse an scribblelive ID and check validity
+ *
+ */
+function dpiscald_scribblelive_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    $parsing = parse_url($string);
+    if (isset($parsing['host']) && $parsing['host'] == "embed.scribblelive.com") {
+      $id = $string;
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_scribblelive_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
 }
