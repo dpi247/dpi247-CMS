@@ -1,27 +1,29 @@
-<?php
+<?php 
+
 require_once 'packagehelper.class.inc';
 
 class WallyXmlV1 extends PackageHelper {
-
   /**
    * Intercept dom at element <Package>
    *
-   * @param DOM $dom          
+   * @param DOM $dom
    */
   public function buildPackage($dom) {
     // @todo : Pourquoi ne pas passer par la methode constructEntity?
-    Logger::logExecution ( 'package', TRUE );
+
+    Logger::logExecution('package', TRUE);
     $package = $this->constructPackage ( $dom );
     if (! Logger::error ()) {
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher ();
       
-      // /* Replace atom package from field_embededobjects to field_atompackage */
-      // $package = $this->_buildFieldAtompackage($package);
-      
-      $package_wrapper = entity_metadata_wrapper ( 'node', $package );
-      module_invoke_all ( 'dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher );
-      $this->savePackage ( $dom, $package );
+//       /* Replace atom package from field_embededobjects to field_atompackage */
+//       $package = $this->_buildFieldAtompackage($package);
+
+      $package_wrapper = entity_metadata_wrapper('node', $package);
+      module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
+      $this->savePackage($dom, $package);
+
     }
     
     // Set the CurrentLog to the previous one to stop children growing.
@@ -186,6 +188,7 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildExternalReference($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
+
     if (! isset ( $entity->provider )) {
       // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
       if (! isset ( $entity->external_reference_set )) {
@@ -723,17 +726,14 @@ class WallyXmlV1 extends PackageHelper {
    * @param EntityDrupalWrapper $wrapper          
    * @param Object $entity          
    */
-  public function buildTitle($dom, $wrapper, $entity) {
+  public function buildTitle($dom, $wrapper, $entity){
     try {
       $value = $dom->nodeValue;
-      $format = $this->getDefaultTextFormat ();
-      $wrapper->title->set ( $this->filterHtmlTags ( $value ) );
-      $wrapper->field_displaytitle->set ( array (
-        'value' => $value,
-        'format' => $format 
-      ) );
-    } catch ( Exception $e ) {
-      $e->getMessage ();
+      $format = $this->getDefaultTextFormat();
+      $wrapper->title->set($this->filterHtmlTags($value));
+      $wrapper->field_displaytitle->set(array('value' => $value, 'format' => $format));
+    } catch (Exception $e) {
+      $e->getMessage();
     }
   }
 
@@ -762,13 +762,13 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildURI($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $parsedurl = parse_url ( $value );
-    switch ($parsedurl ['scheme']) {
-      case 'embed' :
-        $file = $this->createFile ( $value, scald_atom_thumbnail_path ( $entity->type ) );
-        switch ($entity->type) {
-          case 'image' :
-            $wrapper->scald_thumbnail->set ( ( array ) $file );
+    $parsedurl = parse_url($value);
+    switch ($parsedurl['scheme']){
+      case 'embed':
+        $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
+        switch ($entity->type){
+          case 'image':
+            $wrapper->scald_thumbnail->set((array) $file);
             break;
           case 'audio' :
             // No existing wrapper for audio so the file is directly set on the entity
@@ -975,7 +975,7 @@ class WallyXmlV1 extends PackageHelper {
       return $atom;
     }
   }
-
+  
   /**
    * Set AudioObjectType
    *

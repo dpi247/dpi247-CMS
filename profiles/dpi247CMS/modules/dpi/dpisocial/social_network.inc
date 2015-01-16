@@ -64,6 +64,34 @@ abstract class dpisocial_social_network {
 	public function addCheckboxShareComment(&$form) {
 	}
 	
+	public function getShareButtonHtml($nid, $url) {
+		return $this->getShareButtonHtmlPersonnalized($nid, $url);	
+	}
+	
+	public function getShareButtonHtmlClassic($nid, $url) {
+		
+	}
+	
+	public function getShareButtonHtmlPersonnalized($nid, $url) {
+		return '<button class="btn btn-social btn-'.$this->whoAmI.'" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i><span class="label">'.$this->getNbShares($nid, $url).'</span></button>'	;
+	}
+	
+	public function getShareUrl($url) {	
+	}
+	
+	public function apiGetNbShares($url) {
+		return false;	
+	}
+	
+	public function getNbShares($nid) {	
+		return 0;
+	}
+	
+	
+	public function getNbSharesApi($url) {	
+		return 0;
+	}
+	
 	public function getSocialHTML() {
 		return NULL;	
 	}
