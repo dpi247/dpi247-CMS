@@ -222,7 +222,7 @@ function dpisocial_field_extra_fields() {
 
   $extrafield_name_share_article = 'dpisocial_share';
 
-  foreach (array('page', 'article','package') as $node_type) {
+  foreach (array('page', 'article','package', 'package-gallery') as $node_type) {
 	
     $extra['node'][$node_type]['display'][$extrafield_name_share_article] = array(
 
