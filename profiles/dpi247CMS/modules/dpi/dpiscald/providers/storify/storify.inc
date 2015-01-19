@@ -174,3 +174,31 @@ function dpiscald_storify_validate_id($element, &$form_state) {
     form_error($element, t('Media already imported.'));
   }
 }
+
+/**
+ * Parse an storify ID and check validity
+ *
+ */
+function dpiscald_storify_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    $parsing = parse_url($string);
+    if (isset($parsing['host']) && $parsing['host'] == "storify.com") {
+      $id = $string;
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_scribblelive_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
+}
