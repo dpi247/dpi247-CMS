@@ -930,6 +930,14 @@ class WallyXmlV1 extends PackageHelper {
                   $wrapper->scald_thumbnail->set ( ( array ) $file );
                 }
               }
+            }elseif($entity->type == "timelinejs"){    
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $entity->data['url'] = $value;              
+              $entity->data['orig_identifier'] = $value;
+              $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
+              $file = $this->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+              $wrapper->scald_thumbnail->set ( ( array ) $file );
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (

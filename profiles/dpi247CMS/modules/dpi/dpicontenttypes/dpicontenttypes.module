@@ -691,6 +691,12 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
           $provider = array('name' => $types['picktochart']->provider, 'type' => $types['picktochart']->type);
   }
+  /* Modification manuel pour timelinejs car le nom ne correspond a rien */
+  if(strstr($uri, 'cdn.knightlab.com')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+      $provider = array('name' => $types['timelinejs']->provider, 'type' => $types['timelinejs']->type);
+  }
   return array('dpicontenttypes' => $provider);
 }
 
