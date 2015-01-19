@@ -7,13 +7,13 @@ sites/*/private
 sites/*/modules
 sites/*/importer
 sites/all/libraries
+sites/*
 
 #ignore eclipse settings
 .settings/*
 .project
 .gitignore
 .buildpath
-.htaccess
 robots.txt
 
 .idea

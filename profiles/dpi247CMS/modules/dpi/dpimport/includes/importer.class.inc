@@ -280,7 +280,7 @@ abstract class Importer {
           Logger::logWarning('importer', 2, 'fileupload', t('The file (!file) can not be uploaded', array('!file' => $uri['host'])));
         }
         break;
-      case 'http':
+      case 'http' || 'https':
         if ($data = drupal_http_request($file_uri, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)))){
           list($file_type, $file_ext) = explode('/', $data->headers['content-type']);
           $file_name = 'http'.rand().'.'.$file_ext;

@@ -62,7 +62,8 @@ function _dpissoaccessmanager_paywall_moduleload($politic_instance) {
 function _dpissoaccessmanager_paywall_define_return($operation, $politic_instance){  
   switch ($operation) {
     case "is_secure_page" :
-        $return = $politic_instance->issecurepage ( $_GET ["url"], (isset($_GET ["services"]) )? $_GET['services']:NULL);   
+        $return = $politic_instance->issecurepage ( $_GET ["url"], (isset($_GET ["services"]) )? $_GET['services']:NULL);
+        header ( 'HTTP/1.1 '.$return['code'].' invalid Operation', null, $return['code'] );
         header ( 'Content-Type: application/json' );
 	    echo json_encode ( $return );
 	    die ();     
