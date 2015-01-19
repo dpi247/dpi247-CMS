@@ -5,7 +5,7 @@
  */
 
 define('DPISCALD_FLICKR_PHOTOS', 'www.flickr.com/photos/');
-define('DPISCALD_FLICKR_API_REST', 'http://api.flickr.com/services/rest');
+define('DPISCALD_FLICKR_API_REST', 'https://api.flickr.com/services/rest');
 define('DPISCALD_FLICKR_PHOTO_SOURCE', 'http://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg');
 
 /**
@@ -197,7 +197,6 @@ function dpiscald_flickr_feed($type, $id) {
   $url .= '&' . $feed_methods_info[$type]['id'] . '=' . urlencode($id);
   $url .= '&format=json&nojsoncallback=1&extras=original_format';
   $url .= '&page=' . ($page + 1);
-  
   if ($dpiscald_flickr_api_key != '') {
 
     $response = drupal_http_request($url);
