@@ -250,8 +250,6 @@ function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
 function dpisocial_field_extra_fields() {
 
   $extrafield_name_share_article = 'dpisocial_share';
-  $extrafield_name_mail_article = 'dpisocial_mail';
-  $extrafield_name_print_article = 'dpisocial_print';
 
   foreach (array('page', 'article','package') as $node_type) {
 	
@@ -264,45 +262,6 @@ function dpisocial_field_extra_fields() {
       'weight' => 50, // default weight, can be changed on display form by site-builder.
 
     );
-	
-	$extra['node'][$node_type]['display'][$extrafield_name_mail_article] = array(
-
-      'label' => t('DPI Social Partage par email'),
-
-      'description' => t('Le bouton de partage par email.'),
-
-      'weight' => 50, // default weight, can be changed on display form by site-builder.
-
-    );
-	
-	$extra['node'][$node_type]['display'][$extrafield_name_print_article] = array(
-
-      'label' => t('DPI Social Boutons d\'impression'),
-
-      'description' => t('Le boutons d\'impression.'),
-
-      'weight' => 50, // default weight, can be changed on display form by site-builder.
-
-    );
-	
-	/*
-	ctools_include('plugins');
-	  $social_network = ctools_get_plugins('dpisocial', 'social_network');
-	  
-	  foreach ($social_network as $snetwork) {
-		  $class = $snetwork['handler']['class'];
-		  $nclass = new $class();
-		  $extra['node'][$node_type]['display']['dpisocial_share_'.$class] = array(
-
-			  'label' => t('DPI Social Bouton de partage '.$nclass->whoAmI),
-		
-			  'description' => t('Les boutons de partage sur les différents réseaux sociaux.'),
-		
-			  'weight' => 50, // default weight, can be changed on display form by site-builder.
-		
-			);
-	  }
-	  */
 
   }
 
@@ -327,8 +286,6 @@ function dpisocial_field_extra_fields() {
   //$urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
 
   $extrafield_name_share_article = 'dpisocial_share';
-  $extrafield_name_mail_article = 'dpisocial_mail';
-  $extrafield_name_print_article = 'dpisocial_print';
   
   $isShare = false;
   
@@ -387,31 +344,6 @@ function dpisocial_field_extra_fields() {
 			';
 			drupal_add_js($js, 'inline');  
 	  }
-	  
-	 // if (isset($extrafields[$extrafield_name_mail_article])
-
-  //     && isset($extrafields[$extrafield_name_mail_article]['visible'])
-
-  //     && $extrafields[$extrafield_name_mail_article]['visible']) {
-		  
-		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
-		
-		// $node->content[$extrafield_name_mail_article] = array('#markup' => $content);		  
-	 
-	 // }
-	 
-	 // if (isset($extrafields[$extrafield_name_print_article])
-
-  //     && isset($extrafields[$extrafield_name_print_article]['visible'])
-
-  //     && $extrafields[$extrafield_name_print_article]['visible']) {
-		  
-		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
-		
-		// $node->content[$extrafield_name_print_article] = array('#markup' => $content);		  
-	 
-	 // }
-	 // 
 
 }
 
