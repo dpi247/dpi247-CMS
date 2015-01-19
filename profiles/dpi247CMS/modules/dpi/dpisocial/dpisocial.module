@@ -366,9 +366,15 @@ function dpisocial_field_extra_fields() {
 	  
 	  usort($buttons, "dpisocial_cmp_share_buttons");
 	  
-	  $content='';
+	  $content='<div class="btn-group gr-social" aria-label="..." role="group">'; 
+
 	  
 	  foreach ($buttons as $b) $content.=$b['html'];
+
+	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
+	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
+
+	  $content .= '</div>';
 	  
 	  $node->content[$extrafield_name_share_article] = array('#markup' => $content);
 	  
@@ -382,29 +388,29 @@ function dpisocial_field_extra_fields() {
 			drupal_add_js($js, 'inline');  
 	  }
 	  
-	 if (isset($extrafields[$extrafield_name_mail_article])
+	 // if (isset($extrafields[$extrafield_name_mail_article])
 
-      && isset($extrafields[$extrafield_name_mail_article]['visible'])
+  //     && isset($extrafields[$extrafield_name_mail_article]['visible'])
 
-      && $extrafields[$extrafield_name_mail_article]['visible']) {
+  //     && $extrafields[$extrafield_name_mail_article]['visible']) {
 		  
-		$content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
+		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
 		
-		$node->content[$extrafield_name_mail_article] = array('#markup' => $content);		  
+		// $node->content[$extrafield_name_mail_article] = array('#markup' => $content);		  
 	 
-	 }
+	 // }
 	 
-	 if (isset($extrafields[$extrafield_name_print_article])
+	 // if (isset($extrafields[$extrafield_name_print_article])
 
-      && isset($extrafields[$extrafield_name_print_article]['visible'])
+  //     && isset($extrafields[$extrafield_name_print_article]['visible'])
 
-      && $extrafields[$extrafield_name_print_article]['visible']) {
+  //     && $extrafields[$extrafield_name_print_article]['visible']) {
 		  
-		$content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
+		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
 		
-		$node->content[$extrafield_name_print_article] = array('#markup' => $content);		  
+		// $node->content[$extrafield_name_print_article] = array('#markup' => $content);		  
 	 
-	 }
+	 // }
 	 // 
 
 }
