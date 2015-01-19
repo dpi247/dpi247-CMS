@@ -908,6 +908,28 @@ class WallyXmlV1 extends PackageHelper {
                 $file = $this->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
                 $wrapper->scald_thumbnail->set ( ( array ) $file );
               }
+            }elseif ($entity->type == "storify"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( $id );
+              $function_info = 'dpiscald_' . $entity->type . '_get_media_infos_from_url';
+              $url = $value;
+              if (startsWith($url,'https')){
+                $url = explode('https://storify.com/',$url);
+              } else {
+                $url = explode('http://storify.com/',$url);
+              }               
+              $url = $url[1];
+              if (function_exists ( $function_info )) {
+                $infos = $function_info ( $url );
+                $infos = $infos->content;                
+                $entity->title = $infos->title;                
+                $entity->data['url'] = $url;
+                $entity->data['orig_identifier'] = $value;   
+                if(isset($infos->thumbnail)){
+                  $file = $this->createFile ( $infos->thumbnail, scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+              }
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
