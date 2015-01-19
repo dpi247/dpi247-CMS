@@ -487,6 +487,9 @@ function dpiscald_flickr_update_atom(&$atom, $infos) {
   }
   $atom->title = $infos->title;
 
+  $atom->provider = 'dpiscald';
+  $atom->type = 'flickr';
+
   // Prefill the author.
   $atom->scald_authors[LANGUAGE_NONE][0] = array(
     'tid' => 0,
