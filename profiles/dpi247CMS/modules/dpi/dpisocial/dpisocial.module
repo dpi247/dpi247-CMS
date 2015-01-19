@@ -294,16 +294,13 @@ function dpisocial_field_extra_fields() {
 	  
 	  usort($buttons, "dpisocial_cmp_share_buttons");
 	  
-	  $content='<div class="btn-group gr-social" aria-label="..." role="group">'; 
-
-	  
 	  foreach ($buttons as $b) $content.=$b['html'];
 
 	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
 	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
-
-	  $content .= '</div>';
 	  
+	  $content = theme('dpisocial_share_button', array('html_button' => $content));
+
 	  $node->content[$extrafield_name_share_article] = array('#markup' => $content);
 	  
 	  if ($isShare) {
