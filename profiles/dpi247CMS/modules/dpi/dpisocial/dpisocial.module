@@ -42,49 +42,7 @@ function dpisocial_menu() {
 		'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
 	  );	  
   }
-  
-  /*
-  $items['admin/dpi247/dpisocial/networks'] = array (
-    'title' => 'Configure social networks interaction',
-    'description' => 'Configure social networks interaction.',
-    'page callback' => 'dpisocial_listplugin',
-    'access callback' => TRUE,
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'type'	=> MENU_DEFAULT_LOCAL_TASK,
-	'weight'	=> 2,
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  
-  $items['admin/dpi247/dpisocial/test'] = array (
-    'title' => 'Test',
-    'page callback' => 'dpisocial_adminplugin',
-    'access callback' => TRUE,
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'type'	=> MENU_DEFAULT_LOCAL_TASK,
-	'weight'	=> 1,
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  */
-  /*
-  $items['admin/dpi247/dpisocial/networks/%'] = array (
-    'title' => 'Configure social network',
-    'description' => 'Configure social network.',
-    'page callback' => 'dpisocial_adminplugin',
-    'access callback' => TRUE,
-	'page arguments' => array(4),
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  */
+ 
   $items['shares_callback/%'] = array( 
     'page callback' => 'dpisocial_shareinitiated', 
     'access arguments' => array('access content'),
@@ -92,6 +50,19 @@ function dpisocial_menu() {
   );
   
   return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpisocial_theme() {
+	return array(
+		'dpisocial_share_button' => array(
+	      'variables' => array('html_button' => ''),
+	      'template' => 'dpisocial_share_button',
+	      'path' => drupal_get_path('module', 'dpisocial') . '/templates',
+	    ),
+	);
 }
 
 /**
