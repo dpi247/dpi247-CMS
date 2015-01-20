@@ -42,6 +42,20 @@ function dpisocial_menu() {
 		'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
 	  );	  
   }
+
+  // Item for add (or not) email and print links
+  $items['admin/dpi247/dpisocial/others'] = array(
+    'title' => t('Others'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpisocial_adminplugin_others'),
+    'access arguments' => array (
+		  'administer dpisocial' 
+		), 
+    'weight' => 5,
+    'type'	=> MENU_LOCAL_TASK,
+    'file' => 'dpisocial.pages.view.inc',
+    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
+  );
  
   $items['shares_callback/%'] = array( 
     'page callback' => 'dpisocial_shareinitiated', 
@@ -296,9 +310,13 @@ function dpisocial_field_extra_fields() {
 	  
 	  foreach ($buttons as $b) $content.=$b['html'];
 
-	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
-	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
-	  
+	  if (variable_get('dpisocial_add_email_link', 0)) {
+	  	$content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
+	  } 
+	  if (variable_get('dpisocial_add_print_link', 0)) {
+	  	$content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
+	  }
+
 	  $content = theme('dpisocial_share_button', array('html_button' => $content));
 
 	  $node->content[$extrafield_name_share_article] = array('#markup' => $content);
