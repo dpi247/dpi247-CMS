@@ -697,6 +697,12 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
       $provider = array('name' => $types['timelinejs']->provider, 'type' => $types['timelinejs']->type);
   }
+  /* modification pour googlemap */
+  if(strstr($uri, 'google.com/maps')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['googlemap']->provider, 'type' => $types['googlemap']->type);
+  }
   return array('dpicontenttypes' => $provider);
 }
 

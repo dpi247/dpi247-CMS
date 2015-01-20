@@ -955,6 +955,21 @@ class WallyXmlV1 extends PackageHelper {
                 }     
                 $entity->data['orig_identifier'] = $value;       
               }
+            }elseif ($entity->type == "googlemap"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $function_info = $entity->provider . '_' . $entity->type . '_get_media_infos_from_url';
+              if (function_exists ( $function_info )) {
+                $info = $function_info ( $id );
+                if(isset($info->title)){
+                  $entity->title = $info->title;
+                }
+                if(isset($info->scald_thumbnail['src'])){
+                  $file = $this->createFile ( $info->scald_thumbnail['src'], scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+                $entity->data['urlN'] = $info->data['urlN'];
+              }
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
