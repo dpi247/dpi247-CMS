@@ -9,15 +9,9 @@
  * Implements hook_scald_add_form().
  */
 function dpiscald_deezer_scald_add_form(&$form, &$form_state) {
-  $form['type_deezer'] = array(
-    '#title' => t('Select item type'),
-    '#type' => 'select',
-    '#description' => 'Select the desired item',
-    '#options' => array('tracks' => t('Track'), 'album' => t('Album'), 'playlist' => t('Playlist')),
-  );
-  $form['id_deezer'] = array(
+  $form['url_deezer'] = array(
     '#type' => 'textfield',
-    '#title' => t('ID Deezer'),
+    '#title' => t('Url Deezer (track, album or playlist'),
     '#default_value' => '',
     '#maxlength' => 1000
   );
@@ -31,13 +25,17 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   
   $atom = is_array($atoms) ? reset($atoms) : $atoms;
 
-  $type = $form_state['values']['type_deezer'];
-  $id = $form_state['values']['id_deezer'];
+  $url = $form_state['values']['url_deezer'];
+
+  $parse_id = dpiscald_deezer_parse_id($url, null);
+
+  $type = $parse_id[0];
+  $id = $parse_id[1];
 
   // Get media infos.
   $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
   
-  $url = dpiscald_deezer_build_url($form_state);
+  $url = dpiscald_deezer_build_url($type, $id);
   $atom->base_id = md5($url);
 
   $atom->title = $infos->title;
@@ -53,7 +51,7 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
       'taxonomy_term' => (object)(array('name' => $type=="playlist"?$infos->creator->name:$infos->artist->name))
   );
 
-  if ($type == "tracks") {
+  if ($type == "track") {
    $thumbnail_url =  $infos->album->cover;
   } elseif ($type == "album") {
     $thumbnail_url = $infos->cover;
@@ -134,10 +132,6 @@ function dpiscald_deezer_theme() {
 function dpiscald_deezer_get_media_infos_from_url($type, $id) {
   $api_url = 'http://api.deezer.com/';
 
-  if ($type == 'tracks') {
-    $type = 'track';
-  }
-
   $url = $api_url . $type . '/' . $id;
 
   $response = drupal_http_request($url);
@@ -172,9 +166,10 @@ function dpiscald_deezer_already_imported($id) {
  *
  * @return string url
  */
-function dpiscald_deezer_build_url($form_state) {
-  $type = $form_state['values']['type_deezer'];
-  $id = $form_state['values']['id_deezer'];
+function dpiscald_deezer_build_url($type, $id) {
+  if ($type  == 'track') {
+    $type = 'tracks';
+  }
   $url = 'http://www.deezer.com/plugins/player?type=' . $type . '&id=' . $id;
 
   return $url;
@@ -184,10 +179,14 @@ function dpiscald_deezer_build_url($form_state) {
  * Form element validation handler for media url.
  */
 function dpiscald_deezer_form_validate(&$form, &$form_state) {
-  $type = $form_state['values']['type_deezer'];
-  $id = $form_state['values']['id_deezer'];
+  $url = $form_state['values']['url_deezer'];
 
-  if (!in_array($type, array('tracks', 'album', 'playlist'))) {
+  $parse_id = dpiscald_deezer_parse_id($url, null);
+
+  $type = $parse_id[0];
+  $id = $parse_id[1];
+
+  if (!in_array($type, array('track', 'album', 'playlist'))) {
     form_error($form, t('Type is not defined'));
   }
 
@@ -195,7 +194,7 @@ function dpiscald_deezer_form_validate(&$form, &$form_state) {
     form_error($form, t('Please enter an identifier'));
   }
 
-  $url = dpiscald_deezer_build_url($form_state);
+  $url = dpiscald_deezer_build_url($type, $id);
 
   $id = md5($url);
   if (dpiscald_deezer_already_imported($id)) {
