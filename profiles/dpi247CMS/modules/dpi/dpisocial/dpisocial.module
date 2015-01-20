@@ -42,49 +42,7 @@ function dpisocial_menu() {
 		'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
 	  );	  
   }
-  
-  /*
-  $items['admin/dpi247/dpisocial/networks'] = array (
-    'title' => 'Configure social networks interaction',
-    'description' => 'Configure social networks interaction.',
-    'page callback' => 'dpisocial_listplugin',
-    'access callback' => TRUE,
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'type'	=> MENU_DEFAULT_LOCAL_TASK,
-	'weight'	=> 2,
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  
-  $items['admin/dpi247/dpisocial/test'] = array (
-    'title' => 'Test',
-    'page callback' => 'dpisocial_adminplugin',
-    'access callback' => TRUE,
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'type'	=> MENU_DEFAULT_LOCAL_TASK,
-	'weight'	=> 1,
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  */
-  /*
-  $items['admin/dpi247/dpisocial/networks/%'] = array (
-    'title' => 'Configure social network',
-    'description' => 'Configure social network.',
-    'page callback' => 'dpisocial_adminplugin',
-    'access callback' => TRUE,
-	'page arguments' => array(4),
-    'access arguments' => array (
-      'administer dpisocial' 
-    ), 
-	'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  */
+ 
   $items['shares_callback/%'] = array( 
     'page callback' => 'dpisocial_shareinitiated', 
     'access arguments' => array('access content'),
@@ -92,6 +50,19 @@ function dpisocial_menu() {
   );
   
   return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpisocial_theme() {
+	return array(
+		'dpisocial_share_button' => array(
+	      'variables' => array('html_button' => ''),
+	      'template' => 'dpisocial_share_button',
+	      'path' => drupal_get_path('module', 'dpisocial') . '/templates',
+	    ),
+	);
 }
 
 /**
@@ -250,10 +221,8 @@ function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
 function dpisocial_field_extra_fields() {
 
   $extrafield_name_share_article = 'dpisocial_share';
-  $extrafield_name_mail_article = 'dpisocial_mail';
-  $extrafield_name_print_article = 'dpisocial_print';
 
-  foreach (array('page', 'article','package') as $node_type) {
+  foreach (array('page', 'article','package', 'package_gallery') as $node_type) {
 	
     $extra['node'][$node_type]['display'][$extrafield_name_share_article] = array(
 
@@ -264,45 +233,6 @@ function dpisocial_field_extra_fields() {
       'weight' => 50, // default weight, can be changed on display form by site-builder.
 
     );
-	
-	$extra['node'][$node_type]['display'][$extrafield_name_mail_article] = array(
-
-      'label' => t('DPI Social Partage par email'),
-
-      'description' => t('Le bouton de partage par email.'),
-
-      'weight' => 50, // default weight, can be changed on display form by site-builder.
-
-    );
-	
-	$extra['node'][$node_type]['display'][$extrafield_name_print_article] = array(
-
-      'label' => t('DPI Social Boutons d\'impression'),
-
-      'description' => t('Le boutons d\'impression.'),
-
-      'weight' => 50, // default weight, can be changed on display form by site-builder.
-
-    );
-	
-	/*
-	ctools_include('plugins');
-	  $social_network = ctools_get_plugins('dpisocial', 'social_network');
-	  
-	  foreach ($social_network as $snetwork) {
-		  $class = $snetwork['handler']['class'];
-		  $nclass = new $class();
-		  $extra['node'][$node_type]['display']['dpisocial_share_'.$class] = array(
-
-			  'label' => t('DPI Social Bouton de partage '.$nclass->whoAmI),
-		
-			  'description' => t('Les boutons de partage sur les différents réseaux sociaux.'),
-		
-			  'weight' => 50, // default weight, can be changed on display form by site-builder.
-		
-			);
-	  }
-	  */
 
   }
 
@@ -327,8 +257,6 @@ function dpisocial_field_extra_fields() {
   //$urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
 
   $extrafield_name_share_article = 'dpisocial_share';
-  $extrafield_name_mail_article = 'dpisocial_mail';
-  $extrafield_name_print_article = 'dpisocial_print';
   
   $isShare = false;
   
@@ -366,16 +294,13 @@ function dpisocial_field_extra_fields() {
 	  
 	  usort($buttons, "dpisocial_cmp_share_buttons");
 	  
-	  $content='<div class="btn-group gr-social" aria-label="..." role="group">'; 
-
-	  
 	  foreach ($buttons as $b) $content.=$b['html'];
 
 	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
 	  $content .= '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
-
-	  $content .= '</div>';
 	  
+	  $content = theme('dpisocial_share_button', array('html_button' => $content));
+
 	  $node->content[$extrafield_name_share_article] = array('#markup' => $content);
 	  
 	  if ($isShare) {
@@ -387,31 +312,6 @@ function dpisocial_field_extra_fields() {
 			';
 			drupal_add_js($js, 'inline');  
 	  }
-	  
-	 // if (isset($extrafields[$extrafield_name_mail_article])
-
-  //     && isset($extrafields[$extrafield_name_mail_article]['visible'])
-
-  //     && $extrafields[$extrafield_name_mail_article]['visible']) {
-		  
-		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label">Email</span></button>';
-		
-		// $node->content[$extrafield_name_mail_article] = array('#markup' => $content);		  
-	 
-	 // }
-	 
-	 // if (isset($extrafields[$extrafield_name_print_article])
-
-  //     && isset($extrafields[$extrafield_name_print_article]['visible'])
-
-  //     && $extrafields[$extrafield_name_print_article]['visible']) {
-		  
-		// $content = '<button class="btn btn-social btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label">Imprimer</span></button>';
-		
-		// $node->content[$extrafield_name_print_article] = array('#markup' => $content);		  
-	 
-	 // }
-	 // 
 
 }
 
