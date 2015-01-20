@@ -938,6 +938,23 @@ class WallyXmlV1 extends PackageHelper {
               $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
               $file = $this->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
               $wrapper->scald_thumbnail->set ( ( array ) $file );
+            }elseif ($entity->type == "flickr"){
+              $id = $function_parse_id ( 'photo', $value );
+              $wrapper->base_id->set ( $id );
+              $function_info = $entity->provider . '_' . $entity->type . '_image';
+              if (function_exists ( $function_info )) {
+                $info = $function_info ( $id );
+                $element = new stdClass();
+                dpiscald_flickr_update_atom($element, $info, TRUE);
+                $wrapper->base_id->set( $element->base_id );
+                if(isset($element->scald_thumbnail[LANGUAGE_NONE][0])){
+                  $wrapper->scald_thumbnail->set( ( array ) $element->scald_thumbnail[LANGUAGE_NONE][0] );
+                }             
+                if(isset($element->title->_content)){
+                  $entity->title = $element->title->_content;
+                }     
+                $entity->data['orig_identifier'] = $value;       
+              }
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
