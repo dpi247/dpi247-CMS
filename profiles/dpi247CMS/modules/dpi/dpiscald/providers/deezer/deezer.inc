@@ -132,6 +132,10 @@ function dpiscald_deezer_theme() {
 function dpiscald_deezer_get_media_infos_from_url($type, $id) {
   $api_url = 'http://api.deezer.com/';
 
+  if ($type == 'tracks') {
+    $type = 'track';
+  }
+
   $url = $api_url . $type . '/' . $id;
 
   $response = drupal_http_request($url);
