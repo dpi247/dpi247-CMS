@@ -703,6 +703,13 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && $request->code == 200)
       $provider = array('name' => $types['googlemap']->provider, 'type' => $types['googlemap']->type);
   }
+  /* hack pour equipefr */
+  if(strstr($uri, 'video.lequipe.fr')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['equipefr']->provider, 'type' => $types['equipefr']->type);
+  }
+  
   return array('dpicontenttypes' => $provider);
 }
 
