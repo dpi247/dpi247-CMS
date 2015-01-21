@@ -111,7 +111,7 @@ DirectoryIndex index.php index.html index.htm
 
   #RewriteCond %{REQUEST_FILENAME} -f
   RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|css|js|txt|xml|png)$ [NC]
-  RewriteCond %{REQUEST_URI} !^/dpistyles/$
+  RewriteCond %{REQUEST_URI} !^.*/dpistyle/.*$
   RewriteRule .* - [L]
 
   # Pass all requests not referring directly to files in the filesystem to
