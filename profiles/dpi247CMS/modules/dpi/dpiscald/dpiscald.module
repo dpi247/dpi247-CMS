@@ -147,7 +147,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'coveritlive','picktochart','scribblelive', 'spotify', 'deezer');
+    'coveritlive','picktochart','scribblelive', 'spotify', 'deezer', 'embedly');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';

@@ -47,7 +47,7 @@ function dpiscald_embedly_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->title = $infos->title;
 
-  $atom->data['html'] = $infos->html;
+  $atom->data['url'] = $infos->url;
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
@@ -93,7 +93,15 @@ function dpiscald_embedly_scald_fetch($atom, $type) {
 function dpiscald_embedly_scald_prerender($atom, $context, $options, $mode) {
   if ($mode == 'atom') {
     if ($context != 'sdl_library_item') {
-      $atom->rendered->player = $atom->data['html'];
+      $atom->rendered->player = theme('dpiscald_embedly_player',
+      array('vars' =>
+        array(
+          'url'      => $atom->data['url'],
+          'title'     => $atom->title,
+        ),
+        'atom' => $atom,
+      )
+    );
     }
   }
 }
@@ -142,4 +150,16 @@ function dpiscald_embedly_validate_id($element, &$form_state) {
   elseif (dpiscald_embedly_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpiscald_embedly_theme() {
+  return array(
+    'dpiscald_embedly_player' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'providers/embedly/dpiscald_embedly_player'
+    ),
+  );
 }
