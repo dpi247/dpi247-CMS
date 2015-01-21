@@ -710,6 +710,13 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
       $provider = array('name' => $types['equipefr']->provider, 'type' => $types['equipefr']->type);
   }
   
+  /* Cas pas de provider -> fallback embedly */
+  if(!isset($provider) && isset($types['embedly'])){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['embedly']->provider, 'type' => $types['embedly']->type);
+  }
+  
   return array('dpicontenttypes' => $provider);
 }
 

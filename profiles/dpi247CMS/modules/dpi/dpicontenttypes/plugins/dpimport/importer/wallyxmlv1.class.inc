@@ -188,17 +188,14 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildExternalReference($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-
-    if (! isset ( $entity->provider )) {
-      // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
-      if (! isset ( $entity->external_reference_set )) {
-        $wrapper->field_external_reference->set ( $value );
-        Logger::logExecution ( 'external_reference', FALSE, 1, '000', $value );
-        $entity->external_reference_set = TRUE;
-      } else {
-        $wrapper->field_external_reference_2->set ( $value );
-        Logger::logExecution ( 'external_reference_2', FALSE, 1, '000', $value );
-      }
+    // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
+    if (! isset ( $entity->external_reference_set )) {
+      $wrapper->field_external_reference->set ( $value );
+      Logger::logExecution ( 'external_reference', FALSE, 1, '000', $value );
+      $entity->external_reference_set = TRUE;
+    } else {
+      $wrapper->field_external_reference_2->set ( $value );
+      Logger::logExecution ( 'external_reference_2', FALSE, 1, '000', $value );
     }
   }
 
@@ -982,6 +979,20 @@ class WallyXmlV1 extends PackageHelper {
                   $wrapper->scald_thumbnail->set ( ( array ) $file );
                 }
                 $entity->data['id'] = $infos['id'];
+                $entity->data['orig_identifier'] = $value;
+              }
+            }elseif ($entity->type == "embedly"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $function_info = $entity->provider . '_' . $entity->type . '_get_media_infos_from_url';
+              if (function_exists ( $function_info )) {
+                $infos = $function_info ( $id );
+                $entity->title = $infos->title;
+                if(isset($infos->thumbnail_url)){
+                  $file = $this->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+                $entity->data['url'] = $infos->url;
                 $entity->data['orig_identifier'] = $value;
               }
             }
