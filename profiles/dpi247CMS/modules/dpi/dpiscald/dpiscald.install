@@ -28,7 +28,6 @@ function dpiscald_install() {
   scald_add_type('googlemap', 'Google Maps', 'Resource Google Maps');
   scald_add_type('storify', 'Storify', 'Resource Storify');
   scald_add_type('timelinejs', 'Timeline Js', 'Resource Timeline Js');
-  scald_add_type('coveritlive', 'CoveritLive', 'Resource CoveritLive');
   scald_add_type('picktochart', 'Picktochart', 'Resource Picktochart');
   scald_add_type('scribblelive', 'Scribblelive', 'Resource Scribblelive');
   scald_add_type('spotify', 'Spotify', 'Resource Spotify');
@@ -73,8 +72,7 @@ function dpiscald_uninstall() {
   scald_remove_type('googlemap');
   scald_remove_type('embedly');
   scald_remove_type('storify');
-  scald_remove_type('timelinejs');
-  scald_remove_type('coveritlive');
+  scald_remove_type('timelinejs');  
   scald_remove_type('picktochart');
   scald_remove_type('scribblelive');
   scald_remove_type('spotify');
@@ -97,4 +95,11 @@ function dpiscald_update_7001() {
             SET weight = '-1'
             WHERE name = 'dpiscald'";
   db_query($sql);
+}
+
+/**
+ * Suppression du provider coveritlive
+ */
+function dpiscald_update_7002(){
+  scald_remove_type('coveritlive');
 }
