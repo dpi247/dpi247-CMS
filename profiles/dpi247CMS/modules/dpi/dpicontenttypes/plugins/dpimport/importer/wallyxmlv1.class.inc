@@ -984,6 +984,20 @@ class WallyXmlV1 extends PackageHelper {
                 $entity->data['id'] = $infos['id'];
                 $entity->data['orig_identifier'] = $value;
               }
+            }elseif ($entity->type == "embedly"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $function_info = $entity->provider . '_' . $entity->type . '_get_media_infos_from_url';
+              if (function_exists ( $function_info )) {
+                $infos = $function_info ( $id );
+                $entity->title = $infos->title;
+                if(isset($infos->thumbnail_url)){
+                  $file = $this->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+                $entity->data['url'] = $infos->url;
+                $entity->data['orig_identifier'] = $value;
+              }
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
