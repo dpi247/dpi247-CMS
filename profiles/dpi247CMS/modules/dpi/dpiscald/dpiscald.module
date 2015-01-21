@@ -11,7 +11,6 @@ function dpiscald_scald_atom_providers() {
     'googlemap' => 'DPI Maps hosted on Google Maps',
     'storify' => 'DPI Storify ressources hosted on Storify',
     'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
-    'coveritlive' => 'DPI Media hosted on CoveritLive',
     'picktochart' => 'DPI Media hosted on Picktochart',
     'scribblelive' => 'DPI Media hosted on Scribblelive',
   );
