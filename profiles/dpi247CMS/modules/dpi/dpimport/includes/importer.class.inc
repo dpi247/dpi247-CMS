@@ -341,7 +341,12 @@ abstract class Importer {
    * @param Object $entity
    */
   protected function saveEntity($dom, $entity_type, $entity){
-    entity_save($entity_type, $entity);
+    try {     
+      entity_save($entity_type, $entity);
+    } catch (Exception $e) {
+      Logger::logWarning('importer', 2, 'entitySave', t('The entity (!file) can not be saved', array('!file' => $entity_type)));
+    }
+    
   }
 
   /**

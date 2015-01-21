@@ -938,6 +938,52 @@ class WallyXmlV1 extends PackageHelper {
               $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
               $file = $this->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
               $wrapper->scald_thumbnail->set ( ( array ) $file );
+            }elseif ($entity->type == "flickr"){
+              $id = $function_parse_id ( 'photo', $value );
+              $wrapper->base_id->set ( $id );
+              $function_info = $entity->provider . '_' . $entity->type . '_image';
+              if (function_exists ( $function_info )) {
+                $info = $function_info ( $id );
+                $element = new stdClass();
+                dpiscald_flickr_update_atom($element, $info, TRUE);
+                $wrapper->base_id->set( $element->base_id );
+                if(isset($element->scald_thumbnail[LANGUAGE_NONE][0])){
+                  $wrapper->scald_thumbnail->set( ( array ) $element->scald_thumbnail[LANGUAGE_NONE][0] );
+                }             
+                if(isset($element->title->_content)){
+                  $entity->title = $element->title->_content;
+                }     
+                $entity->data['orig_identifier'] = $value;       
+              }
+            }elseif ($entity->type == "googlemap"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $function_info = $entity->provider . '_' . $entity->type . '_get_media_infos_from_url';
+              if (function_exists ( $function_info )) {
+                $info = $function_info ( $id );
+                if(isset($info->title)){
+                  $entity->title = $info->title;
+                }
+                if(isset($info->scald_thumbnail['src'])){
+                  $file = $this->createFile ( $info->scald_thumbnail['src'], scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+                $entity->data['urlN'] = $info->data['urlN'];
+              }
+            }elseif($entity->type == "equipefr"){
+              $id = $function_parse_id ( $value, FALSE );
+              $wrapper->base_id->set ( md5($id) );
+              $function_info = $entity->provider . '_' . $entity->type . '_get_media_infos_from_url';
+              if (function_exists ( $function_info )) {
+                $infos = $function_info ( $id );
+                $entity->title = $infos['title'];
+                if(isset($infos['thumbnail_url'])){
+                  $file = $this->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
+                  $wrapper->scald_thumbnail->set ( ( array ) $file );
+                }
+                $entity->data['id'] = $infos['id'];
+                $entity->data['orig_identifier'] = $value;
+              }
             }
           } else {
             Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
