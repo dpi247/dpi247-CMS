@@ -147,12 +147,14 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'coveritlive','picktochart','scribblelive', 'spotify', 'deezer', 'embedly');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
-    $themeReturn = $function_name();
-    $theme = array_merge($theme,$themeReturn);
+    if(function_exists($function_name)){
+      $themeReturn = $function_name();
+      $theme = array_merge($theme,$themeReturn);
+    }
   }
   
   $theme['atom_package_inline'] = array(

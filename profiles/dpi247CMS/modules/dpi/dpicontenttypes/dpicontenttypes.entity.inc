@@ -203,6 +203,134 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
     $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference_2'] = $external_reference_2;
     $info['scald_atom']['bundles']['links_list']['properties']['field_source'] = $source;
   }
+  
+  //Set to the atoms dailymotion
+  if (isset($info['scald_atom']['bundles']['dailymotion'])){
+    $info['scald_atom']['bundles']['dailymotion']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['dailymotion']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['dailymotion']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['dailymotion']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms deezer
+  if (isset($info['scald_atom']['bundles']['deezer'])){
+    $info['scald_atom']['bundles']['deezer']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['deezer']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['deezer']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['deezer']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms embedly
+  if (isset($info['scald_atom']['bundles']['embedly'])){
+    $info['scald_atom']['bundles']['embedly']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['embedly']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['embedly']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['embedly']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms equipefr
+  if (isset($info['scald_atom']['bundles']['equipefr'])){
+    $info['scald_atom']['bundles']['equipefr']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['equipefr']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['equipefr']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['equipefr']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms flickr
+  if (isset($info['scald_atom']['bundles']['flickr'])){
+    $info['scald_atom']['bundles']['flickr']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['flickr']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['flickr']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['flickr']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms googlemap
+  if (isset($info['scald_atom']['bundles']['googlemap'])){
+    $info['scald_atom']['bundles']['googlemap']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['googlemap']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['googlemap']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['googlemap']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms kewego
+  if (isset($info['scald_atom']['bundles']['kewego'])){
+    $info['scald_atom']['bundles']['kewego']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['kewego']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['kewego']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['kewego']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms picktochart
+  if (isset($info['scald_atom']['bundles']['picktochart'])){
+    $info['scald_atom']['bundles']['picktochart']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['picktochart']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['picktochart']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['picktochart']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms scribblelive
+  if (isset($info['scald_atom']['bundles']['scribblelive'])){
+    $info['scald_atom']['bundles']['scribblelive']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['scribblelive']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['scribblelive']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['scribblelive']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms soundcloud
+  if (isset($info['scald_atom']['bundles']['soundcloud'])){
+    $info['scald_atom']['bundles']['soundcloud']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['soundcloud']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['soundcloud']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['soundcloud']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms spotify
+  if (isset($info['scald_atom']['bundles']['spotify'])){
+    $info['scald_atom']['bundles']['spotify']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['spotify']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['spotify']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['spotify']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms storify
+  if (isset($info['scald_atom']['bundles']['storify'])){
+    $info['scald_atom']['bundles']['storify']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['storify']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['storify']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['storify']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms timelinejs
+  if (isset($info['scald_atom']['bundles']['timelinejs'])){
+    $info['scald_atom']['bundles']['timelinejs']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['timelinejs']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['timelinejs']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['timelinejs']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms twitter
+  if (isset($info['scald_atom']['bundles']['twitter'])){
+    $info['scald_atom']['bundles']['twitter']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['twitter']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['twitter']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['twitter']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms vimeo
+  if (isset($info['scald_atom']['bundles']['vimeo'])){
+    $info['scald_atom']['bundles']['vimeo']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['vimeo']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['vimeo']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['vimeo']['properties']['field_source'] = $source;
+  }
+  
+  //Set to the atoms youtube
+  if (isset($info['scald_atom']['bundles']['youtube'])){
+    $info['scald_atom']['bundles']['youtube']['properties']['field_product_id'] = $product_id;
+    $info['scald_atom']['bundles']['youtube']['properties']['field_external_reference'] = $external_reference;
+    $info['scald_atom']['bundles']['youtube']['properties']['field_external_reference_2'] = $external_reference_2;
+    $info['scald_atom']['bundles']['youtube']['properties']['field_source'] = $source;
+  }
 }
 
 /**

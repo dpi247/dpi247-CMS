@@ -188,17 +188,14 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildExternalReference($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-
-    if (! isset ( $entity->provider )) {
-      // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
-      if (! isset ( $entity->external_reference_set )) {
-        $wrapper->field_external_reference->set ( $value );
-        Logger::logExecution ( 'external_reference', FALSE, 1, '000', $value );
-        $entity->external_reference_set = TRUE;
-      } else {
-        $wrapper->field_external_reference_2->set ( $value );
-        Logger::logExecution ( 'external_reference_2', FALSE, 1, '000', $value );
-      }
+    // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
+    if (! isset ( $entity->external_reference_set )) {
+      $wrapper->field_external_reference->set ( $value );
+      Logger::logExecution ( 'external_reference', FALSE, 1, '000', $value );
+      $entity->external_reference_set = TRUE;
+    } else {
+      $wrapper->field_external_reference_2->set ( $value );
+      Logger::logExecution ( 'external_reference_2', FALSE, 1, '000', $value );
     }
   }
 
