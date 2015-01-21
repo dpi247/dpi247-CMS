@@ -108,6 +108,11 @@ class dpisocial_google_social_network extends dpisocial_social_network {
 <!-- Place this tag where you want the +1 button to render. -->
 <div class="g-plusone" data-annotation="inline" data-width="300" data-href="'.$url.'"></div>';	
 	}
+
+	public function getShareButtonHtmlPersonnalized($nid, $url) {
+		return '<button class="btn btn-social btn-google-plus" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i><span class="label">'.$this->getNbShares($nid, $url).'</span></button>'	;
+	}
+	
 }
 
 
