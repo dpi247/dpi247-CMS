@@ -29,7 +29,8 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
           // This is a text area, search for CCI Inline Objects tags
           if ($current_field = $entity_wrapper->{$field_instance['field_name']}->value()) {
             $text = $current_field['value'];
-            $tag_regex = "@<ccix:inline(\s.*)?>.*<\/ccix:inline(\s.*)?>@sU";
+            /*$tag_regex = "@<ccix:inline(\s.*)?>.*<\/ccix:inline(\s.*)?>@sU"; => modification de la regexp pour qu'elle fonctionne */
+            $tag_regex = "/<ccix:inline(.*?)\/>/i";
             $tag_matches = array();
             // Get all ccix:inline tags in the text
             preg_match_all($tag_regex, $text, $tag_matches);
