@@ -22,6 +22,8 @@ class WallyXmlV1 extends PackageHelper {
 
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
+      
+      $this->_replace_inline_object($package);
       $this->savePackage($dom, $package);
 
     }
@@ -1105,6 +1107,27 @@ class WallyXmlV1 extends PackageHelper {
     if (! empty ( $field_atompackage ))
       $package->field_atompackage = $field_atompackage;
     return $package;
+  }
+  
+  function _replace_inline_object(& $package){
+    try {
+      $text = current(current($package->field_textbody))["value"];
+      $embeddedObjects = current($package->field_embededobjects);
+      
+      if(isset($text) && isset($embeddedObjects) && !empty($embeddedObjects)){
+        foreach($embeddedObjects as $k => $embed){
+          $tag_regex = "/ \[scald=".$embed["sid"].":(.*?)\]/i";
+          if(preg_match_all($tag_regex, $text, $tag_matches)){
+            if(isset($package->field_embededobjects[$package->language])){
+              $package->field_embededobjects[$package->language][$k]["inline"] = 1;
+            }elseif(isset($package->field_embededobjects['und'])){
+              $package->field_embededobjects['und'][$k]["inline"] = 1;
+            }
+          }
+        }
+      }
+    } catch (Exception $e) {
+    } 
   }
 }
 
