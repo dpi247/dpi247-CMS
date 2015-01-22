@@ -260,7 +260,7 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
       $options['attributes'] = array('target' => '_blank');
     }
     $form['terms'] = array(
-      '#markup' => l(t('Terms of use'),variable_get('dpicomments_terms_of_use_link', ''), $options),
+      '#markup' => l(variable_get('dpicomments_terms_of_use_label', ''),variable_get('dpicomments_terms_of_use_link', ''), $options),
       '#weight' => 10,
     );
   }
