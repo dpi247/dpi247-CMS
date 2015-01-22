@@ -41,11 +41,23 @@ function dpicomments_settings() {
     '#default_value' => variable_get('dpicomments_add_terms_of_use_link', 0),
   );
 
+  $form['dpicomments_global_settings']['dpicomments_terms_of_use_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Terms of use label"),
+    '#default_value' => variable_get('dpicomments_terms_of_use_label', ''),
+    '#description' => t('Enter a label'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="dpicomments_add_terms_of_use_link"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
   $form['dpicomments_global_settings']['dpicomments_terms_of_use_link'] = array(
     '#type' => 'textfield',
     '#title' => t("Terms of use link"),
     '#default_value' => variable_get('dpicomments_terms_of_use_link', ''),
-    '#description' => t('Enter reltive or contextual link'),
+    '#description' => t('Enter relative or contextual link'),
     '#states' => array(
       'visible' => array(
         'input[name="dpicomments_add_terms_of_use_link"]' => array('checked' => TRUE),
