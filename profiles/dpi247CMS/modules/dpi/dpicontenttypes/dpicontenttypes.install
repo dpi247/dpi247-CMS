@@ -469,17 +469,3 @@ function dpicontenttypes_update_7008(){
     }
   }
 }
-
-function dpicontenttypes_update_7009(){
-  module_load_include('field_base.inc', 'dpicontenttypes');
-  if($fields = dpicontenttypes_field_default_field_base_atom_package()){
-    field_create_field($fields);
-  }
-  module_load_include('field_instance.inc', 'dpicontenttypes');
-  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
-    field_info_cache_clear();
-    foreach ($instances as $field_instance) {
-      field_create_instance($field_instance);
-    }
-  }
-}
