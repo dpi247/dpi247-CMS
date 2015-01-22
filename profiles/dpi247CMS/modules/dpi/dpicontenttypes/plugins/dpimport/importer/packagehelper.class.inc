@@ -276,13 +276,13 @@ abstract class PackageHelper extends Importer {
     if ($provider == NULL){
       Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri createOrLoadEntityLink', array('!uri' => $uri)));
     } else {
-      $atom = scald_atom_defaults($provider['type']);
+      $atom = scald_atom_defaults($provider['type']);    
       $atom->provider = $provider['name'];
-      $atom->type = $provider['type'];      
+      $atom->type = $provider['type'];
       $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
       if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
         $atom = $temp_atom;
-      }      
+      }
     }
     return $atom;
   }

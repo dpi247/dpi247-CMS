@@ -676,6 +676,11 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
   $types = scald_types();
   $values = array_keys($types);
   $provider = NULL;
+  
+  if(isset($types['embedly'])){
+    $provider = array('name' => $types['embedly']->provider, 'type' => $types['embedly']->type);
+  }
+  
   foreach($values as $prov) {
     if(strstr($uri, $prov)!==FALSE){
         $request = drupal_http_request($uri);
@@ -709,14 +714,7 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && $request->code == 200)
       $provider = array('name' => $types['equipefr']->provider, 'type' => $types['equipefr']->type);
   }
-  
-  /* Cas pas de provider -> fallback embedly */
-  if(!isset($provider) && isset($types['embedly'])){
-    $request = drupal_http_request($uri);
-    if(isset($request->code) && $request->code == 200)
-      $provider = array('name' => $types['embedly']->provider, 'type' => $types['embedly']->type);
-  }
-  
+
   return array('dpicontenttypes' => $provider);
 }
 
@@ -798,3 +796,45 @@ function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $op
   }
   return $replacements;
 }
+
+/**
+ * @ todo Trouver une version en ordre de l'import des scalds
+ */
+/*
+function dpicontenttypes_filter_info() {
+  $filters['filter_cci_scald_inline'] = array(
+    'title' => t('Filter cci scald inline'),
+    'description' => t("Every instance of cci élement is replace by scald input format"),
+    'process callback' => '_dpicontenttypes_filter_cci_scald__process',
+    'tips callback' => '_dpicontenttypes_filter_cci_scald_tips',
+  );
+  return $filters;
+}*/
+
+/**
+ * <ccix:inline align="" extref="G1T1L11GG.1" height="" runaround="" width=""/>
+ * @param unknown $text
+ * @param unknown $filter
+ * @return mixed
+ */
+/*function _dpicontenttypes_filter_cci_scald__process($text, $filter) {
+  module_load_include('inc', 'dpicontenttypes', 'dpicontenttypes.api');
+  $pattern = "/<ccix:inline(.*?)\/>/i";
+  preg_match_all($pattern, $text, $matches);
+  if(isset($matches[1])){
+      foreach($matches[1] as $k => $el){
+         preg_match('/extref="(.*?)"/i', $el, $extUrl);
+         if(isset($extUrl[1])){
+            $atom = dpicontenttypes_api_getatombyexternalreference($extUrl[1]);
+            if(isset($atom) && isset($atom->sid)){
+               $text = str_replace($matches[0][$k] , scald_render(994, 'full') , $text);
+            }
+         }
+      }
+    } 
+  return $text;
+}
+
+function _dpicontenttypes_filter_cci_scald_tips($filter, $format, $long = FALSE) {
+  return t('<em><ccix:inline align="" extref="G1T1L11GG.1" height="" runaround="" width=""/></em> is replaced with the scald input.');
+}*/
