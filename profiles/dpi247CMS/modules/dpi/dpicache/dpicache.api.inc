@@ -340,11 +340,6 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
  *          the category of cache
  */
 function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category = NULL) {
-  dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category", array (
-    '@cache_name' => $cache_type,
-    '@category' => $category 
-  ) ), array (), NULL, WATCHDOG_INFO );
-  
   $query = db_select ( 'dpicache_cache_entries', 'dce' );
   $query->fields ( 'dce', array (
     'name',
@@ -358,7 +353,47 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
   if ($category != NULL) {
     $query->condition ( 'dce.category', $category );
   }
-  dpicache_regenerate_cache_entries_process ( $query );
+  //dpicache_regenerate_cache_entries_process ( $query );
+  /**
+   * @todo problem avec le cache régénérate donc on a courcircuité le tout pour venir supprimer le
+   * cache manuellement ainsi que sont entrée de cache (entrée de cache pour éviter une régénération inutile
+   * ou bien une entrée sans cache derrière).
+   * 
+   * Pour remettre à la normal retirer tout le code du dessous et décommenter la fonction au dessus.
+   */
+  dsm($category);
+  /* suppression des caches concernés */
+  foreach($query->execute() as $entry){
+    try {
+      $cid = $entry->name.'_'.$entry->hash;
+      cache_clear_all($cid, 'cache_dpicache');
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_INFO );
+    } catch (Exception $e) {
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_CRITICAL );
+    }
+  }
+//   /* suppression des entrées concernées */
+//   try {
+//     $query = db_delete ( 'dpicache_cache_entries');
+//     $query->condition ( 'name', $cache_type );    
+//     if ($category != NULL) {
+//       $query->condition ( 'category', $category );
+//     }
+//     $query->execute();
+//     dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category success", array (
+//       '@cache_name' => $cache_type,
+//       '@category' => $category 
+//     ) ), array (), NULL, WATCHDOG_INFO );
+//   } catch (Exception $e) {
+//     dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category fail", array (
+//       '@cache_name' => $cache_type,
+//       '@category' => $category 
+//     ) ), array (), NULL, WATCHDOG_CRITICAL);
+//   }
 }
 
 /**
