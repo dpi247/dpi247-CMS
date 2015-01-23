@@ -17,10 +17,15 @@ function dpicache_get_cache_entry($cache_name) {
   }
   
   // Get arguments for callback
-  $parameters = func_get_args ();
+  $parameters = func_get_args ();  
+  $hash_parameters = $parameters;
+  array_shift ( $hash_parameters );
   array_shift ( $parameters );
+  array_pop( $hash_parameters ); //unset $conf
+  array_pop( $hash_parameters ); //unset title -> for one_cache_regenerate
+  
   // Get hash
-  $hash = _dpicache_get_hash ( $cache_name, $parameters );
+  $hash = _dpicache_get_hash ( $cache_name, $hash_parameters );
   if (! $hash) {
     dpi_log ( 'dpicache', "error", t ( "dpicache_get_cache_entry : Unable to generate hash for !cache_name", array (
       "!cache_name" => $cache_name 
@@ -296,7 +301,7 @@ function dpi_system_settings_form_submit($form, &$form_state) {
  */
 function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
   $args = func_get_args ();
-  
+  dsm($args);
   foreach ( $args as $key => $value ) {
     if ($value == DPICACHE_NULL_URL_PARAMETER) {
       $args [$key] = NULL;
@@ -304,16 +309,24 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
     if ($value == DPICACHE_EMPTYSTRING_URL_PARAMETER) {
       $args [$key] = "";
     }
-  }
-  
+  }  
   unset ( $args [0] );
+  array_pop($args);
   
   $hash = _dpicache_get_hash ( $cache_name, $args );
+  try {
+    $cid = $cache_name.'_'.$hash;
+    cache_clear_all($cid, 'cache_dpicache');
+    dpi_log ( 'dpicache', "manual_regeneration_of_cache_entry", t ( "Manual cache regeneration: @cache_name success", array (
+      '@cache_name' => $cid,
+    ) ), array (), $hash, WATCHDOG_INFO );
+  } catch (Exception $e) {
+    dpi_log ( 'dpicache', "manual_regeneration_of_cache_entry", t ( "Manual cache regeneration: @cache_name fail", array (
+      '@cache_name' => $cid,
+    ) ), array (), $hash, WATCHDOG_ERROR );
+  }  
   
-  dpi_log ( 'dpicache', "manual_regeneration_of_cache_entry", t ( "Manual cache regeneration: @cache_name (@args)", array (
-    '@cache_name' => $cache_name,
-    '@args' => implode ( ',', $args ) 
-  ) ), array (), $hash, WATCHDOG_INFO );
+  /*
   $cache_definition = dpicache_get_cache_entry_definition ( $cache_name );
   if ($cache_definition != FALSE) {
     $fresh_content = _dpicache_cache_call_function ( $cache_definition, $args );
@@ -327,7 +340,7 @@ function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
       '@cache_name' => $cache_name,
       '@args' => implode ( ',', $args ) 
     ) ), 'error' );
-  }
+  }*/
   drupal_goto ();
 }
 
