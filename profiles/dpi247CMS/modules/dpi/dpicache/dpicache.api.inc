@@ -301,7 +301,6 @@ function dpi_system_settings_form_submit($form, &$form_state) {
  */
 function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
   $args = func_get_args ();
-  dsm($args);
   foreach ( $args as $key => $value ) {
     if ($value == DPICACHE_NULL_URL_PARAMETER) {
       $args [$key] = NULL;
