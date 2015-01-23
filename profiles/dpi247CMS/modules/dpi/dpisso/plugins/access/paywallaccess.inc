@@ -46,12 +46,12 @@ function dpisso_paywallaccess_ctools_access_check($conf, $context) {
     
     /* Bypass by admin dpisso config */
     if(isset($bypass) && dpisso_paywall_test_bypass($bypass, $user->roles)){
-      $return = TRUE;
+      $return = FALSE;
     }
     
     /* bypass admin */
     if(user_access('administer')){
-      $return = TRUE;
+      $return = FALSE;
     }
     return $return;
 }
