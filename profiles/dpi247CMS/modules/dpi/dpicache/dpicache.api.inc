@@ -361,7 +361,6 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
    * 
    * Pour remettre à la normal retirer tout le code du dessous et décommenter la fonction au dessus.
    */
-  dsm($category);
   /* suppression des caches concernés */
   foreach($query->execute() as $entry){
     try {
