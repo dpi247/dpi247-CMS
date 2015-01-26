@@ -21,14 +21,19 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
 
     $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-    
     if(isset($_COOKIE[$config['loginToken_cookie_name']])){
-      $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']]);
-    }
+      $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']], TRUE);
+    }    
     
-    if(isset($loginId) && isset($_COOKIE['dpisso_is_connected']) && $_COOKIE['dpisso_is_connected'] == true){
+    if(isset($loginId)){
+      if(!isset($_COOKIE['dpisso_is_connected'])){
+        $drupal_session_auto_connect = TRUE;
+      }else{
+        $drupal_session_auto_connect = FALSE;
+      }
       $SsoSession = new SsoSession ( $loginId );
     }else{
+      $drupal_session_auto_connect = FALSE;
       $SsoSession = new SsoSession (  );
     }
 
@@ -65,5 +70,16 @@ if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'
   }
 }
 
+/* test de connexion via le login token -> co automatique */
+if(isset($drupal_session_auto_connect) && $drupal_session_auto_connect == TRUE){
+  require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
+  $profile=$SsoSession->getProfile();
+  $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
+  $sso_user_infos['mail']=$profile->mail;
+  $sso_user_infos['name']=$profile->cn;
+  $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
+  dpisso_user_external_login_register($loginId, 'dpisso',$sso_user_infos);  
+  setcookie ( 'dpisso_is_connected', true);
+}
 
 menu_execute_active_handler ();
