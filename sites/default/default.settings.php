@@ -551,3 +551,13 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
  * Remove the leading hash signs to disable.
  */
 # $conf['allow_authorize_operations'] = FALSE;
+
+/**
+ * Memcache config
+ */
+/* http://andrewdunkle.com/2012/how-to-install-memcached-for-drupal-7.html -> Really good tuto
+  $conf['cache_backends'][] = 'profiles/dpi247CMS/modules/third/memcache/memcache.inc';
+  $conf['cache_default_class'] = 'MemCacheDrupal';
+  $conf['cache_class_cache_form'] = 'DrupalDatabaseCache';
+  $conf['memcache_key_prefix'] = 'unique_key'; // nécessaire pour les fédérations ! Changer la clef pour chaque fédération
+*/
