@@ -203,7 +203,7 @@ function _dpicontenttypes_entityinsertscaldatom($node){
           'title' => $node->title,
           'data' => array(
             'nid' => $node->nid,
-            'author' => $node->field_authors,
+            'author' => (isset($node->field_authors))?$node->field_authors: array(),
           ),
         ));
         if($atomId = scald_atom_save($atom)){

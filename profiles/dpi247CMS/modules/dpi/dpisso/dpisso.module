@@ -1,55 +1,4 @@
 <?php
-
-/*
-function dpisso_boot() {
-  
-    drupal_load ( 'module', 'user' );
-    drupal_register_shutdown_function('devel_shutdown');
-    
-    
-    if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/SsoSession.class.php" ) && file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolbox/Config.class.php" )) {
-      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/Config.class.php';
-      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/AccessManager.class.php';
-      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/LoginManager.class.php';
-      require_once $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
-        require_once $_SERVER ['DOCUMENT_ROOT'] . '/includes/common.inc';
-        require_once $_SERVER ['DOCUMENT_ROOT'] . '/includes/session.inc';
-
-
-      $config = Config::getInstance ( $_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' );
-     
-      
-      
-      global $user;
-      if ($user->uid > 0) {
-        $external_auth = user_get_authmaps ( $user->init );
-        if (isset ( $external_auth ['dpisso'] )) {
-          $loginId = $external_auth ['dpisso'];
-          $SsoSession = new SsoSession ( $loginId );
-        }
-        else{
-          $SsoSession = new SsoSession ();
-        
-        }
-      }else{
-        $SsoSession = new SsoSession ();
-        
-      }
-      $context = $_SERVER ["REQUEST_URI"];
-      if($context[0]=='/'){
-        $context = substr($context, 1);
-      }
-      $rolesd = $SsoSession->getFreemiumInfo ( $context );
-      $user->dpisso = array (
-        'accessmanager' => array (
-          'freemium' => ($rolesd->nbFreemium) ? true : false,
-          'freemium_count' => $rolesd->nbFreemium 
-        ) 
-      );
-    }
-    
-}*/
-
 // @todo: crer un callback que le varnish appelle
 // pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
 // Même chose pour le profile manager etc ...
@@ -135,6 +84,21 @@ function dpisso_menu() {
     'file' => 'dpisso.pages.paywall.admin.inc',
     'weight' => 0,
     'type' => MENU_LOCAL_TASK 
+  );
+  
+  $items [DPI_ADMIN_PATH . '/dpisso/bypasspaywall'] = array (
+    'title' => t ( 'Bypass paywall' ),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpisso_bypasspaywall_admin_settings_page_form'
+    ),
+    'access arguments' => array (
+      'administer dpisso'
+    ),
+    'file path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes',
+    'file' => 'dpisso.bypasspaywall.admin.inc',
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK
   );
   
   $items ['dpisso/login'] = array (

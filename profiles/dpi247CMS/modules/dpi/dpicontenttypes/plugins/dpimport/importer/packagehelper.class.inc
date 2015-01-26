@@ -45,7 +45,10 @@ abstract class PackageHelper extends Importer {
    */
   protected function _createOrLoadEntityPackage($dom, $external_reference, $action) {
     $node = new stdClass();
-    $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);    
+    $type_xml_info = "NaN";
+    if(isset($dom->getAttributeNode('xsi:type')->value)){
+      $type_xml_info = strtolower($dom->getAttributeNode('xsi:type')->value);
+    }       
     $node->type = 'package';
     if($type_xml_info == "GalleryPackageType"){
       $node->type = 'package_gallery';
