@@ -207,7 +207,9 @@ function googletagmanager_convert_datalayer_to_json($dataLayer){
  * @return the translated string
  */
 function googletagmanager_removeUnicodeSequences($string) {
-  return preg_replace("/\\\\u([a-f0-9]{4})/e", "iconv('UCS-4LE','UTF-8',pack('V', hexdec('U$1')))", $string);
+  return preg_replace_callback("/\\\\u([a-f0-9]{4})/", function($m) {
+    return iconv('UCS-4LE', 'UTF-8', pack('V', hexdec('U'.$m[1])));
+  }, $string);
 }
 
 /**
