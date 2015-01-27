@@ -157,6 +157,7 @@ function dpisocial_shareinitiated($nid) {
 		
 		$parts = explode(' ',$_GET['url']);
 		$url = $parts[0]; // get rid of something after domain
+		//@todo superbe faille de sécurité ...
 		db_query("INSERT INTO dpisocial_node_shares_to_update SET nid=".$nid.", url = '".$url."', network='".$network."'");	
 	}
 }
