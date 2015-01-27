@@ -623,7 +623,6 @@ class WallyXmlV1 extends PackageHelper {
     
     $dispatcher = $this->getDispatcher ();
     $linkslists = $dispatcher->processList ( $dom, $wrapper, $entity );
-    
     $linkslist_list = array ();
     $i = 100;
     if (! Logger::error ()) {
@@ -695,11 +694,11 @@ class WallyXmlV1 extends PackageHelper {
     }
     // Sort the links
     ksort ( $links_list );
+    $valid_key_array = array();
     foreach ( $links_list as $link ) {
-      $wrapper->field_linkitems->set ( array (
-        $link 
-      ) );
+      $valid_key_array[] = $link;
     }
+    $wrapper->field_linkitems->set($valid_key_array);
   }
 
   /**
