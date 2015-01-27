@@ -22,7 +22,6 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
     require_once $_SERVER ['DOCUMENT_ROOT'] . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
 
     $config = Config::getInstance($_SERVER ['DOCUMENT_ROOT'] . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-    print_r($_COOKIE);
     if(isset($_COOKIE[$config['loginToken_cookie_name']])){
       $loginId = LoginManager::getLoginId($_COOKIE[$config['loginToken_cookie_name']], TRUE);
       if($loginId == FALSE){
