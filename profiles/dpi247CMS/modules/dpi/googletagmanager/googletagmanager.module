@@ -127,11 +127,12 @@ function googletagmanager_build_datalayer(&$dataLayer, $title){
   }
 
   if(arg(0)=="node"){
-    $dataLayer['typePage']='Article';
-    $node = node_load(arg(1));
-
-    // On ajoute le node au type de tokens
-    $types['node'] = $node;
+    if(is_numeric(arg(1))){
+      $dataLayer['typePage']='Article';
+      $node = node_load(arg(1));
+      // On ajoute le node au type de tokens
+      $types['node'] = $node;      
+    }
   }
   elseif(arg(0) == "taxonomy" && arg(1) == "term" && arg(2) != ""){
     $term = taxonomy_term_load(arg(2));
