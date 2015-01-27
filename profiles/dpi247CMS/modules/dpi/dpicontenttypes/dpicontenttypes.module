@@ -838,3 +838,24 @@ function dpicontenttypes_filter_info() {
 function _dpicontenttypes_filter_cci_scald_tips($filter, $format, $long = FALSE) {
   return t('<em><ccix:inline align="" extref="G1T1L11GG.1" height="" runaround="" width=""/></em> is replaced with the scald input.');
 }*/
+ 
+/**
+ * Ajout de cette fonctio pour la gestion des urls utilisée dans les sections
+ * Path auto utilisant déja une url alias il faut modifier de manière particulière le code
+ * @param String $path
+ * @param Array $options
+ * @param Array $original_path
+ */
+function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
+  if(strstr($path, 'taxonomy/term')!==FALSE){
+    $terms = explode('/', $path);
+    $tid = (isset($terms[2]))? $terms[2] : NULL;    
+    if(isset($tid)){
+      $term_load = taxonomy_term_load($tid);
+      if(isset($term_load) && isset($term_load->name) && isset($term_load->vocabulary_machine_name) && $term_load->vocabulary_machine_name == "sections"){
+        module_load_include('inc', 'pathauto', 'pathauto');
+        $path = "sections/".pathauto_cleanstring($term_load->name);
+      }
+    }
+  }
+}
