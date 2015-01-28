@@ -159,11 +159,22 @@ function dpidam_theme() {
 }
 
 /**
+ * Implementation of hook_dpilog_register
+ */
+function dpidam_dpilog_register() {
+  return array(
+    'dpidam' => array(
+      'actions' => array('cron'),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_cron
  */
 function dpidam_cron() {
   if (lock_acquire('dpidam_cron', 120)) {
-    print '<strong>'.t('Cron run on @date', array('@date' => date('Y-m-d H:i:s'))).'</strong><br>';
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron run on @date', array('@date' => date('Y-m-d H:i:s'))));
 
     module_load_include('inc', 'dpidam', 'includes/dpidam.cron');
 
@@ -185,11 +196,9 @@ function dpidam_cron() {
       dpidam_purge_cron();
     }
 
-    print '<br>';
-
     lock_release('dpidam_cron');
   } else {
-    print '<strong>'.t('Cron locked on @date', array('@date' => date('Y-m-d H:i:s'))).'</strong><br>';
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron locked on @date', array('@date' => date('Y-m-d H:i:s'))));
   }
 }
 
