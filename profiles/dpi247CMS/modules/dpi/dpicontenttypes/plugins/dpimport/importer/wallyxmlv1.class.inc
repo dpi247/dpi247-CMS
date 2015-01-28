@@ -16,16 +16,14 @@ class WallyXmlV1 extends PackageHelper {
     if (! Logger::error ()) {
       // Allow to alter entity before save
       $dispatcher = $this->getDispatcher ();
-      
-//       /* Replace atom package from field_embededobjects to field_atompackage */
-//       $package = $this->_buildFieldAtompackage($package);
-
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
       
       $this->_replace_inline_object($package);
-      $this->savePackage($dom, $package);
+      /* Hack to change external url */
+      $this->_buildExternalUrl($package);
 
+      $this->savePackage($dom, $package);
     }
     
     // Set the CurrentLog to the previous one to stop children growing.
@@ -625,7 +623,6 @@ class WallyXmlV1 extends PackageHelper {
     
     $dispatcher = $this->getDispatcher ();
     $linkslists = $dispatcher->processList ( $dom, $wrapper, $entity );
-    
     $linkslist_list = array ();
     $i = 100;
     if (! Logger::error ()) {
@@ -697,11 +694,11 @@ class WallyXmlV1 extends PackageHelper {
     }
     // Sort the links
     ksort ( $links_list );
+    $valid_key_array = array();
     foreach ( $links_list as $link ) {
-      $wrapper->field_linkitems->set ( array (
-        $link 
-      ) );
+      $valid_key_array[] = $link;
     }
+    $wrapper->field_linkitems->set($valid_key_array);
   }
 
   /**
@@ -1130,6 +1127,17 @@ class WallyXmlV1 extends PackageHelper {
       }
     } catch (Exception $e) {
     } 
+  }
+  
+  function _buildExternalUrl(& $package){
+    try {
+      $extUrl = current($package->field_externalurl);
+      $extUrl = current($extUrl);
+      if(!isset($extUrl["url"]) || $extUrl["url"]==""){
+        $package->field_externalurl = array();
+      }
+    } catch (Exception $e) {
+    }
   }
 }
 
