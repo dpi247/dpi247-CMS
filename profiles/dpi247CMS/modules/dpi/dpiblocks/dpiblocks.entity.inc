@@ -134,7 +134,7 @@ function dpiblocks_entity_info(){
 
   // FlowMix
   $entities['accroche'] = array(
-    'label' => t('Dpi Accroche'),
+    'label' => t('Dpi Accroche entity'),
     'entity class' => 'AccrocheEntity',
     'controller class' => 'AccrocheController',
     'base table' => 'dpiblocks_accroche',
