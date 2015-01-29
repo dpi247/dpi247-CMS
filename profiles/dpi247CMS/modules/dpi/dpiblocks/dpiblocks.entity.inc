@@ -132,6 +132,27 @@ function dpiblocks_entity_info(){
     ),
   );
 
+  // FlowMix
+  $entities['accroche'] = array(
+    'label' => t('Dpi Accroche'),
+    'entity class' => 'AccrocheEntity',
+    'controller class' => 'AccrocheController',
+    'base table' => 'dpiblocks_accroche',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'aid',
+    ),
+  
+    // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    'module'=> 'dpiblocks',
+    'access callback' => 'custom_content_access_admin_callback',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => DPI_ADMIN_PATH.'/AccrocheCustom',
+      'file' => 'includes/custom_accroche.admin.inc',
+    ),
+  );
+  
   return $entities;
 }
 
@@ -156,6 +177,18 @@ if (!function_exists('custom_content_access_admin_callback')) {
     return TRUE;
   }
 }
+
+/**
+ * Implement the access_admin_callback() for the custom content
+ *
+ * @return boolean
+ */
+if (!function_exists('accroche_access_admin_callback')) {
+  function accroche_access_admin_callback() {
+    return TRUE;
+  }
+}
+
 
 /**
  * Implement the access_admin_callback() for the flowmix
@@ -197,6 +230,22 @@ if (!function_exists('custom_content_load')) {
     $custom_content = custom_content_load_multiple($tids, $reset);
 
     return $custom_content ? reset($custom_content) : FALSE;
+  }
+}
+
+/**
+ * Load a custom content entity with this id
+ *
+ * @param $tid
+ * @param $reset
+ */
+if (!function_exists('accroche_load')) {
+  function accroche_load($tid = NULL, $reset = FALSE) {
+    $tids = (isset ($tid) ? array($tid) : array());
+
+    $accroche = custom_content_load_multiple($tids, $reset);
+
+    return $accroche ? reset($accroche) : FALSE;
   }
 }
 
@@ -251,6 +300,23 @@ if (!function_exists('custom_content_load_multiple')) {
 }
 
 /**
+ * Retrieve multiple custom content entities
+ *
+ * @param $tids
+ *  Their ids
+ * @param $conditions
+ * @param $reset
+ *
+ * @return object
+ *  Return the entities
+ */
+if (!function_exists('accroche_load_multiple')) {
+  function accroche_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+    return entity_load('accroche', $tids, $conditions, $reset);
+  }
+}
+
+/**
  * Retrieve multiple flowmix entities
  *
  * @param $tids
@@ -292,6 +358,18 @@ if (!function_exists('custom_content_page_title')) {
 }
 
 /**
+ * Return the name of the given custom content entity
+ *
+ * @param $custom_content
+ *  The given entities (custom_content)
+ */
+if (!function_exists('accroche_page_title')) {
+  function accroche_page_title($custom_content) {
+    return $accroche->title;
+  }
+}
+
+/**
  * Return the name of the given FlowMix entity
  *
  * @param $remotehtml
@@ -324,6 +402,18 @@ if (!function_exists('remotehtml_delete')) {
 if (!function_exists('custom_content_delete')) {
   function custom_content_delete($custom_content) {
     entity_delete('custom_content', entity_id('custom_content' ,$custom_content));
+  }
+}
+
+/**
+ * Delete single custom content entity.
+ *
+ * @param $custom_content
+ *  The entity
+ */
+if (!function_exists('accroche_delete')) {
+  function accroche_delete($custom_content) {
+    entity_delete('accroche', entity_id('accroche' ,$custom_content));
   }
 }
 
@@ -364,6 +454,18 @@ if (!function_exists('custom_content_delete_multiple')) {
 }
 
 /**
+ * Delete multiple custom content entities.
+ *
+ * @param $custom_content_ids
+ *  Their ids
+ */
+if (!function_exists('accroche_delete_multiple')) {
+  function accroche_delete_multiple($custom_content_ids) {
+    entity_delete_multiple('accroche', $custom_content_ids);
+  }
+}
+
+/**
  * Delete multiple FlowMix entities.
  *
  * @param $flowmix_ids
@@ -394,6 +496,17 @@ if (!function_exists('remotehtml_save')) {
 if (!function_exists('custom_content_save')) {
   function custom_content_save(&$custom_content) {
     return entity_save('custom_content', $custom_content);
+  }
+}
+
+/**
+ * Save a custom content entity
+ *
+ * @param $custom_content
+ */
+if (!function_exists('accroche_save')) {
+  function accroche_save(&$custom_content) {
+    return entity_save('accroche', $custom_content);
   }
 }
 
@@ -430,6 +543,19 @@ if (!function_exists('remotehtml_view')) {
  */
 if (!function_exists('custom_content_view')) {
   function custom_content_view($custom_content, $view_mode = 'full') {
+    return $custom_content->view();
+  }
+}
+
+/**
+ * Generate an array for rendering the given custom content entity
+ *
+ * @param $custom_content
+ *  The given entities
+ * @param $view_mode
+ */
+if (!function_exists('accroche_view')) {
+  function accroche_view($custom_content, $view_mode = 'full') {
     return $custom_content->view();
   }
 }
@@ -476,6 +602,23 @@ if (!function_exists('custom_content_page_view')) {
     field_attach_prepare_view('custom_content', array($custom_content->tid => $custom_content), $view_mode);
     entity_prepare_view('custom_content', array($custom_content->tid => $custom_content));
     $custom_content->content += field_attach_view('custom_content', $custom_content, $view_mode);
+
+    return $custom_content->content;
+  }
+}
+
+/**
+ * @param $custom_content
+ * @param $view_mode
+ */
+if (!function_exists('accroche_page_view')) {
+  function accroche_page_view($custom_content, $view_mode = 'full') {
+    $custom_content->content = array();
+
+    // Build fields content.
+    field_attach_prepare_view('accroche', array($custom_content->tid => $custom_content), $view_mode);
+    entity_prepare_view('accroche', array($custom_content->tid => $custom_content));
+    $custom_content->content += field_attach_view('accroche', $custom_content, $view_mode);
 
     return $custom_content->content;
   }

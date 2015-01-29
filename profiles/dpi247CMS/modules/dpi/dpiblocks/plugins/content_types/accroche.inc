@@ -13,18 +13,16 @@ $plugin = array (
 function dpiblocks_accroche_content_type_content_types($plugins) {
   $types = array ();
   $layouts = _dpiblocks_accroche_get_all_teaser ();
-  if(isset($layouts) && is_array($layouts)){
-    foreach ( $layouts as $key => $layout ) {
-      $types [$key] = array (
-        'title' => check_plain ( $layout [0] ),
-        'subtype' => $key,
-        'description' => check_plain ( $layout [0] ),
-        'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
-        'category' => 'Accroche',
-        'group' => 'DPI Core',
-        'all contexts' => TRUE
-      );
-    } 
+  foreach ( $layouts as $key => $layout ) {
+    $types [$key] = array (
+      'title' => check_plain ( $layout [0] ),
+      'subtype' => $key,
+      'description' => check_plain ( $layout [0] ),
+      'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
+      'category' => 'Accroche',
+      'group' => 'DPI Core', 
+      'all contexts' => TRUE
+    );
   }
   return $types;
 }
@@ -169,18 +167,18 @@ function dpiblocks_accroche_plugin_edit_form($form, &$form_state) {
   return $form;
 }
 
-function dpiblocks_ajax_callback_define_type_form($form, $form_state) {
-  return $form ['accroche'];
-}
+// function dpiblocks_ajax_callback_define_type_form($form, $form_state) {
+//   return $form ['accroche'];
+// }
 
-function dpiblocks_ajax_callback_define_target_from_form($form, $form_state) {
-  // $i = $form_state['triggering_element']['#parents'][2];
-  return $form ["accroche"];
-}
+// function dpiblocks_ajax_callback_define_target_from_form($form, $form_state) {
+//   // $i = $form_state['triggering_element']['#parents'][2];
+//   return $form ["accroche"];
+// }
 
-function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
-  return $form ['accroche'];
-}
+// function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
+//   return $form ['accroche'];
+// }
 
 function dpiblocks_accroche_plugin_edit_form_validate($form, &$form_state) {
   if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "node") {
