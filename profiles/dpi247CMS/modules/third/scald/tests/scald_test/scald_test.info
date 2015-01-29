@@ -1,8 +1,11 @@
-name = Scald Vimeo
-description = Provides Video atoms from Vimeo.
-package = Scald Providers
+name = Scald Test
+description = Hooks and dependencies for testing Scald
+package = Scald
 core = 7.x
-dependencies[] = scald
+hidden = TRUE
+
+dependencies[] = i18n
+dependencies[] = i18n_string
 
 
 ; Information added by Drupal.org packaging script on 2014-12-14

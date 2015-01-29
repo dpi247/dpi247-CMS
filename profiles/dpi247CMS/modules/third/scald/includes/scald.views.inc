@@ -18,11 +18,13 @@ function scald_views_data() {
     'help' => t("Views related to Scald Atoms."),
   );
 
+  $data['scald_atoms']['table']['entity type'] = 'scald_atom';
+
   $data['scald_atoms']['sid'] = array(
     'title' => t('Scald ID'),
     'help' => t("The atom's unique identifier"),
     'field' => array(
-      'handler' => 'views_handler_field_numeric',
+      'handler' => 'views_handler_field',
       'click sortable' => TRUE,
     ),
     'sort' => array(
@@ -147,6 +149,36 @@ function scald_views_data() {
     'field' => array(
       'handler' => 'scald_views_handler_field_data',
       'click sortable' => FALSE,
+    ),
+  );
+
+  $data['scald_atoms']['created'] = array(
+    'title' => t('Created date'),
+    'help' => t('The date the Atom was created.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['scald_atoms']['changed'] = array(
+    'title' => t('Updated date'),
+    'help' => t('The date the Atom was last updated.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
     ),
   );
 
