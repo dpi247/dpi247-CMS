@@ -6,10 +6,10 @@
  */
 
 //include the database layer
-require_once(drupal_get_path('module', 'taxonomy_menu') . '/taxonomy_menu.database.inc');
+require_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'taxonomy_menu') . '/taxonomy_menu.database.inc');
 
 //include the batch functions
-require_once(drupal_get_path('module', 'taxonomy_menu') . '/taxonomy_menu.batch.inc');
+require_once(DRUPAL_ROOT . '/' . drupal_get_path('module', 'taxonomy_menu') . '/taxonomy_menu.batch.inc');
 
 /**
  * Implements hook_form_alter().
@@ -172,6 +172,28 @@ function taxonomy_menu_vocab_submit($form, &$form_state) {
     variable_set($variable_name, $value);
   }
 
+  // If the menu hasn't changed and the menu is disabled then do not do anything else.
+  if ($form_state['values']['taxonomy_menu']['options']['rebuild'] ||
+      $changed_menu ||
+      (!$changed_menu && variable_get(_taxonomy_menu_build_variable('vocab_menu', $vid), FALSE) == 0)) {
+    // Rebuild if rebuild is selected, menu has changed or vocabulary option changed.
+    if ($form_state['values']['taxonomy_menu']['options']['rebuild'] || $changed_menu || $change_vocab_item || $changed_path) {
+      $message = _taxonomy_menu_rebuild($vid);
+    }
+    // If setting has changed and a menu item is enabled, then update all of the menu items.
+    elseif ($changed && variable_get(_taxonomy_menu_build_variable('vocab_menu', $vid), FALSE)) {
+      $message = _taxonomy_menu_update_link_items($vid);
+    }
+
+    // Do a full menu rebuild in case we have removed the menu or moved it between menus.
+    variable_set('menu_rebuild_needed', TRUE);
+    // Only send a message if one has been created.
+    if (isset($message) && $message) {
+      // $message is sanitized coming out of its source function,
+      // no need to reclean it here
+      drupal_set_message($message, 'status');
+    }
+  }
 }
 
 /**
@@ -459,7 +481,12 @@ function _taxonomy_menu_taxonomy_termapi_helper($term, $operation) {
  */
 function _taxonomy_menu_nodeapi_helper($op, $terms = array(), $node) {
   foreach ($terms as $key => $tid) {
-    $term = taxonomy_term_load($tid);
+
+    // taxonomy_term_load($tid) return FALSE if the term was not found
+    // if taxonomy $term is false, then go to the next $term
+    if (!$term = taxonomy_term_load($tid)) {
+      continue;
+    }
 
     // update the menu for each term if necessary
     $menu_name = variable_get(_taxonomy_menu_build_variable('vocab_menu', $term->vid), FALSE);
@@ -583,6 +610,7 @@ function taxonomy_menu_handler($op, $args = array(), $node = NULL, $item = array
  */
 function _taxonomy_menu_save($item) {
   $insert = TRUE;
+
   $flatten_menu = variable_get(_taxonomy_menu_build_variable('flat',
 $item['vid']));
   // Child items should appear around the parent/root, so set their weight
@@ -661,6 +689,7 @@ $item['vid']));
 
   // If remove is true then set hidden to 1
   $link['hidden'] = (isset($item['remove']) && $item['remove']) ? 1 : 0;
+
   // Save the menu item
   if ($mlid = menu_link_save($link)) {
     // if inserting a new menu item then insert a record into the table
@@ -726,18 +755,11 @@ function taxonomy_menu_path_default($vid, $tid) {
     // get all of the terms for the vocab
     $vtids = _taxonomy_menu_get_terms($vid);
     $end = implode(' ', $vtids);
-    $term = taxonomy_term_load($end);
-    $uri = entity_uri('taxonomy_term', $term);
-    $path = $uri['path'];
-    
+    $path = "taxonomy/term/$end";
   }
   else {
-    $term = taxonomy_term_load($tid);
-    $uri = entity_uri('taxonomy_term', $term);
-    $path = $uri['path'];
-    
-    //$path = 'taxonomy/term/' . $tid;
-    if (variable_get(_taxonomy_menu_build_variable('display_decendants', $vid), FALSE)) {
+    $path = 'taxonomy/term/' . $tid;
+    if (variable_get(_taxonomy_menu_build_variable('display_descendants', $vid), FALSE)) {
       // Use 'all' at the end of the path
       if (variable_get(_taxonomy_menu_build_variable('end_all', $vid), FALSE)) {
         $path .= '/all';
