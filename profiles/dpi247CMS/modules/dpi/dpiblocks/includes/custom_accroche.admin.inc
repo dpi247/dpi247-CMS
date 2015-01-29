@@ -32,7 +32,7 @@ function accroche_form_validate($form, &$form_state) {
  */
 function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
   module_load_include('inc', 'dpiblocks', 'dpiblocks.api');
-
+  
   $form ['aid'] = array(
     '#type' => 'value',
     '#value' => $custom_content->aid,
@@ -62,7 +62,7 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
   $form ['type'] = array (
     '#type' => 'select',
     '#title' => t ( 'Select type of value' ),
-    '#default_value' => (isset($custom_content->type))?$custom_content->type : null,
+    '#default_value' => $custom_content->layout,
     '#options' => array (
       '' => t ( 'Choose a node selection method' ),
       'node' => t ( 'Node' ),
@@ -77,28 +77,33 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
   );
 
   form_load_include ( $form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin' );
-  if (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) {
+  if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || ($custom_content->layout == 'node' && !isset($form_state ['values']['type']))) {
+    if(isset($custom_content->layout) && $custom_content->layout == "destination"){
+      $valnode = '';
+    }else{
+      $valnode = $custom_content->data;
+    }
     $form ['node'] = array (
       '#type' => 'textfield',
       '#title' => t ( 'Enter node id' ),
       '#description' => t ( 'add ; between each node id' ),
       '#required' => FALSE,
       '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
-      '#default_value' => $custom_content->node
+      '#default_value' => $valnode
     );
-  } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' )) {
+  } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->layout == 'destination' && !isset($form_state ['values']['type']))) {
     $nb = 1;
-
+    if(!isset($form_state['values']['destination'])){
+      $form_state['values']['destination'] = unserialize($custom_content->data);
+    }
     // watchdog('debug dpi', '<pre>'.print_r($form_state,1).'</pre>');
     /* si je rebuild && si il s'agit du obuton add more */
     if (isset ( $form_state ['values']['destination'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button") {
       $nb = count ( $form_state ['values']['destination'] ) + 1;
     } elseif (isset ( $form_state ['values']['destination'] )) {
       $nb = count ( $form_state ['values']['destination'] );
-    } elseif (isset($custom_content->destination)) {
-      $nb = count($custom_content->destination);
     }
-
+    
     /* boucle */
     $form ['form_dest']['destination'] = array(
       '#tree' => TRUE, 
@@ -109,7 +114,7 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
         '#prefix' => '<div id="destination-add-form" class="container-inline" >',
         '#suffix' => '</div>',
       );
-
+      
       $form ['form_dest']['destination'] [$i] ['destination_section'] = array (
         '#type' => 'select',
         '#title' => t ( 'Choose a section' ),
@@ -120,13 +125,11 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
           'wrapper' => 'accroche-form',
           'method' => 'replace'
         ),
-        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) ? $form_state ['values']['destination'] [$i] ['destination_section'] : isset ( $conf ["destination"] [$i] ["section"] ) ? $conf ["destination"] [$i] ["section"] :  ''
+        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) ? $form_state ['values']['destination'] [$i] ['destination_section'] : ''
       );
 
       if (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) {
         $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $form_state ['values']['destination'] [$i] ['destination_section'] );
-      } elseif (isset ( $conf ["destination"] [$i] ["section"] ) && $conf ["destination"] [$i] ["section"] != "") {
-        $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $conf ["destination"] [$i] ["section"] );
       } else {
         $options = array ();
       }
@@ -136,14 +139,14 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
         '#title' => t ( 'Choose a section' ),
         '#required' => FALSE,
         "#options" => $options,
-        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_target'] : isset ( $conf ["destination"] [$i] ["target"] ) ? $conf ["destination"] [$i] ["target"] : ''
+        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_target'] : ''
       );
 
       $form ['form_dest']['destination'] [$i] ['destination_nb_element'] = array (
         '#type' => 'textfield',
         '#title' => t ( 'Enter number of element that you want' ),
         '#required' => TRUE,
-        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_nb_element'] )) ? $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_nb_element'] :isset ( $conf ["destination"] [$i] ["nb_element"] ) ? $conf ["destination"] [$i] ["nb_element"] :  ''
+        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_nb_element'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_nb_element'] : ''
       );
     }
 
@@ -194,6 +197,31 @@ function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
  * @param $form
  * @param $form_state
  */
-function accroche_form_submit($form, &$form_state) {
-  dsm('ok');
+function accroche_form_submit($form, &$form_state) {  
+  $array_val = array(
+    'aid' => $form_state['values']['aid'],
+    'override_title' => $form_state['values']['override_title'],
+    'title' => $form_state['values']['title'],
+    'link' => $form_state['values']['link'],
+    'layout' => $form_state['values']['type'],
+  );
+  
+  if($form_state['values']['type'] == "node"){
+    $array_val = $array_val + array(
+      'data' => $form_state['values']['node'],
+    );
+  }elseif ($form_state['values']['type'] == "destination"){    
+    $array_val = $array_val + array(
+      'data' => serialize($form_state['values']['destination']),
+    );         
+  }
+  
+  $accroche_entity = new AccrocheEntity($array_val);
+  if(accroche_save($accroche_entity)){
+    drupal_set_message(t('Ajout réussis'));
+  }else{
+    drupal_set_message(t('Echec de l\'ajout. Si le problème survient encore, veuillez contacter l\'administrateur.'), 'error');
+  }
+  $form_state['custom_content']=$accroche_entity;
+  $form_state['redirect'] = "admin/dpi247/AccrocheCustom";
 }

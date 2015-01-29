@@ -141,6 +141,7 @@ function dpiblocks_entity_info(){
     'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'aid',
+      'label' => 'title',
     ),
   
     // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
