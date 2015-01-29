@@ -7,18 +7,7 @@
  * @param $form_state
  */
 function accroche_form_validate($form, &$form_state) {
-//   $customContent_submission = (object) $form_state['values'];
-//   $results = dpiblocks_reuse_accroche_get_all();
-//   if($results != NULL) {
-//     foreach($results as $record) {
-//       // Validate title
-//       if($customContent_submission->aid != $record->aid) {
-//         if($customContent_submission->title == $record->title) {
-//           form_set_error('title', t('the title already exist'));
-//         }
-//       }
-//     }
-//   }
+  
 }
 
 /**
@@ -218,9 +207,9 @@ function accroche_form_submit($form, &$form_state) {
   
   $accroche_entity = new AccrocheEntity($array_val);
   if(accroche_save($accroche_entity)){
-    drupal_set_message(t('Ajout réussis'));
+    drupal_set_message(t('Enregistrement réussis'));
   }else{
-    drupal_set_message(t('Echec de l\'ajout. Si le problème survient encore, veuillez contacter l\'administrateur.'), 'error');
+    drupal_set_message(t('Echec de l\'enregistrement. Si le problème survient encore, veuillez contacter l\'administrateur.'), 'error');
   }
   $form_state['custom_content']=$accroche_entity;
   $form_state['redirect'] = "admin/dpi247/AccrocheCustom";
