@@ -27,11 +27,21 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   return $types;
 }
 
-function dpiblocks_accroche_plugin_edit_form($form,$form_state){
-  form_load_include($form_state, 'inc', 'dpiblocks','includes/custom_accroche.admin');
-  $form = dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
-  dsm(function_exists('dpiblocks_ajax_callback_define_type_entity_form'), 'exist');
+function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
+  form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
+  form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
+  global $i;
+  if(!isset($i)){
+    $i = FALSE;
+  }else{
+    $i = TRUE;
+  }
+  $form += dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
   unset($form['revision']);
+  if($i){
+    unset($form['buttons']);
+  }
+  dsm($form, 'form');
   return $form;
 }
 
@@ -39,7 +49,6 @@ function dpiblocks_accroche_plugin_edit_form($form,$form_state){
  * Content type submit handler.
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
-  dsm($form_state);  
 //   $form_state ['conf'] ['title'] = $form_state ['values'] ["accroche"] ['title'];
 //   $form_state ['conf'] ['url'] = $form_state ['values'] ["accroche"] ['url'];
 //   $form_state ['conf'] ['layout'] = $form_state ['values'] ["accroche"] ['layout'];
