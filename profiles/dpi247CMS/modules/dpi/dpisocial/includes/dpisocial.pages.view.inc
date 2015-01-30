@@ -54,18 +54,31 @@ function dpisocial_adminplugin($network) {
 
 function dpisocial_adminplugin_others() {
 
-  $form['dpisocial_global_settings']['dpisocial_add_email_link'] = array(
-    '#type' => 'checkbox',
-    '#title' => t("Add email link"),
-    '#default_value' => dpi_variable_get('dpisocial_add_email_link', 0),
-  );
-
   $form['dpisocial_global_settings']['dpisocial_add_print_link'] = array(
     '#type' => 'checkbox',
     '#title' => t("Add print link"),
     '#default_value' => dpi_variable_get('dpisocial_add_print_link', 0),
   );
 
+  $form['dpisocial_global_settings']['dpisocial_add_email_link'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Add email link"),
+    '#default_value' => dpi_variable_get('dpisocial_add_email_link', 0),
+  );
+
+  $form['dpisocial_global_settings']['dpisocial_add_email_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mail default subject'),
+    '#default_value' => variable_get('dpisocial_add_email_subject', ''),
+    '#size' => '50',
+  );
+
+  $form['dpisocial_global_settings']['dpisocial_add_email_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Mail default subject'),
+    '#descritpion' => t('Use [node:url] to place node url'),
+    '#default_value' => variable_get('dpisocial_add_email_body', ''),
+  );
   return system_settings_form($form);
 }
 
