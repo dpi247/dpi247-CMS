@@ -91,6 +91,18 @@ function scald_schema() {
         'not null'    => TRUE,
         'serialize'   => TRUE,
       ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the atom was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the atom was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('sid'),
     'indexes'     => array(
@@ -108,6 +120,8 @@ function scald_schema() {
         array('type', 64),
         array('base_id', 64),
       ),
+      'atom_changed'        => array('changed'),
+      'atom_created'        => array('created'),
     ),
   );
 
@@ -161,6 +175,14 @@ function scald_schema() {
       ),
       'player' => array(
         'description' => 'A serialized array of player per type.',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+      'data' => array(
+        'description' => 'Arbitrary data.',
         'type' => 'blob',
         'size' => 'big',
         'not null' => TRUE,
@@ -341,11 +363,12 @@ function _scald_create_author_vocabulary() {
   field_associate_fields('taxonomy');
 
   // Create the atom vocabulary if it does not exist.
-  $vocabulary = taxonomy_vocabulary_load(variable_get('scald_author_vocabulary', 0));
+  $name = variable_get('scald_author_vocabulary', 'scald_authors');
+  $vocabulary = taxonomy_vocabulary_machine_name_load($name);
   if (!$vocabulary) {
     $edit = array(
       'name' => t('Authors'),
-      'machine_name' => 'scald_authors',
+      'machine_name' => $name,
       'description' => t('Scald authors vocabulary'),
       'hierachy' => 0,
       'module' => 'scald',
@@ -353,7 +376,7 @@ function _scald_create_author_vocabulary() {
     );
     $vocabulary = (object) $edit;
     taxonomy_vocabulary_save($vocabulary);
-    variable_set('scald_author_vocabulary', $vocabulary->vid);
+    variable_set('scald_author_vocabulary', $name);
 
     // Create a URL field on the taxonomy terms of the Scald Authors
     // bundle.
@@ -368,7 +391,7 @@ function _scald_create_author_vocabulary() {
       'field_name' => 'scald_author_url',
       'label' => t('URL'),
       'entity_type' => 'taxonomy_term',
-      'bundle' => 'scald_authors',
+      'bundle' => $name,
       'required' => FALSE,
       'description' => 'Homepage of the Author',
     );
@@ -403,11 +426,12 @@ function _scald_create_tags_vocabulary() {
   field_associate_fields('taxonomy');
 
   // Create the atom vocabulary if it does not exist.
-  $vocabulary = taxonomy_vocabulary_load(variable_get('scald_tags_vocabulary', 0));
+  $name = variable_get('scald_tags_vocabulary', 'scald_tags');
+  $vocabulary = taxonomy_vocabulary_machine_name_load($name);
   if (!$vocabulary) {
     $edit = array(
       'name' => t('Scald tags'),
-      'machine_name' => 'scald_tags',
+      'machine_name' => $name,
       'description' => t('Scald tags vocabulary'),
       'hierachy' => 0,
       'module' => 'scald',
@@ -415,7 +439,7 @@ function _scald_create_tags_vocabulary() {
     );
     $vocabulary = (object) $edit;
     taxonomy_vocabulary_save($vocabulary);
-    variable_set('scald_tags_vocabulary', $vocabulary->vid);
+    variable_set('scald_tags_vocabulary', $vocabulary->machine_name);
   }
 
   // Create the scald_tags field.
@@ -590,3 +614,71 @@ function scald_update_7009() {
   return array();
 }
 
+/**
+ * Update the thumbnail field path to match the old defaults.
+ */
+function scald_update_7010() {
+  $field = field_info_field('scald_thumbnail');
+  if (!empty($field['bundles']['scald_atom'])) {
+    foreach ($field['bundles']['scald_atom'] as $type) {
+      $instance = field_info_instance('scald_atom', 'scald_thumbnail', $type);
+      // Only update the field instance if it is not modified since.
+      if (empty($instance['settings']['file_directory'])) {
+        $instance['settings']['file_directory'] = 'thumbnails/' . $type;
+        field_update_instance($instance);
+      }
+    }
+  }
+}
+
+/**
+ * Update the vocabulary variables to point toward the machine names.
+ */
+function scald_update_7011() {
+  foreach (array('scald_author_vocabulary', 'scald_tags_vocabulary') as $variable) {
+    $vid = variable_get($variable);
+    $vocabulary = taxonomy_vocabulary_load($vid);
+    if ($vocabulary) {
+      variable_set($variable, $vocabulary->machine_name);
+    }
+  }
+}
+
+/**
+ * Add the {scald_atoms}.created and {scald_atoms}.changed column.
+ */
+function scald_update_7012() {
+  $new_field = array(
+    'description' => 'The Unix timestamp when the atom was created.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('scald_atoms', 'created', $new_field);
+
+  $new_field = array(
+    'description' => 'The Unix timestamp when the atom was most recently saved.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('scald_atoms', 'changed', $new_field);
+
+  db_add_index('scald_atoms', 'atom_changed', array('changed'));
+  db_add_index('scald_atoms', 'atom_created', array('created'));
+}
+
+/**
+ * Add a new field 'data' to scald_context_config table.
+ */
+function scald_update_7013() {
+  db_add_field('scald_context_config', 'data', array(
+    'description' => 'Arbitrary data.',
+    'type' => 'blob',
+    'size' => 'big',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'object default' => array(),
+    'initial' => serialize(array()),
+  ));
+}

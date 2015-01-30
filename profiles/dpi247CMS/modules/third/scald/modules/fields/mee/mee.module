@@ -8,16 +8,6 @@
 define('MEE_RENDERED_COPYRIGHT_PATTERN', '/<!--\s*copyright=(\d+)\s*-->(.*)<!--\s*END copyright=\1\s*-->/sU');
 
 /**
- * Implements hook_init().
- */
-function mee_init() {
-  drupal_add_js(array('mee' => array(
-    'sas' => variable_get('mee_store_sas', TRUE),
-    'editors' => array(),
-  )), 'setting');
-}
-
-/**
  * Implements hook_theme().
  */
 function mee_theme($existing, $type, $theme, $path) {
@@ -39,6 +29,15 @@ function mee_library() {
     'version' => '1.x',
     'js' => array(
       $path . '/mee.js' => array(),
+      array(
+        'type' => 'setting',
+        'data' => array(
+          'mee' => array(
+            'sas' => variable_get('mee_store_sas', TRUE),
+            'editors' => array(),
+          ),
+        ),
+      ),
     ),
     'css' => array(
       $path . '/css/mee.css' => array(),
@@ -91,10 +90,17 @@ function mee_form_alter(&$form, &$form_state, $form_id) {
     '#description' => t('Enable MEE for this field to get access to an advance resource management interface. MEE will automatically detect the resources embedded in this field, and allow you to define a few metadata properties on them, e.g. choose if the node should be unpublished if at some point in the future the resource became unavailable.'),
     '#default_value' => $settings['mee_enabled'],
   );
+  $form['instance']['settings']['context_default'] = array(
+    '#type' => 'select',
+    '#title' => t('Scald default context'),
+    '#description' => t('You can customize field level default context for drag and drop atoms.'),
+    '#default_value' => isset($settings['context_default']) ? $settings['context_default'] : variable_get('dnd_context_default', 'sdl_editor_representation'),
+    '#options' => $context_options,
+  );
   $form['instance']['settings']['context'] = array(
     '#type' => 'select',
-    '#title' => t('Scald Editor Context'),
-    '#description' => t('Choose a Scald Context to use for displaying Scald Atoms included in the textarea during editing.'),
+    '#title' => t('Scald fallback context'),
+    '#description' => t('The fallback context is only used when the specified context for embedded atom is not available (e.g. deleted).'),
     '#default_value' => $settings['context'],
     '#options' => $context_options,
   );
@@ -289,7 +295,7 @@ function mee_field_widget_form_alter(&$element, &$form_state, $context) {
   $resource_manager = array();
   // 'input' is used instead of 'values' because we need extra items inserted
   // using JavaScript on the client side.
-  if (isset($form_state['input'][$context['field']['field_name']])) {
+  if (isset($form_state['input'][$context['field']['field_name']][$context['langcode']])) {
     $resource_manager = $form_state['input'][$context['field']['field_name']][$context['langcode']][$context['delta']]['mee']['resource_manager'];
   }
   elseif (isset($element['#entity'])) {
@@ -361,7 +367,7 @@ function mee_field_text_validate($element, &$form_state) {
  * text_with_summary) are eligible due to the actual implementation.
  */
 function mee_field_types() {
-  return variable_get('mee_field_types', array('text_with_summary'));
+  return variable_get('mee_field_types', array('text', 'text_long', 'text_with_summary'));
 }
 
 /**
@@ -387,6 +393,15 @@ function mee_node_revision_delete($revision) {
     ->condition('entity_id', $revision->nid)
     ->condition('revision_id', $revision->vid)
     ->execute();
+}
+
+/**
+ * Implements hook_ckeditor_filter_xss_allowed_tags().
+ */
+function mee_ckeditor_filter_xss_allowed_tags() {
+  // The comment "tag" is used to mark parseable atom. It is currently required
+  // for the dnd plugin to work. Add it to the CKEditor XSS allowed tags.
+  return array('!--');
 }
 
 /**

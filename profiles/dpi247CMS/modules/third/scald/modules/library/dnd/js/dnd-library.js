@@ -7,13 +7,16 @@
  * the Wysiwyg plugin.
  */
 
-(function($) {
+(function($, Drupal) {
 /**
  * Initialize our namespace.
  */
 Drupal.dnd = {
   Atoms: {
   },
+
+  // Keep track of the last focused textarea.
+  lastFocus: null,
 
   // Setting for the qTip v2 library
   qTipSettings: {
@@ -72,7 +75,7 @@ Drupal.dnd = {
 
     if (atom_ids.length) {
       $.getJSON(Drupal.settings.basePath + 'atom/fetch/' + atom_ids.join() + '?context=' + context, function(data) {
-        for (atom_id in data) {
+        for (var atom_id in data) {
           if (Drupal.dnd.Atoms[atom_id]) {
             // Merge old data into the new return atom.
             $.extend(true, Drupal.dnd.Atoms[atom_id], data[atom_id]);
@@ -95,7 +98,7 @@ Drupal.dnd = {
 
   // Refresh the library.
   refreshLibraries: function() {
-    $('.dnd-library-wrapper .view-filters input[type=submit]').click();
+    $('.dnd-library-wrapper .view-filters .views-submit-button').find('input[type=submit], button[type=submit]').click();
   },
 
   // Convert HTML to SAS. We consider there is no nested elements.
@@ -109,7 +112,7 @@ Drupal.dnd = {
   // scope of Drupal.dnd.Atoms
   sas2html: function(text) {
     for (var i in Drupal.dnd.Atoms) {
-      atom = Drupal.dnd.Atoms[i];
+      var atom = Drupal.dnd.Atoms[i];
       if (text.indexOf(atom.sas) > -1) {
         text = text.replace(atom.sas, atom.editor);
       }
@@ -119,16 +122,58 @@ Drupal.dnd = {
 
   // Convert SAS to an array of atom attributes.
   sas2array: function(sas) {
-    matches = sas.match(/\[scald=(\d+)(:([^\s]+))?(.*)]/);
-    if (matches.length) {
+    var matches = sas.match(/\[scald=(\d+)(:([^\s]+))?(.*)]/);
+    if (matches && matches.length) {
       return {
         sid: matches[1],
         context: matches[3],
         options: matches[4]
       };
     }
+  },
+
+  /**
+   * Insert text at the caret in a textarea.
+   */
+  insertText: function(txtArea, textValue) {
+    //IE
+    if (document.selection) {
+      txtArea.focus();
+      var sel = document.selection.createRange();
+      sel.text = textValue;
+    }
+    //Firefox, chrome, mozilla
+    else if (txtArea.selectionStart || txtArea.selectionStart == '0') {
+      var startPos = txtArea.selectionStart;
+      var endPos = txtArea.selectionEnd;
+      txtArea.value = txtArea.value.substring(0, startPos) + textValue + txtArea.value.substring(endPos, txtArea.value.length);
+      txtArea.focus();
+      txtArea.selectionStart = startPos + textValue.length;
+      txtArea.selectionEnd = startPos + textValue.length;
+    }
+    else {
+      txtArea.value += textArea.value;
+      txtArea.focus();
+    }
+    return true;
+  },
+
+  /**
+   * Insert an atom in the current RTE or textarea.
+   */
+  insertAtom: function(sid) {
+    var cke = Drupal.ckeditorInstance;
+    if (cke) {
+      var markup = Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[sid]);
+      cke.insertElement(CKEDITOR.dom.element.createFromHtml(markup));
+    }
+    else if (Drupal.dnd.lastFocus) {
+      var markup = Drupal.dnd.Atoms[sid].sas;
+      Drupal.dnd.insertText(Drupal.dnd.lastFocus, markup);
+    }
+    return true;
   }
-}
+};
 
 /**
  *  Extend jQuery a bit
@@ -170,11 +215,8 @@ Drupal.theme.prototype.scaldEmbed = function(atom, context, options) {
     output = output.replace(/<!-- scald=\d+(.+?) -->/, '<!-- scald=' + atom.sid + ':' + context + ' ' + JSON.stringify(options) + ' -->');
   }
 
-  // Trick: if not the image might come out and go into the current hovered
-  // paragraph.
-  output = '<p>&nbsp;</p>' + output;
   return output;
-}
+};
 
 /**
  * Initialize and load drag and drop library and pass off rendering and
@@ -190,52 +232,58 @@ attach: function(context, settings) {
 
   $('body').once('dnd', function() {
     var wrapper = $('<div class="dnd-library-wrapper"></div>').appendTo('body');
-    $editor = $("<a />");
-    wrapper.library_url = Drupal.settings.dnd.url;
-    $.getJSON(wrapper.library_url, function(data) {
+    var $editor = $("<a />");
+    $.getJSON(Drupal.settings.dnd.url, function(data) {
       Drupal.behaviors.dndLibrary.renderLibrary.call(wrapper, data, $editor);
     });
+  });
+
+  // Track the last focused textarea or textfield.
+  $('textarea, .form-type-textfield input').focus(function(){
+    Drupal.dnd.lastFocus = this;
+    Drupal.ckeditorInstance = false;
   });
 },
 
 renderLibrary: function(data, editor) {
-  $this = $(this);
+  var library_wrapper = $(this);
 
   // Save the current status
   var dndStatus = {
-    search: $this.find('.scald-menu').hasClass('search-on')
-    ,library: $this.find('.dnd-library-wrapper').hasClass('library-on')
+    search: library_wrapper.find('.scald-menu').hasClass('search-on'),
+    library: library_wrapper.hasClass('library-on')
   };
 
-  $this.html(data.menu + data.anchor + data.library);
+  library_wrapper.html(data.menu + data.anchor + data.library);
+  var scald_menu = library_wrapper.find('.scald-menu');
 
   // Rearrange some element for better logic and easier theming.
   // @todo We'd better do it on server side.
-  $this.find('.scald-menu')
-    .prepend($this.find('.summary'))
-    .append($this.find('.view-filters').addClass('filters'));
+  scald_menu
+    .prepend(library_wrapper.find('.summary'))
+    .append(library_wrapper.find('.view-filters').addClass('filters'));
   if (dndStatus.search) {
-    $this.find('.scald-menu').addClass('search-on');
-    $this.find('.dnd-library-wrapper').addClass('library-on');
+    scald_menu.addClass('search-on');
+    library_wrapper.addClass('library-on');
   }
-  $this.find('.summary .toggle').click(function() {
+  library_wrapper.find('.summary .toggle').click(function() {
     // We toggle class only when animation finishes to avoid flash back.
-    $('.scald-menu').animate({left: $('.scald-menu').hasClass('search-on') ? '-42px' : '-256px'}, function() {
+    scald_menu.animate({left: scald_menu.hasClass('search-on') ? '-42px' : '-256px'}, function() {
       $(this).toggleClass('search-on');
     });
     // When display search, we certainly want to display the library, too.
-    if (!$('.scald-menu').hasClass('search-on') && !$('.dnd-library-wrapper').hasClass('library-on')) {
+    if (!scald_menu.hasClass('search-on') && !library_wrapper.hasClass('library-on')) {
       $('.scald-anchor').click();
     }
   });
-  $this.find('.scald-anchor').click(function() {
+  library_wrapper.find('.scald-anchor').click(function() {
     // We toggle class only when animation finishes to avoid flash back.
-    $('.dnd-library-wrapper').animate({right: $('.dnd-library-wrapper').hasClass('library-on') ? '-276px' : '0'}, function() {
-      $('.dnd-library-wrapper').toggleClass('library-on');
+    library_wrapper.animate({right: library_wrapper.hasClass('library-on') ? '-276px' : '0'}, function() {
+      library_wrapper.toggleClass('library-on');
     });
   });
 
-  for (atom_id in data.atoms) {
+  for (var atom_id in data.atoms) {
     // Store the atom data in our object
     Drupal.dnd.Atoms[atom_id] = Drupal.dnd.Atoms[atom_id] || {sid: atom_id};
     Drupal.dnd.Atoms[atom_id].contexts = Drupal.dnd.Atoms[atom_id].contexts || {};
@@ -266,9 +314,9 @@ renderLibrary: function(data, editor) {
 
   // Preload images in editor representations
   var cached = $.data($(editor), 'dnd_preload') || {};
-  for (editor_id in Drupal.dnd.Atoms) {
+  for (var editor_id in Drupal.dnd.Atoms) {
     if (!cached[editor_id]) {
-      $representation = $(Drupal.dnd.Atoms[editor_id].editor);
+      var $representation = $(Drupal.dnd.Atoms[editor_id].editor);
       if ($representation.is('img') && $representation.get(0).src) {
         $representation.attr('src', $representation.get(0).src);
       } else {
@@ -281,8 +329,18 @@ renderLibrary: function(data, editor) {
   $.data($(editor), 'dnd_preload', cached);
 
   // Set up drag & drop data
+  $('.editor-item ._insert a').show().each(function(i) {
+    $(this)
+      .bind('click', function(e) {
+        e.preventDefault();
+        return Drupal.dnd.insertAtom($(this).data('atom-id'));
+      });
+  });
   $('.editor-item .drop').each(function(i) {
     $(this)
+      .bind('dblclick', function(e) {
+        return Drupal.dnd.insertAtom($(this).data('atom-id'));
+      })
       .bind('dragstart', function(e) {
         var dt = e.originalEvent.dataTransfer, id = e.target.id, $this = $(this);
         var $img;
@@ -295,8 +353,12 @@ renderLibrary: function(data, editor) {
         var id = $img.data('atom-id');
         dt.dropEffect = 'copy';
         dt.setData("Text", Drupal.dnd.Atoms[id].sas);
+        Drupal.dnd.currentAtom = Drupal.dnd.Atoms[id].sas;
         try {
-          dt.setData("text/html", Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[id]));
+          // Trick: if not the image might come out and go into the current hovered
+          // paragraph.
+          var markup = '<p>&nbsp;</p>' + Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[id]);
+          dt.setData("text/html", markup);
         }
         catch(e) {
         }
@@ -307,24 +369,22 @@ renderLibrary: function(data, editor) {
       });
   });
   // Makes pager links refresh the library instead of opening it in the browser window
-  $('.pager a', $this).click(function() {
-    $this.get(0).library_url = this.href;
+  library_wrapper.find('.pager a').click(function() {
     $.getJSON(this.href, function(data) {
-      Drupal.behaviors.dndLibrary.renderLibrary.call($this.get(0), data, $(editor));
+      Drupal.behaviors.dndLibrary.renderLibrary.call(library_wrapper.get(0), data, $(editor));
     });
     return false;
   });
 
   // Turns Views exposed filters' submit button into an ajaxSubmit trigger
-  $('.view-filters input[type=submit]', $this).click(function(e) {
+  library_wrapper.find('.view-filters .views-submit-button').find('input[type=submit], button[type=submit]').click(function(e) {
     var submit = $(this);
+    var target = submit.parents('div.dnd-library-wrapper').get(0);
     settings = Drupal.settings.dnd;
-    $('.view-filters form', $this).ajaxSubmit({
+    library_wrapper.find('.view-filters form').ajaxSubmit({
       'url' : settings.url,
       'dataType' : 'json',
       'success' : function(data) {
-        var target = submit.parents('div.dnd-library-wrapper').get(0);
-        target.library_url = this.url;
         Drupal.behaviors.dndLibrary.renderLibrary.call(target, data, $(editor));
       }
     });
@@ -334,14 +394,13 @@ renderLibrary: function(data, editor) {
 
   // Makes Views exposed filters' reset button submit the form via ajaxSubmit,
   // without data, to get all the default values back.
-  $('.view-filters input[type=reset]', $this).click(function(e) {
+  library_wrapper.find('.view-filters .views-reset-button').find('input[type=submit], button[type=submit]').click(function(e) {
     var reset = $(this);
-    $('.view-filters form', $this).ajaxSubmit({
+    var target = reset.parents('div.dnd-library-wrapper').get(0);
+    library_wrapper.find('.view-filters form').ajaxSubmit({
       'url' : Drupal.settings.dnd.url,
       'dataType' : 'json',
       'success' : function(data) {
-        var target = reset.parents('div.dnd-library-wrapper').get(0);
-        target.library_url = Drupal.settings.dnd.url;
         Drupal.behaviors.dndLibrary.renderLibrary.call(target, data, $(editor));
       },
       'beforeSubmit': function (data, form, options) {
@@ -355,15 +414,14 @@ renderLibrary: function(data, editor) {
   });
 
   // Deals with Views Saved Searches "Save" button
-  $('#views-savedsearches-save-search-form input[type=submit]', $this).click(function() {
+  library_wrapper.find('#views-savedsearches-save-search-form').find('input[type=submit], button[type=submit]').click(function() {
     var submit = $(this);
-    url = submit.parents('div.dnd-library-wrapper').get(0).library_url;
-    $('#views-savedsearches-save-search-form', $this).ajaxSubmit({
+    var url = Drupal.settings.dnd.url;
+    var target = submit.parents('div.dnd-library-wrapper').get(0);
+    library_wrapper.find('#views-savedsearches-save-search-form').ajaxSubmit({
       'url' : url,
       'dataType' : 'json',
       'success' : function(data) {
-        var target = submit.parents('div.dnd-library-wrapper').get(0);
-        target.library_url = this.url;
         Drupal.behaviors.dndLibrary.renderLibrary.call(target, data, $(editor));
       }
     });
@@ -371,14 +429,13 @@ renderLibrary: function(data, editor) {
   });
 
   // Deals with Views Saved Searches "Delete" button
-  $('#views-savedsearches-delete-search-form input[type=submit]', $this).click(function() {
+  library_wrapper.find('#views-savedsearches-delete-search-form').find('input[type=submit], button[type=submit]').click(function() {
     var submit = $(this);
-    $('#views-savedsearches-delete-search-form', $this).ajaxSubmit({
+    var target = submit.parents('div.dnd-library-wrapper').get(0);
+    library_wrapper.find('#views-savedsearches-delete-search-form').ajaxSubmit({
       'url' : settings.url,
       'dataType' : 'json',
       'success' : function(data) {
-        var target = submit.parents('div.dnd-library-wrapper').get(0);
-        target.library_url = this.url;
         Drupal.behaviors.dndLibrary.renderLibrary.call(target, data, $(editor));
       }
     });
@@ -386,21 +443,16 @@ renderLibrary: function(data, editor) {
   });
 
   // Deals with Views Saved Searches search links
-  $('#views-savedsearches-delete-search-form label a', $this).click(function() {
-    $this.get(0).library_url = this.href;
+  library_wrapper.find('#views-savedsearches-delete-search-form label a').click(function() {
     $.getJSON(this.href, function(data) {
-      Drupal.behaviors.dndLibrary.renderLibrary.call($this.get(0), data, $(editor));
+      Drupal.behaviors.dndLibrary.renderLibrary.call(library_wrapper.get(0), data, $(editor));
     });
     return false;
   });
 
   // Attach all the behaviors to our new HTML fragment
-  Drupal.attachBehaviors($this);
-},
-
-// Do garbage collection on detach
-detach: function() {
+  Drupal.attachBehaviors(library_wrapper);
 }
 }
 
-}) (jQuery);
+}) (jQuery, Drupal);

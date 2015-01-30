@@ -446,7 +446,7 @@ function _dpi247CMS_install_demo_contents_full() {
     $base_term->vid = $dest_vid;
     $base_term->weight = 0;
     $base_term->vocabulary_machine_name = $dest_voc;
-    $terms = array('Hors texte', 'Article inférieur');
+    $terms = array('Article', 'Hors-texte');
     foreach ($terms as $term) {
       $base_term->weight++;
       $copied_term = clone $base_term;

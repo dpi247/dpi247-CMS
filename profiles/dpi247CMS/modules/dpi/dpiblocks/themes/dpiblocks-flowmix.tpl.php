@@ -32,7 +32,7 @@ if (!function_exists('dpiblocks_flowmix_build_feed')) {
 ?>
 
 <div class="flowmix-bloc">
-	<h2><?php dsm($variables);print check_plain($settings->title); ?></h2>
+	<h2><?php print check_plain($settings->title); ?></h2>
 	<div class="flowmix-list">
 		<ul>
 		<?php print dpiblocks_flowmix_build_feed($feed); ?>

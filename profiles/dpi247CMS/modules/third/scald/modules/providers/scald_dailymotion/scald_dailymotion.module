@@ -92,7 +92,7 @@ function scald_dailymotion_scald_add_form_fill(&$atom, $form, $form_state) {
   // Download a copy of the video thumbnail. This makes it possible
   // to do interesting manipulation with image styles presets.
   $thumb = drupal_http_request($infos->thumbnail['src']);
-  if ($thumb->code == 200 && $directory = scald_atom_thumbnail_path('video')) {
+  if ($thumb->code == 200 && $directory = ScaldAtomController::getThumbnailPath('video')) {
     $dest = $directory . '/dailymotion-' . $infos->id . '.jpg';
     $file = file_save_data($thumb->data, $dest);
 
@@ -254,7 +254,7 @@ function scald_dailymotion_direct_import($video) {
   ));
 
   // Create and link author term
-  if ($term = scald_dailymotion_taxonomy_get_create($infos->author, variable_get('scald_author_vocabulary', 0))) {
+  if ($term = scald_dailymotion_taxonomy_get_create($infos->author, variable_get('scald_author_vocabulary'))) {
     $langcode = field_language('scald_atom', $atom, 'scald_authors');
     $atom->scald_authors[$langcode][0] = array(
       'tid' => $term->tid,
@@ -264,7 +264,7 @@ function scald_dailymotion_direct_import($video) {
   // Create and link tags terms
   $langcode = field_language('scald_atom', $atom, 'scald_tags');
   foreach ($infos->tags as $index => $tag) {
-    if ($term = scald_dailymotion_taxonomy_get_create($tag, variable_get('scald_tags_vocabulary', 0))) {
+    if ($term = scald_dailymotion_taxonomy_get_create($tag, variable_get('scald_tags_vocabulary'))) {
       $atom->scald_tags[$langcode][$index] = array(
         'tid' => $term->tid,
       );
@@ -308,55 +308,53 @@ function scald_dailymotion_direct_import($video) {
  *
  * @param $name
  *   The name or the taxonomy term.
- * @param $vid
- *   Vocabulary ID to search and create from/to.
+ * @param $machine_name
+ *   Vocabulary Machine Name to search and create from/to.
  * @return object
- *   The taxonomy term.
+ *   The taxonomy term or NULL if it didn't existed before and creation failed.
  */
-function scald_dailymotion_taxonomy_get_create($name, $vid) {
-  // remove extra white spaces
+function scald_dailymotion_taxonomy_get_create($name, $machine_name) {
+  // Remove extra white spaces.
   $name = trim($name);
 
-  // find existing term(s)
-  $terms = taxonomy_term_load_multiple(
-    array(),
-    array(
-      'name' => $name,
-      'vid' =>  $vid,
-    )
-  );
+  // Find existing term(s).
+  $terms = taxonomy_get_term_by_name($name, $machine_name);
 
   if (!count($terms)) {
-    // create a new term
-    $term = new stdClass();
-    $term->name = trim($name);
-    $term->vid = $vid;
-    taxonomy_term_save($term);
+    $vocabulary = taxonomy_vocabulary_machine_name_load($machine_name);
+
+    if ($vocabulary) {
+      // Create a new term.
+      $term = new stdClass();
+      $term->name = trim($name);
+      $term->vid = $vocabulary->vid;
+      taxonomy_term_save($term);
+    }
+    else {
+      return NULL;
+    }
   }
   else {
-    // get the first found term
+    // Get the first found term.
     $term = reset($terms);
   }
+
   return $term;
 }
 
 /**
- * Analyze a Dailymotion RSS feed, reformating the informations about its
- * items in an easy to manipulate objects containing the informations we're
- * interested in.
+ * Analyze a Dailymotion RSS feed, reformating the informations about its items
+ * in an easy to manipulate objects containing the informations we're interested
+ * in.
+ *
  * @param $type
- *   Dailymotion RSS feed type. Examples include 'user', 'video', 'tag', 'search', ...
+ *   Dailymotion RSS feed type. Examples include 'user', 'video', 'tag', 'search'
  * @param $id
  *   The identifier, related to the type mentionned above. If you're requestion
  *   a user feed, then, its the username...
  * @return array
- *   Each array value is an object containing the following members:
- *     - id: the Dailymotion video id
- *     - author: the Dailymotion username of the user who uploaded the video
- *     - title: the video title
- *     - thumbnail: an associative array, containing the source ('src'), width
- *       and height of the video's thumbnail
- *     - pubDate: the publication date of the video
+ *
+ * @see scald_dailymotion_parse_item()
  */
 function scald_dailymotion_feed($type, $id) {
   $url = DAILYMOTION_RSS . $type . '/' . urlencode($id);
@@ -366,35 +364,7 @@ function scald_dailymotion_feed($type, $id) {
     $dom = new DOMDocument();
     if ($dom->loadXML($response->data)) {
       foreach ($dom->getElementsByTagName('item') as $item) {
-        $info = new stdClass();
-        // Fetch from the feed
-        // ... the video id
-        $info->id = $item->getElementsByTagNameNS(NS_DM, 'id')->item(0)->nodeValue;
-        // ... its title
-        $title = $item->getElementsByTagName('title')->item(0);
-        $info->title = $title->nodeValue;
-        // Video size
-        $player = $item->getElementsByTagNameNS(NS_MEDIA, 'player')->item(0);
-        $info->width = $player->getAttribute('width');
-        $info->height = $player->getAttribute('height');
-        // ... and usefull informations about its thumbnails
-        $thumb = $item->getElementsByTagNameNS(NS_MEDIA, 'thumbnail')->item(0);
-        $info->thumbnail = array(
-          'src'    => $thumb->getAttribute('url'),
-          'width'  => $thumb->getAttribute('width'),
-          'height' => $thumb->getAttribute('height')
-        );
-        // Tags
-        $info->tags = array();
-        foreach ($item->getElementsByTagNameNS(NS_MEDIA, 'category') as $tag) {
-          $info->tags[] = $tag->nodeValue;
-        }
-        // ... also get the author
-        $info->author = $item->getElementsByTagNameNS(NS_DM, 'author')->item(0)->nodeValue;
-        // ... and the publication date
-        $info->pubDate = date('c', strtotime($item->getElementsByTagName('pubDate')->item(0)->nodeValue));
-        $info->license = 'DM';
-        $items[] = $info;
+        $items[] = scald_dailymotion_parse_item($item);
       }
     }
   }
@@ -403,15 +373,62 @@ function scald_dailymotion_feed($type, $id) {
 
 /**
  * Get information on a specific video.
+ *
  * @param $id
  *   The video id
  * @return object
  *   An object containing the video informations. For information on
- *   the object format, see @scald_dailymotion_feed.
+ *   the object format, see scald_dailymotion_parse_item().
  */
 function scald_dailymotion_video($id) {
   $items = scald_dailymotion_feed('video', $id);
   return $items[0];
+}
+
+/**
+ * Analyze a XML DOMElement item to extract interesting info.
+ *
+ * @param $item
+ *   An object of classe DOMElement corresponding to an element of the feed.
+ * @return array
+ *   An object containing various video informations:
+ *     - id: the Dailymotion video id
+ *     - author: the Dailymotion username of the user who uploaded the video
+ *     - title: the video title
+ *     - thumbnail: an associative array, containing the source ('src'), width
+ *       and height of the video's thumbnail
+ *     - pubDate: the publication date of the video
+ */
+function scald_dailymotion_parse_item($item) {
+  $info = new stdClass();
+  // Fetch from the feed
+  // ... the video id
+  $info->id = $item->getElementsByTagNameNS(NS_DM, 'id')->item(0)->nodeValue;
+  // ... its title
+  $title = $item->getElementsByTagName('title')->item(0);
+  $info->title = $title->nodeValue;
+  // Video size
+  $player = $item->getElementsByTagNameNS(NS_MEDIA, 'player')->item(0);
+  $info->width = $player->getAttribute('width');
+  $info->height = $player->getAttribute('height');
+  // ... and usefull informations about its thumbnails
+  $thumb = $item->getElementsByTagNameNS(NS_MEDIA, 'thumbnail')->item(0);
+  $info->thumbnail = array(
+    'src'    => $thumb->getAttribute('url'),
+    'width'  => $thumb->getAttribute('width'),
+    'height' => $thumb->getAttribute('height')
+  );
+  // Tags
+  $info->tags = array();
+  foreach ($item->getElementsByTagNameNS(NS_MEDIA, 'category') as $tag) {
+    $info->tags[] = $tag->nodeValue;
+  }
+  // ... also get the author
+  $info->author = $item->getElementsByTagNameNS(NS_DM, 'author')->item(0)->nodeValue;
+  // ... and the publication date
+  $info->pubDate = date('c', strtotime($item->getElementsByTagName('pubDate')->item(0)->nodeValue));
+  $info->license = 'DM';
+  return $info;
 }
 
 /**

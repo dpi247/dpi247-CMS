@@ -9,7 +9,7 @@
  * Implements hook_install().
  */
 function scald_audio_install() {
-  scald_add_type('audio', 'Audio', 'Audio');
+  ScaldAtomController::addType('audio', 'Audio', 'Audio');
 }
 
 /**
@@ -17,5 +17,8 @@ function scald_audio_install() {
  */
 function scald_audio_uninstall() {
   drupal_load('module', 'scald');
-  scald_remove_type('audio');
+  // If Scald is disabled, its classes are not autoloaded.
+  module_load_include('inc', 'scald', 'includes/ScaldAtomController');
+
+  ScaldAtomController::removeType('audio');
 }

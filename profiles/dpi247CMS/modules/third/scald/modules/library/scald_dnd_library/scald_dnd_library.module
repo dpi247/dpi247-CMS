@@ -99,6 +99,9 @@ function scald_dnd_library_add_item(&$library, $sid) {
   if (empty($atom->omit_legend)) {
     $library['atoms'][$sid]['meta']['legend'] = theme('sdl_editor_legend', array('atom' => $atom));
   }
+
+  // Allow other modules to alter this library item
+  drupal_alter('scald_dnd_library_item', $atom, $library['atoms'][$sid]);
 }
 
 /**
@@ -187,7 +190,11 @@ function scald_dnd_library_scald_render($atom, $context, $options) {
       $render = theme('sdl_library_item', array('atom' => $atom, 'image' => $image));
       break;
     default:
-      $render = theme('sdl_editor_item', array('informations' => $atom->rendered, 'image' => $image));
+      $render = array(
+        '#theme' => 'sdl_editor_item',
+        '#informations' => $atom->rendered,
+        '#image' => $image,
+      );
   }
 
   return $render;
@@ -207,6 +214,19 @@ function theme_sdl_library_item($variables) {
   foreach ($links as $action => $link) {
     $links[$action]['attributes']['target'] = '_blank';
   }
+  // The Insert link. Use the "_" prefix to avoid collision with possible
+  // "insert" action.
+  $links['_insert'] = array(
+    'title' => t('Insert'),
+    'external' => TRUE,
+    'fragment' => FALSE,
+    'attributes' => array(
+      'data-atom-id' => $atom->sid,
+      'style' => 'display:none',
+    ),
+    'href' => '',
+  );
+
   $links_element = array(
     '#theme' => 'links',
     '#links' => $links,
@@ -226,7 +246,7 @@ function theme_sdl_library_item($variables) {
   }
 
   $return = "<div class='image'>{$image}</div>
-  <div class='meta type-" . drupal_strtolower($informations->type) . " clearfix'>
+  <div class='meta type-" . drupal_html_class($atom->type) . " clearfix'>
     <div class='title'>{$informations->title}</div>
     <div class='author'>{$authors}</div>
     {$rendered_links}
@@ -239,8 +259,18 @@ function theme_sdl_library_item($variables) {
  * Returns HTML for an atom rendered in the "Editor Representation" context.
  */
 function theme_sdl_editor_item($variables) {
-  $data = !empty($variables['informations']->player) ? $variables['informations']->player : $variables['image'];
-  return "<div class='image'>{$data}</div>";
+  if (empty($variables['informations']->player)) {
+    return $variables['image'];
+  }
+  else {
+    $player = $variables['informations']->player;
+    $output = is_array($player) ? $player : array('#markup' => $player);
+    $output += array(
+      '#prefix' => '<div class=\'image\'>',
+      '#suffix' => '</div>',
+    );
+    return drupal_render($output);
+  }
 }
 
 /**
