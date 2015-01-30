@@ -132,7 +132,7 @@ function dpiblocks_entity_info(){
     ),
   );
 
-  // FlowMix
+  // accroche
   $entities['accroche'] = array(
     'label' => t('Dpi Accroche entity'),
     'entity class' => 'AccrocheEntity',
@@ -143,7 +143,19 @@ function dpiblocks_entity_info(){
       'id' => 'aid',
       'label' => 'title',
     ),
-  
+    'bundles' => array(
+      'accroche' => array(),
+    ),
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
     // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
     'module'=> 'dpiblocks',
     'access callback' => 'custom_content_access_admin_callback',
@@ -617,8 +629,8 @@ if (!function_exists('accroche_page_view')) {
     $custom_content->content = array();
 
     // Build fields content.
-    field_attach_prepare_view('accroche', array($custom_content->tid => $custom_content), $view_mode);
-    entity_prepare_view('accroche', array($custom_content->tid => $custom_content));
+    field_attach_prepare_view('accroche', array($custom_content->aid => $custom_content), $view_mode);
+    entity_prepare_view('accroche', array($custom_content->aid => $custom_content));
     $custom_content->content += field_attach_view('accroche', $custom_content, $view_mode);
 
     return $custom_content->content;

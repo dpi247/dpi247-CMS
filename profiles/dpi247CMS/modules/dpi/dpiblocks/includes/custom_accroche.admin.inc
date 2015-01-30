@@ -1,16 +1,6 @@
 <?php 
 
 /**
- * Implementation of hook_form_validate()
- *
- * @param $form
- * @param $form_state
- */
-function accroche_form_validate($form, &$form_state) {
-  
-}
-
-/**
  * Implementation of hook_form()
  *
  * @param $form
@@ -65,7 +55,6 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
     )
   );
 
-  form_load_include ( $form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin' );
   if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || ($custom_content->layout == 'node' && !isset($form_state ['values']['type']))) {
     if(isset($custom_content->layout) && $custom_content->layout == "destination"){
       $valnode = '';
@@ -141,7 +130,7 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
 
     $form ['add_more'] = array (
       '#type' => 'button',
-      '#value' => 'Add more',
+      '#value' => 'Add more',      
       '#ajax' => array (
         'callback' => 'dpiblocks_ajax_callback_define_get_destination',
         'wrapper' => 'accroche-form',
@@ -160,11 +149,15 @@ function accroche_form($form, &$form_state, $custom_content, $op = 'edit') {
   }
 
   $form ['submit'] = array(
-    '#type' => 'submit',
-    '#suffix' => '</div>',
+    '#type' => 'submit',    
     '#value' => t('Save'),
   );
-
+  
+  $form ['complet'] = array(
+    '#markup' => t('complet all form correctly'),
+    '#suffix' => '</div>',
+  );
+  
   return $form;
 }
 

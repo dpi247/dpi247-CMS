@@ -136,6 +136,12 @@ function dpiblocks_menu() {
     'file' => 'includes/accroche.admin.inc',
   );
   
+  $items['my_module_set_target'] = array(
+    'page callback'    => 'dpiblocks_ajax_callback_define_type_entity_form',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,    
+  );
+  
   return $items;
 }
 

@@ -28,7 +28,9 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
 }
 
 function dpiblocks_accroche_plugin_edit_form($form,$form_state){
-  $form = dpiblocks_get_entity_form('accroche_form', $form_state);
+  form_load_include($form_state, 'inc', 'dpiblocks','includes/custom_accroche.admin');
+  $form = dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
+  dsm(function_exists('dpiblocks_ajax_callback_define_type_entity_form'), 'exist');
   unset($form['revision']);
   return $form;
 }
@@ -38,21 +40,21 @@ function dpiblocks_accroche_plugin_edit_form($form,$form_state){
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
   dsm($form_state);  
-  $form_state ['conf'] ['title'] = $form_state ['values'] ["accroche"] ['title'];
-  $form_state ['conf'] ['url'] = $form_state ['values'] ["accroche"] ['url'];
-  $form_state ['conf'] ['layout'] = $form_state ['values'] ["accroche"] ['layout'];
-  $form_state ['conf'] ['type'] = $form_state ['values'] ["accroche"] ['type'];
-  if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "destination") {
-    for($i = 0; $i < count ( $form_state ["values"] ["accroche"] ['destination'] ); $i ++) {
-      $form_state ['conf'] ['destination'] [$i] = array (
-        'section' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_section"],
-        'target' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_target"],
-        'nb_element' => $form_state ["values"] ["accroche"] ['destination'] [$i] ['destination_nb_element'] 
-      );
-    }
-  } else {
-    $form_state ['conf'] ['node'] = $form_state ['values'] ["accroche"] ['node'];
-  }
+//   $form_state ['conf'] ['title'] = $form_state ['values'] ["accroche"] ['title'];
+//   $form_state ['conf'] ['url'] = $form_state ['values'] ["accroche"] ['url'];
+//   $form_state ['conf'] ['layout'] = $form_state ['values'] ["accroche"] ['layout'];
+//   $form_state ['conf'] ['type'] = $form_state ['values'] ["accroche"] ['type'];
+//   if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "destination") {
+//     for($i = 0; $i < count ( $form_state ["values"] ["accroche"] ['destination'] ); $i ++) {
+//       $form_state ['conf'] ['destination'] [$i] = array (
+//         'section' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_section"],
+//         'target' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_target"],
+//         'nb_element' => $form_state ["values"] ["accroche"] ['destination'] [$i] ['destination_nb_element'] 
+//       );
+//     }
+//   } else {
+//     $form_state ['conf'] ['node'] = $form_state ['values'] ["accroche"] ['node'];
+//   }
 }
 
 /**
@@ -140,4 +142,11 @@ function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {
     "@type" => $conf ["type"] 
   ) );
   return $block;
+}
+
+function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
+  // Create a new custom content controller
+  $customContentController = new Custom_contentController('accroche');
+  // Return the custom_content entity
+  return $customContentController->load_by_title($machine_name);
 }
