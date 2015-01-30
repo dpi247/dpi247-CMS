@@ -311,9 +311,12 @@ function dpisocial_field_extra_fields() {
 	  
 	  foreach ($buttons as $b) $content.=$b['html'];
 
-	  $body = token_replace(variable_get('dpisocial_add_email_body', ''), array('node' => $node));
+	  $body = str_replace("'", "\'", variable_get('dpisocial_add_email_body', ''));
+	  $body = token_replace($body, array('node' => $node));
 
-	  $mailto = "mailto:?subject=".variable_get('dpisocial_add_email_subject', '')."&body=".$body;
+	  $suject = str_replace("'", "\'", variable_get('dpisocial_add_email_subject', ''));
+
+	  $mailto = "mailto:?subject=".$suject."&body=".$body;
 
 	  if (variable_get('dpisocial_add_email_link', 0)) {
 	  	$content .= '<button onClick="location.href=\''.$mailto.'\'" class="btn btn-social-icon btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label"></span></button>';

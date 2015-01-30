@@ -70,7 +70,7 @@ function dpisocial_adminplugin_others() {
     '#type' => 'textfield',
     '#title' => t('Mail default subject'),
     '#default_value' => variable_get('dpisocial_add_email_subject', ''),
-    '#size' => '50',
+    '#size' => '78',
   );
 
   $form['dpisocial_global_settings']['dpisocial_add_email_body'] = array(
