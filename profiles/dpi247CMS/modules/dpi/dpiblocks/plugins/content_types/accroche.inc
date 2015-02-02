@@ -30,12 +30,16 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
 function dpiblocks_accroche_plugin_edit_form($form,& $form_state){  
   if(!isset($form_state['conf']['view_mode']))
     $form_state['conf']['view_mode'] = $form_state["subtype_name"];
+  
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
+  
   $entity = _dpiblocks_accroche_get_entity_by_subtype($form_state['pane']->subtype);
   $form += dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
+  
   unset($form['accroche']['revision']);
   unset($form['accroche']['submit']);  
+  
   return $form;
 }
 
@@ -44,13 +48,13 @@ function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
   $form_state2=array();
-  $form_state2['values']=$form_state['values'];
+  $form_state2['values']=$form_state['values'];  
   //load form include
   form_load_include($form_state2, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state2, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   //submit
   drupal_form_submit('accroche_form', $form_state2);
-  $form_state['pane']->subtype = $form_state2['accroche']->title;
+  $form_state['pane']->subtype = $form_state2['accroche']->machine_name;
 }
 
 /**
@@ -109,13 +113,13 @@ function dpiblocks_define_node_element_string($dest){
   foreach ( $dest as $destination ) {
     try {
       $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["target"], 0 );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
       $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
       $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
       $val_view = $targetview->result;
-      $cpt = $destination ["nb_element"];
+      $cpt = $destination ["destination_nb_element"];
       if ($cpt > count ( $val_view ))
         $cpt = count ( $val_view );
       for($i = 0; $i < $cpt; $i ++) {
@@ -143,5 +147,5 @@ function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
   // Create a new custom content controller
   $customContentController = new AccrocheController('accroche');
   // Return the custom_content entity
-  return $customContentController->load_by_title($machine_name);
+  return $customContentController->load_by_machine_name($machine_name);
 }

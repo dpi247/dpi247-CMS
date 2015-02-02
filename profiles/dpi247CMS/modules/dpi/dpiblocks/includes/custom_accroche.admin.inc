@@ -18,8 +18,9 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   );
   
   $form ['accroche'] ['aid'] = array(
-    '#type' => 'value',
+    '#type' => 'hidden',
     '#value' => (isset($custom_content->aid))? $custom_content->aid : null,
+    '#default_value' => (isset($custom_content->aid))? $custom_content->aid : null,
   );   
 
   $form ['accroche'] ['override_title'] = array(
@@ -72,7 +73,8 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       'method' => 'replace'
     )
   );
-
+  
+  form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->layout) && $custom_content->layout == 'node' && !isset($form_state ['values']['type']))) {
     if((isset($custom_content->layout) && $custom_content->layout == "destination") || !isset($custom_content->data)){
       $valnode = '';
@@ -165,12 +167,14 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       '#default_value' => 0,
     );
   }
-
+  
   $form ['accroche'] ['submit'] = array(
     '#type' => 'submit',    
     '#value' => t('Save'),
   );
   
+  field_attach_form('accroche', $custom_content, $form, $form_state);
+
   return $form;
 }
 
@@ -192,7 +196,7 @@ function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
  * @param $form
  * @param $form_state
  */
-function accroche_form_submit($form, &$form_state) {  
+function accroche_form_submit($form, &$form_state) {
   if(isset($form_state['values']['revision'])) {
     $is_revision = $form_state['values']['revision'];
   }
@@ -200,6 +204,10 @@ function accroche_form_submit($form, &$form_state) {
     $is_revision = FALSE;
   }
   unset($form_state['values']['revision']);
+  
+  if(!isset($form_state['values']['aid']) && isset($form_state['input']['aid']) && $form_state['input']['aid']!=""){
+    $form_state['values']['aid'] = $form_state['input']['aid'];
+  }
   
   $array_val = array(
     'aid' => $form_state['values']['aid'],
@@ -232,11 +240,7 @@ function accroche_form_submit($form, &$form_state) {
   // Set the default revision
   entity_revision_set_default('accroche', $accroche_entity);
   
-  if(accroche_save($accroche_entity)){
-    drupal_set_message(t('Enregistrement réussis'));
-  }else{
-    drupal_set_message(t('Echec de l\'enregistrement. Si le problème survient encore, veuillez contacter l\'administrateur.'), 'error');
-  }
+  accroche_save($accroche_entity);
   $form_state['accroche']=$accroche_entity;
   $form_state['redirect'] = "admin/dpi247/AccrocheCustom";
 }

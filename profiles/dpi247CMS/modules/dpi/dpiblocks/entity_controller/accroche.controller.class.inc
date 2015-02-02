@@ -7,8 +7,8 @@
  */
 class AccrocheController extends EntityAPIControllerExportable {
 
-  public function load_by_title($machine_name) {
-    $results = $this->load(FALSE, array('title' => $machine_name));
+  public function load_by_machine_name($machine_name) {
+    $results = $this->load(FALSE, array('machine_name' => $machine_name));
     $result = current($results);
     return $result;
   }

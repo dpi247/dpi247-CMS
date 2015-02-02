@@ -134,12 +134,14 @@ function dpiblocks_entity_info(){
 
   // accroche
   $entities['accroche'] = array(
-    'label' => t('Dpi Accroche entity'),
+    'label' => t('Dpi Accroche entitie'),
     'entity class' => 'AccrocheEntity',
     'controller class' => 'AccrocheController',
     'base table' => 'dpiblocks_accroche',
     'revision table' => 'dpiblocks_accroche_revision',
     'fieldable' => TRUE,
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
     'entity keys' => array(
       'id' => 'aid',
       'machine_name' => 'machine_name',
