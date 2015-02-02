@@ -69,7 +69,7 @@ class dpisocial_facebook_social_network extends dpisocial_social_network {
 		  
 		  $form['facebook_share_article']['facebook_share_article_method'] = array(
 		  	'#type' => 'radios',
-			'#title' => t('Boutton de partage'),
+			'#title' => t('Bouton de partage'),
 			'#maxlength' => 1,
 			'#description' => t('Sélectionner si vous voulez utiliser le bouton classique ou une version personnalisée'),
 			'#options' => array( 'c' => 'Classique', 'p' => 'Personnalisé'),
