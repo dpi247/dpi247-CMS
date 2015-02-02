@@ -11,7 +11,7 @@
  */
 function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit') {
   module_load_include('inc', 'dpiblocks', 'dpiblocks.api');
-dsm($custom_content);
+
   $form ['accroche'] = array(
     '#prefix' => '<div id="accroche-form">',
     '#suffix' => '</div>',
@@ -42,7 +42,7 @@ dsm($custom_content);
     '#maxlength' => 50,
     '#machine_name' => array(
       'exists' => '_dpiblocks_validate_machine_name',
-      'source' => array('accroche][title'),
+      'source' => array('accroche','title'),
     ),
     '#description' => t ( 'A unique name to construct the machine name of view. It must only contain lowercase letters, numbers and hyphens.' ),
     '#disabled' => isset($custom_content->machine_name) && $custom_content->machine_name != "",
