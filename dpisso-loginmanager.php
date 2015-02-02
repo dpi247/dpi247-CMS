@@ -39,7 +39,9 @@ require_once DRUPAL_ROOT . '/includes/common.inc';
 $config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
 
 $SsoSession= new SsoSession();
+
 $redirect_url=$SsoSession->processLoginManagerUrl();
+
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
   $profile=$SsoSession->getProfile();
@@ -47,14 +49,18 @@ if($login_id=$SsoSession->getLoginId()){
   $sso_user_infos['mail']=$profile->mail;
   $sso_user_infos['name']=$profile->cn;
   $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
-  //@todo: sync roles with existing ones
-  dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);  
+
+  dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);
 }
 //We are on the logout operation
 else{
-   dpisso_api_user_logout();
+  //@todo: We should remove the loginToken cookie on logout to prevent loop and no man's land.
+
+  dpisso_api_user_logout();
    //@todo: should i call the Login manager ?
 }
 //Process to redirect
-header("Location: $redirect_url");
+if($redirect_url){
+  header("Location: $redirect_url");
+}
 die();
