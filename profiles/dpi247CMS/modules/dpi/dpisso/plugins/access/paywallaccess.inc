@@ -15,7 +15,7 @@ $plugin = array(
   'callback' => 'dpisso_paywallaccess_ctools_access_check',
   'summary' =>  'dpisso_paywallaccess_ctools_access_summary',
     'settings form' => 'dpisso_paywallaccess_ctools_access_settings_form',
-    'required context' => new ctools_context_required(t('Node'), 'node'),
+ //   'required context' => new ctools_context_required(t('Node'), 'node'),
 );
 
 function dpisso_paywall_access_ctools_access_settings_form(&$form, &$form_state, $conf) {
