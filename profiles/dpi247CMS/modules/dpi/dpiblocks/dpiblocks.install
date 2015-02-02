@@ -235,6 +235,12 @@ function dpiblocks_schema() {
         'length' => '255',
         'not null' => TRUE,
       ),
+      'type' => array(
+        'description' => 'The type of our accroche content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
       'data' => array(
         'description' => 'The data for our accroche',
         'type' => 'varchar',
@@ -310,4 +316,20 @@ function dpiblocks_update_7003() {
 function dpiblocks_update_7004() {
   $schema = drupal_get_schema('dpiblocks_accroche_revision', TRUE);
   db_create_table('dpiblocks_accroche_revision', $schema);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7005() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'type', $schema['fields']['type']);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7006() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche_revision', 'type', $schema['fields']['type']);
 }

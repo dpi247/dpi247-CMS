@@ -56,11 +56,25 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     '#required' => FALSE,
     '#default_value' => (isset($custom_content->link)) ? $custom_content->link : null,
   );
+  
+  $layouts = variable_get("dpiblocks_accroche_settings", array());
+  $infos = array();
+  foreach ($layouts as $el){
+    $infos[$el[0]] = $el[0];    
+  }
+  $form ['accroche'] ['layout'] = array (
+    '#type' => 'select',
+    '#title' => t ( 'Select type of value' ),
+    '#default_value' => (isset($custom_content->layout)) ? $custom_content->layout : null,
+    '#options' => $infos,
+    '#description' => t ( 'Choose your layout of display' ),
+    '#disabled' => (isset($custom_content->layout) && $custom_content->layout != ""),
+  );
 
   $form ['accroche'] ['type'] = array (
     '#type' => 'select',
     '#title' => t ( 'Select type of value' ),
-    '#default_value' => (isset($custom_content->layout)) ? $custom_content->layout : null,
+    '#default_value' => (isset($custom_content->type)) ? $custom_content->type : null,
     '#options' => array (
       '' => t ( 'Choose a node selection method' ),
       'node' => t ( 'Node' ),
@@ -75,8 +89,8 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   );
   
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
-  if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->layout) && $custom_content->layout == 'node' && !isset($form_state ['values']['type']))) {
-    if((isset($custom_content->layout) && $custom_content->layout == "destination") || !isset($custom_content->data)){
+  if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->type) && $custom_content->type == 'node' && !isset($form_state ['values']['type']))) {
+    if((isset($custom_content->type) && $custom_content->type == "destination") || !isset($custom_content->data)){
       $valnode = '';
     }else{
       $valnode = $custom_content->data;
@@ -89,7 +103,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
       '#default_value' => $valnode
     );
-  } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->layout == 'destination' && !isset($form_state ['values']['type']))) {
+  } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->type == 'destination' && !isset($form_state ['values']['type']))) {
     $nb = 1;
     if(!isset($form_state['values']['destination'])){
       $form_state['values']['destination'] = unserialize($custom_content->data);
@@ -215,7 +229,8 @@ function accroche_form_submit($form, &$form_state) {
     'override_title' => $form_state['values']['override_title'],
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
-    'layout' => $form_state['values']['type'],
+    'layout' => $form_state['values']['layout'],
+    'type' => $form_state['values']['type'],
   );
   
   if($form_state['values']['type'] == "node"){

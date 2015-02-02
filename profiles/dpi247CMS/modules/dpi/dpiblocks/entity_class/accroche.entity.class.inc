@@ -47,6 +47,13 @@ class AccrocheEntity extends Entity {
    * @var $layout
    */
   public $layout;
+  
+  /**
+   * The type of accroche content
+   *
+   * @var $type
+   */
+  public $type;
 
   /**
    * The date of accroche content

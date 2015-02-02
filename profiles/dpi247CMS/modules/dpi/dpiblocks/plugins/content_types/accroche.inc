@@ -90,7 +90,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   
   /* Prepare element for view */
   $teasers = _dpiblocks_accroche_get_all_teaser ();
-  if (isset ( $info_entity->layout ) && $info_entity->layout == "node") {
+  if (isset ( $info_entity->type ) && $info_entity->type == "node") {
     $string_element = "";
     $vals = explode ( ";", $info_entity->data );
     foreach ($vals as $val){
@@ -99,7 +99,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
       }
     }
     $string_element = substr($string_element,0,-1);
-  } elseif (isset ( $info_entity->layout ) && $info_entity->layout == "destination") {
+  } elseif (isset ( $info_entity->type ) && $info_entity->type == "destination") {
     $array_val = unserialize($info_entity->data);
     $string_element = dpiblocks_define_node_element_string($array_val);
   }
@@ -107,7 +107,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $view_name = _dpiblocks_accroche_get_view_name ();
   $view = views_get_view ( $view_name );
   $view->set_display ( $view_name );
-  $view->accroche_view_mode = $teasers [$conf ["view_mode"]] [1];
+  $view->accroche_view_mode = $teasers [$info_entity->layout] [1];
 
   /* set arguments and execute view */
   $view->set_arguments ( array($string_element) );

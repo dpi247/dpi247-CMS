@@ -27,6 +27,7 @@ class AccrocheController extends EntityAPIControllerExportable {
       'title' => '',
       'link' => '',
       'layout' => '',
+      'type' => '',
       'data' => '',
     );
     return parent::create($values);
@@ -39,25 +40,6 @@ class AccrocheController extends EntityAPIControllerExportable {
    */
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
     $wrapper = entity_metadata_wrapper('accroche', $entity);
-
-//     // Make Description and Status themed like default fields.
-//     $content['description'] = array(
-//       '#theme' => 'field',
-//       '#weight' => 0,
-//       '#title' =>t('Description'),
-//       '#access' => TRUE,
-//       '#label_display' => 'above',
-//       '#view_mode' => 'full',
-//       '#language' => LANGUAGE_NONE,
-//       '#field_name' => 'field_fake_description',
-//       '#field_type' => 'text',
-//       '#entity_type' => 'custom_content',
-//       '#bundle' => 'custom_content',
-//       '#items' => array(array('value' => "")),
-//       '#formatter' => 'text_default',
-//       0 => array('#markup' => check_plain(""))
-//     );
-
     return parent::buildContent($entity, $view_mode, $langcode, $content);
   }
 }
