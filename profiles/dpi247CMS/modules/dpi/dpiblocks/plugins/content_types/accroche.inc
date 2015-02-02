@@ -42,11 +42,15 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   return $types;
 }
 
-function dpiblocks_accroche_plugin_edit_form($form,& $form_state){  
+function dpiblocks_accroche_plugin_edit_form($form,& $form_state){ 
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   
   $entity = _dpiblocks_accroche_get_entity_by_subtype($form_state['pane']->subtype);
+  if(isset($entity) && empty($entity)  && isset($form_state['subtype_name'])){
+    $entity = new stdClass();
+    $entity->layout = $form_state['subtype_name'];
+  }
   $form += dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
   
   unset($form['accroche']['revision']);
