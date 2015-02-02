@@ -53,7 +53,7 @@ class dpisocial_twitter_social_network extends dpisocial_social_network {
 		  
 		  $form['twitter_share_article']['twitter_share_article_method'] = array(
 		  	'#type' => 'radios',
-			'#title' => t('Button de partage'),
+			'#title' => t('Boutton de partage'),
 			'#maxlength' => 1,
 			'#description' => t('Sélectionner si vous voulez utiliser le bouton classique ou une version personnalisée'),
 			'#options' => array( 'c' => 'Classique', 'p' => 'Personnalisé'),
