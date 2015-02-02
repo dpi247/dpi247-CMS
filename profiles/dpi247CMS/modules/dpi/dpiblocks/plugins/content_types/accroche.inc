@@ -43,9 +43,6 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
 }
 
 function dpiblocks_accroche_plugin_edit_form($form,& $form_state){  
-  if(!isset($form_state['conf']['view_mode']))
-    $form_state['conf']['view_mode'] = $form_state["subtype_name"];
-  
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   

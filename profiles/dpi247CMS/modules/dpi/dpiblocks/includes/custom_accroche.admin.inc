@@ -59,16 +59,15 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   
   $layouts = variable_get("dpiblocks_accroche_settings", array());
   $infos = array();
-  foreach ($layouts as $el){
-    $infos[$el[0]] = $el[0];    
+  foreach ($layouts as $k => $el){
+    $infos[$k] = $el[0];    
   }
   $form ['accroche'] ['layout'] = array (
     '#type' => 'select',
-    '#title' => t ( 'Select type of value' ),
+    '#title' => t ( 'Choose layout value' ),
     '#default_value' => (isset($custom_content->layout)) ? $custom_content->layout : null,
     '#options' => $infos,
-    '#description' => t ( 'Choose your layout of display' ),
-    '#disabled' => (isset($custom_content->layout) && $custom_content->layout != ""),
+    '#description' => t ( 'Choose layout render' ),    
   );
 
   $form ['accroche'] ['type'] = array (
