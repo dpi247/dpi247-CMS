@@ -22,7 +22,7 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
       'category' => 'Accroche',
       'group' => 'DPI Core', 
       'all contexts' => TRUE
-    );
+    ); 
   }
   
   /* foreach on entity */
