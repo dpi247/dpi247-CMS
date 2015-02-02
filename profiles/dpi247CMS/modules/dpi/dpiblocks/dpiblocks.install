@@ -205,6 +205,12 @@ function dpiblocks_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'machine_name' => array(
+        'description' => 'The name of our accroche',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
       'override_title' => array(
         'description' => 'The title of our custom if it\'s override',
         'type' => 'varchar',
@@ -247,6 +253,30 @@ function dpiblocks_schema() {
     'unique keys' => array(),
   );
   
+  $schema['dpiblocks_accroche_revision'] = $schema['dpiblocks_accroche'];
+  
+  $schema['dpiblocks_accroche_revision']['fields']['revision_id'] = array(
+    'type' => 'serial',
+    'not null' => TRUE,
+    'description' => 'Primary Key: Unique revision ID.',
+  );
+  
+  $schema['dpiblocks_accroche_revision']['fields']['aid'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'The ID of the attached entity custom_content.',
+  );
+  
+  $schema['dpiblocks_accroche_revision']['fields']['machine_name'] = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => TRUE,
+  );
+  
+  $schema['dpiblocks_accroche_revision']['primary key'] = array('revision_id');
+  
   return $schema;
 }
 
@@ -264,4 +294,20 @@ function dpiblocks_update_7001() {
 function dpiblocks_update_7002() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
   db_create_table('dpiblocks_accroche', $schema);
+}
+
+/**
+ * Add machine name column
+ */
+function dpiblocks_update_7003() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'machine_name', $schema['fields']['machine_name']);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7004() {
+  $schema = drupal_get_schema('dpiblocks_accroche_revision', TRUE);
+  db_create_table('dpiblocks_accroche_revision', $schema);
 }

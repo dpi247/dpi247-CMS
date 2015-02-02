@@ -27,21 +27,15 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   return $types;
 }
 
-function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
+function dpiblocks_accroche_plugin_edit_form($form,& $form_state){  
+  if(!isset($form_state['conf']['view_mode']))
+    $form_state['conf']['view_mode'] = $form_state["subtype_name"];
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
-  global $i;
-  if(!isset($i)){
-    $i = FALSE;
-  }else{
-    $i = TRUE;
-  }
+  $entity = _dpiblocks_accroche_get_entity_by_subtype($form_state['pane']->subtype);
   $form += dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
-  unset($form['revision']);
-  if($i){
-    unset($form['buttons']);
-  }
-  dsm($form, 'form');
+  unset($form['accroche']['revision']);
+  unset($form['accroche']['submit']);  
   return $form;
 }
 
@@ -49,21 +43,14 @@ function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
  * Content type submit handler.
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
-//   $form_state ['conf'] ['title'] = $form_state ['values'] ["accroche"] ['title'];
-//   $form_state ['conf'] ['url'] = $form_state ['values'] ["accroche"] ['url'];
-//   $form_state ['conf'] ['layout'] = $form_state ['values'] ["accroche"] ['layout'];
-//   $form_state ['conf'] ['type'] = $form_state ['values'] ["accroche"] ['type'];
-//   if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "destination") {
-//     for($i = 0; $i < count ( $form_state ["values"] ["accroche"] ['destination'] ); $i ++) {
-//       $form_state ['conf'] ['destination'] [$i] = array (
-//         'section' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_section"],
-//         'target' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_target"],
-//         'nb_element' => $form_state ["values"] ["accroche"] ['destination'] [$i] ['destination_nb_element'] 
-//       );
-//     }
-//   } else {
-//     $form_state ['conf'] ['node'] = $form_state ['values'] ["accroche"] ['node'];
-//   }
+  $form_state2=array();
+  $form_state2['values']=$form_state['values'];
+  //load form include
+  form_load_include($form_state2, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
+  form_load_include($form_state2, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
+  //submit
+  drupal_form_submit('accroche_form', $form_state2);
+  $form_state['pane']->subtype = $form_state2['accroche']->title;
 }
 
 /**
@@ -80,30 +67,28 @@ function _dpiblocks_accroche_get_view_name() {
 }
 
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
+  $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   
   /* Prepare element for view */
-  $elements = array ();
   $teasers = _dpiblocks_accroche_get_all_teaser ();
-  $elements ["layout"] = $teasers [$conf ["layout"]] [1];
-  if (isset ( $conf ["type"] ) && $conf ["type"] == "node") {
-    $elements ["node_id"] = explode ( ";", $conf ["node"] );
+  if (isset ( $info_entity->layout ) && $info_entity->layout == "node") {
     $string_element = "";
-    $vals = explode ( ";", $conf ["node"] );
+    $vals = explode ( ";", $info_entity->data );
     foreach ($vals as $val){
       if(isset($val) && $val != ""){
         $string_element .= $val."+";
       }
     }
     $string_element = substr($string_element,0,-1);
-  } elseif (isset ( $conf ["type"] ) && $conf ["type"] == "destination") {
-    $elements ["destination"] = $conf ["destination"];
-    $string_element = dpiblocks_define_node_element_string($conf["destination"]);
+  } elseif (isset ( $info_entity->layout ) && $info_entity->layout == "destination") {
+    $array_val = unserialize($info_entity->data);
+    $string_element = dpiblocks_define_node_element_string($array_val);
   }
   /* create view */
   $view_name = _dpiblocks_accroche_get_view_name ();
   $view = views_get_view ( $view_name );
   $view->set_display ( $view_name );
-  $view->accroche_view_mode = $elements ["layout"];
+  $view->accroche_view_mode = $teasers [$conf ["view_mode"]] [1];
 
   /* set arguments and execute view */
   $view->set_arguments ( array($string_element) );
@@ -112,7 +97,7 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
 
   /* Prepare render element and return it */
   $block = new stdClass ();
-  $block->title = (isset ( $conf ["url"] ) && $conf ["url"] != "") ? l ( $conf ["title"], $conf ["url"] ) : $conf ["title"];
+  $block->title = (isset ( $info_entity->link ) && $info_entity->link != "") ? l ( $info_entity->title, $info_entity->link ) : $info_entity->title;
   $block->content = $view->render ();
   $block->admin_links = array ();
   return $block;
@@ -143,19 +128,20 @@ function dpiblocks_define_node_element_string($dest){
 }
 
 function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {
+  $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   $block = new stdClass ();
-  $block->title = $conf ['override_title'] ? $conf ['override_title_text'] : $conf ["title"];
+  $block->title = $info_entity->override_title ? $info_entity->override_title : $info_entity->title;
   $block->content = t ( 'Accroche key : @accroche_key<br />Title : @title<br />Type : @type', array (
     '@accroche_key' => $subtype,
-    '@title' => $conf ["title"],
-    "@type" => $conf ["type"] 
+    '@title' => $info_entity->title,
+    "@type" => $info_entity->layout 
   ) );
   return $block;
 }
 
 function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
   // Create a new custom content controller
-  $customContentController = new Custom_contentController('accroche');
+  $customContentController = new AccrocheController('accroche');
   // Return the custom_content entity
   return $customContentController->load_by_title($machine_name);
 }

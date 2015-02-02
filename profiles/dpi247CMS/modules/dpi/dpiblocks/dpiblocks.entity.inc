@@ -138,10 +138,12 @@ function dpiblocks_entity_info(){
     'entity class' => 'AccrocheEntity',
     'controller class' => 'AccrocheController',
     'base table' => 'dpiblocks_accroche',
+    'revision table' => 'dpiblocks_accroche_revision',
     'fieldable' => TRUE,
     'entity keys' => array(
       'id' => 'aid',
-      'label' => 'title',
+      'machine_name' => 'machine_name',
+      'revision' => 'revision_id',
     ),
     'bundles' => array(
       'accroche' => array(),

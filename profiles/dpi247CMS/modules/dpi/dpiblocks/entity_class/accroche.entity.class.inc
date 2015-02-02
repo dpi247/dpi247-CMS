@@ -12,6 +12,13 @@ class AccrocheEntity extends Entity {
    * @var $aid
    */
   public $aid;
+  
+  /**
+   * The machine_name of custom content
+   *
+   * @var $machine_name
+   */
+  public $machine_name;
 
   /**
    * The override title of accroche content
@@ -58,11 +65,20 @@ class AccrocheEntity extends Entity {
   }
 
   /**
+   * Overrides defaultLabel function from entity
+   *
+   * @see Entity::defaultLabel()
+   */
+  protected function defaultLabel() {
+    return $this->machine_name;
+  }
+  
+  /**
    * Overrides defaultUri function from entity
    *
    * @see Entity::defaultUri()
    */
   protected function defaultUri() {
-    return array('path' => 'accroche/' . $this->layout);
+    return array('path' => 'accroche/' . $this->machine_name);
   }
 }
