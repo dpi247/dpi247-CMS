@@ -144,7 +144,8 @@ function dpiblocks_define_node_element_string($dest){
       if ($cpt > count ( $val_view ))
         $cpt = count ( $val_view );
       for($i = 0; $i < $cpt; $i ++) {
-        $string .= $val_view [$i]->nid.'+';
+        $tmp = $val_view [$i];
+        $string .= $tmp->nid.'+';
       }
     } catch (Exception $e) {
     }
