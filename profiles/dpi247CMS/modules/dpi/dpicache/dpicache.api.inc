@@ -23,7 +23,7 @@ function dpicache_get_cache_entry($cache_name) {
   array_shift ( $parameters );
   array_pop( $hash_parameters ); //unset $conf
   array_pop( $hash_parameters ); //unset title -> for one_cache_regenerate
-  
+
   // Get hash
   $hash = _dpicache_get_hash ( $cache_name, $hash_parameters );
   if (! $hash) {

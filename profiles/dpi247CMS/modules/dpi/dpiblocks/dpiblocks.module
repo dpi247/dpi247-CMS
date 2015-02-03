@@ -244,7 +244,7 @@ function dpiblocks_dpicache_cache_entry_register() {
     'dpiblocks_flowmix_feed' => array(
       'callback' => 'dpiblocks_flowmix_content_type_generate_feed', // Function to call
       'plugin' => 'dpicache_memcache', // Which storage?
-      'catagory' => 'dpiblocks', // Group
+      'category' => 'dpiblocks', // Group
       'data_type' => 'array', // The callback returns an array
       'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
       'refresh_interval' => 15*60, // Default refresh interval
@@ -252,6 +252,20 @@ function dpiblocks_dpicache_cache_entry_register() {
         'module' => 'dpiblocks',
         'type' => 'inc',
         'name' => 'plugins/content_types/flowmix',
+      ),
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+    'dpiblocks_accroche_feed' => array(
+      'callback' => 'dpiblocks_accroche_content_type_generate_feed', // Function to call
+      'plugin' => 'dpicache_memcache', // Which storage?
+      'category' => 'dpiblocks_accroche', // Group
+      'data_type' => 'array', // The callback returns an array
+      'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
+      'refresh_interval' => 15*60, // Default refresh interval
+      'file' => array( // File to load
+        'module' => 'dpiblocks',
+        'type' => 'inc',
+        'name' => 'plugins/content_types/accroche',
       ),
       'bypass' => FALSE, // Has to be set to FALSE in production environments
     ),

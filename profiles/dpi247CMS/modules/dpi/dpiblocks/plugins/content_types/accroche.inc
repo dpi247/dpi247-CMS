@@ -87,6 +87,16 @@ function _dpiblocks_accroche_get_view_name() {
 }
 
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
+  $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $conf, $args);
+  /* Prepare render element and return it */
+  $block = new stdClass ();
+  $block->title = (isset ( $elements['entity']->link ) && $elements['entity']->link != "") ? l ( $elements['entity']->title, $elements['entity']->link ) : $elements['entity']->title;
+  $block->content = $elements['view'];
+  $block->admin_links = array ();
+  return $block;
+}
+
+function dpiblocks_accroche_content_type_generate_feed($subtype){
   $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   
   /* Prepare element for view */
@@ -109,18 +119,13 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $view = views_get_view ( $view_name );
   $view->set_display ( $view_name );
   $view->accroche_view_mode = $teasers [$info_entity->layout] [1];
-
+  
   /* set arguments and execute view */
   $view->set_arguments ( array($string_element) );
   $view->pre_execute ();
   $view->execute ();
-
-  /* Prepare render element and return it */
-  $block = new stdClass ();
-  $block->title = (isset ( $info_entity->link ) && $info_entity->link != "") ? l ( $info_entity->title, $info_entity->link ) : $info_entity->title;
-  $block->content = $view->render ();
-  $block->admin_links = array ();
-  return $block;
+  
+  return array('view' => $view->render(), 'entity' => $info_entity);
 }
 
 function dpiblocks_define_node_element_string($dest){
