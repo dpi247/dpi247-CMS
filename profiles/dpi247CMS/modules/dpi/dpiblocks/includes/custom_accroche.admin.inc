@@ -229,18 +229,29 @@ function accroche_form_submit($form, &$form_state) {
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
     'layout' => $form_state['values']['layout'],
-    'type' => $form_state['values']['type'],
+    'type' => $form_state['values']['type'],    
   );
-  
+  //hash_cache_data
   if($form_state['values']['type'] == "node"){
     $array_val = $array_val + array(
       'data' => $form_state['values']['node'],
+      'hash_cache_data' => ';'.$form_state['values']['node'],
     );
   }elseif ($form_state['values']['type'] == "destination"){    
     $array_val = $array_val + array(
       'data' => serialize($form_state['values']['destination']),
-    );         
-  }
+    );   
+    if(is_array($form_state['values']['destination'])){
+      $string_tmp = "";
+      foreach($form_state['values']['destination'] as $dest){
+        $string_tmp .= '|'.$dest['destination_section']."_".$dest['destination_target'].'|';
+      }
+      $array_val = $array_val + array(
+        'hash_cache_data' => $string_tmp,
+      );
+    }    
+  }  
+  
   $accroche_entity = new AccrocheEntity($array_val);
   $accroche_entity->is_new = FALSE;
   $accroche_entity->is_new_revision = !$is_revision;

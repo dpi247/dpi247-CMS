@@ -56,12 +56,19 @@ class AccrocheEntity extends Entity {
   public $type;
 
   /**
-   * The date of accroche content
+   * The data of accroche content
    *
    * @var $date
    */
   public $data;
 
+  /**
+   * The hash cache data of accroche content
+   *
+   * @var $date
+   */
+  public $hash_cache_data;
+  
   /**
    * Creates a new entity.
    *

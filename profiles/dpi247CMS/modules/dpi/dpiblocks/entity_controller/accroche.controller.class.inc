@@ -29,6 +29,7 @@ class AccrocheController extends EntityAPIControllerExportable {
       'layout' => '',
       'type' => '',
       'data' => '',
+      'hash_cache_data' => '',
     );
     return parent::create($values);
   }
