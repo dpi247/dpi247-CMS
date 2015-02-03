@@ -71,6 +71,9 @@ function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
   //submit
   drupal_form_submit('accroche_form', $form_state2);
   $form_state['pane']->subtype = $form_state2['accroche']->machine_name;
+  
+  /* invalidate cache */
+  dpicache_api_regenerate_all_cache_entry_callback('dpiblocks_accroche_feed', 'accroche_'.$form_state2['accroche']->machine_name);
 }
 
 /**
@@ -94,6 +97,13 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $block->content = $elements['view'];
   $block->admin_links = array ();
   return $block;
+}
+
+function dpiblocks_accroche_get_category_callback($cachedefinition = '', $arguments = array()){
+  if(isset($arguments[0]) && is_string($arguments[0])){
+    return 'accroche_'.$arguments[0];
+  }
+  return "dpiblocks_accroche";
 }
 
 function dpiblocks_accroche_content_type_generate_feed($subtype){

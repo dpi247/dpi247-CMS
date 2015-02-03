@@ -259,6 +259,7 @@ function dpiblocks_dpicache_cache_entry_register() {
       'callback' => 'dpiblocks_accroche_content_type_generate_feed', // Function to call
       'plugin' => 'dpicache_memcache', // Which storage?
       'category' => 'dpiblocks_accroche', // Group
+      'category_callback' => 'dpiblocks_accroche_get_category_callback',
       'data_type' => 'array', // The callback returns an array
       'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
       'refresh_interval' => 15*60, // Default refresh interval
