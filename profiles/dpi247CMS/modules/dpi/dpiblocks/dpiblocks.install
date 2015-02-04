@@ -195,6 +195,100 @@ function dpiblocks_schema() {
 
   $schema['dpiblocks_custom_content_revision']['unique keys'] = array();
 
+  $schema['dpiblocks_accroche'] = array(
+    'description' => 'The custom accroche entity table',
+    'fields' => array(
+      'aid' => array(
+        'description' => 'Primary key for our table of accroche',
+        'type' => 'serial',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'machine_name' => array(
+        'description' => 'The name of our accroche',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'override_title' => array(
+        'description' => 'The title of our custom if it\'s override',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'title' => array(
+        'description' => 'The title of our accroche content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'link' => array(
+        'description' => 'The link of our accroche content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'layout' => array(
+        'description' => 'The layout for our accroche',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'description' => 'The type of our accroche content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'The data for our accroche',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+      ),
+      'hash_cache_data' => array(
+        'description' => 'The data for our accroche',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+      ),
+      'revision_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+        'description' => 'The ID of the entity\'s default revision.',
+      ),
+    ),
+    'primary key' => array('aid'),
+    'unique keys' => array(),
+  );
+  
+  $schema['dpiblocks_accroche_revision'] = $schema['dpiblocks_accroche'];
+  
+  $schema['dpiblocks_accroche_revision']['fields']['revision_id'] = array(
+    'type' => 'serial',
+    'not null' => TRUE,
+    'description' => 'Primary Key: Unique revision ID.',
+  );
+  
+  $schema['dpiblocks_accroche_revision']['fields']['aid'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'default' => NULL,
+    'description' => 'The ID of the attached entity custom_content.',
+  );
+  
+  $schema['dpiblocks_accroche_revision']['fields']['machine_name'] = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => TRUE,
+  );
+  
+  $schema['dpiblocks_accroche_revision']['primary key'] = array('revision_id');
+  
   return $schema;
 }
 
@@ -204,4 +298,53 @@ function dpiblocks_schema() {
 function dpiblocks_update_7001() {
   $schema = drupal_get_schema('dpiblocks_flowmix', TRUE);
   db_create_table('dpiblocks_flowmix', $schema);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7002() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_create_table('dpiblocks_accroche', $schema);
+}
+
+/**
+ * Add machine name column
+ */
+function dpiblocks_update_7003() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'machine_name', $schema['fields']['machine_name']);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7004() {
+  $schema = drupal_get_schema('dpiblocks_accroche_revision', TRUE);
+  db_create_table('dpiblocks_accroche_revision', $schema);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7005() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'type', $schema['fields']['type']);
+}
+
+/**
+ * Create the dpiblocks_accroche table
+ */
+function dpiblocks_update_7006() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche_revision', 'type', $schema['fields']['type']);
+}
+
+/**
+ * Add hash_cache_data column
+ */
+function dpiblocks_update_7007() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'hash_cache_data', $schema['fields']['hash_cache_data']);
+  db_add_field('dpiblocks_accroche_revision', 'hash_cache_data', $schema['fields']['hash_cache_data']);
 }
