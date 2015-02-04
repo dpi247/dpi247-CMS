@@ -156,9 +156,10 @@ function dpiblocks_preprocess_node(& $vars){
 
 function dpiblocks_preprocess_panels_pane(& $vars){
   if($vars['pane']->type == "accroche"){
+    $entity = _dpiblocks_accroche_get_entity_by_subtype($vars['pane']->subtype);
     $vars["theme_hook_suggestions"][] = "panels_pane__accroche";
-    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$vars['pane']->subtype;
-    $vars["theme_hook_suggestions"][] = "accroche__".$vars['pane']->subtype;
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$entity->layout;
+    $vars["theme_hook_suggestions"][] = "accroche__".$entity->layout;
   }
 }
 
