@@ -313,7 +313,7 @@ function dpiblocks_update_7002() {
  */
 function dpiblocks_update_7003() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
-  db_add_field('dpiblocks_accroche', 'machine_name', $schema['fields']['machine_name']);
+  //db_add_field('dpiblocks_accroche', 'machine_name', $schema['fields']['machine_name']);
 }
 
 /**
@@ -329,7 +329,7 @@ function dpiblocks_update_7004() {
  */
 function dpiblocks_update_7005() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
-  db_add_field('dpiblocks_accroche', 'type', $schema['fields']['type']);
+  //db_add_field('dpiblocks_accroche', 'type', $schema['fields']['type']);
 }
 
 /**
@@ -337,7 +337,7 @@ function dpiblocks_update_7005() {
  */
 function dpiblocks_update_7006() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
-  db_add_field('dpiblocks_accroche_revision', 'type', $schema['fields']['type']);
+  //db_add_field('dpiblocks_accroche_revision', 'type', $schema['fields']['type']);
 }
 
 /**
@@ -345,6 +345,6 @@ function dpiblocks_update_7006() {
  */
 function dpiblocks_update_7007() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
-  db_add_field('dpiblocks_accroche', 'hash_cache_data', $schema['fields']['hash_cache_data']);
-  db_add_field('dpiblocks_accroche_revision', 'hash_cache_data', $schema['fields']['hash_cache_data']);
+  //db_add_field('dpiblocks_accroche', 'hash_cache_data', $schema['fields']['hash_cache_data']);
+  // db_add_field('dpiblocks_accroche_revision', 'hash_cache_data', $schema['fields']['hash_cache_data']);
 }
