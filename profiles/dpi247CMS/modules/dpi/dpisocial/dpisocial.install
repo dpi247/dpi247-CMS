@@ -1,7 +1,8 @@
 <?php
 
 function dpisocial_uninstall() {
-  drupal_uninstall_schema('dpisocial');
+  drupal_uninstall_schema('dpisocial_node_nbshares');
+  drupal_uninstall_schema('dpisocial_node_shares_to_update');
 }
 
 function dpisocial_schema() {
