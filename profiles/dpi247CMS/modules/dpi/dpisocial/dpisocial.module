@@ -255,26 +255,19 @@ function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
 
 function dpisocial_field_extra_fields() {
   $extrafield_name_share_article = 'dpisocial_share';
-  
-  foreach ( array (
+  $values = array (
     'page',
     'article',
     'package',
     'package_gallery' 
-  ) as $node_type ) {
-    
+  );  
+  foreach ($values  as $node_type ) {
     $extra ['node'] [$node_type] ['display'] [$extrafield_name_share_article] = array (
-      
       'label' => t ( 'DPI Social Boutons de partage' ),
-      
       'description' => t ( 'Les boutons de partage sur les différents réseaux sociaux.' ),
-      
-      'weight' => 50  // default weight, can be changed on display form by site-builder.
-        )
-
-    ;
+      'weight' => 50,  // default weight, can be changed on display form by site-builder.
+    );
   }
-  
   return $extra;
 }
 
@@ -328,10 +321,10 @@ function dpisocial_node_view($node, $view_mode, $langcode) {
   }
   
   usort ( $buttons, "dpisocial_cmp_share_buttons" );
-  
-  foreach ( $buttons as $b )
+  $content = "";
+  foreach ( $buttons as $b ){
     $content .= $b ['html'];
-  
+  }
   $body = str_replace ( "'", "\'", variable_get ( 'dpisocial_add_email_body', '' ) );
   $body = token_replace ( $body, array (
     'node' => $node 
@@ -375,9 +368,7 @@ function dpisocial_cron() {
   
   foreach ( $social_network as $snetwork ) {
     $class = $snetwork ['handler'] ['class'];
-    
     $nclass = new $class ();
-    
     $networks [$nclass->whoAmI] = $nclass;
   }
   
