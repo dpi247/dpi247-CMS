@@ -170,6 +170,42 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         'method' => 'replace'
       )
     );
+    
+    if($nb>1){
+      $mixing = array(
+        'followed' => t('Followed'),
+        'alternate' => t('Alternate'),
+        'random' => t('Random'),
+        'custom' => t('Define custom schema'),
+      );
+      $defaultval = (isset ( $custom_content->mixing )) ? $custom_content->mixing : '';
+      if(strstr($custom_content->mixing, 'custom')!==FALSE){
+        $el = explode('_', $custom_content->mixing);
+        $defaultval = isset($el[0]) ? $el[0] : '';
+        $specialschema = isset($el[1]) ? $el[1] : '';
+      }
+      $form ['accroche'] ['mixing'] = array (
+        '#type' => 'select',
+        '#title' => t ( 'Schema used for mixing the feeds ' ),
+        '#required' => FALSE,
+        "#options" => $mixing,
+        '#default_value' => $defaultval,
+        '#ajax' => array (
+          'callback' => 'dpiblocks_ajax_callback_define_get_destination',
+          'wrapper' => 'accroche-form',
+          'method' => 'replace'
+        )
+      );
+      if($form_state ['values']['mixing'] == "custom" || $defaultval == 'custom'){
+        $form ['accroche'] ['schema'] = array (
+          '#type' => 'textfield',
+          '#title' => t ( 'Define schema that you want to use' ),
+          "#description" => t('Use line that you want to use and separate every number by ",". Example : 1,2,1,3,2,1. If you use this way the number of element cannot be used. The first line is 1.'),          
+          '#default_value' => (isset ( $specialschema )) ? $specialschema : '',
+        );
+      }
+      
+    }
   }
 
   if(!isset($custom_content->is_new)) {
@@ -228,6 +264,7 @@ function accroche_form_submit($form, &$form_state) {
     'override_title' => $form_state['values']['override_title'],
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
+    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : $form_state['values']['mixing'],
     'layout' => $form_state['values']['layout'],
     'type' => $form_state['values']['type'],    
   );

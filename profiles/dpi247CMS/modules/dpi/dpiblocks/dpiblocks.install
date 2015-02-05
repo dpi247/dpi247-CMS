@@ -241,6 +241,12 @@ function dpiblocks_schema() {
         'length' => '255',
         'not null' => TRUE,
       ),
+      'mixing' => array(
+        'description' => 'The type of our accroche content',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
       'data' => array(
         'description' => 'The data for our accroche',
         'type' => 'varchar',
@@ -347,4 +353,13 @@ function dpiblocks_update_7007() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
   //db_add_field('dpiblocks_accroche', 'hash_cache_data', $schema['fields']['hash_cache_data']);
   // db_add_field('dpiblocks_accroche_revision', 'hash_cache_data', $schema['fields']['hash_cache_data']);
+}
+
+/**
+ * Add hash_cache_data column
+ */
+function dpiblocks_update_7008() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  //db_add_field('dpiblocks_accroche', 'mixing', $schema['fields']['mixing']);
+  db_add_field('dpiblocks_accroche_revision', 'mixing', $schema['fields']['mixing']);
 }

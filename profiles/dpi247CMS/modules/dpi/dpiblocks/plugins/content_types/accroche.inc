@@ -122,7 +122,7 @@ function dpiblocks_accroche_content_type_generate_feed($subtype){
     $string_element = substr($string_element,0,-1);
   } elseif (isset ( $info_entity->type ) && $info_entity->type == "destination") {
     $array_val = unserialize($info_entity->data);
-    $string_element = dpiblocks_define_node_element_string($array_val);
+    $string_element = dpiblocks_define_node_element_string($array_val, $info_entity);
   }
   /* create view */
   $view_name = _dpiblocks_accroche_get_view_name ();
@@ -138,9 +138,39 @@ function dpiblocks_accroche_content_type_generate_feed($subtype){
   return array('view' => $view->render(), 'entity' => $info_entity);
 }
 
-function dpiblocks_define_node_element_string($dest){
+function dpiblocks_define_node_element_string($dest, $info_entity){
   module_load_include('inc','dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
-  $string = "";  
+  $string = "";
+  if(count($dest) > 1){    
+    if(isset($info_entity->mixing)){
+      $switch = $info_entity->mixing;
+      if(strstr($info_entity->mixing, 'custom')!==FALSE){
+        $tmp_info = explode('_', $info_entity->mixing);
+        $switch = (isset($tmp_info[0])) ? $tmp_info[0] : '';
+        $customVal = (isset($tmp_info[1])) ? $tmp_info[1] : '';
+      }
+      switch($switch){
+        case 'alternate':
+            _dpiblocks_accroche_get_alternate_mixing_result($string, $dest);
+          break;
+        case 'random':
+            _dpiblocks_accroche_get_random_mixing_result($string, $dest);
+          break;
+        case 'custom':
+            _dpiblocks_accroche_get_custom_mixing_result($string, $dest, $customVal);
+          break;
+        default:
+            _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+          break;
+      }
+    }
+  } else{
+    _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+  } 
+  return substr($string, 0 , -1);
+}
+
+function _dpiblocks_accroche_get_default_mixing_result(& $string, $dest){
   foreach ( $dest as $destination ) {
     try {
       $targetBlockController = new TargetBlockController ( 'targetblock' );
@@ -160,7 +190,122 @@ function dpiblocks_define_node_element_string($dest){
     } catch (Exception $e) {
     }
   }
-  return substr($string, 0 , -1);
+}
+
+function _dpiblocks_accroche_get_alternate_mixing_result(& $string, $dest){
+  $results = array();
+  $cpt_result = 0;
+  //create results
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        if(!isset($results[$cpt_result])){
+          $results[$cpt_result] = array();
+        }
+        $results[$cpt_result][] = $val_view [$i];
+      }
+      $cpt_result++;
+    } catch (Exception $e) {
+    }
+  }
+  //use results
+  return _dpiblocks_accroche_merge_table_alternate($string, $results);
+}
+
+function _dpiblocks_accroche_merge_table_alternate(& $string, $results){
+  $return = array();
+  $nb_table = count($results);
+  $val_max = 0;
+  for ($i = 0; $i < $nb_table; $i++){
+    if($val_max < count($results[$i])){
+      $val_max = count($results[$i]);
+    }
+  }
+  for ($i=0;$i<$val_max;$i++){
+    for($j=0;$j<$nb_table;$j++){
+      if(isset($results[$j][$i]) && $tmp = $results[$j][$i]){
+        $string .= $tmp->nid.'+';
+      }
+    }
+  }
+}
+
+function _dpiblocks_accroche_get_random_mixing_result(& $string, $dest){
+  $results = array();
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        $results[] = $val_view [$i];
+      }
+    } catch (Exception $e) {
+    }
+  }
+  if(shuffle($results)){
+    foreach($results as $node){
+      $string .= $node->nid.'+';
+    }
+  }  
+}
+
+function _dpiblocks_accroche_get_custom_mixing_result(& $string, $dest, $customVal){
+  $results = array();
+  $cpt_result = 0;
+  //create results
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        if(!isset($results[$cpt_result])){
+          $results[$cpt_result] = array();
+        }
+        $results[$cpt_result][] = $val_view [$i];
+      }
+      $cpt_result++;
+    } catch (Exception $e) {
+    }
+  }
+  //use results
+  return _dpiblocks_accroche_merge_table_custom($string, $results, $customVal);
+}
+
+function _dpiblocks_accroche_merge_table_custom(& $string, $results, $customVal){
+  $tab_val = explode(',', $customVal);
+  foreach($tab_val as $destinationLine){
+    if(isset($results[$destinationLine-1]) && !empty($results[$destinationLine-1])){
+      $val = current($results[$destinationLine-1]); 
+      $string .= $val->nid.'+';
+      array_shift($results[$destinationLine-1]);
+    }
+  }
 }
 
 function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {

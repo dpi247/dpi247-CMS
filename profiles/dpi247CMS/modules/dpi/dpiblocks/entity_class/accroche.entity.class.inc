@@ -56,6 +56,13 @@ class AccrocheEntity extends Entity {
   public $type;
 
   /**
+   * The type of accroche content
+   *
+   * @var $type
+   */
+  public $mixing;
+  
+  /**
    * The data of accroche content
    *
    * @var $date
