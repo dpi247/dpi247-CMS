@@ -138,7 +138,9 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
   $result_save = $targetviews_values [$term_value] [$target_value];
   
   $result = $result_save;
-  $result = array_slice ( $result, $targetblock->offset, $targetblock->node_count_for_targetblockinstance );
+  if(isset($targetblock->node_count_for_targetblockinstance) && $targetblock->node_count_for_targetblockinstance > 0){
+    $result = array_slice ( $result, $targetblock->offset, $targetblock->node_count_for_targetblockinstance );
+  }  
   
   $targetview_clone->display_handler->view->result = $result;
   $targetview_clone->result = $result;
@@ -196,7 +198,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Number of item(s)' ),
     '#size' => 4,
     '#description' => t ( 'Number of element(s) displayed on this block' ),
-    '#required' => TRUE
+    '#required' => FALSE
   );
   
   if (count ( $available_templates_override )) {
