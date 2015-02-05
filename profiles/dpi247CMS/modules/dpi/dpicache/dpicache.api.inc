@@ -23,7 +23,7 @@ function dpicache_get_cache_entry($cache_name) {
   array_shift ( $parameters );
   array_pop( $hash_parameters ); //unset $conf
   array_pop( $hash_parameters ); //unset title -> for one_cache_regenerate
-  
+
   // Get hash
   $hash = _dpicache_get_hash ( $cache_name, $hash_parameters );
   if (! $hash) {
@@ -365,7 +365,6 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
   if ($category != NULL) {
     $query->condition ( 'dce.category', $category );
   }
-  //dpicache_regenerate_cache_entries_process ( $query );
   /**
    * @todo problem avec le cache régénérate donc on a courcircuité le tout pour venir supprimer le
    * cache manuellement ainsi que sont entrée de cache (entrée de cache pour éviter une régénération inutile
@@ -373,6 +372,8 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
    * 
    * Pour remettre à la normal retirer tout le code du dessous et décommenter la fonction au dessus.
    */
+  //dpicache_regenerate_cache_entries_process ( $query );
+  
   /* suppression des caches concernés */
   foreach($query->execute() as $entry){
     try {
@@ -387,24 +388,6 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
       ) ), array (), NULL, WATCHDOG_CRITICAL );
     }
   }
-//   /* suppression des entrées concernées */
-//   try {
-//     $query = db_delete ( 'dpicache_cache_entries');
-//     $query->condition ( 'name', $cache_type );    
-//     if ($category != NULL) {
-//       $query->condition ( 'category', $category );
-//     }
-//     $query->execute();
-//     dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category success", array (
-//       '@cache_name' => $cache_type,
-//       '@category' => $category 
-//     ) ), array (), NULL, WATCHDOG_INFO );
-//   } catch (Exception $e) {
-//     dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache regeneration: @cache_name category: @category fail", array (
-//       '@cache_name' => $cache_type,
-//       '@category' => $category 
-//     ) ), array (), NULL, WATCHDOG_CRITICAL);
-//   }
 }
 
 /**

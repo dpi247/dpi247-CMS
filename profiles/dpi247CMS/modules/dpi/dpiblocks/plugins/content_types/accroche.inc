@@ -13,212 +13,67 @@ $plugin = array (
 function dpiblocks_accroche_content_type_content_types($plugins) {
   $types = array ();
   $layouts = _dpiblocks_accroche_get_all_teaser ();
-  if(isset($layouts) && is_array($layouts)){
-    foreach ( $layouts as $key => $layout ) {
-      $types [$key] = array (
-        'title' => check_plain ( $layout [0] ),
-        'subtype' => $key,
-        'description' => check_plain ( $layout [0] ),
-        'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
-        'category' => 'Accroche',
-        'group' => 'DPI Core',
-        'all contexts' => TRUE
-      );
-    } 
+  foreach ( $layouts as $key => $layout ) {
+    $types [$key] = array (
+      'title' => check_plain ( $layout [0] ),
+      'subtype' => $key,
+      'description' => check_plain ( $layout [0] ),
+      'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
+      'category' => 'Accroche',
+      'group' => 'DPI Core', 
+      'all contexts' => TRUE
+    ); 
   }
+  
+  /* foreach on entity */
+  $entities = entity_load('accroche');
+  foreach($entities as $aid => $entity){
+    $types [$entity->machine_name] = array (
+      'title' => check_plain ( $entity->title ),
+      'subtype' => $entity->machine_name,
+      'description' => check_plain ( $entity->title ),
+      'icon' => drupal_get_path ( "module", "dpiblocks" ) . '/icons/1422908884_kwrite.png',
+      'category'     => t('DPI Blocks'),
+      'group'        => t('DPI Core'),
+      'all contexts' => TRUE
+    );
+  }
+  
   return $types;
 }
 
-function dpiblocks_accroche_plugin_edit_form($form, &$form_state) {
-  $form_temp = $form;
-  $conf = $form_state ['conf'];
-  if(!isset($form_state ['values'] ['accroche'] ['type'])){
-    if (isset ( $conf ["destination"] )) {
-      $form_state ['values'] ['accroche'] ['type'] = "destination";
-    } elseif (isset ( $conf ["node"] )) {
-      $form_state ['values'] ['accroche'] ['type'] = "node";
-    }
+function dpiblocks_accroche_plugin_edit_form($form,& $form_state){ 
+  form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
+  form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
+  
+  $entity = _dpiblocks_accroche_get_entity_by_subtype($form_state['pane']->subtype);
+  if(isset($entity) && empty($entity)  && isset($form_state['subtype_name'])){
+    $entity = new stdClass();
+    $entity->layout = $form_state['subtype_name'];
   }
+  $form += dpiblocks_get_entity_form('accroche_form', $form_state,$entity);
   
-  $form ['accroche'] = array (
-    '#prefix' => '<div id="accroche-form">',
-    '#suffix' => '</div>',
-    "#tree" => true 
-  );
-  
-  form_load_include ( $form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche' );
-  
-  $form ['accroche'] ['title'] = array (
-    '#type' => 'textfield',
-    '#title' => t ( 'Enter a Title' ),
-    '#required' => TRUE,
-    '#default_value' => $conf ["title"] 
-  );
-  
-  $form ['accroche'] ['url'] = array (
-    '#type' => 'textfield',
-    '#title' => t ( 'Enter url for title link' ),
-    '#required' => FALSE,
-    '#default_value' => $conf ["url"],
-    '#description' => t ( 'URL should be : http://www.mysite.com/ask/me' ) 
-  );
-  
-  $form ['accroche'] ['layout'] = array (
-    '#type' => 'textfield',
-    '#title' => t ( 'Layout choose' ),
-    '#default_value' => $form_state ['subtype_name'],
-    '#required' => TRUE,
-    '#disabled' => TRUE 
-  );
-  
-  $form ['accroche'] ['type'] = array (
-    '#type' => 'select',
-    '#title' => t ( 'Select type of value' ),
-    '#default_value' => $conf ["type"],
-    '#options' => array (
-      '' => t ( 'Choose a node selection method' ),
-      'node' => t ( 'Node' ),
-      'destination' => t ( 'Destination' ) 
-    ),
-    '#description' => t ( 'Choose your type of informations' ),
-    '#ajax' => array (
-      'callback' => 'dpiblocks_ajax_callback_define_type_form',
-      'wrapper' => 'accroche-form',
-      'method' => 'replace' 
-    ) 
-  );
-
-  if (! strcmp ( $form_state ['values'] ['accroche'] ['type'], 'node' )) {
-    $form ['accroche'] ['node'] = array (
-      '#type' => 'textfield',
-      '#title' => t ( 'Enter node id' ),
-      '#description' => t ( 'add ; between each node id' ),
-      '#required' => FALSE,
-      
-      '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
-      '#default_value' => $conf ["node"] 
-    );
-  } elseif (! strcmp ( $form_state ['values'] ['accroche'] ['type'], 'destination' )) {
-    $nb = 1;
-    
-    // watchdog('debug dpi', '<pre>'.print_r($form_state,1).'</pre>');
-    /* si je rebuild && si il s'agit du obuton add more */
-    if (isset ( $form_state ['values'] ['accroche'] ['destination'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button") {
-      $nb = count ( $form_state ['values'] ['accroche'] ['destination'] ) + 1;
-    } elseif (isset ( $form_state ['values'] ['accroche'] ['destination'] )) {
-      $nb = count ( $form_state ['values'] ['accroche'] ['destination'] );
-    } elseif (isset($conf ["destination"])) {
-      $nb = count($conf ["destination"]);
-    }
-    
-    /* boucle */
-    for($i = 0; $i < $nb; $i ++) {
-      $form ['accroche'] ['destination'] [$i] = array (
-        '#prefix' => '<div id="destination-add-form" class="container-inline" >',
-        '#suffix' => '</div>' 
-      );
-      
-      $form ['accroche'] ['destination'] [$i] ['destination_section'] = array (
-        '#type' => 'select',
-        '#title' => t ( 'Choose a section' ),
-        '#required' => TRUE,
-        '#options' => dpidestinations_api_get_all_sections_term_available_as_select_options ( FALSE ),
-        '#ajax' => array (
-          'callback' => 'dpiblocks_ajax_callback_define_target_from_form',
-          'wrapper' => 'accroche-form',
-          'method' => 'replace' 
-        ),
-        '#default_value' => (isset ( $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_section'] )) ? $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_section'] : isset ( $conf ["destination"] [$i] ["section"] ) ? $conf ["destination"] [$i] ["section"] :  '' 
-      );
-      
-      if (isset ( $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_section'] )) {
-        $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_section'] );
-      } elseif (isset ( $conf ["destination"] [$i] ["section"] ) && $conf ["destination"] [$i] ["section"] != "") {
-        $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $conf ["destination"] [$i] ["section"] );
-      } else {
-        $options = array ();
-      }
-      
-      $form ['accroche'] ['destination'] [$i] ['destination_target'] = array (
-        '#type' => 'select',
-        '#title' => t ( 'Choose a section' ),
-        '#required' => FALSE,
-        "#options" => $options,
-        '#default_value' => (isset ( $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_target'] : isset ( $conf ["destination"] [$i] ["target"] ) ? $conf ["destination"] [$i] ["target"] : '' 
-      );
-      
-      $form ['accroche'] ['destination'] [$i] ['destination_nb_element'] = array (
-        '#type' => 'textfield',
-        '#title' => t ( 'Enter number of element that you want' ),
-        '#required' => TRUE,
-        '#default_value' => (isset ( $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_nb_element'] )) ? $form_state ['values'] ['accroche'] ['destination'] [$i] ['destination_nb_element'] :isset ( $conf ["destination"] [$i] ["nb_element"] ) ? $conf ["destination"] [$i] ["nb_element"] :  '' 
-      );
-    }
-    
-    $form ['accroche'] ['add_more'] = array (
-      '#type' => 'button',
-      '#value' => 'Add more',
-      '#ajax' => array (
-        'callback' => 'dpiblocks_ajax_callback_define_get_destination',
-        'wrapper' => 'accroche-form',
-        'method' => 'replace' 
-      ) 
-    );
-  }
+  unset($form['accroche']['revision']);
+  unset($form['accroche']['submit']);  
   
   return $form;
-}
-
-function dpiblocks_ajax_callback_define_type_form($form, $form_state) {
-  return $form ['accroche'];
-}
-
-function dpiblocks_ajax_callback_define_target_from_form($form, $form_state) {
-  // $i = $form_state['triggering_element']['#parents'][2];
-  return $form ["accroche"];
-}
-
-function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
-  return $form ['accroche'];
-}
-
-function dpiblocks_accroche_plugin_edit_form_validate($form, &$form_state) {
-  if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "node") {
-    if (! isset ( $form_state ['values'] ["accroche"] ['node'] ) || $form_state ['values'] ["accroche"] ['node'] == "")
-      form_set_error ( "accroche][node", "Pleaser enter a value into the node field" );
-  } elseif (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "destination") {
-    for($i = 0; $i < count ( $form_state ['values'] ['accroche'] ['destination'] ); $i ++) {
-      if (! isset ( $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_section'] ) || $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_section'] == "")
-        form_set_error ( "accroche] ['destination'] [$i][destination_section", "Select a section value" );
-      if (! isset ( $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_target'] ) || $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_target'] == "")
-        form_set_error ( "accroche] ['destination'] [$i][destination_target", "Please select a target" );
-      if (! isset ( $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_nb_element'] ) || ! is_numeric ( $form_state ['values'] ["accroche"] ['destination'] [$i] ['destination_nb_element'] ))
-        form_set_error ( "accroche] ['destination'] [$i][destination_nb_element", "Enter a numeric value" );
-    }
-  } else {
-    form_set_error ( "accroche][type", "Pleaser choose a section" );
-  }
 }
 
 /**
  * Content type submit handler.
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
-  $form_state ['conf'] ['title'] = $form_state ['values'] ["accroche"] ['title'];
-  $form_state ['conf'] ['url'] = $form_state ['values'] ["accroche"] ['url'];
-  $form_state ['conf'] ['layout'] = $form_state ['values'] ["accroche"] ['layout'];
-  $form_state ['conf'] ['type'] = $form_state ['values'] ["accroche"] ['type'];
-  if (isset ( $form_state ['values'] ["accroche"] ['type'] ) && $form_state ['values'] ["accroche"] ['type'] == "destination") {
-    for($i = 0; $i < count ( $form_state ["values"] ["accroche"] ['destination'] ); $i ++) {
-      $form_state ['conf'] ['destination'] [$i] = array (
-        'section' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_section"],
-        'target' => $form_state ["values"] ["accroche"] ['destination'] [$i] ["destination_target"],
-        'nb_element' => $form_state ["values"] ["accroche"] ['destination'] [$i] ['destination_nb_element'] 
-      );
-    }
-  } else {
-    $form_state ['conf'] ['node'] = $form_state ['values'] ["accroche"] ['node'];
-  }
+  $form_state2=array();
+  $form_state2['values']=$form_state['values'];  
+  //load form include
+  form_load_include($form_state2, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
+  form_load_include($form_state2, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
+  //submit
+  drupal_form_submit('accroche_form', $form_state2);
+  $form_state['pane']->subtype = $form_state2['accroche']->machine_name;
+  
+  /* invalidate cache */
+  dpicache_api_regenerate_all_cache_entry_callback('dpiblocks_accroche_feed', 'accroche_'.$form_state2['accroche']->machine_name);
 }
 
 /**
@@ -235,75 +90,239 @@ function _dpiblocks_accroche_get_view_name() {
 }
 
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
+  $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $conf, $args);
+  /* Prepare render element and return it */
+  $block = new stdClass ();
+  $block->title = (isset ( $elements['entity']->link ) && $elements['entity']->link != "") ? l ( $elements['entity']->title, $elements['entity']->link ) : $elements['entity']->title;
+  $block->content = $elements['view'];
+  $block->admin_links = array ();
+  return $block;
+}
+
+function dpiblocks_accroche_get_category_callback($cachedefinition = '', $arguments = array()){
+  if(isset($arguments[0]) && is_string($arguments[0])){
+    return 'accroche_'.$arguments[0];
+  }
+  return "dpiblocks_accroche";
+}
+
+function dpiblocks_accroche_content_type_generate_feed($subtype){
+  $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   
   /* Prepare element for view */
-  $elements = array ();
   $teasers = _dpiblocks_accroche_get_all_teaser ();
-  $elements ["layout"] = $teasers [$conf ["layout"]] [1];
-  if (isset ( $conf ["type"] ) && $conf ["type"] == "node") {
-    $elements ["node_id"] = explode ( ";", $conf ["node"] );
+  if (isset ( $info_entity->type ) && $info_entity->type == "node") {
     $string_element = "";
-    $vals = explode ( ";", $conf ["node"] );
+    $vals = explode ( ";", $info_entity->data );
     foreach ($vals as $val){
       if(isset($val) && $val != ""){
         $string_element .= $val."+";
       }
     }
     $string_element = substr($string_element,0,-1);
-  } elseif (isset ( $conf ["type"] ) && $conf ["type"] == "destination") {
-    $elements ["destination"] = $conf ["destination"];
-    $string_element = dpiblocks_define_node_element_string($conf["destination"]);
+  } elseif (isset ( $info_entity->type ) && $info_entity->type == "destination") {
+    $array_val = unserialize($info_entity->data);
+    $string_element = dpiblocks_define_node_element_string($array_val, $info_entity);
   }
   /* create view */
   $view_name = _dpiblocks_accroche_get_view_name ();
   $view = views_get_view ( $view_name );
   $view->set_display ( $view_name );
-  $view->accroche_view_mode = $elements ["layout"];
-
+  $view->accroche_view_mode = $teasers [$info_entity->layout] [1];
+  
   /* set arguments and execute view */
   $view->set_arguments ( array($string_element) );
   $view->pre_execute ();
   $view->execute ();
-
-  /* Prepare render element and return it */
-  $block = new stdClass ();
-  $block->title = (isset ( $conf ["url"] ) && $conf ["url"] != "") ? l ( $conf ["title"], $conf ["url"] ) : $conf ["title"];
-  $block->content = $view->render ();
-  $block->admin_links = array ();
-  return $block;
+  
+  return array('view' => $view->render(), 'entity' => $info_entity);
 }
 
-function dpiblocks_define_node_element_string($dest){
+function dpiblocks_define_node_element_string($dest, $info_entity){
   module_load_include('inc','dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
-  $string = "";  
+  $string = "";
+  if(count($dest) > 1){    
+    if(isset($info_entity->mixing)){
+      $switch = $info_entity->mixing;
+      if(strstr($info_entity->mixing, 'custom')!==FALSE){
+        $tmp_info = explode('_', $info_entity->mixing);
+        $switch = (isset($tmp_info[0])) ? $tmp_info[0] : '';
+        $customVal = (isset($tmp_info[1])) ? $tmp_info[1] : '';
+      }
+      switch($switch){
+        case 'alternate':
+            _dpiblocks_accroche_get_alternate_mixing_result($string, $dest);
+          break;
+        case 'random':
+            _dpiblocks_accroche_get_random_mixing_result($string, $dest);
+          break;
+        case 'custom':
+            _dpiblocks_accroche_get_custom_mixing_result($string, $dest, $customVal);
+          break;
+        default:
+            _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+          break;
+      }
+    }
+  } else{
+    _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+  } 
+  return substr($string, 0 , -1);
+}
+
+function _dpiblocks_accroche_get_default_mixing_result(& $string, $dest){
   foreach ( $dest as $destination ) {
     try {
       $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["target"], 0 );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
       $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
       $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["section"] ), $destination ["target"], $targetblock );
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
       $val_view = $targetview->result;
-      $cpt = $destination ["nb_element"];
+      $cpt = $destination ["destination_nb_element"];
       if ($cpt > count ( $val_view ))
         $cpt = count ( $val_view );
       for($i = 0; $i < $cpt; $i ++) {
-        $string .= $val_view [$i]->nid.'+';
+        $tmp = $val_view [$i];
+        $string .= $tmp->nid.'+';
       }
     } catch (Exception $e) {
     }
   }
-  return substr($string, 0 , -1);
+}
+
+function _dpiblocks_accroche_get_alternate_mixing_result(& $string, $dest){
+  $results = array();
+  $cpt_result = 0;
+  //create results
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        if(!isset($results[$cpt_result])){
+          $results[$cpt_result] = array();
+        }
+        $results[$cpt_result][] = $val_view [$i];
+      }
+      $cpt_result++;
+    } catch (Exception $e) {
+    }
+  }
+  //use results
+  return _dpiblocks_accroche_merge_table_alternate($string, $results);
+}
+
+function _dpiblocks_accroche_merge_table_alternate(& $string, $results){
+  $return = array();
+  $nb_table = count($results);
+  $val_max = 0;
+  for ($i = 0; $i < $nb_table; $i++){
+    if($val_max < count($results[$i])){
+      $val_max = count($results[$i]);
+    }
+  }
+  for ($i=0;$i<$val_max;$i++){
+    for($j=0;$j<$nb_table;$j++){
+      if(isset($results[$j][$i]) && $tmp = $results[$j][$i]){
+        $string .= $tmp->nid.'+';
+      }
+    }
+  }
+}
+
+function _dpiblocks_accroche_get_random_mixing_result(& $string, $dest){
+  $results = array();
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        $results[] = $val_view [$i];
+      }
+    } catch (Exception $e) {
+    }
+  }
+  if(shuffle($results)){
+    foreach($results as $node){
+      $string .= $node->nid.'+';
+    }
+  }  
+}
+
+function _dpiblocks_accroche_get_custom_mixing_result(& $string, $dest, $customVal){
+  $results = array();
+  $cpt_result = 0;
+  //create results
+  foreach ( $dest as $destination ) {
+    try {
+      $targetBlockController = new TargetBlockController ( 'targetblock' );
+      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+      $target=$targetblock_wrapper->target->value();
+      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+      $val_view = $targetview->result;
+      $cpt = $destination ["destination_nb_element"];
+      if ($cpt > count ( $val_view ))
+        $cpt = count ( $val_view );
+      for($i = 0; $i < $cpt; $i ++) {
+        if(!isset($results[$cpt_result])){
+          $results[$cpt_result] = array();
+        }
+        $results[$cpt_result][] = $val_view [$i];
+      }
+      $cpt_result++;
+    } catch (Exception $e) {
+    }
+  }
+  //use results
+  return _dpiblocks_accroche_merge_table_custom($string, $results, $customVal);
+}
+
+function _dpiblocks_accroche_merge_table_custom(& $string, $results, $customVal){
+  $tab_val = explode(',', $customVal);
+  foreach($tab_val as $destinationLine){
+    if(isset($results[$destinationLine-1]) && !empty($results[$destinationLine-1])){
+      $val = current($results[$destinationLine-1]); 
+      $string .= $val->nid.'+';
+      array_shift($results[$destinationLine-1]);
+    }
+  }
 }
 
 function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {
+  $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   $block = new stdClass ();
-  $block->title = $conf ['override_title'] ? $conf ['override_title_text'] : $conf ["title"];
+  $block->title = $info_entity->override_title ? $info_entity->override_title : $info_entity->title;
   $block->content = t ( 'Accroche key : @accroche_key<br />Title : @title<br />Type : @type', array (
     '@accroche_key' => $subtype,
-    '@title' => $conf ["title"],
-    "@type" => $conf ["type"] 
+    '@title' => $info_entity->title,
+    "@type" => $info_entity->layout 
   ) );
   return $block;
+}
+
+function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
+  // Create a new custom content controller
+  $customContentController = new AccrocheController('accroche');
+  // Return the custom_content entity
+  return $customContentController->load_by_machine_name($machine_name);
 }

@@ -652,7 +652,7 @@ function dpicontenttypes_api_define_element_without_mediabox(& $node, $langcode,
     }
   }
   
-  $node->$updated_field = $elements_embed;
+  $node->$updated_field[$langcode] = $elements_embed;
   $vars_out_embed = dpicontenttypes_api_define_hors_text($elements_outembed, $options);
   $node->$bottom_box_field_name = $vars_out_embed['other'];
   $node->content[$bottom_box_field_name] = array();
@@ -663,6 +663,7 @@ function dpicontenttypes_api_define_element_without_mediabox(& $node, $langcode,
     );
   }
   $node->$hors_text_field_name = $vars_out_embed['hors_texte'];
+  $node->content[$hors_text_field_name] = array();
   $tmp = $node->$hors_text_field_name;
   foreach($tmp as $elem){
     $node->content[$hors_text_field_name][] = array(

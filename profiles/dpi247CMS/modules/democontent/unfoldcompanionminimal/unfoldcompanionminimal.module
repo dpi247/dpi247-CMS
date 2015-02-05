@@ -134,7 +134,7 @@ function unfoldcompanionminimal_node_view_mediabox(& $node, $view_mode, $langcod
             /* Get type of elements to know style of mediabox  */
             $types = field_get_items('node', $node, 'field_packagetype');
             $type = reset($types);
-            $type = intval($type['value']);
+            $type = $type['tid'];
 
             /* Get rendered element */
             $node_render = node_view($node_info);

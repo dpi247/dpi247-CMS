@@ -136,6 +136,12 @@ function dpiblocks_menu() {
     'file' => 'includes/accroche.admin.inc',
   );
   
+  $items['my_module_set_target'] = array(
+    'page callback'    => 'dpiblocks_ajax_callback_define_type_entity_form',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,    
+  );
+  
   return $items;
 }
 
@@ -150,9 +156,10 @@ function dpiblocks_preprocess_node(& $vars){
 
 function dpiblocks_preprocess_panels_pane(& $vars){
   if($vars['pane']->type == "accroche"){
+    $entity = _dpiblocks_accroche_get_entity_by_subtype($vars['pane']->subtype);
     $vars["theme_hook_suggestions"][] = "panels_pane__accroche";
-    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$vars['pane']->subtype;
-    $vars["theme_hook_suggestions"][] = "accroche__".$vars['pane']->subtype;
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$entity->layout;
+    $vars["theme_hook_suggestions"][] = "accroche__".$entity->layout;
   }
 }
 
@@ -238,7 +245,7 @@ function dpiblocks_dpicache_cache_entry_register() {
     'dpiblocks_flowmix_feed' => array(
       'callback' => 'dpiblocks_flowmix_content_type_generate_feed', // Function to call
       'plugin' => 'dpicache_memcache', // Which storage?
-      'catagory' => 'dpiblocks', // Group
+      'category' => 'dpiblocks', // Group
       'data_type' => 'array', // The callback returns an array
       'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
       'refresh_interval' => 15*60, // Default refresh interval
@@ -246,6 +253,21 @@ function dpiblocks_dpicache_cache_entry_register() {
         'module' => 'dpiblocks',
         'type' => 'inc',
         'name' => 'plugins/content_types/flowmix',
+      ),
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+    'dpiblocks_accroche_feed' => array(
+      'callback' => 'dpiblocks_accroche_content_type_generate_feed', // Function to call
+      'plugin' => 'dpicache_memcache', // Which storage?
+      'category' => 'dpiblocks_accroche', // Group
+      'category_callback' => 'dpiblocks_accroche_get_category_callback',
+      'data_type' => 'array', // The callback returns an array
+      'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
+      'refresh_interval' => 15*60, // Default refresh interval
+      'file' => array( // File to load
+        'module' => 'dpiblocks',
+        'type' => 'inc',
+        'name' => 'plugins/content_types/accroche',
       ),
       'bypass' => FALSE, // Has to be set to FALSE in production environments
     ),
@@ -506,3 +528,19 @@ function dpiblocks_views_api() {
     'path' => drupal_get_path('module', 'dpiblocks')."/themes",
   );
 }
+
+function dpiblocks_views_post_execute(& $view){  
+  if(isset($view->name) && $view->name == "dpiblocks_accroche_default"){
+    if(isset($view->args[0]) && !empty($view->args[0])){
+      $nid_args = explode('+', $view->args[0]);
+      $result = array();
+      foreach($nid_args as $nid){
+        $tmp = new stdClass();
+        $tmp->nid = $nid;
+        $result[] = $tmp;
+      }
+      $view->result = $result;
+    }
+  }
+}
+

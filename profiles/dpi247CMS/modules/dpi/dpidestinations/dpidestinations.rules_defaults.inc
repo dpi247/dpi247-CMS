@@ -21,7 +21,8 @@ function dpidestinations_default_rules_configuration() {
               },
               "DO" : [
                 { "regenerate_node" : { "node" : [ "node" ] } },
-                { "refresh_node_cash" : { "node" : [ "node" ] } }
+                { "refresh_node_cash" : { "node" : [ "node" ] } },
+                { "regenerate_accroche_cache" : { "node" : [ "node" ] } }
               ]
             }
           }';
