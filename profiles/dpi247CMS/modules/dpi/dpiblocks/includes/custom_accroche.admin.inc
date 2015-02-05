@@ -196,7 +196,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
           'method' => 'replace'
         )
       );
-      if($form_state ['values']['mixing'] == "custom" || $defaultval == 'custom'){
+      if($form_state ['values']['mixing'] == "custom" || (!isset($form_state ['values']['mixing']) && $defaultval == 'custom')){
         $form ['accroche'] ['schema'] = array (
           '#type' => 'textfield',
           '#title' => t ( 'Define schema that you want to use' ),
