@@ -10,8 +10,8 @@
  * by the system that includes this file.
  */
 $plugin = array(
-  'title' => t("Dpisso: paywall access"),
-  'description' => t('Test if the user have more than 0 freemium'),
+  'title' => t("Dpisso: no freemium access"),
+  'description' => t('Block the user if he has 0 freemium'),
   'callback' => 'dpisso_paywallaccess_ctools_access_check',
   'summary' =>  'dpisso_paywallaccess_ctools_access_summary',
     'settings form' => 'dpisso_paywallaccess_ctools_access_settings_form',
