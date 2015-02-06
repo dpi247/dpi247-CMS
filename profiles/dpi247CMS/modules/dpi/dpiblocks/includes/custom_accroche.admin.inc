@@ -147,7 +147,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
 
       $form ['accroche'] ['destination'] [$i] ['destination_target'] = array (
         '#type' => 'select',
-        '#title' => t ( 'Choose a section' ),
+        '#title' => t ( 'Choose a target' ),
         '#required' => FALSE,
         "#options" => $options,
         '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_target'] : ''
