@@ -201,6 +201,13 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#required' => FALSE
   );
   
+  $form ['form_targetblock'] ['targetblok_instance_settings'] ['rank_max_value'] = array (
+    '#type' => 'select',
+    '#title' => t ( 'Number of reserved position' ),
+    '#options' => range ( 0, _dpidestinations_variable_get ( 'dpidestination_max_reserved_position', 10 ) ),
+    '#default_value' => ($form_state['conf']['rank_max_value']) ? $form_state['conf']['rank_max_value'] : isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 )
+  );
+  
   if (count ( $available_templates_override )) {
     $form ['form_targetblock'] ['targetblok_instance_settings'] ['template_rule'] = array (
       '#type' => 'select',
@@ -211,22 +218,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       ) + $available_templates_override 
     );
   }
-  
-  $form ['form_targetblock'] ['targetblok_instance_settings'] ['hide_pager'] = array (
-    '#type' => 'checkbox',
-    '#default_value' => $targetblock->hide_pager,
-    '#title' => t ( 'Hide the pager on this targetblock' ),
-    '#size' => 4,
-    '#description' => t ( 'Check this if you don\'t want the pager to display above this targetblock instance' ),
-    '#states' => array (
-      'visible' => array ( // action to take.
-        ':input[name="use_pager"]' =>         // element to evaluate condition on
-        array (
-          'checked' => TRUE 
-        )  // condition
-            ) 
-    ) 
-  );
   
   $form ["form_targetblock"] ['field_settings_rank'] = array(
     '#type' => 'fieldset',
@@ -333,13 +324,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Split & Pager' ) 
   );
   
-  $form ['form_targetblock'] ['targetblok_settings'] ['rank_max_value'] = array (
-    '#type' => 'select',
-    '#title' => t ( 'Number of reserved position' ),
-    '#options' => range ( 0, _dpidestinations_variable_get ( 'dpidestination_max_reserved_position', 10 ) ),
-    '#default_value' => ($form_state['conf']['rank_max_value']) ? $form_state['conf']['rank_max_value'] : isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 ) 
-  );
-  
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] = array (
     '#type' => 'fieldset',
     '#collapsible' => FALSE 
@@ -365,6 +349,21 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
         )  // condition
             ) 
     ) 
+  );
+  $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings']  ['hide_pager'] = array (
+    '#type' => 'checkbox',
+    '#default_value' => $targetblock->hide_pager,
+    '#title' => t ( 'Hide the pager on this targetblock' ),
+    '#size' => 4,
+    '#description' => t ( 'Check this if you don\'t want the pager to display above this targetblock instance' ),
+    '#states' => array (
+      'visible' => array ( // action to take.
+        ':input[name="use_pager"]' =>         // element to evaluate condition on
+        array (
+          'checked' => TRUE
+        )  // condition
+      )
+    )
   );
   
   $form ['form_targetblock'] ['targetblok_settings'] ['split_settings'] = array (
