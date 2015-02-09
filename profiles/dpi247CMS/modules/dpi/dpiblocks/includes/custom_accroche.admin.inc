@@ -264,7 +264,7 @@ function accroche_form_submit($form, &$form_state) {
     'override_title' => $form_state['values']['override_title'],
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
-    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : $form_state['values']['mixing'],
+    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : (isset($form_state['values']['mixing']))? $form_state['values']['mixing'] : "",
     'layout' => $form_state['values']['layout'],
     'type' => $form_state['values']['type'],    
   );
