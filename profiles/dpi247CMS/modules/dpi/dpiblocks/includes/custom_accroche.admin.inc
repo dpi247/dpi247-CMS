@@ -257,14 +257,14 @@ function accroche_form_submit($form, &$form_state) {
   if(!isset($form_state['values']['aid']) && isset($form_state['input']['aid']) && $form_state['input']['aid']!=""){
     $form_state['values']['aid'] = $form_state['input']['aid'];
   }
-  
+
   $array_val = array(
     'aid' => $form_state['values']['aid'],
     'machine_name' => $form_state['values']['machine_name'],
     'override_title' => $form_state['values']['override_title'],
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
-    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : (isset($form_state['values']['mixing']))? $form_state['values']['mixing'] : "",
+    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : "",
     'layout' => $form_state['values']['layout'],
     'type' => $form_state['values']['type'],    
   );
