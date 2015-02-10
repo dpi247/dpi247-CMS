@@ -77,24 +77,6 @@ function dpiscald_videortl_scald_fetch($atom, $type) {
  * Implements hook_scald_prerender().
  */
 function dpiscald_videortl_scald_prerender($atom, $context, $options, $mode) {
-	dsm($atom, 'atom');
-	dsm($mode, 'mode');
-	dsm($options, 'options');
-	dsm($context, 'context');
-
-	$vvvvvv = theme('dpiscald_videortl_player',
-      array('vars' =>
-        array(
-          'video_id'      => $atom->base_id,
-          'video_key'   => $atom->data['video_key'],
-          'video_liveid'  => $atom->data['video_liveid'],
-          'video_domain'     => $atom->data['video_domain'],
-        ),
-        'atom' => $atom,
-      )
-    );
-   dsm($vvvvvv, 'vvvvv');
-
   if ($mode == 'atom') {
     $atom->rendered->player = theme('dpiscald_videortl_player',
       array('vars' =>
