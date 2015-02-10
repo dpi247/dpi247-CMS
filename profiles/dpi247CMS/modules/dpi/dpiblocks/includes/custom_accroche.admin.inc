@@ -404,9 +404,10 @@ function accroche_form_submit($form, &$form_state) {
 
 function _dpiblocks_validate_machine_name($element, $elements, $form_state){
   module_load_include('inc', 'dpiblocks', 'plugins/content_types/accroche');
-  $entity = _dpiblocks_accroche_get_entity_by_subtype($element);
-  if(isset($entity) && !empty((array) $entity)){
-    return TRUE;
-  }
+  //@todo Créer un test de validité correcte
+//   $entity = _dpiblocks_accroche_get_entity_by_subtype($element);
+//   if(isset($entity) && !empty((array) $entity)){
+//     return TRUE;
+//   }
   return FALSE;
 }
