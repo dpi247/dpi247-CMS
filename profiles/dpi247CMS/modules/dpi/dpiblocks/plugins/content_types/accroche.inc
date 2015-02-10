@@ -10,9 +10,15 @@ $plugin = array (
   'all contexts' => TRUE 
 );
 
+/**
+ * Ajout des blocks d'informations pour les accroches ainsi que les accroches réutilisables
+ * @param array $plugins
+ * @return array
+ */
 function dpiblocks_accroche_content_type_content_types($plugins) {
   $types = array ();
   $layouts = _dpiblocks_accroche_get_all_teaser ();
+  
   foreach ( $layouts as $key => $layout ) {
     $types [$key] = array (
       'title' => check_plain ( $layout [0] ),
@@ -42,6 +48,12 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   return $types;
 }
 
+/**
+ * Formulaire de création et de modification d'une accroche
+ * @param array $form
+ * @param array $form_state
+ * @return $form
+ */
 function dpiblocks_accroche_plugin_edit_form($form,& $form_state){ 
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
@@ -60,7 +72,9 @@ function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
 }
 
 /**
- * Content type submit handler.
+ * Formulaire de soumission pour la création et la modification d'une accroche
+ * @param array $form
+ * @param array $form_state
  */
 function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
   $form_state2=array();
@@ -77,18 +91,29 @@ function dpiblocks_accroche_plugin_edit_form_submit($form, &$form_state) {
 }
 
 /**
- * This function return different kind of teaser
- *
- * @return multitype:string
+ * Retourne les accroches disponibles
+ * @return array
  */
 function _dpiblocks_accroche_get_all_teaser() {
   return variable_get ( 'dpiblocks_accroche_settings' );
 }
 
+/**
+ * Retourne le nom de la vue a utilisé
+ * @return string
+ */
 function _dpiblocks_accroche_get_view_name() {
   return 'dpiblocks_accroche_default';
 }
 
+/**
+ * Retourne un object contenant le rendu de l'accroche
+ * @param String $subtype
+ * @param array $conf
+ * @param array $args
+ * @param String $contexts
+ * @return stdClass
+ */
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $conf, $args);
   /* Prepare render element and return it */
@@ -99,6 +124,12 @@ function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   return $block;
 }
 
+/**
+ * Définis la categorie pour les différentes accroches lors de l'enregistrement en cache
+ * @param string $cachedefinition
+ * @param array $arguments
+ * @return string
+ */
 function dpiblocks_accroche_get_category_callback($cachedefinition = '', $arguments = array()){
   if(isset($arguments[0]) && is_string($arguments[0])){
     return 'accroche_'.$arguments[0];
@@ -106,6 +137,11 @@ function dpiblocks_accroche_get_category_callback($cachedefinition = '', $argume
   return "dpiblocks_accroche";
 }
 
+/**
+ * Cette fonction crée le rendu de la vue et rend également la configuration de l'entité accroche selectionnée
+ * @param String $subtype
+ * @return array(view->render, entity_info)
+ */
 function dpiblocks_accroche_content_type_generate_feed($subtype){
   $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   
@@ -124,6 +160,7 @@ function dpiblocks_accroche_content_type_generate_feed($subtype){
     $array_val = unserialize($info_entity->data);
     $string_element = dpiblocks_define_node_element_string($array_val, $info_entity);
   }
+  
   /* create view */
   $view_name = _dpiblocks_accroche_get_view_name ();
   $view = views_get_view ( $view_name );
@@ -138,6 +175,13 @@ function dpiblocks_accroche_content_type_generate_feed($subtype){
   return array('view' => $view->render(), 'entity' => $info_entity);
 }
 
+/**
+ * Cette fonction définit le type de rendu a fournir pour les accroches de types destinations.
+ * Renvois une chaine de caractère. Ex: 1+5+6+7, les nombres représentent le nid des noeuds
+ * @param array $dest
+ * @param array $info_entity
+ * @return string
+ */
 function dpiblocks_define_node_element_string($dest, $info_entity){
   module_load_include('inc','dpidestinations', 'plugins/ctools/content_types/targetblock/targetblock');
   $string = "";
@@ -151,16 +195,16 @@ function dpiblocks_define_node_element_string($dest, $info_entity){
       }
       switch($switch){
         case 'alternate':
-            _dpiblocks_accroche_get_alternate_mixing_result($string, $dest);
+            _dpiblocks_accroche_get_alternate_mixing_result($string, $info_entity);
           break;
         case 'random':
-            _dpiblocks_accroche_get_random_mixing_result($string, $dest);
+            _dpiblocks_accroche_get_random_mixing_result($string, $info_entity);
           break;
         case 'custom':
-            _dpiblocks_accroche_get_custom_mixing_result($string, $dest, $customVal);
+            _dpiblocks_accroche_get_custom_mixing_result($string, $info_entity, $customVal);
           break;
         default:
-            _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+            _dpiblocks_accroche_get_default_mixing_result($string, $info_entity);
           break;
       }
     }
@@ -170,126 +214,111 @@ function dpiblocks_define_node_element_string($dest, $info_entity){
   return substr($string, 0 , -1);
 }
 
-function _dpiblocks_accroche_get_default_mixing_result(& $string, $dest){
-  foreach ( $dest as $destination ) {
+/**
+ * Cette fonction crée la chaine de caractère a partir des nid des nodes.
+ * Cette fonction definit la chaine en suivant l'arrivée des résultats.
+ * @param String $string
+ * @param stdClass $info_entity
+ */
+function _dpiblocks_accroche_get_default_mixing_result(& $string, $info_entity){
+  $nb_el = $info_entity->nb_max_value;
+  foreach ( unserialize($info_entity->data) as $destination ) {
     try {
-      $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
-      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-      $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
-      $val_view = $targetview->result;
-      $cpt = $destination ["destination_nb_element"];
-      if ($cpt > count ( $val_view ))
-        $cpt = count ( $val_view );
-      for($i = 0; $i < $cpt; $i ++) {
-        $tmp = $val_view [$i];
-        $string .= $tmp->nid.'+';
+      $targetview = dpiblocks_create_targetview_from_destination($destination);      
+      foreach($targetview->result as $el){
+        $string .= $el->nid.'+';
+        $nb_el--;
+        if(!$nb_el) break;
       }
+      if(!$nb_el) break;
     } catch (Exception $e) {
     }
   }
 }
 
-function _dpiblocks_accroche_get_alternate_mixing_result(& $string, $dest){
+/**
+ * Cette fonction retourne les résultats en alternant entre chacune des destinations précisées.
+ * @param String $string
+ * @param stdClass $info_entity
+ */
+function _dpiblocks_accroche_get_alternate_mixing_result(& $string, $info_entity){
   $results = array();
-  $cpt_result = 0;
   //create results
-  foreach ( $dest as $destination ) {
+  foreach ( unserialize($info_entity->data) as $destination ) {
     try {
-      $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
-      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-      $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
-      $val_view = $targetview->result;
-      $cpt = $destination ["destination_nb_element"];
-      if ($cpt > count ( $val_view ))
-        $cpt = count ( $val_view );
-      for($i = 0; $i < $cpt; $i ++) {
-        if(!isset($results[$cpt_result])){
-          $results[$cpt_result] = array();
-        }
-        $results[$cpt_result][] = $val_view [$i];
-      }
-      $cpt_result++;
+      $targetview = dpiblocks_create_targetview_from_destination($destination);
+      $results[] = $targetview->result;
     } catch (Exception $e) {
     }
   }
   //use results
-  return _dpiblocks_accroche_merge_table_alternate($string, $results);
+  return _dpiblocks_accroche_merge_table_alternate($string, $results, $info_entity->nb_max_value);
 }
 
-function _dpiblocks_accroche_merge_table_alternate(& $string, $results){
-  $return = array();
+/**
+ * Cette fonction retourne les résultats en alternant les valeurs en fonction de la variables résults.
+ * @param String $string
+ * @param Array $results
+ * @param integer $nb_max_value
+ */
+function _dpiblocks_accroche_merge_table_alternate(& $string, $results, $nb_max_value){
   $nb_table = count($results);
   $val_max = 0;
   for ($i = 0; $i < $nb_table; $i++){
-    if($val_max < count($results[$i])){
-      $val_max = count($results[$i]);
-    }
+    $val_max += count($results[$i]);
   }
-  for ($i=0;$i<$val_max;$i++){
-    for($j=0;$j<$nb_table;$j++){
+  if($val_max > $nb_max_value)
+    $val_max = $nb_max_value;
+  $tmp_val = 0;
+  for($i=0;$i<$val_max && $tmp_val<$val_max;$i++){
+    for($j=0;$j<$nb_table && $tmp_val<$val_max;$j++){
       if(isset($results[$j][$i]) && $tmp = $results[$j][$i]){
         $string .= $tmp->nid.'+';
+        $tmp_val++;
       }
     }
   }
 }
 
-function _dpiblocks_accroche_get_random_mixing_result(& $string, $dest){
+/**
+ * Cette fonction retourne les resultats de manière aléatoire.
+ * @param String $string
+ * @param stdClass $info_entity
+ */
+function _dpiblocks_accroche_get_random_mixing_result(& $string, $info_entity){
   $results = array();
-  foreach ( $dest as $destination ) {
+  foreach ( unserialize($info_entity->data) as $destination ) {
     try {
-      $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
-      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-      $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
-      $val_view = $targetview->result;
-      $cpt = $destination ["destination_nb_element"];
-      if ($cpt > count ( $val_view ))
-        $cpt = count ( $val_view );
-      for($i = 0; $i < $cpt; $i ++) {
-        $results[] = $val_view [$i];
-      }
+      $targetview = dpiblocks_create_targetview_from_destination($destination);
+      $results = array_merge($results, $targetview->result);      
     } catch (Exception $e) {
     }
   }
-  if(shuffle($results)){
-    foreach($results as $node){
+  if($info_entity->nb_max_value > count($results)){
+    $nb_slice = count($results);
+  }else{
+    $nb_slice = $info_entity->nb_max_value;
+  }
+  if(shuffle($results) && $slice_array = array_slice($results, 0, $nb_slice)){
+    foreach($slice_array as $node){
       $string .= $node->nid.'+';
     }
   }  
 }
 
-function _dpiblocks_accroche_get_custom_mixing_result(& $string, $dest, $customVal){
+/**
+ * Cette fonction retourne les résultats en suivant le schéma précisé dans la variable $customVal.
+ * @param String $string
+ * @param stdClass $info_entity
+ * @param String $customVal
+ */
+function _dpiblocks_accroche_get_custom_mixing_result(& $string, $info_entity, $customVal){
   $results = array();
-  $cpt_result = 0;
   //create results
-  foreach ( $dest as $destination ) {
+  foreach ( unserialize($info_entity->data) as $destination ) {
     try {
-      $targetBlockController = new TargetBlockController ( 'targetblock' );
-      $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
-      $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
-      $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
-      $target=$targetblock_wrapper->target->value();
-      $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
-      $val_view = $targetview->result;
-      $cpt = $destination ["destination_nb_element"];
-      if ($cpt > count ( $val_view ))
-        $cpt = count ( $val_view );
-      for($i = 0; $i < $cpt; $i ++) {
-        if(!isset($results[$cpt_result])){
-          $results[$cpt_result] = array();
-        }
-        $results[$cpt_result][] = $val_view [$i];
-      }
-      $cpt_result++;
+      $targetview = dpiblocks_create_targetview_from_destination($destination);
+      $results[] = $targetview->result;
     } catch (Exception $e) {
     }
   }
@@ -297,6 +326,12 @@ function _dpiblocks_accroche_get_custom_mixing_result(& $string, $dest, $customV
   return _dpiblocks_accroche_merge_table_custom($string, $results, $customVal);
 }
 
+/**
+ * Cette fonction retourne les résultats en suivant les valeur fournie dans results.
+ * @param String $string
+ * @param Array $results
+ * @param String $customVal
+ */
 function _dpiblocks_accroche_merge_table_custom(& $string, $results, $customVal){
   $tab_val = explode(',', $customVal);
   foreach($tab_val as $destinationLine){
@@ -308,6 +343,26 @@ function _dpiblocks_accroche_merge_table_custom(& $string, $results, $customVal)
   }
 }
 
+/**
+ * Cette fonction retourne la targetview associée à la destination passé en paramètre.
+ * @param stdClass $destination
+ */
+function dpiblocks_create_targetview_from_destination($destination){
+  $targetBlockController = new TargetBlockController ( 'targetblock' );
+  $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
+  $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+  $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+  $target=$targetblock_wrapper->target->value();
+  return _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
+}
+
+/**
+ * Cette fonction retourne les informations sur le content pane.
+ * @param String $subtype
+ * @param Array $conf
+ * @param String $contexts
+ * @return stdClass
+ */
 function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {
   $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
   $block = new stdClass ();
@@ -320,9 +375,14 @@ function dpiblocks_accroche_admin_info($subtype, $conf, $contexts) {
   return $block;
 }
 
+/**
+ * Cette fonction retourne l'entité accroche passé associé au machine name associé à la chaine de caractère passé en paramètre.
+ * @param String $machine_name
+ * @return stdClass
+ */
 function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
-  // Create a new custom content controller
+  // Create a new accroche controller
   $customContentController = new AccrocheController('accroche');
-  // Return the custom_content entity
+  // Return the accroche entity
   return $customContentController->load_by_machine_name($machine_name);
 }

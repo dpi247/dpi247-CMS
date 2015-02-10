@@ -247,6 +247,12 @@ function dpiblocks_schema() {
         'length' => '255',
         'not null' => FALSE,
       ),
+      'nb_max_value' => array(
+        'description' => 'The number of element',
+        'type' => 'int',
+        'length' => '5',
+        'not null' => FALSE,
+      ),
       'data' => array(
         'description' => 'The data for our accroche',
         'type' => 'varchar',
@@ -360,6 +366,15 @@ function dpiblocks_update_7007() {
  */
 function dpiblocks_update_7008() {
   $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
-  //db_add_field('dpiblocks_accroche', 'mixing', $schema['fields']['mixing']);
+  db_add_field('dpiblocks_accroche', 'mixing', $schema['fields']['mixing']);
   db_add_field('dpiblocks_accroche_revision', 'mixing', $schema['fields']['mixing']);
+}
+
+/**
+ * Add nb_max_value column
+ */
+function dpiblocks_update_7009() {
+  $schema = drupal_get_schema('dpiblocks_accroche', TRUE);
+  db_add_field('dpiblocks_accroche', 'nb_max_value', $schema['fields']['nb_max_value']);
+  db_add_field('dpiblocks_accroche_revision', 'nb_max_value', $schema['fields']['nb_max_value']);
 }

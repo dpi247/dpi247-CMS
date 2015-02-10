@@ -29,6 +29,7 @@ class AccrocheController extends EntityAPIControllerExportable {
       'layout' => '',
       'type' => '',
       'mixing' => '',
+      'nb_max_value' => '',
       'data' => '',
       'hash_cache_data' => '',
     );

@@ -63,6 +63,13 @@ class AccrocheEntity extends Entity {
   public $mixing;
   
   /**
+   * The type of accroche content
+   *
+   * @var $type
+   */
+  public $nb_max_value;
+  
+  /**
    * The data of accroche content
    *
    * @var $date

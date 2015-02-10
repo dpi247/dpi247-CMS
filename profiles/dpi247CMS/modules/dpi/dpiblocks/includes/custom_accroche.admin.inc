@@ -115,6 +115,13 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       $nb = count ( $form_state ['values']['destination'] );
     }
     
+    $form ['accroche'] ['nb_max_elem'] = array (
+      '#type' => 'textfield',
+      '#title' => t ( 'Number of max elements' ),
+      '#required' => FALSE,
+      '#default_value' => $custom_content->nb_max_value,
+    );
+    
     /* boucle */
     $form ['accroche']['destination'] = array(
       '#tree' => TRUE, 
@@ -151,13 +158,6 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         '#required' => FALSE,
         "#options" => $options,
         '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_target'] : ''
-      );
-
-      $form ['accroche'] ['destination'] [$i] ['destination_nb_element'] = array (
-        '#type' => 'textfield',
-        '#title' => t ( 'Enter number of element that you want' ),
-        '#required' => TRUE,
-        '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_nb_element'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_nb_element'] : ''
       );
     }
 
@@ -264,7 +264,8 @@ function accroche_form_submit($form, &$form_state) {
     'override_title' => $form_state['values']['override_title'],
     'title' => $form_state['values']['title'],
     'link' => $form_state['values']['link'],
-    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : "",
+    'mixing' => (isset($form_state['values']['schema'])) ? $form_state['values']['mixing'].'_'.$form_state['values']['schema'] : $form_state['values']['mixing'],
+    'nb_max_value' => (isset($form_state['values']['nb_max_elem']))? $form_state['values']['nb_max_elem'] : count(explode(';', $form_state['values']['node']))-1,
     'layout' => $form_state['values']['layout'],
     'type' => $form_state['values']['type'],    
   );
