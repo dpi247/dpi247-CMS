@@ -165,25 +165,19 @@ function dpiblocks_preprocess_panels_pane(& $vars){
 
 function dpiblocks_get_title_ajax($string = "") {
   // clean other node present to the string
-  if (isset ( $string ) && $string != "") {
-    $array_string = explode ( ';', $string );
-    $string = $array_string [count ( $array_string ) - 1];
-    unset ( $array_string [count ( $array_string ) - 1] );
-    $other_response = implode ( ";", $array_string );
-  }
   $matches = array ();
   if ($string) {
     $result = db_select ( 'node', 'n' )->fields ( 'n', array (
       'nid',
       'title'
-    ) )->condition ( 'title', db_like ( $string ) . '%', 'LIKE' )->range ( 0, 10 )->execute ();
+    ) )->condition ( 'n.title', '%%'. $string . '%%', 'LIKE' )->range ( 0, 10 )->execute ();
     if (isset ( $other_response ) && $other_response != "") {
       foreach ( $result as $user ) {
         $matches [$other_response . ";" . $user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
       }
     } else {
       foreach ( $result as $user ) {
-        $matches [$user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
+        $matches [$user->title . ' ('.$user->nid.')'] = $user->title . ' ('.$user->nid.')';
       }
     }
   }

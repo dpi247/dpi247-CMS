@@ -89,19 +89,55 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->type) && $custom_content->type == 'node' && !isset($form_state ['values']['type']))) {
-    if((isset($custom_content->type) && $custom_content->type == "destination") || !isset($custom_content->data)){
-      $valnode = '';
-    }else{
-      $valnode = $custom_content->data;
+    $nb = 1;
+    if(!isset($form_state['values']['node'])){
+      $form_state['values']['node'] = unserialize($custom_content->data);
     }
-    $form ['accroche'] ['node'] = array (
-      '#type' => 'textfield',
-      '#title' => t ( 'Enter node id' ),
-      '#description' => t ( 'add ; between each node id' ),
-      '#required' => FALSE,
-      '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
-      '#default_value' => $valnode
+
+    /* si je rebuild && si il s'agit du bouton add more */
+    if (isset ( $form_state ['values']['node'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button") {
+      $nb = count ( $form_state ['values']['node'] ) + 1;
+    } elseif (isset ( $form_state ['values']['node'] )) {
+      $nb = count ( $form_state ['values']['node'] );
+    }
+    
+    /* boucle */
+    $form ['accroche']['node'] = array(
+      '#tree' => TRUE,      
     );
+    
+    for($i = 0; $i < $nb; $i ++) {
+      $form ['accroche'] ['node'] [$i] = array (
+        '#type' => 'textfield',
+        '#required' => FALSE,
+        '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
+        '#default_value' => (isset($form_state ['values']['node'][$i]))? $form_state ['values']['node'][$i] : "",
+      );
+      
+      if(!$i){
+        $form ['accroche'] ['node'] [$i] = $form ['accroche'] ['node'] [$i] + array(
+          '#title' => t ( 'Enter node title' ),
+        );
+      }
+      
+      if(($i) == $nb){
+        $form ['accroche'] ['node'] [$i] = $form ['accroche'] ['node'] [$i] + array(
+          '#description' => t ( 'Enter title of node' ),
+        );
+      }
+    }
+    
+    $form ['accroche'] ['add_more'] = array (
+      '#type' => 'button',
+      '#value' => 'Add more',      
+      '#ajax' => array (
+        'callback' => 'dpiblocks_ajax_callback_define_get_destination',
+        'wrapper' => 'accroche-form',
+        'method' => 'replace'
+      )
+    );
+    
+    
   } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->type == 'destination' && !isset($form_state ['values']['type']))) {
     $nb = 1;
     if(!isset($form_state['values']['destination'])){
@@ -268,17 +304,23 @@ function accroche_form_submit($form, &$form_state) {
     'nb_max_value' => (isset($form_state['values']['nb_max_elem']))? $form_state['values']['nb_max_elem'] : count(explode(';', $form_state['values']['node']))-1,
     'layout' => $form_state['values']['layout'],
     'type' => $form_state['values']['type'],    
+    'data' => serialize($form_state['values'][$form_state['values']['type']]),
   );
   //hash_cache_data
-  if($form_state['values']['type'] == "node"){
+  if($form_state['values']['type'] == "node"){    
+    $str = ";";
+    if(is_array($form_state['values']['node'])){    
+      foreach($form_state['values']['node'] as $el){
+        preg_match("/.*?\((.*?)\)/U", $el, $matches);
+        if(!empty($matches) && isset($matches[1])){
+          $str .= $matches[1].';';
+        }
+      }
+    }
     $array_val = $array_val + array(
-      'data' => $form_state['values']['node'],
-      'hash_cache_data' => ';'.$form_state['values']['node'],
+      'hash_cache_data' => $str,
     );
-  }elseif ($form_state['values']['type'] == "destination"){    
-    $array_val = $array_val + array(
-      'data' => serialize($form_state['values']['destination']),
-    );   
+  }elseif ($form_state['values']['type'] == "destination"){      
     if(is_array($form_state['values']['destination'])){
       $string_tmp = "";
       foreach($form_state['values']['destination'] as $dest){
