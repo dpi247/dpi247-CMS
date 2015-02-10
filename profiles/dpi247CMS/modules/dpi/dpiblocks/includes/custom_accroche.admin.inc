@@ -95,34 +95,55 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     }
 
     /* si je rebuild && si il s'agit du bouton add more */
-    if (isset ( $form_state ['values']['node'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button") {
+    if (isset ( $form_state ['values']['node'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && strstr($form_state ['triggering_element'] ["#id"], 'delete') === FALSE) {
       $nb = count ( $form_state ['values']['node'] ) + 1;
-    } elseif (isset ( $form_state ['values']['node'] )) {
+    } elseif (strstr($form_state ['triggering_element'] ["#id"], 'delete') !== FALSE){
+      $nb = count ( $form_state ['values']['node'] ) - 1;
+      $id = $form_state ['triggering_element'] ['#parents'] [1];
+      $elements = $form_state['values']['node'];
+      unset($elements[$id]);
+      $form_state['values']['node'] = array();
+      foreach($elements as $element){
+        $form_state['values']['node'][] = $element;
+      }
+    }elseif (isset ( $form_state ['values']['node'] )) {
       $nb = count ( $form_state ['values']['node'] );
-    }
-    
+    } 
     /* boucle */
     $form ['accroche']['node'] = array(
       '#tree' => TRUE,      
     );
     
     for($i = 0; $i < $nb; $i ++) {
-      $form ['accroche'] ['node'] [$i] = array (
+      $form ["accroche"] ['node'] [$i] = array(
+        '#prefix' => '<div class="container-inline" >',
+        '#suffix' => '</div>',
+      );
+      $form ['accroche'] ['node'] [$i]["node"] = array (
+        '#title' => t ( 'Enter node title' ),
         '#type' => 'textfield',
-        '#required' => FALSE,
+        '#required' => FALSE,                
         '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
-        '#default_value' => (isset($form_state ['values']['node'][$i]))? $form_state ['values']['node'][$i] : "",
+        '#default_value' => (isset($form_state ['values']['node'][$i]["node"]))? $form_state ['values']['node'][$i]["node"] : "",
       );
       
-      if(!$i){
-        $form ['accroche'] ['node'] [$i] = $form ['accroche'] ['node'] [$i] + array(
-          '#title' => t ( 'Enter node title' ),
+      if(isset($form_state ['values']['node'][$i]["node"]) && $form_state ['values']['node'][$i]["node"]!=""){
+        $form ['accroche'] ['node'] [$i]["node"] = $form ['accroche'] ['node'] [$i]["node"] + array(
+          '#value' => $form_state ['values']['node'][$i]["node"],
         );
       }
       
-      if(($i) == $nb){
-        $form ['accroche'] ['node'] [$i] = $form ['accroche'] ['node'] [$i] + array(
-          '#description' => t ( 'Enter title of node' ),
+      if($i>0 || $nb >1){
+        $form ['accroche'] ['node'] [$i]["delete"] = array (
+          '#type' => 'button',
+          '#value' => t("Delete"),
+          '#name' => 'delete_'.$i,
+          '#id' => 'delete_'.$i,
+          '#ajax' => array (
+            'callback' => 'dpiblocks_ajax_callback_define_del_element',
+            'wrapper' => 'accroche-form',
+            'method' => 'replace'
+          )
         );
       }
     }
@@ -143,10 +164,19 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     if(!isset($form_state['values']['destination'])){
       $form_state['values']['destination'] = unserialize($custom_content->data);
     }
-
+        
     /* si je rebuild && si il s'agit du bouton add more */
-    if (isset ( $form_state ['values']['destination'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button") {
+    if (isset ( $form_state ['values']['destination'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && strstr($form_state ['triggering_element'] ["#id"], 'delete') === FALSE) {
       $nb = count ( $form_state ['values']['destination'] ) + 1;
+    } elseif (strstr($form_state ['triggering_element'] ["#id"], 'delete') !== FALSE){
+      $nb = count ( $form_state ['values']['destination'] ) - 1;
+      $id = $form_state ['triggering_element'] ['#parents'] [1];
+      $elements = $form_state['values']['destination'];
+      unset($elements[$id]);
+      $form_state['values']['destination'] = array();
+      foreach($elements as $element){
+        $form_state['values']['destination'][] = $element;
+      }
     } elseif (isset ( $form_state ['values']['destination'] )) {
       $nb = count ( $form_state ['values']['destination'] );
     }
@@ -162,7 +192,6 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     $form ['accroche']['destination'] = array(
       '#tree' => TRUE, 
     );
-    
     for($i = 0; $i < $nb; $i ++) {
       $form ['accroche'] ['destination'] [$i] = array (
         '#prefix' => '<div id="destination-add-form" class="container-inline" >',
@@ -181,6 +210,12 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         ),
         '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) ? $form_state ['values']['destination'] [$i] ['destination_section'] : ''
       );
+      
+      if(isset($form_state ['values']['destination'][$i]["destination_section"]) && $form_state ['values']['destination'][$i]["destination_section"]!=""){
+        $form ['accroche'] ['destination'] [$i]["destination_section"] = $form ['accroche'] ['destination'] [$i]["destination_section"] + array(
+          '#value' => $form_state ['values']['destination'][$i]["destination_section"],
+        );
+      }
 
       if (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) {
         $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $form_state ['values']['destination'] [$i] ['destination_section'] );
@@ -195,6 +230,20 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         "#options" => $options,
         '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_target'] )) ? $form_state ['values'] ['destination'] [$i] ['destination_target'] : ''
       );
+      
+      if($i>0 || $nb >1){
+        $form ['accroche'] ['destination'] [$i]["delete"] = array (
+          '#type' => 'button',
+          '#value' => t("Delete"),
+          '#name' => 'delete_'.$i,
+          '#id' => 'delete_'.$i,
+          '#ajax' => array (
+            'callback' => 'dpiblocks_ajax_callback_define_del_element',
+            'wrapper' => 'accroche-form',
+            'method' => 'replace'
+          )
+        );
+      }
     }
 
     $form ['accroche'] ['add_more'] = array (
@@ -275,6 +324,10 @@ function dpiblocks_ajax_callback_define_get_destination($form, $form_state) {
   return $form['accroche'];
 }
 
+function dpiblocks_ajax_callback_define_del_element($form,& $form_state) {  
+  return $form['accroche'];
+}
+
 /**
  * Implementation of hook_submit()
  *
@@ -293,7 +346,6 @@ function accroche_form_submit($form, &$form_state) {
   if(!isset($form_state['values']['aid']) && isset($form_state['input']['aid']) && $form_state['input']['aid']!=""){
     $form_state['values']['aid'] = $form_state['input']['aid'];
   }
-
   $array_val = array(
     'aid' => $form_state['values']['aid'],
     'machine_name' => $form_state['values']['machine_name'],
@@ -311,7 +363,7 @@ function accroche_form_submit($form, &$form_state) {
     $str = ";";
     if(is_array($form_state['values']['node'])){    
       foreach($form_state['values']['node'] as $el){
-        preg_match("/.*?\((.*?)\)/U", $el, $matches);
+        preg_match("/.*?\((.*?)\)/U", $el["node"], $matches);
         if(!empty($matches) && isset($matches[1])){
           $str .= $matches[1].';';
         }
@@ -350,7 +402,11 @@ function accroche_form_submit($form, &$form_state) {
   $form_state['redirect'] = "admin/dpi247/AccrocheCustom";
 }
 
-function _dpiblocks_validate_machine_name(){
-  //@todo Créer un test de validité correcte
+function _dpiblocks_validate_machine_name($element, $elements, $form_state){
+  module_load_include('inc', 'dpiblocks', 'plugins/content_types/accroche');
+  $entity = _dpiblocks_accroche_get_entity_by_subtype($element);
+  if(isset($entity) && !empty((array) $entity)){
+    return TRUE;
+  }
   return FALSE;
 }
