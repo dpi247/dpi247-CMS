@@ -209,7 +209,7 @@ function dpiblocks_define_node_element_string($dest, $info_entity){
       }
     }
   } else{
-    _dpiblocks_accroche_get_default_mixing_result($string, $dest);
+    _dpiblocks_accroche_get_default_mixing_result($string, $info_entity);
   } 
   return substr($string, 0 , -1);
 }
