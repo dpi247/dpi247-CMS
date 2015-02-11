@@ -92,7 +92,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     $nb = 1;
     if(!isset($form_state['values']['node'])){
       $form_state['values']['node'] = unserialize($custom_content->data);
-    }elseif(isset($form_state['input']['destination']) && !empty($form_state['input']['destination'])){
+    }elseif(isset($form_state['input']['node']) && !empty($form_state['input']['node'])){
       $form_state['values']['node'] = $form_state['input']['node'];
     }
 
@@ -124,12 +124,12 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       $form ['accroche'] ['node'] [$i]["node"] = array (
         '#title' => t ( 'Enter node title' ),
         '#type' => 'textfield',
-        '#required' => TRUE,                
+        '#required' => FALSE,                
         '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
         '#default_value' => (isset($form_state ['values']['node'][$i]["node"]))? $form_state ['values']['node'][$i]["node"] : "",
       );
 
-      if($form ['accroche'] ['node'] [$i]["node"]['#value'] != $form_state ['values']['node'][$i]["node"]){
+      if(isset($form_state ['values']['node'][$i]["node"]) && isset($form_state ['input']['node'][$i]["node"]) && $form_state ['input']['node'][$i]["node"] != $form_state ['values']['node'][$i]["node"]){
         $form ['accroche'] ['node'] [$i]["node"] = $form ['accroche'] ['node'] [$i]["node"] + array(
           '#value' => $form_state ['values']['node'][$i]["node"],
         );
@@ -149,7 +149,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         );
       }
     }
-    
+
     $form ['accroche'] ['add_more'] = array (
       '#type' => 'button',
       '#value' => 'Add more',      
@@ -188,7 +188,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     $form ['accroche'] ['nb_max_elem'] = array (
       '#type' => 'textfield',
       '#title' => t ( 'Number of max elements' ),
-      '#required' => FALSE,
+      '#required' => TRUE,
       '#default_value' => $custom_content->nb_max_value,
     );
     
