@@ -1,166 +1,169 @@
 <?php
-/**
- * @file
- * ESI handlers for ESI Block.
- */
+
+
+
 
 /**
- * Prepare an ESI block for rendering.
- * Defined in hook_esi_component_info().
+ * Implements hook_ctools_plugin_post_alter().
  *
- * @see dpicache_esi_component_info().
- */
-function dpicache_block__esi_block_prepare($component_key) {
-  list($theme, $region, $module, $delta) = explode(':', $component_key);
-
-  $block = block_load($module, $delta);
-  // Validate that the module/delta combination is valid.
-  if (empty($block->esi_enabled)) {
-    return FALSE;
-  }
-
-  $block->theme = $theme;
-  $block->region = $region;
-
-  // Check for optional arguments (page, user/role cache control).
-  $args = array_slice(func_get_args(), 1);
-  if (count($args)) {
-    // Check for user/role contexts.
-    if (preg_match('/CACHE=(USER|ROLE)/', $args[count($args)-1], $matches)) {
-      $block->esi_cache_context = $matches[1];
-      array_pop($args);
-    }
-    // Check for a page context.
-    if (count($args) && $page = base64_decode($args[0])) {
-      $block->esi_page_context = $page;
-    }
-  }
-
-  // Allow other modules to alter the context information here.
-  // @see hook_esi_block_context_alter().
-  drupal_alter('esi_block_context', $block);
-
-  // Restore the original context.
-  dpicache_block__restore_context($block);
-
-  return $block;
-}
-
-/**
- * Restore the original context that was used when a block was displayed.
- */
-function dpicache_block__restore_context($block) {
-  // Restore the theme.
-  global $theme;
-  $theme = $block->theme;
-
-  // Restore the page context.
-  if (!empty($block->esi_page_context)) {
-    $_SERVER['REQUEST_URI'] = $block->esi_page_context;
-    $_GET['q'] = $block->esi_page_context;
-    drupal_static_reset('drupal_get_destination');
-  }
-}
-
-/**
- * Render the HTML for a single block.
- * Defined in hook_esi_component_info().
+ * @see dpicache.esi.panel.inc
  *
- * @see dpicache_esi_component_info()
  */
-function dpicache_block__esi_block_render($block) {
-  $build = array();
-
-  // Reproduce functionality of _block_render_blocks().
-  $array = module_invoke($block->module, 'block_view', $block->delta);
-
-  // Allow modules to modify the block before it is viewed, via either
-  // hook_block_view_alter() or hook_block_view_MODULE_DELTA_alter().
-  drupal_alter(array('block_view', "block_view_{$block->module}_{$block->delta}"), $array, $block);
-
-  if (isset($array) && is_array($array)) {
-    foreach ($array as $k => $v) {
-      $block->$k = $v;
-    }
+function dpicache_ctools_plugin_post_alter(&$plugin, &$info) {
+  // Every time the configuration of a panel is saved, the default hook on the
+  // panel-context is invoked.  Replace that hook, in order to check for the
+  // presence of ESI panes, and switch the rendering pipeline if necessary.
+  if ($plugin['name'] == 'panel_context') {
+    dsm(dpicache_ctools_plugin_post_alter);
+    // Replace the default 'save' operation - panels_panel_context_save();
+    $plugin['save'] = 'dpicache__panel_context_save';
   }
+}
 
-  if (isset($block->content) && $block->content) {
-    // Normalize to the drupal_render() structure.
-    if (is_string($block->content)) {
-      $block->content = array('#markup' => $block->content);
-    }
-    // Override default block title if a custom display title is present.
-    if ($block->title) {
-      // Check plain here to allow module generated titles to keep any
-      // markup.
-      $block->subject = $block->title == '<none>' ? '' : check_plain($block->title);
-    }
-    if (!isset($block->subject)) {
-      $block->subject = '';
-    }
 
-    // Reproduce functionality of _block_get_renderable_array().
-    $key = "{$block->module}_{$block->delta}";
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function dpicache_panels_form_panels_panel_context_edit_settings_alter(&$form, &$form_state) {
+  // The 'ESI' panels renderer should automatically replace the 'standard'
+  // panels renderer when there are panes on a panel which are handled by ESI.
+  // It should not be selectable in its own right.
+  dsm($form);
+  dsm($form_state);
 
-    $build[$key] = $block->content;
-    unset($block->content);
-    if ($key != 'system_main' && $key != 'system_help') {
-      $build[$key]['#contextual_links']['block'] = array('admin/structure/block/manage', array($block->module, $block->delta));
-    }
-    $build[$key] += array(
-      '#block' => $block,
-      // @TODO: is weight really an issue here?
-      // '#weight' => ++$weight,
-    );
-    $build[$key]['#theme_wrappers'][] ='block';
+  unset($form['conf']['pipeline']['#options']['dpicacheesi']);
+  if ($form['conf']['pipeline']['#default_value'] == 'dpicacheesi') {
+
+    $form['conf']['pipeline']['#default_value'] = 'standard';
   }
+}
+/**
+ * Save the configuration of a panel page.
+ * @see panels_panel_context_save().
+ */
+function dpicache__panel_context_save(&$handler, $update) {
+  // Override the rendering pipeline if any pane uses ESI.
+  // Only the standard rendering pipeline is supported; alternative/IPE/legacy
+  // pipelines cannot be used with ESI.
+  // @TODO: inform the user of this on the display, if a non-standard renderer
+  // is selected.
 
-  esi_block_set_http_headers($block);
+  dsm($handler->conf['pipeline'],ppeline);
+  if (($handler->conf['pipeline'] == 'standard' || $handler->conf['pipeline'] == 'esi') && _dpicache_panels__display_uses_esi($handler->conf['display'])) {
+    $handler->conf['pipeline'] = 'dpicacheesi';
+    dsm($handler,dpicache__panel_context_save);
 
-  return $build;
+  }
+  panels_panel_context_save($handler, $update);
 }
 
 /**
- * Set HTTP headers to control caching of ESI fragments.
+ * Check if any panes are configured to use ESI.
+ *
+ * @param Object $display
+ * A panels_display object.
+ *
+ * @return Boolean
  */
-function esi_block_set_http_headers($block) {
-  // Nginx follows rfc2616 section 14.9.1 correctly and will not cache if
-  // header is set to private.
-  // The example Varnish VCL does not follow the RFC, and for ajax private
-  // should be used.
-
-  // $user_cache_control_header = variable_get('esi_mode', ESI_MODE) == ESI__CONFIG_SSI ? 'public' : 'private';
-  $user_cache_control_header = 'private';
-  $ttl = $block->esi_ttl;
-
-  $headers = array();
-  if ($block->cache == DRUPAL_NO_CACHE) {
-    $headers[] = array('Cache-Control', 'must-revalidate, max-age=0');
+function _dpicache_panels__display_uses_esi(panels_display $display) {
+  // Iterate each pane.
+  foreach ($display->content as $pid => $pane) {
+    // Any single pane implementing ESI is enough to return TRUE.
+    dsm($pane->cache['method'],CACHEMETHID );
+    if (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
+      return TRUE;
+    }
   }
-  elseif ($block->cache & DRUPAL_CACHE_PER_ROLE || $block->cache & DRUPAL_CACHE_PER_USER) {
-    $headers[] = array('Cache-Control', "$user_cache_control_header, max-age=$ttl");
-    $headers[] = array('X-BLOCK-CACHE', ($block->cache & DRUPAL_CACHE_PER_USER ? 'USER' : 'ROLE'));
+
+  return FALSE;
+}
+
+
+
+/**
+ * Reverse the $display->cache_key encoding to get the task name.
+ *
+ * @param String $cache_key
+ * The cache key used on a display.
+ *
+ * @return String
+ * The task name of the task handler.
+ */
+function _dpicache_panels__get_taskname($cache_key) {
+  // $display->cache_key = 'panel_context:' . $task_name . ':' . $handler->name;
+  if (preg_match('/^panel_context:([^:]+):.*$/', $cache_key, $matches)) {
+    return $matches[1];
+  }
+}
+
+/**
+ * Reverse the $display->cache_key encoding to get the task name (and sub-task
+ * if used).
+ *
+ * @param String $task_name
+ * The task key, as used by a display cache_key.
+ *
+ * @return Array
+ * - 0 => Name of the task.
+ * - 1 => Name of the subtask (or '' if not set).
+ */
+function _dpicache_panels__get_task_identifier($task_name) {
+  if (strpos('-', $task_name)) {
+    list ($task, $subtask) = explode('-', $task_name, 2);
+    return array($task, $subtask);
   }
   else {
-    $headers[] = array('Cache-Control', "public, max-age=$ttl");
-  }
-
-  // Allow other modules to alter the headers.
-  // @see hook_esi_block_cache_headers_alter().
-  drupal_alter('esi_block_cache_headers', $headers);
-
-  foreach($headers as $header) {
-    drupal_add_http_header($header[0], $header[1]);
+    return array($task_name, '');
   }
 }
 
-/**
- * Flush the ESI block caches.
- * Defined in hook_esi_component_info().
- *
- * @see esi_block_esi_component_info()
- */
-function dpicache_block__esi_block_flush() {
-  // @TODO.
 
+/**
+ * Build the URL to use for this ESI component.
+ *
+ * @return String
+ * The internal URL. Generate a fully-qualified path by running through url().
+ */
+function dpicache_esi_panels_url($pane, $display) {
+  // ESI 6.x-1.x and 6.x-2.x used the URL patterns:
+  // Default:                esi/panels_pane/theme:display_id:pane_id
+  // With context:           esi/panels_pane/theme:display_id:pane_id/[base64($_GET['q'])]/task_name/context
+
+  $url = "esi/panels_pane/";
+
+  global $theme;
+  $url .= implode(':', array(
+      $theme,
+      $pane->did,
+      $pane->pid,
+  ));
+
+  // The did and pid are used to identify which pane content_type to load.
+
+  // Other available data to pass into the URL:
+  // - $display->args       Are *always* passed.
+  // - $display->context    A pane can only accept a single context.
+  // - $display->cache_key  The cache key provides the name of the task/subtask.
+
+  if (!empty($pane->configuration['context'])) {
+    // If the context originates from the *TASK* plugin (which is typical), the
+    // task name is required in order to generate the task contexts
+    // ($base_context in panels_panel_context_render()).
+    // Additional contexts may be supplied directly by the display.
+    $task_name = _esi_panels__get_taskname($display->cache_key);
+
+    $url .= "/{$task_name}";
+  }
+
+  // Add all the display arguments to the end of the URL.
+  $url .= '/' . implode('/', $display->args);
+
+  // Always add the current page URL.
+  $url .= '/' . base64_encode($_GET['q']);
+
+  // Allow other modules to alter the ESI URL (or respond to it).
+  // @see hook_esi_block_url_alter().
+  drupal_alter('esi_panels_url', $url);
+
+  return $url;
 }
