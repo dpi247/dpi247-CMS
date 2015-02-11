@@ -11,7 +11,7 @@
  */
 function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit') {
   module_load_include('inc', 'dpiblocks', 'dpiblocks.api');
-
+  
   $form ['accroche'] = array(
     '#prefix' => '<div id="accroche-form">',
     '#suffix' => '</div>',
@@ -92,6 +92,8 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     $nb = 1;
     if(!isset($form_state['values']['node'])){
       $form_state['values']['node'] = unserialize($custom_content->data);
+    }elseif(isset($form_state['input']['destination']) && !empty($form_state['input']['destination'])){
+      $form_state['values']['node'] = $form_state['input']['node'];
     }
 
     /* si je rebuild && si il s'agit du bouton add more */
@@ -122,12 +124,12 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       $form ['accroche'] ['node'] [$i]["node"] = array (
         '#title' => t ( 'Enter node title' ),
         '#type' => 'textfield',
-        '#required' => FALSE,                
+        '#required' => TRUE,                
         '#autocomplete_path' => 'package/autocomplete/input[name="node"]',
         '#default_value' => (isset($form_state ['values']['node'][$i]["node"]))? $form_state ['values']['node'][$i]["node"] : "",
       );
-      
-      if(isset($form_state ['values']['node'][$i]["node"]) && $form_state ['values']['node'][$i]["node"]!=""){
+
+      if($form ['accroche'] ['node'] [$i]["node"]['#value'] != $form_state ['values']['node'][$i]["node"]){
         $form ['accroche'] ['node'] [$i]["node"] = $form ['accroche'] ['node'] [$i]["node"] + array(
           '#value' => $form_state ['values']['node'][$i]["node"],
         );
@@ -163,6 +165,8 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     $nb = 1;
     if(!isset($form_state['values']['destination'])){
       $form_state['values']['destination'] = unserialize($custom_content->data);
+    }elseif(isset($form_state['input']['destination']) && !empty($form_state['input']['destination'])){
+      $form_state['values']['destination'] = $form_state['input']['destination'];
     }
         
     /* si je rebuild && si il s'agit du bouton add more */
@@ -211,7 +215,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         '#default_value' => (isset ( $form_state ['values']['destination'] [$i] ['destination_section'] )) ? $form_state ['values']['destination'] [$i] ['destination_section'] : ''
       );
       
-      if(isset($form_state ['values']['destination'][$i]["destination_section"]) && $form_state ['values']['destination'][$i]["destination_section"]!=""){
+      if($form ['accroche'] ['destination'] [$i]["destination_section"]['#value'] != $form_state ['values']['destination'][$i]["destination_section"]){
         $form ['accroche'] ['destination'] [$i]["destination_section"] = $form ['accroche'] ['destination'] [$i]["destination_section"] + array(
           '#value' => $form_state ['values']['destination'][$i]["destination_section"],
         );
@@ -301,7 +305,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       '#default_value' => 0,
     );
   }
-  
+
   $form ['accroche'] ['submit'] = array(
     '#type' => 'submit',    
     '#value' => t('Save'),
@@ -316,7 +320,7 @@ function dpiblocks_ajax_callback_define_type_entity_form($form, $form_state) {
   return $form['accroche'];
 }
 
-function dpiblocks_ajax_callback_define_target_from_entity($form, $form_state) {
+function dpiblocks_ajax_callback_define_target_from_entity($form,& $form_state) {
   return $form['accroche'];
 }
 
