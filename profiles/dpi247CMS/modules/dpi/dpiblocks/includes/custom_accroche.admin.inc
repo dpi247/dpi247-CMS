@@ -89,18 +89,19 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->type) && $custom_content->type == 'node' && !isset($form_state ['values']['type']))) {
-    $nb = 1;
-    if(!isset($form_state['values']['node'])){
+    $nb_node = 1;
+    
+    if(!isset($form_state['values']['node']) && !isset($form_state['values']['destination'])){
       $form_state['values']['node'] = unserialize($custom_content->data);
     }elseif(isset($form_state['input']['node']) && !empty($form_state['input']['node'])){
       $form_state['values']['node'] = $form_state['input']['node'];
     }
-
+    
     /* si je rebuild && si il s'agit du bouton add more */
     if (isset ( $form_state ['values']['node'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && strstr($form_state ['triggering_element'] ["#id"], 'delete') === FALSE) {
-      $nb = count ( $form_state ['values']['node'] ) + 1;
+      $nb_node = count ( $form_state ['values']['node'] ) + 1;
     } elseif (strstr($form_state ['triggering_element'] ["#id"], 'delete') !== FALSE){
-      $nb = count ( $form_state ['values']['node'] ) - 1;
+      $nb_node = count ( $form_state ['values']['node'] ) - 1;
       $id = $form_state ['triggering_element'] ['#parents'] [1];
       $elements = $form_state['values']['node'];
       unset($elements[$id]);
@@ -109,14 +110,14 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         $form_state['values']['node'][] = $element;
       }
     }elseif (isset ( $form_state ['values']['node'] )) {
-      $nb = count ( $form_state ['values']['node'] );
+      $nb_node = count ( $form_state ['values']['node'] );
     } 
     /* boucle */
     $form ['accroche']['node'] = array(
       '#tree' => TRUE,      
     );
     
-    for($i = 0; $i < $nb; $i ++) {
+    for($i = 0; $i < $nb_node; $i ++) {
       $form ["accroche"] ['node'] [$i] = array(
         '#prefix' => '<div class="container-inline" >',
         '#suffix' => '</div>',
@@ -135,7 +136,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
         );
       }
       
-      if($i>0 || $nb >1){
+      if($i>0 || $nb_node >1){
         $form ['accroche'] ['node'] [$i]["delete"] = array (
           '#type' => 'button',
           '#value' => t("Delete"),
@@ -163,12 +164,13 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
     
   } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->type == 'destination' && !isset($form_state ['values']['type']))) {
     $nb = 1;
-    if(!isset($form_state['values']['destination'])){
+    
+    if(!isset($form_state['values']['destination']) && !isset($form_state['values']['node'])){
       $form_state['values']['destination'] = unserialize($custom_content->data);
     }elseif(isset($form_state['input']['destination']) && !empty($form_state['input']['destination'])){
       $form_state['values']['destination'] = $form_state['input']['destination'];
     }
-        
+    
     /* si je rebuild && si il s'agit du bouton add more */
     if (isset ( $form_state ['values']['destination'] ) && isset ( $form_state ['triggering_element'] ) && $form_state ['triggering_element'] ["#type"] == "button" && strstr($form_state ['triggering_element'] ["#id"], 'delete') === FALSE) {
       $nb = count ( $form_state ['values']['destination'] ) + 1;
