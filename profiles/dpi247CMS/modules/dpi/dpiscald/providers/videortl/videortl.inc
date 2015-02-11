@@ -5,6 +5,13 @@
  */
 
 /**
+ *
+ @TODO : LIVE ID
+ @TODO : Mieux checker si le liens existe
+ @TODO : Titre automatique (request + get title)
+ */
+
+/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_videortl_scald_add_form(&$form, &$form_state) {
@@ -77,8 +84,12 @@ function dpiscald_videortl_scald_fetch($atom, $type) {
  * Implements hook_scald_prerender().
  */
 function dpiscald_videortl_scald_prerender($atom, $context, $options, $mode) {
+  $theme_name = 'dpiscald_videortl_player';
+  if (isset($atom->data['video_liveid']) && !empty($atom->data['video_liveid'])) {
+  	$theme_name .= '_live';
+  }
   if ($mode == 'atom') {
-    $atom->rendered->player = theme('dpiscald_videortl_player',
+    $atom->rendered->player = theme($theme_name,
       array('vars' =>
         array(
           'video_id'      => $atom->base_id,
@@ -100,6 +111,10 @@ function dpiscald_videortl_theme() {
     'dpiscald_videortl_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/videortl/dpiscald_videortl_player'
+    ),
+    'dpiscald_videortl_player_live' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'providers/videortl/dpiscald_videortl_player_live'
     ),
   );
 }
