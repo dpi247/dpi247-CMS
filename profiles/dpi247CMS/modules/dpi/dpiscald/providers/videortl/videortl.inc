@@ -5,13 +5,6 @@
  */
 
 /**
- *
- @TODO : LIVE ID
- @TODO : Mieux checker si le liens existe
- @TODO : Titre automatique (request + get title)
- */
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_videortl_scald_add_form(&$form, &$form_state) {
@@ -37,7 +30,9 @@ function dpiscald_videortl_scald_add_form_fill(&$atom, $form, $form_state) {
 
   $atom->base_id = $identifier;
 
-  $atom->title = 'Titre par défaut de la video RTL';
+  $infos = dpiscald_videortl_get_media_infos_from_url($form_state['values']['identifier']);
+
+  $atom->title = $infos['title'];
 
   $atom->provider = 'dpiscald';
   $atom->type = 'videortl';
@@ -49,15 +44,6 @@ function dpiscald_videortl_scald_add_form_fill(&$atom, $form, $form_state) {
     'taxonomy_term' => (object)(array('name' => $infos->author))
   );
 
-  // // Prefill tags
-  // $langcode = field_language('scald_atom', $atom, 'scald_tags');
-  // foreach ($infos->tags as $index => $tag) {
-  //   $atom->scald_tags[$langcode][$index] = array(
-  //     'tid' => $index,  // Beware, this is not a real tid, it's just an index
-  //     'taxonomy_term' => (object)(array('name' => $tag))
-  //   );
-  // }
-
   // Save video width and height
   if (!isset($atom->data)) {
     $atom->data = array();
@@ -66,8 +52,6 @@ function dpiscald_videortl_scald_add_form_fill(&$atom, $form, $form_state) {
   $atom->data['video_key'] = $key;
   $atom->data['video_liveid'] = $liveid;
   $atom->data['video_domain'] = $domain;
-
-
 }
 
 /**
@@ -86,7 +70,7 @@ function dpiscald_videortl_scald_fetch($atom, $type) {
 function dpiscald_videortl_scald_prerender($atom, $context, $options, $mode) {
   $theme_name = 'dpiscald_videortl_player';
   if (isset($atom->data['video_liveid']) && !empty($atom->data['video_liveid'])) {
-  	$theme_name .= '_live';
+    $theme_name .= '_live';
   }
   if ($mode == 'atom') {
     $atom->rendered->player = theme($theme_name,
@@ -123,8 +107,22 @@ function dpiscald_videortl_theme() {
  * Get media infos from url.
  */
 function dpiscald_videortl_get_media_infos_from_url($url, $id_elem = NULL) {
-  $infos = array('title'=>'coucou');
-  return $infos;
+  $infos = array();
+
+  $response = drupal_http_request($url);
+
+  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
+    preg_match("/\<title\>(.*)\<\/title\>/",$response->data,$title);
+
+    if (!empty($title[1])) {
+      $infos['title'] = $title[1];
+    } else {
+      $infos['title'] = 'Vidéo RTL : titre par défaut';
+    }
+    return $infos;
+  } else {
+    return false;
+  }
 }
 
 /**
@@ -150,13 +148,14 @@ function dpiscald_videortl_validate_id($element, &$form_state) {
   if (!valid_url($url, TRUE)) {
     form_error($element, t('Invalid media url, you must specify an absolute url.'));
   }
-  // if (startsWith($url,'https')){
-  //   $url = explode('https://play.spotify.com/',$url);
-  // } else {
-  //   $url = explode('http://play.spotify.com/',$url);
-  // }
-  // $url = $url[1];
+  if (startsWith($url,'https')){
+    $url = explode('https://www.rtl.be/',$url);
+  } else {
+    $url = explode('http://www.rtl.be/',$url);
+  }
+  $url = $url[1];
   $id = md5($url);
+
   if (dpiscald_videortl_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
@@ -171,7 +170,7 @@ function dpiscald_videortl_parse_id($string, $check) {
   $string = trim($string);
 
   if (preg_match('/videoid=([0-9]*)/i', $string,$urlT)) {
-  	$id = $urlT[1];
+    $id = $urlT[1];
   }
 
   return $id;
@@ -186,7 +185,7 @@ function dpiscald_videortl_parse_key($string, $check) {
   $string = trim($string);
 
   if (preg_match('/key=([0-9a-z-]*)/i', $string,$urlT)) {
-  	$key = $urlT[1];
+    $key = $urlT[1];
   }
 
   return $key;
@@ -201,7 +200,7 @@ function dpiscald_videortl_parse_liveid($string, $check) {
   $string = trim($string);
 
   if (preg_match('/LiveID=([0-9a-z-]*)/i', $string,$urlT)) {
-  	$liveid = $urlT[1];
+    $liveid = $urlT[1];
   }
 
   return $liveid;
@@ -216,7 +215,7 @@ function dpiscald_videortl_parse_domain($string, $check) {
   $string = trim($string);
 
   if (preg_match('/http\:\/\/www\.rtl\.be\/([0-9a-z-]*)\//', $string,$urlT)) {
-  	$domain = $urlT[1];
+    $domain = $urlT[1];
   }
 
   return $domain;
