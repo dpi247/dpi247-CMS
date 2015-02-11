@@ -91,8 +91,11 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   if ((isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'node' )) || (isset($custom_content->type) && $custom_content->type == 'node' && !isset($form_state ['values']['type']))) {
     $nb_node = 1;
     
-    if(!isset($form_state['values']['node']) && !isset($form_state['values']['destination'])){
-      $form_state['values']['node'] = unserialize($custom_content->data);
+    if(!isset($form_state['values']['node'])){
+      $tmp = unserialize($custom_content->data);
+      if(!isset($tmp[0]['destination_section'])){
+        $form_state['values']['node'] = $tmp;
+      }      
     }elseif(isset($form_state['input']['node']) && !empty($form_state['input']['node'])){
       $form_state['values']['node'] = $form_state['input']['node'];
     }
@@ -165,8 +168,11 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
   } elseif (isset($form_state ['values']['type']) && ! strcmp ( $form_state ['values']['type'], 'destination' ) || ($custom_content->type == 'destination' && !isset($form_state ['values']['type']))) {
     $nb = 1;
     
-    if(!isset($form_state['values']['destination']) && !isset($form_state['values']['node'])){
-      $form_state['values']['destination'] = unserialize($custom_content->data);
+    if(!isset($form_state['values']['destination'])){
+      $tmp = unserialize($custom_content->data);
+      if(isset($tmp[0]['destination_section'])){
+        $form_state['values']['destination'] = $tmp;
+      }      
     }elseif(isset($form_state['input']['destination']) && !empty($form_state['input']['destination'])){
       $form_state['values']['destination'] = $form_state['input']['destination'];
     }
@@ -191,7 +197,7 @@ function accroche_form($form, &$form_state, $custom_content = null, $op = 'edit'
       '#type' => 'textfield',
       '#title' => t ( 'Number of max elements' ),
       '#required' => TRUE,
-      '#default_value' => $custom_content->nb_max_value,
+      '#default_value' => ($custom_content->nb_max_value && $custom_content->nb_max_value!=-1)? $custom_content->nb_max_value : 5,
     );
     
     /* boucle */
