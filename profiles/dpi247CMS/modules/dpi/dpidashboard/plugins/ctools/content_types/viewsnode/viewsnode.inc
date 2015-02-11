@@ -42,12 +42,11 @@ function viewsnode_content_type_render($subtype, $conf, $args, $context) {
   $node = $context['argument_entity_id:node_1']->data;
 
   $description = (!empty($conf['description'])) ? check_plain($conf['description']) : '';
-  $title = 'Number of views';
   
   $block = new stdClass();
   $block->module = 'viewsnode';
   $block->delta = $subtype;
-  $block->title = $title;
+  $block->title = t('Number of views');
   
   $values = array(
   	'select'	=> '1d',
