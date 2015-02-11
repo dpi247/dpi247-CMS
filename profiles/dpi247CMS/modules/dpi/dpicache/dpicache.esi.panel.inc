@@ -13,8 +13,7 @@ function dpicache_ctools_plugin_post_alter(&$plugin, &$info) {
   // Every time the configuration of a panel is saved, the default hook on the
   // panel-context is invoked.  Replace that hook, in order to check for the
   // presence of ESI panes, and switch the rendering pipeline if necessary.
-  if ($plugin['name'] == 'panel_context') {
-    dsm(dpicache_ctools_plugin_post_alter);
+  if ($plugin['name'] == 'panel_context') {    
     // Replace the default 'save' operation - panels_panel_context_save();
     $plugin['save'] = 'dpicache__panel_context_save';
   }
