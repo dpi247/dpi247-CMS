@@ -31,6 +31,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
   $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
+  $types['video']['dpiscald_videortl'] ='DPI Videos on RTL';
   $types['video']['dpiscald_vimeo'] = 'DPI Videos on Vimeo';
   $types['video']['dpiscald_youtube'] ='DPI Videos on Youtube';
 }
@@ -146,7 +147,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
