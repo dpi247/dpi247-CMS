@@ -149,7 +149,9 @@ function dpiblocks_accroche_content_type_generate_feed($subtype){
   $teasers = _dpiblocks_accroche_get_all_teaser ();
   if (isset ( $info_entity->type ) && $info_entity->type == "node") {
     $string_element = "";
-    $vals = explode ( ";", $info_entity->data );
+    $vals = explode ( ";", $info_entity->hash_cache_data );
+    array_shift($vals); //commence par un ';' donc la 1er valeur est vide
+    array_pop($vals); //termine par un ';' donc la dernière valeur est vide
     foreach ($vals as $val){
       if(isset($val) && $val != ""){
         $string_element .= $val."+";
