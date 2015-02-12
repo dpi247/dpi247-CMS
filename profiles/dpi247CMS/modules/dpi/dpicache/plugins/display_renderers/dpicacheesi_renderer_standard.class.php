@@ -142,8 +142,11 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
     $render =array(
       '#type' => 'esi',
       '#url' => $url,
-      //"#suffix"=>"esi url:" .$url
     );
+
+    if(variable_get('dpicache_esi_add_url_in_comment',FALSE)){
+      $render["#prefix"]="<!-- esi url: $url -->";
+    }
     $this->rendered['panes'][$pane->pid] = drupal_render($render);
   }
 }
