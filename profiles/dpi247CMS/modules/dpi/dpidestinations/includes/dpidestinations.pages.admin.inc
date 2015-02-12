@@ -64,7 +64,7 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     unset($items['admin/dpi247/dpidestinations/targetblock/add']);
     return $items;
   }
-
+  
   /**
    * Builds the entity overview form.
    */
@@ -77,7 +77,13 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     }
     // By default just show a simple overview for all entities.
     $form['table'] = $this->overviewTable();
-    $form['pager'] = array('#theme' => 'pager');    
+    
+    /* Suppression de l'édition */
+    foreach($form['table']['#rows'] as $k => $row){
+      unset($form['table']['#rows'][$k][7]);
+    }
+    
+    $form['pager'] = array('#theme' => 'pager');       
     return $form;
   }
   
