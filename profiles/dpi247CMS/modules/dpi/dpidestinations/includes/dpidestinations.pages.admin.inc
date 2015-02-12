@@ -61,6 +61,7 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       $items['admin/dpi247/dpidestinations/targetblock']['weight']=9;
 
     }
+    unset($items['admin/dpi247/dpidestinations/targetblock/add']);
     return $items;
   }
 
@@ -70,16 +71,16 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
   public function overviewForm($form, &$form_state) {
     //FAKE the exportable behavior cause it is confusing...
     $this->entityInfo['exportable']=FALSE;
-
+    
     if ($filters = $this->overviewFilters()) {
       $form['filters'] = $this->buildFiltersForm($filters);
     }
     // By default just show a simple overview for all entities.
     $form['table'] = $this->overviewTable();
-    $form['pager'] = array('#theme' => 'pager');
+    $form['pager'] = array('#theme' => 'pager');    
     return $form;
   }
-
+  
   /**
    * Generates the render array for the overview table for arbitrary entities
    * matching the given conditions.
