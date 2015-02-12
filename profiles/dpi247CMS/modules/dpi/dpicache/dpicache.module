@@ -142,10 +142,10 @@ function dpicache_esi_component_info() {
       'file'       => 'dpicache.esi.block.inc',
     ),
     'panels' => array(
-      'preprocess' => 'dpicache_block__esi_panels_prepare',
-      'render'     => 'dpicache_block__esi_panels_render',
-      'flush'      => 'dpicache_block__esi_panels_flush',
-      'file'       => 'dpicache.esi.panels.inc',
+        'preprocess' => 'dpicacheesi_panels__esi_pane_prepare',
+        'render'     => 'dpicacheesi_panels__esi_pane_render',
+        'flush'      => 'dpicacheesi_panels__esi_pane_flush',
+        'file'       => 'dpicache.esi.panels.inc',
     ),
   );
 }
