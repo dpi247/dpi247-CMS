@@ -205,13 +205,13 @@ function dpicache_esi_panels_url($pane, $display) {
     case DRUPAL_CACHE_GLOBAL;
       break;
     case DRUPAL_CACHE_PER_ROLE;
-      $url .= '/CACHE%3DROLE';
+      $url .= '/CACHE=ROLE';
 
       break;
     case DRUPAL_CACHE_PER_USER;
       break;
       // Always add the current page URL.
-      $url .= '/CACHE%3DUSER';
+      $url .= '/CACHE=USER';
 
   }
   // Allow other modules to alter the ESI URL (or respond to it).
