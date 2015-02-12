@@ -1,13 +1,14 @@
 <?php
 /**
- * Extend the panels_renderer_standard class, to override render_layout().
- * The standard renderer renders the panes, then immediately renders the
- * regions.
- * We need to catch the panes after they're individually rendered, but before
- * they're bundled together into regions.
+ * @file
+ * Replacement for IPE editor.
  */
-class esi_panels_renderer_esi extends panels_renderer_standard {
-  
+
+/**
+ * Extend the panels_renderer_ipe class.
+ */
+class esi_panels_renderer_ipe extends panels_renderer_ipe {
+
   /**
    * Prepare the list of panes to be rendered, accounting for visibility/access
    * settings and rendering order.
@@ -101,7 +102,9 @@ class esi_panels_renderer_esi extends panels_renderer_standard {
     if (empty($this->prep_run)) {
       $this->prepare();
     }
+    // Get the default rendering of the panes.
     $this->render_panes();
+    // Replace content with ESI tags, as needed.
     $this->handle_esi();
     $this->render_regions();
 
@@ -131,11 +134,52 @@ class esi_panels_renderer_esi extends panels_renderer_standard {
    * Replace a pane's rendered content with ESI content.
    */
   function handle_esi_pane($pane) {
+    // Get the initial output.
     $url = url(esi_panels_url($pane, $this->display), array('absolute' => TRUE));
     $render =array(
       '#type' => 'esi',
       '#url' => $url,
     );
-    $this->rendered['panes'][$pane->pid] = drupal_render($render);
+    $output = drupal_render($render);
+
+    // If there are region locks, add them.
+    if (!empty($pane->locks['type']) && $pane->locks['type'] == 'regions') {
+      static $key = NULL;
+      $javascript = &drupal_static('drupal_add_js', array());
+
+      // drupal_add_js breaks as we add these, but we can't just lump them
+      // together because panes can be rendered independently. So game the system:
+      if (empty($key)) {
+        $settings['Panels']['RegionLock'][$pane->pid] = $pane->locks['regions'];
+        drupal_add_js($settings, 'setting');
+
+        // These are just added via [] so we have to grab the last one
+        // and reference it.
+        $keys = array_keys($javascript['settings']['data']);
+        $key = end($keys);
+      }
+      else {
+        $javascript['settings']['data'][$key]['Panels']['RegionLock'][$pane->pid] = $pane->locks['regions'];
+      }
+
+    }
+
+    if (empty($pane->IPE_empty)) {
+      // Add an inner layer wrapper to the pane content before placing it into
+      // draggable portlet
+      $output = "<div class=\"panels-ipe-portlet-content\">$output</div>";
+    }
+    else {
+      $output = "<div class=\"panels-ipe-portlet-content panels-ipe-empty-pane\">$output</div>";
+    }
+    // Hand it off to the plugin/theme for placing draggers/buttons
+    $output = theme('panels_ipe_pane_wrapper', array('output' => $output, 'pane' => $pane, 'display' => $this->display, 'renderer' => $this));
+
+    if (!empty($pane->locks['type']) && $pane->locks['type'] == 'immovable') {
+      return "<div id=\"panels-ipe-paneid-{$pane->pid}\" class=\"panels-ipe-nodrag panels-ipe-portlet-wrapper panels-ipe-portlet-marker\">" . $output . "</div>";
+    }
+
+    $result = "<div id=\"panels-ipe-paneid-{$pane->pid}\" class=\"panels-ipe-portlet-wrapper panels-ipe-portlet-marker\">" . $output . "</div>";
+    $this->rendered['panes'][$pane->pid] = $result;
   }
 }
