@@ -21,9 +21,39 @@ function dpicache_default_panels_renderer_pipeline() {
   $pipeline->settings = array(
     'renderers' => array(
       0 => array(
-        'access' => array(),
-        'renderer' => 'dpicacheesi',
-        'options' => array(),
+          'access' => array(
+              'plugins' => array(
+                  0 => array(
+                      'name' => 'dpicache_pipeline_renderer_access',
+                      'settings' => array('pipeline' => 'dpicacheesi_ipe'),
+                  ),
+                // Add the permissions-check from the IPE pipeline.
+                  1 => array(
+                      'name' => 'perm',
+                      'settings' => array(
+                          'perm' => 'use panels in place editing',
+                      ),
+                      'context' => 'logged-in-user',
+                  ),
+              ),
+              'logic' => 'and',
+          ),
+          'renderer' => 'dpicacheesi_ipe',
+          'options' => array(),
+      ),
+      // Standard renderer.
+        1 => array(
+            'access' => array(
+                'plugins' => array(
+                    array(
+                        'name' => 'dpicache_pipeline_renderer_access',
+                        'settings' => array('pipeline' => 'dpicacheesi_standard'),
+                    ),
+                ),
+            ),
+            'renderer' => 'dpicacheesi_standard',
+
+            'options' => array(),
       ),
     ),
   );
