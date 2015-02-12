@@ -11,7 +11,7 @@
  * We need to catch the panes after they're individually rendered, but before
  * they're bundled together into regions.
  */
-class dpicacheesi_renderer_standard extends panels_renderer_standard {
+class esi_panels_renderer_standard extends panels_renderer_standard {
 
   /**
    * Prepare the list of panes to be rendered, accounting for visibility/access
@@ -83,7 +83,7 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
     if (!$pane->shown) {
       return FALSE;
     }
-    elseif (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
+    elseif (!empty($pane->cache) && $pane->cache['method'] == 'esi') {
       // ESI panes are always rendered (access callbacks)
       return TRUE;
     }
@@ -126,10 +126,8 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
    */
   function handle_esi() {
     foreach ($this->prepared['panes'] as $pid => $pane) {
-      if (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
-       if(!variable_get('dpicache_disable_esi',FALSE)) {
-         $this->handle_esi_pane($pane);
-       }
+      if (!empty($pane->cache) && $pane->cache['method'] == 'esi') {
+        $this->handle_esi_pane($pane);
       }
     }
   }
@@ -138,15 +136,11 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
    * Replace a pane's rendered content with ESI content.
    */
   function handle_esi_pane($pane) {
-    $url = url(dpicache_esi_panels_url($pane, $this->display), array('absolute' => TRUE));
+    $url = url(esi_panels_url($pane, $this->display), array('absolute' => TRUE));
     $render =array(
       '#type' => 'esi',
       '#url' => $url,
     );
-
-    if(variable_get('dpicache_esi_add_url_in_comment',FALSE)){
-      $render["#prefix"]="<!-- esi url: $url -->";
-    }
     $this->rendered['panes'][$pane->pid] = drupal_render($render);
   }
 }

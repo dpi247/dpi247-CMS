@@ -1,17 +1,13 @@
 <?php
 /**
  * @file
- * Replacement for standard editor.
+ * Replacement for IPE editor.
  */
 
 /**
- * Extend the panels_renderer_standard class, to override render_layout().
- * The standard renderer renders the panes, then immediately renders the
- * regions.
- * We need to catch the panes after they're individually rendered, but before
- * they're bundled together into regions.
+ * Extend the panels_renderer_ipe class.
  */
-class dpicacheesi_renderer_standard extends panels_renderer_standard {
+class esi_panels_renderer_ipe extends panels_renderer_ipe {
 
   /**
    * Prepare the list of panes to be rendered, accounting for visibility/access
@@ -83,7 +79,7 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
     if (!$pane->shown) {
       return FALSE;
     }
-    elseif (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
+    elseif (!empty($pane->cache) && $pane->cache['method'] == 'esi') {
       // ESI panes are always rendered (access callbacks)
       return TRUE;
     }
@@ -106,7 +102,9 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
     if (empty($this->prep_run)) {
       $this->prepare();
     }
+    // Get the default rendering of the panes.
     $this->render_panes();
+    // Replace content with ESI tags, as needed.
     $this->handle_esi();
     $this->render_regions();
 
@@ -126,10 +124,8 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
    */
   function handle_esi() {
     foreach ($this->prepared['panes'] as $pid => $pane) {
-      if (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
-       if(!variable_get('dpicache_disable_esi',FALSE)) {
-         $this->handle_esi_pane($pane);
-       }
+      if (!empty($pane->cache) && $pane->cache['method'] == 'esi') {
+        $this->handle_esi_pane($pane);
       }
     }
   }
@@ -138,15 +134,52 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
    * Replace a pane's rendered content with ESI content.
    */
   function handle_esi_pane($pane) {
-    $url = url(dpicache_esi_panels_url($pane, $this->display), array('absolute' => TRUE));
+    // Get the initial output.
+    $url = url(esi_panels_url($pane, $this->display), array('absolute' => TRUE));
     $render =array(
       '#type' => 'esi',
       '#url' => $url,
     );
+    $output = drupal_render($render);
 
-    if(variable_get('dpicache_esi_add_url_in_comment',FALSE)){
-      $render["#prefix"]="<!-- esi url: $url -->";
+    // If there are region locks, add them.
+    if (!empty($pane->locks['type']) && $pane->locks['type'] == 'regions') {
+      static $key = NULL;
+      $javascript = &drupal_static('drupal_add_js', array());
+
+      // drupal_add_js breaks as we add these, but we can't just lump them
+      // together because panes can be rendered independently. So game the system:
+      if (empty($key)) {
+        $settings['Panels']['RegionLock'][$pane->pid] = $pane->locks['regions'];
+        drupal_add_js($settings, 'setting');
+
+        // These are just added via [] so we have to grab the last one
+        // and reference it.
+        $keys = array_keys($javascript['settings']['data']);
+        $key = end($keys);
+      }
+      else {
+        $javascript['settings']['data'][$key]['Panels']['RegionLock'][$pane->pid] = $pane->locks['regions'];
+      }
+
     }
-    $this->rendered['panes'][$pane->pid] = drupal_render($render);
+
+    if (empty($pane->IPE_empty)) {
+      // Add an inner layer wrapper to the pane content before placing it into
+      // draggable portlet
+      $output = "<div class=\"panels-ipe-portlet-content\">$output</div>";
+    }
+    else {
+      $output = "<div class=\"panels-ipe-portlet-content panels-ipe-empty-pane\">$output</div>";
+    }
+    // Hand it off to the plugin/theme for placing draggers/buttons
+    $output = theme('panels_ipe_pane_wrapper', array('output' => $output, 'pane' => $pane, 'display' => $this->display, 'renderer' => $this));
+
+    if (!empty($pane->locks['type']) && $pane->locks['type'] == 'immovable') {
+      return "<div id=\"panels-ipe-paneid-{$pane->pid}\" class=\"panels-ipe-nodrag panels-ipe-portlet-wrapper panels-ipe-portlet-marker\">" . $output . "</div>";
+    }
+
+    $result = "<div id=\"panels-ipe-paneid-{$pane->pid}\" class=\"panels-ipe-portlet-wrapper panels-ipe-portlet-marker\">" . $output . "</div>";
+    $this->rendered['panes'][$pane->pid] = $result;
   }
 }

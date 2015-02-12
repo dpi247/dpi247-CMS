@@ -163,7 +163,6 @@ function _dpicache_panels__get_task_identifier($task_name) {
 function dpicache_esi_panels_url($pane, $display) {
 
 
-
   $url = "esi/panels_pane/";
 
   global $theme;
@@ -206,13 +205,13 @@ function dpicache_esi_panels_url($pane, $display) {
     case DRUPAL_CACHE_GLOBAL;
       break;
     case DRUPAL_CACHE_PER_ROLE;
-      $url .= '/CACHE=ROLE';
+      $url .= '/CACHE%3DROLE';
 
       break;
     case DRUPAL_CACHE_PER_USER;
       break;
       // Always add the current page URL.
-      $url .= '/CACHE=USER';
+      $url .= '/CACHE%3DUSER';
 
   }
   // Allow other modules to alter the ESI URL (or respond to it).
@@ -224,79 +223,10 @@ function dpicache_esi_panels_url($pane, $display) {
 
 
 
-  /*
-
-  // ESI 6.x-1.x and 6.x-2.x used the URL patterns:
-  // Default:                esi/panels_pane/theme:display_id:pane_id
-  // With context:           esi/panels_pane/theme:display_id:pane_id/[base64($_GET['q'])]/task_name/context
-
-  $url = "esi/panels_pane/";
-
-  global $theme;
-  $url .= implode(':', array(
-      $theme,
-      $pane->did,
-      $pane->pid,
-  ));
-
-  // The did and pid are used to identify which pane content_type to load.
-
-  // Other available data to pass into the URL:
-  // - $display->args       Are *always* passed.
-  // - $display->context    A pane can only accept a single context.
-  // - $display->cache_key  The cache key provides the name of the task/subtask.
-
-
-  if (!empty($pane->configuration['context'])) {
-    // If the context originates from the *TASK* plugin (which is typical), the
-    // task name is required in order to generate the task contexts
-    // ($base_context in panels_panel_context_render()).
-    // Additional contexts may be supplied directly by the display.
-    $task_name = _esi_panels__get_taskname($display->cache_key);
-
-    $url .= "/{$task_name}";
-  }
 
 
 
-  if($pane->cache['settings']['granularity']['display_args']){
-// Add all the display arguments to the end of the URL.
-    $url .= '/' . implode('/', $display->args);
 
-  }
-
-
-  if($pane->cache['settings']['granularity']['page']){
-    // Always add the current page URL.
-    $url .= '/' . base64_encode($_GET['q']);
-
-  }
-
-  switch($pane->cache['settings']['granularity']['user']){
-    case'global';
-      break;
-    case'role';
-      $url .= '/CACHE%3DROLE';
-
-      break;
-    case'user';
-      break;
-    // Always add the current page URL.
-    $url .= '/CACHE%3DUSER';
-
-  }
-
-
-
-    // Allow other modules to alter the ESI URL (or respond to it).
-  // @see hook_esi_block_url_alter().
-  drupal_alter('esi_panels_url', $url);
-
-  return $url;
-
-
-
-  */
 }
 
 
@@ -359,7 +289,7 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
       'url' => base64_decode($url),
   );
 
-  esi_panels__restore_context($pane);
+  dpicacheesi_panels__restore_context($pane);
 
   return $pane;
 }
@@ -421,6 +351,8 @@ function dpicacheesi_panels__restore_context(&$pane) {
  * @see esi_panels_esi_component_info()
  */
 function dpicacheesi_panels__esi_pane_render($pane) {
+
+
   // Much of this is from the "standard" display renderer:
   // see panels_renderer_standard::prepare().
   ctools_include('content');
@@ -505,3 +437,6 @@ function dpicacheesi_panels__esi_pane_flush() {
   // @TODO.
 
 }
+
+
+

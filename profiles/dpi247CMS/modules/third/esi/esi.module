@@ -48,11 +48,20 @@ define('ESI_DEFAULT_TTL', 300);
 // Default render mode is to use an ESI tag.
 define('ESI_DEFAULT_RENDER_MODE', 'esi');
 
+// Enable the AJAX fallback by default.
+define('ESI_DEFAULT_AJAX_FALLBACK', TRUE);
+
+// By default, do not alter the ESI URLs when AJAX rendering.
+define('ESI_DEFAULT_AJAX_FALLBACK_CONTEXTUALIZE_URL', FALSE);
+
 // Default interval for rotating the seed key: change each day by default.
 define('ESI_SEED_ROTATION_INTERVAL', 86400);
 
 // By default, user context-cookies are hardened.
 define('ESI_DEFAULT_CONTEXT_COOKIES_HARDENING', TRUE);
+
+// When ESI sets cookies, prefix the cookie name with 'ESI_' by default.
+define('ESI_DEFAULT_COOKIE_NAME_PREFIX', 'ESI_');
 
 /**
  * Implements hook_flush_caches().
@@ -83,7 +92,7 @@ function esi_prerender_esi_tag($element) {
   if (empty($element['#mode'])) {
     $element['#mode'] = variable_get('esi_render_mode', ESI_DEFAULT_RENDER_MODE);
   }
-  // mode is usually either SSI or esi
+
   if ($render_function = esi_get_tag_render_function($element['#mode'])) {
     $element['#children'] = $render_function($element['#url']);
     unset($element['#theme']);
@@ -102,6 +111,32 @@ function esi_theme() {
   );
 }
 
+/**
+ * Implements hook_init().
+ */
+function esi_init() {
+  // Add the AJAX fallback handler, if it's enabled.
+  if (variable_get('esi_ajax_fallback', ESI_DEFAULT_AJAX_FALLBACK)) {
+    $path = drupal_get_path('module', 'esi');
+    drupal_add_js("{$path}/js/esi.js");
+    drupal_add_js("{$path}/js/jquery.esi.js");
+
+    // Contextualize the URLs, if required.
+    // Drupal.ESI.contextualize_URLs
+    if (variable_get('esi_ajax_fallback_contextualize_url', ESI_DEFAULT_AJAX_FALLBACK_CONTEXTUALIZE_URL)) {
+      $harden_cookies = variable_get('esi_harden_cookie_key', ESI_DEFAULT_CONTEXT_COOKIES_HARDENING);
+
+      $setting = array(
+        'ESI' => array(
+          'cookie_prefix' => variable_get('esi_cookie_name_prefix', ESI_DEFAULT_COOKIE_NAME_PREFIX),
+          'cookie_suffix' => ($harden_cookies) ? '_' . session_name() : '',
+          'contextualize_URLs' => TRUE,
+        ),
+      );
+      drupal_add_js($setting, 'setting');
+    }
+  }
+}
 
 /**
  * Implements hook_boot().
@@ -112,10 +147,10 @@ function esi_boot() {
 
   // ESI will *always* set a cookie in order to determine if cookies need to be
   // resent. That cookie's name will be:
-  // ESI_:                   if the "Harden cookie key" setting is disabled.
-  // ESI_{32-char-MD5-hash}: if the "Harden cookie key" setting is enabled.
+  // ESI_:                    if the "Harden cookie key" setting is disabled.
+  // ESI_{_32-char-MD5-hash}: if the "Harden cookie key" setting is enabled.
   $sessify = variable_get('esi_harden_cookie_key', TRUE);
-  $session_name = $sessify ? session_name() : '';
+  $session_name = $sessify ? '_' . session_name() : '';
 
   // Expect *at least* an "ESI_{$session_name}" cookie.
   // Use this as the basis for refreshing context cookies.
@@ -246,6 +281,10 @@ function esi_esi_mode() {
       'title' => 'SSI tag',
       'render' => 'esi_ssi_tag',
     ),
+    'ssi_remote' => array(
+      'title' => 'SSI remote tag',
+      'render' => 'esi_ssi_remote_tag',
+    ),
   );
 }
 
@@ -272,7 +311,7 @@ function esi_get_components() {
         $components[$key] = $component;
       }
     }
-    drupal_alter('esi_component_info', $esi_component_info);
+    drupal_alter('esi_component_info', $components);
     cache_set('esi_component_info', $components);
     return $components;
   }
@@ -342,6 +381,7 @@ function esi_max_age_options($current_max_age = NULL) {
  */
 function esi__set_user_contexts($account) {
   $cookie_data = esi__get_cookie_data($account);
+
   // Transmit the cookies.
   foreach ($cookie_data as $cookie) {
     setcookie($cookie['name'], $cookie['value'], $cookie['expire'], $cookie['path'], $cookie['domain'], $cookie['secure'], $cookie['httponly']);
@@ -356,13 +396,25 @@ function esi__get_cookie_data($account) {
 
   // Allow other modules to generate context for this user.
   $contexts = esi__get_user_contexts($account);
+
+  // Use the same path/domain/secure/httponly params as the main site config.
   $params = session_get_cookie_params();
   $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
+
+  $cookie_name_prefix = variable_get('esi_cookie_name_prefix', ESI_DEFAULT_COOKIE_NAME_PREFIX);
+
+  // If support for the AJAX fallback with contextualized URLs is needed, then
+  // the ESI cookies must be accessible to JavaScript.
+  $ajax_with_contextualize_urls = variable_get('esi_ajax_fallback', ESI_DEFAULT_AJAX_FALLBACK) && variable_get('esi_ajax_fallback_contextualize_url', ESI_DEFAULT_AJAX_FALLBACK_CONTEXTUALIZE_URL);
+  if ($ajax_with_contextualize_urls) {
+    $params['httponly'] = FALSE;
+  }
+
   foreach ($contexts as $key => $context) {
     // Each context has the session key appended to it, to ensure site-
     // specifity.
     $cookie_data[] = array(
-      'name'     => $key,
+      'name'     => $cookie_name_prefix . $key,
       'value'    => $context,
       'expire'   => $expire,
       'path'     => $params['path'],
@@ -388,12 +440,16 @@ function esi__get_cookie_data($account) {
     'httponly' => $params['httponly'],
   );
 
-  // The default user-session cookie uses the session_name.
-  // Append the session-name to all ESI cookies (if desired).
-  $sessify = variable_get('esi_harden_cookie_key', ESI_DEFAULT_CONTEXT_COOKIES_HARDENING);
-  $session_name = $sessify ? session_name() : '';
-  foreach ($cookie_data as &$cookie) {
-    $cookie['name'] .= $session_name;
+  // The ESI cookie names are predictable. They can be made less predictable,
+  // by using the same session-naming convention as core - adding a hash of the
+  // domain name as a suffix.
+  // See drupal_settings_initialize() where the session name is initialized.
+  $harden_esi_cookies = variable_get('esi_harden_cookie_key', ESI_DEFAULT_CONTEXT_COOKIES_HARDENING);
+  if ($harden_esi_cookies) {
+    $session_name = '_' . session_name();
+    foreach ($cookie_data as &$cookie) {
+      $cookie['name'] .= $session_name;
+    }
   }
 
   return $cookie_data;
@@ -413,10 +469,12 @@ function esi__get_user_contexts($account = NULL) {
  * Implements hook_esi_context().
  */
 function esi_esi_context($account) {
-  // Add a role context.
   global $user;
   return array(
-    'R' => implode(',', array_keys($user->roles)),
+    // Add a role context.
+    'ROLE' => implode(',', array_keys($user->roles)),
+    // Add a user context (to match the primary session key).
+    'USER' => session_id(),
   );
 }
 
@@ -446,7 +504,12 @@ function esi_ssi_tag($url) {
   return '<!--# include virtual="' . $url . '" -->';
 }
 
-
+/**
+ * Render a remote SSI tag (as used by mod_publisher).
+ */
+function esi_ssi_remote_tag($url) {
+  return '<!--# include url="' . $url . '" -->';
+}
 
 
 /**
