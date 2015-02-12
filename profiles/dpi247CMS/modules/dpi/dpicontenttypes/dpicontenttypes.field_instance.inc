@@ -437,7 +437,7 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_embededobjects',
+    'field_name' => 'field_embeddedobjects',
     'label' => 'EmbededObjects',
     'required' => 0,
     'settings' => array(
@@ -2892,7 +2892,7 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_embededobjects',
+    'field_name' => 'field_embeddedobjects',
     'label' => 'EmbededObjects',
     'required' => 0,
     'settings' => array(
