@@ -127,7 +127,9 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
   function handle_esi() {
     foreach ($this->prepared['panes'] as $pid => $pane) {
       if (!empty($pane->cache) && $pane->cache['method'] == 'dpicacheesi') {
-        $this->handle_esi_pane($pane);
+       if(!variable_get('dpicache_disable_esi',FALSE)) {
+         $this->handle_esi_pane($pane);
+       }
       }
     }
   }
@@ -137,11 +139,10 @@ class dpicacheesi_renderer_standard extends panels_renderer_standard {
    */
   function handle_esi_pane($pane) {
     $url = url(dpicache_esi_panels_url($pane, $this->display), array('absolute' => TRUE));
-    dsm(good);
     $render =array(
       '#type' => 'esi',
       '#url' => $url,
-        "#suffix"=>"esi url:" .$url
+      //"#suffix"=>"esi url:" .$url
     );
     $this->rendered['panes'][$pane->pid] = drupal_render($render);
   }
