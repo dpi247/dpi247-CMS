@@ -68,8 +68,8 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     foreach($node->field_field_authors as $author){
       $str_author .= '<a href="/'.$author["rendered"]["#href"].'">'.$author["rendered"]["#title"].'</a> ';
     }
-    $form['nodes'][$node->nid]['authors'] = array(
-      '#markup' => $str_author,
+    $form['nodes'][$node->nid]['field_field_authors'] = array(
+      '#markup' => (!empty($str_author))? $str_author : t("Undefined"),
     );
     
     $str_date = "";

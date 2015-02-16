@@ -96,7 +96,7 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
     $variables['node_listing'][$i]->node_title = drupal_render($node['title']);
     $variables['node_listing'][$i]->actions = (!empty($node['delete'])) ? drupal_render($node['edit']).' ,'.!empty($node['delete'])  : drupal_render($node['edit']);
     $variables['node_listing'][$i]->printed = FALSE;
-    $variables['node_listing'][$i]->author = (!empty($node['authors']['#markup'])) ? drupal_render($node['authors']) : t('Undefined');
+    $variables['node_listing'][$i]->author = drupal_render($node['authors']);
     $variables['node_listing'][$i]->publication_date = drupal_render($node["field_field_editorialpublicationdate"]);
   }
   $variables['form_submit'] = drupal_render_children($variables['form']);
