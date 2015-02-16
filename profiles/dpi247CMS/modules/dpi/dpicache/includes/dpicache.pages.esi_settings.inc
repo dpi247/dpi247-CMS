@@ -7,9 +7,14 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
     '#type' => 'fieldset',
   );
   $form['debug']['dpicache_disable_esi'] = array(
-    '#title' => t('Disable Esi block for developpement'),
-    '#type' => 'checkbox',
-    '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
+      '#title' => t('Disable Esi block for developpement'),
+      '#type' => 'checkbox',
+      '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
+  );
+  $form['debug']['dpicache_esi_add_url_in_comment'] = array(
+      '#title' => t('Add esi url as a comment in the HTML source'),
+      '#type' => 'checkbox',
+      '#default_value'=>variable_get('dpicache_esi_add_url_in_comment', FALSE),
   );
 
   $form['esi_ttl'] = array(

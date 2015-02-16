@@ -105,7 +105,6 @@ function esi_block_block_view_alter(&$data, $block) {
       '#type' => 'esi',
       '#url' => $url,
     );
-    dsm($url);
   }
 }
 

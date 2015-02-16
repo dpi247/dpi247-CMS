@@ -8,6 +8,10 @@ module_load_include('inc', 'dpicache','varnish');
 module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
 
+
+module_load_include('inc', 'dpicache','dpicache.esi.block');
+module_load_include('inc', 'dpicache','dpicache.esi.panels');
+
 /**
  * Implementation of hook_menu
  */
@@ -137,14 +141,70 @@ function dpicache_esi_component_info() {
       'flush'      => 'dpicache_block__esi_block_flush',
       'file'       => 'dpicache.esi.block.inc',
     ),
-    'panels' => array(
-      'preprocess' => 'dpicache_block__esi_panels_prepare',
-      'render'     => 'dpicache_block__esi_panels_render',
-      'flush'      => 'dpicache_block__esi_panels_flush',
-      'file'       => 'dpicache.esi.panels.inc',
+    'panels_pane' => array(
+        'preprocess' => 'dpicacheesi_panels__esi_pane_prepare',
+        'render'     => 'dpicacheesi_panels__esi_pane_render',
+        'flush'      => 'dpicacheesi_panels__esi_pane_flush',
+        'file'       => 'dpicache.esi.panels.inc',
     ),
   );
 }
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function dpicache_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', ESI_PANELS_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  // We don't support the 'ctools' 'cache' plugin and pretending to causes
+  // errors when they're in use.
+  if ($module == 'ctools' && $plugin == 'cache') {
+    return;
+    // if we did we'd make a plugin/ctools_cache or something.
+  }
+
+  if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Register display_renderer plugin types.
+ */
+function dpicache_ctools_plugin_type() {
+  return array(
+      'display_renderers' => array(
+          'classes' => array('renderer'),
+      ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpicache_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+        'version' => 1,
+    );
+  }
+}
+
 
 
 /**
@@ -214,22 +274,6 @@ function dpicache_block_view($delta) {
   );
 }
 
-/**
- * Implements hook_block_view_alter().
- */
-function dpicache_block_view_alter(&$data, $block) {
-  // The region isn't known in hook_block_view().  This is the first hook where
-  // the region is provided.
-
-  if ($block->module == 'dpicache') {
-    // Build a URL which contains all the necessary data.
-    $url = url(dpicache_block_url($block), array('absolute' => TRUE));
-    $data['content'] = array(
-      '#type' => 'esi',
-      '#url' => $url,
-    );
-  }
-}
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -365,160 +409,6 @@ function dpicache__new_delta() {
     return array($module, $delta);
   }
 }
-
-/**
- * Build the URL to use for this ESI component.  The URL must contain all the
- * relevant information required to restore the original context of this block.
- *
- * @param Object $block.
- * A populated block object (as made available in hook_block_view_alter())
- * containing as a minimum the keys:
- * - cache
- * - module
- * - delta
- * - region
- * - theme
- *
- * @return String
- * The internal URL. Generate a fully-qualified path by running through url().
- */
-function dpicache_block_url($block) {
-  // ESI 6.x-1.x and 6.x-2.x used the URL patterns:
-  // Default:                esi/block/theme:region:module:delta
-  // Cache-per-page:         esi/block/theme:region:module:delta/[base64($_GET['q'])]
-  // Cache-per-role:         esi/block/theme:region:module:delta/CACHE=ROLE
-  // Cache-per-role DI:      esi/block/theme:region:module:delta/CACHE=[rolehash]
-  // Cache-per-page-role:    esi/block/theme:region:module:delta/[base64($_GET['q'])]/CACHE=ROLE
-  // Cache-per-page-role DI: esi/block/theme:region:module:delta/[base64($_GET['q'])]/CACHE=[rolehash]
-  // Cache-per-user:         esi/block/theme:region:module:delta/CACHE=USER
-  // Cache-per-user DI:      esi/block/theme:region:module:delta/CACHE=[userhash]
-  // Cache-per-user-page:    esi/block/theme:region:module:delta/[base64($_GET['q'])]/CACHE=USER
-  // Cache-per-user-page DI: esi/block/theme:region:module:delta/[base64($_GET['q'])]/CACHE=[userhash]
-
-
-  // Get the original module/delta.
-  list($module, $delta) = dpicache__new_delta($block->delta);
-  // Build the "theme:region:module:delta" key.
-  $component_key = implode(':', array(
-    $block->theme,
-    $block->region,
-    $module,
-    $delta,
-  ));
-  $url = "esi/block/{$component_key}";
-
-  // Use the $block->cache parameter (as defined in the database) to determine
-  // the caching rules for this block (per-user, per-role, etc).
-  // The cache configuration is defined in hook_block_info(), and may be
-  // altered through hook_block_info_alter().  The alter hook is the correct
-  // method to specify a custom cache configuration which is different from
-  // that defined in the original hook_block_info().
-  // If the block changes per page, encode the page URL in the ESI URL.
-  if ($block->cache & DRUPAL_CACHE_PER_PAGE) {
-    $url .= '/' . base64_encode($_GET['q']);
-  }
-
-  if ($block->cache != DRUPAL_NO_CACHE) {
-    // DRUPAL_CACHE_PER_ROLE and DRUPAL_CACHE_PER_USER are mutually exclusive.
-    // DRUPAL_CACHE_PER_USER takes precedence.
-    // Do not inject the actual roles or user data here; this string must not
-    // contain any personalisation, if the current page is to be cacheable.
-    if ($block->cache & DRUPAL_CACHE_PER_USER) {
-      $url .= '/CACHE=USER';
-    }
-    elseif ($block->cache & DRUPAL_CACHE_PER_ROLE) {
-      $url .= '/CACHE=ROLE';
-    }
-  }
-  // Allow other modules to alter the ESI URL (or respond to it).
-  // @see hook_dpicache_block_url_alter().
-  drupal_alter('dpicache_block_url', $url);
-
-  return $url;
-}
-
-
-
-
-
-
-
-
-/**
- * Implementation of hook_ctools_plugin_api().
- *
- * Inform CTools about version information for various plugins implemented by
- * Panels.
- *
- * @param string $owner
- *   The system name of the module owning the API about which information is
- *   being requested.
- * @param string $api
- *   The name of the API about which information is being requested.
- */
-function dpicache_panels_ctools_plugin_api($owner, $api) {
-  if ($owner == 'panels' && $api == 'pipelines') {
-    return array(
-      'version' => 1,
-    );
-  }
-}
-
-
-
-/**
- * Implementation of hook_ctools_plugin_directory().
- */
-function dpicache_panels_ctools_plugin_directory($module, $plugin) {
-  // Safety: go away if CTools is not at an appropriate version.
-  if (!module_invoke('ctools', 'api_version', ESI_PANELS_REQUIRED_CTOOLS_API)) {
-    return;
-  }
-
-  // We don't support the 'ctools' 'cache' plugin and pretending to causes
-  // errors when they're in use.
-  if ($module == 'ctools' && $plugin == 'cache') {
-    return;
-    // if we did we'd make a plugin/ctools_cache or something.
-  }
-
-  if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
-    return 'plugins/' . $plugin;
-  }
-}
-/**
- * Implements hook_ctools_plugin_post_alter().
- * 
- * @see dpicache.esi.panel.inc
- * 
- */
-function dpicache_ctools_plugin_post_alter(&$plugin, &$info) {
-  // Every time the configuration of a panel is saved, the default hook on the
-  // panel-context is invoked.  Replace that hook, in order to check for the
-  // presence of ESI panes, and switch the rendering pipeline if necessary.
-  if ($plugin['name'] == 'panel_context') {
-    // Replace the default 'save' operation - panels_panel_context_save();
-    $plugin['save'] = 'dpicache__panel_context_save';
-  }
-}
-
-
-/**
- * Save the configuration of a panel page.
- * @see panels_panel_context_save().
- */
-function dpicache__panel_context_save(&$handler, $update) {
-  // Override the rendering pipeline if any pane uses ESI.
-  // Only the standard rendering pipeline is supported; alternative/IPE/legacy
-  // pipelines cannot be used with ESI.
-  // @TODO: inform the user of this on the display, if a non-standard renderer
-  // is selected.
-  if ($handler->conf['pipeline'] == 'standard' && _esi_panels__display_uses_esi($handler->conf['display'])) {
-    $handler->conf['pipeline'] = 'dpicacheesi';
-  }
-  panels_panel_context_save($handler, $update);
-}
-
 
 /**
  * Implements hook_requirements().

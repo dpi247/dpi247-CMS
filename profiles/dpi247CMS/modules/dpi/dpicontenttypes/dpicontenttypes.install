@@ -469,3 +469,99 @@ function dpicontenttypes_update_7008(){
     }
   }
 }
+
+/**
+ * Modification du label embeddedobject
+ */
+function dpicontenttypes_update_7009(){
+  $field_instances = array();
+  
+  // Exported field_instance: 'node-package_gallery-field_embededobjects'
+  $field_instances['node-package_gallery-field_embededobjects'] = array(
+    'bundle' => 'package_gallery',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 23,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'image' => 'image',
+        'video' => 'video',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 6,
+    ),
+  );
+  
+  // Exported field_instance: 'node-package-field_embededobjects'
+  $field_instances['node-package-field_embededobjects'] = array(
+    'bundle' => 'package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 23,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'image' => 'image',
+        'video' => 'video',
+        'atom_package' => 'atom_package',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 6,
+    ),
+  );
+  
+  foreach($field_instances as $instance){
+    field_update_instance($instance);
+  }
+}
