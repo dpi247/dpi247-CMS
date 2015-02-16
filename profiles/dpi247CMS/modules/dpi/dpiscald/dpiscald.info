@@ -11,6 +11,7 @@ stylesheets[all][] = providers/timelinejs/timelinejs.css
 stylesheets[all][] = providers/googlemap/googlemap.css
 stylesheets[all][] = providers/coveritlive/coveritlive.css
 stylesheets[all][] = providers/scribblelive/scribblelive.css
+stylesheets[all][] = providers/facebook_status/facebook_status.css
 stylesheets[all][] = dpiscald.css
 
 files[] = includes/dpiscald_plugin_display_library.inc

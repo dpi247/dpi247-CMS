@@ -13,6 +13,7 @@ function dpiscald_scald_atom_providers() {
     'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
     'picktochart' => 'DPI Media hosted on Picktochart',
     'scribblelive' => 'DPI Media hosted on Scribblelive',
+    'facebook_status' => 'DPI Facebook status ressources hosted on Facebook',
   );
 }
 
@@ -147,7 +148,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
