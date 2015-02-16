@@ -14,7 +14,7 @@ function dpiscald_facebook_status_scald_add_form(&$form, &$form_state) {
     '#rows' => '3',
     '#title' => t('Facebook status markup'),
     '#element_validate' => array('dpiscald_facebook_status_validate_id'),
-    '#description' => t('Paste here the markup of the Facebook status :<ul><li>At the top right of a status, you can select an option to embed the status on a web page.</li><li>Copy and paste the given code here.</li><li>see : https://developers.facebook.com/blog/post/2013/07/31/introducing-embedded-posts/</li></ul>'),
+    '#description' => t('Paste here the link post or markup of the Facebook status :<ul><li>At the top right of a status, you can select an option to embed the status on a web page.</li><li>Copy and paste the given code here.</li><li>see : https://developers.facebook.com/blog/post/2013/07/31/introducing-embedded-posts/</li></ul>'),
   );
 }
 
@@ -97,55 +97,73 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
   $values->name = FALSE;
   $values->country = 'en_US';
 
-  // get the data-href
-  preg_match("/data-href=\"(.*)\"/siU", $identifier, $match);
-  if (isset($match[1])) {
-    $values->data_href = $match[1];
-  }
-  else {
-    return $values;
-  }
+  if (substr($identifier, 0, 4) == "http") {
+    // Si on passe juste une url
+        // get something else like a page post (i don't have any video example to play with)
+        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)$/siU", $identifier, $match);
+        if (isset($match[0])) {
+          $values->base_id = $match[2];
+          $values->user_id = $match[1];
+          $values->data_href = $identifier;
+          $values->title = $values->user_id . ' ' . $values->base_id;
+          $values->name = $values->title;
+        }
+        return $values;
 
-  // get the title
-  preg_match_all("/<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>/siU", $identifier, $matches);
-  if (isset($matches[3][1])) {
-    $values->name = $matches[3][1];
-  }
+  } else {
+    // Code embed
 
-  // get the country
-  preg_match("/connect\.facebook\.net\/(.*)\/all\.js/siU", $identifier, $match);
-  if (isset($match[1])) {
-    $values->country = $match[1];
-  }
-
-  // check if this is a permalink
-  preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)\"/siU", $identifier, $match);
-  if (isset($match[0])) {
-    $values->base_id = $match[1];
-    $values->user_id = $match[2];
-  }
-  else {
-    // check if this is a photo
-    preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&amp\;set=(.*)\&amp\;type=/siU", $identifier, $match);
-    if (isset($match[0])) {
-      // get the values
-      $data = explode('.', $match[2]);
-      $values->base_id = $match[1];
-      $values->user_id = $data[3];
+    // get the data-href
+    preg_match("/data-href=\"(.*)\"/siU", $identifier, $match);
+    if (isset($match[1])) {
+      $values->data_href = $match[1];
     }
     else {
-      // get something else like a page post (i don't have any video example to play with)
-      preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)\"/siU", $identifier, $match);
+      return $values;
+    }
+
+    // get the title
+    preg_match_all("/<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>/siU", $identifier, $matches);
+    if (isset($matches[3][1])) {
+      $values->name = $matches[3][1];
+    }
+
+    // get the country
+    preg_match("/connect\.facebook\.net\/(.*)\/all\.js/siU", $identifier, $match);
+    if (isset($match[1])) {
+      $values->country = $match[1];
+    }
+
+    // check if this is a permalink
+    preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)\"/siU", $identifier, $match);
+    if (isset($match[0])) {
+      $values->base_id = $match[1];
+      $values->user_id = $match[2];
+    }
+    else {
+      // check if this is a photo
+      preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&amp\;set=(.*)\&amp\;type=/siU", $identifier, $match);
       if (isset($match[0])) {
-        $values->base_id = $match[2];
-        $values->user_id = $match[1];
+        // get the values
+        $data = explode('.', $match[2]);
+        $values->base_id = $match[1];
+        $values->user_id = $data[3];
+      }
+      else {
+        // get something else like a page post (i don't have any video example to play with)
+        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)\"/siU", $identifier, $match);
+        if (isset($match[0])) {
+          $values->base_id = $match[2];
+          $values->user_id = $match[1];
+        }
       }
     }
+    if ($values->name) {
+      $values->title = $values->name. '-'. $values->base_id;
+    }
+    return $values;
+
   }
-  if ($values->name) {
-    $values->title = $values->name. '-'. $values->base_id;
-  }
-  return $values;
 }
 
 /**
@@ -168,7 +186,6 @@ function dpiscald_facebook_status_already_imported($id) {
  */
 function dpiscald_facebook_status_validate_id($element, &$form_state) {
   $values = dpiscald_facebook_status_get_media_infos_from_url($form_state['values']['identifier']);
-  dsm($values);
   if (!$values->base_id) {
     form_error($element, t('Invalid status ID or URL.'));
   }
