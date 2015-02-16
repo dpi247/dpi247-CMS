@@ -91,6 +91,30 @@ function dpidestinations_menu() {
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
+  
+  $items['admin/dpi247/dpidestinations/reorder_targetblock'] = array(
+    'title' => t('reordering'),
+    'description' => 'Reorder targetblock rank.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_get_reorder_form',
+    'file' => 'dpidestinations.pages.admin-reorder.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
+  $items['admin/dpi247/dpidestinations/reorder_targetblock/%taxonomy_term/%dpidestinations_api_target_machinename'] = array(
+    'title' => t('reordering'),
+    'description' => 'Reorder targetblock rank.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_get_reorder_form',
+    'page arguments' => array(4,5),    
+    'file' => 'dpidestinations.pages.admin-reorder.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
   $items['section/%section'] = array(
     'title' => 'Section term',
     'title callback' => 'taxonomy_term_title',
