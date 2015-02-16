@@ -96,7 +96,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Re order'),
+    '#value' => t('Save'),
   );
   
   return $form;
