@@ -10,9 +10,8 @@
  */
 function dpiscald_facebook_status_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
-    '#type' => 'textarea',
-    '#rows' => '3',
-    '#title' => t('Facebook status markup'),
+    '#type' => 'textfield',
+    '#title' => t('Facebook status'),
     '#element_validate' => array('dpiscald_facebook_status_validate_id'),
     '#description' => t('Paste here the link post or markup of the Facebook status :<ul><li>At the top right of a status, you can select an option to embed the status on a web page.</li><li>Copy and paste the given code here.</li><li>see : https://developers.facebook.com/blog/post/2013/07/31/introducing-embedded-posts/</li></ul>'),
   );
