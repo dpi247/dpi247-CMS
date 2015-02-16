@@ -34,7 +34,7 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   /* foreach on entity */
   $entities = entity_load('accroche');
   foreach($entities as $aid => $entity){
-    $types [$entity->machine_name] = array (
+    $types ['accroche_'.$entity->machine_name] = array (
       'title' => check_plain ( $entity->title ),
       'subtype' => $entity->machine_name,
       'description' => check_plain ( $entity->title ),
@@ -44,7 +44,7 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
       'all contexts' => TRUE
     );
   }
-  
+
   return $types;
 }
 
