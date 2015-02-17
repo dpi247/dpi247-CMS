@@ -38,15 +38,34 @@ function dpiscald_facebook_status_scald_add_form_fill(&$atoms, $form, $form_stat
     'tid' => 0,
     'taxonomy_term' => (object)(array('name' => $values->name))
   );
+
+  $uri = 'public://atoms/facebook_status.png';
+
+  // Take a look at: file.inc::file_load_multiple
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  $file = reset($files); // If empty, $file will be false, otherwise will contain the required file
+  if (isset($file)) {
+    $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+  }
 }
 
 /**
  * Implements hook_scald_fetch().
  */
 function dpiscald_facebook_status_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+
+  if (!isset($atom->file_source) || !isset($atom->thumbnail_source)){
+    $uri = 'public://atoms/facebook_status.png';
+    $files = file_load_multiple(array(), array('uri' => $uri));
+    $file = reset($files);
+    if (isset($file)) {
+      file_usage_add($file, 'dpiscald', 'facebook_status', $atom->sid);
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+
+    if (file_exists($uri)) {
+      $atom->file_source = $atom->thumbnail_source = $uri;
+    }
   }
 }
 
@@ -96,73 +115,63 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
   $values->name = FALSE;
   $values->country = 'en_US';
 
+
   if (substr($identifier, 0, 4) == "http") {
-    // Si on passe juste une url
-        // get something else like a page post (i don't have any video example to play with)
-        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)$/siU", $identifier, $match);
-        if (isset($match[0])) {
-          $values->base_id = $match[2];
-          $values->user_id = $match[1];
-          $values->data_href = $identifier;
-          $values->title = $values->user_id . ' ' . $values->base_id;
-          $values->name = $values->title;
-        }
-        return $values;
-
+    $regexEndChar = "$";
   } else {
-    // Code embed
-
-    // get the data-href
-    preg_match("/data-href=\"(.*)\"/siU", $identifier, $match);
-    if (isset($match[1])) {
-      $values->data_href = $match[1];
-    }
-    else {
-      return $values;
-    }
-
-    // get the title
-    preg_match_all("/<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>/siU", $identifier, $matches);
-    if (isset($matches[3][1])) {
-      $values->name = $matches[3][1];
-    }
-
-    // get the country
-    preg_match("/connect\.facebook\.net\/(.*)\/all\.js/siU", $identifier, $match);
-    if (isset($match[1])) {
-      $values->country = $match[1];
-    }
-
-    // check if this is a permalink
-    preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)\"/siU", $identifier, $match);
-    if (isset($match[0])) {
-      $values->base_id = $match[1];
-      $values->user_id = $match[2];
-    }
-    else {
-      // check if this is a photo
-      preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&amp\;set=(.*)\&amp\;type=/siU", $identifier, $match);
-      if (isset($match[0])) {
-        // get the values
-        $data = explode('.', $match[2]);
-        $values->base_id = $match[1];
-        $values->user_id = $data[3];
-      }
-      else {
-        // get something else like a page post (i don't have any video example to play with)
-        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)\"/siU", $identifier, $match);
-        if (isset($match[0])) {
-          $values->base_id = $match[2];
-          $values->user_id = $match[1];
-        }
-      }
-    }
-    if ($values->name) {
-      $values->title = $values->name. '-'. $values->base_id;
-    }
-    return $values;
-
+    $regexEndChar = "\"";
   }
+
+  // get the data-href
+  preg_match("/data-href=\"(.*)\"/siU", $identifier, $match);
+  if (isset($match[1])) {
+    $values->data_href = $match[1];
+  }
+  else {
+    $values->data_href = $identifier;
+  }
+
+  // get the title
+  preg_match_all("/<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>/siU", $identifier, $matches);
+  if (isset($matches[3][1])) {
+    $values->name = $matches[3][1];
+  }
+
+  // get the country
+  preg_match("/connect\.facebook\.net\/(.*)\/all\.js/siU", $identifier, $match);
+  if (isset($match[1])) {
+    $values->country = $match[1];
+  }
+
+  // check if this is a permalink
+  preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&id=(.*)".$regexEndChar."/siU", $identifier, $match);
+  if (isset($match[0])) {
+    $values->base_id = $match[1];
+    $values->user_id = $match[2];
+  }
+  else {
+    // check if this is a photo
+    preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&set=(.*)\&type=/siU", $identifier, $match);
+    if (isset($match[0])) {
+      // get the values
+      $data = explode('.', $match[2]);
+      $values->base_id = $match[1];
+      $values->user_id = $data[3];
+    }
+    else {
+      // get something else like a page post (i don't have any video example to play with)
+      preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)".$regexEndChar."/siU", $identifier, $match);
+      if (isset($match[0])) {
+        $values->base_id = $match[2];
+        $values->user_id = $match[1];
+      }
+    }
+  }
+  if (!$values->name) {
+    $values->name = $values->user_id;
+  }
+  $values->title = $values->name. '-'. $values->base_id;
+  return $values;
 }
 
 /**

@@ -49,6 +49,30 @@ function dpiscald_install() {
           SET weight = '-1'
           WHERE name = 'dpiscald'";
   db_query($sql);
+
+  // copy the default FB thumbnail icon if it does not exist
+  $default_thumbnail_source = 'public://atoms/facebook_status.png';
+  if (!file_exists($default_thumbnail_source)) {
+    // file_unmanaged_copy() does not create new directory, so it is necessary to create it before.
+    $directory = dirname($default_thumbnail_source);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+    file_unmanaged_copy(drupal_get_path('module', 'dpiscald') . '/providers/facebook_status/icons/facebook_status.png', $default_thumbnail_source);
+
+    global $base_url;
+    $url = $base_url.'/'.drupal_get_path('module', 'dpiscald') . '/providers/facebook_status/icons/facebook_status.png';
+    $img = drupal_http_request($url);
+    if ($img && file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
+      $file = file_save_data($img->data, 'public://atoms/facebook_status.png', FILE_EXISTS_REPLACE);
+
+      if ($file) {
+        // Set the file status to temporary.
+        $query = db_update('file_managed')
+          ->condition('fid', $file->fid)
+          ->fields(array('status' => 0))
+          ->execute();
+      }
+    }
+  }
 }
 
 /**
