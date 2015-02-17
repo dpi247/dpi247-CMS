@@ -34,12 +34,10 @@ function dpiscald_facebook_status_player_settings_form($form, &$form_state, &$el
 
 function dpiscald_facebook_status_build_render(&$atom, $context, $options, $mode, $config) {
 	$theme_parameters = dpiscald_facebook_status_get_theme_parameters($atom, $context, $options, $mode, $config);
-	dsm($theme_parameters);
 	$atom->rendered->player = theme('dpiscald_facebook_status_player_html5', $theme_parameters);
 }
 
 function dpiscald_facebook_status_get_theme_parameters($atom, $context, $options, $mode, $config) {
-	dsm($atom);
 	return array('vars' =>
         array(
           'title'       => $atom->title,
