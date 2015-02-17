@@ -97,7 +97,11 @@ function dpiscald_facebook_status_theme() {
   return array(
     'dpiscald_facebook_status' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
-      'template' => 'providers/facebook_status/dpiscald_facebook_status_player'
+      'template' => 'templates/players/dpiscald_facebook_status_player'
+    ),
+    'dpiscald_facebook_status_player_html5' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'templates/players/dpiscald_facebook_status_player_html5'
     ),
   );
 }
