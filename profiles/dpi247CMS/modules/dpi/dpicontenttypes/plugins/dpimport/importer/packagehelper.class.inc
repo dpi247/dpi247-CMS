@@ -51,11 +51,8 @@ abstract class PackageHelper extends Importer {
     }
     $node->is_new = TRUE;
     node_object_prepare($node);
-    if($type_xml_info == "GalleryPackageType"){
-      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package_gallery'), 'dpiproperties');
-    }else{
-      $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
-    }
+    $node->dpiproperties = new DPIPropertiesEntity(array('type' => $node->type), 'dpiproperties');
+    
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
     if ($dpiproperties !== FALSE){
