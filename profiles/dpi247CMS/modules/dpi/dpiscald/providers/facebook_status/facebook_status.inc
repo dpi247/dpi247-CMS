@@ -38,15 +38,34 @@ function dpiscald_facebook_status_scald_add_form_fill(&$atoms, $form, $form_stat
     'tid' => 0,
     'taxonomy_term' => (object)(array('name' => $values->name))
   );
+
+  $uri = 'public://atoms/facebook_status.png';
+
+  // Take a look at: file.inc::file_load_multiple
+  $files = file_load_multiple(array(), array('uri' => $uri));
+  $file = reset($files); // If empty, $file will be false, otherwise will contain the required file
+  if (isset($file)) {
+    $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+  }
 }
 
 /**
  * Implements hook_scald_fetch().
  */
 function dpiscald_facebook_status_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+
+  if (!isset($atom->file_source) || !isset($atom->thumbnail_source)){
+    $uri = 'public://atoms/facebook_status.png';
+    $files = file_load_multiple(array(), array('uri' => $uri));
+    $file = reset($files);
+    if (isset($file)) {
+      file_usage_add($file, 'dpiscald', 'facebook_status', $atom->sid);
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+
+    if (file_exists($uri)) {
+      $atom->file_source = $atom->thumbnail_source = $uri;
+    }
   }
 }
 
@@ -96,20 +115,27 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
   $values->name = FALSE;
   $values->country = 'en_US';
 
-  if (substr($identifier, 0, 4) == "http") {
-    // Si on passe juste une url
-        // get something else like a page post (i don't have any video example to play with)
-        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)$/siU", $identifier, $match);
-        if (isset($match[0])) {
-          $values->base_id = $match[2];
-          $values->user_id = $match[1];
-          $values->data_href = $identifier;
-          $values->title = $values->user_id . ' ' . $values->base_id;
-          $values->name = $values->title;
-        }
-        return $values;
 
+  if (substr($identifier, 0, 4) == "http") {
+    $regexEndChar = "$";
   } else {
+    $regexEndChar = "\"";
+  }
+
+  // if (substr($identifier, 0, 4) == "http") {
+  //   // Si on passe juste une url
+  //       // get something else like a page post (i don't have any video example to play with)
+  //       preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)$/siU", $identifier, $match);
+  //       if (isset($match[0])) {
+  //         $values->base_id = $match[2];
+  //         $values->user_id = $match[1];
+  //         $values->data_href = $identifier;
+  //         $values->title = $values->user_id . ' ' . $values->base_id;
+  //         $values->name = $values->title;
+  //       }
+  //       return $values;
+
+  // } else {
     // Code embed
 
     // get the data-href
@@ -118,7 +144,7 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
       $values->data_href = $match[1];
     }
     else {
-      return $values;
+      $values->data_href = $identifier;
     }
 
     // get the title
@@ -134,7 +160,7 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
     }
 
     // check if this is a permalink
-    preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)\"/siU", $identifier, $match);
+    preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)".$regexEndChar."/siU", $identifier, $match);
     if (isset($match[0])) {
       $values->base_id = $match[1];
       $values->user_id = $match[2];
@@ -150,10 +176,13 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
       }
       else {
         // get something else like a page post (i don't have any video example to play with)
-        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)\"/siU", $identifier, $match);
+        preg_match("/www\.facebook\.com\/(.*)\/posts\/(.*)".$regexEndChar."/siU", $identifier, $match);
         if (isset($match[0])) {
           $values->base_id = $match[2];
           $values->user_id = $match[1];
+          if (!$values->name) {
+            $values->name = $values->user_id;
+          }
         }
       }
     }
@@ -162,7 +191,7 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
     }
     return $values;
 
-  }
+  // }
 }
 
 /**
