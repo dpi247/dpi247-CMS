@@ -144,14 +144,14 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
   }
 
   // check if this is a permalink
-  preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&amp\;id=(.*)".$regexEndChar."/siU", $identifier, $match);
+  preg_match("/www\.facebook\.com\/permalink\.php\?story_fbid=(.*)\&id=(.*)".$regexEndChar."/siU", $identifier, $match);
   if (isset($match[0])) {
     $values->base_id = $match[1];
     $values->user_id = $match[2];
   }
   else {
     // check if this is a photo
-    preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&amp\;set=(.*)\&amp\;type=/siU", $identifier, $match);
+    preg_match("/www\.facebook\.com\/photo\.php\?fbid=(.*)\&set=(.*)\&type=/siU", $identifier, $match);
     if (isset($match[0])) {
       // get the values
       $data = explode('.', $match[2]);
@@ -164,15 +164,13 @@ function dpiscald_facebook_status_get_media_infos_from_url($identifier) {
       if (isset($match[0])) {
         $values->base_id = $match[2];
         $values->user_id = $match[1];
-        if (!$values->name) {
-          $values->name = $values->user_id;
-        }
       }
     }
   }
-  if ($values->name) {
-    $values->title = $values->name. '-'. $values->base_id;
+  if (!$values->name) {
+    $values->name = $values->user_id;
   }
+  $values->title = $values->name. '-'. $values->base_id;
   return $values;
 }
 
