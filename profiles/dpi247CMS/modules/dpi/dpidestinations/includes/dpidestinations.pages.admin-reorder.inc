@@ -8,14 +8,14 @@ function dpidestinations_get_reorder_form($term = NULL,$target = NULL){
   }
   
   if(!isset($nodes)){
-    return drupal_get_form('dpidestinations_destination_defina_target_form');
+    return drupal_get_form('dpidestinations_destination_define_target_form');
   }elseif(empty($nodes)){
     $val = array(
       '#markup' => t("Aucun élément n'est associé à cette destination"),
     );
-    return array(drupal_get_form('dpidestinations_destination_defina_target_form'),$val);
+    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name),$val);
   }else{
-    return array(drupal_get_form('dpidestinations_destination_defina_target_form'),drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target));
+    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name),drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target));
   }
 }
 
@@ -40,10 +40,15 @@ function dpidestinations_define_result_by_term($term, $target){
   return $return;
 }
 
-function dpidestinations_destination_defina_target_form($form, & $form_state){
+function dpidestinations_destination_define_target_form($form, & $form_state, $tid = NULL, $machName = NULL){
   $form['accroche'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Select the destination that you wish to reorder'),
+    '#weight' => 5,
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
     '#tree' => TRUE,
-    '#prefix' => '<div id="accroche-form" class="container-inline">',
+    '#prefix' => '<div id="accroche-form">',
     '#suffix' => '</div>',
   );
   
@@ -57,12 +62,14 @@ function dpidestinations_destination_defina_target_form($form, & $form_state){
       'wrapper' => 'accroche-form',
       'method' => 'replace'
     ),
-    '#default_value' => (isset ( $form_state ['values']['accroche']['selectsection'] )) ? $form_state ['values']['accroche']['selectsection'] : ''
+    '#default_value' => (isset ( $form_state ['values']['accroche']['selectsection'] )) ? $form_state ['values']['accroche']['selectsection'] : (isset($tid)) ? $tid : ""
   );
   
   if (isset ( $form_state ['values']['accroche']['selectsection'] )) {
     $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $form_state ['values']['accroche']['selectsection'] );
-  } else {
+  } elseif (isset($machName) && isset($tid)) {
+    $options = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $tid );    
+  }else{
     $options = array ();
   }
   
@@ -71,23 +78,23 @@ function dpidestinations_destination_defina_target_form($form, & $form_state){
     '#title' => t ( 'Choose a target' ),
     '#required' => FALSE,
     "#options" => $options,
-    '#default_value' => (isset ( $form_state ['values']['accroche']['selecttarget'] )) ? $form_state ['values']['accroche']['selecttarget'] : ''
+    '#default_value' => (isset ( $form_state ['values']['accroche']['selecttarget'] )) ? $form_state ['values']['accroche']['selecttarget'] : (isset($machName)) ? $machName : ""
   );
   
   $form['accroche']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Go'),
+    '#value' => t('Reorder'),
     '#id' => 'getelement',
   );
   
   return $form;
 }
 
-function dpidestinations_destination_defina_target_form_submit($form, & $form_state){  
+function dpidestinations_destination_define_target_form_submit($form, & $form_state){  
   $op = $form_state['triggering_element']['#id'];
   switch ($op){
     case 'getelement':
-        drupal_goto('admin/dpi247/dpidestinations/reorder_targetblock/'.$form_state['values']['accroche']['selectsection'].'/'.$form_state['values']['accroche']['selecttarget']);
+        drupal_goto('admin/content/reorder_targetblock/'.$form_state['values']['accroche']['selectsection'].'/'.$form_state['values']['accroche']['selecttarget']);
       break;
     default:        
       break;
