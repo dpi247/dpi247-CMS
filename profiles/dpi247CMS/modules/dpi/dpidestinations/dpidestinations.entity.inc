@@ -63,7 +63,7 @@ function dpidestinations_entity_info(){
   $entities['targetblock'] = array(
     'label' => t('Target Block'),
     // seulement si on utilise le module entity API
-    'exportable' => TRUE,
+    'exportable' => FALSE,
     'entity class' => 'TargetBlockEntity',
     'controller class' => 'TargetBlockController',
     'base table' => 'dpidestinations_targetblock',
