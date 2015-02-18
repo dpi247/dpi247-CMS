@@ -34,10 +34,11 @@ function dpiscald_install() {
   scald_add_type('deezer', 'Deezer', 'Resource Deezer');
   scald_add_type('videortl', 'Video RTL', 'Resource Video RTL');
   scald_add_type('facebook_status', 'Facebook status', 'Resource Facebook status');
+  scald_add_type('infogram', 'Infogram', 'Resource Infogram');
   
   //Changer le provider par defaut des types créés, ci-dessus via le module scald, de "scald" à "dpiscald".
   $providers = array('flickr', 'soundcloud', 'youtube', 'dailymotion', 'vimeo', 'twitter', 'equipefr', 'kewego', 'googlemap',
-       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status');
+       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status', 'infogram');
   $requete='UPDATE {scald_types} SET provider=\'dpiscald\' where ';
   foreach($providers as $provider){
   	$requete.='type = \''.$provider.'\' OR ';
@@ -51,18 +52,31 @@ function dpiscald_install() {
   db_query($sql);
 
   // copy the default FB thumbnail icon if it does not exist
-  $default_thumbnail_source = 'public://atoms/facebook_status.png';
+  $thumbpath = drupal_get_path('module', 'dpiscald') . '/providers/facebook_status/icons/facebook_status.png';
+  _create_default_dpiscald_thumbnail($thumbpath, 'png', 'facebook_status');
+  
+  //copy the default infogram thumbnail icon if it does not exist
+  $thumbpath = drupal_get_path('module', 'dpiscald') . '/providers/infogram/icons/infogram.png';
+  _create_default_dpiscald_thumbnail($thumbpath, 'png', 'infogram');
+}
+
+/**
+ * This function create the default thumbnails
+ * File are in public://atoms folder
+ */
+function _create_default_dpiscald_thumbnail($file_path, $format, $provider) {
+  $default_thumbnail_source = 'public://atoms/'.$provider.'.'.$format;
   if (!file_exists($default_thumbnail_source)) {
     // file_unmanaged_copy() does not create new directory, so it is necessary to create it before.
     $directory = dirname($default_thumbnail_source);
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    file_unmanaged_copy(drupal_get_path('module', 'dpiscald') . '/providers/facebook_status/icons/facebook_status.png', $default_thumbnail_source);
+    file_unmanaged_copy($file_path, $default_thumbnail_source);
 
     global $base_url;
-    $url = $base_url.'/'.drupal_get_path('module', 'dpiscald') . '/providers/facebook_status/icons/facebook_status.png';
+    $url = $base_url.'/'.$file_path;
     $img = drupal_http_request($url);
     if ($img && file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
-      $file = file_save_data($img->data, 'public://atoms/facebook_status.png', FILE_EXISTS_REPLACE);
+      $file = file_save_data($img->data, 'public://atoms/'.$provider.'.'.$format, FILE_EXISTS_REPLACE);
 
       if ($file) {
         // Set the file status to temporary.
