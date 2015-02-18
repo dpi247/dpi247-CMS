@@ -59,12 +59,20 @@ function _dpicontenttypes_cropings_entity_form_add_cropings_alter(&$form, &$form
  * Add an "edit croping" link on an atom in an entity edition form
  */
 function _dpicontenttypes_cropings_generate_edition_link(&$item, $entity_type, $eid, $aid) {
-  $callback = 'admin/editdpicrop/ajax/'.$entity_type.'/'.$eid.'/'.$aid;
-
+  drupal_add_css(drupal_get_path('module', 'dpicontenttypes') . '/css/edit-atom.css');
+  $callback = 'admin/editdpicrop/ajax/'.$entity_type.'/'.$eid.'/'.$aid;  
+  
   $edit_crop_link = ctools_modal_text_button(t('Click here to edit croping informations'), $callback, '');
   $item['editcrops'] = array(
     '#markup' => $edit_crop_link,
     '#weight' => 100,
+    '#prefix' => '<div class="pad-10">',
+  );
+  
+  $item['edit-atom-btn'] = array(
+    '#markup' => l(t('Edit atom'), 'atom/'.$aid.'/edit/nojs'),
+    '#weight' => 103,
+    '#suffix' => '</div>',
   );
 }
 
