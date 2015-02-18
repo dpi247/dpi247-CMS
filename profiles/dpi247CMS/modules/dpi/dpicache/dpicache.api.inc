@@ -23,7 +23,8 @@ function dpicache_get_cache_entry($cache_name) {
   array_shift ( $parameters );
   array_pop( $hash_parameters ); //unset $conf
   array_pop( $hash_parameters ); //unset title -> for one_cache_regenerate
-
+  $arg_callback = dpicache_get_arguments_values ( $cache_definition, $parameters );
+  $hash_parameters[] = $arg_callback ["category"];
   // Get hash
   $hash = _dpicache_get_hash ( $cache_name, $hash_parameters );
   if (! $hash) {
@@ -72,7 +73,7 @@ function dpicache_get_cache_entry($cache_name) {
       "!hash" => $hash 
     ) ), array (), $hash, WATCHDOG_DEBUG );
     
-    $arg_callback = dpicache_get_arguments_values ( $cache_definition, $parameters );
+    
     // Add or update cache entry data
     $entry_information = array (
       "name" => $cache_name,
