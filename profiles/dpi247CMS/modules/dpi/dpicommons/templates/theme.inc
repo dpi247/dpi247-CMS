@@ -81,7 +81,7 @@ function theme_dpi_vertical_tabs($variables){
  *
  *      $a = array(
  *          '#type' => 'markup',
- *          '#markup' => 'ena',
+ *          '#markup' => 'dpi',
  *      );
  *      $b = array(
  *        '#value' =>array($a,$a,$a,$a,$a,$a,$a),
@@ -89,7 +89,7 @@ function theme_dpi_vertical_tabs($variables){
  *        '#attributes' => array(
  *        'class' => 'test',
  *        ),
- *      '#theme_wrappers' => array(0 => 'ena_render_wrapper'),
+ *      '#theme_wrappers' => array(0 => 'dpi_render_wrapper'),
  *      );
  */
 function theme_dpi_render_wrapper($variables) {
