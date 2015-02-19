@@ -18,11 +18,10 @@ class WallyXmlV1 extends PackageHelper {
       $dispatcher = $this->getDispatcher ();
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
-      
+
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
       $this->savePackage($dom, $package);
     }
     
@@ -578,10 +577,16 @@ class WallyXmlV1 extends PackageHelper {
     $wrapper->field_embededobjects->set ( NULL );
     $dispatcher = $this->getDispatcher ();
     $embeds = $dispatcher->processList ( $dom, $wrapper, $entity );
+    
+    //print_r($embeds);
+    //die();
     $embeds_list = array ();
     $i = 100;
     if (! Logger::error ()) {
       foreach ( $embeds as $atom ) {
+        if(isset($atom->original)){
+          $atom->original = null;
+        }
         if ($atom != NULL) {
           if (isset ( $atom->embeddedobjectsorder )) {
             $order = $atom->embeddedobjectsorder;

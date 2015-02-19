@@ -79,6 +79,7 @@ function dpiblocks_flowhelpers_filter_html_tags($text) {
  */
 function dpiblocks_flowhelpers_create_or_load_atom($type, $provider, $external_reference) {
   $atom = scald_atom_defaults($type);
+  $atom=clone($atom);
   $atom->provider = $provider;
   $atom->type = $type;
 

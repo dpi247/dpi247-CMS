@@ -437,8 +437,8 @@ function dpicontenttypes_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_embeddedobjects',
-    'label' => 'EmbededObjects',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
     'required' => 0,
     'settings' => array(
       'field_to_analyse' => 'field_textbody',
@@ -2892,8 +2892,8 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_embeddedobjects',
-    'label' => 'EmbededObjects',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
     'required' => 0,
     'settings' => array(
       'field_to_analyse' => 'field_textbody',

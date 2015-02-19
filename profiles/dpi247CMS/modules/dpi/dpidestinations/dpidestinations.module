@@ -654,7 +654,21 @@ function dpidestinations_dpicache_category_callback($cachedefinition = '', $argu
   $retour = "dpidestinations";
   if(is_array($arguments) && (isset($arguments[0])  && is_numeric($arguments[0])) && (isset($arguments[1])) && is_numeric($arguments[1])
         && isset($arguments[2])){
-    $retour = $arguments[0].'_'.$arguments[1].'_'.$arguments[2];
+    $sub_arg = "";
+    if(user_access('administer')){
+      $sub_arg = "_admin";
+    }else{
+      global $user;
+      if(isset($user->roles)){
+        foreach($user->roles as $role){
+          $sub_arg .= preg_replace('/\s/', '', $role."_");
+        }
+        $sub_arg = '_'.substr($sub_arg, 0, -1);
+      }else{
+        $sub_arg = '_anonymous';        
+      }
+    }
+    $retour = $arguments[0].'_'.$arguments[1].'_'.$arguments[2].$sub_arg;
   }
   return $retour;
 }

@@ -106,7 +106,7 @@ abstract class PackageHelper extends Importer {
    * @return Object $node
    */
   protected function _createOrLoadEntityScaldAtom($dom, $external_reference, $atom) {
-    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){      
       $atom = $temp_atom;
       $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
       $atom_wrapper->field_external_reference->set($external_reference);
@@ -121,7 +121,6 @@ abstract class PackageHelper extends Importer {
     } else {
       $atom->dpiproperties = new DPIPropertiesEntity(array('type' => 'scald_atom'), 'dpiproperties');
     }
-
     return $atom;
   }
 
@@ -135,6 +134,8 @@ abstract class PackageHelper extends Importer {
    */
   protected function _createOrLoadEntityPhotoObjectType($dom, $external_reference) {
     $atom = scald_atom_defaults('image');
+    /* Besoin de cloner a cause du cache static ! */
+    $atom=clone($atom);
     $atom->provider = 'scald_image';
     $atom->type = 'image';
     $atom->field_external_reference = $external_reference;
@@ -229,6 +230,7 @@ abstract class PackageHelper extends Importer {
    */
   protected function createOrLoadEntityLinksList($dom){
     $atom = scald_atom_defaults('links_list');
+    $atom=clone($atom);
     $atom->provider = 'dpicontenttypes';
     $atom->type = 'links_list';
     $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
@@ -272,7 +274,8 @@ abstract class PackageHelper extends Importer {
     if ($provider == NULL){
       Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri createOrLoadEntityLink', array('!uri' => $uri)));
     } else {
-      $atom = scald_atom_defaults($provider['type']);    
+      $atom = scald_atom_defaults($provider['type']);   
+      $atom=clone($atom);
       $atom->provider = $provider['name'];
       $atom->type = $provider['type'];
       $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
@@ -312,6 +315,7 @@ abstract class PackageHelper extends Importer {
    */
   protected function createOrLoadEntityAudioObjectType($dom){
     $atom = scald_atom_defaults('audio');
+    $atom=clone($atom);
     $atom->provider = 'scald_audio';
     $atom->type = 'audio';
 
