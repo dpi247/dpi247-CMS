@@ -6,6 +6,7 @@ module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
 module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
 module_load_include('inc', 'dpidestinations','dpidestinations.rules');
+module_load_include('inc', 'dpidestinations','dpidestinations.formatters');
 
 /**
  * Implementation of hook_menu()

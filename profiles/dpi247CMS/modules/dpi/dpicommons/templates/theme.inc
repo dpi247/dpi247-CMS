@@ -61,3 +61,55 @@ function theme_dpi_vertical_tabs($variables){
 
   return $out;
 }
+
+/**
+ * Returns HTML for a generic HTML tag with attributes.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *    - tag: the tag name to output
+ *    - attributes: (optional) An array of HTML attributes to apply to the
+ *       tag.
+ *     - value: (optional) A string containing tag content, such as inline
+ *       CSS.
+ *     - value_prefix: (optional) A string to prepend to #value, e.g. a CDATA
+ *       wrapper prefix.
+ *     - value_suffix: (optional) A string to append to #value, e.g. a CDATA
+ *       wrapper suffix.
+ *
+ *      Example of implementation
+ *
+ *      $a = array(
+ *          '#type' => 'markup',
+ *          '#markup' => 'ena',
+ *      );
+ *      $b = array(
+ *        '#value' =>array($a,$a,$a,$a,$a,$a,$a),
+ *        '#tag' => 'div',
+ *        '#attributes' => array(
+ *        'class' => 'test',
+ *        ),
+ *      '#theme_wrappers' => array(0 => 'ena_render_wrapper'),
+ *      );
+ */
+function theme_dpi_render_wrapper($variables) {
+  $attributes = isset ( $variables ['attributes'] ) ? drupal_attributes ( $variables ['attributes'] ) : '';
+  if (! isset ( $variables ['value'] )) {
+    return '<' . $variables ['tag'] . $attributes . " ></" . $variables ['tag'] . ">\n";
+  } else {
+    $output = '<' . $variables ['tag'] . $attributes . '>';
+    if (isset ( $variables ['value_prefix'] )) {
+      $output .= $variables ['value_prefix'];
+    }
+    if (is_array ( $variables ['value'] )) {
+      $output .= drupal_render ( $variables ['value'] );
+    } else {
+      $output .= $variables ['value'];
+    }
+    if (isset ( $variables ['value_suffix'] )) {
+      $output .= $variables ['value_suffix'];
+    }
+    $output .= '</' . $variables ['tag'] . ">\n";
+    return $output;
+  }
+}
