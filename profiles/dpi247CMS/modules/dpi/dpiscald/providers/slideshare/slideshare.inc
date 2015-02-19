@@ -27,7 +27,7 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get the URL.
   $url = $form_state['values']['identifier'];
-  
+
   // Get media infos.
   $infos = dpiscald_slideshare_get_media_infos_from_url($url);
   
@@ -64,7 +64,6 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
     }
 
     $thumb = drupal_http_request($thumbnail_url);
-    dsm($thumb);
     $dir = 'public://slideshare';
     if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
       $dest = $dir . '/' . $atom->base_id . '.jpg';
@@ -132,11 +131,8 @@ function dpiscald_slideshare_get_media_infos_from_url($url, $id_elem = NULL) {
 
   $url = $api_url . $url . '&format=json';
   $response = drupal_http_request($url);
-  dsm($url);
-  dsm($response);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
-    dsm($infos);
     return $infos;
   }
   else {
