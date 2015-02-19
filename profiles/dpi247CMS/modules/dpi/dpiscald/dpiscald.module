@@ -15,6 +15,7 @@ function dpiscald_scald_atom_providers() {
     'scribblelive' => 'DPI Media hosted on Scribblelive',
     'facebook_status' => 'DPI Facebook status ressources hosted on Facebook',
     'infogram' => 'DPI Infogram ressources hosted on Infogram',
+    'slideshare' => 'DPI Slideshare ressources hosted on Slideshare',
   );
 }
 
