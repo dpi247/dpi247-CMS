@@ -34,7 +34,7 @@ function dpiscald_scribblelive_scald_add_form_fill(&$atoms, $form, $form_state) 
   // We use the permalink md5 as identifier.
   $atom->base_id = md5($url);
 
-  $title = html_entity_decode($infos['title'], ENT_QUOTES);
+  $title = html_entity_decode($infos['title'], ENT_QUOTES, 'UTF-8');
   $atom->title = $title;
 
   $atom->data['id'] = $infos['id'];
