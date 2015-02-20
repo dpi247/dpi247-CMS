@@ -158,7 +158,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram', 'slideshare');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
