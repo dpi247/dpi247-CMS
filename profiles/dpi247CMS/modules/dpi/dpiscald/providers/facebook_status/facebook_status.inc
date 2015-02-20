@@ -38,23 +38,17 @@ function dpiscald_facebook_status_scald_add_form_fill(&$atoms, $form, $form_stat
     'tid' => 0,
     'taxonomy_term' => (object)(array('name' => $values->name))
   );
-
-  $uri = 'public://atoms/facebook_status.png';
-
-  // Take a look at: file.inc::file_load_multiple
-  $files = file_load_multiple(array(), array('uri' => $uri));
-  $file = reset($files); // If empty, $file will be false, otherwise will contain the required file
-  if (isset($file)) {
-    $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
-  }
 }
 
 /**
  * Implements hook_scald_fetch().
  */
 function dpiscald_facebook_status_scald_fetch($atom, $type) {
-
-  if (!isset($atom->file_source) || !isset($atom->thumbnail_source)){
+  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+  if (file_exists($file)) {
+    $atom->file_source = $atom->thumbnail_source = $file;
+  } else {
+    // Default thumbnail
     $uri = 'public://atoms/facebook_status.png';
     $files = file_load_multiple(array(), array('uri' => $uri));
     $file = reset($files);
