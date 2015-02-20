@@ -318,6 +318,9 @@ function dpidestinations_permission(){
     'create targets' => array(
       'title' => t('Create targets'),
     ),
+    'reorder target' => array(
+      'title' => t('Reorder targetblock'),
+    ),
   );
 }
 
