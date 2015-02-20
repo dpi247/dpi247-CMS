@@ -432,6 +432,10 @@ function dpicontenttypes_custom_theme(){
     if(count($_POST)==0)
       return 'shiny';
   }
+  if(strstr($path,'atom/%/edit')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
   if(strstr($path,'admin/structure/pages')){
     return 'shiny';
   }
