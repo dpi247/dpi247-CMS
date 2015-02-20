@@ -63,6 +63,16 @@ function dpicommons_theme() {
       'variables' => array('data' => null),
       'file' => 'templates/theme.inc',
     ),
+    'dpi_render_wrapper' => array(
+      'variables' => array(
+        'tag' => NULL, 
+        'attributes' => NULL, 
+        'value_prefix' => NULL, 
+        'value_suffix' => NULL, 
+        'value' => NULL
+      ),
+      'file' => 'templates/theme.inc',
+    ),
     'dpicommons_line_chart'	=> $chart_base + array(
       'variables' => array(
         'data' => NULL,

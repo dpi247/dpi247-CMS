@@ -13,6 +13,7 @@ stylesheets[all][] = providers/coveritlive/coveritlive.css
 stylesheets[all][] = providers/scribblelive/scribblelive.css
 stylesheets[all][] = providers/facebook_status/facebook_status.css
 stylesheets[all][] = providers/infogram/infogram.css
+stylesheets[all][] = providers/slideshare/slideshare.css
 stylesheets[all][] = dpiscald.css
 
 files[] = includes/dpiscald_plugin_display_library.inc
