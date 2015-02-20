@@ -847,7 +847,7 @@ function _dpicontenttypes_filter_cci_scald_tips($filter, $format, $long = FALSE)
  * @param Array $original_path
  */
 function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
-  if(strstr($path, 'taxonomy/term')!==FALSE){
+  if(strstr($path, 'taxonomy/term')!==FALSE && strstr($path, '/edit')===FALSE){
     $terms = explode('/', $path);
     $tid = (isset($terms[2]))? $terms[2] : NULL;    
     if(isset($tid)){

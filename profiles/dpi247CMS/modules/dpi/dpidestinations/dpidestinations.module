@@ -81,12 +81,23 @@ function dpidestinations_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  
+  $items['admin/dpi247/dpidestinations/define_default_target'] = array(
+    'title' => t('Define default targetblock'),
+    'description' => 'Configure dpidestinations.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_admin_default_targetblock',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
 
   $items['admin/dpi247/dpidestinations/configuration'] = array(
     'title' => t('Configuration'),
     'description' => 'Configure dpidestinations.',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 10,
+    'weight' => 11,
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_configuration',
     'file' => 'dpidestinations.pages.admin.inc',
@@ -179,6 +190,13 @@ function dpidestinations_theme() {
     'file' => 'theme.inc',
     'variables' => array('buttons' => NULL),
   );
+  
+  $theme['destinations_form_table'] =array (
+    'render element' => 'form',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'path' => drupal_get_path ( 'module', 'dpidestinations' ) . '/includes' 
+  );
+  
   return $theme;
 }
 

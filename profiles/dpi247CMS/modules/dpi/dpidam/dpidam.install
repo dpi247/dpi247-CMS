@@ -17,7 +17,7 @@ function dpidam_install() {
     $archive_term->vid = $dest_vid;
     $archive_term->weight = 0;
     $archive_term->vocabulary_machine_name = 'sections';
-    $archive_term->name = 'Archive';
+    $archive_term->name = 'Archives';
     taxonomy_term_save($archive_term);
   }
 
@@ -181,4 +181,14 @@ function dpidam_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Redéfinitions de la terminologie Archives
+ */
+function dpidam_update_7001(){
+  $term = taxonomy_get_term_by_name('Archive');
+  $term = current($term);
+  $term->name = "Archives";
+  taxonomy_term_save($term);
 }
