@@ -38,6 +38,7 @@ function dpiscald_scribblelive_scald_add_form_fill(&$atoms, $form, $form_state) 
   $atom->title = $title;
 
   $atom->data['id'] = $infos['id'];
+  $atom->data['url'] = $infos['url'];
 
   if (!empty($infos['thumbnail_url'])) {
     // Download a copy of the media thumbnail. This makes it possible
@@ -98,7 +99,7 @@ function dpiscald_scribblelive_theme() {
           'template' => 'providers/scribblelive/dpiscald_scribblelive_player'
       ),
       'dpiscald_scribblelive_player_html5' => array(
-        'variables' => array( 'id_scribble' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+        'variables' => array('vars' => NULL, 'atom' => NULL),
         'template' => 'templates/players/dpiscald_scribblelive_player_html5'
     ),
   );
@@ -120,7 +121,8 @@ function dpiscald_scribblelive_get_media_infos_from_url($url) {
       preg_match('/<meta property="og:image" content="(.*?)" \/>/', $response->data, $thumb);
     }
     $infos = array(
-        'id' => $url,
+        'id' => $id,
+        'url' => $url,
         'title' => $title[1],
         'thumbnail_url' => $thumb[1]
     );
