@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *   Default theme implementation for the Scribble Live Player
+ *   Default theme implementation for the Idalgo Player
  */
 ?>
 
