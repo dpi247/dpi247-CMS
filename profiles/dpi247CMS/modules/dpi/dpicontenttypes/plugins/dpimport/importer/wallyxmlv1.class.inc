@@ -878,7 +878,7 @@ class WallyXmlV1 extends PackageHelper {
                 $file = $this->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
                 $wrapper->scald_thumbnail->set ( ( array ) $file );
                 $entity->data['id'] = $infos['id'];
-                $entity->data['url'] = $infos['id'];
+                $entity->data['url'] = $value;
                 $entity->data['orig_identifier'] = $value;
               }
             }elseif ($entity->type == "twitter"){
