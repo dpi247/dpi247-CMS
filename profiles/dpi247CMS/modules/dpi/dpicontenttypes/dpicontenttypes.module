@@ -405,10 +405,10 @@ function dpicontenttypes_scald_contexts() {
  * Implementation of hook_admin_paths_alter
 */
 function dpicontenttypes_admin_paths_alter(&$paths) {
-  $paths['node/*/edit'] = FALSE;
+  $paths['node/*/edit'] = TRUE;
   $paths['node/*/delete'] = FALSE;
   $paths['node/add'] = FALSE;
-  $paths['node/add/*'] = FALSE;
+  $paths['node/add/*'] = TRUE;
   $paths['admin/structure/pages/*'] = FALSE;
 }
 
