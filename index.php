@@ -51,11 +51,28 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
           'freemium_count' => (isset($rolesd->nbFreemium)) ? $rolesd->nbFreemium : 0,
         )
       );
+      if(!isset($rolesd->nbFreemium) || !$rolesd->nbFreemium){        
+        $unset_freemium_role = TRUE;       
+      }
     } 
 }
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap ( DRUPAL_BOOTSTRAP_FULL );
+
+if(isset($unset_freemium_role) && $unset_freemium_role){
+  global $user;
+  $roles = $user->roles;  
+  if(in_array('freemium', $roles)){
+    $newRoles = array();
+    foreach($roles as $k => $v){
+      if($v!="freemium"){
+        $newRoles[$k] = $v;
+      }
+    }
+    user_save($user, array('roles' => $newRoles));
+  }
+}
 
 if(isset($destroy_session) && $destroy_session == TRUE && user_is_logged_in()){
   dpisso_api_user_logout();
