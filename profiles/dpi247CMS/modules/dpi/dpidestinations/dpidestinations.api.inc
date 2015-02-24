@@ -286,3 +286,27 @@ function   dpidestination_api_get_category($destination){
   $category = $did->did.'_'.$destination['tid'].'_'.$destination['target'];
   return $category;
 }
+
+function dpidestinations_api_create_config_cache_entries($name, $conf){
+  try {
+    db_merge('dpidestinations_targetblock_config')
+      ->key(array('targetblock_name' => $name))
+      ->fields(array("serialize_conf" => serialize($conf)))
+      ->execute();
+  } catch (Exception $e) {
+    drupal_set_message(t("Une erreur est survenue lors de l'enregistrement de la configuration de cache"), "error");
+  }
+}
+
+function dpidestinations_api_get_config_cache_entries($name){
+  try {
+    $result = db_select('dpidestinations_targetblock_config', 'd')
+    ->fields('d', array('serialize_conf'))
+    ->condition('targetblock_name', $name)
+    ->execute()
+    ->fetchAssoc();
+    return (isset($result['serialize_conf']))? unserialize($result['serialize_conf']): array();
+  } catch (Exception $e) {
+    drupal_set_message(t("Une erreur est survenue lors de la récupération de la configuration de cache"), "error");
+  }
+}
