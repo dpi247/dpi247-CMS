@@ -190,7 +190,7 @@ $boundary=count($form_state["values"]['nodes']);
     }
     foreach($destinations_to_update as $nid=>$virtual_rank){
       //@todo: LE faire en une seule querry avec l'invalidation du cache une seule fois par nid
-      _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
+      _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank,$nid);
 
     }
     $destination['tid']=$form_state['values']['sectiontid'];
