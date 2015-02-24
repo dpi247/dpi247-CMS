@@ -22,6 +22,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
+
       $this->savePackage($dom, $package);
     }
     
@@ -806,6 +807,8 @@ class WallyXmlV1 extends PackageHelper {
               if (function_exists ( $function_info )) {
                 $info = $function_info ( $id );
                 $file = $this->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+                $entity->data['video_width'] = $info->width;
+                $entity->data['video_height'] = $info->height;
                 $wrapper->scald_thumbnail->set ( ( array ) $file );
               }
               /* Gestion de deezer */

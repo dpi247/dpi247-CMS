@@ -242,7 +242,6 @@ features[user_permission][] = create atom of any type
 features[user_permission][] = create atom of audio type
 features[user_permission][] = create atom of image type
 features[user_permission][] = create atom of links_list type
-features[user_permission][] = create atom of twitter type
 features[user_permission][] = create atom of video type
 features[user_permission][] = create dpiproperties
 features[user_permission][] = create package content
