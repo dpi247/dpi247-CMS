@@ -209,9 +209,9 @@ function dpicache_esi_panels_url($pane, $display) {
 
       break;
     case DRUPAL_CACHE_PER_USER;
-      break;
       // Always add the current page URL.
       $url .= '/CACHE=USER';
+      break;
 
   }
   // Allow other modules to alter the ESI URL (or respond to it).
