@@ -86,7 +86,6 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
 
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
   $block = new stdClass ();  
-  dsm('out');
   $conf = dpidestinations_api_get_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)));
   
   $targetBlockController = new TargetBlockController ( 'targetblock' );
