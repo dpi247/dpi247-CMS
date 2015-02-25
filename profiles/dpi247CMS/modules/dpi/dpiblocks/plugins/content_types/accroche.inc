@@ -116,7 +116,6 @@ function _dpiblocks_accroche_get_view_name() {
  */
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
   $accessArg = (user_access('administer')) ? 'administer' : 'anonymous_user';
-  drupal_alter('dpiblocks_accroche_alter_granularity', $accessArg);
   $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $accessArg);
   /* Prepare render element and return it */
   $block = new stdClass ();
