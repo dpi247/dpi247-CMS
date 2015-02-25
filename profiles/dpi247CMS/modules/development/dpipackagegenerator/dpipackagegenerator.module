@@ -1,98 +1,219 @@
 <?php
+
+function dpipackagegenerator_menu() {
+  $items = array ();
+  
+  $items ['admin/dpi247/dpicontentgenerator'] = array (
+    'title' => 'DPI content generator',
+    'description' => 'Manage content generator',
+    'access arguments' => array (
+      'administer targets' 
+    ),
+    'page callback' => 'dpipackagegenerator_generate_complementary_element',
+    'file' => 'dpipackagegenerator.pages.admin.inc',
+    'file path' => drupal_get_path ( 'module', 'dpipackagegenerator' ) . '/includes' 
+  );
+  
+  return $items;
+}
+
 /**
  * Implements hook_node_presave().
  */
 function dpipackagegenerator_node_presave($node) {
-
+  
   // see: http://www.wunderkraut.com/blog/generating-realistic-test-content/2011-03-07
-  if ($node->type == 'package' && isset($node->devel_generate)) {
-
-    /*
-    $images = field_get_items('node', $node, 'field_recipe_image');
-
-    foreach ($images as $delta => $image) {
-      // Pick one sample image randomly.
-      $source = drupal_get_path('module', 'mymodule') . '/images/food' . rand(0, 9) . '.jpg';
-
-      // Load the reference to the original from the database.
-      $file = file_load($image['fid']);
-
-      // Overwrite the original image with a copy of our sample image.
-      $destination = $file->uri;
-      $path = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE);
+  if ($node->type == 'package' && isset ( $node->devel_generate )) {
+    $lang = (isset ( $node->language )) ? $node->language : 'und';
+    
+    // Enlever le use emabargo dans 95 pourcent des cas.
+    if (rand ( 0, 100 ) < 95) {
+      if (isset ( $node->field_autopublish [$node->language] )) {
+        $node->field_autopublish [$node->language] [0] ['value'] = 0;
+      } else {
+        $node->field_autopublish [$node->language] [0] ['value'] = 1;
+      }
     }
-    */
-
-
-
-    //Enlever le use emabargo dans 95 pourcent des cas.
-
-
-
-
-    //Ajouter entre 1 et 4 destinations.
-
-
-    //Ajouter une à 2 linklist dans 10% des cas
-
-
-    //AJouter entre 1 et 6 embedded (images ?).
-
-
-    //Ajouter un author
-
-
-    //{deux parmis:}
-    //Ajouter 0 à 3 concepts
-
-
-    //Ajouter 0 à 3 Freetags
-
-    //Ajouter 0 à 1 locations
-
-    //ajuter 0 à 3 entitieis
-
-    //ajuter 0 à 2 Personnes
-    //{/deux parmis:}
-
-
-
+    
+    // Ajouter entre 1 et 4 destinations.
+    $number_of_destinations = rand ( 1, 4 );
+    for($i = 0; $i < $number_of_destinations; $i ++) {
+      if ((isset ( $node->language )) && isset ( $node->field_destinations [$node->language] )) {
+        $node->field_destinations [$node->language] [] = dpipackagegenerator_get_pool_of_destinations ();
+      } else {
+        $node->field_destinations ['und'] [] = dpipackagegenerator_get_pool_of_destinations ();
+      }
+    }
+    
+    // Ajouter une à 2 linklist dans 10% des cas
+    if (rand ( 0, 100 ) < 10) {
+      $number_of_linklists = rand ( 1, 2 );
+      dpipackagegenerator_get_pool_of_linklists ( $node, $number_of_linklists );
+    }
+    
+    // AJouter entre 1 et 6 embedded
+    $number_of_embeds = rand ( 1, 6 );
+    dpipackagegenerator_get_pool_of_embeddedobjects ( $node, $number_of_embeds );
+    
+    // Ajouter un author
+    $parents_term = dpipackagegenerator_get_parents_machine_name ();
+    $range = range ( 1, count ( $parents_term ) - 1 );
+    $numbers = array_rand ( $range, 2 );
+    foreach ( $numbers as $number ) {
+      if (isset ( $parents_term [$number] )) {
+        dpipackagegenerator_get_pool_of_taxonomy ( $node, $parents_term [$number] ['type'], $parents_term [$number] ['range'] );
+      }
+    }
   }
 }
 
-
-
-function dpipackagegenerator_get_pool_of_destinations(){
-
-
-  $tids= dpidestinations_api_get_all_sections_terms_flat_struct();
-
-  $tid=array_rand ($tids);
-
-  $target_blocks=dpidestinations_api_get_all_targetblocks_for_destination($tid->tid);
-
-  $target_block=array_rand ($target_blocks);
-  $targetblock_object=$target_blocks[$target_block];
-
-  $target_object=dpidestinations_api_target_machinename_load($targetblock_object->target);
-
-  $layouts=__dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($target_object->targetid,$targetblock_object->target);
-  $layout=array_rand ($layouts);
-
-
-  return array($tid,$target_block,$layout,'default');
-
-
+/**
+ * Get destination informations
+ *
+ * @return array
+ */
+function dpipackagegenerator_get_pool_of_destinations() {
+  $tids = dpidestinations_api_get_all_sections_terms_flat_struct ();
+  $tid = array_rand ( $tids );
+  
+  $target_blocks = dpidestinations_api_get_all_targetblocks_for_destination ( $tid );
+  $target_block = array_rand ( $target_blocks );
+  
+  $targetblock_object = $target_blocks [$target_block];
+  $target_object = dpidestinations_api_target_machinename_load ( $targetblock_object->target );
+  
+  $layouts = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target ( $target_object->targetid, $targetblock_object->target );
+  $layout = array_rand ( $layouts );
+  
+  return array (
+    'tid' => $tid,
+    'target' => $target_block,
+    'layout' => $layout,
+    'rank' => 0 
+  );
 }
 
-function dpipackagegenerator_get_pool_of_taxonomies(){
-
+function dpipackagegenerator_get_pool_of_linklists(& $node, $number) {
+  if ($number > 0) {
+    $atoms = entity_load ( 'scald_atom', array (), array (
+      'type' => 'links_list' 
+    ) );
+    $used_atoms = array_rand ( $atoms, $number );
+    $lang = (isset ( $node->language )) ? $node->language : 'und';
+    if (is_array ( $used_atoms )) {
+      foreach ( $used_atoms as $atom ) {
+        $node->field_linklists [$lang] [] = array (
+          'sid' => $atoms [$atom]->sid,
+          'type' => $atoms [$atom]->type,
+          'provider' => $atoms [$atom]->provider,
+          'inline' => 0 
+        );
+      }
+    } else {
+      $node->field_linklists [$lang] [] = array (
+        'sid' => $atoms [$used_atoms]->sid,
+        'type' => $atoms [$used_atoms]->type,
+        'provider' => $atoms [$used_atoms]->provider,
+        'inline' => 0 
+      );
+    }
+  }
 }
 
-function dpipackagegenerator_get_pool_of_linklists(){}
+function dpipackagegenerator_get_pool_of_embeddedobjects(& $node, $number) {
+  $atoms = entity_load ( 'scald_atom', array (), array (
+    'type' => 'image' 
+  ) );
+  if ($number > 0) {
+    if (count ( $atoms ) > 1) {
+      $used_atoms = array_rand ( $atoms, $number );
+    }
+    $lang = (isset ( $node->language )) ? $node->language : 'und';
+    if (is_array ( $used_atoms )) {
+      foreach ( $used_atoms as $atom ) {
+        $node->field_embededobjects [$lang] [] = array (
+          'sid' => $atoms [$atom]->sid,
+          'type' => $atoms [$atom]->type,
+          'provider' => $atoms [$atom]->provider,
+          'inline' => 0 
+        );
+      }
+    } else {
+      $node->field_embededobjects [$lang] [] = array (
+        'sid' => $atoms [$used_atoms]->sid,
+        'type' => $atoms [$used_atoms]->type,
+        'provider' => $atoms [$used_atoms]->provider,
+        'inline' => 0 
+      );
+    }
+  }
+}
 
-function dpipackagegenerator_get_pool_of_embeddedobjects(){}
+function dpipackagegenerator_get_pool_of_taxonomy(& $node, $taxonomy_term_type, $number) {
+  $range = range ( 1, $number );
+  $number_of_results = array_rand ( $range );
+  $parent = taxonomy_vocabulary_machine_name_load ( $taxonomy_term_type );
+  $results = taxonomy_get_tree ( $parent->vid );
+  if ($number_of_results > count ( $results )) {
+    $number_of_results = count ( $results ) - 1;
+  }
+  
+  if ($number_of_results) {
+    $terms = array_rand ( $results, $number_of_results );
+    $lang = (isset ( $node->language )) ? $node->language : 'und';
+    if (is_array ( $terms )) {
+      $cpt = 0;
+      foreach ( $terms as $term ) {
+        $field = 'field_' . $taxonomy_term_type;
+        $node->$field = array (
+          'und' => array (
+            $cpt => array (
+              'tid' => $results [$term]->tid 
+            ) 
+          ) 
+        );
+        $cpt ++;
+      }
+    } else {
+      $field = 'field_' . $taxonomy_term_type;
+      $node->$field = array (
+        'und' => array (
+          array (
+            'tid' => $results [$terms]->tid 
+          ) 
+        ) 
+      );
+    }
+  }
+}
 
-function dpipackagegenerator_get_pool_of_taxonomy(){}
+function dpipackagegenerator_get_parents_machine_name() {
+  return array (
+    array (
+      'type' => "concepts",
+      'range' => 3 
+    ),
+    array (
+      'type' => "freetags",
+      'range' => 3 
+    ),
+    array (
+      'type' => "locations",
+      'range' => 1 
+    ),
+    array (
+      'type' => "entities",
+      'range' => 3 
+    ),
+    array (
+      'type' => "persons",
+      'range' => 2 
+    ) 
+  );
+}
 
-function dpipackagegenerator_get_pool_of_taxonomy(){}
+function dpipackagegenerator_taxonomy_term_presave($term) {
+  if ($term->vocabulary_machine_name == "persons") {
+    $term->field_personbirthdate [$term->language] [0] ['value'] = 1424876400;
+  }
+}
