@@ -172,12 +172,18 @@ function dpicontenttypes_node_create($node) {
  * Implementation of hook_node_presave
  *
  * @param object $node
+ *
+ * @see buildEmbeddedObjects()
  */
 function dpicontenttypes_node_presave($node) {
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
       rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
     }
+  }
+
+  foreach($node->temp_crops as $atom_id=>$crops_infos){
+    _dpicontenttypes_cropings_update_cropings('node', $node->nid, $atom_id, $crops_infos);
   }
 }
 
@@ -745,7 +751,6 @@ function typed_entity_load($typed_id) {
 }
 
 function dpicontenttypes_insert($node){
-  dsm($node , 'insert');
 }
 
 function dpicontenttypes_token_info() {
