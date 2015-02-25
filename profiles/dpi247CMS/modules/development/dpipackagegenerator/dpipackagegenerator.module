@@ -33,14 +33,16 @@ function dpipackagegenerator_node_presave($node) {
     //Ajouter entre 1 et 4 destinations.
 
 
-    //Ajouter une linklist dans 10% des cas
+    //Ajouter une à 2 linklist dans 10% des cas
 
 
-    //AJouter entre 1 et 6 embedded.
+    //AJouter entre 1 et 6 embedded (images ?).
 
 
     //Ajouter un author
 
+
+    //{deux parmis:}
     //Ajouter 0 à 3 concepts
 
 
@@ -51,6 +53,7 @@ function dpipackagegenerator_node_presave($node) {
     //ajuter 0 à 3 entitieis
 
     //ajuter 0 à 2 Personnes
+    //{/deux parmis:}
 
 
 
