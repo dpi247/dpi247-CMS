@@ -22,8 +22,12 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+      
       $this->savePackage($dom, $package);
+      
+      foreach($package->temp_crops as $atom_id=>$crops_infos){
+        _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+      }
     }
     
     // Set the CurrentLog to the previous one to stop children growing.

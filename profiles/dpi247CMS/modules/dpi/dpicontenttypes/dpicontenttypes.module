@@ -182,9 +182,9 @@ function dpicontenttypes_node_presave($node) {
     }
   }
 
-  foreach($node->temp_crops as $atom_id=>$crops_infos){
-    _dpicontenttypes_cropings_update_cropings('node', $node->nid, $atom_id, $crops_infos);
-  }
+//   foreach($node->temp_crops as $atom_id=>$crops_infos){
+//     _dpicontenttypes_cropings_update_cropings('node', $node->nid, $atom_id, $crops_infos);
+//   }
 }
 
 /**
