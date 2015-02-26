@@ -267,7 +267,7 @@ abstract class Importer {
    *
    * @return Object $file
    */
-  protected function createFile($file_uri, $destination){
+  public function createFile($file_uri, $destination){
     $dispatcher = $this->getDispatcher();
     $uri = parse_url($file_uri);
     $file = NULL;

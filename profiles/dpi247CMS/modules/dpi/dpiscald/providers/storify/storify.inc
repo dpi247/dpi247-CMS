@@ -202,3 +202,24 @@ function dpiscald_storify_parse_id($string, $check) {
 
   return $id;
 }
+
+function dpiscald_storify_get_import_info($importer, & $entity, & $wrapper, $urls){
+  $id = dpiscald_storify_parse_id ( $urls, FALSE );
+  $wrapper->base_id->set ( $id );
+  $url = $urls;
+  if (startsWith($url,'https')){
+    $url = explode('https://storify.com/',$url);
+  } else {
+    $url = explode('http://storify.com/',$url);
+  }               
+  $url = $url[1];
+  $infos = dpiscald_storify_get_media_infos_from_url ( $url );
+  $infos = $infos->content;                
+  $entity->title = $infos->title;                
+  $entity->data['url'] = $url;
+  $entity->data['orig_identifier'] = $urls;   
+  if(isset($infos->thumbnail)){
+    $file = $importer->createFile ( $infos->thumbnail, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  }
+}

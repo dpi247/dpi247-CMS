@@ -237,3 +237,23 @@ function dpiscald_deezer_parse_id($string, $check) {
  
   return $id;
 }
+
+function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $entity->provider = 'dpiscald';
+    $id = dpiscald_deezer_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id [1] );
+    $infos = dpiscald_deezer_get_media_infos_from_url ( $id [0], $id [1] );
+    if ($id [0] == "tracks") {
+      $thumbnail_url = $infos->album->cover;
+    } elseif ($id [0] == "album") {
+      $thumbnail_url = $infos->cover;
+    } else {
+      $thumbnail_url = $infos->picture;
+    }
+    $file = $importer->createFile ( $thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+    $entity->data ['url'] = 'http://www.deezer.com/plugins/player?type=' . $id [0] . '&id=' . $id [1];
+  } catch (Exception $e) {
+  }
+}

@@ -289,3 +289,18 @@ function dpiscald_soundcloud_resolve_url($track_url) {
 
   return $type . '/' . $id;
 }
+
+function dpiscald_soundcloud_get_import_info($importer, & $entity, & $wrapper, $url){
+  $value = str_replace ( '\\', '', $url );
+  $id = dpiscald_soundcloud_parse_id ( $value, FALSE );
+  $wrapper->base_id->set ( $id );
+  $info = dpiscald_soundcloud_audio ( $id );
+  if (isset ( $info->thumbnail ['src'] )) {
+    $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  }
+  $entity->title = $info->title;
+  $entity->data ['kind'] = $info->kind;
+  $entity->data ['track_count'] = $info->track_count;
+  $entity->data ['permalink_url'] = $info->permalink_url;
+}

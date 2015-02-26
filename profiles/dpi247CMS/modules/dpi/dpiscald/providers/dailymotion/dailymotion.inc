@@ -526,3 +526,12 @@ function dpiscald_dailymotion_import() {
   module_load_include('inc', 'scald', 'includes/scald.pages');
   return scald_atom_add_page(FALSE, $types['video'], 'add');
 }
+
+function dpiscald_dailymotion_get_import_info($importer, & $entity, & $wrapper, $url){
+  $value = str_replace ( '\\', '', $url );
+  $id = dpiscald_dailymotion_parse_id ( $value, FALSE );
+  $wrapper->base_id->set ( $id );
+  $info = dpiscald_dailymotion_video ( $id );
+  $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+  $wrapper->scald_thumbnail->set ( ( array ) $file );
+}

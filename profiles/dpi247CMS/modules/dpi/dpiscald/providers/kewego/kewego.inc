@@ -146,7 +146,7 @@ function dpiscald_kewego_parse_id($string, $check) {
   $string = trim($string);
   if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
     // The string ID is not easy to parse, let's try to analyze it
-    if (preg_match('#http?://www\.kewego\.fr/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
+    if (preg_match('#http?://www\.kewego\..*/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
       // This string os a full dailymotion URL
       $id = array( $m[1], $m[2]);
     }
@@ -167,4 +167,18 @@ function dpiscald_kewego_parse_id($string, $check) {
   }
 
   return $id;
+}
+
+function dpiscald_kewego_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $id = dpiscald_kewego_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id [1] );
+    $infos = dpiscald_kewego_get_media_infos_from_url ( $url );
+    $entity->data['html'] = $infos->html;
+    $entity->title = $infos->title;
+    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );  
+  } catch (Exception $e) {
+    
+  }
 }

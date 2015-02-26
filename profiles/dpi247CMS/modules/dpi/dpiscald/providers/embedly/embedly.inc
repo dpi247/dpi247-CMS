@@ -190,3 +190,16 @@ function dpiscald_embedly_parse_id($string, $check) {
 
   return $id;
 }
+
+function dpiscald_embedly_get_import_info($importer, & $entity, & $wrapper, $url){
+  $id = dpiscald_embedly_parse_id ( $url, FALSE );
+  $wrapper->base_id->set ( md5($id) );
+  $infos = dpiscald_embedly_get_media_infos_from_url ( $id );
+  $entity->title = $infos->title;
+  if(isset($infos->thumbnail_url)){
+    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  }
+  $entity->data['url'] = $infos->url;
+  $entity->data['orig_identifier'] = $url;
+}
