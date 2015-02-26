@@ -78,12 +78,15 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $target_name = $subtype;
   $split_delta = $conf ["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title ( $conf );
-  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, serialize ( $conf ) );
+  dpidestinations_api_create_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)), $conf);
+  global $user;
+  $roles = implode('_', $user->roles);
+  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles);
 }
 
-function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title, $conf) {
-  $block = new stdClass ();
-  $conf = unserialize ( $conf );
+function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
+  $block = new stdClass ();  
+  $conf = dpidestinations_api_get_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)));
   
   $targetBlockController = new TargetBlockController ( 'targetblock' );
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( $did, $target_name, $split_delta );

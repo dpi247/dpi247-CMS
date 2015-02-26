@@ -172,6 +172,8 @@ function dpicontenttypes_node_create($node) {
  * Implementation of hook_node_presave
  *
  * @param object $node
+ *
+ * @see buildEmbeddedObjects()
  */
 function dpicontenttypes_node_presave($node) {
   if(function_exists("rules_invoke_event")){
@@ -179,6 +181,10 @@ function dpicontenttypes_node_presave($node) {
       rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
     }
   }
+
+//   foreach($node->temp_crops as $atom_id=>$crops_infos){
+//     _dpicontenttypes_cropings_update_cropings('node', $node->nid, $atom_id, $crops_infos);
+//   }
 }
 
 /**
@@ -405,10 +411,10 @@ function dpicontenttypes_scald_contexts() {
  * Implementation of hook_admin_paths_alter
 */
 function dpicontenttypes_admin_paths_alter(&$paths) {
-  $paths['node/*/edit'] = FALSE;
+  $paths['node/*/edit'] = TRUE;
   $paths['node/*/delete'] = FALSE;
   $paths['node/add'] = FALSE;
-  $paths['node/add/*'] = FALSE;
+  $paths['node/add/*'] = TRUE;
   $paths['admin/structure/pages/*'] = FALSE;
 }
 
@@ -745,7 +751,6 @@ function typed_entity_load($typed_id) {
 }
 
 function dpicontenttypes_insert($node){
-  dsm($node , 'insert');
 }
 
 function dpicontenttypes_token_info() {

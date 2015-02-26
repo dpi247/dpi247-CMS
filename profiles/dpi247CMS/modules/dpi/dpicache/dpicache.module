@@ -2,8 +2,9 @@
 
 define("DPICACHE_NULL_URL_PARAMETER",'dpicache_null');
 define("DPICACHE_EMPTYSTRING_URL_PARAMETER",'dpicache_emptystring');
-  
-  
+define('DPICACHE_ESI_PANELS_REQUIRED_CTOOLS_API', '1.7.2');
+
+
 module_load_include('inc', 'dpicache','varnish');
 module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
@@ -155,7 +156,7 @@ function dpicache_esi_component_info() {
  */
 function dpicache_ctools_plugin_directory($module, $plugin) {
   // Safety: go away if CTools is not at an appropriate version.
-  if (!module_invoke('ctools', 'api_version', ESI_PANELS_REQUIRED_CTOOLS_API)) {
+  if (!module_invoke('ctools', 'api_version', DPICACHE_ESI_PANELS_REQUIRED_CTOOLS_API)) {
     return;
   }
 

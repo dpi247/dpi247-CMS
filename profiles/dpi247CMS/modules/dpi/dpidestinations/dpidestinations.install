@@ -176,6 +176,26 @@ function dpidestinations_schema() {
     ),
     'primary key' => array('targetblockid'),
   );
+  
+  $schema['dpidestinations_targetblock_config'] = array (
+    'description' => 'The target entity table config',
+    'fields' => array(
+      'targetblock_name' => array(
+        'description' => 'the config manchine name',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'serialize_conf' => array(
+        'description' => 'the serialize information for config targetblock',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE
+      ),
+    ),
+    'primary key' => array('targetblock_name'),
+  );
+  
   /*
    $schema['dpidestinations_destinationvariant'] = array (
      'description' => 'The target entity table',
@@ -323,4 +343,14 @@ function dpidestinations_update_7001() {
 
 function dpidestinations_update_7002() {
   _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+}
+
+/**
+ * Create targetblock config table
+ */
+function dpidestinations_update_7003() {
+  if (!db_table_exists('dpidestinations_targetblock_config')) {
+    $schema = drupal_get_schema('dpidestinations_targetblock_config', TRUE);
+    db_create_table('dpidestinations_targetblock_config', $schema);
+  }
 }

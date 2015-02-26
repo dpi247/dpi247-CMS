@@ -115,7 +115,8 @@ function _dpiblocks_accroche_get_view_name() {
  * @return stdClass
  */
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
-  $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $conf, $args);
+  $accessArg = (user_access('administer')) ? 'administer' : 'anonymous_user';
+  $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $accessArg);
   /* Prepare render element and return it */
   $block = new stdClass ();
   $block->title = (isset ( $elements['entity']->link ) && $elements['entity']->link != "") ? l ( $elements['entity']->title, $elements['entity']->link ) : $elements['entity']->title;
@@ -144,7 +145,6 @@ function dpiblocks_accroche_get_category_callback($cachedefinition = '', $argume
  */
 function dpiblocks_accroche_content_type_generate_feed($subtype){
   $info_entity = _dpiblocks_accroche_get_entity_by_subtype($subtype);
-  
   /* Prepare element for view */
   $teasers = _dpiblocks_accroche_get_all_teaser ();
   if (isset ( $info_entity->type ) && $info_entity->type == "node") {
@@ -226,7 +226,7 @@ function _dpiblocks_accroche_get_default_mixing_result(& $string, $info_entity){
   $nb_el = $info_entity->nb_max_value;
   foreach ( unserialize($info_entity->data) as $destination ) {
     try {
-      $targetview = dpiblocks_create_targetview_from_destination($destination);      
+      $targetview = dpiblocks_create_targetview_from_destination($destination);    
       foreach($targetview->result as $el){
         $string .= $el->nid.'+';
         $nb_el--;
@@ -352,8 +352,10 @@ function _dpiblocks_accroche_merge_table_custom(& $string, $results, $customVal)
 function dpiblocks_create_targetview_from_destination($destination){
   $targetBlockController = new TargetBlockController ( 'targetblock' );
   $panel_display = dpidestinations_api_get_panelsdisplay_for_sectionterm(intval ( $destination ["destination_section"] ));
-  $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0 );
+  $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ($panel_display->did, $destination ["destination_target"], 0);
+  $targetblock->use_pager = 0;
   $targetblock_wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+  $targetblock_wrapper = clone $targetblock_wrapper;
   $target=$targetblock_wrapper->target->value();
   return _dpidestinations_targetblock_content_type_helper_get_global_targetview ( intval ( $destination ["destination_section"] ), $destination ["destination_target"], $targetblock );
 }

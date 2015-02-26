@@ -8,6 +8,7 @@ dependencies[] = entity
 dependencies[] = panels
 dependencies[] = devel
 dependencies[] = rules
+dependencies[] = pathauto
 dependencies[] = panels_ipe
 
 

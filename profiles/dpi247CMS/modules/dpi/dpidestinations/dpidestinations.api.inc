@@ -256,6 +256,103 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
   return $display;
 }
 
+
+/**
+ * Return the virtual rank present in database for a defined position.
+ *
+ *
+ * @todo: validate and log if the node is present twice on the destination.
+ *
+ * @ingroup dpidestination_reorder
+ *
+ * @param int $position
+ *   the position id to consider
+ * @param int $tid
+ *   the tid of the section term
+ * @param string $target
+ *   the target machine name.
+ * @return NULL|int
+ *   the return is the virtual timestamp that represent the virtual rank
+ *   if the node is present in the targetblock, NULL otherwise.
+ *
+ */
+function dpidestinations_api_get_virtual_rank_of_position_for_targetblock($position,$tid,$target)
+{
+
+  //@todo: avoid hard coding of the table...
+  $destination_table = 'field_data_field_destinations';
+
+  $query = db_select($destination_table, 'd');
+  //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
+  $query->condition('d.field_destinations_tid', $tid, '=');
+  $query->condition('d.field_destinations_target', $target, '=');
+  $query->fields('d', array('field_destinations_virtual_rank'));
+  $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
+  $query->range($position-1, 1); // Offset is the first argument, second argument is
+  $results = $query->execute();
+  $array_results = array();
+  foreach ($results as $result) {
+    $array_results[] = $result;
+  }
+
+  if (count($array_results) == 0) {
+    return NULL;
+  }
+  else{
+    $result = current($array_results);
+    return $result->field_destinations_virtual_rank;
+  }
+}
+
+/**
+ * Return the current db virtual rank for a node in a specific target.
+ *
+ * Beware that if the node is present twice on the destination we only return the smallest virtual rank
+ *
+ * @todo: validate and log if the node is present twice on the destination.
+ *
+ * @ingroup dpidestination_reorder
+ *
+ * @param int $nid
+ *   the node id to consider
+ * @param int $tid
+ *   the tid of the section term
+ * @param string $target
+ *   the target machine name.
+ * @return NULL|int
+ *   the return is the virtual timestamp that represent the virtual rank
+ *   if the node is present in the targetblock, NULL otherwise.
+ *
+ */
+function dpidestinations_api_get_current_node_virtual_rank_for_targetblock($nid,$tid,$target)
+{
+
+  //@todo: avoid hard coding of the table...
+  $destination_table = 'field_data_field_destinations';
+
+  $query = db_select($destination_table, 'd');
+  //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
+  $query->condition('d.field_destinations_tid', $tid, '=');
+  $query->condition('d.field_destinations_target', $target, '=');
+  $query->condition('d.entity_id', $nid, '=');
+  $query->fields('d', array('field_destinations_virtual_rank'));
+  $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
+  $query->range(0, 1); // Offset is the first argument, second argument is
+  $results = $query->execute();
+  $array_results = array();
+  foreach ($results as $result) {
+    $array_results[] = $result;
+  }
+
+  if (count($array_results) == 0) {
+    return NULL;
+  }
+  else{
+    $result = current($array_results);
+    return $result->field_destinations_virtual_rank;
+  }
+}
+
 /*
  * Return all node type that have a field_destination
  */
@@ -285,4 +382,28 @@ function   dpidestination_api_get_category($destination){
   $did = dpidestinations_api_get_panelsdisplay_for_sectionterm($destination['tid']);
   $category = $did->did.'_'.$destination['tid'].'_'.$destination['target'];
   return $category;
+}
+
+function dpidestinations_api_create_config_cache_entries($name, $conf){
+  try {
+    db_merge('dpidestinations_targetblock_config')
+      ->key(array('targetblock_name' => $name))
+      ->fields(array("serialize_conf" => serialize($conf)))
+      ->execute();
+  } catch (Exception $e) {
+    drupal_set_message(t("Une erreur est survenue lors de l'enregistrement de la configuration de cache"), "error");
+  }
+}
+
+function dpidestinations_api_get_config_cache_entries($name){
+  try {
+    $result = db_select('dpidestinations_targetblock_config', 'd')
+    ->fields('d', array('serialize_conf'))
+    ->condition('targetblock_name', $name)
+    ->execute()
+    ->fetchAssoc();
+    return (isset($result['serialize_conf']))? unserialize($result['serialize_conf']): array();
+  } catch (Exception $e) {
+    drupal_set_message(t("Une erreur est survenue lors de la récupération de la configuration de cache"), "error");
+  }
 }

@@ -22,7 +22,12 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
+      
       $this->savePackage($dom, $package);
+      
+      foreach($package->temp_crops as $atom_id=>$crops_infos){
+        _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+      }
     }
     
     // Set the CurrentLog to the previous one to stop children growing.
@@ -558,7 +563,8 @@ class WallyXmlV1 extends PackageHelper {
    *
    * @param DOM $dom          
    * @param EntityDrupalWrapper $wrapper          
-   * @param Object $entity          
+   * @param Object $entity
+   *
    */
   public function buildEmbeddedContent($dom, $wrapper, $entity) {
     $dispatcher = $this->getDispatcher ();
@@ -570,7 +576,10 @@ class WallyXmlV1 extends PackageHelper {
    *
    * @param DOM $dom          
    * @param EntityDrupalWrapper $wrapper          
-   * @param Object $entity          
+   * @param Object $entity
+   *
+   * @see buildCrops()
+   * @see dpicontenttypes_node_presave()
    */
   public function buildEmbeddedObjects($dom, $wrapper, $entity) {
     // Empty the embededobjects field
@@ -578,8 +587,6 @@ class WallyXmlV1 extends PackageHelper {
     $dispatcher = $this->getDispatcher ();
     $embeds = $dispatcher->processList ( $dom, $wrapper, $entity );
     
-    //print_r($embeds);
-    //die();
     $embeds_list = array ();
     $i = 100;
     if (! Logger::error ()) {
@@ -608,9 +615,18 @@ class WallyXmlV1 extends PackageHelper {
           'provider' => $atom->provider,
           'inline' => '0'  // @todo
                 );
+
+        //We build cropping info into entity element
+        // @see buildCrops()
+        // @see dpicontenttypes_node_presave()
         $wrapper->field_embededobjects->set ( $embededobject );
+
+        $entity->temp_crops[$atom->sid]=$atom->temp_crops;
       }
     }
+
+
+
   }
 
   /**
@@ -797,7 +813,6 @@ class WallyXmlV1 extends PackageHelper {
           module_load_include ( 'inc', 'dpiscald', 'providers/' . $entity->type . '/' . $entity->type );
           $function_parse_id = 'dpiscald_' . $entity->type . '_parse_id';
           if (function_exists ( $function_parse_id )) {
-            /* Gestion des video dailymotion - youtube */
             $functionbyentity = 'dpiscald_'.$entity->type.'_get_import_info';
             $functionbyentity($this, $entity, $wrapper, $value);
           } else {
@@ -834,6 +849,25 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildCrops($dom, $wrapper, $entity) {
     // @todo
+
+
+    $dom_crops = $dom->getElementsByTagName ( 'Crop' );
+    $crops=array();
+    foreach($dom_crops as $dom_crop){
+      if($dom_crop->hasAttribute('X')){
+      $x=$dom_crop->getAttributeNode ( 'X' )->value;
+      $y=$dom_crop->getAttributeNode ( 'Y' )->value;
+      $w=$dom_crop->getAttributeNode ( 'W' )->value;
+      $h=$dom_crop->getAttributeNode ( 'H' )->value;
+      }
+
+
+      $preset_name=$dom_crop->getAttributeNode ( 'Type' )->value;
+      $crops[$preset_name]=array($x,$y,$w,$h);
+    }
+
+    $entity->temp_crops=$crops;
+
   }
 
   /**

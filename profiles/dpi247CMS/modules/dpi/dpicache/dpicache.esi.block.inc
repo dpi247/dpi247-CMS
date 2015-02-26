@@ -22,6 +22,11 @@ function dpicache_block_view_alter(&$data, $block) {
         '#type' => 'esi',
         '#url' => $url,
     );
+
+
+    if(variable_get('dpicache_esi_add_url_in_comment',FALSE)){
+      $data['content']["#prefix"]="<!-- esi url: $url -->";
+    }
   }
 }
 

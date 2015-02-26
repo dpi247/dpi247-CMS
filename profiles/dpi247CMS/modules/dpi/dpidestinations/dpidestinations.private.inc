@@ -244,17 +244,22 @@ function _targetblock_metadata_getter($object, $options, $property_name) {
 
 /**
  * Update the virtualtrank of each items of a node
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_items(&$items) {
+function _dpidestinations_virtualrank_update_items(&$items,$nid) {
   foreach($items as &$item) {
-    _dpidestinations_virtualrank_update_item($item);
+
+    _dpidestinations_virtualrank_update_item($item,$nid);
   }
 }
 
 /**
  * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_item(&$item) {
+function _dpidestinations_virtualrank_update_item(&$item,$nid) {
   if($item['rank'] == 'default') {
     $controller = new TargetBlockController('targetblock');
     $targetblock = $controller->load_targetblock_by_termid_and_target($item['tid'], $item['target']);
@@ -280,7 +285,7 @@ function _dpidestinations_virtualrank_update_item(&$item) {
 
   if($item['rank'] != 'DNC') {
     //Caclulate virtual_rank
-    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank']);
+    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank'],$nid);
   }
   else {
     $item['rank'] = 0;
@@ -289,10 +294,22 @@ function _dpidestinations_virtualrank_update_item(&$item) {
 
 /**
  * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position) {
+function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position,$nid) {
   //@todo: avoid hard coding of the table...
   $destination_table = 'field_data_field_destinations';
+
+
+
+  $actual_time_rank=dpidestinations_api_get_current_node_virtual_rank_for_targetblock($nid,$tid,$target);
+  $time_rank_in_position=dpidestinations_api_get_virtual_rank_of_position_for_targetblock($position,$tid,$target);
+
+  if($actual_time_rank!==NULL and $actual_time_rank>$time_rank_in_position){
+    $position++;
+  }
+
 
   // USING OFFSET for efficency
   if($position == 0 || $position == 1 || $position == 2) {

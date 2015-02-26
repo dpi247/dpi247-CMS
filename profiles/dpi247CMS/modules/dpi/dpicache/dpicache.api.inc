@@ -17,16 +17,11 @@ function dpicache_get_cache_entry($cache_name) {
   }
   
   // Get arguments for callback
-  $parameters = func_get_args ();  
-  $hash_parameters = $parameters;
-  array_shift ( $hash_parameters );
+  $parameters = func_get_args ();
   array_shift ( $parameters );
-  array_pop( $hash_parameters ); //unset $conf
-  array_pop( $hash_parameters ); //unset title -> for one_cache_regenerate
-  $arg_callback = dpicache_get_arguments_values ( $cache_definition, $parameters );
-  $hash_parameters[] = $arg_callback ["category"];
+  
   // Get hash
-  $hash = _dpicache_get_hash ( $cache_name, $hash_parameters );
+  $hash = _dpicache_get_hash ( $cache_name, $parameters );
   if (! $hash) {
     dpi_log ( 'dpicache', "error", t ( "dpicache_get_cache_entry : Unable to generate hash for !cache_name", array (
       "!cache_name" => $cache_name 
@@ -73,7 +68,7 @@ function dpicache_get_cache_entry($cache_name) {
       "!hash" => $hash 
     ) ), array (), $hash, WATCHDOG_DEBUG );
     
-    
+    $arg_callback = dpicache_get_arguments_values ( $cache_definition, $parameters );
     // Add or update cache entry data
     $entry_information = array (
       "name" => $cache_name,
