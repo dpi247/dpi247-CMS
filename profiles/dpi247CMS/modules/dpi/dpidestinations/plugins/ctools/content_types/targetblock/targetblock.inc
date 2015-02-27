@@ -79,9 +79,13 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   $split_delta = $conf ["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title ( $conf );
   dpidestinations_api_create_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)), $conf);
+  $pager_info = "0"; // 1 par défault pour si on n'en a pas ou si le pager est a n'est pas préciser car c'est le 1er toujours
+  if($conf['use_pager'] && isset($_GET['page'])){
+    $pager_info = $_GET['page'];
+  }
   global $user;
   $roles = implode('_', $user->roles);
-  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles);
+  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles, $pager_info);
 }
 
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
