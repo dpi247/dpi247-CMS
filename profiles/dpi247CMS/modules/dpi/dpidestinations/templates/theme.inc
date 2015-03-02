@@ -85,7 +85,9 @@ function dpidestinations_process_dpidestinations_add_content_modal(&$vars) {
  */
 function template_preprocess_dpidestinations_page_targetview_reorder_form(&$variables) {
   // Add each block in the form to the appropriate place in the block listing.
+  $orig_place = 0;
   foreach (element_children($variables['form']['nodes']) as $i) {
+    $orig_place++;
     $node = &$variables['form']['nodes'][$i];
     // Set special classes needed for table drag and drop.
     $node['weight']['#attributes']['class'] = array('node-weight', 'node-weight');
@@ -93,7 +95,7 @@ function template_preprocess_dpidestinations_page_targetview_reorder_form(&$vari
     $variables['node_listing'][$i] = new stdClass();
     $variables['node_listing'][$i]->row_class = 'node-weight';
     $variables['node_listing'][$i]->weight_select = drupal_render($node['weight']);
-    $variables['node_listing'][$i]->visual_id = drupal_render($node['visual_id']);
+    $variables['node_listing'][$i]->visual_id = $orig_place;
     $variables['node_listing'][$i]->node_title = drupal_render($node['title']);
     $variables['node_listing'][$i]->actions = (!empty($node['delete'])) ? drupal_render($node['edit']).' - '.drupal_render($node['delete'])  : drupal_render($node['edit']);
     $variables['node_listing'][$i]->printed = FALSE;
