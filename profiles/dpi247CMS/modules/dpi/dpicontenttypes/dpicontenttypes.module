@@ -724,6 +724,24 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && $request->code == 200)
       $provider = array('name' => $types['equipefr']->provider, 'type' => $types['equipefr']->type);
   }
+  /* hack pour facebook_status */
+  if(strstr($uri, 'facebook.com')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['facebook_status']->provider, 'type' => $types['facebook_status']->type);
+  }
+  /* hack pour infogram */
+  if(strstr($uri, 'infogr.am')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['infogram']->provider, 'type' => $types['infogram']->type);
+  }
+  /* hack pour videortl */
+  if(strstr($uri, 'rtl.be')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['videortl']->provider, 'type' => $types['videortl']->type);
+  }
 
   return array('dpicontenttypes' => $provider);
 }

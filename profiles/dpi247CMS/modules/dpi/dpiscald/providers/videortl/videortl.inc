@@ -220,3 +220,21 @@ function dpiscald_videortl_parse_domain($string, $check) {
 
   return $domain;
 }
+
+function dpiscald_videortl_get_import_info($importer, & $entity, & $wrapper, $url){
+  $identifier = dpiscald_videortl_parse_id($url, TRUE);
+  $key = dpiscald_videortl_parse_key($url, TRUE);
+  $live_id = dpiscald_videortl_parse_liveid($url, TRUE);
+  $domain = dpiscald_videortl_parse_domain($url, TRUE);
+  $entity->base_id = $identifier;
+  $wrapper->base_id->set ( md5($identifier) );
+  $infos = dpiscald_videortl_get_media_infos_from_url ( $url );
+  if(isset($infos->thumbnail_url)){
+    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  }
+  $entity->title = $infos['title'];
+  $entity->data['video_key'] = $key;
+  $entity->data['video_liveid'] = $liveid;
+  $entity->data['video_domain'] = $domain;
+}
