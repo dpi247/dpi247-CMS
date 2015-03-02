@@ -47,7 +47,9 @@ function _dpicontenttypes_cropings_entity_form_add_cropings_alter(&$form, &$form
             $aid = $item['sid']['#default_value'];
             _dpicontenttypes_cropings_generate_edition_link($item, $entity_type, $eid, $aid);            
           }
-          _dpicontenttypes_cropings_generate_edit_link($item, $entity_type, $eid, $aid);
+          if(isset($aid)){
+            _dpicontenttypes_cropings_generate_edit_link($item, $entity_type, $eid, $aid);
+          }
           $items[$item_id] = $item;
         }
       }
