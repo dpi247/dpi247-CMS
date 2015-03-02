@@ -28,12 +28,13 @@ function dpidestinations_define_result_by_term($term, $target){
   $targetblocks=dpidestinations_api_get_all_targetblocks_from_target_for_destination($target->machine_name,$term->tid);
   $targetblock=current($targetblocks);
   $targetblock->node_count_for_targetblockinstance=$targetblock->node_count_for_targetblock;
+  $targetblock->node_count_for_targetblock = 100;
   $targetblock->offset=0;
-  
+
   $targetview=_dpidestinations_targetviewreorder_initialize_view($targetblock,$term);
   $targetview->pre_execute();
   $targetview->execute();
-  
+
   $return->result = $targetview->result;
   $return->targetblock = $targetblock;
   

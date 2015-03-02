@@ -36,8 +36,10 @@ drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
 <table id="targetview" class="sticky-enabled">
   <thead>
     <tr>
+      <th><?php print t('Visual Id'); ?></th>
       <th><?php print t('Node'); ?></th>
-      <th><?php print t('Publication Date'); ?></th>
+      <th><?php print t('Editorial Publication Date'); ?></th>
+      <th><?php print t('Editorial Update Date'); ?></th>
       <th><?php print t('Author'); ?></th>
       <th><?php print t('Weight'); ?></th>
       <th ><?php print t('Operations'); ?></th>
@@ -47,8 +49,10 @@ drupal_add_tabledrag('targetview', 'order', 'sibling', 'node-weight');
     <?php $row = 0; ?>
       <?php foreach ($node_listing as $delta => $data): ?>
       <tr class="draggable <?php print $row % 2 == 0 ? 'odd' : 'even'; ?>">
-        <td class="node"><?php print $data->node_title; ?></td>
+        <td class="node"><?php print $data->visual_id; ?></td>
+        <td><?php print $data->node_title; ?></td>
         <td><?php print $data->publication_date; ?></td>
+        <td><?php print $data->update_date; ?></td>
         <td><?php print $data->author; ?></td>
         <td><?php print $data->weight_select; ?></td>
         
