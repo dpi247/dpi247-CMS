@@ -756,10 +756,10 @@ function dpicontenttypes_field_default_field_instances() {
   );
   $field_instances['node-package-field_packagetype'] = array(
     'bundle' => 'package',
-    'default_value' => array(
-      0 => array(
-        'value' => 0,
-      ),
+    'default_value' =>  array (
+      array (
+        'tid' => 6
+      ) 
     ),
     'deleted' => 0,
     'description' => '',
@@ -3210,10 +3210,10 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
   );
   $field_instances['node-package_gallery-field_packagetype'] = array(    
     'bundle' => 'package_gallery',
-    'default_value' => array(
-      0 => array(
-        'value' => 0,
-      ),
+    'default_value' =>  array (
+      array (
+        'tid' => 6
+      ) 
     ),
     'deleted' => 0,
     'description' => '',
