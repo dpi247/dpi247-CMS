@@ -36,8 +36,7 @@ function _dpicontenttypes_cropings_entity_form_add_cropings_alter(&$form, &$form
       'eid' => $eid,
     );
     drupal_add_js(array('dpicontenttypesCropingsLinks' => $croping_link_settings), 'setting');
-
-    foreach (element_children($form) as $element) {
+    foreach (element_children($form) as $element) {      
       if (in_array($element, $fields_to_alter)) {
         $items = &$form[$element][$form[$element]['#language']];
         foreach (dpicommons_element_children_numeric($items) as $item_id) {
@@ -46,9 +45,10 @@ function _dpicontenttypes_cropings_entity_form_add_cropings_alter(&$form, &$form
               && isset($item['provider']['#value']) && $item['provider']['#value'] == 'scald_image') {
             // Add "edit cropings" link
             $aid = $item['sid']['#default_value'];
-            _dpicontenttypes_cropings_generate_edition_link($item, $entity_type, $eid, $aid);
-            $items[$item_id] = $item;
+            _dpicontenttypes_cropings_generate_edition_link($item, $entity_type, $eid, $aid);            
           }
+          _dpicontenttypes_cropings_generate_edit_link($item, $entity_type, $eid, $aid);
+          $items[$item_id] = $item;
         }
       }
     }
@@ -67,14 +67,20 @@ function _dpicontenttypes_cropings_generate_edition_link(&$item, $entity_type, $
     '#markup' => $edit_crop_link,
     '#weight' => 100,
     '#prefix' => '<div class="pad-10">',
-  );
-  
-  $item['edit-atom-btn'] = array(
-    '#markup' => l(t('Edit atom'), 'atom/'.$aid.'/edit/nojs'),
-    '#weight' => 103,
     '#suffix' => '</div>',
   );
 }
+
+function _dpicontenttypes_cropings_generate_edit_link(&$item, $entity_type, $eid, $aid){
+  dsm('pl');
+  $item['edit-atom-btn'] = array(
+    '#markup' => l(t('Edit atom'), 'atom/'.$aid.'/edit/nojs'),
+    '#weight' => 103,
+    '#prefix' => '<div class="pad-10">',
+    '#suffix' => '</div>',
+  );
+}
+
 
 /**
  * When an entity is saved, its temporary cropings have to be flaged as permanent (i.e. unflagged as temporary)
