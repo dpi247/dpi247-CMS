@@ -72,7 +72,6 @@ function _dpicontenttypes_cropings_generate_edition_link(&$item, $entity_type, $
 }
 
 function _dpicontenttypes_cropings_generate_edit_link(&$item, $entity_type, $eid, $aid){
-  dsm('pl');
   $item['edit-atom-btn'] = array(
     '#markup' => l(t('Edit atom'), 'atom/'.$aid.'/edit/nojs'),
     '#weight' => 103,
