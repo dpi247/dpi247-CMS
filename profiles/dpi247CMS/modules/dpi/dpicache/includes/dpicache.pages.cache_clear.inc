@@ -10,25 +10,25 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   );
   
   $form['dpicache_use'] = array(
-    '#title' => t('Utilisation for caching system'),
-    '#description' => 'Check this box if you want to disable the module dpicache',
+    '#title' => t('Caching system settings'),
+    '#description' => 'Check this box if you want to bypass cache from dpicache',
     '#type' => 'fieldset',
   );
   
   $form['dpicache_use']['dpicache_utilisation'] = array(
-    '#title' => t('Disable dpicache'),
+    '#title' => t('bypass dpicache'),
     '#type' => 'checkbox',    
     '#default_value' => dpi_variable_get('dpicache_disable_dpicache_utilisation', FALSE),
   );
   
   $form['dpicache_use']['dpicache_status'] = array(
     '#type' => 'submit',
-    '#value'=>'Save Dpicache',
+    '#value'=>'Save',
   );
   
   $form['dpicache_accumulation'] = array(
     '#title' => t('Settings for caching with accumulation'),
-    '#description' => 'Check this box if you want to activate accumulation système',
+    '#description' => 'Check this box if you want to activate accumulation system',
     '#type' => 'fieldset',
   );
   
@@ -40,7 +40,7 @@ function dpicache_pages_form_cache_clear_form($form, &$form_state){
   
   $form['dpicache_accumulation']['dpicache_accumulation_cache'] = array(
     '#type' => 'submit',
-    '#value'=>'Save Dpicache Accumulation',
+    '#value'=>'Save Settings',
   );
   
   $form['dpicache_cache_varnish'] = array(

@@ -73,12 +73,14 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value'=>variable_get('varnish_control_terminal', '127.0.0.1:6082'),
+    '#description' => t("It's the url from varnish terminal"),
   );
   $form['varnish_config']['varnish_control_key'] = array(
     '#title' => t('Varnish secret key'),
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value'=>variable_get('varnish_control_key', FALSE),
+    '#description' => t("It's the pass present the to /etc/varnish/secret file"),
   );
 
   $form['varnish_config']['varnish_version'] = array(

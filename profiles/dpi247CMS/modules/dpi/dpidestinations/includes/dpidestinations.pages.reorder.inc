@@ -178,7 +178,8 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   $nodes_to_process=array_merge($smaller_than_boundary,$greater_than_boundary);
   */
   
-$boundary=count($form_state["values"]['nodes']);
+  $boundary=count($form_state["values"]['nodes']);
+  $nodes_to_process = array();
   foreach($order_by_new_rank as $rank=>$data){
     if(!($data['weight']==$data['original_weight'] and  $data['original_weight']==0)){
       $sum=abs($data['weight'])+abs($data['original_weight']);
@@ -198,13 +199,13 @@ $boundary=count($form_state["values"]['nodes']);
     foreach($nodes_to_process as $new_rank=>$data){
       $position=$new_rank+1;
       $nid=$data['nid'];
-      $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
+      $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position, $nid);
       $destinations_to_update[$nid]=$virtual_rank;
 
     }
     foreach($destinations_to_update as $nid=>$virtual_rank){
       //@todo: LE faire en une seule querry avec l'invalidation du cache une seule fois par nid
-      _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank,$nid);
+      _dpidestinations_virtualrank_update_virtualrank($nid, $term_id, $target_name, $virtual_rank);
 
     }
     $destination['tid']=$form_state['values']['sectiontid'];
