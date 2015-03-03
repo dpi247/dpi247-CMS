@@ -77,6 +77,11 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     'custom settings' => FALSE,
   );
 
+  $entity_info['node']['view modes']['dpi_atom_embedd'] = array(
+    'label' => t('DPI Atom embedd'),
+    'custom settings' => TRUE,
+  );
+
   $dpiproperties_types = dpiproperties_types();
   
   $package_type_info = new stdClass();
