@@ -364,6 +364,56 @@ function dpicontenttypes_schema() {
     ),
     'primary key' => array('eid'),
   );
+  
+  $schema['dpicontenttypes_temp_nodetopublish'] = array(
+    'description' => 'Contains all the node where embargo date or unpublish date are the current date',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'node status',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+      'field_embargodatetime_value' => array(
+        'description' => 'Embargo date.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      'field_unpublishdate_value' => array(
+        'description' => 'Unpublish date.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      'date' => array(
+        'description' => 'Date.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      //0 : unpublish, 1 publish
+      'action' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'date_timezone' => array(
+        'description' => 'The timezone of the field date',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
 
   return $schema;
 }
@@ -564,4 +614,13 @@ function dpicontenttypes_update_7009(){
   foreach($field_instances as $instance){
     field_update_instance($instance);
   }
+}
+
+/**
+ * Creation of the table dpi_properties
+ */
+function dpicontenttypes_update_7010() {
+  // Creation of table dpi_properties
+  $schema = drupal_get_schema('dpicontenttypes_temp_nodetopublish', TRUE);
+  db_create_table('dpicontenttypes_temp_nodetopublish', $schema);
 }
