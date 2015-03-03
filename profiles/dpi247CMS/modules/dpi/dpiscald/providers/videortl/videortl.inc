@@ -235,6 +235,6 @@ function dpiscald_videortl_get_import_info($importer, & $entity, & $wrapper, $ur
   }
   $entity->title = $infos['title'];
   $entity->data['video_key'] = $key;
-  $entity->data['video_liveid'] = $liveid;
+  $entity->data['video_liveid'] = $live_id;
   $entity->data['video_domain'] = $domain;
 }
