@@ -18,6 +18,12 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
         $external_reference = $dpiproperties->external_reference;
         $embed_objects_by_ext_ref[$external_reference] = $embed_object;
         $embed_objects_by_ext_ref[$external_reference]['dpiproperties'] = $dpiproperties;
+        // Ajout de la seconde external ref dans le tableau si elle existe (ajout de la condition)
+        if (isset($dpiproperties->external_reference_2) && !empty($dpiproperties->external_reference_2)) {
+          $external_reference_2 = $dpiproperties->external_reference_2;
+          $embed_objects_by_ext_ref[$external_reference_2] = $embed_object;
+          $embed_objects_by_ext_ref[$external_reference_2]['dpiproperties'] = $dpiproperties;
+        }
       }
 
       // This is the default inline ScalD context
@@ -34,7 +40,6 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
             $tag_matches = array();
             // Get all ccix:inline tags in the text
             preg_match_all($tag_regex, $text, $tag_matches);
-
             if (!empty($tag_matches[0])) {
               foreach ($tag_matches[0] as $match_id => $match_val) {
                 // Extract attributes from the tag

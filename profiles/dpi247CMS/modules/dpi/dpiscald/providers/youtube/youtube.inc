@@ -373,3 +373,11 @@ function dpiscald_youtube_parse_id($string, $check) {
   return $id;
 }
 
+function dpiscald_youtube_get_import_info($importer, & $entity, & $wrapper, $url){
+  $value = str_replace ( '\\', '', $url );
+  $id = dpiscald_youtube_parse_id ( $value, FALSE );
+  $wrapper->base_id->set ( $id );
+  $info = dpiscald_youtube_video ( $id );
+  $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+  $wrapper->scald_thumbnail->set ( ( array ) $file );
+}

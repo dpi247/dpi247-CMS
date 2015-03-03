@@ -37,7 +37,7 @@ function atom_package_gallery_scald_prerender($atom, $context, $options, $mode) 
     $atom->rendered->player = theme('atom_package_gallery_player',
       array('vars' =>
         array(
-          'node'    => node_view($node_info),
+          'node'    => node_view($node_info, 'dpi_atom_embedd'),
         ),
         'atom' => $atom,
       )
