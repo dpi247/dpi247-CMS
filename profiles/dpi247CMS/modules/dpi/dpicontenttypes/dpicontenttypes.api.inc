@@ -779,32 +779,24 @@ function dpicontenttypes_api_create_default_table_options($options = array()) {
  * This function merge informations about autopublish node
  * @param stdClass $node
  */
-function dpicontenttypes_api_insert_autopublish($node) {
+function dpicontenttypes_api_insert_autopublish($element) {
   $return = FALSE;
   if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
     try {
       $fields = array(
-        'nid' => $node->nid,
-        'status' => $node->status,
+        'nid' => $element->nid,
+        'status' => $element->status,
+        'date' => $element->date,
+        'action' => $element->action,
+        'date_timezone' => $element->timezone,
       );
-      $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
-      $autopublishdate = current($autopublishdates);
-      if (isset($autopublishdate['value'])) {
-        $fields = $fields + array(
-          'field_embargodatetime_value' => $autopublishdate['value'],
-          'field_unpublishdate_value' => $autopublishdate['value2'],
-          'date' => time(),
-          'action' => 1,
-          'date_timezone' => $autopublishdate['timezone'],
-        );
-      }
 
       db_merge('dpicontenttypes_temp_nodetopublish')
-          ->key(array('nid' => $node->nid))
+          ->key(array('nid' => $element->nid, 'action' => $element->action ))
           ->fields($fields)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : insert success for node with nid @nid", array("@nid" => $node->nid)));
+      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : insert success for node with nid @nid", array("@nid" => $element->nid)));
     } catch (Exception $exc) {
       dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Catch an error into db_merge execution"));
     }
@@ -837,34 +829,49 @@ function dpicontenttypes_api_delete_autopublish($node) {
   }
   return $return;
 }
-
+/**
+ * $node = node_load(67);
+  dsm($node, 'start');
+  module_load_include('inc', 'dpicontenttypes', 'dpicontenttypes.api');
+  dpicontenttypes_api_check_autopublish($node);
+  dsm($node, 'end');
+ * @param type $node
+ */
 function dpicontenttypes_api_check_autopublish($node) {
   if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
-    if (isset($node->field_autopublishdate[0]['value'])) {
-      $embargo_date = $node->field_autopublishdate[0];
-      $embargo_timzone_db = $embargo_date['timezone_db'] ? $embargo_date['timezone_db'] : 'UTC';
-      if ($form_date = date_make_date($embargo_date['value'], $embargo_timzone_db)) {
-        $form_date = (object) date_timezone_set($form_date, timezone_open($embargo_date['timezone']));
-        $form_date = unserialize(serialize($form_date));
-        $safe_embargo_date = $form_date->date;
-      }
-      $unpublish_date = $node->field_autopublishdate[0];
-      $unpublish_timzone_db = $unpublish_date['timezone_db'] ? $unpublish_date['timezone_db'] : 'UTC';
-      if ($form_date = date_make_date($unpublish_date['value2'], $unpublish_timzone_db)) {
-        $form_date = (object) date_timezone_set($form_date, timezone_open($unpublish_date['timezone']));
-        $form_date = unserialize(serialize($form_date));
-        $safe_unpublish_date = $form_date->date;
-      }
+    $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+    $useautopublishdate = current($useautopublishdates);
+    if (isset($useautopublishdate['value']) && $useautopublishdate['value']) {
+      $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+      $autopublishdate = current($autopublishdates);
+      if (isset($autopublishdate['value'])) {
+        $embargo_date = $autopublishdate;
+        $embargo_timzone_db = $embargo_date['timezone_db'] ? $embargo_date['timezone_db'] : 'UTC';
+        if ($form_date = date_make_date($embargo_date['value'], $embargo_timzone_db)) {
+          $form_date = (object) date_timezone_set($form_date, timezone_open($embargo_date['timezone']));
+          $form_date = unserialize(serialize($form_date));
+          $safe_embargo_date = $form_date->date;
+        }
+        $unpublish_date = $autopublishdate;
+        $unpublish_timzone_db = $unpublish_date['timezone_db'] ? $unpublish_date['timezone_db'] : 'UTC';
+        if ($form_date = date_make_date($unpublish_date['value2'], $unpublish_timzone_db)) {
+          $form_date = (object) date_timezone_set($form_date, timezone_open($unpublish_date['timezone']));
+          $form_date = unserialize(serialize($form_date));
+          $safe_unpublish_date = $form_date->date;
+        }
 
-      if (strtotime($safe_embargo_date) <= time() && ($node->field_autopublishdate[0]['value2'] == NULL || strtotime($safe_unpublish_date) >= time())) {
-        $node->status = 1;
+        if (strtotime($safe_embargo_date) <= time() && ($autopublishdate['value2'] == NULL || strtotime($safe_unpublish_date) >= time())) {
+          $node->status = 1;
+        }
+        else {
+          $node->status = 0;
+        }
       }
       else {
         $node->status = 0;
       }
-    }
-    else {
-      $node->status = 0;
+    }else{
+      $node->status = 1;
     }
   }
   else {

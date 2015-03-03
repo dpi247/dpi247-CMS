@@ -380,18 +380,6 @@ function dpicontenttypes_schema() {
         'size' => 'medium',
         'not null' => TRUE,
       ),
-      'field_embargodatetime_value' => array(
-        'description' => 'Embargo date.',
-        'type' => 'text',
-        'size' => 'medium',
-        'not null' => FALSE,
-      ),
-      'field_unpublishdate_value' => array(
-        'description' => 'Unpublish date.',
-        'type' => 'text',
-        'size' => 'medium',
-        'not null' => FALSE,
-      ),
       'date' => array(
         'description' => 'Date.',
         'type' => 'text',
@@ -412,7 +400,7 @@ function dpicontenttypes_schema() {
         'not null' => FALSE,
       ),
     ),
-    'primary key' => array('nid'),
+    'primary key' => array('nid', 'action'),
   );
 
   return $schema;
@@ -620,6 +608,16 @@ function dpicontenttypes_update_7009(){
  * Creation of the table dpi_properties
  */
 function dpicontenttypes_update_7010() {
+  // Creation of table dpi_properties
+  $schema = drupal_get_schema('dpicontenttypes_temp_nodetopublish', TRUE);
+  db_create_table('dpicontenttypes_temp_nodetopublish', $schema);
+}
+
+/**
+ * Creation of the table dpi_properties
+ */
+function dpicontenttypes_update_7011() {
+  db_drop_table("dpicontenttypes_temp_nodetopublish");
   // Creation of table dpi_properties
   $schema = drupal_get_schema('dpicontenttypes_temp_nodetopublish', TRUE);
   db_create_table('dpicontenttypes_temp_nodetopublish', $schema);

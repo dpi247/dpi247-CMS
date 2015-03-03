@@ -237,7 +237,22 @@ function _dpicontenttypes_entityinsertembargoinformation($node){
   $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
   $useautopublishdate = current($useautopublishdates);
   if(isset($useautopublishdate) && $useautopublishdate['value']){
-    dpicontenttypes_api_insert_autopublish($node);
+    $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+    $autopublishdate = current($autopublishdates);
+    $infos = new stdClass();
+    $infos->nid = $node->nid;
+    $infos->status = $node->status;
+    $infos->date = $autopublishdate['value'];
+    $infos->action = 0;
+    $infos->timezone = $autopublishdate['timezone'];    
+    dpicontenttypes_api_insert_autopublish($infos);
+    $infos2 = new stdClass();
+    $infos2->nid = $node->nid;
+    $infos2->status = $node->status;
+    $infos2->date = $autopublishdate['value2'];
+    $infos2->action = 1;
+    $infos2->timezone = $autopublishdate['timezone']; 
+    dpicontenttypes_api_insert_autopublish($infos2);
   }
 }
 
@@ -262,7 +277,7 @@ function _dpicontenttypes_entitydeletescaldatom($object, $entity, $nid){
  * Delete des informations d'embargo dans la table en fonction des informations présente dans le noeud.
  * @param stdClass $node
  */
-function _dpicontenttypes_entitydeleteembargoinformation($node){
+function _dpicontenttypes_entitydeleteembargoinformation($node){  
   dpicontenttypes_api_delete_autopublish($node);
 }
 
