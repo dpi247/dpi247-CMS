@@ -149,6 +149,7 @@ function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
     _dpicontenttypes_entityinsertscaldatom($node);
+    _dpicontenttypes_entityinsertembargoinformation($node);
     if(function_exists("rules_invoke_event")){
       rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
     }
@@ -181,10 +182,6 @@ function dpicontenttypes_node_presave($node) {
       rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
     }
   }
-
-//   foreach($node->temp_crops as $atom_id=>$crops_infos){
-//     _dpicontenttypes_cropings_update_cropings('node', $node->nid, $atom_id, $crops_infos);
-//   }
 }
 
 /**
@@ -195,11 +192,11 @@ function dpicontenttypes_node_presave($node) {
 function dpicontenttypes_node_delete($node) {
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
   _dpicontenttypes_entitydeletescaldatom($node, 'node', $node->nid);
-  if(function_exists("rules_invoke_event")){
-  
-  if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
-    rules_invoke_event('dpicontenttypes_rules_event_package_deleted', $node);
-  }
+  _dpicontenttypes_entitydeleteembargoinformation($node);
+  if(function_exists("rules_invoke_event")){  
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_deleted', $node);
+    }
   }
 }
     

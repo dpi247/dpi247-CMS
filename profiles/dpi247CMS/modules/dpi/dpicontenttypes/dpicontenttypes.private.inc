@@ -230,6 +230,18 @@ function _dpicontenttypes_entityinsertscaldatom($node){
 }
 
 /**
+ * Insertion des informations d'embargo dans la table en fonction des informations présente dans le noeud.
+ * @param stdClass $node
+ */
+function _dpicontenttypes_entityinsertembargoinformation($node){
+  $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+  $useautopublishdate = current($useautopublishdates);
+  if(isset($useautopublishdate) && $useautopublishdate['value']){
+    dpicontenttypes_api_insert_autopublish($node);
+  }
+}
+
+/**
  * Delete dpiproperties from the database
  * 
  * @param Object $object
@@ -244,6 +256,14 @@ function _dpicontenttypes_entitydeletedpiproperties($object, $entity, $eid) {
 
 function _dpicontenttypes_entitydeletescaldatom($object, $entity, $nid){
   db_delete('scald_atoms')->condition('title', $object->title)->execute();
+}
+
+/**
+ * Delete des informations d'embargo dans la table en fonction des informations présente dans le noeud.
+ * @param stdClass $node
+ */
+function _dpicontenttypes_entitydeleteembargoinformation($node){
+  dpicontenttypes_api_delete_autopublish($node);
 }
 
 /**
