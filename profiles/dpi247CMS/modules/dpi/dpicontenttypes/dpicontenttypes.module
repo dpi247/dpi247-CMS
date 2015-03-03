@@ -868,3 +868,16 @@ function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
     }
   }
 }
+
+/**
+ * Implementation of hook_dpilog_register
+ * 
+ * @return array
+ */
+function dpicontenttypes_dpilog_register(){
+  return array(
+    "dpi_autopublish"=>array(
+      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", 'error_autopublish_node'),
+    )
+  );
+}

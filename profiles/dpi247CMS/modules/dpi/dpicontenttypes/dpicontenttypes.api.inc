@@ -764,3 +764,64 @@ function dpicontenttypes_api_create_default_table_options($options = array()){
   $return['elem_other'] = array();
   return $return;
 }
+
+/**
+ * This function merge informations about autopublish node
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_insert_autopublish($node){
+  $return = FALSE;
+  if(db_table_exists('dpicontenttypes_temp_nodetopublish')){
+    try {
+      $fields = array(
+        'nid' => $node->nid,
+        'status' => $node->status,        
+      );
+      $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+      $autopublishdate = current($autopublishdates);
+      if (isset($autopublishdate['value'])){
+        $fields = $fields + array(
+          'field_embargodatetime_value' => $autopublishdate['value'],
+          'field_unpublishdate_value' => $autopublishdate['value2'],
+          'date' => time(),
+          'action' => 1,
+          'date_timezone' => $autopublishdate['timezone'],
+        );
+      }
+      
+     db_merge('dpicontenttypes_temp_nodetopublish')
+      ->key(array('nid' => $node->nid))
+      ->fields($fields)
+      ->execute();
+      $return = TRUE;
+      dpi_log ( 'dpi_autopublish', "insert_autopublish_node", t ( "dpi_autopublish : insert success for node with nid @nid", array("@nid" => $node->nid)));
+    } catch (Exception $exc) {
+      dpi_log ( 'dpi_autopublish', "insert_autopublish_node", t ( "dpi_autopublish : Catch an error into db_merge execution"));
+    }    
+  }else{
+    dpi_log ( 'dpi_autopublish', "insert_autopublish_node", t ( "dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
+/**
+ * This function delete informations about autopublish node pass by parameter
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_delete_autopublish($node) {
+  $return = FALSE;
+  if(db_table_exists('dpicontenttypes_temp_nodetopublish')){
+    try {
+      db_delete('dpicontenttypes_temp_nodetopublish')
+        ->condition('nid', $node->nid)
+        ->execute();
+      $return = TRUE;
+      dpi_log ( 'dpi_autopublish', "delete_autopublish_node", t ( "dpi_autopublish : Suppression success for node with nid @nid", array("@nid" => $node->nid)));
+    } catch (Exception $exc) {
+      dpi_log ( 'dpi_autopublish', "delete_autopublish_node", t ( "dpi_autopublish : Catch an error into db_delete execution"));
+    }
+  }else{
+    dpi_log ( 'dpi_autopublish', "delete_autopublish_node", t ( "dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
