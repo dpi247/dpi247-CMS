@@ -1,6 +1,6 @@
 (function($) {
 CKEDITOR.dialog.add('atomProperties', function(editor) {
-  var lang = editor.lang.dnd, element, atom;
+  var lang = editor.lang.dnd, atom;
 
   return {
     title: lang.atom_properties,
@@ -10,8 +10,9 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
       if (!Drupal.dnd.atomCurrent) {
         this.hide();
         // If the library is hidden, show it
-        if ($('.dnd-library-wrapper').length && !$('.dnd-library-wrapper').hasClass('library-on')) {
-          $('.dnd-library-wrapper .scald-anchor').click();
+        var library_wrapper = $('.dnd-library-wrapper');
+        if (library_wrapper.length && !library_wrapper.hasClass('library-on')) {
+          $('.scald-anchor', library_wrapper).click();
         }
         else {
           alert(lang.atom_none);
@@ -42,12 +43,12 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
         legend: legend,
         align: elm.hasClass('atom-align-left') ? 'left' : elm.hasClass('atom-align-right') ? 'right' : elm.hasClass('atom-align-center') ? 'center' : 'none'
       };
-      var me = this;
       Drupal.dnd.fetchAtom(context, sid, function() {
         var type = Drupal.dnd.Atoms[atom.sid].meta.type;
+        var me = CKEDITOR.dialog.getCurrent();
         var cmbContext = me.getContentElement('info', 'cmbContext');
         cmbContext.clear();
-        for (context in Drupal.settings.dnd.contexts[type]) {
+        for (var context in Drupal.settings.dnd.contexts[type]) {
           cmbContext.add(Drupal.settings.dnd.contexts[type][context], context);
         }
         me.setupContent(atom);
@@ -61,8 +62,8 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
       atom.options.link = this.getValueOf('info', 'txtLink');
       Drupal.dnd.fetchAtom(context, atom.sid, function() {
         var html = Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[atom.sid], context, atom.options);
-        // Remove the first 13 characters '<p>&nbsp;</p>'
-        CKEDITOR.dom.element.createFromHtml(html.substr(13)).replace(Drupal.dnd.atomCurrent);
+        CKEDITOR.dom.element.createFromHtml(html).replace(Drupal.dnd.atomCurrent);
+        Drupal.dnd.protectAtom($(editor.document.$).find('.dnd-atom-wrapper'));
       });
     },
     contents: [
@@ -77,7 +78,7 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
             id: 'txtLegend',
             type: 'textarea',
             rows: 5,
-            label: 'Legend',
+            label: lang.properties_legend,
             setup: function(atom) {
               this.setValue(atom.legend);
             }
@@ -85,7 +86,7 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
           {
             id: 'cmbContext',
             type: 'select',
-            label: 'Context',
+            label: lang.properties_context,
             items: [],
             setup: function(atom) {
               this.setValue(atom.context);
@@ -94,8 +95,8 @@ CKEDITOR.dialog.add('atomProperties', function(editor) {
           {
             id: 'cmbAlign',
             type: 'select',
-            label: 'Alignment',
-            items: [['None', 'none'], ['Left', 'left'], ['Right', 'right'], ['Center', 'center']],
+            label: lang.properties_alignment,
+            items: [[lang.alignment_none, 'none'], [lang.alignment_left, 'left'], [lang.alignment_right, 'right'], [lang.alignment_center, 'center']],
             setup: function(atom) {
               this.setValue(atom.align);
             }

@@ -4,23 +4,25 @@
  * Plugin definition.
  */
 $plugin = array(
-  'title' => t('Custom content'),
+  'title'             => t('Custom content'),  
   'no title override' => TRUE,
-  'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
-  'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
+  'defaults'          => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
+  'js'                => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
   // Make sure the edit form is only used for some subtypes.
-  'edit text' => t('Edit'),
-  'all contexts' => TRUE,
-  'edit form' => array(
-    'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-    'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-    'dpiblocks_custom_content_type_revision_form'=>'view revision',
+  'edit text'         => t('Edit'),
+  'all contexts'      => TRUE,
+  'add form'          => array(
+    'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+    'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+    'dpiblocks_custom_content_type_revision_form'     => 'view revision',
   ),
-  'add form' => array(
-    'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-    'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-    'dpiblocks_custom_content_type_revision_form'=>'view revision',
+  'edit form'         => array(
+    'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+    'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+    'dpiblocks_custom_content_type_revision_form'     => 'view revision',
   ),
+  'category'          => t('DPI Blocks'),  
+  'group'             => t('DPI Core'),
 );
 
 /**
@@ -35,19 +37,21 @@ function dpiblocks_custom_content_content_type_content_types(){
   foreach($results as $record) {
     //existant content type
     $custom_content[$record->machine_name] = array(
-      'title' => t('Custom content version : '.$record->title),
-      'description' => t(''),
-      'category' => t('DPI Extras'),
-      'subtype'=> $record->machine_name,
-      'add form' => array(
-        'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-        'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-        'dpiblocks_custom_content_type_revision_form'=>'view revision',
+      'title'        => t('Custom content version : '.$record->title),
+      'description'  => t(''),
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/html.png',
+      'category'     => t('DPI Blocks'),
+      'group'        => t('DPI Core'),
+      'subtype'      => $record->machine_name,
+      'add form'     => array(
+        'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+        'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+        'dpiblocks_custom_content_type_revision_form'     => 'view revision',
       ),
-      'edit form' => array(
-        'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-        'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-        'dpiblocks_custom_content_type_revision_form'=>'view revision',
+      'edit form'    => array(
+        'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+        'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+        'dpiblocks_custom_content_type_revision_form'     => 'view revision',
       ),
     );
   }
@@ -56,16 +60,18 @@ function dpiblocks_custom_content_content_type_content_types(){
   //new custom content type
   $custom_content['custom']= array(
     'name'           => 'custom_version',
-    'title'          => t('New custom content version'),
+    'title'          => t('New versionnable custom content'),
+    'icon'              => drupal_get_path("module", "dpiblocks").'/icons/add_content.ico',
     'top level'      => TRUE,
     'category'       => t('Custom'),
+    'group'          => t('DPI Core'),
     'description'    => t('Create a completely custom piece of custom content.'),
-    'edit form' => array(),
-    'add form' => 'dpiblocks_custom_content_content_type_add_form',
-    'edit form' => array(
-      'dpiblocks_custom_content_content_type_view_form'=>'view custom content',
-      'dpiblocks_custom_content_content_type_edit_form'=>'edit custom content',
-      'dpiblocks_custom_content_type_revision_form'=>'view revision',
+    'edit form'      => array(),
+    'add form'       => 'dpiblocks_custom_content_content_type_add_form',
+    'edit form'      => array(
+      'dpiblocks_custom_content_content_type_view_form' => 'view custom content',
+      'dpiblocks_custom_content_content_type_edit_form' => 'edit custom content',
+      'dpiblocks_custom_content_type_revision_form'     => 'view revision',
     ),
     'all contexts'   => TRUE,
   );
@@ -82,6 +88,7 @@ function dpiblocks_custom_content_content_type_content_types(){
  * @param $context
  */
 function dpiblocks_custom_content_content_type_render($subtype, $conf, $panel_args, $context){
+  
   $block = new stdClass();
   //get the custom content entity
   $entity = _dpiblocks_custom_content_get_entity_by_subtype($subtype);
@@ -89,9 +96,24 @@ function dpiblocks_custom_content_content_type_render($subtype, $conf, $panel_ar
   $block->module = 'dpiblocks';
   $block->title = t($entity->title);
   $block->content = check_markup($entity->body, $entity->format);
-
+  
   return $block;
 }
+
+
+/**
+ * 'admin info' callback for panel pane.
+ */
+function dpiblocks_custom_content_content_type_admin_info($subtype, $conf, $contexts) {
+  if (!empty($conf)) {
+    $block = new stdClass;
+    $entity = _dpiblocks_custom_content_get_entity_by_subtype($subtype);
+    $block->title = t($entity->title);
+    $block->content = check_markup($entity->body, $entity->format);;
+    return $block;
+  }
+}
+  
 
 /**
  * Implementation of edit_form() for a new custom content block

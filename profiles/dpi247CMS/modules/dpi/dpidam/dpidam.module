@@ -1,0 +1,356 @@
+<?php
+
+module_load_include('inc', 'dpidam', 'dpidam.api');
+module_load_include('inc', 'dpidam', 'dpidam.private');
+
+/**
+ * Implementation of hook_menu().
+ */
+function dpidam_menu() {
+  $items = array();
+
+  $items['admin/dpi247/dpidam'] = array(
+    'title' => t('DPI Dam Settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_packages_sync_form'),
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Manage DAM communications settings'),
+    'file' => 'includes/dpidam.pages.admin.inc',
+  );
+
+  $items['admin/dpi247/dpidam/packagessync'] = array(
+    'title' => t('Packages synchronization'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_packages_sync_form'),
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Packages synchronization settings'),
+    'file' => 'includes/dpidam.pages.admin.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  // Sources management
+  $items['admin/dpi247/dpidam/sources'] = array(
+    'title' => t('Sources'),
+    'page callback' => 'dpidam_page_admin_sources',
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Manage sources'),
+    'file' => 'includes/dpidam.pages.sources.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['admin/dpi247/dpidam/sources/edit/%'] = array(
+    'title' => t('Edit'),
+    'description' => t('Edit an existing source'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_sources_edit_source_form', 5),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.sources.inc',
+  );
+
+  $items['admin/dpi247/dpidam/sources/delete/%'] = array(
+    'title' => t('Delete'),
+    'description' => t('Delete a source'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_source_delete_source_form', 5),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.sources.inc',
+  );
+
+  // Search settings and profiles management
+  $items['admin/dpi247/dpidam/search'] = array(
+    'title' => t('Search'),
+    'page callback' => 'dpidam_page_admin_search',
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Search settings'),
+    'file' => 'includes/dpidam.pages.search.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+  $items['admin/dpi247/dpidam/search/edit/%'] = array(
+    'title' => t('Edit'),
+    'description' => t('Edit an existing DAM search profile.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_search_edit_profile_form', 5),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.search.inc',
+  );
+
+  $items['admin/dpi247/dpidam/search/delete/%'] = array(
+    'title' => t('Delete'),
+    'description' => t('Delete a DAM search profile.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_search_delete_profile_form', 5),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.search.inc',
+  );
+
+  $items['admin/dpi247/dpidam/search/setdefault/%'] = array(
+    'title' => t('Set as default'),
+    'description' => t('Set a DAM search profile as default profile.'),
+    'page callback' => 'dpidam_page_admin_search_set_default_profile',
+    'page arguments' => array(5),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.search.inc',
+  );
+
+  $items['admin/dpi247/dpidam/archive'] = array(
+    'title' => t('Archive recovery'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_archive_form'),
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Packages recovery settings'),
+    'file' => 'includes/dpidam.pages.archive.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+
+  $items['admin/dpi247/dpidam/historic'] = array(
+    'title' => t('History archiving'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_historic_form'),
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Settings about old nodes history archiving'),
+    'file' => 'includes/dpidam.pages.historic.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 4,
+  );
+
+  $items['admin/dpi247/dpidam/purge'] = array(
+    'title' => t('Nodes purge'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidam_page_admin_purge_form'),
+    'access arguments' => array('administer dam interactions'),
+    'description' => t('Settings about old nodes purge'),
+    'file' => 'includes/dpidam.pages.purge.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+  );
+
+  $items['node/%node/dam'] = array(
+    'title' => t('Node as archive'),
+    'page callback' => 'dpidam_archive_simulation',
+    'page arguments' => array(1),
+    'access arguments' => array('administer dam interactions'),
+    'file' => 'includes/dpidam.pages.archive.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function dpidam_theme() {
+  $path = drupal_get_path('module', 'dpidam');
+  $base = array(
+    'file' => 'theme.inc',
+    'path' => $path.'/theme',
+  );
+
+  return array(
+    'dpidam_archive_failed_limit_exceeded' => $base + array(
+      'arguments' => array(),
+      'template' => 'dpidam-archive-failed-limit-exceeded',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_dpilog_register
+ */
+function dpidam_dpilog_register() {
+  return array(
+    'dpidam' => array(
+      'actions' => array('cron'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_cron
+ */
+function dpidam_cron() {
+  if (lock_acquire('dpidam_cron', 120)) {
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron run on @date', array('@date' => date('Y-m-d H:i:s'))));
+
+    module_load_include('inc', 'dpidam', 'includes/dpidam.cron');
+
+    // Send packages to DAM
+    dpidam_post_packages_cron();
+
+    // Send URLs to DAM
+    dpidam_post_urls_cron();
+
+    // Send old packages to DAM
+    if (!dpi_variable_get('dpidam_historic_archive_done', FALSE)) {
+      module_load_include('inc', 'dpidam', 'includes/dpidam.pages.historic');
+      dpidam_historic_cron();
+    }
+
+    // Purge old packages
+    if (dpi_variable_get('dpidam_historic_archive_done', FALSE)) {
+      module_load_include('inc', 'dpidam', 'includes/dpidam.pages.purge');
+      dpidam_purge_cron();
+    }
+
+    lock_release('dpidam_cron');
+  } else {
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron locked on @date', array('@date' => date('Y-m-d H:i:s'))));
+  }
+}
+
+/**
+ * Implementation of hook_permission()
+ */
+function dpidam_permission(){
+  return array(
+    'administer dam interactions' =>  array(
+      'title' => t('Administer DAM interactions'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_node_insert
+ */
+function dpidam_node_insert($node) {
+  if ($node->type == 'package') {
+    // URL Alias Insert
+    $url = drupal_get_path_alias('node/'.$node->nid);
+    _dpidam_add_url_to_buffer($node->nid, $url);
+
+    // Package Insert
+    $dpiproperties = dpiproperties_load_by_type_and_id('node', $node->nid);
+    $current_source = $dpiproperties->source;
+    if ($current_source && !empty($current_source)) {
+      $source = _dpidam_get_source_by_name($current_source);
+      if ($source) {
+        if ($source->archive == 1 && ($source->archive_from_dpimport == 1 || !isset($node->dpimport_node))) {
+          // If the package is to be archived and it's not from dpimport or archive_from_dpimport is set to one, the package is saved
+          _dpidam_add_package_to_buffer($node->nid);
+        } elseif ($source->archive == 1 && $source->archive_from_dpimport == 0 && isset($node->dpimport_node)) {
+          // If the package is from dpimport and archive from dpimport is set to 0, the package is deleted from the buffer.
+          _dpidam_remove_package_from_buffer($node->nid);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_update
+ */
+function dpidam_node_update($node) {
+  if ($node->type == 'package') {
+    // URL Alias Update
+    // @todo : Update only if the Alias is modified
+    $url = drupal_get_path_alias('node/'.$node->nid);
+    _dpidam_add_url_to_buffer($node->nid, $url);
+
+    // Package Update
+    $node_wrapper = entity_metadata_wrapper('package', $node);
+    if (isset($node_wrapper->field_source)) {
+      $current_source = $node_wrapper->field_source->value();
+      if ($current_source && !empty($current_source)) {
+        $source = _dpidam_get_source_by_name($current_source);
+        if ($source->archive == 1 && ($source->archive_from_dpimport == 1 || !isset($node->dpimport_node))) {
+          // If the package is to be archived and it's not from dpimport or archive_from_dpimport is set to one, the package is saved
+          _dpidam_add_package_to_buffer($node->nid);
+        } elseif ($source->archive == 1 && $source->archive_from_dpimport == 0 && isset($node->dpimport_node)) {
+          // If the package is from dpimport and archive from dpimport is set to 0, the package is deleted from the buffer.
+          _dpidam_remove_package_from_buffer($node->nid);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function dpidam_form_alter(&$form, &$form_state, $form_id) {
+  // @todo
+  /*
+  // Add a submit when an alias is edited in admin/build/path/list
+  if ($form_id == 'path_admin_form') {
+    $form['#submit'][] = 'wallydam_form_path_admin_form_submit';
+  }
+
+  // Add a submit when the action pathauto_update_alias is choose in bulk operation
+  if (preg_match('/^views_bulk_operations_form/', $form_id)
+      && isset($form_state['values']['operation'])
+      && preg_match('/^pathauto_node_update_alias_multiple/', $form_state['values']['operation'])) {
+    // Store the nodes choosed by the user to know in the submit wich node as been updated
+    $storage = array();
+    foreach ($form_state['storage']['selection'] as $key => $value) {
+      $node = node_load(array('nid' => $key));
+      $storage[$key] = array('old_alias' => $node->path);
+    }
+    $form['wallydam'] = array(
+      '#type' => 'value',
+      '#value' => $storage,
+    );
+    $form['#submit'][] = 'wallydam_pathauto_node_update_alias_multiple_submit';
+  }
+  */
+}
+
+/**
+ * Implementation hook_preprocess_page
+ * To add primary links and secondary links on archive
+ *
+ * @param {array} $vars
+ */
+function dpidam_preprocess_page(&$vars) {
+  /*
+  global $wallydam_archive;
+  //Check if archive page, if so, add the primary and secondary links
+  if ($wallydam_archive == 'archive') {
+    if (empty($vars['primary_links'])) {
+      $vars['primary_links'] = wallydam_menu_primary_links();
+    }
+    if (empty($vars['secondary_links'])){
+      $vars['secondary_links'] = wallydam_menu_secondary_links();
+    }
+    if ($node = wallydam_save_static_node()) {
+      $vars['node'] = $node;
+    }
+  }
+  */
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpidam_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+      'version' => 1,
+    );
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory()
+ */
+function dpidam_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'arguments') {
+    return 'plugins/arguments';
+  }
+  if ($module == 'dpimport' && $plugin == 'importer') {
+    return 'plugins/dpimport/' . $plugin;
+  }
+}

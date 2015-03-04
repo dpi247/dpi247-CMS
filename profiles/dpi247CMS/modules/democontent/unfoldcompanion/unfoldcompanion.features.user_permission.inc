@@ -75,6 +75,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'devel',
   );
 
+  // Exported permission: 'access overlay'.
+  $permissions['access overlay'] = array(
+    'name' => 'access overlay',
+    'roles' => array(),
+    'module' => 'overlay',
+  );
+
   // Exported permission: 'access scald dnd library'.
   $permissions['access scald dnd library'] = array(
     'name' => 'access scald dnd library',
@@ -190,6 +197,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'dnd',
   );
 
+  // Exported permission: 'administer dpimport'.
+  $permissions['administer dpimport'] = array(
+    'name' => 'administer dpimport',
+    'roles' => array(),
+    'module' => 'dpimport',
+  );
+
   // Exported permission: 'administer dpiproperties'.
   $permissions['administer dpiproperties'] = array(
     'name' => 'administer dpiproperties',
@@ -296,6 +310,13 @@ function unfoldcompanion_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'user',
+  );
+
+  // Exported permission: 'administer remotehtml'.
+  $permissions['administer remotehtml'] = array(
+    'name' => 'administer remotehtml',
+    'roles' => array(),
+    'module' => 'dpiblocks',
   );
 
   // Exported permission: 'administer scald'.
@@ -497,15 +518,6 @@ function unfoldcompanion_user_default_permissions() {
   // Exported permission: 'create atom of links_list type'.
   $permissions['create atom of links_list type'] = array(
     'name' => 'create atom of links_list type',
-    'roles' => array(
-      'administrator' => 'administrator',
-    ),
-    'module' => 'scald',
-  );
-
-  // Exported permission: 'create atom of twitter type'.
-  $permissions['create atom of twitter type'] = array(
-    'name' => 'create atom of twitter type',
     'roles' => array(
       'administrator' => 'administrator',
     ),
@@ -908,6 +920,7 @@ function unfoldcompanion_user_default_permissions() {
   $permissions['fetch any atom'] = array(
     'name' => 'fetch any atom',
     'roles' => array(
+      'Importer' => 'Importer',
       'administrator' => 'administrator',
     ),
     'module' => 'scald',
@@ -956,6 +969,13 @@ function unfoldcompanion_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'features',
+  );
+
+  // Exported permission: 'manage flow plugins'.
+  $permissions['manage flow plugins'] = array(
+    'name' => 'manage flow plugins',
+    'roles' => array(),
+    'module' => 'dpiblocks',
   );
 
   // Exported permission: 'post comments'.
@@ -1106,7 +1126,10 @@ function unfoldcompanion_user_default_permissions() {
   $permissions['view any atom'] = array(
     'name' => 'view any atom',
     'roles' => array(
+      'Importer' => 'Importer',
       'administrator' => 'administrator',
+      'anonymous user' => 'anonymous user',
+      'authenticated user' => 'authenticated user',
     ),
     'module' => 'scald',
   );
@@ -1163,6 +1186,13 @@ function unfoldcompanion_user_default_permissions() {
     'module' => 'statistics',
   );
 
+  // Exported permission: 'view remotehtml'.
+  $permissions['view remotehtml'] = array(
+    'name' => 'view remotehtml',
+    'roles' => array(),
+    'module' => 'dpiblocks',
+  );
+
   // Exported permission: 'view revisions'.
   $permissions['view revisions'] = array(
     'name' => 'view revisions',
@@ -1170,6 +1200,16 @@ function unfoldcompanion_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'node',
+  );
+
+  // Exported permission: 'view section'.
+  $permissions['view section'] = array(
+    'name' => 'view section',
+    'roles' => array(
+      'anonymous user' => 'anonymous user',
+      'authenticated user' => 'authenticated user',
+    ),
+    'module' => 'dpidestinations',
   );
 
   // Exported permission: 'view targets'.

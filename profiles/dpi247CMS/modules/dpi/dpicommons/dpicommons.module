@@ -2,37 +2,18 @@
 
 module_load_include('inc', 'dpilog', 'dpilog.private');
 
+define('DPI_ADMIN_PATH', 'admin/dpi247');
+
 /**
  * Implementation of hook_menu
 */
 function dpicommons_menu() {
   $items = array();
 
-  $items['admin/config/dpi247'] = array(
+  // Menu items that are basically menu blocks.
+  $items[DPI_ADMIN_PATH] = array(
     'title' => 'DPI247',
-    'description' => 'Parent item for DPI247',
-    'position' => 'left',
-    'weight' => -100,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-    'file path' => drupal_get_path('module', 'system'),
-  );
-
-  $items['admin/config/dpi247/settings'] = array(
-    'title' => 'DPI247 Settings',
-    'description' => 'General settings for DPI247',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpicommons_admin_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'dpicommons.pages.admin.inc',
-    'file path' => drupal_get_path('module', 'dpicommons').'/includes',
-  );
-
-  // Menu items that are basically just menu blocks.
-  $items['admin/dpi247'] = array(
-    'title' => 'dpi247',
-    'description' => 'Administer dpi247 settings.',
+    'description' => 'Administer DPI247 settings.',
     'position' => 'right',
     'weight' => -8,
     'page callback' => 'system_admin_menu_block_page',
@@ -41,15 +22,101 @@ function dpicommons_menu() {
     'file path'=> drupal_get_path('module', 'system'),
   );
 
+  $items[DPI_ADMIN_PATH.'/general-settings'] = array(
+    'title' => 'DPI Settings',
+    'description' => 'General settings for DPI247',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicommons_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'dpicommons.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpicommons').'/includes',
+    'weight' => -1,
+  );
+  
+  $items['finalize_install_process'] = array(
+    'title' => 'DPI247 Finalize install process',
+    'description' => 'Save section page manager tasks in DB',
+    'page callback' => '_dpicommons_finalize_install_process',
+    'access arguments' => TRUE,
+    'type'=>MENU_CALLBACK,
+    'file' => 'dpicommons.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpicommons').'/includes',
+    'weight' => -1,
+  );
+
   return $items;
 }
 
-function dpicommons_theme(){
+
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpicommons_theme() {
+  $chart_base = array(
+    'file' => 'theme.charts.inc',
+    'path' => drupal_get_path('module', 'dpicommons').'/templates',
+  );
+
   return array(
     'dpi_vertical_tabs' => array(
       'variables' => array('data' => null),
-      'file'=>'templates/theme.inc',
-    )
+      'file' => 'templates/theme.inc',
+    ),
+    'dpi_render_wrapper' => array(
+      'variables' => array(
+        'tag' => NULL, 
+        'attributes' => NULL, 
+        'value_prefix' => NULL, 
+        'value_suffix' => NULL, 
+        'value' => NULL
+      ),
+      'file' => 'templates/theme.inc',
+    ),
+    'dpicommons_line_chart'	=> $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'pointSize' => NULL,
+        'AxeXTitle' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_pie_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'header_name' => NULL,
+        'header_unit' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_gauge_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'hAxis' => NULL,
+        'vAxis' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
+    'dpicommons_bar_chart' => $chart_base + array(
+      'variables' => array(
+        'data' => NULL,
+        'title' => NULL,
+        'hAxis' => NULL,
+        'vAxis' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'jsprint' => FALSE,
+      ),
+    ),
   );
 }
 
@@ -67,13 +134,35 @@ function dpicommons_init() {
     register_shutdown_function('_dpicommons_shutdown_function');
   }
 }
-/*
+
+/**
+ * Implementation of hook_form_FORM-ID_alter
+ *
+ * Add debug checkboxes to devel settings form
+ */
+function dpicommons_form_devel_admin_settings_alter(&$form, $form_alter) {
+  $form['dpicommons_activated_error_handler'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Activate Wally error handler'),
+    '#default_value' => variable_get('dpicommons_activated_error_handler', FALSE),
+  );
+
+  $form['dpicommons_activated_shutdown_function'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display error on shutdown'),
+    '#description' => t('Register a shutdown function to display the last PHP error.<br>
+        <strong>Do not forget to disable this feature when debug is done.</strong>'),
+    '#default_value' => variable_get('dpicommons_activated_shutdown_function', FALSE),
+  );
+}
+
+/**
  * dpilog is used to log some actions (user interactions and system actions).
- * 
+ *
  * dpilog is more powerfull than watchdog since you have more granularit to groups log and have the ability to save some variable and one id.
  * dpilog is also a wrapper for the watchdog fonction.
  * No need to use both cause dpilog can trigger a watchdog based on settings in the dpilog settings page.
- * 
+ *
  * @param string $log_name
  *   A string used to to identify the log category (see the related hook_dpilog_register).
  * @param string $action
@@ -93,9 +182,9 @@ function dpicommons_init() {
  * @param boolean $keep_backtrace
  *   If TRUE it will keep the backtrace as a vardump
  *
- * @see hook_dpilog_register() 
- * @see _dpilog() 
- * 
+ * @see hook_dpilog_register()
+ * @see _dpilog()
+ *
  */
 function dpi_log($log_name, $action, $message, $variables = array(), $id = NULL, $severity = WATCHDOG_NOTICE, $uid = NULL, $keep_backtrace = FALSE){
   if (module_exists('dpilog')) {
@@ -161,4 +250,41 @@ function dpicommons_element_children_numeric($element) {
  */
 function dpicommons_element_child_numeric($key) {
   return is_numeric($key);
+}
+
+/**
+ * Implementation of hook_rules_event_info().
+ * @ingroup rules
+ */
+function dpicommons_rules_event_info_alter(&$events){
+  //We chose to remove the dpiproperties event related
+  foreach($events as $name=>& $event){
+
+    if(strpos( $name,'dpiproperties')===0){
+      $event['group']='z dpi247 advanced';
+    }
+  }
+}
+
+function dpicommons_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'panels' && $plugin=='layouts') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+
+
+
+function dpicommons_api_get_all_path_alias_for_node($node){
+  return array(
+    'node/'.$node->nid,
+    drupal_get_path_alias('node/'.$node->nid)
+  );
+}
+
+function dpicommons_api_get_all_path_alias_for_taxonomy($tid){
+  return array(
+    'section/'.$tid,
+    drupal_get_path_alias('section/'.$tid)
+  );
 }

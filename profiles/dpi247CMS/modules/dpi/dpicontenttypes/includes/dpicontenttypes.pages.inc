@@ -9,6 +9,9 @@
 function dpicontenttypes_entity_properties($type, $entity) {
   $content = '';
   $dpiproperties = dpiproperties_load_by_type_and_id($type, entity_id($type, $entity), TRUE);
+  if (module_exists('devel')) {
+    
+  }
   if ($dpiproperties != NULL) {
     $dpiproperties_view = dpiproperties_view($dpiproperties);
     $content = render($dpiproperties_view);
@@ -53,7 +56,9 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
   }
 
   $image_uri = $scheme . '://' . $target;
-
+  $image_uri = explode('?', $image_uri);
+  $image_uri = $image_uri[0];
+  
   $derivative_uri = _dpicontenttypes_image_style_path($style['name'], $entity->entity_id, $atom->sid, $image_uri);
 
   // If using the private scheme, let other modules provide headers and

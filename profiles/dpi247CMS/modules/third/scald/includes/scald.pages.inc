@@ -24,7 +24,7 @@ function scald_atom_add() {
       continue;
     }
     $content[] = array(
-      'title' => $type->title,
+      'title' => scald_type_property_translate($type),
       'href'  => 'atom/add/' . $name,
       'localized_options' => array(),
       'description' => '',
@@ -78,7 +78,11 @@ function scald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {
     'scald' => ctools_object_cache_get('scald_atom', $cache_id),
   );
 
-  $form_state['atom'] = $form_state['scald']['atoms'][0];
+  // Entity Translation workaround when the fix https://drupal.org/node/2027513
+  // is not corporated in a stable release.
+  if (isset($form_state['scald']['atoms'][0])) {
+    $form_state['atom'] = $form_state['scald']['atoms'][0];
+  }
 
   if (empty($form_state['scald'])) {
     $form_state['scald'] = array(
@@ -253,6 +257,15 @@ function scald_atom_add_form_options($form, &$form_state) {
       '#suffix' => '</div>',
       '#parents' => array('atom' . $delta),
     );
+    if (count($atoms) > 1) {
+      $title = 'atom' . $delta .' : '. $atom->title;
+      $form['atom' . $delta] += array(
+        '#title' => $title,
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
+      );
+    }
     $form['atom' . $delta]['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Title'),
@@ -279,7 +292,7 @@ function scald_atom_add_form_options($form, &$form_state) {
     }
     $form['atom' . $delta]['scald_actions'] = array(
       '#type' => 'checkboxes',
-      '#title' => 'Openly available actions',
+      '#title' => t('Openly available actions'),
       '#group' => 'additional_settings',
       '#options' => $options,
       '#default_value' => $options_default,
@@ -324,17 +337,18 @@ function scald_atom_add_form_options_submit(&$form, &$form_state) {
   }
 
   // Add a message confirming the creation.
+  $type = scald_type_property_translate(scald_type_load($atoms[0]->type));
   if (count($atoms) == 1) {
     drupal_set_message(t('Atom %title, of type %type has been @op.', array(
       '%title' => $atoms[0]->title,
-      '%type' => $atoms[0]->type,
+      '%type' => $type,
       '@op' => $op,
     )));
   }
   else {
     drupal_set_message(t('%count atoms of type %type have been @op.', array(
       '%count' => count($atoms),
-      '%type' => $atoms[0]->type,
+      '%type' => $type,
       '@op' => $op,
     )));
   }
@@ -394,7 +408,7 @@ function scald_atom_delete_confirm($form, &$form_state, $atom) {
   return confirm_form($form,
     t('Are you sure you want to delete %title?', array('%title' => $atom->title)),
     'admin/content/atoms',
-    t('<p>Note that unchecking the Fetch checkbox in the "<em>Openly available actions</em>" field of this atom <a href="!url">edit form</a> makes the atom disapears for everyone but scald administrators, and is usally a better idea.</p><p>This action cannot be undone.</p>', array('!url' => url("atom/{$atom->sid}/edit"))),
+    t('<p>Note that unchecking the Fetch checkbox in the "<em>Openly available actions</em>" field of this atom <a href="!url">edit form</a> makes the atom disappear for everyone but Scald administrators, and is usually a better idea.</p><p>This action cannot be undone.</p>', array('!url' => url("atom/{$atom->sid}/edit"))),
     t('Delete'),
     t('Cancel')
   );
@@ -408,8 +422,9 @@ function scald_atom_delete_confirm_submit($form, &$form_state) {
     $atom = scald_atom_load($form_state['values']['sid']);
     scald_atom_delete($atom->sid);
     watchdog('scald_atom', '@type: deleted %title.', array('@type' => $atom->type, '%title' => $atom->title));
-    $types = scald_type_get_names();
-    drupal_set_message(t('@type %title has been deleted.', array('@type' => $types[$atom->type], '%title' => $atom->title)));
+    $types = scald_types();
+    $type = scald_type_property_translate($types[$atom->type]);
+    drupal_set_message(t('@type %title has been deleted.', array('@type' => $type, '%title' => $atom->title)));
   }
 
   $form_state['redirect'] = 'admin/content/atoms';
@@ -436,7 +451,6 @@ function scald_atom_fetch_atoms($sids) {
       'meta' => array(
         'title' => $atom->title,
         'type' => $atom->type,
-        'legend' => '',
       ),
       'actions' => array_keys(scald_atom_actions_available($atom)),
     );

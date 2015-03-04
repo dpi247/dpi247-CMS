@@ -3,12 +3,22 @@ description = "DPI Blocks containing all blocks and content types CTools created
 name = "DPI blocks"
 package = DPI
 
+dependencies[] = dpicache
 dependencies[] = entity
 dependencies[] = ctools
 dependencies[] = page_manager
 dependencies[] = panels
+dependencies[] = scald
+dependencies[] = scald_image
 
 files[] = entity_controller/remotehtml.controller.class.inc
 files[] = entity_class/remotehtml.entity.class.inc
 files[] = entity_controller/custom_content.controller.class.inc
 files[] = entity_class/custom_content.entity.class.inc
+files[] = entity_controller/flowmix.controller.class.inc
+files[] = entity_class/flowmix.entity.class.inc
+files[] = includes/views/dpiblocks.views.inc
+files[] = includes/views/accroche_teaser_plugin_style.inc
+files[] = includes/views/dpiblocks_plugin_row_node_accroche.inc
+files[] = entity_controller/accroche.controller.class.inc
+files[] = entity_class/accroche.entity.class.inc

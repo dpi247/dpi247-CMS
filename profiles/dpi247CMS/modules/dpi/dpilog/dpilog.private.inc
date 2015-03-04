@@ -64,13 +64,16 @@ function _dpilog_log($log_name, $action, $message, $variables = array(), $id = N
   $dpilog_method = $registrations[$log_name][$action]['dpilog'];
   $watchdog_method = $registrations[$log_name][$action]['watchdog'];
 
-  // DPI Log
-  if($dpilog_method == "save") {
-    $dpilog_structure = _dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid, $id, $variables, $keep_backtrace);
-    //_dpilog_delayed_save($dpilog_structure,'dpilog');
-    drupal_write_record('dpilog_logs', $dpilog_structure);
+  $dpilog_structure = _dpilog_format_dpilog_structure($log_name, $action, $message, $severity, $uid, $id, $variables, $keep_backtrace);
+  switch ($dpilog_method){
+    case 'save':        
+        //_dpilog_delayed_save($dpilog_structure,'dpilog');
+        drupal_write_record('dpilog_logs', $dpilog_structure);
+      break;
+    case 'dsm':
+        dsm($dpilog_structure, 'Dpilog message');
+      break;
   }
-
   // DPI Watchdog
   switch ($watchdog_method) {
     case 'save_debug':
@@ -147,6 +150,7 @@ function _dpilog_get_dpilogs_actions(){
   return array(
     'ignore' => t("Ignore"),
     'save'   => t("Save"),
+    'dsm'    => t("Dsm"),
   );
 }
 

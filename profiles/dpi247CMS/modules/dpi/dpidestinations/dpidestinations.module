@@ -5,78 +5,8 @@ module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
 module_load_include('inc', 'dpidestinations','dpidestinations.fields');
 module_load_include('inc', 'dpidestinations','dpidestinations.entity');
-
-
-/**
- * Implementation of hook_theme()
-*/
-function dpidestinations_theme() {
-
-  $theme['dpidestinations_add_content_modal'] = array(
-    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL, 'group' => NULL, 'categories'=> array(), 'column_count' => 2),
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'template' => 'dpidestinations-add-content-modal',
-  );
-  $theme['dpidestinations_page_targetview_reorder_form'] = array(
-    'template' => 'dpidestinations-targetview-page-reorder-form',
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'render element' => 'form',
-  );
-  $theme['dpidestinations_ipe_pane_wrapper'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('output' => NULL, 'pane' => NULL, 'display' => NULL, 'renderer' => NULL),
-  );
-  $theme['dpidestinations_ipe_region_wrapper'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('output' => NULL, 'region_id' => NULL, 'display' => NULL, 'controls' => NULL, 'renderer' => NULL),
-  );
-  $theme['dpidestinations_ipe_add_pane_button'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('region_id' => NULL, 'display' => NULL, 'renderer' => NULL),
-  );
-  $theme['dpidestinations_ipe_placeholder_pane'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('region_id' => NULL, 'region_title' => NULL),
-  );
-  $theme['dpidestinations_ipe_dnd_form_container'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('link' => NULL, 'cache_key' => NULL, 'display' => NULL),
-  );
-  $theme['dpidestinations_ipe_toolbar'] = array(
-    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
-    'file' => 'theme.inc',
-    'variables' => array('buttons' => NULL),
-  );
-  return $theme;
-}
-
-
-/**
- * Implementation of hook_footer()
- *
- * Adds the IPE control container.
- *
- * @param unknown_type $main
- */
-function dpidestinations_page_alter(&$page) {
-  $buttons = &drupal_static('dpidestinations_ipe_toolbar_buttons', array());
-  if (empty($buttons)) {
-    return;
-  }
-
-  $output = theme('dpidestinations_ipe_toolbar', array('buttons' => $buttons));
-
-  $page['page_bottom']['dpidestinations_ipe'] = array(
-    '#markup' =>$output,
-  );
-}
+module_load_include('inc', 'dpidestinations','dpidestinations.rules');
+module_load_include('inc', 'dpidestinations','dpidestinations.formatters');
 
 /**
  * Implementation of hook_menu()
@@ -137,7 +67,8 @@ function dpidestinations_menu() {
   }
 
   $items['admin/dpi247/dpidestinations'] = array(
-    'title' => 'DPIDestinations',
+    'title' => 'DPI Destinations',
+    'description' => 'Manage sections terms, targets, target blocks and destinations related settings',
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_destinations',
     'file' => 'dpidestinations.pages.admin.inc',
@@ -150,20 +81,150 @@ function dpidestinations_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  
+  $items['admin/dpi247/dpidestinations/define_default_target'] = array(
+    'title' => t('Define default targetblock'),
+    'description' => 'Configure dpidestinations.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_page_admin_default_targetblock',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
 
   $items['admin/dpi247/dpidestinations/configuration'] = array(
     'title' => t('Configuration'),
     'description' => 'Configure dpidestinations.',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 10,
+    'weight' => 11,
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_configuration',
     'file' => 'dpidestinations.pages.admin.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
+  
+  $items['admin/content/reorder_targetblock'] = array(
+    'title' => t('Reorder'),
+    'description' => 'Reorder targetblock rank.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_get_reorder_form',
+    'file' => 'dpidestinations.pages.admin-reorder.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
+  $items['admin/content/reorder_targetblock/%taxonomy_term/%dpidestinations_api_target_machinename'] = array(
+    'title' => t('Reorder'),
+    'description' => 'Reorder targetblock rank.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'dpidestinations_get_reorder_form',
+    'page arguments' => array(3,4),    
+    'file' => 'dpidestinations.pages.admin-reorder.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
+  $items['section/%section'] = array(
+    'title' => 'Section term',
+    'title callback' => 'taxonomy_term_title',
+    'title arguments' => array(1),
+    'page callback' => 'toto',
+    'page arguments' => array(1),
+    'access arguments' => TRUE,
+   
+  );
 
   return $items;
 }
+function toto($r){
+  return 'coou';
+}
+
+
+/**
+ * Implementation of hook_theme()
+*/
+function dpidestinations_theme() {
+  $theme['dpidestinations_add_content_modal'] = array(
+    'variables' => array('renderer' => NULL, 'groups' => array(), 'region' => NULL, 'category' => NULL, 'group' => NULL, 'categories'=> array(), 'column_count' => 2),
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'template' => 'dpidestinations-add-content-modal',
+  );
+  $theme['dpidestinations_page_targetview_reorder_form'] = array(
+    'template' => 'dpidestinations-targetview-page-reorder-form',
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'render element' => 'form',
+  );
+  $theme['dpidestinations_ipe_pane_wrapper'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('output' => NULL, 'pane' => NULL, 'display' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_region_wrapper'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('output' => NULL, 'region_id' => NULL, 'display' => NULL, 'controls' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_add_pane_button'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('region_id' => NULL, 'display' => NULL, 'renderer' => NULL),
+  );
+  $theme['dpidestinations_ipe_placeholder_pane'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('region_id' => NULL, 'region_title' => NULL),
+  );
+  $theme['dpidestinations_ipe_dnd_form_container'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('link' => NULL, 'cache_key' => NULL, 'display' => NULL),
+  );
+  $theme['dpidestinations_ipe_toolbar'] = array(
+    'path' => drupal_get_path('module', 'dpidestinations') . '/templates',
+    'file' => 'theme.inc',
+    'variables' => array('buttons' => NULL),
+  );
+  
+  $theme['destinations_form_table'] =array (
+    'render element' => 'form',
+    'file' => 'dpidestinations.pages.admin.inc',
+    'path' => drupal_get_path ( 'module', 'dpidestinations' ) . '/includes' 
+  );
+  
+  return $theme;
+}
+
+
+/**
+ * Implementation of hook_footer()
+ *
+ * Adds the IPE control container.
+ *
+ * @param unknown_type $main
+ */
+function dpidestinations_page_alter(&$page) {
+  $buttons = &drupal_static('dpidestinations_ipe_toolbar_buttons', array());
+  if (empty($buttons)) {
+    return;
+  }
+
+  $output = theme('dpidestinations_ipe_toolbar', array('buttons' => $buttons));
+
+  $page['page_bottom']['dpidestinations_ipe'] = array(
+    '#markup' =>$output,
+  );
+}
+
+
+
+
+
 
 function dpidestinations_menu_alter(&$items) {
   // dpidestinations can be used as standalone module outside the distribution
@@ -182,6 +243,63 @@ function dpidestinations_menu_alter(&$items) {
 }
 
 /**
+ * Implementation of hook_node_insert
+ *
+ * @param object $node
+ */
+function dpidestinations_node_update($node) {  
+  if(function_exists("rules_invoke_event")){
+  
+  if (in_array($node->type, dpidestinations_api_get_node_type_with_destination_field())) {
+    rules_invoke_event('dpidestinations_rules_event_package_edit', $node);
+  }
+  }
+}
+
+/**
+ * Implementation of hook_node_create
+ *
+ * @param object $node
+ */
+function dpidestinations_node_insert($node) {
+  if(function_exists("rules_invoke_event")){
+  
+  if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
+    rules_invoke_event('dpidestinations_rules_event_package_create', $node);
+  }
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
+ */
+function dpidestinations_node_presave($node) {
+  if(function_exists("rules_invoke_event")){
+  
+  if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
+    rules_invoke_event('dpidestinations_rules_event_package_create_or_edit', $node);
+  }
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
+ */
+function dpidestinations_node_delete($node) {
+  if(function_exists("rules_invoke_event")){
+  
+  if (in_array($node->type, array_flip(dpidestinations_api_get_node_type_with_destination_field()))) {
+    rules_invoke_event('dpidestinations_rules_event_package_deleted', $node);
+  }
+  }
+}
+
+
+/*
  * Implementation of hook_permission()
  */
 function dpidestinations_permission(){
@@ -190,12 +308,18 @@ function dpidestinations_permission(){
       'title' => t('Administer targets'),
       'restrict access' => TRUE,
     ),
+    'view section'=>array(
+      'title' => t('View section pages'),
 
+    ),
     'view targets' => array(
       'title' => t('View targets'),
     ),
     'create targets' => array(
       'title' => t('Create targets'),
+    ),
+    'reorder target' => array(
+      'title' => t('Reorder targetblock'),
     ),
   );
 }
@@ -215,6 +339,8 @@ function dpidestinations_form_page_manager_handler_add_alter(&$form, $form_state
  * Implementation of hook_panels_display_save()
  */
 function dpidestinations_panels_display_save($display){
+  
+  
   //STEP 1: First delete all targetblock that doesn't exist anymore.
   $targetController = new TargetBlockController('targetblock');
   $existing_targetblocks = $targetController->load_targetblocks_by_panels_display($display->did);
@@ -264,7 +390,7 @@ function dpidestinations_panels_display_save($display){
 }
 
 function dpidestinations_default_panels_renderer_pipeline() {
-  
+
   $pipelines = array();
   $pipeline = new stdClass;
   $pipeline->disabled = FALSE; /* Edit this to true to make a default pipeline disabled initially */
@@ -293,7 +419,7 @@ function dpidestinations_default_panels_renderer_pipeline() {
         'options' => array(),
       ),
     ),
-    
+
   );
   $pipelines[$pipeline->name] = $pipeline;
 
@@ -357,6 +483,19 @@ function sectionterm_load($section_tid){
 
 function dpidestinations_page_section_view($destination){
   return t('You need to activate the page manager');
+}
+
+
+
+/**
+ * Implementation of hook_views_plugins
+ */
+function dpidestinations_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
+    //'template path' => drupal_get_path('module', 'example') . '/themes',
+  );
 }
 
 /**
@@ -428,13 +567,43 @@ function dpidestinations_views_plugins() {
      'type' => 'normal',
      )
      )
-    */
+     */
   );
 }
 
-function dpidestinations_views_api() {
-  return array('api' => 2
+/*
+ * Implementation of hook_contextual_links_view_alter
+ */
+
+/*
+We dont need this naymore since the targetblock contextual link are now working ...
+This should be removed soon
+function dpidestinations_contextual_links_view_alter(&$element, $items){
+  
+  //make sure we override contextual links for a view
+  if(isset($element['#element']["#views_contextual_links_info"]["views_ui"])){
+    //make sure we override contextual links for a target view
+    if(isset($element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_tid)){
+      $tid=$element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_tid;
+      $target=$element['#element']["#views_contextual_links_info"]["views_ui"]["view"]->targetview_target;
+      
+      $element['#links']['dpidestinations-reorder']= array(
+      'title' => t('Reorder the target'),
+      'href' => 'admin/targetview_reorder/'.$tid.'/'.$target,
+    );
+    }
+  }
+}
+*/
+
+/*
+ * Implementation of hook_admin_paths_alter
+*/
+function dpidestinations_admin_paths() {
+  $paths = array(
+    'admin/targetview_reorder/*/*' => TRUE,
   );
+  return $paths;
 }
 
 /**
@@ -463,10 +632,9 @@ function dpidestinations_preprocess_views_view_field(&$vars) {
 }
 
 function dpidestinations_preprocess_node(&$vars) {
-  //Remove this suggestion... useless
+  //Remove this suggestion... useless  
   unset($vars['theme_hook_suggestions']['node__'.$vars['node']->nid]);
-
-  if (isset($vars['elements']['#entity_type'])) {
+  /*if (isset($vars['elements']['#entity_type'])) {
     $entity_type = $vars['elements']['#entity_type'];
     if (isset($vars[$entity_type])) {
       $entity = $vars[$entity_type];
@@ -480,30 +648,7 @@ function dpidestinations_preprocess_node(&$vars) {
         }
       }
     }
-  }
-
-  // The 'view' attribute of the node is added in views_preprocess_node()
-
-
-  /*
-   * Still Need to provide some overiding patterns
-  if (!empty($vars['node']->view) && !empty($vars['node']->view->display_handler->plugin_name) && $vars['node']->view->display_handler->plugin_name=="targetview") {
-  dsm(($vars['node']->view));
-  $vars['view'] = $vars['node']->view;
-
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name;
-  if (!empty($vars['node']->view->current_display)) {
-  $vars['theme_hook_suggestions'][] = 'node__view__' . $vars['node']->view->name . '__' . $vars['node']->view->current_display;
-
-  // If a node is being rendered in a view, and the view does not have a path,
-  // prevent drupal from accidentally setting the $page variable:
-  if ($vars['page'] && $vars['view_mode'] == 'full' && !$vars['view']->display_handler->has_path()) {
-  $vars['page'] = FALSE;
-  }
-  }
-  }
-  */
-
+  }*/
 }
 
 function dpidestinations_dpicache_cache_entry_register() {
@@ -511,7 +656,8 @@ function dpidestinations_dpicache_cache_entry_register() {
     'dpidestinations_targetblock_render' => array(
       'callback' => '_dpidestinations_targetblock_content_type_render_process', // function to call
       'plugin' => 'dpicache_memcache', // which storage?
-      'catagory' => 'dpidestinations', // group
+      'category' => 'dpidestinations', // group
+      'category_callback' => 'dpidestinations_dpicache_category_callback', 
       'data_type' => "object", // the callback returns a string
       'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
       'refresh_interval' => 60*400, // no need to refresh since hook_nodeapi will do it for us
@@ -520,7 +666,62 @@ function dpidestinations_dpicache_cache_entry_register() {
         "type" => "inc",
         "name" => "plugins/ctools/content_types/targetblock/targetblock",
       ),
-      'bypass' => TRUE,
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
     )
   );
 }
+
+function dpidestinations_dpicache_category_callback($cachedefinition = '', $arguments = array()){  
+  $retour = "dpidestinations";
+  if(is_array($arguments) && (isset($arguments[0])  && is_numeric($arguments[0])) && (isset($arguments[1])) && is_numeric($arguments[1])
+        && isset($arguments[2])){
+    $retour = $arguments[0].'_'.$arguments[1].'_'.$arguments[2];
+  }
+  return $retour;
+}
+
+
+
+function dpidestinations_token_info() {
+  $info['tokens']['node']['maindestid'] = array(
+    'name' => t('Main destination Id'),
+    'description' => t('Return the main destination about node'),
+  );
+  $info['tokens']['node']['pageType'] = array(
+    'name' => t('Page type information'),
+    'description' => t('Return the type about the node page info'),
+  );
+  return $info;
+}
+
+function dpidestinations_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'node') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'maindestid':
+            $name = '';
+            if(isset($data['node'])){
+              $info = current(field_get_items('node', $data['node'], 'field_destinations'));
+              $name = $info["tid"];
+            }
+            $replacements[$original] = $name;
+          break;
+        case 'pageType':
+            $name = '';
+            if(isset($data['node'])){
+              $name = $data['node']->type;
+            }
+            $replacements[$original] = $name;
+          break;
+      }
+    }
+  }
+  return $replacements;
+}
+
+
+
+
+
+

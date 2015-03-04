@@ -37,14 +37,21 @@ require_once 'includes/scald.atom.inc';
  *    ...
  *  );
  *
+ * @param bool $reset
+ *   Whether or not to reset the static cache. Defaults to FALSE.
+ *
  * @return array
  *   The Scald Unified Types array
  */
-function scald_types() {
-  $types = db_select('scald_types', 's')
-    ->fields('s', array('type', 'title', 'provider'))
-    ->execute()
-    ->fetchAllAssoc('type');
+function scald_types($reset = FALSE) {
+  $types = &drupal_static(__FUNCTION__);
+
+  if ($reset || empty($types)) {
+    $types = db_select('scald_types', 's')
+      ->fields('s', array('type', 'title', 'description', 'provider'))
+      ->execute()
+      ->fetchAllAssoc('type');
+  }
 
   return $types;
 }
@@ -67,110 +74,21 @@ function scald_type_get_names() {
 /**
  * Add a Scald unified type.
  *
- * This function create a new type if it does not already exist.
- * It can be used inside atom providers hook_install(), to easily
- * ensure that the type of the atom the module will provide is
- * defined.
- *
- * @return bool
- *   TRUE if the new type was added, FALSE if already exists.
+ * @deprecated
+ * @see ScaldAtomController::addType()
  */
 function scald_add_type($type, $title, $description) {
-  // Check if this type already exists.
-  $types = scald_types();
-  if (!empty($types[$type])) {
-    return FALSE;
-  }
-
-  // Create a new type.
-  db_insert('scald_types')
-    ->fields(array('type', 'title', 'description', 'provider'))
-    ->values(array($type, $title, $description, 'scald'))
-    ->execute();
-
-  // And add fields on it, starting with the Scald Thumbnail field.
-  $instance = array(
-    'field_name' => 'scald_thumbnail',
-    'entity_type' => 'scald_atom',
-    'bundle' => $type,
-    'label' => 'Thumbnail',
-    'required' => FALSE,
-    'display' => array(
-      'default' => array(
-        'type' => 'hidden',
-      ),
-    ),
-    'settings' => array(
-      'file_directory' => 'thumbnails/' . $type,
-    ),
-  );
-  if (!field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle'])) {
-    field_create_instance($instance);
-    $instance = field_info_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']);
-    foreach ($instance['display'] as $view_mode => $settings) {
-      $instance['display'][$view_mode]['type'] = 'hidden';
-    }
-    field_update_instance($instance);
-  }
-
-  // Instantiate the Scald Authors field.
-  $instance = array(
-    'field_name' => 'scald_authors',
-    'entity_type' => 'scald_atom',
-    'bundle' => $type,
-    'label' => 'Authors',
-    'required' => FALSE,
-    'widget' => array(
-      'type' => 'taxonomy_autocomplete',
-    ),
-  );
-  if (!field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle'])) {
-    field_create_instance($instance);
-  }
-
-  // Instantiate the Scald Tags field.
-  $instance = array(
-    'field_name' => 'scald_tags',
-    'entity_type' => 'scald_atom',
-    'bundle' => $type,
-    'label' => 'Tags',
-    'required' => FALSE,
-    'widget' => array(
-      'type' => 'taxonomy_autocomplete',
-    ),
-  );
-  if (!field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle'])) {
-    field_create_instance($instance);
-  }
-
-  // Flush our caches.
-  scald_contexts(TRUE);
-
-  return TRUE;
+  return ScaldAtomController::addType($type, $title, $description);
 }
 
 /**
  * Remove a Scald unified type.
  *
- * This function removes a type. It can be used inside atom providers
- * hook_uninstall(), to easily ensure that the type of the atom the module
- * provides is removed if no other use it.
- *
- * @param string $type
- *   Machine name of atom type.
- *
- * @return bool
- *   TRUE if the type was removed, FALSE otherwise.
+ * @deprecated
+ * @see ScaldAtomController::removeType()
  */
 function scald_remove_type($type) {
-  if (!array_key_exists($type, scald_atom_providers())) {
-    db_delete('scald_types')
-      ->condition('type', $type)
-      ->execute();
-    return TRUE;
-  }
-
-  return FALSE;
+  return ScaldAtomController::removeType($type);
 }
 
 /**
@@ -363,7 +281,18 @@ function scald_atom_providers($reset = FALSE) {
  * Get the info from all modules on a specific scald item type.
  */
 function _scald_get_info($type, $reset = FALSE) {
-  $info = cache_get($type, 'cache_scald');
+  $data = &drupal_static(__FUNCTION__);
+  if (!isset($data)) {
+    $data = array();
+  }
+
+  if (!$reset && isset($data[$type])) {
+    return $data[$type];
+  }
+
+  global $language;
+  $key = 'info:' . $language->language . ':' . $type;
+  $info = cache_get($key, 'cache_scald');
   if ($reset || empty($info)) {
     $info = array();
     $hook = 'scald_' . $type;
@@ -375,11 +304,12 @@ function _scald_get_info($type, $reset = FALSE) {
       $info = array_merge($info, $list);
     }
     drupal_alter($hook, $info);
-    cache_set($type, $info, 'cache_scald');
+    cache_set($key, $info, 'cache_scald');
   }
   else {
     $info = $info->data;
   }
+  $data[$type] = $info;
   return $info;
 }
 
@@ -387,16 +317,23 @@ function _scald_get_info($type, $reset = FALSE) {
  * Get the defaults options for a specific Atom type.
  */
 function scald_atom_defaults($type) {
+  $defaults = &drupal_static(__FUNCTION__);
+  if (!isset($defaults)) {
+    $defaults = array();
+  }
+
+  if (isset($defaults[$type])) {
+    return $defaults[$type];
+  }
+
   $all = variable_get('scald_atom_defaults', array());
   if (isset($all[$type])) {
     $default = $all[$type];
   }
   else {
-    $types = scald_types();
     $actions = scald_actions();
     $default = new stdClass();
     $default->actions = $actions['view']['bitmask'] + $actions['fetch']['bitmask'];
-    $default->upload_type = 'managed_file';
     $default->description = '';
 
     $thumbnail = in_array($type, array('image', 'audio', 'video')) ? $type . '.png' : 'thumbnail_default.png';
@@ -410,7 +347,20 @@ function scald_atom_defaults($type) {
       file_unmanaged_copy(drupal_get_path('module', 'scald') . '/assets/' . $thumbnail, $default->thumbnail_source);
     }
   }
-  return $default;
+
+  // In old versions, this option did not exist and results in a PHP notice
+  // when the default is not update. Fix it.
+  if (!isset($default->upload_type)) {
+    $default->upload_type = 'managed_file';
+  }
+
+  // If plupload upload type is in use but the module is no longer enabled, do
+  // not die silently.
+  if ($default->upload_type == 'plupload' && !function_exists('plupload_element_info')) {
+    $default->upload_type = 'managed_file';
+  }
+
+  return $defaults[$type] = $default;
 }
 
 
@@ -436,140 +386,26 @@ function scald_atom_load($sid) {
 /**
  * Load multiple Scald atoms.
  *
- * @todo This function needs to be optimized;
+ * @param array $sids
+ *   An array of Scald ID's being loaded
+ *
+ * @return mixed
+ *   An array of populated Scald Atom objects keyed by the sid. Value might be
+ *   FALSE if SID is invalid or if $user is not permitted to fetch the Scald
+ *   Atom
  */
 function scald_atom_load_multiple($sids) {
-  $atoms = array();
-  foreach ($sids as $sid) {
-    $atoms[$sid] = scald_fetch($sid);
-  }
+  $atoms = scald_fetch_multiple($sids);
   return $atoms;
 }
 
 /**
  * Save changes to a Scald Atom, or create a new one.
  *
- * @param ScaldAtom $atom
- *   At minimum, 'type', 'provider', and 'base_id' (which uniquely identifies a
- *   given Atom) are required.  Additional included values which are keyed by
- *   recognized Scald Atom Object members will be used for those members and
- *   any additional values will be passed along to the Providers.
- *
- * @return mixed
- *   The Scald ID upon successful save
- *   FALSE upon failure
+ * @see ScaldAtomController::save()
  */
 function scald_atom_save(&$atom) {
-  // First pass Atom object validation.
-  $types = scald_types();
-
-  // Verify type.
-  if (empty($atom->type) || empty($atom->provider) || empty($types[$atom->type])) {
-    return FALSE;
-  }
-
-  // Ensure the Atom Object has all the required members.
-  if (!isset($atom->publisher)) {
-    $atom->publisher = NULL;
-  }
-  if (!isset($atom->actions)) {
-    $atom->actions = NULL;
-  }
-  if (!isset($atom->title)) {
-    $atom->title = '';
-  }
-  if (!isset($atom->data)) {
-    $atom->data = array();
-  }
-
-  $op = empty($atom->sid) ? 'insert' : 'update';
-
-  if ($op == 'update') {
-    $hook = 'scald_update_atom';
-    $atom->original = entity_load_unchanged('scald_atom', $atom->sid);
-  }
-  else {
-    $hook = 'scald_register_atom';
-  }
-
-  // The Type Provider can implement some other defaults at this point, but
-  // the Atom Provider may override them.
-  module_invoke($types[$atom->type]->provider, $hook, $atom, 'type');
-
-  // Hand the Atom off to the Atom Provider to do additional processing and
-  // population.
-  // NOTE: Providers explicitly have access to change the Atom's basic members
-  // to allow for hypothetical "dispatch Providers" which would determine the
-  // appropriate Provider and/or characteristics of an Atom upon registration.
-  module_invoke($atom->provider, $hook, $atom, 'atom');
-
-  // Another round of member validation is necessary due to the potential for
-  // the Providers to modify them.  By design!
-  if (empty($atom->type) || empty($atom->provider) || empty($types[$atom->type])) {
-    return FALSE;
-  }
-
-  // Only supply defaults for the Actions bitstring if the Provider did nothing.
-  // Otherwise assume that the bitstring is intentional.
-  if (is_null($atom->actions)) {
-    $defaults = scald_atom_defaults($atom->type);
-    $atom->actions = $defaults->actions;
-  }
-
-  // Do "poor-man's" UID validation.
-  if (empty($atom->publisher) || !is_numeric($atom->publisher) || !($atom->publisher > 0)) {
-    global $user;
-    $atom->publisher = $user->uid;
-  }
-
-  // Let Field API have a pass at our atom too.
-  field_attach_presave('scald_atom', $atom);
-
-  // Inform all modules before writing the atom in the database.
-  module_invoke_all('scald_atom_presave', $atom);
-  module_invoke_all('entity_presave', $atom, 'scald_atom');
-
-  // Put the basic data in the Scald Atom Registry.
-  if ($op == 'update') {
-    $written = drupal_write_record('scald_atoms', $atom, array('sid'));
-  }
-  else {
-    $written = drupal_write_record('scald_atoms', $atom);
-  }
-
-  if (!$written) {
-    return FALSE;
-  }
-
-  $function = 'field_attach_' . $op;
-  $function('scald_atom', $atom);
-
-  // Notify all modules of our new atom.
-  module_invoke_all('scald_atom_' . $op, $atom);
-  module_invoke_all('entity_' . $op, $atom, 'scald_atom');
-
-  // Transcoding
-  // Only fire hook_register_atom() for Transcoder Providers that might be
-  // responsible for transcoding this Atom (based on the currently-configured
-  // Context and Transcoder settings).
-  $contexts = scald_contexts();
-  $transcoders = scald_transcoders();
-
-  foreach ($contexts as $context => $details) {
-    if (isset($details['type_format'][$atom->type])) {
-      $transcoder = $details['type_format'][$atom->type]['transcoder'];
-      $values['@ccontext'] = $context;
-      module_invoke($transcoders[$transcoder]['provider'], $hook, $atom, 'transcoder');
-    }
-  }
-
-  // Clear the render cache.
-  cache_clear_all($atom->sid . ':', 'cache_scald', TRUE);
-
-  // Clear the static caches.
-  entity_get_controller('scald_atom')->resetCache(array($atom->sid));
-
-  return $atom->sid;
+  return ScaldAtomController::save($atom) ? $atom->sid : FALSE;
 }
 
 /**
@@ -677,17 +513,14 @@ function scald_unregister_atom($sid) {
 }
 
 /**
- * Determine if a Scald Atom is registered with Scald Core or not.
+ * Load a Scald Atom.
  *
  * @param int $sid
- *   The Scald ID being tested.
+ *   The Scald Atom ID.
  *
  * @return mixed
- *   - A Scald Atom Object if the Scald ID is valid.  The Atom Object is *ONLY*
- *   populated with the following members: type, provider, base_id, actions,
- *   and fetched *set to FALSE*.
- *   - FALSE if $sid is not a valid Scald ID (int) or if it does not reference
- *   an Atom.
+ *   - A Scald Atom entity if the Scald ID is valid.
+ *   - FALSE if the atom can not be loaded.
  */
 function scald_is_registered($sid, $rebuild = FALSE) {
   // Argument validation.
@@ -695,36 +528,8 @@ function scald_is_registered($sid, $rebuild = FALSE) {
     return FALSE;
   }
   $sid = (int) $sid;
-
-  static $scald_atoms;
-  if (!isset($scald_atoms)) {
-    $scald_atoms = array();
-  }
-
-  // Reference the memory cache when appropriate.
-  if (!$rebuild && isset($scald_atoms[$sid])) {
-    return $scald_atoms[$sid];
-  }
-
-  // Build the Atom from the database.
-  $registration_results = db_query("SELECT * FROM {scald_atoms} WHERE sid = :sid", array(':sid' => $sid));
-  if (!$registration_results) {
-    // Ensure that no Atoms linger improperly post-deletion.
-    unset($scald_atoms[$sid]);
-    return FALSE;
-  }
-  $atom = $registration_results->fetchObject();
-
-  if (!empty($atom)) {
-    $atom->fetched = FALSE;
-  }
-  else {
-    return FALSE;
-  }
-
-  $scald_atoms[$sid] = $atom;
-
-  return $scald_atoms[$sid];
+  $atoms = entity_load('scald_atom', array($sid), array(), $rebuild);
+  return reset($atoms);
 }
 
 /**
@@ -742,68 +547,78 @@ function scald_is_registered($sid, $rebuild = FALSE) {
  *   Atom
  */
 function scald_fetch($sid, $rebuild = FALSE) {
+  $atoms = scald_fetch_multiple(array($sid), $rebuild);
+  return $atoms[$sid];
+}
+
+/**
+ * Load multiple Scald Atoms.
+ *
+ * @param array $sids
+ *   An array of Scald IDs of the Atoms to load.
+ * @param bool $rebuild
+ *   If set to TRUE, the Atoms will be reloaded from the DB even if it is
+ *    already present in the memory cache.
+ *
+ * @return mixed
+ *   An array of populated Scald Atom objects keyed by the sid. Value might be
+ *   FALSE if SID is invalid or if $user is not permitted to fetch the Scald
+ *   Atom
+ */
+function scald_fetch_multiple(array $sids, $rebuild = FALSE) {
   // Verify the SID is legit and fetch basic info about the Atom.
-  $atoms = entity_load('scald_atom', array($sid), array(), $rebuild);
+  $atoms = entity_load('scald_atom', $sids, array(), $rebuild);
   if (!$atoms) {
     return FALSE;
   }
 
-  $atom = reset($atoms);
-
-  // Verify that the current user is allowed to fetch this Atom.
-  if (!scald_action_permitted($atom, array('fetch', 'view'))) {
-    return FALSE;
-  }
-
-  // Check the memory cache for the Atom.
-  static $scald_atoms;
-  if (empty($scald_atoms)) {
-    $scald_atoms = array();
-  }
-
-  if (!$rebuild && isset($scald_atoms[$sid])) {
-    return $scald_atoms[$sid];
-  }
-
   $types = scald_types();
 
-  // If the type or atom provider is no longer available, ignore the atom. It
-  // cannot be loaded nor deleted.
-  if (!isset($types[$atom->type]) || !module_exists($atom->provider)) {
-    return FALSE;
+  foreach ($atoms as $sid => $atom) {
+    // Verify that the current user is allowed to fetch this Atom.
+    // If the type or atom provider is no longer available, ignore the atom. It
+    // cannot be loaded nor deleted.
+    if (!scald_action_permitted($atom, array('fetch', 'view')) ||!isset($types[$atom->type]) || !module_exists($atom->provider)) {
+      $atoms[$sid] = FALSE;
+    }
+    else {
+      // Check the memory cache for the Atom.
+      static $scald_atoms = array();
+
+      if (!$rebuild && isset($scald_atoms[$sid])) {
+        $atoms[$sid] = $scald_atoms[$sid];
+      }
+      else {
+        // Let the Atom Type Provider handle type-global values.
+        module_invoke($types[$atom->type]->provider, 'scald_fetch', $atom, 'type');
+
+        // Let the Atom Provider handle atom-specific values.
+        module_invoke($atom->provider, 'scald_fetch', $atom, 'atom');
+
+        // Ensure all required Atom members are set.
+        $defaults = scald_atom_defaults($atom->type);
+        $properties = array(
+          'file_source',
+          'thumbnail_source',
+          'description',
+          'base_entity',
+        );
+        foreach ($properties as $property) {
+          if (empty($atom->{$property})) {
+            $atom->{$property} = isset($defaults->{$property}) ? $defaults->{$property} : NULL;
+          }
+        }
+
+        // Mark the atom as fetched.
+        $atom->fetched = TRUE;
+
+        // Populate both static cache and return value with this atom.
+        $scald_atoms[$sid] = $atoms[$sid] = $atom;
+      }
+    }
   }
 
-  // Let the Atom Type Provider handle any defaults.
-  module_invoke($types[$atom->type]->provider, 'scald_fetch', $atom, 'type');
-
-  $atom->base_entity = NULL;
-
-  module_invoke($atom->provider, 'scald_fetch', $atom, 'atom');
-
-  // If the Providers tried to mess with "protected" Atom object members, fail!
-  if ($sid != $atom->sid) {
-    return FALSE;
-  }
-
-  // Ensure all required Atom members are populated with at minimum default
-  // values.
-  // NOTE: it is assumed that Atom Providers won't be monkeying with the
-  // "essentials" like the Type, Provider, SID, etc.
-  $defaults = scald_atom_defaults($atom->type);
-  if (empty($atom->file_source) && isset($defaults->file_source)) {
-    $atom->file_source = isset($defaults->file_source) ? $defaults->file_source : '';
-  }
-  if (empty($atom->thumbnail_source)) {
-    $atom->thumbnail_source = isset($defaults->thumbnail_source) ? $defaults->thumbnail_source : '';
-  }
-  if (empty($atom->description)) {
-    $atom->description = isset($defaults->description) ? $defaults->description : '';
-  }
-
-  $atom->fetched = TRUE;
-  $scald_atoms[$sid] = $atom;
-
-  return $atom;
+  return $atoms;
 }
 
 /**
@@ -1392,8 +1207,8 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
 
   // SID doesn't correspond to a registered Atom; drop through to render the
   // "Invalid ID" message.
-  if (empty($atom_reg)) {
-    return scald_scald_render($atom_reg, 'invalid-id');
+  if (empty($atom)) {
+    return scald_scald_render($atom, 'invalid-id');
   }
 
   // Drop through to no-access rendering if current user can't view.
@@ -1429,7 +1244,7 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
     if (!empty($cache)) {
       $data = $cache->data;
       $atom->rendered = $data['rendered'];
-      return $data['content'];
+      return is_array($data['content']) ? drupal_render($data['content']) : $data['content'];
     }
   }
 
@@ -1456,21 +1271,29 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
   scald_prerender($atom, $context, $options);
 
   // Context Provider does the final rendering.
-  $rendered = module_invoke($contexts[$context]['provider'], 'scald_render', $atom, $context, $options);
+  $content = module_invoke($contexts[$context]['provider'], 'scald_render', $atom, $context, $options);
 
   // The Context exists but rendering is failing hard for some reason.  Output
   // still needs to be ensured, however.  Also note that an empty string is
   // valid output.  However, hook_scald_render() should return FALSE upon
   // failure and module_invoke() will return NULL if the function does not
   // exist.
-  if ($rendered === FALSE || is_null($rendered)) {
+  if ($content === FALSE || is_null($content)) {
     return scald_render($atom, _scald_context_fallback($atom->type, $context), $options, $rebuild);
   }
 
+  if (!is_array($content)) {
+    $content = array('#markup' => $content);
+  }
   // For so-called "parsable" Contexts, ensure a standard format for the
   // enclosing comments.
   if ($contexts[$context]['parseable']) {
-    $rendered = '<!-- scald=' . $atom->sid . ':' . $context . ($options ? ' ' . drupal_json_encode($options) : '') . ' -->' . $rendered . '<!-- END scald=' . $atom->sid . ' -->';
+    $content += array(
+      '#prefix' => '',
+      '#suffix' => '',
+    );
+    $content['#prefix'] = '<!-- scald=' . $atom->sid . ':' . $context . ($options ? ' ' . drupal_json_encode($options) : '') . ' -->' . $content['#prefix'];
+    $content['#suffix'] .= '<!-- END scald=' . $atom->sid . ' -->';
   }
 
   // Only cache the Atom if Contexts, etc. have not indicated that the rendering
@@ -1481,13 +1304,12 @@ function scald_render($sid, $context, $options = array(), $rebuild = FALSE) {
     // responsibility of the Atom Provider as it has the best idea when the base
     // entity is changing.
     $data = array(
-      'content' => $rendered,
+      'content' => $content,
       'rendered' => $atom->rendered,
     );
     cache_set($cache_id, $data, 'cache_scald', CACHE_PERMANENT);
   }
-
-  return $rendered;
+  return drupal_render($content);
 }
 
 /**
@@ -1704,15 +1526,15 @@ function scald_scald_render($atom, $context, $options = array()) {
       break;
 
     case 'no-access':
-      $output = theme('scald_render_error', array('context' => $context, 'message' => t('You do not have access to view this Atom.')));
+      $output = theme('scald_render_error', array('context' => $context, 'message' => t('You do not have access to view this Atom.'), 'atom' => $atom));
       break;
 
     case 'invalid-id':
-      $output = theme('scald_render_error', array('context' => $context, 'message' => t('Invalid Scald ID.')));
+      $output = theme('scald_render_error', array('context' => $context, 'message' => t('Invalid Scald ID.'), 'atom' => $atom));
       break;
 
     case 'deleted':
-      $output = theme('scald_render_error', array('context' => $context, 'message' => t('Atom deleted!')));
+      $output = theme('scald_render_error', array('context' => $context, 'message' => t('Atom deleted!'), 'atom' => $atom));
       break;
 
     default:
@@ -1720,8 +1542,7 @@ function scald_scald_render($atom, $context, $options = array()) {
       // render.
       $system = _scald_system_contexts();
       if ($context == 'full' || empty($system[$context])) {
-        $content = scald_atom_view($atom, $context);
-        $output = drupal_render($content);
+        $output = scald_atom_view($atom, $context);
       }
       // Else, returns the title as we don't know what to render.
       else {
@@ -1780,9 +1601,13 @@ function scald_entity_info() {
       'bundles' => array(),
       'view modes' => array(),
       'view callback' => 'scald_render_multiple',
+      'creation callback' => 'entity_metadata_create_object',
+      'deletion callback' => 'scald_atom_delete',
+      'save callback' => 'scald_atom_save',
       'translation' => array(
         'entity_translation' => array(
           'base path' => 'atom/%scald_atom',
+          'edit path' => 'atom/%scald_atom/edit/%ctools_js',
           'edit form' => 'atom',
         ),
       ),
@@ -1890,6 +1715,20 @@ function scald_entity_property_info() {
     'setter permission' => 'administer scald atoms',
     'required' => TRUE,
     'schema field' => 'publisher',
+  );
+  $properties['created'] = array(
+    'label' => t('Created'),
+    'description' => t("The Unix timestamp when the atom was created."),
+    'setter callback' => 'entity_property_verbatim_set',
+    'required' => TRUE,
+    'schema field' => 'created',
+  );
+  $properties['changed'] = array(
+    'label' => t('Changed'),
+    'description' => t("The Unix timestamp when the atom was most recently saved."),
+    'setter callback' => 'entity_property_verbatim_set',
+    'required' => TRUE,
+    'schema field' => 'changed',
   );
   return $info;
 }
@@ -2211,6 +2050,113 @@ function scald_menu() {
 }
 
 /**
+ * Implements hook_locale().
+ */
+function scald_locale($op = 'groups') {
+  switch ($op) {
+    case 'groups':
+      return array('scald' => t('Scald'));
+  }
+}
+
+/**
+ * Implements hook_i18n_string_info().
+ */
+function scald_18n_string_info() {
+  $groups['scald_type'] = array(
+    'title' => t('Scald atom type'),
+    'description' => t('The title and description of the different atom types supported by Scald.'),
+    'format' => FALSE,
+    'list' => TRUE,
+  );
+
+  return $groups;
+}
+
+/**
+ * Implements hook_i18n_object_info().
+ */
+function scald_i18n_object_info() {
+  $info['scald_type'] = array(
+    'title' => t('Scald atom type'),
+    'key' => 'type',
+    'placeholders' => array(
+      '%scald_type' => 'type',
+    ),
+    'edit path' => 'admin/structure/scald/%scald_type',
+    'translate tab' => 'admin/structure/scald/%scald_type/translate',
+    'list callback' => 'scald_types',
+    'string translation' => array(
+      'textgroup' => 'scald',
+      'type' => 'type',
+      'properties' => array(
+        'title' => t('Title'),
+        'description' => t('Description'),
+      ),
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Returns a translated property of a Scald atom type.
+ *
+ * @param object $type
+ *   The Scald atom type for which to return a translated property.
+ * @param string $property
+ *   Either 'title' or 'description'. Defaults to 'title'.
+ * @param string $langcode
+ *   Optional language code for the translation. Defaults to the current
+ *   language.
+ *
+ * @return string
+ *   The translated property.
+ */
+function scald_type_property_translate($type, $property = 'title', $langcode = NULL) {
+  $name = array('scald', 'type', $type->type, $property);
+  $string = $type->$property;
+  $options = $langcode ? array('langcode' => $langcode) : array();
+
+  return scald_string_translate($name, $string, $options);
+}
+
+/**
+ * Translates a dynamic string.
+ *
+ * This uses dynamic string translation from Internationalization module if
+ * available. Falls back to basic translation support if it is not.
+ *
+ * @param array|string $name
+ *   Array or string concatenated with ':' that contains textgroup and string
+ *   context.
+ * @param string $string
+ *   The string to translate.
+ * @param array $options
+ *   An associative array of options as used by i18n_string_translate().
+ *
+ * @return string
+ *   The translated string, or if i18n_string is not enabled, the input string.
+ *
+ * @see i18n_string_translate()
+ */
+function scald_string_translate($name, $string, $options = array()) {
+  if (module_exists('i18n_string')) {
+    // Do not sanitize, to have parity with the untranslated string which should
+    // also be sanitized by the calling function.
+    $options['sanitize'] = FALSE;
+    $string = i18n_string_translate($name, $string, $options);
+  }
+  else {
+    // If i18n_string is not enabled, fall back to t() to translate the string.
+    // @see https://www.drupal.org/node/2291875
+    $options = array_intersect_key($options, array_flip(array('langcode')));
+    $string = t($string, array(), $options);
+  }
+  return $string;
+}
+
+/**
  * Scald Atom entity uri callback.
  */
 function scald_atom_uri($atom) {
@@ -2234,7 +2180,7 @@ function scald_type_load($type) {
  * Title callback for the atom type administration page.
  */
 function scald_type_name($type) {
-  return $type->title;
+  return scald_type_property_translate($type);
 }
 
 /**
@@ -2286,6 +2232,9 @@ function scald_context_config_load($name) {
     }
     if (!isset($context_config->player[$type->type]['*'])) {
       $context_config->player[$type->type]['*'] = 'default';
+    }
+    if(!isset($context_config->data)) {
+      $context_config->data = array();
     }
   }
 
@@ -2353,7 +2302,7 @@ function scald_atom_add_access($type = NULL) {
 function scald_theme($existing, $type, $theme, $path) {
   return array(
     'scald_render_error' => array(
-      'arguments' => array('type' => NULL, 'message' => NULL),
+      'arguments' => array('type' => NULL, 'message' => NULL, 'atom' => NULL),
     ),
   );
 }
@@ -2489,13 +2438,10 @@ function scald_atom_user_build_actions_links($atom, $query = NULL) {
 
 /**
  * Prepares and returns the default thumbnail path for an atom type.
+ *
+ * @deprecated
+ * @see ScaldAtomController::getThumbnailPath()
  */
 function scald_atom_thumbnail_path($type) {
-  $field = field_info_field('scald_thumbnail');
-  $instance = field_info_instance('scald_atom', 'scald_thumbnail', $type);
-  $directory = file_field_widget_uri($field, $instance);
-  if (file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
-    return $directory;
-  }
+  return ScaldAtomController::getThumbnailPath($type);
 }
-

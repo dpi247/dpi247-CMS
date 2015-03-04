@@ -171,7 +171,8 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
 
     //@todo: should get the $field_to_analyse from the settings of the dpiatomreference filed
     $field_to_analyse = 'field_textbody';
-    $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $entity->language);
+    $language = isset($entity->language) ? $entity->language : NULL;
+    $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $language);
     foreach($field_to_analyse_items as $field_to_analyse_item) {
       if (isset($field_to_analyse_item['mee']['resource_manager']) && is_array($field_to_analyse_item['mee']['resource_manager'])) {
         foreach($field_to_analyse_item['mee']['resource_manager'] as $sid => $mee) {
@@ -204,18 +205,33 @@ function dpicontenttypes_field_is_empty($item, $field) {
  * Implements hook_field_formatter_info().
  */
 function dpicontenttypes_field_formatter_info() {
+  module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
   // Expose all the Scald Contexts as formatters for the Atom Reference field.
   $formatters = array();
-  $contexts = scald_contexts();
-  foreach ($contexts as $name => $context) {
-    if (empty($context['hidden'])) {
-      $formatters[$name] = array(
-        'label' => $context['title'],
-        'field types' => array('dpiatom_reference')
-      );
-    }
-  }
+  
+  $formatters['first_element'] = array(
+    'label' => t('Premier élément'),
+    'field types' => array('dpiatom_reference'),
+    'settings'  => array( 
+      'context' => 'full', 
+    ),
+  );
+  
+  $formatters['media_box'] = array(
+    'label' => t('Média box'),
+    'field types' => array('dpiatom_reference'),
+    'settings'  => array(
+      'type_number' => 'all',
+      'value_number' => '1',
+      'context' => 'full',
+    ),
+  );
 
+  foreach(dpicontenttypes_get_scald_types() as $type){
+    $formatters['first_element']['settings']['type_'.$type] = FALSE;
+    $formatters['media_box']['settings']['type_'.$type] = FALSE;
+  }
+  
   $formatters['simple_html_tag_formatter'] = array( // Machine name of the formatter
     'label' => t('Simple HTML Tag'),
     'field types' => array('text', 'text_long'), // This will only be available to fields of these types
@@ -238,7 +254,6 @@ function dpicontenttypes_field_formatter_prepare_view($entity_type, $entities, $
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       dpicontenttypes_field_formatter_prepare_view_simple_html_tag_formatter($entity_type, $entities, $field, $instances, $langcode, $items, $displays);
       break;
-
     default:
       break;
   }
@@ -254,19 +269,18 @@ function dpicontenttypes_field_formatter_view($entity_type, $entity, $field, $in
     case 'text_long':
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       $element = dpicontenttypes_field_formatter_view_simple_html_tag_formatter($entity_type, $entity, $field, $instance, $langcode, $items, $display);
-      break;
-
+      break;  
     case 'dpiatom_reference':
       $render_context = $display['type'];
       $contexts = scald_contexts();
+      $settings = $display['settings'];
       $element = array();
 
-      if (!empty($contexts[$render_context])) {
+      if (!empty($contexts[$settings['context']])) {
         module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
         $element = dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entity, $field, $instance, $langcode, $items, $display, $render_context);
       }
       break;
-
     default:
       break;
   }
@@ -284,7 +298,10 @@ function dpicontenttypes_field_formatter_settings_form($field, $instance, $view_
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       return dpicontenttypes_field_formatter_settings_form_simple_html_tag_formatter($field, $instance, $view_mode, $form, $form_state);
       break;
-
+    case 'dpiatom_reference':
+       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+       return dpicontenttypes_field_formatter_settings_form_first_element_formatter($field, $instance, $view_mode, $form, $form_state);
+      break;
     default:
       return array();
       break;
@@ -301,7 +318,10 @@ function dpicontenttypes_field_formatter_settings_summary($field, $instance, $vi
       module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
       return dpicontenttypes_field_formatter_settings_summary_simple_html_tag_formatter($field, $instance, $view_mode);
       break;
-
+    case 'dpiatom_reference':
+      module_load_include('inc', 'dpicontenttypes', 'includes/dpicontenttypes.formatters');
+      return dpicontenttypes_field_formatter_settings_summary_first_element_formatter($field, $instance, $view_mode);
+      break;
     default:
       return '';
       break;

@@ -1,47 +1,4 @@
-<?php 
-
-/**
- * Define a cache entry type.
- *
- * If an cache entry type is not defined,
- * it will be impossible to use the functionnalities
- * of the dpicache module, like the hot and cold
- * cache refreshing processes.
- *
- * @return array
- *   An array of arrays defining the cache entries.
- *     - callback : the function to call to refresh the cache entry
- *     - plugin : the kind of storage
- *     - category : a group classification
- *     - data_type : the type of datas to be cached
- *     - ttl : validity time (in seconds) for a cache entry
- *     - refresh_interval : the time (in seconds) between two cold refreshes for a cache entry
- *     - bypass : for development purpose, allows to always bypass the cache
- *     - file : an array defining a file to include
- *       - module : module to which the file belongs
- *       - type : extension of the file
- *       - name : path of the file, relative to the module directory, without the extension
- */
-function hook_dpicache_cache_entry_register() {
-  return array(
-    'flowmix_render' => array(
-      'callback' => 'flowmix_get_render', // function to call
-      'plugin' => 'dpicache_memcache', // which storage?
-      'catagory' => 'flowmix_render', // group
-      'data_type' => "string", // the callback returns a string
-      'ttl' => 7*24*60*60, // (in seconds) keep a cache for one week
-      'refresh_interval' => 5*60 //(in seconds) auto-refresh cache every 5 minutes
-    ),
-    // file key if your callback is not auto loaded (not in .module)
-    //'file'=>array(
-    //  "module"=>"dpidestinations",
-    //  "type"=>"inc",
-    //  "name"=>"plugins/ctools/content_types/targetblock/targetblock"
-    //),
-    // use bypass to bypass cache for debugging purpose.
-    //'bypass'=>TRUE,
-  );
-}
+<?php
 
 /**
  * Get cache content throught DPIcache system.
@@ -51,63 +8,80 @@ function hook_dpicache_cache_entry_register() {
  * @return void               Your cache content, or FALSE.
  */
 function dpicache_get_cache_entry($cache_name) {
-  $cache_definition = dpicache_get_cache_entry_definition($cache_name);
-  if(!$cache_definition) {
-    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array("!cache_name" => $cache_name)), array(), '', WATCHDOG_ERROR);
+  $cache_definition = dpicache_get_cache_entry_definition ( $cache_name );
+  if (! $cache_definition) {
+    dpi_log ( 'dpicache', "error", t ( "dpicache_get_cache_entry : !cache_name is not a registred DPIcache", array (
+      "!cache_name" => $cache_name 
+    ) ), array (), '', WATCHDOG_ERROR );
     return FALSE;
   }
-
+  
   // Get arguments for callback
-  $parameters = func_get_args();
-  array_shift($parameters);
+  $parameters = func_get_args ();
+  array_shift ( $parameters );
+  
   // Get hash
-  $hash = _dpicache_get_hash($cache_name, $parameters);
-  if(!$hash) {
-    dpi_log('dpicache', "error", t("dpicache_get_cache_entry : Unable to generate hash for !cache_name",array("!cache_name"=>$cache_name)),array(),'',WATCHDOG_ERROR);
+  $hash = _dpicache_get_hash ( $cache_name, $parameters );
+  if (! $hash) {
+    dpi_log ( 'dpicache', "error", t ( "dpicache_get_cache_entry : Unable to generate hash for !cache_name", array (
+      "!cache_name" => $cache_name 
+    ) ), array (), '', WATCHDOG_ERROR );
     return FALSE;
   }
-
+  
   // fetch cache from ad hoc storage
-  if(($content = dpicache_fetch_cache($cache_name, $hash)) && (!isset($cache_definition['bypass']) || $cache_definition['bypass'] !== TRUE)) {
+  if (($content = dpicache_fetch_cache ( $cache_name, $hash )) && (! isset ( $cache_definition ['bypass'] ) || $cache_definition ['bypass'] !== TRUE) && ! dpi_variable_get ( 'dpicache_disable_dpicache_utilisation', FALSE )) {
     // cache available
-    dpi_log('dpicache', "cache_hit", t("Cache hit : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
+    dpi_log ( 'dpicache', "cache_hit", t ( "Cache hit : name = !cache_name, hash = !hash", array (
+      "!cache_name" => $cache_name,
+      "!hash" => $hash 
+    ) ), array (), $hash, WATCHDOG_DEBUG );
     return $content;
-  }
-  else {
+  } else {
     // no cache available
-    dpi_log('dpicache', "cache_miss", t("Cache miss : name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_NOTICE);
-
+    dpi_log ( 'dpicache', "cache_miss", t ( "Cache miss : name = !cache_name, hash = !hash", array (
+      "!cache_name" => $cache_name,
+      "!hash" => $hash 
+    ) ), array (), $hash, WATCHDOG_NOTICE );
+    
     // Get fresh content
-    $fresh_content = _dpicache_cache_call_function($cache_definition, $parameters);
-    if(is_string($fresh_content) && strpos($fresh_content, '#ERROR#')){
+    $fresh_content = _dpicache_cache_call_function ( $cache_definition, $parameters );
+    if (is_string ( $fresh_content ) && strpos ( $fresh_content, '#ERROR#' )) {
       return FALSE;
     }
-
+    
     try {
-      $parameters_array = serialize($parameters);
-    } catch (Exception $e) {
+      $parameters_array = serialize ( $parameters );
+    } catch ( Exception $e ) {
       // Unable to keep parameters for future use
-      dpi_log('dpicache', "error", t("dpicache_get_cache_entry : Unable to serialize parameters for name = !cache_name and hash = !hash",array("!cache_name"=>$cache_name,'!hash'=>$hash)),array(),'',WATCHDOG_ERROR);
+      dpi_log ( 'dpicache', "error", t ( "dpicache_get_cache_entry : Unable to serialize parameters for name = !cache_name and hash = !hash", array (
+        "!cache_name" => $cache_name,
+        '!hash' => $hash 
+      ) ), array (), '', WATCHDOG_ERROR );
       return $fresh_content;
     }
-
+    
     // Save content into adhoc cache
-    $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-    dpi_log('dpicache', "regenerate_hot", t("Cache (re)generated for name = !cache_name, hash = !hash",array("!cache_name"=>$cache_name,"!hash"=>$hash)),array(),$hash,WATCHDOG_DEBUG);
-
+    $saved = dpicache_save_cache ( $cache_name, $hash, $fresh_content, $cache_definition );
+    dpi_log ( 'dpicache', "regenerate_hot", t ( "Cache (re)generated for name = !cache_name, hash = !hash", array (
+      "!cache_name" => $cache_name,
+      "!hash" => $hash 
+    ) ), array (), $hash, WATCHDOG_DEBUG );
+    
+    $arg_callback = dpicache_get_arguments_values ( $cache_definition, $parameters );
     // Add or update cache entry data
-    $entry_information = array(
+    $entry_information = array (
       "name" => $cache_name,
       "hash" => $hash,
-      "category" => @$cache_definition["category"],
-      "data_type" => @$cache_definition["data_type"] ?: "string",
-      "creation_date" => time(),
-      "expiration_date" => intval(time() + $cache_definition["ttl"]),
-      "last_run" => time(),
-      "update_freq" => $cache_definition["refresh_interval"],
-      "parameters" => $parameters_array
+      "category" => $arg_callback ["category"],
+      "data_type" => @$cache_definition ["data_type"] ?  : "string",
+      "creation_date" => time (),
+      "expiration_date" => intval ( time () + $arg_callback ["expiration_date"] ),
+      "last_run" => time (),
+      "update_freq" => $arg_callback ['update_freq'],
+      "parameters" => $parameters_array 
     );
-    dpicache_save_cache_entry($entry_information, false);
+    dpicache_save_cache_entry ( $entry_information, false );
     return $fresh_content;
   }
 }
@@ -116,15 +90,24 @@ function dpicache_get_cache_entry($cache_name) {
  * Get the url to invalidate a cache entry
  * The url is returned without begin or trailling slash
  *
- * @param  String $cache_name Cache name
- * @return String  tur url to call
+ * @param String $cache_name
+ *          Cache name
+ * @return String tur url to call
  */
-function dpicache_get_regenerate_url($cache_name){
-  $args=func_get_args();
-  unset($args[0]);
-  $args_url=implode('/', $args);
-
-  $url='dpicache/regenerate/one_cache_entry/'.$cache_name.'/'.$args_url;
+function dpicache_get_regenerate_url($cache_name) {
+  $args = func_get_args ();
+  unset ( $args [0] );
+  foreach ( $args as $key => $value ) {
+    if ($value == NULL) {
+      $args [$key] = DPICACHE_NULL_URL_PARAMETER;
+    }
+    if ($value == "") {
+      $args [$key] = DPICACHE_EMPTYSTRING_URL_PARAMETER;
+    }
+  }
+  $args_url = implode ( '/', $args );
+  
+  $url = 'dpicache/regenerate/one_cache_entry/' . $cache_name . '/' . $args_url;
   return $url;
 }
 
@@ -135,47 +118,46 @@ function dpicache_get_regenerate_url($cache_name){
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  *
- * @param $name
- *   The name of the variable to return.
- * @param $default
- *   The default value to use if this variable has never been set.
- * @return
- *   The value of the variable.
- *
- * @see  dpi_variable_del(), dpi_variable_set(), dpi_variable_get_all()
+ * @param $name The
+ *          name of the variable to return.
+ * @param $default The
+ *          default value to use if this variable has never been set.
+ * @return The value of the variable.
+ *        
+ * @see dpi_variable_del(), dpi_variable_set(), dpi_variable_get_all()
  */
 function dpi_variable_get($name, $default, $regenerate = FALSE) {
-  $dpivariables = &drupal_static(__FUNCTION__);
-
-  if (!isset($dpivariables[$name]) || $regenerate) {
-    $result=db_query('SELECT value FROM {dpi_variables} WHERE name = :name', array(':name'=>$name));
-    if($variable = $result->fetchAssoc()) {
-      $dpivariables[$name] =  unserialize($variable['value']);
-    }
-    else{
+  $dpivariables = &drupal_static ( __FUNCTION__ );
+  
+  if (! isset ( $dpivariables [$name] ) || $regenerate) {
+    $result = db_query ( 'SELECT value FROM {dpi_variables} WHERE name = :name', array (
+      ':name' => $name 
+    ) );
+    if ($variable = $result->fetchAssoc ()) {
+      $dpivariables [$name] = unserialize ( $variable ['value'] );
+    } else {
       return $default;
     }
   }
-  return $dpivariables[$name];
+  return $dpivariables [$name];
 }
 
 /**
  * Returns all persistents variables.
  *
- * @return
- *   The value of the variables.
- *
+ * @return The value of the variables.
+ *        
  * @see dpi_variable_set()
  */
 function dpi_variable_get_all() {
-  $dpivariables = &drupal_static("dpivariables");
-
-  $result = db_query('SELECT * FROM {dpi_variables}');
-  while($variable = db_fetch_array($result)) {
-    $dpivariables[$name] = unserialize($variable['value']);
-  }
-
-  return  $dpivariables;
+  $dpivariables = &drupal_static ( 'dpivariables' );
+  $result = db_select ( 'dpi_variables', 'd' )->fields ( 'd', array (
+    'name',
+    'value' 
+  ) )->execute ();
+  foreach ( $result as $row )
+    $dpivariables [$row->name] = unserialize ( $row->value );
+  return $dpivariables;
 }
 
 /**
@@ -185,28 +167,27 @@ function dpi_variable_get_all() {
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  *
- * @param $name
- *   The name of the variable to set.
- * @param $value
- *   The value to set. This can be any PHP data type; these functions take care
- *   of serialization as necessary.
- *
+ * @param $name The
+ *          name of the variable to set.
+ * @param $value The
+ *          value to set. This can be any PHP data type; these functions take care
+ *          of serialization as necessary.
+ *          
  * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
  */
 function dpi_variable_set($name, $value) {
-  $dpivariables = &drupal_static("dpivariables");
-
-  $dpivariables[$name]=$value;
-
-  $serialized_value = serialize($value);
-
-  db_merge('dpi_variables')
-    ->key(array('name' => $name))
-    ->fields(array(
-      'name' => $name,
-      'value' => $serialized_value,
-    ))
-    ->execute();
+  $dpivariables = &drupal_static ( 'dpivariables' );
+  
+  $dpivariables [$name] = $value;
+  
+  $serialized_value = serialize ( $value );
+  
+  db_merge ( 'dpi_variables' )->key ( array (
+    'name' => $name 
+  ) )->fields ( array (
+    'name' => $name,
+    'value' => $serialized_value 
+  ) )->execute ();
 }
 
 /**
@@ -216,44 +197,78 @@ function dpi_variable_set($name, $value) {
  * collation used. To avoid problems, always use lower case for persistent
  * variable names.
  *
- * @param $name
- *   The name of the variable to undefine.
- *
+ * @param $name The
+ *          name of the variable to undefine.
+ *          
  * @see dpi_variable_del(), dpi_variable_get(), dpi_variable_get_all()
  */
 function dpi_variable_del($name) {
-  db_delete('dpi_variables')
-  ->condition('name', $name)
-  ->execute();
-  drupal_static_reset($name);
+  db_delete ( 'dpi_variables' )->condition ( 'name', $name )->execute ();
+  drupal_static_reset ( 'dpivariables' );
+}
+
+/**
+ * Unsets persistent variables starting with a given namespace
+ *
+ * Case-sensitivity of the dpi_variable_* functions depends on the database
+ * collation used. To avoid problems, always use lower case for persistent
+ * variable names.
+ *
+ * @param $name The
+ *          name of the variable to undefine.
+ * @param $type Type
+ *          of variables to delete, "system" (classic variable_set variables),
+ *          "dpi" (dpi_variable_set variables) or "both".
+ *          
+ * @see dpi_variable_get(), dpi_variable_set(), dpi_variable_del()
+ */
+function dpi_variable_del_namespace($namespace, $type = 'both') {
+  if ($type == 'system' || $type == 'both') {
+    global $conf;
+    
+    $db_vars = db_select ( 'variable', 'v' )->fields ( 'v', array (
+      'name' 
+    ) )->condition ( 'v.name', $namespace . '%', 'LIKE' )->execute ();
+    foreach ( $db_vars as $db_var ) {
+      unset ( $conf [$db_var->name] );
+    }
+    db_delete ( 'variable' )->condition ( 'name', $namespace . '%', 'LIKE' )->execute ();
+    
+    cache_clear_all ( 'variables', 'cache_bootstrap' );
+  }
+  
+  if ($type == 'dpi' || $type == 'both') {
+    db_delete ( 'dpi_variables' )->condition ( 'name', $namespace . '%', 'LIKE' )->execute ();
+    drupal_static_reset ( 'dpivariables' );
+  }
 }
 
 /**
  * Sets up a form to save information automatically
  * into dpi_variable structure.
  *
- * @param $form
- * An associative array containing the structure of the form.
- *
- * @return
- * The form structure.
- *
+ * @param $form An
+ *          associative array containing the structure of the form.
+ *          
+ * @return The form structure.
+ *        
  * @see system_settings_form()
  *
  */
-function dpi_system_settings_form($form){
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
+function dpi_system_settings_form($form) {
+  system_settings_form ( $form );
+  $form ['actions'] ['#type'] = 'actions';
+  $form ['actions'] ['submit'] = array (
     '#type' => 'submit',
-    '#value' => t('Save configuration'),
+    '#value' => t ( 'Save configuration' ) 
   );
-  if (!empty($_POST) && form_get_errors()) {
-    drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
+  if (! empty ( $_POST ) && form_get_errors ()) {
+    drupal_set_message ( t ( 'The settings have not been saved because of the errors.' ), 'error' );
   }
-  $form['#submit'][] = 'dpi_system_settings_form_submit';
+  $form ['#submit'] [] = 'dpi_system_settings_form_submit';
   // By default, render the form using theme_system_settings_form().
-  if (!isset($form['#theme'])) {
-    $form['#theme'] = 'system_settings_form';
+  if (! isset ( $form ['#theme'] )) {
+    $form ['#theme'] = 'system_settings_form';
   }
   return $form;
 }
@@ -265,12 +280,191 @@ function dpi_system_settings_form($form){
  */
 function dpi_system_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
-  form_state_values_clean($form_state);
-  foreach ($form_state['values'] as $key => $value) {
-    if (is_array($value) && isset($form_state['values']['array_filter'])) {
-      $value = array_keys(array_filter($value));
+  form_state_values_clean ( $form_state );
+  foreach ( $form_state ['values'] as $key => $value ) {
+    if (is_array ( $value ) && isset ( $form_state ['values'] ['array_filter'] )) {
+      $value = array_keys ( array_filter ( $value ) );
     }
-    dpi_variable_set($key, $value);
+    dpi_variable_set ( $key, $value );
   }
-  drupal_set_message(t('The configuration options have been saved.'));
+  drupal_set_message ( t ( 'The configuration options have been saved.' ) );
+}
+
+/**
+ * Regenerate one caches that need to be regenerated based on the cache's name
+ *
+ * @param String $cache_name          
+ */
+function dpicache_api_regenerate_one_cache_entry_callback($cache_name) {
+  $args = func_get_args ();
+  foreach ( $args as $key => $value ) {
+    if ($value == DPICACHE_NULL_URL_PARAMETER) {
+      $args [$key] = NULL;
+    }
+    if ($value == DPICACHE_EMPTYSTRING_URL_PARAMETER) {
+      $args [$key] = "";
+    }
+  }  
+  unset ( $args [0] );
+  array_pop($args);
+  
+  $hash = _dpicache_get_hash ( $cache_name, $args );
+  try {
+    $cid = $cache_name.'_'.$hash;
+    cache_clear_all($cid, 'cache_dpicache');
+    dpi_log ( 'dpicache', "manual_regeneration_of_cache_entry", t ( "Manual cache regeneration: @cache_name success", array (
+      '@cache_name' => $cid,
+    ) ), array (), $hash, WATCHDOG_INFO );
+  } catch (Exception $e) {
+    dpi_log ( 'dpicache', "manual_regeneration_of_cache_entry", t ( "Manual cache regeneration: @cache_name fail", array (
+      '@cache_name' => $cid,
+    ) ), array (), $hash, WATCHDOG_ERROR );
+  }  
+  
+  /*
+  $cache_definition = dpicache_get_cache_entry_definition ( $cache_name );
+  if ($cache_definition != FALSE) {
+    $fresh_content = _dpicache_cache_call_function ( $cache_definition, $args );
+    $saved = dpicache_save_cache ( $cache_name, $hash, $fresh_content, $cache_definition );
+    drupal_set_message ( t ( "Manual cache regeneration success: @cache_name (@args)", array (
+      '@cache_name' => $cache_name,
+      '@args' => implode ( ',', $args ) 
+    ) ) );
+  } else {
+    drupal_set_message ( t ( "Manual cache regeneration failed: @cache_name (@args) : No cache", array (
+      '@cache_name' => $cache_name,
+      '@args' => implode ( ',', $args ) 
+    ) ), 'error' );
+  }*/
+  drupal_goto ();
+}
+
+/**
+ * Regenerate caches that need to be regenerated based on cachetype and category
+ *
+ * @param String $time
+ *          cache name
+ * @param String $categoroy
+ *          the category of cache
+ */
+function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category = NULL) {
+  $query = db_select ( 'dpicache_cache_entries', 'dce' );
+  $query->fields ( 'dce', array (
+    'name',
+    'hash',
+    'data_type',
+    'creation_date',
+    'parameters' 
+  ) );
+  $query->condition ( 'dce.name', $cache_type );
+  
+  if ($category != NULL) {
+    $query->condition ( 'dce.category', $category );
+  }
+  /**
+   * @todo problem avec le cache régénérate donc on a courcircuité le tout pour venir supprimer le
+   * cache manuellement ainsi que sont entrée de cache (entrée de cache pour éviter une régénération inutile
+   * ou bien une entrée sans cache derrière).
+   * 
+   * Pour remettre à la normal retirer tout le code du dessous et décommenter la fonction au dessus.
+   */
+  //dpicache_regenerate_cache_entries_process ( $query );
+  
+  /* suppression des caches concernés */
+  foreach($query->execute() as $entry){
+    try {
+      $cid = $entry->name.'_'.$entry->hash;
+      cache_clear_all($cid, 'cache_dpicache');
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_INFO );
+    } catch (Exception $e) {
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_CRITICAL );
+    }
+  }
+}
+
+/**
+ * This function invalidate cache for varnish
+ *
+ * @param unknown $pattern          
+ */
+function dpicache_api_varnish_purge_pattern($pattern) {
+  $host = $_SERVER ['SERVER_NAME'].':8080';
+  varnish_purge ( $host, $pattern );
+}
+
+/**
+ * This function invalidate cache for all varnish
+ */
+function dpicache_api_varnish_purge_all_page() {
+  varnish_purge_all_pages ();
+}
+
+/**
+ * This function controle accumulation for refresh content
+ *
+ * @param taxonomy_term $tid          
+ * @param dpidestinations $category          
+ */
+function dpicache_api_manage_regeneration_all_cache_entry($tid, $category) {
+  global $accumul;
+  if (!isset($accumul)){
+    $accumul = array ();
+    register_shutdown_function('dpicache_api_shutdown_function');
+  }
+  
+  if (dpi_variable_get ( 'dpicache_disable_dpicache_accumulation', FALSE )) {
+    dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );
+    foreach ( dpicommons_api_get_all_path_alias_for_taxonomy ( $tid ) as $url_alias ) {
+      if (! in_array ( '/' . $url_alias, $accumul ))
+        $accumul [] = '/' . $url_alias;
+    }    
+  } else {
+    dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );
+    foreach ( dpicommons_api_get_all_path_alias_for_taxonomy ( $tid ) as $url_alias ) {
+      dpicache_api_varnish_purge_pattern ( '/'.$url_alias );
+    }
+  }
+}
+
+/**
+ * This function controle accumulation for clean varnish
+ * 
+ * @param node $node
+ */
+function dpicache_api_manage_varnish_clear_cache_for_node($node) {
+  if (dpi_variable_get ( 'dpicache_disable_dpicache_accumulation', FALSE )) {
+    global $accumul;
+    if (!isset($accumul)){
+      $accumul = array ();
+      register_shutdown_function('dpicache_api_shutdown_function');
+    }
+    $urls = dpicommons_api_get_all_path_alias_for_node ( $node );
+    if(is_array($urls)){
+      foreach ($urls  as $url_alias ) {
+        $accumul [] = '/' . $url_alias;
+      } 
+    }    
+  } else {
+    foreach ( dpicommons_api_get_all_path_alias_for_node ( $node ) as $url_alias ) {
+      dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
+    }
+  }  
+}
+
+/**
+ * This function is call in shutdown to invalidate all cache present to the variable
+ */
+function dpicache_api_shutdown_function(){
+  global $accumul;
+  if(!empty($accumul)){
+    if(is_array($accumul)){
+      foreach($accumul as $url){
+        dpicache_api_varnish_purge_pattern (  $url );        
+      }
+    }
+  }
 }

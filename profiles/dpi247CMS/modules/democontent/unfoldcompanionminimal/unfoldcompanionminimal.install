@@ -6,6 +6,6 @@
  * Set the Scald modal window dimensions
  */
 function unfoldcompanionminimal_install() {
-  variable_set('dnd_modal_width', 1500);
+  variable_set('dnd_modal_width', 1000);
   variable_set('dnd_modal_height', 800);
 }

@@ -7,11 +7,24 @@ module_load_include('inc', 'dpicontenttypes','dpicontenttypes.private');
 module_load_include('inc', 'dpicontenttypes','dpicontenttypes.effects');
 include_once 'dpicontenttypes.features.inc';
 
+
+
+
+
 /**
  * Implementation of hook_menu()
  */
 function dpicontenttypes_menu(){
   $items = array();
+
+  $items['admin/dpi247/external-files'] = array(
+    'title' => 'DPI content types : External files management',
+    'description' => 'This concerns files fetched from external services, like RSS feeds',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicontenttypes_form_page_external_files_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/dpicontenttypes.pages.admin.inc',
+  );
 
   $dpiproperties_uri = 'dpiproperties/%dpiproperties';
   $dpiproperties_uri_argument_position = 1;
@@ -43,7 +56,7 @@ function dpicontenttypes_menu(){
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
 
-  $items['admin/structure/dpiproperties-types/%dpiproperties_type/delete'] = array(
+  $items['admin/dpi247/dpiproperties-types/%dpiproperties_type/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpiproperties_type_form_delete_confirm', 4),
@@ -51,17 +64,6 @@ function dpicontenttypes_menu(){
     'weight' => 1,
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dpicontenttypes.entity.inc',
-  );
-
-  $items['node/%node/dpiproperties'] = array(
-    'title' => 'DPIProperties',
-    'page callback' => 'dpicontenttypes_entity_properties',
-    'page arguments' => array('node', 1),
-    'access arguments' => array('view dpiproperties'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'dpicontenttypes.pages.inc',
-    'file path' => drupal_get_path('module', 'dpicontenttypes').'/includes',
-    'weight' => 50,
   );
 
   $items['atom/%scald_atom/dpiproperties'] = array(
@@ -95,7 +97,39 @@ function dpicontenttypes_menu(){
     'file' => 'includes/dpicontenttypes.pages.inc',
   );
 
+  $items['node/%node/dpiproperties'] = array(
+    'title' => 'DPIProperties',
+    'page callback' => 'dpicontenttypes_entity_properties',
+    'page arguments' => array('node', 1),
+    'access arguments' => array('view dpiproperties'),
+    'weight' => 3,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/dpicontenttypes.pages.inc',
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+  
   return $items;
+}
+
+/**
+ * Implementation of hook_cron
+ */
+function dpicontenttypes_cron() {
+  /* Get the date of today to test cron run */
+  $today = strtotime(date('Y-m-d'));
+  $last_run_timestamp = dpi_variable_get('dpicontenttypes_embargo_last_run', time() - 86400);
+  if ($last_run_timestamp < $today) {
+    dpi_variable_set('dpicontenttypes_embargo_last_run', $today);
+    
+    /* flush caching before modification */
+    /**
+     * @todo Flush caching
+     */
+  }
+  
+  
+  // Remove old external files
+  _dpicontenttypes_cron_remove_external_files();
 }
 
 /**
@@ -127,18 +161,60 @@ function dpicontenttypes_permission(){
 function dpicontenttypes_node_insert($node) {
   if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
     _dpicontenttypes_entityinsertdpiproperties($node, 'node', $node->nid);
+    _dpicontenttypes_entityinsertscaldatom($node);
+    _dpicontenttypes_entityinsertembargoinformation($node);
+    if(function_exists("rules_invoke_event")){
+      rules_invoke_event('dpicontenttypes_rules_event_package_create_or_edit', $node);
+    }
   }
 }
 
 /**
- * Implementation of hook_delete
+ * Implementation of hook_node_create
  *
- * @param Object $node
+ * @param object $node
+ */
+function dpicontenttypes_node_create($node) {
+  if(function_exists("rules_invoke_event")){
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
+ *
+ * @see buildEmbeddedObjects()
+ */
+function dpicontenttypes_node_presave($node) {
+  dpicontenttypes_api_check_autopublish($node);
+  if(function_exists("rules_invoke_event")){
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * @param object $node
  */
 function dpicontenttypes_node_delete($node) {
-  //Delete the dpiproperties entry corresponding to the node
   _dpicontenttypes_entitydeletedpiproperties($node, 'node', $node->nid);
+  _dpicontenttypes_entitydeletescaldatom($node, 'node', $node->nid);
+  _dpicontenttypes_entitydeleteembargoinformation($node);
+  if(function_exists("rules_invoke_event")){  
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_deleted', $node);
+    }
+  }
 }
+    
+
 
 /**
  * Implementation of hook_theme
@@ -154,6 +230,9 @@ function dpicontenttypes_theme() {
         'content' => NULL,
       ),
       'template' => 'atom-links-list',
+    ),
+    'mediabox_wrapper_full_screen' => $base + array(
+      'template' => 'mediabox-wrapper-full-screen',
     ),
     'dpicontenttypes_image_style' => $base + array(
       'variables' => array(
@@ -203,6 +282,14 @@ function dpicontenttypes_form_alter(&$form, &$form_alter, $form_id) {
   }
 }
 
+function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
+  if(isset($form["field_displaytitle"])){
+    $form["title"]["#type"]='value';
+    $form["title"]["#required"]=FALSE;
+    $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
+  }
+}
+
 /**
  * Implementation of hook_form_FROM-ID_alter
  *
@@ -219,6 +306,22 @@ function dpicontenttypes_form_image_effect_form_alter_validate($form, $form_stat
   $effect = $form_state['image_effect'];
   if (function_exists($effect['form callback'].'_validate')) {
     call_user_func($effect['form callback'].'_validate', $form, $form_state, $form_state['values']['data']);
+  }
+}
+
+/**
+ * Implementation of hook_form_FROM-ID_alter
+ *
+ * Add a devel link for nodes in the admin/content page
+ */
+function dpicontenttypes_form_node_admin_content_alter(&$form, $form_state) {
+  if (module_exists('devel') && user_access('access devel information')) {
+    foreach ($form['admin']['nodes']['#options'] as $nid => $options) {
+      $form['admin']['nodes']['#options'][$nid]['operations']['data']['#links']['devel'] = array(
+        'title' => 'devel',
+        'href' => 'node/'.$nid.'/devel',
+      );
+    }
   }
 }
 
@@ -257,8 +360,6 @@ function dpicontenttypes_file_delete($file) {
   dpicontenttypes_api_image_path_flush($file->uri);
 }
 
-function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
-}
 
 /**
  * Implements hook_scald_contexts().
@@ -300,7 +401,73 @@ function dpicontenttypes_scald_contexts() {
       'parseable'       => TRUE,
       'formats'         => array(),
     ),
+    'links_list'      => array(
+      'title'           => t('DPI LinkList'),
+      'description'     => t('When linklist atom is displayed in a package.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
+    'links_list_small'      => array(
+      'title'           => t('DPI LinkList small'),
+      'description'     => t('When linklist atom is displayed in a context.'),
+      'render_language' => 'XHTML',
+      'parseable'       => TRUE,
+      'formats'         => array(),
+    ),
   );
+}
+
+/*
+ * Implementation of hook_admin_paths_alter
+*/
+function dpicontenttypes_admin_paths_alter(&$paths) {
+  $paths['node/*/edit'] = TRUE;
+  $paths['node/*/delete'] = FALSE;
+  $paths['node/add'] = FALSE;
+  $paths['node/add/*'] = TRUE;
+  $paths['admin/structure/pages/*'] = FALSE;
+}
+
+/*
+ * Implementation of hook_custom_theme
+ * We allow modification of the theme only for GET otherwise you will have some issue with rules cache regeneration the view mode of the admin theme
+ * 
+*/
+function dpicontenttypes_custom_theme(){
+  $menu_item=menu_get_item();
+  $path=$menu_item['path'];
+  if(strstr($path,'node/add')){
+    if(count($_POST)==0)
+    return 'shiny';
+  }
+  if(strstr($path,'node/%/delete')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'node/%/edit')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'atom/%/edit')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'admin/structure/pages')){
+    return 'shiny';
+  }
+  if(strstr($path,'node/%/track')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'node/%/dpiproperties')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
+  if(strstr($path,'dpiproperties/%')){
+    if(count($_POST)==0)
+      return 'shiny';
+  }
 }
 
 /**
@@ -323,12 +490,15 @@ function dpicontenttypes_scald_transcoders_alter(&$transcoders) {
  */
 function dpicontenttypes_scald_atom_providers() {
   return array(
-    'links_list' => 'Links lists'
+    'links_list' => 'Links lists',
   );
 }
 
+function dpicontenttypes_scald_atom_providers_alter(&$types){
+}
+
 function dpicontenttypes_scald_add_form(&$form, &$form_state) {
-  return array();
+    return array();
 }
 
 function dpicontenttypes_scald_add_form_fill(&$atom, $form, $form_state) {
@@ -346,9 +516,9 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
       $view_mode = "full";
 
       $temporary_content = scald_atom_view($atom, $context);
-
+      
       $atom->rendered->player = theme('atom_links_lists', array('content' => $temporary_content));
-
+      
       //Don't show title, not needed
       $atom->rendered->title = '';
     }
@@ -357,7 +527,7 @@ function dpicontenttypes_scald_prerender($atom, $context, $options, $mode) {
 
 /**
  * Implements hook_scald_render
- * 
+ *
  * This should be used only for dpi inline, dpi mediabox and dpi simpleimg scald's context
  */
 function dpicontenttypes_scald_render($atom, $context, $options) {
@@ -381,7 +551,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
     default:
       // If this is a custom context created through the UI, we use a special
       // render.
-      $dpi_contexts = dpicontenttypes_scald_contexts();
+      $dpi_contexts = scald_contexts();
       if(array_key_exists($context, $dpi_contexts)) {
         if (isset($options['entity'])) {
           // Replace the image style rendered image with our own
@@ -401,16 +571,15 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
             }
           }
         }
-
+        
         $content = scald_atom_view($atom, $context);
-
+        
         // We only use the render of the atom
         // no need of the field_links_list field rendering
         if ($atom->type == 'links_list') {
           unset($content['field_displaytitle']);
           unset($content['field_linkitems']);
         }
-
         $output = drupal_render($content);
       }
       // Else, returns the title as we don't know what to render.
@@ -425,7 +594,7 @@ function dpicontenttypes_scald_render($atom, $context, $options) {
 
 /**
  * Implementation of hook_scald_atom_insert
- * 
+ *
  * Create a dpi properties linked to the new atom
  *
  * @param Object $atom
@@ -436,7 +605,7 @@ function dpicontenttypes_scald_atom_insert($atom) {
 
 /**
  * Implementation of hook_scald_atom_delete
- * 
+ *
  * Delete the dpiproperties linked to the atom
  *
  * @param Object $atom
@@ -447,7 +616,7 @@ function dpicontenttypes_scald_atom_delete($atom) {
 
 /**
  * Implementation of hook_field_attach_view_alter
- * 
+ *
  * Add package nid to scald tag to get it as an option
  */
 function dpicontenttypes_field_attach_view_alter(&$output, $context) {
@@ -525,17 +694,64 @@ function dpicontenttypes_library() {
  * @return Array $provider
  */
 function dpicontenttypes_dpicontenttypes_provider($uri){
+  $types = scald_types();
+  $values = array_keys($types);
   $provider = NULL;
-
-  if (module_exists('scald_youtube') && scald_youtube_parse_id($uri, FALSE)){
-    //Youtube
-    $provider = array('name' => 'scald_youtube', 'type' => 'video');
-  } elseif (module_exists('scald_vimeo') && scald_vimeo_parse_id($uri, FALSE)){
-    //Vimeo
-    $provider = array('name' => 'scald_vimeo', 'type' => 'video');
-  } elseif (module_exists('scald_dailymotion') &&scald_dailymotion_parse_id($uri, FALSE)){
-    //Dailymotion
-    $provider = array('name' => 'scald_dailymotion', 'type' => 'video');
+  
+  if(isset($types['embedly'])){
+    $provider = array('name' => $types['embedly']->provider, 'type' => $types['embedly']->type);
+  }
+  
+  foreach($values as $prov) {
+    if(strstr($uri, $prov)!==FALSE){
+        $request = drupal_http_request($uri);
+        /*  -1002 simple hack for spotify because redirect */
+        if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+          $provider = array('name' => $types[$prov]->provider, 'type' => $types[$prov]->type);
+      break;
+    }
+  }
+  /* modifier le nom partout et enlever le if */
+  if(strstr($uri, 'magic.piktochart')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+          $provider = array('name' => $types['picktochart']->provider, 'type' => $types['picktochart']->type);
+  }
+  /* Modification manuel pour timelinejs car le nom ne correspond a rien */
+  if(strstr($uri, 'cdn.knightlab.com')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && ($request->code == 200 || $request->code ==  -1002))
+      $provider = array('name' => $types['timelinejs']->provider, 'type' => $types['timelinejs']->type);
+  }
+  /* modification pour googlemap */
+  if(strstr($uri, 'google.com/maps')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['googlemap']->provider, 'type' => $types['googlemap']->type);
+  }
+  /* hack pour equipefr */
+  if(strstr($uri, 'video.lequipe.fr')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['equipefr']->provider, 'type' => $types['equipefr']->type);
+  }
+  /* hack pour facebook_status */
+  if(strstr($uri, 'facebook.com')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['facebook_status']->provider, 'type' => $types['facebook_status']->type);
+  }
+  /* hack pour infogram */
+  if(strstr($uri, 'infogr.am')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['infogram']->provider, 'type' => $types['infogram']->type);
+  }
+  /* hack pour videortl */
+  if(strstr($uri, 'rtl.be')!==FALSE){
+    $request = drupal_http_request($uri);
+    if(isset($request->code) && $request->code == 200)
+      $provider = array('name' => $types['videortl']->provider, 'type' => $types['videortl']->type);
   }
 
   return array('dpicontenttypes' => $provider);
@@ -554,6 +770,143 @@ function typed_entity_load($typed_id) {
       $entity->entity_id = $typed_id;
       return $entity;
     }
+  } elseif ($entity_type == 'node' && $entity_id) {
+    // This must be a prenode
+    $prenode = new Prenode($entity_id);
+    $entity = $prenode->getNode();
+    return $entity;
   }
   return NULL;
+}
+
+function dpicontenttypes_insert($node){
+}
+
+function dpicontenttypes_token_info() {
+  $info['tokens']['user']['connectionStatus'] = array(
+    'name' => t('Connection status'),
+    'description' => t('Return the status about connection'),
+  );
+  $info['tokens']['node']['firstImageUrl'] = array(
+    'name' => t('First Image Url'),
+    'description' => t('Return the first image url'),
+  );
+  return $info;
+}
+
+function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'connectionStatus':
+          $name = 'nonconnecté';
+          if(user_is_logged_in()){
+            $name = 'connecté';
+          }
+          $replacements[$original] = $name;
+          break;        
+      }
+    }
+  }
+  if($type == 'node'){
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'firstImageUrl':
+          $name = '';
+          if(isset($data['node'])){
+            $embeddedObjects = field_get_items('node', $data['node'], 'field_embededobjects');
+            foreach($embeddedObjects as $embed){
+              if($embed['type'] == 'image'){
+                  module_load_include('inc', 'dpicommons', 'dpicommons.api');
+                  $atom = scald_atom_load($embed['sid']);
+                  $preset = "500x500";
+                  drupal_alter('dpicontenttypes_tokens_preset', $embed, $atom, $preset);                  
+                  $name = dpiflexiscald_api_get_path_for_atom($atom, $preset);
+                break;
+              }
+            }
+          }
+          $replacements[$original] = $name;
+          break;
+      }
+    }  
+  }
+  return $replacements;
+}
+
+/**
+ * @ todo Trouver une version en ordre de l'import des scalds
+ */
+/*
+function dpicontenttypes_filter_info() {
+  $filters['filter_cci_scald_inline'] = array(
+    'title' => t('Filter cci scald inline'),
+    'description' => t("Every instance of cci élement is replace by scald input format"),
+    'process callback' => '_dpicontenttypes_filter_cci_scald__process',
+    'tips callback' => '_dpicontenttypes_filter_cci_scald_tips',
+  );
+  return $filters;
+}*/
+
+/**
+ * <ccix:inline align="" extref="G1T1L11GG.1" height="" runaround="" width=""/>
+ * @param unknown $text
+ * @param unknown $filter
+ * @return mixed
+ */
+/*function _dpicontenttypes_filter_cci_scald__process($text, $filter) {
+  module_load_include('inc', 'dpicontenttypes', 'dpicontenttypes.api');
+  $pattern = "/<ccix:inline(.*?)\/>/i";
+  preg_match_all($pattern, $text, $matches);
+  if(isset($matches[1])){
+      foreach($matches[1] as $k => $el){
+         preg_match('/extref="(.*?)"/i', $el, $extUrl);
+         if(isset($extUrl[1])){
+            $atom = dpicontenttypes_api_getatombyexternalreference($extUrl[1]);
+            if(isset($atom) && isset($atom->sid)){
+               $text = str_replace($matches[0][$k] , scald_render(994, 'full') , $text);
+            }
+         }
+      }
+    } 
+  return $text;
+}
+
+function _dpicontenttypes_filter_cci_scald_tips($filter, $format, $long = FALSE) {
+  return t('<em><ccix:inline align="" extref="G1T1L11GG.1" height="" runaround="" width=""/></em> is replaced with the scald input.');
+}*/
+ 
+/**
+ * Ajout de cette fonctio pour la gestion des urls utilisée dans les sections
+ * Path auto utilisant déja une url alias il faut modifier de manière particulière le code
+ * @param String $path
+ * @param Array $options
+ * @param Array $original_path
+ */
+function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
+  if(strstr($path, 'taxonomy/term')!==FALSE && strstr($path, '/edit')===FALSE){
+    $terms = explode('/', $path);
+    $tid = (isset($terms[2]))? $terms[2] : NULL;    
+    if(isset($tid)){
+      $term_load = taxonomy_term_load($tid);
+      if(isset($term_load) && isset($term_load->name) && isset($term_load->vocabulary_machine_name) && $term_load->vocabulary_machine_name == "sections"){
+        module_load_include('inc', 'pathauto', 'pathauto');
+        $path = "sections/".pathauto_cleanstring($term_load->name);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_dpilog_register
+ * 
+ * @return array
+ */
+function dpicontenttypes_dpilog_register(){
+  return array(
+    "dpi_autopublish"=>array(
+      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", 'error_autopublish_node'),
+    )
+  );
 }

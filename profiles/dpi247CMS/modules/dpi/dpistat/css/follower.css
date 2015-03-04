@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+
+#follower {
+	border: solid 2px;
+	background-color: white;
+}
+
+#follower div {
+  display: inline-block;
+  z-index: 1000;
+}

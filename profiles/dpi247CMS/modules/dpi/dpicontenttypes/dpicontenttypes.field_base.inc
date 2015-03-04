@@ -578,7 +578,7 @@ function dpicontenttypes_field_default_field_bases() {
     'type' => 'taxonomy_term_reference',
   );
   // Exported field_base: 'field_packagetype'
-  $field_bases['field_packagetype'] = array(
+  $field_bases['field_packagetype'] = array(    
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
@@ -1129,6 +1129,6 @@ function dpicontenttypes_field_default_field_bases() {
     'translatable' => 0,
     'type' => 'text_long',
   );
-
+  
   return $field_bases;
 }

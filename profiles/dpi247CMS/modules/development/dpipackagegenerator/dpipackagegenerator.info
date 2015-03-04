@@ -1,0 +1,4 @@
+name = "Dpi Package Generator"
+description = "Generate package using Devel."
+core = 7.x
+package = "Dpi developpement"

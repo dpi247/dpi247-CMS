@@ -53,13 +53,7 @@ class TargetBlockEntity extends Entity {
    */
   public $targetblockid;
 
-  /**
-   * The machine name.
-   *
-   * @var string
-   */
-  public $machine_name;
-
+  
   /**
    * The target reference.
    *
@@ -120,10 +114,11 @@ class TargetBlockEntity extends Entity {
   public $split_delta;
 
   protected function defaultLabel() {
-    return $this->machine_name;
+    return (isset($this->machine_name))? $this->machine_name : 'undefined';
   }
 
   protected function defaultUri() {
     return array('path' => 'targetblock/' . $this->targetblockid);
   }
+  
 }

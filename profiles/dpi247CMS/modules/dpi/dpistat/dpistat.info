@@ -1,0 +1,7 @@
+name = DPI Statistics
+description = Statitics using Javascript calls to bypass server caching
+package = DPI
+core = 7.x
+
+dependencies[] = dpicache
+dependencies[] = dpicommons

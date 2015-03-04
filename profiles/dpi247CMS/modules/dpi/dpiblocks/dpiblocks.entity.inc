@@ -12,23 +12,22 @@ function dpiblocks_entity_info(){
 
   // Remote HTML
   $entities['remotehtml'] = array(
-    'label' => t('Remote Html'),
+    'label' => t('DPI Remote Html'),
     'entity class' => 'RemoteHtmlEntity',
     'controller class' => 'RemotehtmlController',
     'base table' => 'dpiblocks_remotehtml',
-    'fieldable' => True,
+    'fieldable' => TRUE,
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
-      'id'=>'rid',
+      'id' => 'rid',
       'machine_name' => 'machine_name',
     ),
-    	
+
     'bundles' => array(
-      'remotehtml'=>array(
-      ),
+      'remotehtml' => array(),
     ),
-    	
+
     'view modes' => array(
       'minimal' => array(
         'label' => t('Minimal'),
@@ -45,21 +44,20 @@ function dpiblocks_entity_info(){
     'access callback' => 'remotehtml_access_admin_callback',
     // Enable the entity API's admin UI.
     'admin ui' => array(
-      	
-    'path' => 'admin/structure/remotehtml',
-    // OPTIONAL- See "Customize the User Interface" below if you set.
-    'file' => 'includes/remotehtml.admin.inc',
+      'path' => DPI_ADMIN_PATH.'/remotehtml',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      'file' => 'includes/remotehtml.admin.inc',
     ),
   );
 
   // Custom content
   $entities['custom_content'] = array(
-    'label' => t('Custom content'),
+    'label' => t('DPI Custom content'),
     'entity class' => 'Custom_contentEntity',
     'controller class' => 'Custom_contentController',
     'base table' => 'dpiblocks_custom_content',
     'revision table' => 'dpiblocks_custom_content_revision',
-    'fieldable' => True,
+    'fieldable' => TRUE,
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
@@ -69,8 +67,7 @@ function dpiblocks_entity_info(){
     ),
 
     'bundles' => array(
-      'custom_content'=>array(
-      ),
+      'custom_content' => array(),
     ),
 
     'view modes' => array(
@@ -88,13 +85,91 @@ function dpiblocks_entity_info(){
     'module'=> 'dpiblocks',
     'access callback' => 'custom_content_access_admin_callback',
     // Enable the entity API's admin UI.
-      'admin ui' => array(
-      'path' => 'admin/structure/custom_content',
+    'admin ui' => array(
+      'path' => DPI_ADMIN_PATH.'/custom_content',
       // OPTIONAL- See "Customize the User Interface" below if you set.
       'file' => 'includes/custom_content.admin.inc',
-      ),
+    ),
   );
 
+  // FlowMix
+  $entities['flowmix'] = array(
+    'label' => t('Dpi FlowMix'),
+    'entity class' => 'FlowMixEntity',
+    'controller class' => 'FlowMixController',
+    'base table' => 'dpiblocks_flowmix',
+    'fieldable' => TRUE,
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'entity keys' => array(
+      'id' => 'fid',
+      'machine_name' => 'machine_name',
+    ),
+
+    'bundles' => array(
+      'flowmix' => array(),
+    ),
+
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+
+    // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    'module'=> 'dpiblocks',
+    'access callback' => 'flowmix_access_admin_callback',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => DPI_ADMIN_PATH.'/flowmix',
+      // OPTIONAL- See "Customize the User Interface" below if you set.
+      'file' => 'includes/flowmix.admin.inc',
+    ),
+  );
+
+  // accroche
+  $entities['accroche'] = array(
+    'label' => t('Dpi Accroche entitie'),
+    'entity class' => 'AccrocheEntity',
+    'controller class' => 'AccrocheController',
+    'base table' => 'dpiblocks_accroche',
+    'revision table' => 'dpiblocks_accroche_revision',
+    'fieldable' => TRUE,
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'entity keys' => array(
+      'id' => 'aid',
+      'machine_name' => 'machine_name',
+      'revision' => 'revision_id',
+    ),
+    'bundles' => array(
+      'accroche' => array(),
+    ),
+    'view modes' => array(
+      'minimal' => array(
+        'label' => t('Minimal'),
+        'custom settings' => FALSE,
+      ),
+      'full' => array(
+        'label' => t('Full'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    'module'=> 'dpiblocks',
+    'access callback' => 'custom_content_access_admin_callback',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => DPI_ADMIN_PATH.'/AccrocheCustom',
+      'file' => 'includes/custom_accroche.admin.inc',
+    ),
+  );
+  
   return $entities;
 }
 
@@ -104,9 +179,9 @@ function dpiblocks_entity_info(){
  * @return boolean
  */
 if (!function_exists('remotehtml_access_admin_callback')) {
-function remotehtml_access_admin_callback(){
-	return TRUE;
-}
+  function remotehtml_access_admin_callback() {
+    return TRUE;
+  }
 }
 
 /**
@@ -115,9 +190,32 @@ function remotehtml_access_admin_callback(){
  * @return boolean
  */
 if (!function_exists('custom_content_access_admin_callback')) {
-function custom_content_access_admin_callback(){
-	return TRUE;
+  function custom_content_access_admin_callback() {
+    return TRUE;
+  }
 }
+
+/**
+ * Implement the access_admin_callback() for the custom content
+ *
+ * @return boolean
+ */
+if (!function_exists('accroche_access_admin_callback')) {
+  function accroche_access_admin_callback() {
+    return TRUE;
+  }
+}
+
+
+/**
+ * Implement the access_admin_callback() for the flowmix
+ *
+ * @return boolean
+ */
+if (!function_exists('flowmix_access_admin_callback')) {
+  function flowmix_access_admin_callback() {
+    return TRUE;
+  }
 }
 
 /**
@@ -127,13 +225,13 @@ function custom_content_access_admin_callback(){
  * @param $reset
  */
 if (!function_exists('remotehtml_load')) {
-function remotehtml_load($tid = NULL, $reset = FALSE){
-	$tids = (isset ($tid) ? array($tid) : array());
+  function remotehtml_load($tid = NULL, $reset = FALSE) {
+    $tids = (isset ($tid) ? array($tid) : array());
 
-	$remotehtml = remotehtml_load_multiple($tids, $reset);
+    $remotehtml = remotehtml_load_multiple($tids, $reset);
 
-	return $remotehtml ? reset ($remotehtml) : FALSE;
-}
+    return $remotehtml ? reset($remotehtml) : FALSE;
+  }
 }
 
 /**
@@ -143,13 +241,45 @@ function remotehtml_load($tid = NULL, $reset = FALSE){
  * @param $reset
  */
 if (!function_exists('custom_content_load')) {
-function custom_content_load($tid = NULL, $reset = FALSE){
-	$tids = (isset ($tid) ? array($tid) : array());
+  function custom_content_load($tid = NULL, $reset = FALSE) {
+    $tids = (isset ($tid) ? array($tid) : array());
 
-	$custom_content = custom_content_load_multiple($tids, $reset);
+    $custom_content = custom_content_load_multiple($tids, $reset);
 
-	return $custom_content ? reset ($custom_content) : FALSE;
+    return $custom_content ? reset($custom_content) : FALSE;
+  }
 }
+
+/**
+ * Load a custom content entity with this id
+ *
+ * @param $tid
+ * @param $reset
+ */
+if (!function_exists('accroche_load')) {
+  function accroche_load($tid = NULL, $reset = FALSE) {
+    $tids = (isset ($tid) ? array($tid) : array());
+
+    $accroche = custom_content_load_multiple($tids, $reset);
+
+    return $accroche ? reset($accroche) : FALSE;
+  }
+}
+
+/**
+ * Load a flowmix entity with this id
+ *
+ * @param $tid
+ * @param $reset
+ */
+if (!function_exists('flowmix_load')) {
+  function flowmix_load($tid = NULL, $reset = FALSE) {
+    $tids = (isset ($tid) ? array($tid) : array());
+
+    $flowmix = flowmix_load_multiple($tids, $reset);
+
+    return $flowmix ? reset($flowmix) : FALSE;
+  }
 }
 
 /**
@@ -164,9 +294,9 @@ function custom_content_load($tid = NULL, $reset = FALSE){
  *  Return the entities
  */
 if (!function_exists('remotehtml_load_multiple')) {
-function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-	return entity_load('remotehtml', $tids, $conditions, $reset);
-}
+  function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+    return entity_load('remotehtml', $tids, $conditions, $reset);
+  }
 }
 
 /**
@@ -181,60 +311,91 @@ function remotehtml_load_multiple($tids = array(), $conditions = array(), $reset
  *  Return the entities
  */
 if (!function_exists('custom_content_load_multiple')) {
-function custom_content_load_multiple($tids = array(), $conditions = array(), $reset = FALSE){
-	return entity_load('custom_content', $tids, $conditions, $reset);
-}
-}
-
-/**
- * This function verify the validity of an url
- *
- * @param $url
- *  The url
- *
- * @return $isGood
- *  Return a boolean
- */
-if (!function_exists('remotehtml_url_verification')) {
-function remotehtml_url_verification($url){
-  if (isset($url)) {
-    //http request on the url
-    $uri_response = drupal_http_request($url, array(), 'GET', NULL);
-
-    if ($uri_response->status_message != 'OK') {
-      $isGood = FALSE;
-    }
-    else {
-      $isGood = TRUE;
-    }
+  function custom_content_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+    return entity_load('custom_content', $tids, $conditions, $reset);
   }
-
-  return $isGood;
-}
 }
 
 /**
- * Return the name of the given remote HTML entities
+ * Retrieve multiple custom content entities
+ *
+ * @param $tids
+ *  Their ids
+ * @param $conditions
+ * @param $reset
+ *
+ * @return object
+ *  Return the entities
+ */
+if (!function_exists('accroche_load_multiple')) {
+  function accroche_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+    return entity_load('accroche', $tids, $conditions, $reset);
+  }
+}
+
+/**
+ * Retrieve multiple flowmix entities
+ *
+ * @param $tids
+ *  Their ids
+ * @param $conditions
+ * @param $reset
+ *
+ * @return object
+ *  Return the entities
+ */
+if (!function_exists('flowmix_load_multiple')) {
+  function flowmix_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+    return entity_load('flowmix', $tids, $conditions, $reset);
+  }
+}
+
+/**
+ * Return the name of the given remote HTML entity
  *
  * @param $remotehtml
  *  The given entities (remote HTML)
  */
 if (!function_exists('remotehtml_page_title')) {
-function remotehtml_page_title($remotehtml){
-	return $remotehtml->machine_name;
-}
+  function remotehtml_page_title($remotehtml) {
+    return $remotehtml->machine_name;
+  }
 }
 
 /**
- * Return the name of the given custom content entities
+ * Return the name of the given custom content entity
  *
  * @param $custom_content
  *  The given entities (custom_content)
  */
 if (!function_exists('custom_content_page_title')) {
-function custom_content_page_title($custom_content){
-	return $custom_content->title;
+  function custom_content_page_title($custom_content) {
+    return $custom_content->title;
+  }
 }
+
+/**
+ * Return the name of the given custom content entity
+ *
+ * @param $custom_content
+ *  The given entities (custom_content)
+ */
+if (!function_exists('accroche_page_title')) {
+  function accroche_page_title($custom_content) {
+    return $accroche->title;
+  }
+}
+
+/**
+ * Return the name of the given FlowMix entity
+ *
+ * @param $remotehtml
+ *  The given entities (remote HTML)
+ */
+if (!function_exists('flowmix_page_title')) {
+  function flowmix_page_title($flowmix) {
+    return $flowmix->machine_name;
+  }
 }
 
 /**
@@ -244,9 +405,9 @@ function custom_content_page_title($custom_content){
  *  The entity
  */
 if (!function_exists('remotehtml_delete')) {
-function remotehtml_delete($remotehtml) {
-	entity_delete('remotehtml', entity_id('remotehtml' ,$remotehtml));
-}
+  function remotehtml_delete($remotehtml) {
+    entity_delete('remotehtml', entity_id('remotehtml' ,$remotehtml));
+  }
 }
 
 /**
@@ -256,9 +417,33 @@ function remotehtml_delete($remotehtml) {
  *  The entity
  */
 if (!function_exists('custom_content_delete')) {
-function custom_content_delete($custom_content) {
-	entity_delete('custom_content', entity_id('custom_content' ,$custom_content));
+  function custom_content_delete($custom_content) {
+    entity_delete('custom_content', entity_id('custom_content' ,$custom_content));
+  }
 }
+
+/**
+ * Delete single custom content entity.
+ *
+ * @param $custom_content
+ *  The entity
+ */
+if (!function_exists('accroche_delete')) {
+  function accroche_delete($custom_content) {
+    entity_delete('accroche', entity_id('accroche' ,$custom_content));
+  }
+}
+
+/**
+ * Delete single FlowMix entity.
+ *
+ * @param $flowmix
+ *  The entity
+ */
+if (!function_exists('flowmix_delete')) {
+  function flowmix_delete($flowmix) {
+    entity_delete('flowmix', entity_id('flowmix', $flowmix));
+  }
 }
 
 /**
@@ -268,9 +453,9 @@ function custom_content_delete($custom_content) {
  *  Their ids
  */
 if (!function_exists('remotehtml_delete_multiple')) {
-function remotehtml_delete_multiple($remotehtml_ids) {
-	entity_delete_multiple('remotehtml', $remotehtml_ids);
-}
+  function remotehtml_delete_multiple($remotehtml_ids) {
+    entity_delete_multiple('remotehtml', $remotehtml_ids);
+  }
 }
 
 /**
@@ -280,9 +465,33 @@ function remotehtml_delete_multiple($remotehtml_ids) {
  *  Their ids
  */
 if (!function_exists('custom_content_delete_multiple')) {
-function custom_content_delete_multiple($custom_content_ids) {
-	entity_delete_multiple('custom_content', $custom_content_ids);
+  function custom_content_delete_multiple($custom_content_ids) {
+    entity_delete_multiple('custom_content', $custom_content_ids);
+  }
 }
+
+/**
+ * Delete multiple custom content entities.
+ *
+ * @param $custom_content_ids
+ *  Their ids
+ */
+if (!function_exists('accroche_delete_multiple')) {
+  function accroche_delete_multiple($custom_content_ids) {
+    entity_delete_multiple('accroche', $custom_content_ids);
+  }
+}
+
+/**
+ * Delete multiple FlowMix entities.
+ *
+ * @param $flowmix_ids
+ *  Their ids
+ */
+if (!function_exists('flowmix_delete_multiple')) {
+  function flowmix_delete_multiple($flowmix_ids) {
+    entity_delete_multiple('flowmix', $flowmix_ids);
+  }
 }
 
 /**
@@ -291,9 +500,9 @@ function custom_content_delete_multiple($custom_content_ids) {
  * @param $remotehtml
  */
 if (!function_exists('remotehtml_save')) {
-function remotehtml_save(&$remotehtml){
-	return entity_save('remotehtml', $remotehtml);
-}
+  function remotehtml_save(&$remotehtml) {
+    return entity_save('remotehtml', $remotehtml);
+  }
 }
 
 /**
@@ -302,35 +511,83 @@ function remotehtml_save(&$remotehtml){
  * @param $custom_content
  */
 if (!function_exists('custom_content_save')) {
-function custom_content_save(&$custom_content){
-	return entity_save('custom_content', $custom_content);
-}
+  function custom_content_save(&$custom_content) {
+    return entity_save('custom_content', $custom_content);
+  }
 }
 
 /**
- * Generate an array for rendering the given remote HTML entities
+ * Save a custom content entity
+ *
+ * @param $custom_content
+ */
+if (!function_exists('accroche_save')) {
+  function accroche_save(&$custom_content) {
+    return entity_save('accroche', $custom_content);
+  }
+}
+
+/**
+ * Save a flowmix entity
+ *
+ * @param $flowmix
+ */
+if (!function_exists('flowmix_save')) {
+  function flowmix_save(&$flowmix) {
+    return entity_save('flowmix', $flowmix);
+  }
+}
+
+/**
+ * Generate an array for rendering the given remote HTML entity
  *
  * @param $remotehtml
  *  The given entities
  * @param $view_mode
  */
 if (!function_exists('remotehtml_view')) {
-function remotehtml_view($remotehtml, $view_mode = 'full'){
-	return $remotehtml->view();
-}
+  function remotehtml_view($remotehtml, $view_mode = 'full') {
+    return $remotehtml->view();
+  }
 }
 
 /**
- * Generate an array for rendering the given custom content entities
+ * Generate an array for rendering the given custom content entity
  *
  * @param $custom_content
  *  The given entities
  * @param $view_mode
  */
 if (!function_exists('custom_content_view')) {
-function custom_content_view($custom_content, $view_mode = 'full'){
-	return $custom_content->view();
+  function custom_content_view($custom_content, $view_mode = 'full') {
+    return $custom_content->view();
+  }
 }
+
+/**
+ * Generate an array for rendering the given custom content entity
+ *
+ * @param $custom_content
+ *  The given entities
+ * @param $view_mode
+ */
+if (!function_exists('accroche_view')) {
+  function accroche_view($custom_content, $view_mode = 'full') {
+    return $custom_content->view();
+  }
+}
+
+/**
+ * Generate an array for rendering the given flowmix entity
+ *
+ * @param $flowmix
+ *  The given entities
+ * @param $view_mode
+ */
+if (!function_exists('flowmix_view')) {
+  function flowmix_view($flowmix, $view_mode = 'full') {
+    return $flowmix->view();
+  }
 }
 
 /**
@@ -338,16 +595,16 @@ function custom_content_view($custom_content, $view_mode = 'full'){
  * @param $view_mode
  */
 if (!function_exists('remotehtml_page_view')) {
-function remotehtml_page_view($remotehtml, $view_mode = 'full'){
-	$remotehtml->content = array();
+  function remotehtml_page_view($remotehtml, $view_mode = 'full') {
+    $remotehtml->content = array();
 
-	// Build fields content.
-	field_attach_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml), $view_mode);
-	entity_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml));
-	$remotehtml->content += field_attach_view('remotehtml', $remotehtml, $view_mode);
+    // Build fields content.
+    field_attach_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml), $view_mode);
+    entity_prepare_view('remotehtml', array($remotehtml->tid => $remotehtml));
+    $remotehtml->content += field_attach_view('remotehtml', $remotehtml, $view_mode);
 
-	return $remotehtml->content;
-}
+    return $remotehtml->content;
+  }
 }
 
 /**
@@ -355,26 +612,82 @@ function remotehtml_page_view($remotehtml, $view_mode = 'full'){
  * @param $view_mode
  */
 if (!function_exists('custom_content_page_view')) {
-function custom_content_page_view($custom_content, $view_mode = 'full'){
-	$custom_content->content = array();
+  function custom_content_page_view($custom_content, $view_mode = 'full') {
+    $custom_content->content = array();
 
-	// Build fields content.
-	field_attach_prepare_view('custom_content', array($custom_content->tid => $custom_content), $view_mode);
-	entity_prepare_view('custom_content', array($custom_content->tid => $custom_content));
-	$custom_content->content += field_attach_view('custom_content', $custom_content, $view_mode);
+    // Build fields content.
+    field_attach_prepare_view('custom_content', array($custom_content->tid => $custom_content), $view_mode);
+    entity_prepare_view('custom_content', array($custom_content->tid => $custom_content));
+    $custom_content->content += field_attach_view('custom_content', $custom_content, $view_mode);
 
-	return $custom_content->content;
-}
+    return $custom_content->content;
+  }
 }
 
 /**
- * This function get all remote HTML names from db
+ * @param $custom_content
+ * @param $view_mode
+ */
+if (!function_exists('accroche_page_view')) {
+  function accroche_page_view($custom_content, $view_mode = 'full') {
+    $custom_content->content = array();
+
+    // Build fields content.
+    field_attach_prepare_view('accroche', array($custom_content->aid => $custom_content), $view_mode);
+    entity_prepare_view('accroche', array($custom_content->aid => $custom_content));
+    $custom_content->content += field_attach_view('accroche', $custom_content, $view_mode);
+
+    return $custom_content->content;
+  }
+}
+
+/**
+ * @param $flowmix
+ * @param $view_mode
+ */
+if (!function_exists('flowmix_page_view')) {
+  function flowmix_page_view($flowmix, $view_mode = 'full') {
+    $flowmix->content = array();
+
+    // Build fields content.
+    field_attach_prepare_view('flowmix', array($flowmix->tid => $flowmix), $view_mode);
+    entity_prepare_view('flowmix', array($flowmix->tid => $flowmix));
+    $flowmix->content += field_attach_view('flowmix', $flowmix, $view_mode);
+
+    return $flowmix->content;
+  }
+}
+
+/**
+ * This function get all Remote HTML blocks from DB
  *
  * @return $allRemotehtml
- *  Return all remote html
+ *  Return all Remote HTML blocks
  */
-function dpiblocks_remotehtml_get_all(){
-  // Get all remotehtml
-  $results = db_query('SELECT * FROM {dpiblocks_remotehtml}');
+function dpiblocks_remotehtml_get_all() {
+  $results = array();
+  $db_results = db_select('dpiblocks_remotehtml', 'dr')
+    ->fields('dr')
+    ->execute();
+  foreach ($db_results as $db_result) {
+    $results[$db_result->rid] = $db_result;
+  }
+  return $results;
+}
+
+/**
+ * This function get all Remote HTML blocks from DB
+ *
+ * @return $allRemotehtml
+ *  Return all Remote HTML blocks
+ */
+function dpiblocks_flowmix_get_all() {
+  $results = array();
+  $db_results = db_select('dpiblocks_flowmix', 'df')
+    ->fields('df')
+    ->execute();
+  foreach ($db_results as $db_result) {
+    $results[$db_result->fid] = $db_result;
+  }
   return $results;
 }

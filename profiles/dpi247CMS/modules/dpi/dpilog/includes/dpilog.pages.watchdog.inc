@@ -633,7 +633,7 @@ function dpilog_watchdog_rules_settings_submit($form, &$form_state){
         drupal_set_message("The new configuration has been saved.");
       }
       else {
-        drupal_set_message("An error occurred while saving wallylog configuration","error");
+        drupal_set_message("An error occurred while saving dpilog configuration","error");
       }
       break;
   }

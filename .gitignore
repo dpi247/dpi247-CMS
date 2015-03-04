@@ -5,6 +5,18 @@ sites/*/settings*.php
 sites/*/files
 sites/*/private
 sites/*/modules
+sites/*/importer
+sites/all/libraries
+sites/*
 
-/.htaccess
-/robots.txt
+#ignore eclipse settings
+.settings/*
+.project
+.gitignore
+.buildpath
+robots.txt
+
+.idea
+nbproject
+
+

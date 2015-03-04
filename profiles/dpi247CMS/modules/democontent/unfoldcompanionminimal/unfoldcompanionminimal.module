@@ -10,13 +10,13 @@ module_load_include('api.inc', 'unfoldcompanionminimal');
 
 /**
  * Implementation of hook_theme
- */
+*/
 function unfoldcompanionminimal_theme() {
   $base = array(
     'path' => drupal_get_path('module', 'unfoldcompanionminimal') . '/templates',
     'file' => 'theme.inc',
   );
-  
+  //hvh
   return array(
     'field_extra_field' => $base + array(
       'variables' => array('view_mode' => '', 'fields' => array()),
@@ -24,6 +24,54 @@ function unfoldcompanionminimal_theme() {
     ),
   );
 }
+
+
+
+/**
+ * Implementation of hook_theme
+ */
+function unfoldcompanionminimal_field_formatter_info() {
+
+  return array(
+    'term_in_red' => array(
+      'label' => t('Term in red'),
+      'field types' => array('taxonomy_term_reference'),
+    ),
+  );
+}
+ 
+function unfoldcompanionminimal_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'term_in_red':
+      // Common case: each value is displayed individually in a sub-element
+      // keyed by delta. The field.tpl.php template specifies the markup
+      // wrapping each value.
+      foreach ($items as $delta => $item) {
+        $term=taxonomy_term_load($item['tid']);
+        $uri=entity_uri('taxonomy_term',$term);
+        $element[$delta] = array(
+          '#theme' => 'link',
+          '#text' => $term->name,
+          '#path' => $uri['path'],
+          '#options' => array(
+            'attributes' => array('class' => array('cool-class'), 'id' => 'cool-id'),
+            //REQUIRED:
+            'html' => FALSE,
+          ),
+          );
+      }
+      $element["#prefix"]='<span class="cat">';
+      $element["#suffix"]='</span>';
+      break;
+      
+  }
+
+  return $element;
+}
+
 
 /**
  * Implementation of hook_field_extra_fields
@@ -40,8 +88,9 @@ function unfoldcompanionminimal_field_extra_fields() {
             'description' => t('Contains some of the embedded objects'),
             'weight' => 0,
           ),
-          'field_publication_comments_and_embeds_count' => array(
-            'label' => t('Publication date, comments count and embeds count'),
+
+          'field_package_infos' => array(
+            'label' => t('Publication infos such as author, publication date, comment count and embeds count'),
             'description' => t('Show the publication date followed by the comments count and the various embeds counts'),
             'weight' => 0,
           ),
@@ -53,6 +102,7 @@ function unfoldcompanionminimal_field_extra_fields() {
   return $extras;
 }
 
+
 /**
  * Implementation of hook_node_view
  *
@@ -61,11 +111,45 @@ function unfoldcompanionminimal_field_extra_fields() {
 function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
   $extra_fields = field_info_extra_fields('node', $node->type, 'display');
 
+  unfoldcompanionminimal_node_view_mediabox($node, $view_mode, $langcode,$extra_fields);
+  unfoldcompanionminimal_node_view_package_infos($node, $view_mode, $langcode,$extra_fields);
+}
+
+
+function unfoldcompanionminimal_node_view_mediabox(& $node, $view_mode, $langcode,$extra_fields){
   // Handle the "Media box" field
   if (isset($extra_fields['field_mediabox']['display'][$view_mode]) && $extra_fields['field_mediabox']['display'][$view_mode]['visible']) {
     switch ($view_mode) {
       case 'full':
-        // All images and videos
+        // All scald atom package
+        if($scald_atom_package = dpicontenttypes_api_get_embeds($node, 'atom_package', 'atom_package', FALSE)){
+          $outTextElements = array();
+          $secondaryTextElements = array();
+          foreach($scald_atom_package as $atom){
+            /* load information */
+            $tmp = scald_atom_load($atom['sid']);
+            $node_info = node_load($tmp->data['nid']);
+            //@todo enlever les atom_package pour éviter le récursif
+            
+            /* Get type of elements to know style of mediabox  */
+            $types = field_get_items('node', $node, 'field_packagetype');
+            $type = reset($types);
+            $type = $type['tid'];
+
+            /* Get rendered element */
+            $node_render = node_view($node_info);
+            if($type){
+              $outTextElements[] = drupal_render($node_render);
+            }else{
+              $secondaryTextElements[] = drupal_render($node_render);
+            }
+          }
+          /* add different element to the  */
+          $node->content['field_horstexte']['#markup'] = theme('theme_package_hors_text', array('articles' => $outTextElements));
+          $node->content['field_secondaryarticle']['#markup'] = theme('theme_package_article_secondaire', array('articles' => $secondaryTextElements));
+        }
+        
+        // All images and videos        
         if ($media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE)) {
           foreach ($media_box_emebeds as $delta => $embed) {
             unset($node->content['field_embededobjects'][$delta]);
@@ -99,28 +183,41 @@ function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
       $node->content['field_mediabox']['#markup'] = '';
     }
   }
+}
+
+
+function   unfoldcompanionminimal_node_view_package_infos(&$node, $view_mode, $langcode,$extra_fields){
 
   // Fill the "Publication date, comments count and embeds count" field
-  if (isset($extra_fields['field_publication_comments_and_embeds_count']['display'][$view_mode]) && $extra_fields['field_publication_comments_and_embeds_count']['display'][$view_mode]['visible']) {
+  if (isset($extra_fields['field_package_infos']['display'][$view_mode]) && $extra_fields['field_package_infos']['display'][$view_mode]['visible']) {
     if (unfoldcompanionminimal_api_check_date_content_not_empty($node->content, 'field_editorialupdatedate')) {
       $date = $node->content['field_editorialupdatedate'];
     } else {
       $date = $node->content['field_editorialpublicationdate'];
     }
+    $authors=array();
+    if(isset($node->content['field_authors'])){
+      $authors = $node->content['field_authors'];
+    }
     $template_fields = array(
       'view_mode' => $view_mode,
       'fields' => array(
+        'authors' => $authors,
         'date' => $date,
-        'comment_count' => $node->comment_count,
+        'comment_count' => isset($node->comment_count) ? $node->comment_count : 0,
         'embeds_count' => dpicontenttypes_api_get_embeds_count_by_type($node),
       ),
     );
-    $node->content['field_publication_comments_and_embeds_count']['#markup'] = theme('field_extra_field', $template_fields);
+    $node->content['field_package_infos']['#markup'] = theme('field_extra_field', $template_fields);
     if (isset($node->content['field_editorialupdatedate'])) {
       unset($node->content['field_editorialupdatedate']);
+    }
+    if (isset($node->content['field_authors'])) {
+      unset($node->content['field_authors']);
     }
     if (isset($node->content['field_editorialpublicationdate'])) {
       unset($node->content['field_editorialpublicationdate']);
     }
   }
 }
+

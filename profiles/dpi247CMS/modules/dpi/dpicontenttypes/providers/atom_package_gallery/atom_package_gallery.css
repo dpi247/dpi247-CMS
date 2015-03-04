@@ -1,0 +1,34 @@
+.scald-menu .add-buttons .add-atom_package {
+  background: url('icons/icone_atom_package.png') 50% 50% no-repeat;
+}
+
+.scald-menu .add-buttons .add-atom_package:hover {
+  background-image: url('icons/icone_atom_package.png');
+}
+
+.dnd-library-wrapper .editor-item .meta.type-atom.package {
+  background-image: url('icons/icone_atom_package.png');
+}
+
+.atom-package-gallery-player{
+	display: block;
+	min-height: 50px;
+}
+
+.atom-package-gallery-player-img{
+	width: 45px;
+	height: 45px;
+	float: left;
+	margin: 0px 10px 0px 0px;
+}
+
+.atom-package-gallery-player-type{
+	text-transform: uppercase;
+	color: #FE2E2E;
+	font-weight: bold;
+	font-size: 10px;
+}
+
+.atom-package-gallery-player-content h2{
+	margin-top: 0;
+}

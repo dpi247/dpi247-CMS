@@ -1,0 +1,8 @@
+name = CCI Dynamic feedback
+description = Bring information from a node to the  CCI NewsGate system
+package = CCI
+core = 7.x
+
+dependencies[] = 'dpicache'
+dependencies[] = 'dpicommons'
+dependencies[] = 'cciadmin'

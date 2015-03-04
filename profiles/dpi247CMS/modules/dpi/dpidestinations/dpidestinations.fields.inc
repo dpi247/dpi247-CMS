@@ -61,7 +61,7 @@ function dpidestinations_field_is_empty($item, $field) {
 }
 
 function dpidestinations_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items){
-  _dpidestinations_virtualrank_update_items($items);
+  _dpidestinations_virtualrank_update_items($items, entity_id($entity_type, $entity));
 
 }
 
@@ -176,7 +176,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     $destinations['rank'] = 'DNC';
   }
   $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
-  if(!isset($rankt_options[$destinations['rank']])) {
+  if(!isset($rank_options[$destinations['rank']])) {
     $destinations['rank'] = current($rank_options);
   }
 
@@ -230,11 +230,11 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
           'method'=>'replace',
         ),
       );
-       
+
       $widget['rank'] = array(
         '#type' => 'select',
         '#options' => $rank_options,
-        // '#default_value' => $destinations['rank'],
+        '#default_value' => $destinations['rank'],
         '#title' => t('Rank'),
         '#attributes' => array('class' => array('field-destinations-widget-tid')),
         '#description' => t('The position of the article in the target'),
@@ -367,178 +367,59 @@ function dpidestinations_field_extra_fields() {
  * Use the formatter according to given layout for destinations views
  */
 function dpidestinations_field_attach_view_alter(&$result, $context) {
-  $display = $context['display'];
-  if (!isset($display['already_altered']) &&
-      isset($display['views_view']) && isset($display['views_field'])) {
-    $view = $display['views_view'];
-    if (isset($view->targetview_tid) && isset($view->targetview_target)) {
-      // Get entity basic informations
-      $entity_type = $context['entity_type'];
-      $entity = $context['entity'];
-      list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+  //@todo Remove this code if no comments
+//   $display = $context['display'];
+//   if (!isset($display['already_altered']) &&
+//       isset($display['views_view']) && isset($display['views_field'])) {
+//     $view = $display['views_view'];
+//     if (isset($view->targetview_tid) && isset($view->targetview_target)) {
+//       // Get entity basic informations
+//       $entity_type = $context['entity_type'];
+//       $entity = $context['entity'];
+//       list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
 
-      // Get destinations from entity
-      static $static_destinations = array();
-      if (!isset($static_destinations[$eid])) {
-        $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
-        $static_destinations[$eid] = $destinations;
-      } else {
-        $destinations = $static_destinations[$eid];
-      }
+//       // Get destinations from entity
+//       static $static_destinations = array();
+//       if (!isset($static_destinations[$eid])) {
+//         $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
+//         $static_destinations[$eid] = $destinations;
+//       } else {
+//         $destinations = $static_destinations[$eid];
+//       }
 
-      if ($destinations) {
-        // Get view mode from destinations
-        $view_mode = FALSE;
-        $tid = $view->targetview_tid;
-        $target = $view->targetview_target;
-        foreach ($destinations as $destination) {
-          if ($destination['tid'] == $tid && $destination['target'] == $target) {
-            $view_mode = $destination['layout'];
-            break;
-          }
-        }
+//       if ($destinations) {
+//         // Get view mode from destinations
+//         $view_mode = FALSE;
+//         $tid = $view->targetview_tid;
+//         $target = $view->targetview_target;
+//         foreach ($destinations as $destination) {
+//           if ($destination['tid'] == $tid && $destination['target'] == $target) {
+//             $view_mode = $destination['layout'];
+//             break;
+//           }
+//         }
 
-        if ($view_mode) {
-          // Load field instance
-          $views_field = $display['views_field'];
-          $field_name = $views_field->field_info['field_name'];
-          $field_instance = field_info_instance($entity_type, $field_name, $bundle);
+//         if ($view_mode) {
+//           // Load field instance
+//           $views_field = $display['views_field'];
+//           $field_name = $views_field->field_info['field_name'];
+//           $field_instance = field_info_instance($entity_type, $field_name, $bundle);
 
-          // Get correct display from the field instance, the view mode and the entity
-          $layout_display = field_get_display($field_instance, $view_mode, $entity);
-          $layout_display['already_altered'] = TRUE; // Avoid infinite loop
-          $langcode = $views_field->field_language($entity_type, $entity);
-          $result[$field_name] = field_view_field($entity_type, $entity, $field_name, $layout_display, $langcode);
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_field_formatter_info().
- *
- * We need to tell Drupal that we have one or more formatters
- * for this field. The default one will display all the information of the quadruplet
- * that define a destination
- * each other will display only one information of the quadruplet
- *
- * @see fdpidestinations_field_formatter_view()
- */
-function dpidestinations_field_formatter_info() {
-  return array(
-    // This formatter just displays the hex value in the color indicated.
-    'destination_default_formatter' => array(
-      'label' => t('Simple text-based formatter of the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_formatter' => array(
-      'label' => t('Simple text-based formatter of the term of the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name  of the destination'),
-      'field types' => array('destination'),
-    ),
-    'destination_main_tid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    'destination_main_tid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    //@todo: http://drupal.stackexchange.com/questions/34823/what-does-the-property-type-key-do-in-hook-field-info/34826#34826
-  );
-}
-
-/**
- * Implements hook_field_formatter_view().
- *
- * Two formatters are implemented.
- * - field_example_simple_text just outputs markup indicating the color that
- *   was entered and uses an inline style to set the text color to that value.
- * - field_example_color_background does the same but also changes the
- *   background color of div.region-content.
- *
- * @see field_example_field_formatter_info()
- */
-function dpidestinations_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
-
-  switch ($display['type']) {
-    // This formatter simply outputs the field as text and with a color.
-    case 'destination_default_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'].'-'.$item['target'].'-'.$item['layout'].'-'.$item['rank'],
-        );
-      }
-      break;
-
-    case 'sectiontid_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'],
-        );
-      }
-      break;
-
-    case 'sectiontid_name_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => taxonomy_term_title($term),
-        );
-      }
-      break;
-
-    case 'sectiontid_name_linked_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-        );
-      }
-      break;
-
-    case 'destination_main_tid_name_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => taxonomy_term_title($term),
-      );
-      break;
-
-    case 'destination_main_tid_name__linked_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-      );
-      break;
-  }
-
-  return $element;
+//           // Get correct display from the field instance, the view mode and the entity
+//           $layout_display = field_get_display($field_instance, $view_mode, $entity);
+//           $layout_display['already_altered'] = TRUE; // Avoid infinite loop
+//           $langcode = $views_field->field_language($entity_type, $entity);
+//           $result[$field_name] = field_view_field($entity_type, $entity, $field_name, $layout_display, $langcode);
+//         }
+//       }
+//     }
+//   }
 }
 
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {
   $array_parents = $form_state['triggering_element']['#array_parents'];
   array_pop($array_parents);
+
   // Iterate over the form parents to find the element.
   $element = $form;
   foreach ($array_parents as $name) {

@@ -78,6 +78,7 @@ function dpidestinations_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+     
       'target' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
@@ -175,6 +176,26 @@ function dpidestinations_schema() {
     ),
     'primary key' => array('targetblockid'),
   );
+  
+  $schema['dpidestinations_targetblock_config'] = array (
+    'description' => 'The target entity table config',
+    'fields' => array(
+      'targetblock_name' => array(
+        'description' => 'the config manchine name',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE
+      ),
+      'serialize_conf' => array(
+        'description' => 'the serialize information for config targetblock',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE
+      ),
+    ),
+    'primary key' => array('targetblock_name'),
+  );
+  
   /*
    $schema['dpidestinations_destinationvariant'] = array (
      'description' => 'The target entity table',
@@ -250,6 +271,14 @@ function dpidestinations_install(){
   $field_info=_dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
   _dpidestination_attach_field_destination_to_bundle('node', 'package');
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+  
+  // Add "view section" permission to anonymous and authenticated user roles
+  $rids = array(1, 2);
+  $permissions = array('view section');
+  foreach ($rids as $rid) {
+    user_role_grant_permissions($rid, $permissions);
+  }
 }
 
 function dpidestinations_uninstall(){
@@ -299,4 +328,29 @@ function dpidestinations_field_schema($field) {
     'indexes' => $indexes,
     'unique keys' => $unique_keys,
   );
+}
+
+/**
+ * Add "view section" permission to anonymous and authenticated user roles
+ */
+function dpidestinations_update_7001() {
+  $rids = array(1, 2);
+  $permissions = array('view section');
+  foreach ($rids as $rid) {
+    user_role_grant_permissions($rid, $permissions);
+  }
+}
+
+function dpidestinations_update_7002() {
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+}
+
+/**
+ * Create targetblock config table
+ */
+function dpidestinations_update_7003() {
+  if (!db_table_exists('dpidestinations_targetblock_config')) {
+    $schema = drupal_get_schema('dpidestinations_targetblock_config', TRUE);
+    db_create_table('dpidestinations_targetblock_config', $schema);
+  }
 }

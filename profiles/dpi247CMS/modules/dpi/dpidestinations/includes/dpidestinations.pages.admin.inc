@@ -61,25 +61,32 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       $items['admin/dpi247/dpidestinations/targetblock']['weight']=9;
 
     }
+    unset($items['admin/dpi247/dpidestinations/targetblock/add']);
     return $items;
   }
-
+  
   /**
    * Builds the entity overview form.
    */
   public function overviewForm($form, &$form_state) {
     //FAKE the exportable behavior cause it is confusing...
     $this->entityInfo['exportable']=FALSE;
-
+    
     if ($filters = $this->overviewFilters()) {
       $form['filters'] = $this->buildFiltersForm($filters);
     }
     // By default just show a simple overview for all entities.
     $form['table'] = $this->overviewTable();
-    $form['pager'] = array('#theme' => 'pager');
+    
+    /* Suppression de l'édition */
+    foreach($form['table']['#rows'] as $k => $row){
+      unset($form['table']['#rows'][$k][7]);
+    }
+    
+    $form['pager'] = array('#theme' => 'pager');       
     return $form;
   }
-
+  
   /**
    * Generates the render array for the overview table for arbitrary entities
    * matching the given conditions.
@@ -119,7 +126,6 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
 
     ctools_include('export');
     $handlers = ctools_export_load_object('page_manager_handlers');
-
     $rows = array();
     $additional_rows = array(
       t('Variant') => '',
@@ -131,11 +137,10 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     );
     foreach ($entities as $entity) {
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($entity->did);
-
       $title = t('undefined');
-      if(isset($handlers[$page_manager_handler_name])) {
-        $title_text = $handlers[$page_manager_handler_name]->conf['title'];
-        $title_link = "admin/structure/pages/nojs/operation/destinations/handlers/".$page_manager_handler_name."/content";
+      if(isset($page_manager_handler_name->name) && isset($handlers[$page_manager_handler_name->name])) {
+        $title_text = $handlers[$page_manager_handler_name->name]->conf['title'];
+        $title_link = "admin/structure/pages/nojs/operation/sections/handlers/".$page_manager_handler_name->name."/content";
         $title = l($title_text, $title_link);
       }
 
@@ -323,12 +328,14 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
     $handlers = ctools_export_load_object('page_manager_handlers');
 
     $targetblocks = dpidestinations_api_get_all_targetblocks();
-
     $variants_options = array();
     foreach($targetblocks as $targetblock) {
       $page_manager_handler_name=_dpidestinations_get_pagemanager_handler_name_for_displayid($targetblock->did);
-      $title_text=$handlers[$page_manager_handler_name]->conf['title'];
-
+      if (isset($page_manager_handler_name->name)){
+        $title_text=$handlers[$page_manager_handler_name->name]->conf['title'];
+      }else{
+        $title_text = "Undefined";
+      }
       $variants_options[$targetblock->did] = $title_text;
     }
 
@@ -533,3 +540,106 @@ function dpidestinations_form_configuration_form_submit($form, &$form_state){
 function _dpidestinations_ajaxcallback_viewname_viewdisplay_config( $form, $form_state){
   return $form["advanced"]['reorder_view']['view_display'];
 }
+
+function dpidestinations_page_admin_default_targetblock(){
+  return drupal_get_form("dpidestinations_page_admin_default_targetblock_form");
+}
+
+function dpidestinations_page_admin_default_targetblock_form($form, &$form_state){
+  $menus = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
+  $default_value = variable_get('dpidestinations_default_targetblock_for_section', array());
+  $result = array();
+  foreach($menus as $k => $v){
+    if($k){
+      $result[$k] = $v;
+    }
+  }
+  $header = array(
+    'Section name',
+    'Targetblock selection',
+  );
+  $rows = array();
+  foreach($result as $key => $menu){
+    $rows['r'.$key] = array();
+    $targetOptions = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $key );
+    $rows[$key]['title'] = array(
+      '#markup' => $menu,
+    );
+    $tmp = array(
+      '#type' => 'select',
+      '#options' => array( 'undefined' => t('Undefined targetblock')) + $targetOptions,
+      '#default_value' => (isset($default_value[$key]['select'])) ? $default_value[$key]['select'] : NULL ,
+    );
+    $rows[$key]['select'] = $tmp;
+  }
+  $form ["table"] = array (
+    "#theme" => "destinations_form_table",
+    "#header" => $header,
+    "rows" => array("#tree" => TRUE)+$rows,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
+  
+  return $form;
+}
+
+function dpidestinations_page_admin_default_targetblock_form_submit($form, &$form_state){
+  if(isset($form_state['values']['rows'])){
+    try {
+      variable_set('dpidestinations_default_targetblock_for_section', $form_state['values']['rows']);
+      drupal_set_message(t('Enregistrement bien effectué'));
+    } catch (Exception $e) {
+      drupal_set_message(t('Une erreur est survenue durant l\'enregistrement'), 'error');
+    }    
+  }
+}
+
+function dpidestinations_get_menu_tree(){
+  module_load_include('inc', 'pathauto', 'pathauto');
+  $json_export = array();
+  $sql = "
+    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
+    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
+    WHERE ml.menu_name = :menu
+    ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
+  $result = db_query($sql, array(':menu' => 'main-menu'), array('fetch' => PDO::FETCH_ASSOC));
+  $links = array();
+  
+  foreach ($result as $item) {
+    $links[] = $item;
+  }
+  $tree = menu_tree_data($links);
+  
+  return $tree;
+}
+
+
+function theme_destinations_form_table(&$variables){
+  $form = $variables ["form"];
+  $rows = $form ["rows"];
+  $header = $form ["#header"];
+  
+  $content = array (
+    "#theme" => "table",
+    "#header" => $header,
+    "#rows" => array (),
+  );
+  
+  foreach ( $rows as $k => $tmp ) {
+    $row = array ();
+    if(strstr($k, '#') ===FALSE){
+      foreach ( $tmp as $key => $el ) {
+        if(strstr($key, '#') ===FALSE){
+          $row[] = render($el);
+        }
+      } 
+    }
+    $content ["#rows"] [] = $row;
+  }
+  
+  return drupal_render ( $content );
+}
+

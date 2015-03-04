@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * Implements hook_schema
+ * 
+ * @return array
+ */
+function dpiservices_schema(){
+  
+  $schemas = array();
+  
+  $schemas['dpiservices_product'] = array(
+    'description' => 'This table is use to create a product in dpiservices settings',
+    'fields' => array(
+      'label' => array(
+        'description' => 'label info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'machine_name' => array(
+        'description' => 'machine name info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'description' => array(
+        'description' => 'description info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'preset' => array(
+        'description' => 'product info',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product' => array(
+        'description' => 'product info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_type' => array(
+        'description' => 'product type info',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'version' => array(
+        'description' => 'json type return',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'dpi',
+      ),
+    ),
+    'indexes' => array(
+      'aid'  => array('label'),
+    ),
+    'primary key' => array('label'),
+  );
+  
+  return $schemas;
+}

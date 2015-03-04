@@ -1,6 +1,9 @@
 <?php
 
 
+module_load_include('inc', 'pipo','pipo.forms');
+
+
 function pipo_entity_info(){
 
   $entities=array();
@@ -168,9 +171,15 @@ function pipo_menu(){
     'access arguments' => array('view section'),
     'type' => MENU_CALLBACK,
   );
+  
+  $items['pipo/ajax_form_example'] = array(
+    'title callback' => 'Ajax',
+    'page callback' => 'pipo_ajax_example',
+    'access arguments' => array('view section'),
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
-
 
 
 

@@ -1,0 +1,28 @@
+/* Images */
+.dnd-library-wrapper .editor-item .meta.type-flickr {
+ background-image: url('icons/image.png');
+}
+/* Audios */
+.dnd-library-wrapper .editor-item .meta.type-soundcloud {
+ background-image: url('icons/audio.png');
+}
+/* Videos */
+.dnd-library-wrapper .editor-item .meta.type-youtube {
+ background-image: url('icons/video.png');
+}
+
+.dnd-library-wrapper .editor-item .meta.type-dailymotion {
+ background-image: url('icons/video.png');
+}
+
+.dnd-library-wrapper .editor-item .meta.type-vimeo {
+ background-image: url('icons/video.png');
+}
+
+.dnd-library-wrapper .editor-item .meta.type-kewego {
+ background-image: url('icons/video.png');
+}
+
+.dnd-library-wrapper .editor-item .meta.type-equipefr {
+ background-image: url('icons/video.png');
+}

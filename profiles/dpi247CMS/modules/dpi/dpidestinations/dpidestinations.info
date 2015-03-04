@@ -7,6 +7,9 @@ core = 7.x
 dependencies[] = entity
 dependencies[] = panels
 dependencies[] = devel
+dependencies[] = rules
+dependencies[] = pathauto
+dependencies[] = panels_ipe
 
 
 ; Entity API controllers

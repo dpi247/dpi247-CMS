@@ -72,9 +72,11 @@ function dnd_element_info_alter(&$types) {
  *   callback should be smart about attachment and detachment
  */
 function dnd_process_textarea($element, $form_state) {
-
   if (!empty($element['#dnd-enabled'])) {
     $element['#attached']['library'][] = array('dnd', 'library');
+    $settings = (array) @$form_state['field'][$element['#field_name']][$element['#language']]['instance']['settings'];
+    $context_default = isset($settings['context_default']) ? $settings['context_default'] : variable_get('dnd_context_default', 'sdl_editor_representation');
+    $element['#attributes']['data-dnd-context'][] = $context_default;
   }
 
   return $element;
@@ -113,6 +115,10 @@ function dnd_library() {
       $path . '/js/dnd-library.js' => array(),
       // javascript workaround for the continue button
       $path . '/js/dnd-modal.js' => array(),
+      // This file is included automatically if the CKEditor plugin is enabled.
+      // However we need to load it directly in Drupal so that strings can be
+      // translated.
+      $path . '/plugins/ckeditor/lang/en.js' => array(),
       // Settings for the library url
       array(
         'type' => 'setting',

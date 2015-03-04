@@ -1,0 +1,286 @@
+<?php
+
+module_load_include('inc', 'dpistat', 'dpistat.api');
+
+/**
+ * Implementation of hook_menu()
+ */
+function dpistat_menu() {
+  $items = array();
+
+  $items[DPI_ADMIN_PATH.'/dpistat'] = array(
+    'title' => t('DPI Statistics Settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpistat_page_admin_general_settings_form'),
+    'access arguments' => array('administer statistics'),
+    'file' => 'includes/dpistat.pages.admin.inc',
+  );
+
+  $items[DPI_ADMIN_PATH.'/dpistat/settings'] = array(
+    'title' => t('General settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpistat_page_admin_general_settings_form'),
+    'access arguments' => array('administer statistics'),
+    'file' => 'includes/dpistat.pages.admin.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  $items[DPI_ADMIN_PATH.'/dpistat/generate'] = array(
+    'title' => t('Generate random statistics'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpistat_page_admin_generate_stats_form'),
+    'access arguments' => array('administer statistics'),
+    'file' => 'includes/dpistat.pages.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items['admin/dpistat/showstats/%'] = array(
+    'page callback' => 'dpistat_show_stats',
+    'page arguments' => array(3),
+    'access arguments' => array('access statistics'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/dpistat.stats_follower.inc',
+  );
+
+  $items['admin/dpistat/setdisplayfollower/%'] = array(
+    'page callback' => 'dpistat_set_display_follower',
+    'page arguments' => array(3),
+    'access arguments' => array('access statistics'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/dpistat.stats_follower.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission().
+ */
+function dpistat_permission() {
+  return array(
+    'administer statistics' =>  array(
+      'title' => t('Access and manage statistics'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_dpilog_register
+ */
+function dpistat_dpilog_register() {
+  return array(
+    'dpistat' => array(
+      'actions' => array('record'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function dpistat_theme() {
+  $module_path = drupal_get_path('module', 'dpistat');
+  $base = array(
+    'path' => $module_path.'/templates',
+    'file' => 'theme.inc',
+  );
+
+  return array(
+    'dpistat_show_stats_48h' => $base + array(
+      'variables' => array('nid' => NULL, 'width' => '300px', 'height' => '250px', 'display_title' => TRUE, 'jsprint' => FALSE),
+      'template' => 'dpistat-show-stats-48h',
+    ),
+    'dpistat_show_stats_param' => $base + array(
+      'variables' => array('nid' => NULL, 'param_i' => 0, 'params_callback' => array(), 'width' => '400px', 'height' => '250px', 'display_title' => TRUE, 'jsprint' => FALSE),
+      'template' => 'dpistat-show-stats-param',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_cron()
+ */
+function dpistat_cron(){
+  dpi_log('dpistat', 'record', 'DPI Stats started : '.date('Y-m-d H:i:s'));
+
+  if (lock_acquire('dpistat_cron_semaphore', 1200)) {
+    module_load_include('inc', 'dpistat', 'includes/dpistat.process');
+
+    // Register shutdown callback
+    register_shutdown_function('lock_release', 'dpistat_cron_semaphore');
+
+    // Call the function calling the flows
+    dpistat_process_cron();
+  } else {
+    dpi_log('dpistat', 'record', 'Process already running.');
+  }
+  
+  dpi_log('dpistat', 'record', 'DPI Stats finished : '.date('Y-m-d H:i:s'));
+}
+
+/**
+ * Implementation of hook_init()
+ */
+function dpistat_init() {
+  if (arg(0) == 'node' && arg(1) != '' && is_numeric(arg(1)) && arg(2) == NULL) {
+    if ($vars['node'] = node_load(arg(1))) {
+      module_load_include('inc', 'dpistat', 'includes/dpistat.updater_helpers');
+      dpistat_add_updater_callback($vars);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory() to let the system know
+ * we implement task and task_handler plugins.
+ */
+function dpistat_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function dpistat_ctools_plugin_api() {
+  return array(
+    'version' => 2,
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function dpistat_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpistat') .'/views',
+  );
+}
+
+/**
+ * Implementation of hook_ccidynamicfeedback_options
+ */
+function dpistat_ccidynamicfeedback_options($op, $delta = '', $node = NULL) {
+  switch ($op) {
+    case 'list':
+      return array(
+      'comments_count' => t('Comments count'),
+      'views_count' => t('Total views count'),
+      'hourly_count' => t('Last hour count'),
+      //'48h_chart' => t('Last 48 hours chart'),
+      //'param1_chart' => t('First parameter chart'),
+      );
+
+    case 'content':
+      $datas = array();
+      switch ($delta) {
+        case 'comments_count':
+          $datas = array(
+          'label' => t('Comments'),
+          'value' => $node->comment_count,
+          );
+          break;
+
+        case 'views_count':
+          $counts = dpistat_api_node_get_counts($node->nid);
+          if (isset($counts[0]['totalcount'])) {
+            $datas = array(
+              'label' => t('Total views count'),
+              'value' => $counts[0]['totalcount'],
+            );
+          }
+          break;
+
+        case 'hourly_count':
+          $hourly_counts = dpistat_api_node_get_hourly_counts($node->nid);
+          if (!empty($hourly_counts)) {
+            $most_recent_time = max(array_keys($hourly_counts));
+            $datas = array(
+              'label' => t('Last hour count'),
+              'value' => $hourly_counts[$most_recent_time],
+            );
+          }
+          break;
+          /*
+           case '48h_chart':
+          $datas = array(
+            'label' => '',
+            'value' => theme('wallystat_show_stats_48h', $node->nid),
+          );
+          break;
+
+          case 'param1_chart':
+          if ($params_callback = variable_get('wallystat_param_1', FALSE)) {
+          $datas = array(
+            'label' => '',
+            'value' => theme('wallystat_show_stats_param', $node->nid, 1, $params_callback),
+          );
+          }
+          break;
+          */
+      }
+      return $datas;
+  }
+}
+
+/**
+ * Implementation of hook_panels_pane_content_alter()
+ */
+function dpistat_panels_pane_content_alter(&$content, $pane, $args, $context, $renderer, $display) {
+  // Add contextual link to enable or disable live statistics
+  if ($pane->type == 'targetblock' && user_access('access statistics')) {
+    if (dpi_variable_get('dpistat_display_follower', 0)) {
+      $content->admin_links[] = array(
+        'title' => t('Disable live statistics'),
+        'href' => 'admin/dpistat/setdisplayfollower/0',
+        'query' => array('destination' => $_GET['q']),
+      );
+    } else {
+      $content->admin_links[] = array(
+        'title' => t('Enable live statistics'),
+        'href' => 'admin/dpistat/setdisplayfollower/1',
+        'query' => array('destination' => $_GET['q']),
+      );
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_view_alter
+ */
+function dpistat_node_view_alter(&$build, $type) {
+  if (isset($build['#node'])) {
+    $node = $build['#node'];
+    // Add div, JS and CSS to display live statistics in overlay
+    if (isset($node->targetview_destination) && dpi_variable_get('dpistat_display_follower', 0) && user_access('access statistics')) {
+      static $first_load = TRUE;
+
+      drupal_add_css(drupal_get_path('module', 'dpistat').'/css/follower.css');
+      $nid = $node->nid;
+      if (!isset($build['#prefix'])) {
+        $build['#prefix'] = '';
+      }
+      $build['#prefix'] = '<span class = "dpistat_follower" id = "'.$nid.'">'.$build['#prefix'];
+      if (!isset($build['#suffix'])) {
+        $build['#suffix'] = '';
+      }
+      $build['#suffix'] .= '</span>';
+      drupal_add_js(drupal_get_path('module', 'dpistat').'/js/display_stats_follower.js');
+
+      drupal_add_js(drupal_get_path('module', 'dpicommons').'/js/googleChartApi.js');
+      if ($first_load) {
+        drupal_add_js('
+          (function($) {
+            $(document).ready(function() {
+              setTimeout(function(){google.load("visualization", "1", {"callback":"console.log()", "packages":["corechart"]})}, 1);
+            });
+          })(jQuery);', 'inline');
+        $first_load = FALSE;
+      }
+    }
+  }
+}

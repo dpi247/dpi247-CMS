@@ -1,0 +1,6 @@
+name = DPI DAM Search Widgets
+description = Implement some block for search and results
+package = "DPI"
+core = "7.x"
+
+dependencies[] = dpidam

@@ -20,6 +20,9 @@ require_once 'scald.constants.inc';
 function scald_admin_dashboard() {
   $types = scald_types();
 
+  $message = '<p>' . t('This is the Scald administration dashboard. It allows to manage <em>Atom Types</em> (entity bundles) and <em>Representation Contexts</em> (entity view modes). In each context, it is possible to choose which <em>transcoder</em> (for Image atoms, it is image style) is used and how atom is rendered using different <em>players</em>. The context settings is for the atom itself, while "manage display" is to controlled how are fields displayed. If you are strange to the terminology, please read the short <a href="@readme">README.txt</a> or the long <a href="@doc">documentation pages</a>.', array('@readme' => 'http://drupalcode.org/project/scald.git/blob/refs/heads/7.x-1.x:/README.txt', '@doc' => 'https://drupal.org/node/1652740')) . '</p>';
+  drupal_set_message($message);
+
   $content = '<h3>' . t('Scald Unified Atom Types') . '</h3>';
   $content .= '<p>' . t('List of Scald Unified Atom Types. Each type is an entity bundle and has different fields, displays and contexts. Multiple providers (e.g. local image provider, Flickr provider) can provide atoms of the same type and share the same transcoders, players.') . '</p>';
 
@@ -29,20 +32,25 @@ function scald_admin_dashboard() {
       t('Name'),
       array(
         'data' => t('Actions'),
-        'colspan' => 4,
+        'colspan' => module_exists('i18n_string') ? 5 : 4,
       ),
     ),
     'rows' => array(),
   );
 
   foreach ($types as $type) {
-    $table['rows'][] = array(
-      check_plain($type->title),
+    $rows = array(
+      check_plain(scald_type_property_translate($type)),
       l(t('edit'), 'admin/structure/scald/' . $type->type),
       l(t('manage fields'), 'admin/structure/scald/' . $type->type . '/fields'),
       l(t('manage display'), 'admin/structure/scald/' . $type->type . '/display'),
       l(t('contexts'), 'admin/structure/scald/' . $type->type . '/contexts'),
     );
+    // Add a 'translate' action if Internationalization is enabled.
+    if (module_exists('i18n_string')) {
+      $rows[] = l(t('translate'), 'admin/structure/scald/' . $type->type . '/translate');
+    }
+    $table['rows'][] = $rows;
   }
 
   $content .= theme('table', $table);
@@ -188,27 +196,28 @@ function scald_admin_type_form_submit($form, &$form_state) {
 
   foreach ($form_state['values'] as $key => $value) {
     if (drupal_substr($key, 0, 5) == 'type_') {
-      switch (drupal_substr($key, -6)) {
-        case '_title':
+      $setting = substr($key, strlen(_scald_parse_machine_name($key)) + 1);
+      switch ($setting) {
+        case 'title':
           db_update('scald_types')
             ->fields(array('title' => $value))
             ->condition('type', $type)
             ->execute();
           break;
 
-        case '_thumb':
+        case 'thumb':
           $scald_atom_defaults[$type]->thumbnail_source = $value;
           break;
 
-        case '_descr':
+        case 'descr':
           $scald_atom_defaults[$type]->description = $value;
           break;
 
-        case '_utype':
+        case 'utype':
           $scald_atom_defaults[$type]->upload_type = $value;
           break;
 
-        case '_actin':
+        case 'actin':
           $actions = scald_actions();
           $bitmask = 0;
           foreach ($actions as $name => $action) {
@@ -483,6 +492,25 @@ function scald_admin_contexts_form($form, $form_state, $type) {
       '#prefix' => '<div id="' . $name . '-player-settings">',
       '#suffix' => '</div>',
     );
+
+    $context_config = scald_context_config_load($name);
+    $form[$name][$name . '_dimensions'] = array(
+      '#type'         => 'fieldset',
+      '#title'        => t('Dimensions'),
+      '#description'  => t('Context width and height are used to hint the Scald rendering process to fit into the specified dimensions. While transcoder is about what to be displayed, the dimensions are about how large an atom is displayed. The unit could be omitted: "200px", "80%" or simply "150" etc.'),
+    );
+    $form[$name][$name . '_dimensions'][$name . '_width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Width'),
+      '#size' => 20,
+      '#default_value' => isset($context_config->data['width']) ? $context_config->data['width'] : '',
+    );
+    $form[$name][$name . '_dimensions'][$name . '_height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Height'),
+      '#size' => 20,
+      '#default_value' => isset($context_config->data['height']) ? $context_config->data['height'] : '',
+    );
   }
 
   $form['submit'] = array(
@@ -497,7 +525,7 @@ function scald_admin_contexts_form($form, $form_state, $type) {
  * Re-generates the player settings form.
  */
 function scald_admin_contexts_player_ajax($form, $form_state) {
-  $context_name = substr($form_state['triggering_element']['#name'], 0, -6);
+  $context_name = _scald_parse_machine_name($form_state['triggering_element']['#name']);
   return $form[$context_name][$context_name . '_player_settings'];
 }
 
@@ -511,11 +539,17 @@ function scald_admin_contexts_form_submit($form, &$form_state) {
   drupal_set_message(t('Context transcoders settings saved'));
   $typename = $form_state['build_info']['args'][0]->type;
   $players = scald_players();
+  $contexts = scald_contexts();
+
   foreach ($form_state['values'] as $key => $value) {
-    switch (drupal_substr($key, -6)) {
+    $context = _scald_parse_machine_name($key);
+    $setting = substr($key, strlen($context) + 1);
+    if (!isset($contexts[$context])) {
+      continue;
+    }
+    switch ($setting) {
       // Handle transcoders submission.
-      case '_trans':
-        $context = drupal_substr($key, 0, -6);
+      case 'trans':
         $transcoder = $value;
         $context_config = scald_context_config_load($context);
         $context_config->transcoder[$typename]['*'] = $transcoder;
@@ -523,14 +557,20 @@ function scald_admin_contexts_form_submit($form, &$form_state) {
         break;
 
       // Handler players submission.
-      case '_playe':
-        $context = drupal_substr($key, 0, -6);
+      case 'playe':
         $context_config = scald_context_config_load($context);
         $context_config->player[$typename]['*'] = $value;
         // Load and save default settings for the player.
-        if (!isset($context_config->player[$typename]['settings']) && isset($players[$value]['settings'])) {
+        if (empty($context_config->player[$typename]['settings']) && isset($players[$value]['settings'])) {
           $context_config->player[$typename]['settings'] = $players[$value]['settings'];
         }
+        scald_context_config_save($context_config);
+        break;
+
+      case 'width':
+        $context_config = scald_context_config_load($context);
+        $context_config->data['width'] = $form_state['values'][$context . '_width'];
+        $context_config->data['height'] = $form_state['values'][$context . '_height'];
         scald_context_config_save($context_config);
         break;
     }
@@ -565,8 +605,8 @@ function scald_settings_form() {
   // Scald tags vocabulary configuration.
   $options = array();
   $vocabularies = taxonomy_get_vocabularies();
-  foreach ($vocabularies as $vid => $vocabulary) {
-    $options[$vid] = $vocabulary->name;
+  foreach ($vocabularies as $vocabulary) {
+    $options[$vocabulary->machine_name] = $vocabulary->name;
   }
   $form['scald_tags_vocabulary'] = array(
     '#type' => 'select',
@@ -582,20 +622,26 @@ function scald_settings_form() {
   return system_settings_form($form);
 }
 
+/**
+ * Returns the machine name from element name.
+ *
+ * Element name is built on {machine name}_{setting name} where 'machine name'
+ * is either type, context machine name or anything else. Historically, the
+ * 'setting name' is limited to exactly 5 characters for easy parsing.
+ */
+function _scald_parse_machine_name($element_name) {
+  $position = strrpos($element_name, '_');
+  return substr($element_name, 0, $position);
+}
 
 /**
  * Handles the admin settings form submission.
  */
 function scald_settings_form_submit($form, &$form_state) {
-  // Find the selected vocabulary.
-  $vocabularies = taxonomy_get_vocabularies();
-  $vocabulary = $vocabularies[$form_state['values']['scald_tags_vocabulary']];
-
-  // Fetch info on the scald_tags taxonomy reference field.
+  // Fetch info on the scald_tags taxonomy reference field and changed
+  // the allowed vocabulary.
   $field = field_info_field('scald_tags');
-
-  // Change the vocabulary used for this field.
-  $field['settings']['allowed_values'][0]['vocabulary'] = $vocabulary->machine_name;
+  $field['settings']['allowed_values'][0]['vocabulary'] = $form_state['values']['scald_tags_vocabulary'];
   field_update_field($field);
 }
 

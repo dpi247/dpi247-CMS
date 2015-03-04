@@ -1,7 +1,17 @@
 <?php 
 
+define("DPICACHE_NULL_URL_PARAMETER",'dpicache_null');
+define("DPICACHE_EMPTYSTRING_URL_PARAMETER",'dpicache_emptystring');
+define('DPICACHE_ESI_PANELS_REQUIRED_CTOOLS_API', '1.7.2');
+
+
+module_load_include('inc', 'dpicache','varnish');
 module_load_include('inc', 'dpicache','dpicache.api');
 module_load_include('inc', 'dpicache','dpicache.private');
+
+
+module_load_include('inc', 'dpicache','dpicache.esi.block');
+module_load_include('inc', 'dpicache','dpicache.esi.panels');
 
 /**
  * Implementation of hook_menu
@@ -9,21 +19,87 @@ module_load_include('inc', 'dpicache','dpicache.private');
 function dpicache_menu(){
   $items=array();
 
+  /**
+   * Regenerate url section
+   */
   $items['dpicache/regenerate/one_cache_entry/%'] = array(
-    'page callback' => '_dpicache_regenerate_one_cache_entry_callback',
+    'page callback' => 'dpicache_api_regenerate_one_cache_entry_callback',
     'page arguments' => array(3),
     'access arguments' => array('dpicache flush caches'),
     'type' => MENU_CALLBACK,
   );
 
   $items['dpicache/regenerate/all_cache_entry/%'] = array(
-    'page callback' => '_dpicache_regenerate_all_cache_entry_callback',
+    'page callback' => 'dpicache_api_regenerate_all_cache_entry_callback',
     'page arguments' => array(3),
     'access arguments' => array('dpicache flush caches'),
     'type' => MENU_CALLBACK,
   );
 
+  /**
+   * Administration of dpicache
+   */
+  $items['admin/dpi247/dpicache'] = array(  
+    'title' => 'DPI cache',           
+    'description'=>'Administer dpicache settings, desactivate esi renderding,...',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpicache_pages_form_esi_settings_form'),
+    'access arguments' => array('administer dpicache'),
+    'file'=>'dpicache.pages.esi_settings.inc',
+    'file path' => drupal_get_path('module', 'dpicache').'/includes',    
+  );
+  
+  $items['admin/dpi247/dpicache/esi'] = array(
+    'title' => 'Manage ESI cache',    
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  
+  /*$items['admin/dpi247/dpicache/config'] = array(
+    'title' => 'config',
+    'description'=>'Administer dpicache settings, desactivate esi renderding,...',
+    'access arguments' => array('administer dpicache'),
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpicache_pages_form_esi_settings_form'),
+    'file'=>'dpicache.pages.settings.inc',
+    'file path' => drupal_get_path('module', 'dpicache').'/includes',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );*/
+  
+  $items['admin/dpi247/dpicache/dpicache_clear'] = array(
+    'title' => 'Manage DpiCache clear',
+    'description'=>'Manage cache of dpi cache ()',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpicache_pages_form_cache_clear_form'),
+    'access arguments' => array('administer dpicache'),
+    'file'=>'dpicache.pages.cache_clear.inc',
+    'file path' => drupal_get_path('module', 'dpicache').'/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
   return $items;
+}
+
+
+function dpicache_flush_caches() {
+  return array('cache_dpicache');
+}
+
+/**
+ * Implementation of hook_permission
+ */
+function dpicache_permission() {
+  return array(
+    'dpicache flush caches' => array(
+      'title' => t('Flush dpicache'),
+      'description' => t('force flush and regeneration of dpi cache.'),
+    ),
+    'administer dpicache' => array(
+      'title' => t('Administer dpicache'),
+      'description' => t('Administer dpicache.'),
+    ),
+  );
 }
 
 /**
@@ -38,6 +114,8 @@ function dpicache_cron() {
 
 /**
  * Implementation of hook_dpilog_register
+ * 
+ * @return multitype:multitype:multitype:string
  */
 function dpicache_dpilog_register(){
   return array(
@@ -45,4 +123,388 @@ function dpicache_dpilog_register(){
       "actions"=>array("manual_regeneration_of_cache_entry", "manual_regeneration_of_cache_name", "cache_hit", "cache_miss", 'regenerate_hot', 'regenerate_cold', 'error'),
     )
   );
+}
+
+
+
+
+/**
+ * Implements hook_esi_component().
+ *
+ * @see ddpicache_block__esi_block_prepare()
+ * @see dpicache_block__esi_block_render()
+ */
+function dpicache_esi_component_info() {
+  return array(
+    'block' => array(
+      'preprocess' => 'dpicache_block__esi_block_prepare',
+      'render'     => 'dpicache_block__esi_block_render',
+      'flush'      => 'dpicache_block__esi_block_flush',
+      'file'       => 'dpicache.esi.block.inc',
+    ),
+    'panels_pane' => array(
+        'preprocess' => 'dpicacheesi_panels__esi_pane_prepare',
+        'render'     => 'dpicacheesi_panels__esi_pane_render',
+        'flush'      => 'dpicacheesi_panels__esi_pane_flush',
+        'file'       => 'dpicache.esi.panels.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function dpicache_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', DPICACHE_ESI_PANELS_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+
+  // We don't support the 'ctools' 'cache' plugin and pretending to causes
+  // errors when they're in use.
+  if ($module == 'ctools' && $plugin == 'cache') {
+    return;
+    // if we did we'd make a plugin/ctools_cache or something.
+  }
+
+  if ($module == 'page_manager' || $module == 'panels' || $module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Register display_renderer plugin types.
+ */
+function dpicache_ctools_plugin_type() {
+  return array(
+      'display_renderers' => array(
+          'classes' => array('renderer'),
+      ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Inform CTools about version information for various plugins implemented by
+ * Panels.
+ *
+ * @param string $owner
+ *   The system name of the module owning the API about which information is
+ *   being requested.
+ * @param string $api
+ *   The name of the API about which information is being requested.
+ */
+function dpicache_ctools_plugin_api($owner, $api) {
+  if ($owner == 'panels' && $api == 'pipelines') {
+    return array(
+        'version' => 1,
+    );
+  }
+}
+
+
+
+/**
+ * Implements hook_page_alter().
+ */
+function dpicache_page_alter(&$page) {
+
+  if(!variable_get('dpicache_disable_esi', FALSE)){
+    // The block system hard-codes some aspects of block information
+    // in _block_get_renderable_array().
+    // ESI blocks need to:
+    // - Remove the contextual-links data.
+    // - Remove the 'block' theme wrapper.
+    foreach (element_children($page) as $region_key) {
+      foreach (element_children($page[$region_key]) as $block_key) {
+        if (isset($page[$region_key][$block_key]['#block']) && is_object($page[$region_key][$block_key]['#block']) && !empty($page[$region_key][$block_key]['#block']->esi_enabled)) {
+          // Remove contextual-links.
+          unset($page[$region_key][$block_key]['#contextual_links']);
+          // Remove the theme wrapper.
+          unset($page[$region_key][$block_key]['#theme_wrappers']);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_block_list_alter().
+ *
+ * @see _block_load_blocks()
+ */
+function dpicache_block_list_alter(&$block_info) {
+
+  if(!variable_get('dpicache_disable_esi', FALSE)){
+
+    // Remove the blocks which have been marked as being served via ESI, and
+    // replace the blocks with the ESI handler.
+    // Altering the blocks here (rather than in the theme layer) is more
+    // performant because the overhead of block-generation (for a block which
+    // won't be rendered) is removed.
+    foreach ($block_info as $key => $block) {
+      if ($block->esi_enabled) {
+        // Preserve the original module-delta combination and pass to ESI as the
+        // replacement block's new delta.
+        // The format allows the delta to be gracefully split into the original
+        // module:delta components but still conforms to the standards which let
+        // the module:delta be used in constructing function names - for
+        // altering, themeing, etc.
+        $new_delta = dpicache__new_delta($block->module, $block->delta);
+        $block_info[$key]->module = 'dpicache';
+        $block_info[$key]->delta  = $new_delta;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function dpicache_block_view($delta) {
+  // At this stage, the region where the block is being rendered isn't
+  // provided.  Return an empty content value, and the content will be
+  // populated once hook_block_view_alter() is invoked.
+
+  return array(
+    'content' => array('#markup' => ''),
+  );
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * for block_admin_configure
+ *   Add ESI-configuration options to the block-config pages.
+ */
+function dpicache_form_block_admin_configure_alter(&$form, $form_state) {
+
+  if(! variable_get('dpicache_disable_esi', FALSE)){
+
+    $module = $form['module']['#value'];
+    $delta  = $form['delta']['#value'];
+    $block = block_load($module, $delta);
+
+
+
+    $form['visibility']['role']['roles']['#default_value']=unserialize($block->esi_roles);
+
+    $element['esi_config'] = array(
+      '#title'        => t('<acronym title="Edge Side Includes">ESI</acronym> settings'),
+      '#type'         => 'fieldset',
+      '#description'  => t('Control how this block is cached on an ESI-enabled reverse proxy.'),
+      '#collapsible'  => TRUE,
+      // Only open the block is ESI is enabled.
+      '#collapsed'    => empty($block->esi_enabled),
+    );
+    $element['esi_config']['esi_enabled'] = array(
+      '#title' => t('Enable ESI'),
+      '#type' => 'checkbox',
+      '#default_value' => $block->esi_enabled,
+    );
+    $element['esi_config']['esi_ttl'] = array(
+      '#title' => t('Cache Maximum Age (TTL)'),
+      '#type' => 'select',
+      '#options' => esi_max_age_options($block->esi_ttl),
+      '#default_value' => (is_null($block->esi_ttl)) ? ESI_DEFAULT_TTL : $block->esi_ttl,
+      '#description' => t('The maximum time (in seconds) that proxies or external caches should cache this individual block.'),
+    );
+
+    // Target the "visibility_title" vertical-tabs, and inject the form elements
+    // before them.
+    if ($index = array_search('visibility_title', array_keys($form))) {
+      $form = array_slice($form, 0, $index) + $element + array_slice($form, $index);
+    }
+    else {
+      $form += $element;
+    }
+
+    // The form only saves particular fields. Add a submit handler to save the
+    // ESI data.
+    array_unshift($form['#submit'], 'dpicache_block_admin_configure_submit');
+  }
+}
+
+/**
+ * Submit handler for the block_admin_configure form.
+ *
+ * This sublit is added only if variable_get('dpicache_disable_esi') return TRUE
+ *
+ * @see dpicache_form_block_admin_configure_alter()
+ */
+function dpicache_block_admin_configure_submit($form, &$form_state) {
+
+  //We remove drupal role and relace with esi role visibility
+  $role_visibility=$form_state["values"]['roles'];
+  foreach($form_state["values"]['roles'] as $id){
+    $form_state["values"]['roles'][$id]=0;
+  }
+  // The regular block-configuration form only saves particular fields. This
+  // submit handler stores the ESI-specific data.
+  dpicache__set_esi_settings($form_state['values']['module'], $form_state['values']['delta'], (bool) $form_state['values']['esi_enabled'], (int) $form_state['values']['esi_ttl'],$role_visibility);
+
+}
+
+/**
+ * Configure the ESI settings for a particular block.
+ *
+ * @param String $module
+ * Module implementing the block.
+ * @param String $delta
+ * The block's delta.
+ * @param Boolean $esi_enabled
+ * Set to TRUE if this block should be served by ESI.
+ * @param Int $esi_ttl
+ * Time-to-live: cache lifetime for this block when served by ESI.
+ */
+function dpicache__set_esi_settings($module, $delta, $esi_enabled, $esi_ttl,$roles_visibility) {
+  $transaction = db_transaction();
+  try {
+    db_update('block')
+    ->fields(array(
+    'esi_enabled' => (int) $esi_enabled,
+    'esi_ttl'     => (int) $esi_ttl,
+    'esi_roles'     => serialize( $roles_visibility),
+    ))
+    ->condition('module', $module)
+    ->condition('delta', $delta)
+    ->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('ESI block', $e);
+    throw $e;
+  }
+}
+
+/**
+ * Convert $module and $delta to and from the new encoded $delta.
+ *
+ * @example
+ * $new_delta = dpicache__new_delta($module, $delta);
+ * @example
+ * list($module, $delta) = dpicache__new_delta($new_delta);
+ */
+function dpicache__new_delta() {
+  $args = func_get_args();
+
+  // Pass 2 arguments to convert from $module, $delta to the new $delta.
+  if (count($args) == 2) {
+    $module = $args[0];
+    $delta = $args[1];
+    $new_delta = 's' . strlen($module) . '_' . $module . '_' . $delta;
+    return $new_delta;
+  }
+
+  // Pass 1 argument (the new $delta) to convert back to $module, $delta.
+  else if (count($args) == 1) {
+    $new_delta = $args[0];
+    // Strip the prefixed 's' from the size value.
+    list($size, $delta) = explode('_', substr($new_delta, 1), 2);
+    $module = substr($delta, 0, $size);
+    $delta = substr($delta, $size + 1);
+    return array($module, $delta);
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * Ensure that varnish's connection is good.
+ */
+function varnish_requirements($phase) {
+  if ($phase == 'runtime') {
+    $requirements = array();
+    $requirements['varnish']['title'] = t('Varnish status');
+    $status = varnish_get_status();
+    foreach ($status as $terminal => $state) {
+      list($server, $port) = explode(':', $terminal);
+      if (!$state) {
+        $requirements['varnish']['value'] = t('Varnish connection broken');
+        $requirements['varnish']['severity'] = REQUIREMENT_ERROR;
+        $requirements['varnish']['description'] = t('The Varnish control terminal is not responding at %server on port %port.', array('%server' => $server, '%port' => $port));
+        return $requirements;
+      }
+      else {
+        $version = floatval(variable_get('varnish_version', 2.1));
+        if ($version <= 2.1) {
+          $requirements['varnish']['value'] = t('Varnish is running. Observe more detailed statistics !link.', array('!link' => l(t('here'), 'admin/reports/varnish')));
+        }
+        else {
+          $requirements['varnish']['value'] = t('Running');
+        }
+      }
+    }
+    return $requirements;
+  }
+}
+
+/**
+ * Implementation of hook_dpidashboard_status_item().
+ *
+ * @return array
+ *   An array containing associative arrays with statuses
+ */
+function dpicache_dpidashboard_status_item() {
+	if(!variable_get('dpicache_disable_esi', FALSE)){ 
+		$dpicacheblockstatus = 0;
+		$dpicacheblockmessage = t('Cache is enabled');
+	} else {
+		$dpicacheblockstatus = 3;
+		$dpicacheblockmessage = t('Cache is disabled');
+	}
+	
+	if(dpi_variable_get('dpicache_disable_dpicache_utilisation', 0)==0){ 
+		$dpicachesystemstatus = 0;
+		$dpicachesystemmessage = t('Cache is enabled');
+	} else {
+		$dpicachesystemstatus = 3;
+		$dpicachesystemmessage = t('Cache is disabled');
+	}
+	
+	$status = array(
+		array(
+			'title' 	=> t('DPI Cache ESI block'),
+			'status'	=> $dpicacheblockstatus,
+			'message'	=> $dpicacheblockmessage,
+			'link'		=> '/admin/dpi247/dpicache/esi',
+		),
+		array(
+			'title' 	=> t('DPI Cache ESI caching system'),
+			'status'	=> $dpicachesystemstatus,
+			'message'	=> $dpicachesystemmessage,
+			'link'		=> '/admin/dpi247/dpicache/dpicache_clear',
+		)
+	);
+	
+	$vstatus = varnish_get_status_detail();
+	
+	while (list($server,$stat) = each($vstatus)) {
+		switch($stat) {
+			case VARNISH_SERVER_STATUS_DETAIL_UP:
+				$vanishstatus = 0;
+				$varnishmessage = t('Server is up and running');
+				break;	
+			case VARNISH_SERVER_STATUS_DETAIL_STOPPED:
+				$vanishstatus = 2;
+				$varnishmessage = t('Server is up but STOPPED');
+				break;	
+			default:
+				$vanishstatus = 3;
+				$varnishmessage = t('Server is not responding');
+		}
+		$status[] = 	
+		array(
+			'title'		=> 'Varnish ['.$server.'] status',
+			'status'	=> $vanishstatus,
+			'message'	=> $varnishmessage,
+			'link'		=> '/admin/dpi247/dpicache'
+		);
+	}
+	
+	return $status;	
 }

@@ -1,0 +1,633 @@
+<?php
+
+/**
+ * Implements hook_scald_atom_providers.
+ * Add to scald a bunch of providers.
+ */
+function dpiscald_scald_atom_providers() {
+  return array (
+    'twitter' => 'DPI Tweets hosted on Twitter',
+    'embedly' => 'DPI Media embedded through Embed.ly',
+    'googlemap' => 'DPI Maps hosted on Google Maps',
+    'storify' => 'DPI Storify ressources hosted on Storify',
+    'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
+    'picktochart' => 'DPI Media hosted on Picktochart',
+    'scribblelive' => 'DPI Media hosted on Scribblelive',
+    'facebook_status' => 'DPI Facebook status ressources hosted on Facebook',
+    'infogram' => 'DPI Infogram ressources hosted on Infogram',
+    'slideshare' => 'DPI Slideshare ressources hosted on Slideshare',
+    'idalgo' => 'DPI Idalgo ressources hosted on Idalgo',
+  );
+}
+
+/**
+ * Implements hook_scald_atom_providers_alter().
+ * Add manualy the providers in the module scald, to merge them in the different types lists (image, audio, video).
+ */
+function dpiscald_scald_atom_providers_alter(&$types){
+  //images
+  $types['image']['dpiscald_flickr'] ='DPI Images on Flickr';
+  //audios
+  $types['audio']['dpiscald_soundcloud'] ='DPI Sounds on Soundcloud';
+  $types['audio']['dpiscald_deezer'] = 'DPI Sounds on Deezer';
+  $types['audio']['dpiscald_spotify'] = 'DPI Sounds on Spotify';
+  //videos
+  $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
+  $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
+  $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
+  $types['video']['dpiscald_videortl'] ='DPI Videos on RTL';
+  $types['video']['dpiscald_vimeo'] = 'DPI Videos on Vimeo';
+  $types['video']['dpiscald_youtube'] ='DPI Videos on Youtube';
+}
+
+
+/**
+ * Implements hook_views_plugins_alter().
+ * Used to hide the providers merged with the hook_scald_atom_providers_alter.
+ */
+function dpiscald_views_plugins_alter(&$views_plugins){
+  $views_plugins['display']['dnd_library']['handler'] = 'dpiscald_plugin_display_library';
+  $views_plugins['display']['dnd_library']['path'] = 'sites/default/modules/dpiscald/includes';
+}
+
+/**
+ * Implements hook_scald_add_form().
+ * Call the right hook_scald_add_form for the given provider (the clicked one).
+ */
+function dpiscald_scald_add_form(&$form, &$form_state) {
+  $type=$form_state['scald']['type']->type;
+  //$type='youtube';
+  module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
+  $function_name='dpiscald_'.$type.'_scald_add_form';
+  $function_name($form, $form_state);
+}
+
+/**
+ * Implements hook_scald_add_form_fill().
+ * Called after the hook_scald_add_form had been submit (and validate).
+ */
+function dpiscald_scald_add_form_fill(&$atom, $form, $form_state) {
+  $type=$form_state['scald']['type']->type;
+  module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
+  $function_name='dpiscald_'.$type.'_scald_add_form_fill';
+  return $function_name($atom, $form, $form_state);
+}
+
+/**
+ * Implements hook_scald_prerender().
+ * Called at the creation and at the rendering of an atom.
+ */
+function dpiscald_scald_prerender($atom, $context, $options, $mode) {
+  if (startsWith($atom->provider,'dpiscald') && $atom->type!='flickr') {
+    $type = $atom->type;
+    if (startsWith($type, 'dpiscald_')){
+      $type = explode('_',$type);
+      $type = $type[1];
+    }
+    module_load_include ( 'inc', 'dpiscald', 'providers/' . $type . '/' . $type );
+    $function_name = 'dpiscald_' . $type . '_scald_prerender';
+    $function_name ( $atom, $context, $options, $mode );
+  }
+  if (!isset($atom->rendered->player)) {
+    _dpiscald_image_prerender($atom, $context, $options, $mode);
+  }
+
+  $config = scald_context_config_load($context);
+  $player = $config->player[$atom->type];
+  switch ($player["*"]) {
+    case "dpiyoutube" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
+      dpiscald_youtube_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpidailymotion" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_dailymotion_player');
+      dpiscald_dailymotion_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpivimeo" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_vimeo_player');
+      dpiscald_vimeo_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpisoundcloud" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_soundcloud_player');
+      dpiscald_soundcloud_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpideezer" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_deezer_player');
+      dpiscald_deezer_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpispotify" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_spotify_player');
+      dpiscald_spotify_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpigooglemap" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_googlemap_player');
+      dpiscald_googlemap_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiscribblelive" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_scribblelive_player');
+      dpiscald_scribblelive_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpifacebook_status" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_facebook_status_player');
+      dpiscald_facebook_status_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiinfogram" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_infogram_player');
+      dpiscald_infogram_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiidalgo" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_idalgo_player');
+      dpiscald_idalgo_build_render($atom, $context, $options, $mode, $config);
+      break;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function dpiscald_menu(){
+  $items = array();
+  $types=array('dailymotion','flickr');
+  foreach($types as $type){
+    module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
+    $function_name='dpiscald_'.$type.'_menu';
+    $function_name($items);
+  }
+  
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpiscald_theme(){
+  $theme=array();
+  $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'idalgo');
+  foreach($types as $type){
+    module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
+    $function_name='dpiscald_'.$type.'_theme';
+    if(function_exists($function_name)){
+      $themeReturn = $function_name();
+      $theme = array_merge($theme,$themeReturn);
+    }
+  }
+  
+  $theme['atom_package_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-inline'
+  );
+  
+  $theme['atom_package_gallery_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-gallery-inline'
+  );
+  
+  return $theme;
+}
+
+/**
+ * Implementation of hook_scald_fetch()
+ */
+function dpiscald_scald_fetch($atom, $type) {
+  $atom_type = $atom->type;
+  module_load_include('inc', 'dpiscald', 'providers/'.$atom_type.'/'.$atom_type);
+  $function_name = 'dpiscald_'.$atom_type.'_scald_fetch';
+  $function_name($atom, $type);
+}
+
+/**
+ * Private function to prerender images (like Flickr)
+ */
+function _dpiscald_image_prerender($atom, $context, $options, $mode) {
+  $config = scald_context_config_load($context);
+
+  // Find out which transcoder is in use, and checks if it's
+  // one of the transcoder provided by Scald Image.
+  $style_name = NULL;
+  if ($transcoder = $config->transcoder[$atom->type]['*']) {
+    // Image style support.
+    if (preg_match('/^style-(.*)$/', $transcoder, $match)) {
+      $style_name = $match[1];
+    }
+    // Picture support.
+    elseif (preg_match('/^group-(.*)$/', $transcoder, $match) && module_exists('picture')) {
+      $mappings = picture_mapping_load($match[1]);
+    }
+  }
+
+  if ($mode == 'transcoder') {
+    // Scald Image can only do 1:1 transcoding. For Picture integration, it is
+    // done in the Atom mode to avoid duplicate code from Picture module.
+    if (empty($style_name)) {
+      return;
+    }
+
+    $preset = image_style_load($style_name);
+
+    if (!empty($atom->file_source)) {
+      $atom->file_transcoded = image_style_path($preset['name'], $atom->file_source);
+      $atom->rendered->file_transcoded_url = image_style_url($preset['name'], $atom->file_source);
+    }
+  }
+  elseif ($mode == 'player') {
+    $settings = $config->player[$atom->type]['settings'];
+    $classes = array_merge(array('scald-atom', 'scald-atom-image'), explode(' ', check_plain($settings['classes'])));
+    $caption = token_replace($settings['caption'], array('atom' => $atom));
+    $atom->rendered->player = '
+        <figure class="' . implode(' ', $classes) . '">
+            ' . $atom->rendered->player . '
+                <figcaption>' . filter_xss_admin($caption) . '</figcaption>
+                    </figure>
+                    ';
+  }
+  elseif ($mode == 'atom') {
+    $attributes = array();
+    $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
+    foreach (array('alt', 'title', 'width', 'height') as $attribute_name) {
+      if (isset($atom->scald_thumbnail[$langcode][0][$attribute_name]) && $atom->scald_thumbnail[$langcode][0][$attribute_name]) {
+        $attributes[$attribute_name] = $atom->scald_thumbnail[$langcode][0][$attribute_name];
+      }
+    }
+
+    if (!empty($style_name)) {
+      $atom->rendered->player = theme('image_style', array('path' => $atom->file_source, 'style_name' => $style_name) + $attributes);
+    }
+    elseif (isset($mappings)) {
+      foreach ($mappings->mapping as $breakpoint_name => $multipliers) {
+        if (!empty($multipliers)) {
+          foreach ($multipliers as $multiplier => $image_style) {
+            if (!empty($image_style)) {
+              $fallback_image_style = $image_style;
+              break 2;
+            }
+          }
+        }
+      }
+      // The fallback_image_style is the first image style we find, and so if it
+      // is empty then we do not have any image style.
+      if (!empty($fallback_image_style)) {
+        $atom->rendered->player = theme('picture', array('uri' => $atom->file_source, 'style_name' => $fallback_image_style, 'breakpoints' => $mappings->mapping) + $attributes);
+      }
+    }
+    else {
+      $path = empty($atom->rendered->file_transcoded_url) ? $atom->file_source : $atom->rendered->file_transcoded_url;
+      $atom->rendered->player = theme('image', array('path' => $path) + $attributes);
+    }
+
+    if (!empty($options['link'])) {
+      $atom->rendered->player = l($atom->rendered->player, $options['link'], array('html' => TRUE));
+    }
+  }
+}
+
+/**
+ * Check if the string "$string" starts with the string "$begin"
+ * (Used in storify.inc and googlemap.inc to check whether or not the url starts with 'https')
+ */
+function startsWith($string, $begin) {
+  return $begin=== "" || strpos($string, $begin) === 0;
+}
+
+function dpiscald_atom_add_page($js, $type, $step = NULL, $atom_id = NULL) {
+  if ($js) {
+    ctools_include('modal');
+    ctools_include('ajax');
+  }
+
+  ctools_include('object-cache');
+  ctools_include('wizard');
+
+  // If we are not currently edit an atom and there is a temporary saved atom,
+  // reopen it.
+  $cache = ctools_object_cache_get('scald_atom', 'edit:-1');
+  if (!$atom_id && $cache && $cache['atoms'][0]->type === $type->type) {
+    $atom_id = -1;
+    $step = 'options';
+  }
+
+  $cache_id = isset($atom_id) ? 'edit:' . $atom_id : 'add';
+
+  // Start by getting the list of all the modules that said they can provide
+  // this atom type.
+  $providers = scald_atom_providers();
+
+  $sources = $providers[$type->type];
+  $source = key($sources);
+
+  // If there's more than one, provide a choice between them. Otherwise, skip
+  // a step and select the only provider upfront.
+  if (empty($step)) {
+    if (count($sources) < 2) {
+      $step = 'add';
+    }
+    else {
+      $step = 'source';
+    }
+    ctools_object_cache_clear('scald_atom', $cache_id);
+  }
+
+  $form_state = array(
+    'ajax' => $js,
+    'scald' => ctools_object_cache_get('scald_atom', $cache_id),
+  );
+
+  $form_state['atom'] = isset($form_state['scald']['atoms'][0]) ? $form_state['scald']['atoms'][0] : NULL;
+
+  if (empty($form_state['scald'])) {
+    $form_state['scald'] = array(
+      'type' => $type,
+      'source' => isset($source) ? $source : NULL,
+    );
+  }
+
+  $form_state['scald']['step'] = $step;
+
+  $form_info = array(
+    'id' => 'scald-atom-add',
+    'path' => 'atom/add/' . $type->type . '/' . ($js ? 'ajax' : 'nojs') . '/%step',
+    'show trail' => TRUE,
+    'show back' => FALSE,
+    'show cancel' => TRUE,
+    'show return' => FALSE,
+    'next callback' => 'scald_atom_add_wizard_next',
+    'finish callback' => 'scald_atom_add_wizard_finish',
+    'cancel callback' => 'scald_atom_add_wizard_cancel',
+    'order' => array(
+      'source' => t('Source'),
+      'add' => t('Add'),
+      'options' => t('Options'),
+    ),
+    'forms' => array(
+      'source' => array(
+        'form id' => 'scald_atom_add_form_source',
+      ),
+      'add' => array(
+        'form id' => 'dpiscald_atom_add_form_add',
+      ),
+      'options' => array(
+        'form id' => 'scald_atom_add_form_options',
+      ),
+    ),
+  );
+
+  // Send this all off to our form. This is like drupal_get_form only wizardy.
+  $form = ctools_wizard_multistep_form($form_info, $step, $form_state);
+  $output = drupal_render($form);
+
+  // If $output is FALSE, there was no actual form.
+  if ($js) {
+    // If javascript is active, we have to use a render array.
+    $commands = array();
+    if ($output === FALSE || !empty($form_state['complete'])) {
+      // Dismiss the modal.
+      $commands[] = array('command' => 'dnd_refresh');
+      $commands[] = ctools_modal_command_dismiss();
+    }
+    elseif (!empty($form_state['cancel'])) {
+      // If cancelling, return to the activity.
+      $commands[] = ctools_modal_command_dismiss();
+    }
+    else {
+      $commands = ctools_modal_form_render($form_state, $output);
+    }
+    print ajax_render($commands);
+    exit;
+  }
+  else {
+    if ($output === FALSE || !empty($form_state['complete'])) {
+      $atom = $form_state['scald']['atoms'][0];
+      drupal_goto('atom/' . $atom->sid);
+    }
+    elseif (!empty($form_state['cancel'])) {
+      drupal_goto('atom/add');
+    }
+    else {
+      return $output;
+    }
+  }
+}
+
+/**
+ * Add form. And then call the right fonction on submit.
+ */
+function dpiscald_atom_add_form_add($form, &$form_state) {
+  $scald = $form_state['scald'];
+  if (startsWith($scald['source'], 'dpiscald_')){
+    $tmp=explode('_', $scald['source']);
+    $tmp = $tmp[1];
+    module_load_include('inc', 'dpiscald', 'providers/'.$tmp.'/'.$tmp);
+  }
+  elseif (startsWith($scald['source'], 'dpiscald_')) {
+    $tmp = $scald['type']->type;
+    module_load_include('inc', 'dpiscald', 'providers/'.$tmp.'/'.$tmp);
+    $scald['source'] = 'dpiscald_'.$tmp;
+  }
+  $function = $scald['source'] . '_scald_add_form';
+  if (function_exists($function)) {
+    $function($form, $form_state);
+  }
+  else {
+    $form['error'] = array(
+      '#markup' => 'Import without form; does it makes sense ?',
+    );
+  }
+  return $form;
+}
+
+/**
+ * Handles the add step form submission. And then call the right hook_scald_add_form_fill
+ */
+function dpiscald_atom_add_form_add_submit(&$form, &$form_state) {
+  $scald = $form_state['scald'];
+
+  $count = 1;
+  $atom_count_implemented = FALSE;
+  // Allow the source provider to define how many atoms to create
+  // and handle differences between upload modules
+  $function = $scald['source'] . '_scald_add_atom_count';
+  if (function_exists($function)) {
+    $count = $function($form, $form_state);
+    $atom_count_implemented = TRUE;
+  }
+
+  $tmp = array();
+  if (startsWith($scald['source'], 'dpi') || startsWith($scald['source'], 'scald_')) {
+    $tmp[0] = $scald['source'];
+    $tmp[1] = $scald['type']->type;
+  }
+  elseif (startsWith($scald['source'], 'dpiscald_')) {
+    $tmp = explode('_', $scald['source']);
+  }
+
+  $atoms = array();
+  for ($delta = 0; $delta < $count; $delta++) {
+    $atoms[$delta] = new ScaldAtom($tmp[1], $tmp[0]); //$scald['type']->type, $tmp[0]);
+  }
+
+  // Allow the source provider to alter it, filling in defaults value.
+  $function = $scald['source'] . '_scald_add_form_fill';
+  if (function_exists($function)) {
+    if ($atom_count_implemented) {
+      $function($atoms, $form, $form_state);
+    }
+    else {
+      $function($atoms[0], $form, $form_state);
+    }
+  }
+
+  foreach ($atoms as &$atom) {
+    if (!isset($atom->data)) {
+      $atom->data = array();
+    }
+    // Save original identifier
+    $atom->data['orig_identifier'] = isset($form_state['values']['identifier']) ? $form_state['values']['identifier'] : '';
+  }
+
+  // And put it in the form_state
+  $form_state['scald']['atoms'] = $atoms;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function dpiscald_menu_alter(&$items){
+  $items['atom/add/%scald_type'] = array(
+    'title' => 'Create Atom',
+    'page callback' => 'dpiscald_atom_add_page',
+    'page arguments' => array(FALSE, 2),
+    'access callback' => 'scald_atom_add_access',
+    'access arguments' => array(2),
+    'file' => '/'.drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['atom/add/%scald_type/%ctools_js'] = array(
+    'title' => 'Create Atom',
+    'page callback' => 'dpiscald_atom_add_page',
+    'page arguments' => array(3, 2),
+    'access callback' => 'scald_atom_add_access',
+    'access arguments' => array(2),
+    'theme callback' => 'ajax_base_page_theme',
+    'file' => '/'.drupal_get_path('module', 'scald') . '/includes/scald.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['admin/dpi247/mediacontext'] = array(
+    'title' => 'DPI Scald : manage mediaContext',
+    'description'=>'You can define different element for media context',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiscald_media_context_admin_form'),
+    'access arguments' => array(TRUE),
+    'file'=>'dpiscald.admin.mediacontext.inc',
+    'file path' => drupal_get_path('module', 'dpiscald').'/includes',
+  );
+  
+  $items['admin/dpi247/mediacontext/management'] = array(
+    'title' => 'Manage Context Element',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array(TRUE),
+  );
+}
+
+/**
+ *
+ * @param unknown $output
+ * @param unknown $context
+ */
+function dpiscald_field_attach_view_alter(&$output, $context){
+  if (variable_get('mee_store_sas', TRUE)) {
+    list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
+    $fields = field_info_instances($context['entity_type'], $bundle);
+    foreach ($fields as $name => $field) {
+      if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
+        foreach (element_children($output[$name]) as $key) {
+          $info_context = 'full';
+          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode']);
+        }
+      }
+    }
+  }
+}
+
+function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL) {
+  if (empty($context)) {
+    $context = 'title';
+  }
+  preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
+  $atoms_info = array();
+  $cpt = 0;
+  if(is_array($matches[0]) && is_array($matches[1])){
+    foreach($matches[1] as $id){
+      if(($atom = scald_atom_load( intval($id)))!=false){
+        $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
+        switch($atom->provider){
+          case 'atom_package':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_inline', array('node' => $node));
+            break;
+          case 'atom_package_gallery':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+            break;
+          default:
+              $atoms_info[] = scald_render($id, $tmp_context);
+            break;
+        }
+        
+      }else{
+        $atoms_info[] = scald_render($id, $matches[2][$cpt]);
+      }        
+      $cpt++;
+    }
+    $string_updated = str_replace($matches[0], $atoms_info, $string);
+  }
+  return $string_updated;
+}
+
+/**
+ *
+ * @param unknown $output
+ * @param unknown $context
+ */
+function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
+  $val_context = variable_get("dpiscald_media_context_table_value", NULL);
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context;
+}
+
+/**
+ * Implements hook_scald_player().
+ */
+function dpiscald_scald_player() {
+  $players = array();
+
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player';
+    $players['dpi'.$type] = $function_name();
+  }
+    
+  return $players;
+}
+
+/**
+ * Implements hook_scald_player_settings_form().
+ */
+function dpiscald_scald_player_settings_form($form, &$form_state) {
+  $element = array();
+
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player_settings_form';
+    $function_name($form, $form_state, $element);
+  }
+
+  return $element;
+}
+
+function _dpiscald_get_type_with_a_dpiplayer() {
+  return array('youtube', 'dailymotion', 'vimeo', 'soundcloud', 'deezer', 'spotify', 'googlemap', 'scribblelive', 'facebook_status', 'infogram', 'idalgo');
+}

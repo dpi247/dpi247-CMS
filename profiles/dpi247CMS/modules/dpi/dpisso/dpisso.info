@@ -1,0 +1,9 @@
+core = "7.x"
+name = "DPI SSO"
+description = "DPI SSO include the sso authentification, the access manager,the profile manager..."
+package = DPI
+
+dependencies[] = libraries
+
+
+files[] = includes/dpisso.paywallpolitics.class.inc

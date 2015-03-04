@@ -3,40 +3,41 @@
 /**
  * Wrapper function to avoid dependancy of dpicache
  */
-function _dpidestinations_variable_get( $name, $default_value){
-  if(function_exists('dpi_variable_get')){
-    return dpi_variable_get($name,$default_value);
+function _dpidestinations_variable_get($name, $default_value) {
+  if(function_exists('dpi_variable_get')) {
+    return dpi_variable_get($name, $default_value);
   }
-  else{
-    return variable_get($name,$default_value);
-  }
-}
-
-/**
- * Wrapper function to avoid dependancy of dpicache
- */
-function _dpidestinations_variable_set( $name, $default_value){
-  if(function_exists('dpi_variable_set')){
-    return dpi_variable_set($name,$default_value);
-  }
-  else{
-    return variable_set($name,$default_value);
+  else {
+    return variable_get($name, $default_value);
   }
 }
 
 /**
  * Wrapper function to avoid dependancy of dpicache
  */
-function _dpidestinations_variable_del( $name){
-  if(function_exists('dpi_variable_del')){
+function _dpidestinations_variable_set($name, $default_value) {
+  if(function_exists('dpi_variable_set')) {
+    return dpi_variable_set($name, $default_value);
+  }
+  else {
+    return variable_set($name, $default_value);
+  }
+}
+
+/**
+ * Wrapper function to avoid dependancy of dpicache
+ */
+function _dpidestinations_variable_del($name) {
+  if(function_exists('dpi_variable_del')) {
     return dpi_variable_del($name);
   }
-  else{
+  else {
     return variable_del($name);
   }
 }
 
-function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALSE){
+// @todo : Interet de cette fonction par rapport à taxonomy_get_tree ?
+function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALSE) {
   $vid = dpidestinations_api_get_sections_vocabulary_vid();
   $query = db_select('taxonomy_term_data', 't');
   $result = $query
@@ -54,28 +55,28 @@ function _dpidestinations_api_get_all_sections_terms_from_db($reset_cache = FALS
   return $terms;
 }
 
-function _dpidestinations_target_machine_name_exists($value){
+function _dpidestinations_target_machine_name_exists($value) {
   $result = db_select('dpidestinations_target', 't')
-  ->fields('t')
-  ->condition('machine_name', $value,'=')
-  ->execute()
-  ->fetchAssoc();
-  if(is_array($result)){
+    ->fields('t')
+    ->condition('machine_name', $value,'=')
+    ->execute()
+    ->fetchAssoc();
+  if(is_array($result)) {
     return TRUE;
   }
   return FALSE;
 }
 
-function _dpidestinations_get_all_targetviews(){
+function _dpidestinations_get_all_targetviews() {
   //@todo: Peut être interessant de mettre un cache statique ici pour performance (DDU)
   // Il faudrait alors implémenter le hook_views_invalidate_cache()
-  $targetviews=array();
-  $views=views_get_all_views();
-  foreach($views as $view_name=>$view){
-    foreach($view->display as $display_name=>$display){
-      if($display->display_plugin=='targetview'){
-        $targetviews[$view_name]['label']=$view->human_name;
-        $targetviews[$view_name]['displays'][]=array('label'=>$display->display_title,'display_name'=>$display_name);
+  $targetviews = array();
+  $views = views_get_all_views();
+  foreach($views as $view_name => $view) {
+    foreach($view->display as $display_name => $display) {
+      if($display->display_plugin == 'targetview'){
+        $targetviews[$view_name]['label'] = $view->human_name;
+        $targetviews[$view_name]['displays'][] = array('label' => $display->display_title, 'display_name' => $display_name);
       }
     }
   }
@@ -83,19 +84,19 @@ function _dpidestinations_get_all_targetviews(){
   return $targetviews;
 }
 
-function _dpidestinations_get_panels_displayid_for_sectionterm($term_id){
-  $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
+function _dpidestinations_get_panels_displayid_for_sectionterm($term_id) {
+  $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
   return $handler->did;
 }
 
-function _dpidestinations_get_panels_display_for_sectionterm($term_id){
+function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
   $displays = &drupal_static(__FUNCTION__);
   if (!isset($displays[$term_id])) {
     ctools_include('context');
     ctools_include('context-task-handler');
     ctools_include('plugins');
 
-    $handler=_dpidestinations_get_panels_handler_for_sectionterm($term_id);
+    $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
 
     $display = panels_panel_context_get_display($handler);
@@ -108,21 +109,29 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id){
 /**
  * Return the name form the page_manager_handlers table for a display_id
  */
-function _dpidestinations_get_pagemanager_handler_name_for_displayid($did){
-  $name=db_query('SELECT p.name FROM {page_manager_handlers} p WHERE p.did = :did', array(':did' => $did))->fetchField();
+function _dpidestinations_get_pagemanager_handler_name_for_displayid($did) {
+  $db_names = db_select('page_manager_handlers', 'p')
+    ->fields('p', array('name'))
+    ->condition('p.did', $did)
+    ->execute();
+  $name = FALSE;
+  foreach ($db_names as $db_name) {
+    $name = $db_name;
+    break;
+  }
   return $name;
 }
 
-function _dpidestinations_get_panels_handler_for_sectionterm($term_id){
+function _dpidestinations_get_panels_handler_for_sectionterm($term_id) {
   $handlers = &drupal_static(__FUNCTION__);
   if (!isset($handlers[$term_id])) {
     ctools_include('context');
     ctools_include('context-task-handler');
     ctools_include('plugins');
      
-    $data['tid']=$term_id;
+    $data['tid'] = $term_id;
 
-    $section=sectionterm_load($term_id);
+    $section = sectionterm_load($term_id);
 
     $task= page_manager_get_task('sections');
     $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
@@ -130,102 +139,102 @@ function _dpidestinations_get_panels_handler_for_sectionterm($term_id){
     $sorted_handlers = page_manager_load_sorted_handlers($task, '', TRUE);
     $id = ctools_context_handler_get_render_handler($task, NULL, $sorted_handlers,$contexts, array());
 
-    $handler=$sorted_handlers[$id];
+    $handler = $sorted_handlers[$id];
     $handlers[$term_id] = $handler;
   }
   return $handlers[$term_id];
 }
 
-function _dpidestinations_get_available_targetlayouts(){
+function _dpidestinations_get_available_targetlayouts() {
   $entites_info = entity_get_info('node');
-  $available_targetlayouts=$entites_info['view modes'];
-  unset($available_targetlayouts["rss"]);
-  unset($available_targetlayouts["search_index"]);
-  unset($available_targetlayouts["search_result"]);
-  $return=array();
-  foreach ($available_targetlayouts as $key=>$value){
-    $return[$key]=$value["label"];
-
+  $available_targetlayouts = $entites_info['view modes'];
+  unset($available_targetlayouts['rss']);
+  unset($available_targetlayouts['search_index']);
+  unset($available_targetlayouts['search_result']);
+  $return = array();
+  foreach ($available_targetlayouts as $key => $value) {
+    $return[$key] = $value['label'];
   }
   return $return;
 }
 
-function _dpidestinations_get_targets_for_sectionterm($term_id){
+function _dpidestinations_get_targets_for_sectionterm($term_id) {
   $targets = &drupal_static(__FUNCTION__);
   if (!isset($targets[$term_id])) {
-    $display=_dpidestinations_get_panels_display_for_sectionterm($term_id);
-    $temp=array();
-    foreach($display->content as $content){
-      if($content->type=="targetblock"){
-        $temp[$content->subtype]=target_load($content->subtype);
+    $display = _dpidestinations_get_panels_display_for_sectionterm($term_id);
+    $temp = array();
+    foreach($display->content as $content) {
+      if($content->type == 'targetblock') {
+        $temp[$content->subtype] = target_load($content->subtype);
       }
     }
-    $targets[$term_id]=$temp;
+    $targets[$term_id] = $temp;
   }
   return $targets[$term_id];
 }
 
-function _target_metadata_getter($object, array $options, $property_name){
-  if($property_name=="available_targetlayouts"){
-    foreach(unserialize($object->available_targetlayouts) as $key=>$layout){
-      if($layout!=FALSE){
-        $layouts[$key]=$layout;
+function _target_metadata_getter($object, $options, $property_name) {
+  if($property_name == 'available_targetlayouts') {
+    foreach(unserialize($object->available_targetlayouts) as $key => $layout) {
+      if($layout != FALSE) {
+        $layouts[$key] = $layout;
       }
     }
     return $layouts;
   }
 
-  if($property_name=="available_templateoverrides"){
-    $result=array();
+  if($property_name == 'available_templateoverrides') {
+    $result = array();
     return $result;
-    if($object->available_templateoverrides!="" && $object->available_templateoverrides!="\n"){
-      foreach(explode("\n",$object->available_templateoverrides) as $line){
-        list($key,$value)=explode("|",$line);
-        $result[$key]=$value;
+    if($object->available_templateoverrides != '' && $object->available_templateoverrides != '\n') {
+      foreach(explode('\n', $object->available_templateoverrides) as $line) {
+        list($key, $value) = explode('|', $line);
+        $result[$key] = $value;
       }
     }
-    return $object->available_templateoverrides=$result;
+    return $object->available_templateoverrides = $result;
   }
 
-  if($property_name=="targetview"){
-    $view_name= $object->view_name;
-    $view_display= $object->view_display;
-    if( $view = views_get_view($view_name)){
+  if($property_name == 'targetview') {
+    $view_name = $object->view_name;
+    $view_display = $object->view_display;
+    if($view = views_get_view($view_name)) {
       $view->set_display($view_display);
       return $view;
-    }else{
+    }
+    else {
       return NULL;
     }
   }
 }
 
-function _target_metadata_setter($object, $property_name, $wrapper){
-  if($property_name=="available_targetlayouts"){
-    return $object->available_targetlayouts=serialize($wrapper);
+function _target_metadata_setter($object, $property_name, $wrapper) {
+  if($property_name == 'available_targetlayouts') {
+    return $object->available_targetlayouts = serialize($wrapper);
   }
 
-  if($property_name=="available_templateoverrides"){
-    $db_value="";
-    foreach($wrapper as $key => $value){
-      $db_value.=$key."|".$value."\n";
+  if($property_name == 'available_templateoverrides') {
+    $db_value = '';
+    foreach($wrapper as $key => $value) {
+      $db_value .= $key.'|'.$value.'\n';
     }
-    return $object->available_templateoverrides=$db_value;
+    return $object->available_templateoverrides = $db_value;
   }
 }
 
-function _targetblock_metadata_getter($object, array $options, $property_name){
-  if($property_name=="target"){
+function _targetblock_metadata_getter($object, $options, $property_name) {
+  if($property_name == 'target') {
     return $object->target;
   }
 
-  if($property_name=="target_object"){
+  if($property_name == 'target_object') {
     return $object->target;
   }
 
-  if($property_name=="other_splitted_targetblocks"){
-    $targetblockController=new TargetBlockController('targetblock');
+  if($property_name == 'other_splitted_targetblocks') {
+    $targetblockController = new TargetBlockController('targetblock');
 
-    $other_splitted_targetblocks=$targetblockController->load_targetblocks_by_did_and_target($object->did, $object->target, $object->delta);
+    $other_splitted_targetblocks = $targetblockController->load_targetblocks_by_did_and_target($object->did, $object->target, $object->delta);
 
     // We remove the current targetblock from the set
     unset($other_splitted_targetblocks[$object->targetblockid]);
@@ -235,17 +244,22 @@ function _targetblock_metadata_getter($object, array $options, $property_name){
 
 /**
  * Update the virtualtrank of each items of a node
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_items( & $items){
-  foreach($items as & $item){
-    _dpidestinations_virtualrank_update_item( $item);
+function _dpidestinations_virtualrank_update_items(&$items,$nid) {
+  foreach($items as &$item) {
+
+    _dpidestinations_virtualrank_update_item($item,$nid);
   }
 }
 
 /**
  * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_item(&$item) {
+function _dpidestinations_virtualrank_update_item(&$item,$nid) {
   if($item['rank'] == 'default') {
     $controller = new TargetBlockController('targetblock');
     $targetblock = $controller->load_targetblock_by_termid_and_target($item['tid'], $item['target']);
@@ -271,7 +285,7 @@ function _dpidestinations_virtualrank_update_item(&$item) {
 
   if($item['rank'] != 'DNC') {
     //Caclulate virtual_rank
-    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank']);
+    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank'],$nid);
   }
   else {
     $item['rank'] = 0;
@@ -280,10 +294,22 @@ function _dpidestinations_virtualrank_update_item(&$item) {
 
 /**
  * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position) {
+function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position,$nid) {
   //@todo: avoid hard coding of the table...
   $destination_table = 'field_data_field_destinations';
+
+
+
+  $actual_time_rank=dpidestinations_api_get_current_node_virtual_rank_for_targetblock($nid,$tid,$target);
+  $time_rank_in_position=dpidestinations_api_get_virtual_rank_of_position_for_targetblock($position,$tid,$target);
+
+  if($actual_time_rank!==NULL and $actual_time_rank>$time_rank_in_position){
+    $position++;
+  }
+
 
   // USING OFFSET for efficency
   if($position == 0 || $position == 1 || $position == 2) {
@@ -449,7 +475,22 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
   $term_value=$term->tid;
   $target_value=$target->machine_name;
 
+  
+  //add title
+
+  $title_view_field['id'] = 'title';
+  $title_view_field['table'] = 'node';
+  $title_view_field['field'] = 'title';
+  
+  $title_view_field['label'] = '';
+  $title_view_field['alter']['word_boundary'] = FALSE;
+  $title_view_field['alter']['ellipsis'] = FALSE;
+  
+  $targetview->set_item($targetview->current_display , 'field', 'title', $title_view_field);
+  
   _dpidestinations_targetview_initialize_view($targetview, $term_value, $target_value, $targetblock);
+  
+  
   return $targetview;
 }
 
@@ -469,11 +510,10 @@ function _dpidestinations_targetviewreorder_initialize_view($targetblock,$term){
 function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, $target_value, $targetblock) {
   //@todo: documenter ces arguments dans la doc technique
   $targetview->targetview_tid=$term_value;
-  $targetview->targetview_target=$target_value;
+  $targetview->targetview_target=$target_value;  
 
   $filter_term=_dpidestinations_targetview_initialize_view_get_term_filter($term_value);
   $filter_target=_dpidestinations_targetview_initialize_view_get_target_filter($target_value);
-
   if($targetblock->use_pager){
     $pager =  $targetview->display_handler->get_option('pager');
     $pager['type'] = $targetblock->pager_type;
@@ -492,9 +532,11 @@ function _dpidestinations_targetview_initialize_view(&$targetview, $term_value, 
     $targetview->set_items_per_page($targetblock->node_count_for_targetblock);
     //$targetview->set_offset($targetblock->offset);
   }
+  $targetview->dpidestinations['destination'] = new stdClass();
   $targetview->dpidestinations['destination']->tid=$term_value;
+  $targetview->dpidestinations['target'] = new stdClass();
   $targetview->dpidestinations['target']->machine_name=$target_value;
-
+  
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_target', $filter_target);
   $targetview->set_item($targetview->current_display , 'filter', 'dpidestination_field_destinations_tid', $filter_term);
 }
@@ -900,4 +942,7 @@ function _dpidestinations_get_view_mode_from_views_row($view, $entity, $entity_t
 
     return $view_mode;
   }
+  
 }
+
+

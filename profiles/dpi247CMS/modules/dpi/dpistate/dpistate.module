@@ -1,0 +1,146 @@
+<?php
+/**
+ * @author GVD - LBA
+ */
+module_load_include ( 'php', 'dpistate', 'dpistate.api' );
+
+define('VARIABLE_NAME', 'dpistate_value_at_moment');
+
+/**
+ * Implementation of hook_menu
+ *
+ * @return multitype:array
+ */
+function dpistate_menu() {
+  $items = array();
+  
+  $items ['admin/config/dpistate'] = array (
+    'title' => 'Create customs dpistate',
+    'description' => 'Allow admin to create specific dpistate.',
+    'position' => 'right',
+    'weight' => - 5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'system.admin.inc',
+    'file_path' => drupal_get_path ( 'module', 'system' ) 
+  );
+  
+  $items ['admin/config/dpistate/settings'] = array (
+    'title' => 'Customs states settings',
+    'description' => 'Modify state\'s propreties.',
+    'page callback' => 'dpistate_view_page',
+    'access callback' => TRUE,
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.view.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/settings'] = array (
+    'title' => 'Settings',
+    'description' => 'Set states options',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpistate_settings_form' 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.admin.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/view'] = array (
+    'title' => 'List',
+    'description' => 'View states',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    "weight" => - 40 
+  );
+  
+  $items ['admin/config/dpistate/settings/add'] = array (
+    'title' => 'Add customs state settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_add_or_edit',
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/edit/%'] = array (
+    'title' => 'Add customs states settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_add_or_edit',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpistate/settings/delete/%'] = array (
+    'title' => 'Add customs states settings',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpistate_delete',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpistate.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission
+ *
+ * @return multitype:array
+ */
+function dpistate_permission() {
+  return array (
+    'administer dpistate' => array (
+      'title' => t ( 'Administer dpistate' ),
+      'description' => t ( 'Perform administration tasks for dpistate module.' ) 
+    ) 
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory
+ *
+ * @param String $owner          
+ * @param String $plugin_type          
+ * @return string
+ */
+function dpistate_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'access') {
+    return 'plugins/' . $plugin_type;
+  }
+}
+
+/**
+ * Implementation of hook_theme
+ * Use: create table form element
+ *
+ * @return multitype:array
+ */
+function dpistate_theme($existing, $type, $theme, $path) {
+  return array (
+    'dpistate_table_theme' => array (
+      'render element' => 'element',
+      'file' => 'includes/dpistate.pages.admin.inc' 
+    ) 
+  );
+}

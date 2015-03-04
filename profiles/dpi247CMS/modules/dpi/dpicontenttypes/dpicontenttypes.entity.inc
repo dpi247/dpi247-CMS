@@ -8,12 +8,12 @@ function dpicontenttypes_entity_info() {
 
   $entities['dpiproperties'] = array(
     'label' => t('DPI properties'),
-    // seulement si on utilise le module entity API
+    // Only if we use the entity API module
     'exportable' => FALSE,
     'entity class' => 'DPIPropertiesEntity',
     'controller class' => 'DPIPropertiesController',
     'base table' => 'dpicontenttypes_properties',
-    'fieldable' => TRUE,
+    'fieldable' => TRUE,  
     // Make use the class' label() and uri() implementation by default.
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
@@ -31,7 +31,7 @@ function dpicontenttypes_entity_info() {
         'custom settings' => FALSE,
       ),
     ),
-    //Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
+    // Since the entity hasn't the same name of the module NEED THIS if you want VIEW intégration
     'module' => 'dpicontenttypes',
     'access callback' => 'dpiproperties_access_admin_callback',
   );
@@ -43,17 +43,18 @@ function dpicontenttypes_entity_info() {
     'base table' => 'dpicontenttypes_properties_type',
     'fieldable' => TRUE,
     'bundle of' => 'dpiproperties',
-    'exportable' => FALSE,
+    'exportable' => TRUE,
+    'uri callback' => 'entity_class_uri',    
     'entity keys' => array(
       'id' => 'id',
       'name' => 'type',
-      'label' => 'label',
+      'label' => 'label', 
     ),
     'module' => 'dpicontenttypes',
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'path' => 'admin/structure/dpiproperties-types',
-      'file' => 'dpicontenttypes.entity.inc',
+      'file' => 'dpicontenttypes.controller.class.inc',
       'controller class' => 'DPIPropertiesTypeUIController',
     ),
     'access callback' => 'dpiproperties_type_access_admin_callback',
@@ -75,7 +76,27 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     'label' => t('Target default'),
     'custom settings' => FALSE,
   );
-  foreach (dpiproperties_types() as $type => $info) {
+
+  $entity_info['node']['view modes']['dpi_atom_embedd'] = array(
+    'label' => t('DPI Atom embedd'),
+    'custom settings' => TRUE,
+  );
+
+  $dpiproperties_types = dpiproperties_types();
+  
+  $package_type_info = new stdClass();
+  $package_type_info->label = 'Package';
+  $dpiproperties_types['package'] = $package_type_info;
+  
+  $scald_atom_type_info = new stdClass();
+  $scald_atom_type_info->label = 'Scald Atom';
+  $dpiproperties_types['scald_atom'] = $scald_atom_type_info;
+  
+  $package_gallery_type_info = new stdClass();
+  $package_gallery_type_info->label = 'Package_gallery';
+  $dpiproperties_types['package_gallery'] = $package_gallery_type_info;
+  
+  foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,
       'admin' => array(
@@ -85,8 +106,12 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
       ),
     );
   }
+  
+  $entity_info['scald_atom']['save callback'] = 'scald_atom_save';  
+}
 
-  $entity_info['scald_atom']['save callback'] = 'scald_atom_save';
+
+function dpicontenttypes_entity_prepare_view($entity_type, $entities, $langcode = NULL){
 }
 
 /**
@@ -123,6 +148,13 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
     'setter callback' => 'entity_property_dpiproperties_set_properties',
     'getter callback' => 'entity_property_dpiproperties_get_properties',
   );
+  
+  $cciinlineobject_orig_attr = array(
+    'label' => t("CCI Inline Objects original attributes"),
+    'type' => 'text',
+    'setter callback' => 'entity_property_dpiproperties_set_properties',
+    'getter callback' => 'entity_property_dpiproperties_get_properties',
+  );
 
   //Set to the package
   $info['node']['bundles']['package']['properties']['field_product_id'] = $product_id;
@@ -130,44 +162,24 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
   $info['node']['bundles']['package']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
-  //Set to the atoms image
-  if (isset($info['scald_atom']['bundles']['image'])){
-    $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
-  }
+  //Set to the package_gallery
+  $info['node']['bundles']['package_gallery']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['node']['bundles']['package_gallery']['properties']['field_source'] = $source;
 
-  //Set to the atoms video
-  if (isset($info['scald_atom']['bundles']['video'])){
-    $info['scald_atom']['bundles']['video']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['video']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['video']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['video']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms audio
-  if (isset($info['scald_atom']['bundles']['audio'])){
-    $info['scald_atom']['bundles']['audio']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['audio']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms flash
-  if (isset($info['scald_atom']['bundles']['flash'])){
-    $info['scald_atom']['bundles']['flash']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['flash']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms linklist
-  if (isset($info['scald_atom']['bundles']['links_list'])){
-    $info['scald_atom']['bundles']['links_list']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_source'] = $source;
+  // Set to the atoms
+  $scald_types = scald_types();
+  foreach(array_keys($scald_types) as $type) {
+    if ($type != 'atom_package') {
+      $info['scald_atom']['bundles'][$type]['properties']['field_product_id'] = $product_id;
+      $info['scald_atom']['bundles'][$type]['properties']['field_external_reference'] = $external_reference;
+      $info['scald_atom']['bundles'][$type]['properties']['field_external_reference_2'] = $external_reference_2;
+      $info['scald_atom']['bundles'][$type]['properties']['field_source'] = $source;
+    }
+    if ($type == 'image') {
+      $info['scald_atom']['bundles']['image']['properties']['field_cciinline_orig_attr'] = $cciinlineobject_orig_attr;
+    }
   }
 }
 
@@ -268,7 +280,9 @@ function dpiproperties_load_by_type_and_id($type, $id, $reset = FALSE) {
  * Save dpiproperties.
  */
 function dpiproperties_save($dpiproperties) {
+  
   entity_save('dpiproperties', $dpiproperties);
+  
 }
 
 /**
@@ -535,10 +549,12 @@ function dpiproperties_form($form, &$form_state, $dpiproperties) {
     '#title' => t('Product ID'),
     '#default_value' => $dpiproperties->product_id,
   );
+
   $form['entity'] = array(
     '#type' => 'value',
     '#value' => $dpiproperties->entity,
   );
+
   $form['id'] = array(
     '#type' => 'value',
     '#value' => $dpiproperties->id,

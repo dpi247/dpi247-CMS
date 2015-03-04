@@ -1,0 +1,20 @@
+name = Dpi Scald Providers
+description = Provides several providers for dpi.
+package = Scald Providers
+core = 7.x
+dependencies[] = scald
+stylesheets[all][] = providers/twitter/twitter.css
+stylesheets[all][] = providers/embedly/embedly.css
+stylesheets[all][] = providers/picktochart/picktochart.css
+stylesheets[all][] = providers/storify/storify.css
+stylesheets[all][] = providers/timelinejs/timelinejs.css
+stylesheets[all][] = providers/googlemap/googlemap.css
+stylesheets[all][] = providers/coveritlive/coveritlive.css
+stylesheets[all][] = providers/scribblelive/scribblelive.css
+stylesheets[all][] = providers/facebook_status/facebook_status.css
+stylesheets[all][] = providers/infogram/infogram.css
+stylesheets[all][] = providers/slideshare/slideshare.css
+stylesheets[all][] = providers/idalgo/idalgo.css
+stylesheets[all][] = dpiscald.css
+
+files[] = includes/dpiscald_plugin_display_library.inc

@@ -63,7 +63,7 @@ function dpidestinations_entity_info(){
   $entities['targetblock'] = array(
     'label' => t('Target Block'),
     // seulement si on utilise le module entity API
-    'exportable' => TRUE,
+    'exportable' => FALSE,
     'entity class' => 'TargetBlockEntity',
     'controller class' => 'TargetBlockController',
     'base table' => 'dpidestinations_targetblock',
@@ -73,7 +73,7 @@ function dpidestinations_entity_info(){
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
       'id' => 'targetblockid',
-      // 'name' => 'machine_name',
+      //'name' => 'machine_name',
       'label' => 'label',
     ),
     'bundles' => array(
@@ -120,8 +120,20 @@ function dpidestinations_entity_info(){
  */
 function dpidestinations_entity_info_alter(&$entity_info) {
   // @todo: ne pas coder en dur le nom du vocabulaire
-  $entity_info['taxonomy_term']['bundles']['destinations']['uri callback'] = 'dpidestinations_term_uri';
-  $entity_info['taxonomy_term']['bundles']['destinations']['label'] = t('Section term');
+  
+  $vid=_dpidestinations_variable_get('dpidestinations_section_vid', 0);
+  if($vid==0){
+    $vocab_name=='sections';
+  }
+  else{
+    $vocabs=taxonomy_get_vocabularies();
+    $section_vocab=$vocabs[$vid];
+    $vocab_name=$section_vocab->machine_name;
+  }
+  //$entity_info['taxonomy_term']['uri callback'] = 'dpidestinations_term_uri';
+  
+  $entity_info['taxonomy_term']['bundles'][$vocab_name]['uri callback'] = 'dpidestinations_term_uri';
+  $entity_info['taxonomy_term']['bundles'][$vocab_name]['label'] = t('Section term');
   
   $entity_info['node']['view modes'] += array(
     'targetblock_small' => array(
@@ -137,6 +149,7 @@ function dpidestinations_entity_info_alter(&$entity_info) {
       'custom settings' => TRUE,
     ),
   );
+
 }
 
 function target_load($tid = NULL, $reset = FALSE){

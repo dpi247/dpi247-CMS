@@ -105,15 +105,17 @@ function dpicache_regenerate_cache_entries_process($query){
       dpi_log('dpicache', "error", t("Error while calling callback function for name = !cache_name, hash = !hash : !error",array("!cache_name"=>$entry->name,"!hash"=>$entry->hash,"!error"=>$fresh_content)),array(),$entry->hash,WATCHDOG_ERROR);
       continue;
     }
+    
     // Save content into cache
     $saved = dpicache_save_cache($entry->name, $entry->hash, $fresh_content, $cache_definition);
+    $val_arg = dpicache_get_arguments_values($cache_definition, unserialize($entry->parameters));
     $entry_information = array(
       "name" => $entry->name,
       "hash" => $entry->hash,
-      "category" => @$cache_definition["category"],
+      "category" => $val_arg['category'],
       "data_type" => @$cache_definition["data_type"] ?: "string",
-      "expiration_date" => intval($entry->creation_date + $cache_definition["ttl"]),
-      "update_freq" => $cache_definition["refresh_interval"]
+      "expiration_date" => intval($entry->creation_date + $val_arg['expiration_date']),
+      "update_freq" => $val_arg['update_freq']
     );
     if($saved)
       $entry_information['last_run'] = time();
@@ -124,6 +126,27 @@ function dpicache_regenerate_cache_entries_process($query){
   return TRUE;
 }
 
+function dpicache_get_arguments_values($cache_definition, $entry){  
+  $value_return['update_freq']=$cache_definition["refresh_interval"];
+
+  if(isset($cache_definition["refresh_interval_callback"])){
+    $func=$cache_definition["refresh_interval_callback"];
+    $value_return['update_freq']=$func($cache_definition,$entry);
+  }
+  
+  $value_return['expiration_date']=$cache_definition["ttl"];
+  if(isset($cache_definition["ttl_callback"])){
+    $func=$cache_definition["ttl_callback"];
+    $value_return['expiration_date']=$func($cache_definition,$entry);
+  }
+  
+  $value_return['category']=$cache_definition["category"];
+  if(isset($cache_definition["category_callback"])){
+    $func=$cache_definition["category_callback"];
+    $value_return['category']=$func($cache_definition,$entry);
+  }
+  return $value_return;
+}
 
 /**
  * Get registered infos associated with a cache type
@@ -134,7 +157,7 @@ function dpicache_get_cache_entry_definition($cache_name){
   if(!$cache_name)
     return FALSE;
   $infos = dpicache_get_all_cache_entries_definitions();
-  if(isset($infos[$cache_name])){
+  if(isset($infos[$cache_name])){    
     return $infos[$cache_name];
   }
   return FALSE;
@@ -164,7 +187,7 @@ function dpicache_get_all_cache_entries_definitions(){
  */
 function _dpicache_cache_call_function($dpicache_definition, $parameters=array()){
   if(_dpicache_validate_cache_entry($dpicache_definition) === FALSE){
-    return "#ERROR# Cache entry defintion is not valid.";
+    return FALSE;
   }
   $out = '';
   try {
@@ -298,44 +321,111 @@ function _dpicache_get_hash($cache_name, $args = array()) {
   return $hash;
 }
 
-function _dpicache_regenerate_one_cache_entry_callback($cache_name){
 
-  $args=func_get_args();
-  unset($args[0]);
-  $hash=_dpicache_get_hash($cache_name, $args);
-
-  drupal_set_message(t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))));
-
-  dpi_log('dpicache', "manual_regeneration_of_cache_entry", t("Manual cache regeneration: @cache_name (@args)",array('@cache_name'=>$cache_name,'@args'=>implode(',', $args))),array(),$hash,WATCHDOG_INFO);
-
-  $hash=_dpicache_get_hash($cache_name, $args);
-  $cache_definition=dpicache_get_cache_entry_definition($cache_name);
-  $fresh_content = _dpicache_cache_call_function($cache_definition, $args);
-  $saved = dpicache_save_cache($cache_name, $hash, $fresh_content, $cache_definition);
-
-  drupal_goto();
+/*
+ * Sync block roles with esi role visibility
+ * 
+ * The dpicache esi block uses it's own visibility to show block.
+ * The main reason to that is to keep the page that contains the esi tag the same for 
+ * everybody.
+ * 
+ * If we rely on Drupal's block role this page would differ based on role ... 
+ * E.g : esi tag will appear or not...
+ * And thus we use the concept of esi block role visibility ...
+ * 
+ * In the admin this is transparent for the user 
+ * but in fact we collect the roles setup and put them on a custom column of the block page
+ * and we let the real role visibility blank
+ * 
+ * Now, when we activate/desactive the ESI from dpicache, we need to synchronize that with Drupal's role block...
+ * 
+ *  
+ * @see _dpicache_esi_sync_esi_visibility_to_drupal_roles()
+ * @see dpicache_block_admin_configure_submit()
+ * @see dpicache_form_block_admin_configure_alter()
+ * 
+ */
+function _dpicache_esi_sync_drupal_roles_to_esi_visibility(){
+  global $theme;
+  $query = db_select('block_role', 'br');
+  // Add extra detail to this query object: a condition, fields and a range
+  $query->condition('b.esi_enabled', 1, '=');
+  $query->condition('b.theme', $theme, '=');
+  $query->fields('br', array('module', 'delta', 'rid'));
+  $query->leftJoin('block', 'b', 'b.delta = br.delta AND b.module = br.module');
+  $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  foreach($results as $result){
+   $writes[$result['module']][$result['delta']][$result['rid']]=$result['rid'];
+   $deletes[$result['module']][$result['delta']][$result['rid']]=$result['rid'];
+    
+   }
+   foreach($results as $result){
+     foreach(user_roles() as $rid=>$role){
+     if(!isset($write[$result['module']][$result['delta']][$rid])){
+     $writes[$result['module']][$result['delta']][$rid]=0;
+     
+     }
+     }
+   }
+   foreach($writes as $module=>$write){
+     foreach($write as $delta=>$roles){
+       
+       
+       $block_updated = db_update('block')
+       ->fields(array(
+         'esi_roles' => serialize($roles),
+       ))
+       ->condition('module', $module, '=')
+       ->condition('delta', $delta, '=')
+       ->execute();
+       
+     }
+   }
+   //remove entry from block roles
+   foreach($deletes as $module=>$delete){
+     foreach($delete as $delta=>$roles){
+       foreach($roles as $rid)
+        
+       $num_deleted = db_delete('block_role')
+       ->condition('module', $module, '=')
+       ->condition('delta', $delta, '=')
+       ->condition('rid', $rid, '=')
+       ->execute();      
+     }
+   }  
 }
 
-/**
- * Regenerate caches that need to be regenerated based on the time
- * @param  Integer $time Current timestamp
- * @return Boolean       Success of regenerations
+
+/*
+ * Sync esi role visibility with block roles with 
+ *
+ *
+ *
+ * @see _dpicache_esi_sync_drupal_roles_to_esi_visibility()
+ * @see dpicache_block_admin_configure_submit()
+ * @see dpicache_form_block_admin_configure_alter()
+ *
  */
-function _dpicache_regenerate_all_cache_entry_callback($cache_type,$category=NULL){
-  drupal_set_message(t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)));
-  dpi_log('dpicache', "manual_regeneration_of_cache_name", t("Manual cache regeneration: @cache_name category: @category",array('@cache_name'=>$cache_type,'@category'=>$category)),array(),NULL,WATCHDOG_INFO);
-
-  $table_cache_entries = 'dpicache_cache_entries';
-  $query = db_select($table_cache_entries, 'dce');
-  $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
-
-  $query->condition('dce.name', $cache_type);
-
-  if($category!=NULL){
-    $query->condition('dce.category', $category);
-
+function _dpicache_esi_sync_esi_visibility_to_drupal_roles(){
+  global $theme;
+  $query = db_select('block', 'b');
+  // Add extra detail to this query object: a condition, fields and a range
+  $query->condition('b.esi_enabled', 1, '=');
+  $query->condition('b.theme', $theme, '=');
+  $query->fields('b', array('module', 'delta', 'esi_roles'));
+  $results = $query->execute();
+  foreach($results as $result){
+    $esi_roles=unserialize($result->esi_roles);    
+    foreach($esi_roles as $rid=>$esi_role){
+      if($esi_role){
+      $block_role=new stdClass();
+      $block_role->module=$result->module;
+      $block_role->delta=$result->delta;
+      $block_role->rid=$rid;
+      drupal_write_record('block_role', $block_role);
+      }
+    }
   }
-  dpicache_regenerate_cache_entries_process($query);
-
-  drupal_goto();
+  
+  
 }

@@ -1,0 +1,7 @@
+name = "Dpi Pub"
+description = "Pub blocks gestion."
+core = "7.x"
+package = "Rossel"
+project = "dpipub"
+files[] = dpipub.module
+files[] = dpipub.test

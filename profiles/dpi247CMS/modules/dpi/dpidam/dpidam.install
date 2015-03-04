@@ -1,0 +1,194 @@
+<?php 
+
+/**
+ * Implementation of hook_install().
+ */
+function dpidam_install() {
+  // Set the  weight to 5
+  db_update('system')
+    ->fields(array('weight' => 5))
+    ->condition('name', 'dpidam')
+    ->execute();
+
+  // Add Archive section term
+  $dest_vid = _dpidestinations_variable_get('dpidestinations_section_vid', 0);
+  if ($dest_vid) {
+    $archive_term = new stdClass();
+    $archive_term->vid = $dest_vid;
+    $archive_term->weight = 0;
+    $archive_term->vocabulary_machine_name = 'sections';
+    $archive_term->name = 'Archives';
+    taxonomy_term_save($archive_term);
+  }
+
+  $dpi247_source = new stdClass();
+  $dpi247_source->name = 'dpi247';
+  $dpi247_source->archive = 1;
+  $dpi247_source->archive_from_dpimport = 1;
+  drupal_write_record('dpidam_source', $dpi247_source);
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function dpidam_uninstall() {
+  // Delete all variable defined by this module
+  dpi_variable_del_namespace('dpidam_');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function dpidam_schema() {
+  $schema = array();
+
+  $schema['dpidam_packagestosend'] = array(
+    'description' => 'Contains ids of the packages to send',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Node Id',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'timestamp' => array(
+        'description' => 'The Unix timestamp when the node was put in the table.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('nid'), // Primary key
+  );
+
+  $schema['dpidam_urltosend'] = array(
+    'description' => 'Contains ids of the url to send',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Node Id',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+      'timestamp' => array(
+        'description' => 'The Unix timestamp when the node was put in the table.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  );
+
+  $schema['dpidam_search_profiles'] = array(
+    'description' => 'Contains profiles informations for the DAM search interface.',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'serial',
+        'description' => 'Profile ID, a database primary key to ensure uniqueness.',
+        'not null' => TRUE,
+        'no export' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Machine readable name.',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'label' => array(
+        'description' => 'Human readable name.',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'default_profile' => array(
+        'description' => 'Boolean, default profile.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'settings' => array(
+        'description' => 'Serialized settings.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('pid'),
+  );
+
+  $schema['dpidam_source'] = array(
+    'description' => 'Contains the list of sources of content',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'serial',
+        'description' => 'Source ID, a database primary key to ensure uniqueness.',
+        'not null' => TRUE,
+        'no export' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'text',
+        'description' => 'The name of the source',
+        'not null' => TRUE,
+      ),
+      'archive' => array(
+        'type' => 'int',
+        'description' => 'Whether the content form the source must be archived or not',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'archive_from_dpimport' => array(
+        'type' => 'int',
+        'description' => 'Whether the content form the source must be archived where comming from dpimport',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+    ),
+    'primary key' => array('sid'),
+  );
+
+  $schema['dpidam_historic_errors'] = array(
+    'description' => 'Packages which couldn\'t be sent to the DAM',
+    'fields' => array(
+      'eid' => array(
+        'type' => 'serial',
+        'description' => 'Error ID, a database primary key to ensure uniqueness.',
+        'not null' => TRUE,
+        'no export' => TRUE,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Node Id',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'message' => array(
+        'type' => 'text',
+        'description' => 'The error message',
+        'not null' => TRUE,
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'description' => 'Unix timestamp of when event occurred.',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('eid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Redéfinitions de la terminologie Archives
+ */
+function dpidam_update_7001(){
+  $term = taxonomy_get_term_by_name('Archive');
+  $term = current($term);
+  $term->name = "Archives";
+  taxonomy_term_save($term);
+}

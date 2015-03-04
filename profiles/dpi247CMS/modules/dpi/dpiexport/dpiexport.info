@@ -1,0 +1,8 @@
+name = DPI Export
+description = Export packages from DPI
+package = DPI
+core = 7.x
+
+dependencies[] = dpicache
+dependencies[] = scald
+dependencies[] = scald_image

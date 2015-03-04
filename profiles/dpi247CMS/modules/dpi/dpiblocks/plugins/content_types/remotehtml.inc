@@ -4,17 +4,19 @@
  * Plugin definition.
  */
 $plugin = array(
-  'title' => t('Remote HTML'),
-  'top level' => TRUE,
+  'title'             => t('Remote HTML'),
+  'top level'         => TRUE,
   'no title override' => TRUE,
-  'defaults' => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
-  'js' => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
-  'edit form' => array(
-    'dpiblocks_remotehtml_content_type_view_form'=>'view remotehtml',
-    'dpiblocks_remotehtml_content_type_edit_form'=>'edit remotehtml',
+  'defaults'          => array('admin_title' => '', 'title' => '', 'body' => '', 'format' => filter_default_format(), 'substitute' => TRUE),
+  'js'                => array('misc/autocomplete.js', 'misc/textarea.js', 'misc/collapse.js'),
+  'edit form'         => array(
+    'dpiblocks_remotehtml_content_type_view_form' => 'view remotehtml',
+    'dpiblocks_remotehtml_content_type_edit_form' => 'edit remotehtml',
   ),
-  'edit text' => t('Edit'),
-  'all contexts' => TRUE,
+  'edit text'         => t('Edit'),
+  'all contexts'      => TRUE,
+  'category'          => t('DPI Blocks'),
+  'group'             => t('DPI Core'),
 );
 
 /**
@@ -28,14 +30,16 @@ function dpiblocks_remotehtml_content_type_content_types(){
 
   foreach($results as $record) {
     $remotehtml[$record->machine_name]= array(
-      'title' => t('Remote HTML : '.$record->title),
+      'title'        => t('Remote HTML : '.$record->title),
       'machine_name' => $record->machine_name,
-      'description' => t(''),
-      'add form'      => array(
+      'icon'              => drupal_get_path("module", "dpiblocks").'/icons/server.png',
+      'description'  => t(''),
+      'add form'     => array(
         'dpiblocks_remotehtml_content_type_view_form'=>'view remotehtml',
         'dpiblocks_remotehtml_content_type_edit_form'=>'edit remotehtml',
       ),
-      'category' => t('DPI Extras'),
+      'category'     => t('DPI Blocks'),
+      'group'        => t('DPI Core'),
     );
   }
   form_load_include($form_state, 'inc', 'dpiblocks','includes/remotehtml.admin');
@@ -43,8 +47,10 @@ function dpiblocks_remotehtml_content_type_content_types(){
   $remotehtml['new_remotehtml']= array(
     'name'           => 'remotehtml',
     'title'          => t('New remote HTML'),
+    'icon'              => drupal_get_path("module", "dpiblocks").'/icons/add_content.ico',
     'top level'      => TRUE,
     'category'       => t('Custom'),
+    'group'          => t('DPI Core'),
     'description'    => t('Create a completely custom piece of HTML content.'),
     'add form'       => 'dpiblocks_remotehtml_content_type_add_form',
     'all contexts'   => TRUE,
@@ -272,6 +278,21 @@ function dpiblocks_remotehtml_content_type_render($subtype, $conf, $panel_args, 
   $block->content = file_get_contents($entity->html_adresse);
 
   return $block;
+}
+
+/**
+ * 'admin info' callback for panel pane.
+ */
+function dpiblocks_remotehtml_content_type_admin_info($subtype, $conf, $contexts) {
+  if (!empty($conf)) {
+    $block = new stdClass;
+    $entity = _dpiblocks_remotehtml_get_entity_by_subtype($subtype);
+    $block->title = t($entity->title);
+    //  get html of th e url
+    $block->content = file_get_contents($entity->html_adresse);
+  
+    return $block;
+  }
 }
 
 /**
