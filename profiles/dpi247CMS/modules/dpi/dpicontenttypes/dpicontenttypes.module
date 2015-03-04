@@ -115,17 +115,59 @@ function dpicontenttypes_menu(){
  * Implementation of hook_cron
  */
 function dpicontenttypes_cron() {
+  /**
+  * Three steps for embargo creation
+  * 1 : 1/Days, set tmp table
+  * 2 : 1/Call, publish element from tmp table
+  * 3 : 1/Call, unpublish element from tmp table
+  */
   /* Get the date of today to test cron run */
   $today = strtotime(date('Y-m-d'));
   $last_run_timestamp = dpi_variable_get('dpicontenttypes_embargo_last_run', time() - 86400);
   if ($last_run_timestamp < $today) {
     dpi_variable_set('dpicontenttypes_embargo_last_run', $today);
+    /* Clear table temporaire complète */
+    dpicontenttypes_api_truncate_autopublish();
+    /* Get all results from node table for autopublish date and unpublish date */
+    $results = db_query("SELECT DISTINCT n.nid, n.status, auto.field_autopublishdate_value as date
+              			   FROM {node} n 
+              			   LEFT JOIN {field_data_field_autopublish} cfe ON cfe.entity_id = n.nid
+              			   LEFT JOIN {field_data_field_autopublishdate} auto ON auto.entity_id = n.nid
+              			   WHERE (CAST(FROM_UNIXTIME(auto.field_autopublishdate_value) as date) = CURDATE())
+                       AND (n.type = 'package' OR n.type = 'package_gallery')
+              			   AND cfe.field_autopublish_value = 1");
     
-    /* flush caching before modification */
-    /**
-     * @todo Flush caching
-     */
+    foreach($results as $row){
+      $default_options = array(
+        'nid' => $row->nid,
+        'status' => $row->status,
+        'date' => $row->date,
+        'action' => 1,
+        'timezone' => 'Europe/Berlin', //@todo trouver une solution pour le timezone
+      );      
+      dpicontenttypes_api_insert_autopublish((object) $default_options);
+    }
+    
+    $results = db_query("SELECT DISTINCT n.nid, n.status, auto.field_autopublishdate_value2 as date
+              			   FROM {node} n 
+              			   LEFT JOIN {field_data_field_autopublish} cfe ON cfe.entity_id = n.nid
+              			   LEFT JOIN {field_data_field_autopublishdate} auto ON auto.entity_id = n.nid
+              			   WHERE (CAST(FROM_UNIXTIME(auto.field_autopublishdate_value2) as date) = CURDATE())
+                       AND (n.type = 'package' OR n.type = 'package_gallery')
+              			   AND cfe.field_autopublish_value = 1");
+    
+    foreach($results as $row){
+      $default_options = array(
+        'nid' => $row->nid,
+        'status' => $row->status,
+        'date' => $row->date,
+        'action' => 0,
+        'timezone' => 'Europe/Berlin', //@todo trouver une solution pour le timezone
+      );      
+      dpicontenttypes_api_insert_autopublish((object) $default_options);
+    }
   }
+  
   
   
   // Remove old external files
@@ -906,7 +948,7 @@ function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
 function dpicontenttypes_dpilog_register(){
   return array(
     "dpi_autopublish"=>array(
-      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", 'error_autopublish_node'),
+      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", "delete_autopublish_table" ,'error_autopublish_node'),
     )
   );
 }

@@ -830,11 +830,7 @@ function dpicontenttypes_api_delete_autopublish($node) {
   return $return;
 }
 /**
- * $node = node_load(67);
-  dsm($node, 'start');
-  module_load_include('inc', 'dpicontenttypes', 'dpicontenttypes.api');
-  dpicontenttypes_api_check_autopublish($node);
-  dsm($node, 'end');
+ * 
  * @param type $node
  */
 function dpicontenttypes_api_check_autopublish($node) {
@@ -864,4 +860,15 @@ function dpicontenttypes_api_check_autopublish($node) {
   else {
     dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
+}
+
+function dpicontenttypes_api_truncate_autopublish(){
+  $return = FALSE;
+  try {
+    db_truncate('dpicontenttypes_temp_nodetopublish')->execute();
+    $return = TRUE;
+  } catch (Exception $exc) {
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("dpi_autopublish : Truncate table impossible"));
+  } 
+  return $return;
 }
