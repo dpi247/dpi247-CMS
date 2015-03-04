@@ -380,8 +380,8 @@ function dpicontenttypes_schema() {
         'size' => 'medium',
         'not null' => TRUE,
       ),
-      'date' => array(
-        'description' => 'Date.',
+      'date_info' => array(
+        'description' => 'date_info.',
         'type' => 'text',
         'size' => 'medium',
         'not null' => FALSE,

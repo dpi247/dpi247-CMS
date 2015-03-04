@@ -786,7 +786,7 @@ function dpicontenttypes_api_insert_autopublish($element) {
       $fields = array(
         'nid' => $element->nid,
         'status' => $element->status,
-        'date' => $element->date,
+        'date_info' => $element->date,
         'action' => $element->action,
         'date_timezone' => $element->timezone,
       );
@@ -829,6 +829,31 @@ function dpicontenttypes_api_delete_autopublish($node) {
   }
   return $return;
 }
+
+/**
+ * This function delete informations about autopublish node pass by parameter
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
+  $return = FALSE;
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    try {
+      db_delete('dpicontenttypes_temp_nodetopublish')
+          ->condition('nid', $node->nid)
+          ->condition('action', $action)
+          ->execute();
+      $return = TRUE;
+      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Suppression success for node with nid @nid", array("@nid" => $node->nid)));
+    } catch (Exception $exc) {
+      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Catch an error into db_delete execution"));
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
 /**
  * 
  * @param type $node
