@@ -845,22 +845,9 @@ function dpicontenttypes_api_check_autopublish($node) {
       $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
       $autopublishdate = current($autopublishdates);
       if (isset($autopublishdate['value'])) {
-        $embargo_date = $autopublishdate;
-        $embargo_timzone_db = $embargo_date['timezone_db'] ? $embargo_date['timezone_db'] : 'UTC';
-        if ($form_date = date_make_date($embargo_date['value'], $embargo_timzone_db)) {
-          $form_date = (object) date_timezone_set($form_date, timezone_open($embargo_date['timezone']));
-          $form_date = unserialize(serialize($form_date));
-          $safe_embargo_date = $form_date->date;
-        }
-        $unpublish_date = $autopublishdate;
-        $unpublish_timzone_db = $unpublish_date['timezone_db'] ? $unpublish_date['timezone_db'] : 'UTC';
-        if ($form_date = date_make_date($unpublish_date['value2'], $unpublish_timzone_db)) {
-          $form_date = (object) date_timezone_set($form_date, timezone_open($unpublish_date['timezone']));
-          $form_date = unserialize(serialize($form_date));
-          $safe_unpublish_date = $form_date->date;
-        }
-
-        if (strtotime($safe_embargo_date) <= time() && ($autopublishdate['value2'] == NULL || strtotime($safe_unpublish_date) >= time())) {
+        $date = $autopublishdate;
+        //@todo Confirmer la validité en fonction du fuseau horaire        
+        if (intval($date['value']) <= time() && ($date['value2'] == NULL || intval($date['value2']) >= time())) {
           $node->status = 1;
         }
         else {
