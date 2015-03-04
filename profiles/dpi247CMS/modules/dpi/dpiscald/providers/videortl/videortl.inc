@@ -50,6 +50,7 @@ function dpiscald_videortl_scald_add_form_fill(&$atom, $form, $form_state) {
   }
 
   $atom->data['video_key'] = $key;
+  $atom->data['video_id'] = $identifier;
   $atom->data['video_liveid'] = $liveid;
   $atom->data['video_domain'] = $domain;
 }
@@ -76,7 +77,7 @@ function dpiscald_videortl_scald_prerender($atom, $context, $options, $mode) {
     $atom->rendered->player = theme($theme_name,
       array('vars' =>
         array(
-          'video_id'      => $atom->base_id,
+          'video_id'      => $atom->data['video_id'],
           'video_key'   => $atom->data['video_key'],
           'video_liveid'  => $atom->data['video_liveid'],
           'video_domain'     => $atom->data['video_domain'],
@@ -235,6 +236,8 @@ function dpiscald_videortl_get_import_info($importer, & $entity, & $wrapper, $ur
   }
   $entity->title = $infos['title'];
   $entity->data['video_key'] = $key;
+  $entity->data['video_id'] = $identifier;
   $entity->data['video_liveid'] = $live_id;
   $entity->data['video_domain'] = $domain;
+  $entity->data['orig_identifier'] = $url;
 }
