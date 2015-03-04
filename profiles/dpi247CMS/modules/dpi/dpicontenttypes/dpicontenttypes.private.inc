@@ -245,14 +245,16 @@ function _dpicontenttypes_entityinsertembargoinformation($node){
     $infos->date = $autopublishdate['value'];
     $infos->action = 0;
     $infos->timezone = $autopublishdate['timezone'];    
-    dpicontenttypes_api_insert_autopublish($infos);
-    $infos2 = new stdClass();
-    $infos2->nid = $node->nid;
-    $infos2->status = $node->status;
-    $infos2->date = $autopublishdate['value2'];
-    $infos2->action = 1;
-    $infos2->timezone = $autopublishdate['timezone']; 
-    dpicontenttypes_api_insert_autopublish($infos2);
+    dpicontenttypes_api_insert_autopublish($infos); 
+    if(isset($autopublishdate['value2'])){
+      $infos2 = new stdClass();
+      $infos2->nid = $node->nid;
+      $infos2->status = $node->status;
+      $infos2->date = $autopublishdate['value2'];
+      $infos2->action = 1;
+      $infos2->timezone = $autopublishdate['timezone']; 
+      dpicontenttypes_api_insert_autopublish($infos2);
+    }
   }
 }
 
