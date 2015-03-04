@@ -277,6 +277,20 @@ function dpicontenttypes_node_create($node) {
 }
 
 /**
+ * Implementation of hook_node_create
+ *
+ * @param object $node
+ */
+function dpicontenttypes_node_update($node) {
+  _dpicontenttypes_entityinsertembargoinformation($node);
+  if(function_exists("rules_invoke_event")){
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_update', $node);
+    }
+  }
+}
+
+/**
  * Implementation of hook_node_presave
  *
  * @param object $node
