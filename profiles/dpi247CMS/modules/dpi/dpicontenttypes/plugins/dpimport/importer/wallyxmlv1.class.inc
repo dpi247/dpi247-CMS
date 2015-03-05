@@ -162,7 +162,11 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildAutopublishDate($dom, $wrapper, $entity) {
     $embargodate = NULL;
     $unpublishdate = NULL;
-    if($wrapper->field_autopublish->value()){
+    $value = FALSE;
+    if(strtolower($dom->getElementsByTagName("AutoPublish")->item(0)->nodeValue) == "true"){
+      $value = TRUE;
+    }
+    if($value){
       if ($dom->hasAttribute("EmbargoDate")) {
         $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
       }else{
