@@ -99,6 +99,7 @@ function dpiscald_twitter_scald_prerender($atom, $context, $options, $mode) {
  */
 function dpiscald_twitter_get_media_infos_from_url($url) {
   $api_url = 'https://api.twitter.com/1/statuses/oembed.json';
+  $url = str_replace("statuses", "status", $url);
   $id = explode("status/", $url);
   $url = $api_url . '?id=' . $id[1];
   $response = drupal_http_request($url);
