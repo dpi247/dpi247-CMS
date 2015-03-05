@@ -637,8 +637,9 @@ class WallyXmlV1 extends PackageHelper {
         // @see buildCrops()
         // @see dpicontenttypes_node_presave()
         $wrapper->field_embededobjects->set($embededobject);
-
-        $entity->temp_crops[$atom->sid] = $atom->temp_crops;
+        if(isset($atom->temp_crops) && $atom->temp_crops!=null){
+          $entity->temp_crops[$atom->sid] = $atom->temp_crops;
+        }
       }
     }
   }

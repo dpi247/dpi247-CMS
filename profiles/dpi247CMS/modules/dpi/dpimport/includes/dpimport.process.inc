@@ -67,7 +67,7 @@ function dpimport_process_import($importer, $dispatcher) {
       }
     }
   } catch (Exception $exc) {
-    Logger::logError('importer', 0, 'importer_002', t('General error is comming into process.'));
+    Logger::logError('importer', 0, 'importer_002', t('General error into process : '.$exc->getMessage()));
   }
 }
 
