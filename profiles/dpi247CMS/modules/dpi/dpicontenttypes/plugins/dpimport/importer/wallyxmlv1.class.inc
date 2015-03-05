@@ -1,38 +1,39 @@
-<?php 
+<?php
 
 require_once 'packagehelper.class.inc';
 
 class WallyXmlV1 extends PackageHelper {
+
   /**
    * Intercept dom at element <Package>
    *
    * @param DOM $dom
    */
   public function buildPackage($dom) {
-    // @todo : Pourquoi ne pas passer par la methode constructEntity?
-
     Logger::logExecution('package', TRUE);
-    $package = $this->constructPackage ( $dom );
-    if (! Logger::error ()) {
+    $package = $this->constructPackage($dom);
+    if (!Logger::error()) {
       // Allow to alter entity before save
-      $dispatcher = $this->getDispatcher ();
+      $dispatcher = $this->getDispatcher();
       $package_wrapper = entity_metadata_wrapper('node', $package);
       module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
 
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-      
+
       $this->savePackage($dom, $package);
-      
-      foreach($package->temp_crops as $atom_id=>$crops_infos){
-        _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+
+      if(isset($package->temp_crops) && is_array($package->temp_crops)){
+        foreach ($package->temp_crops as $atom_id => $crops_infos) {
+          _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+        } 
       }
     }
-    
+
     // Set the CurrentLog to the previous one to stop children growing.
-    Logger::setCurrentToPreviousExecution ();
-    
+    Logger::setCurrentToPreviousExecution();
+
     // Indicates that the dispatcher must not process the children
     return FALSE;
   }
@@ -46,14 +47,14 @@ class WallyXmlV1 extends PackageHelper {
    */
   protected function createOrLoadEntityPackage($dom) {
     // @todo Demander à dimitri pourquoi dans wallymport 6 on filtre l'external reference par filter_xss
-    $external_reference = $dom->getElementsByTagName ( 'ExternalReference' )->item ( 0 )->nodeValue;
-    
+    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+
     $action = 'CreateReplace';
-    if ($dom->hasAttribute ( 'Action' )) {
-      $action = $dom->getAttribute ( 'Action' );
+    if ($dom->hasAttribute('Action')) {
+      $action = $dom->getAttribute('Action');
     }
-    
-    return $this->_createOrLoadEntityPackage ( $dom, $external_reference, $action );
+
+    return $this->_createOrLoadEntityPackage($dom, $external_reference, $action);
   }
 
   /**
@@ -62,8 +63,8 @@ class WallyXmlV1 extends PackageHelper {
    * @param DOM $dom          
    */
   protected function createOrLoadEntityPhotoObjectType($dom) {
-    $external_reference = $dom->getElementsByTagName ( 'ExternalReference' )->item ( 0 )->nodeValue;
-    $atom = $this->_createOrLoadEntityPhotoObjectType ( $dom, $external_reference );
+    $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+    $atom = $this->_createOrLoadEntityPhotoObjectType($dom, $external_reference);
     return $atom;
   }
 
@@ -76,9 +77,9 @@ class WallyXmlV1 extends PackageHelper {
    * @return String $callback
    */
   public function getCallback($dom) {
-    $callback = strtolower ( $dom->nodeName );
-    if (get_class ( $dom ) == 'DOMElement' && $dom->hasAttribute ( 'xsi:type' ) && $dom->nodeName != 'Package' && $dom->nodeName != 'MainStory' && $dom->getAttribute ( 'xsi:type' ) != 'xs:string') {
-      $callback = strtolower ( $dom->getAttributeNode ( 'xsi:type' )->value );
+    $callback = strtolower($dom->nodeName);
+    if (get_class($dom) == 'DOMElement' && $dom->hasAttribute('xsi:type') && $dom->nodeName != 'Package' && $dom->nodeName != 'MainStory' && $dom->getAttribute('xsi:type') != 'xs:string') {
+      $callback = strtolower($dom->getAttributeNode('xsi:type')->value);
     }
     return $callback;
   }
@@ -93,23 +94,23 @@ class WallyXmlV1 extends PackageHelper {
    * @param String $datetime          
    */
   protected function getDateStampFromDateTime($date) {
-    $datetime = new DateTime ( $date );
-    return $datetime->getTimestamp ();
+    $datetime = new DateTime($date);
+    return $datetime->getTimestamp();
   }
 
   protected function setPackageAttributes($dom, $wrapper, $entity) {
     // Language
-    
     // @todo: use global lang
-    if ($dom->getAttributeNode ( 'Language' )->value != "") {
-      $wrapper->language->set ( $dom->getAttributeNode ( 'Language' )->value );
-    } else {
-      $wrapper->language->set ( "fr" );
+    if ($dom->getAttributeNode('Language')->value != "") {
+      $wrapper->language->set($dom->getAttributeNode('Language')->value);
+    }
+    else {
+      $wrapper->language->set("fr");
     }
     // @todo path_autho check alias
-    $this->buildEditorialPublicationDate ( $dom, $wrapper, $entity );
-    $this->buildEditorialUpdateDate ( $dom, $wrapper, $entity );
-    $this->buildAutopublishDate ( $dom, $wrapper, $entity );
+    $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
+    $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
+    $this->buildAutopublishDate($dom, $wrapper, $entity);
   }
 
   /**
@@ -120,12 +121,13 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   protected function buildEditorialPublicationDate($dom, $wrapper, $entity) {
-    if ($dom->hasAttribute ( "PublicationDate" )) {
-      $editorialpublicationdate = $this->getDateStampFromDateTime ( $dom->getAttributeNode ( "PublicationDate" )->value );
-    } else {
-      $editorialpublicationdate = time ();
+    if ($dom->hasAttribute("PublicationDate")) {
+      $editorialpublicationdate = $this->getDateStampFromDateTime($dom->getAttributeNode("PublicationDate")->value);
     }
-    $wrapper->field_editorialpublicationdate->set ( $editorialpublicationdate );
+    else {
+      $editorialpublicationdate = time();
+    }
+    $wrapper->field_editorialpublicationdate->set($editorialpublicationdate);
   }
 
   /**
@@ -137,14 +139,15 @@ class WallyXmlV1 extends PackageHelper {
    */
   protected function buildEditorialUpdateDate($dom, $wrapper, $entity) {
     // We don't save the editorial update date on new node.
-    if ($wrapper->nid->value () != NULL) {
-      if ($dom->hasAttribute ( "ForceLastUpdate" ) && $this->xmlbooleantophpboolean ( $dom->getAttribute ( "ForceLastUpdate" ) )) {
-        if ($dom->hasAttribute ( "LastUpdateDate" )) {
-          $editorialupdatedate = $this->getDateStampFromDateTime ( $dom->getAttributeNode ( "LastUpdateDate" )->value );
-        } else {
-          $editorialupdatedate = time ();
+    if ($wrapper->nid->value() != NULL) {
+      if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
+        if ($dom->hasAttribute("LastUpdateDate")) {
+          $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
         }
-        $wrapper->field_editorialupdatedate->set ( $editorialupdatedate );
+        else {
+          $editorialupdatedate = time();
+        }
+        $wrapper->field_editorialupdatedate->set($editorialupdatedate);
       }
     }
   }
@@ -159,16 +162,20 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildAutopublishDate($dom, $wrapper, $entity) {
     $embargodate = NULL;
     $unpublishdate = NULL;
-    if ($dom->hasAttribute ( "EmbargoDate" )) {
-      $embargodate = $this->getDateStampFromDateTime ( $dom->getAttributeNode ( "EmbargoDate" )->value );
+    if($wrapper->field_autopublish->value()){
+      if ($dom->hasAttribute("EmbargoDate")) {
+        $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
+      }else{
+        Logger::logError('importer', 0, 'embargonotfound', t('No embargo date with autopublish true !'));
+      }
+      if ($dom->hasAttribute("UnPublishDate")) {
+        $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+      }
     }
-    if ($dom->hasAttribute ( "UnPublishDate" )) {
-      $unpublishdate = $this->getDateStampFromDateTime ( $dom->getAttributeNode ( "UnPublishDate" )->value );
-    }
-    $wrapper->field_autopublishdate->set ( array (
+    $wrapper->field_autopublishdate->set(array(
       'value' => $embargodate,
-      'value2' => $unpublishdate 
-    ) );
+      'value2' => $unpublishdate
+    ));
   }
 
   /**
@@ -180,7 +187,7 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildProductID($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $wrapper->field_product_id->set ( $value );
+    $wrapper->field_product_id->set($value);
   }
 
   /**
@@ -193,13 +200,14 @@ class WallyXmlV1 extends PackageHelper {
   public function buildExternalReference($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     // Astuce pour empecher que l'external reference du textobject remplace celle du package et soit mise en external_reference_2
-    if (! isset ( $entity->external_reference_set )) {
-      $wrapper->field_external_reference->set ( $value );
-      Logger::logExecution ( 'external_reference', FALSE, 1, '000', $value );
+    if (!isset($entity->external_reference_set)) {
+      $wrapper->field_external_reference->set($value);
+      Logger::logExecution('external_reference', FALSE, 1, '000', $value);
       $entity->external_reference_set = TRUE;
-    } else {
-      $wrapper->field_external_reference_2->set ( $value );
-      Logger::logExecution ( 'external_reference_2', FALSE, 1, '000', $value );
+    }
+    else {
+      $wrapper->field_external_reference_2->set($value);
+      Logger::logExecution('external_reference_2', FALSE, 1, '000', $value);
     }
   }
 
@@ -212,7 +220,7 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildSource($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $wrapper->field_source->set ( $value );
+    $wrapper->field_source->set($value);
   }
 
   /**
@@ -225,12 +233,12 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildPackageTitle($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->title->set ( $this->filterHtmlTags ( $value ) );
-    $wrapper->field_displaytitle->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->title->set($this->filterHtmlTags($value));
+    $wrapper->field_displaytitle->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -243,38 +251,39 @@ class WallyXmlV1 extends PackageHelper {
    * @return Array $destination_list
    */
   protected function getdestinationsfromdom($dom, $vid, $wrapper) {
-    $destination_list = array ();
-    $keys = array ();
-    foreach ( $dom->getElementsByTagName ( 'Destination' ) as $destination ) {
-      $dest = array ();
-      $path = $destination->getElementsByTagName ( "DestinationPath" )->item ( 0 )->nodeValue;
-      $terms = dpicontenttypes_api_taxonomy_get_term_by_path ( $path, $vid );
-      if ($terms && $destination->hasAttribute ( "DocumentLayout" )) {
-        $dest ['tid'] = $terms [0]->tid;
-        if ($destination->hasAttribute ( "Position" )) {
-          $dest ['target'] = $destination->getAttributeNode ( "Position" )->value;
-          $dest ['layout'] = $destination->getAttributeNode ( "DocumentLayout" )->value;
-          if ($wrapper->nid->value () != NULL && $this->destinationexists ( $wrapper, $dest )) {
+    $destination_list = array();
+    $keys = array();
+    foreach ($dom->getElementsByTagName('Destination') as $destination) {
+      $dest = array();
+      $path = $destination->getElementsByTagName("DestinationPath")->item(0)->nodeValue;
+      $terms = dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid);
+      if ($terms && $destination->hasAttribute("DocumentLayout")) {
+        if ($destination->hasAttribute("Position")) {
+          $dest ['tid'] = $terms [0]->tid;
+          $dest ['target'] = $destination->getAttributeNode("Position")->value;
+          $dest ['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
+          if ($wrapper->nid->value() != NULL && $this->destinationexists($wrapper, $dest)) {
             // If destination already exists and no rank -> DNC
-            $dest ['rank'] = $destination->hasAttribute ( "DestinationRank" ) ? $destination->getAttributeNode ( "DestinationRank" )->value : 'DNC';
-          } else {
-            // If destination does not exists and no rank -> default
-            $dest ['rank'] = $destination->hasAttribute ( "DestinationRank" ) ? $destination->getAttributeNode ( "DestinationRank" )->value : 'default';
+            $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
           }
-        } else {
-          $dest ['target'] = 'none';
-          $dest ['layout'] = 'none';
-          $dest ['rank'] = 0;
+          else {
+            // If destination does not exists and no rank -> default
+            $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'default';
+          }
+          // Add destination only once. If a destinations with the same tid and target exists, the destination is not readded
+          if (!array_key_exists($dest ['tid'] . '-' . $dest ['target'], $keys)) {
+            $keys [$dest ['tid'] . '-' . $dest ['target']] = $dest ['tid'] . '-' . $dest ['target'];
+            $destination_list [] = $dest;
+          }
         }
-        // Add destination only once. If a destinations with the same tid and target exists, the destination is not readded
-        if (! array_key_exists ( $dest ['tid'] . '-' . $dest ['target'], $keys )) {
-          $keys [$dest ['tid'] . '-' . $dest ['target']] = $dest ['tid'] . '-' . $dest ['target'];
-          $destination_list [] = $dest;
+        else {
+          Logger::logWarning('importer', 2, 'pathnotfound', t('Position not found. Destination rejected'));
         }
-      } else {
-        Logger::logWarning ( 'importer', 2, 'pathnotfound', t ( 'Path "!path" not found. Destination rejected', array (
-          '!path' => $path 
-        ) ) );
+      }
+      else {
+        Logger::logWarning('importer', 2, 'pathnotfound', t('Path "!path" not found. Destination rejected', array(
+          '!path' => $path
+        )));
       }
     }
     return $destination_list;
@@ -289,23 +298,25 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildDestinations($dom, $wrapper, $entity, $globalDom) {
     // @todo s'occuper des destinations multiples
-    $term = array ();
-    $result = array ();
-    $vid = _dpidestinations_variable_get ( 'dpidestinations_section_vid', NULL );
-    $package_type = $globalDom->getElementsByTagName ( 'PackageLayout' )->item ( 0 )->nodeValue;
-    if ($package_type != 'Hors-texte' || ! isset ( $package_type )) {
+    $term = array();
+    $result = array();
+    $vid = _dpidestinations_variable_get('dpidestinations_section_vid', NULL);
+    $package_type = $globalDom->getElementsByTagName('PackageLayout')->item(0)->nodeValue;
+    if ($package_type != 'Hors-texte' || !isset($package_type)) {
       if ($vid) {
-        $destination_list = $this->getdestinationsfromdom ( $dom, $vid, $wrapper );
-        
-        if (count ( $destination_list )) {
+        $destination_list = $this->getdestinationsfromdom($dom, $vid, $wrapper);
+
+        if (count($destination_list)) {
           // Add destinations to the package
-          $wrapper->field_destinations->set ( $destination_list );
-        } else {
-          // If no destinations at all > Package can't be created
-          Logger::logError ( 'importer', 0, 'nodestination', t ( 'No destination AT ALL for current package.' ) );
+          $wrapper->field_destinations->set($destination_list);
         }
-      } else {
-        Logger::logError ( 'importer', 0, 'novocpath', t ( 'Destination vocabulary not set.' ) );
+        else {
+          // If no destinations at all > Package can't be created
+          Logger::logError('importer', 0, 'nodestination', t('No destination AT ALL for current package.'));
+        }
+      }
+      else {
+        Logger::logError('importer', 0, 'novocpath', t('Destination vocabulary not set.'));
       }
     }
   }
@@ -332,7 +343,7 @@ class WallyXmlV1 extends PackageHelper {
         $status = 0;
         break;
     }
-    $wrapper->comment->set ( $status );
+    $wrapper->comment->set($status);
   }
 
   /**
@@ -354,8 +365,11 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildAutoPublish($dom, $wrapper, $entity) {
-    $value = $this->xmlbooleantophpboolean ( $dom->nodeValue );
-    $wrapper->field_autopublish->set ( $value );
+    $value = FALSE;
+    if(strtolower($dom->nodeValue) == "true"){
+      $value = TRUE;
+    }
+    $wrapper->field_autopublish->set($value);
   }
 
   /**
@@ -367,21 +381,23 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildPackageLayout($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $vid = dpi_variable_get ( 'dpi_packagelayout', NULL );
-    $vocabulary = taxonomy_vocabulary_load ( $vid );
+    $vid = dpi_variable_get('dpi_packagelayout', NULL);
+    $vocabulary = taxonomy_vocabulary_load($vid);
     $vocabulary_name = $vocabulary->machine_name;
     if ($value == 'Hors-texte') {
-      $vocabulary_name = "package_type";      
-    }else{
+      $vocabulary_name = "package_type";
+    }
+    else {
       $value = "Article";
     }
-    $item = taxonomy_get_term_by_name ( $value, $vocabulary_name );
-    if (! empty ( $item )) {
-        $wrapper->field_packagetype->set ( array_shift ( $item ) );
-    } else {
-      Logger::logWarning ( 'importer', 2, 'packagelayout', t ( 'The package layout !package_layout can not be found', array (
-        '!package_layout' => $value 
-      ) ) );
+    $item = taxonomy_get_term_by_name($value, $vocabulary_name);
+    if (!empty($item)) {
+      $wrapper->field_packagetype->set(array_shift($item));
+    }
+    else {
+      Logger::logWarning('importer', 2, 'packagelayout', t('The package layout !package_layout can not be found', array(
+        '!package_layout' => $value
+      )));
     }
   }
 
@@ -394,9 +410,9 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildExternalURI($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $wrapper->field_externalurl->set ( array (
-      'url' => $value 
-    ) );
+    $wrapper->field_externalurl->set(array(
+      'url' => $value
+    ));
   }
 
   /**
@@ -418,8 +434,8 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildMainStory($dom, $wrapper, $entity) {
-    $dispatcher = $this->getDispatcher ();
-    $dispatcher->processChildren ( $dom, $wrapper, $entity );
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $wrapper, $entity);
   }
 
   /**
@@ -431,7 +447,7 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildCopyright($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $wrapper->field_copyright->set ( $value );
+    $wrapper->field_copyright->set($value);
   }
 
   /**
@@ -454,11 +470,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextBarette($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_textbarette->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textbarette->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -470,11 +486,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextForeTitle($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_textforetitle->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textforetitle->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -486,11 +502,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextSubTitle($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_textsubtitle->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textsubtitle->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -502,12 +518,12 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextTitle($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->title->set ( $this->filterHtmlTags ( $value ) );
-    $wrapper->field_displaytitle->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->title->set($this->filterHtmlTags($value));
+    $wrapper->field_displaytitle->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -519,11 +535,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextChapo($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_textchapo->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textchapo->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -535,11 +551,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildTextBody($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_textbody->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_textbody->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -551,11 +567,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildByLine($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_byline->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_byline->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -567,8 +583,8 @@ class WallyXmlV1 extends PackageHelper {
    *
    */
   public function buildEmbeddedContent($dom, $wrapper, $entity) {
-    $dispatcher = $this->getDispatcher ();
-    $dispatcher->processChildren ( $dom, $wrapper, $entity );
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $wrapper, $entity);
   }
 
   /**
@@ -583,23 +599,24 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildEmbeddedObjects($dom, $wrapper, $entity) {
     // Empty the embededobjects field
-    $wrapper->field_embededobjects->set ( NULL );
-    $dispatcher = $this->getDispatcher ();
-    $embeds = $dispatcher->processList ( $dom, $wrapper, $entity );
-    
-    $embeds_list = array ();
+    $wrapper->field_embededobjects->set(NULL);
+    $dispatcher = $this->getDispatcher();
+    $embeds = $dispatcher->processList($dom, $wrapper, $entity);
+
+    $embeds_list = array();
     $i = 100;
-    if (! Logger::error ()) {
-      foreach ( $embeds as $atom ) {
-        if(isset($atom->original)){
+    if (!Logger::error()) {
+      foreach ($embeds as $atom) {
+        if (isset($atom->original)) {
           $atom->original = null;
         }
         if ($atom != NULL) {
-          if (isset ( $atom->embeddedobjectsorder )) {
+          if (isset($atom->embeddedobjectsorder)) {
             $order = $atom->embeddedobjectsorder;
-          } else {
+          }
+          else {
             $order = $i ++;
-            while( array_key_exists ( $order, $embeds_list ) ) {
+            while (array_key_exists($order, $embeds_list)) {
               $order = $i ++;
             }
           }
@@ -607,26 +624,23 @@ class WallyXmlV1 extends PackageHelper {
         }
       }
       // Sort the embeds
-      ksort ( $embeds_list );
-      foreach ( $embeds_list as $atom ) {
-        $embededobject = array (
+      ksort($embeds_list);
+      foreach ($embeds_list as $atom) {
+        $embededobject = array(
           'sid' => $atom->sid,
           'type' => $atom->type,
           'provider' => $atom->provider,
           'inline' => '0'  // @todo
-                );
+        );
 
         //We build cropping info into entity element
         // @see buildCrops()
         // @see dpicontenttypes_node_presave()
-        $wrapper->field_embededobjects->set ( $embededobject );
+        $wrapper->field_embededobjects->set($embededobject);
 
-        $entity->temp_crops[$atom->sid]=$atom->temp_crops;
+        $entity->temp_crops[$atom->sid] = $atom->temp_crops;
       }
     }
-
-
-
   }
 
   /**
@@ -638,20 +652,21 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildLinksLists($dom, $wrapper, $entity) {
     // Empty the linkslist field
-    $wrapper->field_linkslists->set ( NULL );
-    
-    $dispatcher = $this->getDispatcher ();
-    $linkslists = $dispatcher->processList ( $dom, $wrapper, $entity );
-    $linkslist_list = array ();
+    $wrapper->field_linkslists->set(NULL);
+
+    $dispatcher = $this->getDispatcher();
+    $linkslists = $dispatcher->processList($dom, $wrapper, $entity);
+    $linkslist_list = array();
     $i = 100;
-    if (! Logger::error ()) {
-      foreach ( $linkslists as $atom ) {
+    if (!Logger::error()) {
+      foreach ($linkslists as $atom) {
         if ($atom != NULL) {
-          if (isset ( $atom->embeddedobjectsorder )) {
+          if (isset($atom->embeddedobjectsorder)) {
             $order = $atom->embeddedobjectsorder;
-          } else {
+          }
+          else {
             $order = $i ++;
-            while( array_key_exists ( $order, $linkslist_list ) ) {
+            while (array_key_exists($order, $linkslist_list)) {
               $order = $i ++;
             }
           }
@@ -659,15 +674,15 @@ class WallyXmlV1 extends PackageHelper {
         }
       }
       // Sort the links lists
-      ksort ( $linkslist_list );
-      foreach ( $linkslist_list as $atom ) {
-        $linkslistobject = array (
+      ksort($linkslist_list);
+      foreach ($linkslist_list as $atom) {
+        $linkslistobject = array(
           'sid' => $atom->sid,
           'type' => $atom->type,
           'provider' => $atom->provider,
           'inline' => '0'  // @todo
-                );
-        $wrapper->field_linkslists->set ( $linkslistobject );
+        );
+        $wrapper->field_linkslists->set($linkslistobject);
       }
     }
   }
@@ -680,9 +695,9 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildLinksList($dom, $wrapper, $entity) {
-    Logger::logExecution ( 'linkslist', TRUE );
-    $atom = $this->constructEntity ( $dom, 'scald_atom' );
-    Logger::setCurrentToPreviousExecution ();
+    Logger::logExecution('linkslist', TRUE);
+    $atom = $this->constructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
     return $atom;
   }
 
@@ -694,27 +709,28 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildLinks($dom, $wrapper, $entity) {
-    $wrapper->field_linkitems->set ( NULL );
+    $wrapper->field_linkitems->set(NULL);
     $i = 100;
-    $links_list = array ();
-    foreach ( $dom->getElementsByTagName ( 'Link' ) as $link ) {
-      if ($link->hasAttribute ( 'EmbeddedObjectsOrder' )) {
-        $order = $link->getAttribute ( 'EmbeddedObjectsOrder' );
-      } else {
+    $links_list = array();
+    foreach ($dom->getElementsByTagName('Link') as $link) {
+      if ($link->hasAttribute('EmbeddedObjectsOrder')) {
+        $order = $link->getAttribute('EmbeddedObjectsOrder');
+      }
+      else {
         $order = $i ++;
-        while( array_key_exists ( $order, $links_list ) ) {
+        while (array_key_exists($order, $links_list)) {
           $order = $i ++;
         }
       }
-      $links_list [$order] = array (
-        'url' => $link->getElementsByTagName ( 'URI' )->item ( 0 )->nodeValue,
-        'title' => $link->getElementsByTagName ( 'Title' )->item ( 0 )->nodeValue 
+      $links_list [$order] = array(
+        'url' => $link->getElementsByTagName('URI')->item(0)->nodeValue,
+        'title' => $link->getElementsByTagName('Title')->item(0)->nodeValue
       );
     }
     // Sort the links
-    ksort ( $links_list );
+    ksort($links_list);
     $valid_key_array = array();
-    foreach ( $links_list as $link ) {
+    foreach ($links_list as $link) {
       $valid_key_array[] = $link;
     }
     $wrapper->field_linkitems->set($valid_key_array);
@@ -728,9 +744,9 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildPhotoObjectType($dom, $package_wrapper, $entity) {
-    Logger::logExecution ( 'photobojecttype', TRUE );
-    $atom = $this->constructEntity ( $dom, 'scald_atom' );
-    Logger::setCurrentToPreviousExecution ();
+    Logger::logExecution('photobojecttype', TRUE);
+    $atom = $this->constructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
     return $atom;
   }
 
@@ -741,7 +757,7 @@ class WallyXmlV1 extends PackageHelper {
    * @param EntityDrupalWrapper $wrapper          
    * @param Object $entity          
    */
-  public function buildTitle($dom, $wrapper, $entity){
+  public function buildTitle($dom, $wrapper, $entity) {
     try {
       $value = $dom->nodeValue;
       $format = $this->getDefaultTextFormat();
@@ -761,11 +777,11 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildCaption($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat ();
-    $wrapper->field_caption->set ( array (
+    $format = $this->getDefaultTextFormat();
+    $wrapper->field_caption->set(array(
       'value' => $value,
-      'format' => $format 
-    ) );
+      'format' => $format
+    ));
   }
 
   /**
@@ -778,10 +794,10 @@ class WallyXmlV1 extends PackageHelper {
   public function buildURI($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
     $parsedurl = parse_url($value);
-    switch ($parsedurl['scheme']){
+    switch ($parsedurl['scheme']) {
       case 'embed':
         $file = $this->createFile($value, scald_atom_thumbnail_path($entity->type));
-        switch ($entity->type){
+        switch ($entity->type) {
           case 'image':
             $wrapper->scald_thumbnail->set((array) $file);
             break;
@@ -795,30 +811,45 @@ class WallyXmlV1 extends PackageHelper {
       case 'http' || 'https' :
         // Look for a provider for URL
         $function_parse_id = $entity->provider . '_parse_id';
-        if (function_exists ( $function_parse_id )) {
-          $id = $function_parse_id ( $value, FALSE );
-          $wrapper->base_id->set ( $id );
+        if (function_exists($function_parse_id)) {
+          $id = $function_parse_id($value, FALSE);
+          $wrapper->base_id->set($id);
           $function_info = $entity->provider . '_' . $entity->type;
-          if (function_exists ( $function_info )) {
-            $info = $function_info ( $id );
-            $file = $this->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
-            $wrapper->scald_thumbnail->set ( ( array ) $file );
-          } else {
-            Logger::logWarning ( 'importer', 2, 'thumbnail', t ( 'The thumbnail can not be loaded !uri', array (
-              '!uri' => $value 
-            ) ) );
+          if (function_exists($function_info)) {
+            $info = $function_info($id);
+            $file = $this->createFile($info->thumbnail ['src'], scald_atom_thumbnail_path($entity->type));
+            $wrapper->scald_thumbnail->set((array) $file);
           }
-        } else {
+          else {
+            Logger::logWarning('importer', 2, 'thumbnail', t('The thumbnail can not be loaded !uri', array(
+              '!uri' => $value
+            )));
+          }
+        }
+        else {
           /* Gestion de la partie provenant de dpiscald - provider multiple */
-          module_load_include ( 'inc', 'dpiscald', 'providers/' . $entity->type . '/' . $entity->type );
-          $function_parse_id = 'dpiscald_' . $entity->type . '_parse_id';
-          if (function_exists ( $function_parse_id )) {
-            $functionbyentity = 'dpiscald_'.$entity->type.'_get_import_info';
-            $functionbyentity($this, $entity, $wrapper, $value);
-          } else {
-            Logger::logError ( 'importer', 0, 'provideruri', t ( 'The provider can not analyse the uri !uri', array (
-              '!uri' => $value 
-            ) ) );
+          try {
+            module_load_include('inc', 'dpiscald', 'providers/' . $entity->type . '/' . $entity->type);
+            $function_parse_id = 'dpiscald_' . $entity->type . '_parse_id';
+            if (function_exists($function_parse_id)) {
+              $functionbyentity = 'dpiscald_' . $entity->type . '_get_import_info';
+              if(function_exists($functionbyentity)){
+                $functionbyentity($this, $entity, $wrapper, $value);
+              }else{
+                Logger::logError('importer', 0, 'providerfunction', t('function cannot be found', array(
+                  '!uri' => $value
+                )));
+              }              
+            }
+            else {
+              Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array(
+                '!uri' => $value
+              )));
+            }
+          } catch (Exception $exc) {
+            Logger::logWarning('importer', 2, 'dpiscaldatom_'.$entity->type, t('General error detected for entity !type', array(
+              '!type' => $entity->type
+            )));
           }
         }
         break;
@@ -834,10 +865,10 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildRating($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $vid = dpi_variable_get ( 'dpi_rating', NULL );
-    $item = dpicontenttypes_api_taxonomy_get_term_by_path ( $value, $vid );
+    $vid = dpi_variable_get('dpi_rating', NULL);
+    $item = dpicontenttypes_api_taxonomy_get_term_by_path($value, $vid);
     // We take the first match even is there are more.
-    $wrapper->field_rating->set ( $item [0] );
+    $wrapper->field_rating->set($item [0]);
   }
 
   /**
@@ -851,23 +882,22 @@ class WallyXmlV1 extends PackageHelper {
     // @todo
 
 
-    $dom_crops = $dom->getElementsByTagName ( 'Crop' );
-    $crops=array();
-    foreach($dom_crops as $dom_crop){
-      if($dom_crop->hasAttribute('X')){
-      $x=$dom_crop->getAttributeNode ( 'X' )->value;
-      $y=$dom_crop->getAttributeNode ( 'Y' )->value;
-      $w=$dom_crop->getAttributeNode ( 'W' )->value;
-      $h=$dom_crop->getAttributeNode ( 'H' )->value;
+    $dom_crops = $dom->getElementsByTagName('Crop');
+    $crops = array();
+    foreach ($dom_crops as $dom_crop) {
+      if ($dom_crop->hasAttribute('X')) {
+        $x = $dom_crop->getAttributeNode('X')->value;
+        $y = $dom_crop->getAttributeNode('Y')->value;
+        $w = $dom_crop->getAttributeNode('W')->value;
+        $h = $dom_crop->getAttributeNode('H')->value;
       }
 
 
-      $preset_name=$dom_crop->getAttributeNode ( 'Type' )->value;
-      $crops[$preset_name]=array($x,$y,$w,$h);
+      $preset_name = $dom_crop->getAttributeNode('Type')->value;
+      $crops[$preset_name] = array($x, $y, $w, $h);
     }
 
-    $entity->temp_crops=$crops;
-
+    $entity->temp_crops = $crops;
   }
 
   /**
@@ -878,29 +908,30 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildLink($dom, $package_wrapper, $entity) {
-    $uri_info = $dom->getElementsByTagName ( 'URI' )->item ( 0 )->nodeValue;
-    if (strstr ( $uri_info, 'extref://' ) != FALSE) {
-      $tmpExternalRef = substr ( $uri_info, 9 );
+    $uri_info = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
+    if (strstr($uri_info, 'extref://') != FALSE) {
+      $tmpExternalRef = substr($uri_info, 9);
       $query = "SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref ) LIMIT 1";
-      $args = array (
-        ':extref' => $tmpExternalRef 
+      $args = array(
+        ':extref' => $tmpExternalRef
       );
-      $result = db_query ( $query, $args )->fetchField ();
-      if (isset ( $result ) && $var = scald_atom_load ( intval ( $result ) )) {
+      $result = db_query($query, $args)->fetchField();
+      if (isset($result) && $var = scald_atom_load(intval($result))) {
         $atom = new stdClass ();
         $atom->sid = $result;
         $atom->type = $var->type;
         $atom->provider = $var->provider;
         return $atom;
       }
-    } else {
-      Logger::logExecution ( 'linkbojecttype', TRUE );
-      $atom = $this->constructEntity ( $dom, 'scald_atom' );
-      Logger::setCurrentToPreviousExecution ();
+    }
+    else {
+      Logger::logExecution('linkbojecttype', TRUE);
+      $atom = $this->constructEntity($dom, 'scald_atom');
+      Logger::setCurrentToPreviousExecution();
       return $atom;
     }
   }
-  
+
   /**
    * Set AudioObjectType
    *
@@ -909,9 +940,9 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildAudioObjectType($dom, $package_wrapper, $entity) {
-    Logger::logExecution ( 'photobojecttype', TRUE );
-    $atom = $this->constructEntity ( $dom, 'scald_atom' );
-    Logger::setCurrentToPreviousExecution ();
+    Logger::logExecution('photobojecttype', TRUE);
+    $atom = $this->constructEntity($dom, 'scald_atom');
+    Logger::setCurrentToPreviousExecution();
     // return $atom;
   }
 
@@ -923,60 +954,63 @@ class WallyXmlV1 extends PackageHelper {
    * @return unknown
    */
   public function _buildFieldAtompackage($package) {
-    $field_embededobjects = array ();
-    $field_atompackage = array ();
-    foreach ( $package->field_embededobjects as $klang => $elements ) {
-      foreach ( $elements as $element ) {
+    $field_embededobjects = array();
+    $field_atompackage = array();
+    foreach ($package->field_embededobjects as $klang => $elements) {
+      foreach ($elements as $element) {
         if ($element ['type'] == "atom_package") {
-          if (! isset ( $field_atompackage [$klang] ))
-            $field_atompackage [$klang] = array ();
+          if (!isset($field_atompackage [$klang]))
+            $field_atompackage [$klang] = array();
           $field_atompackage [$klang] [] = $element;
         } else {
-          if (! isset ( $field_embededobjects [$klang] ))
-            $field_embededobjects [$klang] = array ();
+          if (!isset($field_embededobjects [$klang]))
+            $field_embededobjects [$klang] = array();
           $field_embededobjects [$klang] [] = $element;
         }
       }
     }
-    if (! empty ( $field_embededobjects ))
+    if (!empty($field_embededobjects))
       $package->field_embededobjects = $field_embededobjects;
-    if (! empty ( $field_atompackage ))
+    if (!empty($field_atompackage))
       $package->field_atompackage = $field_atompackage;
     return $package;
   }
-  
-  function _replace_inline_object(& $package){
+
+  function _replace_inline_object(& $package) {
     try {
-	  $text = current($package->field_textbody);
-	  $text = current($text);
+      $text = current($package->field_textbody);
+      $text = current($text);
       $text = $text["value"];
       $embeddedObjects = current($package->field_embededobjects);
-      
-      if(isset($text) && isset($embeddedObjects) && !empty($embeddedObjects)){
-        foreach($embeddedObjects as $k => $embed){
-          $tag_regex = "/ \[scald=".$embed["sid"].":(.*?)\]/i";
-          if(preg_match_all($tag_regex, $text, $tag_matches)){
-            if(isset($package->field_embededobjects[$package->language])){
+
+      if (isset($text) && isset($embeddedObjects) && !empty($embeddedObjects)) {
+        foreach ($embeddedObjects as $k => $embed) {
+          $tag_regex = "/ \[scald=" . $embed["sid"] . ":(.*?)\]/i";
+          if (preg_match_all($tag_regex, $text, $tag_matches)) {
+            if (isset($package->field_embededobjects[$package->language])) {
               $package->field_embededobjects[$package->language][$k]["inline"] = 1;
-            }elseif(isset($package->field_embededobjects['und'])){
+            }
+            elseif (isset($package->field_embededobjects['und'])) {
               $package->field_embededobjects['und'][$k]["inline"] = 1;
             }
           }
         }
       }
     } catch (Exception $e) {
-    } 
+      
+    }
   }
-  
-  function _buildExternalUrl(& $package){
+
+  function _buildExternalUrl(& $package) {
     try {
       $extUrl = current($package->field_externalurl);
       $extUrl = current($extUrl);
-      if(!isset($extUrl["url"]) || $extUrl["url"]==""){
+      if (!isset($extUrl["url"]) || $extUrl["url"] == "") {
         $package->field_externalurl = array();
       }
     } catch (Exception $e) {
+      
     }
   }
-}
 
+}

@@ -70,7 +70,7 @@ function dpiscald_infogram_scald_fetch($atom, $type) {
     $uri = 'public://atoms/infogram.png';
     $files = file_load_multiple(array(), array('uri' => $uri));
     $file = reset($files);
-    if (isset($file)) {
+    if ($file != NULL) {
       file_usage_add($file, 'dpiscald', 'infogram', $atom->sid);
       $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
     }
