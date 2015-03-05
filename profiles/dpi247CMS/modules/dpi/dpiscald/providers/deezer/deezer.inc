@@ -218,6 +218,14 @@ function dpiscald_deezer_parse_id($string, $check) {
     if (preg_match('#http?://www\.deezer\.com/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
       // This string os a full dailymotion URL
       $id = array( $m[1], $m[2]);
+      if (!in_array($id[0], array('track', 'album', 'playlist'))) {
+        $parts = parse_url($string);
+        parse_str($parts['query'], $query);
+        if (!empty($query['id']) && !empty($query['type'])) {
+          $id = array($query['type'], $query['id']);
+        }
+      }
+
     }
     elseif (preg_match('#^https://www.deezer.com/([a-zA-Z0-9]+)(_.*)?$#', $string, $m)) {
       // This string os a full dailymotion URL
