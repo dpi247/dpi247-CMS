@@ -179,6 +179,6 @@ function dpiscald_kewego_get_import_info($importer, & $entity, & $wrapper, $url)
     $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
     $wrapper->scald_thumbnail->set ( ( array ) $file );  
   } catch (Exception $e) {
-    
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Kewego : " . $url);
   }
 }

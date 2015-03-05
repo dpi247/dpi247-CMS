@@ -255,5 +255,6 @@ function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url)
     $wrapper->scald_thumbnail->set ( ( array ) $file );
     $entity->data ['url'] = 'http://www.deezer.com/plugins/player?type=' . $id [0] . '&id=' . $id [1];
   } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Deezer : " . $url);
   }
 }

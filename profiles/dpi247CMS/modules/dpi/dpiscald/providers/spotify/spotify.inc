@@ -221,14 +221,18 @@ function dpiscald_spotify_parse_id($string, $check) {
 }
 
 function dpiscald_spotify_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_spotify_parse_id ( $url, FALSE );              
-  $wrapper->base_id->set ( md5($id[0]) );
-  $infos = dpiscald_spotify_get_media_infos_from_url ( $url, $id[count($id)-1] );
-  $entity->title = $infos->name;
-  if(isset($infos->album->images[0])){
-    $file = $importer->createFile ( $infos->album->images[0]->url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_spotify_parse_id ( $url, FALSE );              
+    $wrapper->base_id->set ( md5($id[0]) );
+    $infos = dpiscald_spotify_get_media_infos_from_url ( $url, $id[count($id)-1] );
+    $entity->title = $infos->name;
+    if(isset($infos->album->images[0])){
+      $file = $importer->createFile ( $infos->album->images[0]->url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['url'] = $infos->uri;
+    $entity->data['orig_identifier'] = $url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Spotify : " . $url);
   }
-  $entity->data['url'] = $infos->uri;
-  $entity->data['orig_identifier'] = $url;
 }

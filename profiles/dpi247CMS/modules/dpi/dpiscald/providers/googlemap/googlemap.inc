@@ -176,15 +176,19 @@ function dpiscald_googlemap_get_media_infos_from_url($url) {
 }
 
 function dpiscald_googlemap_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_googlemap_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( md5($id) );
-  $info = dpiscald_googlemap_get_media_infos_from_url ( $id );
-  if(isset($info->title)){
-    $entity->title = $info->title;
+  try {
+    $id = dpiscald_googlemap_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $info = dpiscald_googlemap_get_media_infos_from_url ( $id );
+    if(isset($info->title)){
+      $entity->title = $info->title;
+    }
+    if(isset($info->scald_thumbnail['src'])){
+      $file = $importer->createFile ( $info->scald_thumbnail['src'], scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['urlN'] = $info->data['urlN'];
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Google Map : " . $url);
   }
-  if(isset($info->scald_thumbnail['src'])){
-    $file = $importer->createFile ( $info->scald_thumbnail['src'], scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
-  }
-  $entity->data['urlN'] = $info->data['urlN'];
 }

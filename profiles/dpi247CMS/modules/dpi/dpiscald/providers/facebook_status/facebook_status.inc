@@ -230,7 +230,7 @@ function dpiscald_facebook_status_get_import_info($importer, & $entity, & $wrapp
     $entity->data['user_id'] = $infos->user_id;
     $entity->data['data_href'] = $infos->data_href;
     $entity->data['country'] = $infos->country; 
-  } catch (Exception $exc) {
-      
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Facebook status : " . $url);
   }
 }

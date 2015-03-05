@@ -153,14 +153,18 @@ function dpiscald_idalgo_parse_id($string, $check) {
 }
 
 function dpiscald_idalgo_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_idalgo_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( $id );
-  $infos = dpiscald_idalgo_get_media_infos_from_url ( $url );
-  $entity->title = $infos->title;
-  if(isset($infos->thumbnail_url)){
-    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_idalgo_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id );
+    $infos = dpiscald_idalgo_get_media_infos_from_url ( $url );
+    $entity->title = $infos->title;
+    if(isset($infos->thumbnail_url)){
+      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->base_id = $id;
+    $entity->data['url'] = $infos->url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Dailymotion : " . $url);
   }
-  $entity->base_id = $id;
-  $entity->data['url'] = $infos->url;
 }

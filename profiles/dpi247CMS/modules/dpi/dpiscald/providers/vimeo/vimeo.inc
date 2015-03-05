@@ -328,14 +328,18 @@ function dpiscald_vimeo_parse_id($string, $check) {
 }
 
 function dpiscald_vimeo_get_import_info($importer, & $entity, & $wrapper, $url){
-  $value = str_replace ( '\\', '', $url );
-  $id = dpiscald_vimeo_parse_id ( $value, FALSE );
-  $wrapper->base_id->set ( md5($id) );
-  $info = dpiscald_vimeo_video ( $id );
-  if (!empty($info->thumbnail ['src'])) {
-    $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $value = str_replace ( '\\', '', $url );
+    $id = dpiscald_vimeo_parse_id ( $value, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $info = dpiscald_vimeo_video ( $id );
+    if (!empty($info->thumbnail ['src'])) {
+      $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['video_width'] = $info->width;
+    $entity->data['video_height'] = $info->height;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Vimeo : " . $url);
   }
-  $entity->data['video_width'] = $info->width;
-  $entity->data['video_height'] = $info->height;
 }
