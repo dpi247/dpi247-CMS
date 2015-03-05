@@ -171,11 +171,15 @@ function dpiscald_timelinejs_parse_id($string, $check) {
 }
 
 function dpiscald_timelinejs_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_timelinejs_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( md5($id) );
-  $entity->data['url'] = $url;              
-  $entity->data['orig_identifier'] = $uel;
-  $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
-  $file = $importer->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-  $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_timelinejs_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $entity->data['url'] = $url;              
+    $entity->data['orig_identifier'] = $uel;
+    $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
+    $file = $importer->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media TimelineJS : " . $url);
+  }
 }

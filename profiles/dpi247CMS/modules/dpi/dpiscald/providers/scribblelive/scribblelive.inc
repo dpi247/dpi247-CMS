@@ -192,13 +192,17 @@ function dpiscald_scribblelive_parse_id($string, $check) {
 }
 
 function dpiscald_scribblelive_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_scribblelive_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( $id );
-  $infos = dpiscald_scribblelive_get_media_infos_from_url ( $url );
-  $entity->title = $infos['title'];
-  $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
-  $wrapper->scald_thumbnail->set ( ( array ) $file );
-  $entity->data['id'] = $infos['id'];
-  $entity->data['orig_identifier'] = $value;
-  $entity->data['url'] = $infos['url'];
+  try {
+    $id = dpiscald_scribblelive_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id );
+    $infos = dpiscald_scribblelive_get_media_infos_from_url ( $url );
+    $entity->title = $infos['title'];
+    $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+    $entity->data['id'] = $infos['id'];
+    $entity->data['orig_identifier'] = $value;
+    $entity->data['url'] = $infos['url'];
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Scribble live : " . $url);
+  }
 }

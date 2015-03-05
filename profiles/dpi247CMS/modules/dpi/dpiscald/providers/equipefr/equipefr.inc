@@ -184,14 +184,18 @@ function dpiscald_equipefr_parse_id($string, $check) {
 }
 
 function dpiscald_equipefr_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_equipefr_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( md5($id) );
-  $infos = dpiscald_equipefr_get_media_infos_from_url ( $id );
-  $entity->title = $infos['title'];
-  if(isset($infos['thumbnail_url'])){
-    $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_equipefr_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $infos = dpiscald_equipefr_get_media_infos_from_url ( $id );
+    $entity->title = $infos['title'];
+    if(isset($infos['thumbnail_url'])){
+      $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['id'] = $infos['id'];
+    $entity->data['orig_identifier'] = $url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Equipe FR : " . $url);
   }
-  $entity->data['id'] = $infos['id'];
-  $entity->data['orig_identifier'] = $url;
 }

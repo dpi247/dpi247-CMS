@@ -218,6 +218,14 @@ function dpiscald_deezer_parse_id($string, $check) {
     if (preg_match('#http?://www\.deezer\.com/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
       // This string os a full dailymotion URL
       $id = array( $m[1], $m[2]);
+      if (!in_array($id[0], array('track', 'album', 'playlist'))) {
+        $parts = parse_url($string);
+        parse_str($parts['query'], $query);
+        if (!empty($query['id']) && !empty($query['type'])) {
+          $id = array($query['type'], $query['id']);
+        }
+      }
+
     }
     elseif (preg_match('#^https://www.deezer.com/([a-zA-Z0-9]+)(_.*)?$#', $string, $m)) {
       // This string os a full dailymotion URL
@@ -255,5 +263,6 @@ function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url)
     $wrapper->scald_thumbnail->set ( ( array ) $file );
     $entity->data ['url'] = 'http://www.deezer.com/plugins/player?type=' . $id [0] . '&id=' . $id [1];
   } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Deezer : " . $url);
   }
 }
