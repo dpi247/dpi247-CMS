@@ -27,6 +27,7 @@ function dpiscald_infogram_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get the URL.
   $url = $form_state['values']['identifier'];
+  $url = _dpiscald_infogram_url_cleaner($url);
   
   // Get media infos.
   $infos = dpiscald_infogram_get_media_infos_from_url($url);
@@ -183,8 +184,18 @@ function dpiscald_infogram_parse_id($string, $check) {
   return $id;
 }
 
+function _dpiscald_infogram_url_cleaner($url) {
+  $parts = parse_url($url);
+  $clean_url = $url;
+  if (!empty($parts['scheme']) && !empty($parts['host']) && !empty($parts['path'])) {
+    $clean_url = $parts['scheme'] . '://' . $parts['host'] . $parts['path'];
+  }
+  return $clean_url;
+}
+
 function dpiscald_infogram_get_import_info($importer, & $entity, & $wrapper, $url){
   try {
+    $url = _dpiscald_infogram_url_cleaner($url);
     $id = dpiscald_infogram_parse_id ( $url, FALSE );
     $wrapper->base_id->set ( $id );
     $infos = dpiscald_infogram_get_media_infos_from_url ( $url );
