@@ -978,10 +978,14 @@ class WallyXmlV1 extends PackageHelper {
 
   function _replace_inline_object(& $package) {
     try {
+      
       $text = current($package->field_textbody);
       $text = current($text);
       $text = $text["value"];
-      $embeddedObjects = current($package->field_embededobjects);
+      
+      if(isset($package->field_embededobjects)){
+        $embeddedObjects = current($package->field_embededobjects);
+      }        
 
       if (isset($text) && isset($embeddedObjects) && !empty($embeddedObjects)) {
         foreach ($embeddedObjects as $k => $embed) {
