@@ -64,9 +64,11 @@ function dpiscald_flickr_scald_add_form_fill(&$atom, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_flickr_scald_fetch($atom, $type) {
-  $image_uri = $atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'];
-  if (file_exists ( $image_uri )) {
-    $atom->file_source = $atom->thumbnail_source = $image_uri;
+  if (isset($atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'])) {
+    $image_uri = $atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'];
+    if (file_exists ( $image_uri )) {
+      $atom->file_source = $atom->thumbnail_source = $image_uri;
+    }
   }
 }
 

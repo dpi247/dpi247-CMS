@@ -1,1 +1,1 @@
-<iframe src="https://embed.spotify.com/<?=$base_url?>" width="<?=$width?>" height="<?=$height?>" frameborder="0" allowtransparency="true"></iframe>
+<iframe src="https://embed.spotify.com/?uri=<?php print $vars['base_url'] ?>" width="<?php print $vars['width'];?>" height="<?php print $vars['height'];?>" frameborder="0" allowtransparency="true"></iframe>

@@ -103,6 +103,7 @@ function dpiscald_idalgo_get_media_infos_from_url($url) {
   $response = drupal_http_request($url);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     preg_match('/txt_competition=(.*)$/', $url, $title);
+    $infos = new stdClass;
     if ($title[0]) {
       $infos->title = $title[1];
     } else {
@@ -148,7 +149,7 @@ function dpiscald_idalgo_validate_id($element, &$form_state) {
  *
  */
 function dpiscald_idalgo_parse_id($string, $check) {
-  $id = md5($url);
+  $id = md5($string);
   return $id;
 }
 

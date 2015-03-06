@@ -85,9 +85,11 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_deezer_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 

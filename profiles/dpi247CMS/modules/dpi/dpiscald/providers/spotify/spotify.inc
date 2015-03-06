@@ -27,18 +27,26 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get the URL.
   $url = $form_state['values']['identifier'];
+  $url = _dpiscald_spotify_url_cleaner($url);
+
+  $atom->base_id = md5($url);
   
-  if(startsWith($url, 'https')){
+  if(startsWith($url, 'https://play')){
     $url = explode('https://play.spotify.com/', $url);
-  }else{
+  }elseif(startsWith($url, 'https://open')){
+    $url = explode('https://open.spotify.com/', $url);
+  }elseif(startsWith($url, 'http://play')){
     $url = explode('http://play.spotify.com/', $url);
+  }else{
+    $url = explode('http://open.spotify.com/', $url);
   }
+
+  // http://open.spotify.com/user/spotify/playlist/7EofMpXtFZCgQjJZoKaIXK
+
   $url = explode('/', $url[1]);
-  
+
   // Get media infos.
   $infos = dpiscald_spotify_get_media_infos_from_url($url);
-  
-  $atom->base_id = md5($url);
 
   $atom->title = $infos->name;
 
@@ -46,6 +54,7 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
   $atom->type = 'spotify';
 
   $atom->data['url'] = 'spotify:'.implode(':', $url);
+
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
@@ -88,9 +97,11 @@ function dpiscald_spotify_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_spotify_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -122,7 +133,7 @@ function dpiscald_spotify_theme() {
           'template' => 'providers/spotify/dpiscald_spotify_player'
       ),
       'dpiscald_spotify_player_html5' => array(
-          'variables' => array( 'base_url' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+          'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'templates/players/dpiscald_spotify_player_html5'
       ),
   );
@@ -133,16 +144,12 @@ function dpiscald_spotify_theme() {
  * Get media infos from url.
  */
 function dpiscald_spotify_get_media_infos_from_url($url, $id_elem = NULL) {
-  $api_url = 'https://api.spotify.com/v1/tracks/';
+  $api_url = 'https://api.spotify.com/v1/';
 
-  $url_e = explode(':', $url);
-  if(isset($id_elem)){
-    $id_track = $id_elem;
-  }else{
-    $id_track = $url_e[count($url_e)-1];
-  }  
+  $url[0] = $url[0] . 's';
 
-  $url = $api_url . $id_track;
+  $url = $api_url . $url[0] . '/' . $url[1];
+
   $response = drupal_http_request($url);
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
@@ -195,9 +202,16 @@ function dpiscald_spotify_validate_id($element, &$form_state) {
 function dpiscald_spotify_parse_id($string, $check) {
   $id = NULL;
   $string = trim($string);
-  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {    
+
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {   
+
+    if (preg_match('/^(http\:\/\/)?(play|open).spotify.com\/user\/spotify\/([a-zA-Z0-9]*)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
+      $id = $m;
+    } elseif (preg_match('/^(https\:\/\/)?(play|open).spotify.com\/user\/spotify\/([a-zA-Z0-9]*)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
+      $id = $m;
+    }
     // The string ID is not easy to parse, let's try to analyze it
-    if (preg_match('/^(http\:\/\/)?(play|open).spotify.com\/(track|album|artist)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
+    elseif (preg_match('/^(http\:\/\/)?(play|open).spotify.com\/(track|album|artist)\/([a-zA-Z0-9]{22})$/Si',$string,$m)) {
       // This string os a full dailymotion URL
       $id = $m;
     }
@@ -220,17 +234,44 @@ function dpiscald_spotify_parse_id($string, $check) {
   return $id;
 }
 
+function _dpiscald_spotify_url_cleaner($url) {
+  $parts = parse_url($url);
+  $clean_url = $url;
+  if (!empty($parts['scheme']) && !empty($parts['host']) && !empty($parts['path'])) {
+    $clean_url = $parts['scheme'] . '://' . $parts['host'] . $parts['path'];
+  }
+  return $clean_url;
+}
+
 function dpiscald_spotify_get_import_info($importer, & $entity, & $wrapper, $url){
   try {
     $id = dpiscald_spotify_parse_id ( $url, FALSE );              
-    $wrapper->base_id->set ( md5($id[0]) );
+    $url = _dpiscald_spotify_url_cleaner($url);
+    if(startsWith($url, 'https://play')){
+      $url = explode('https://play.spotify.com/', $url);
+    }elseif(startsWith($url, 'https://open')){
+      $url = explode('https://open.spotify.com/', $url);
+    }elseif(startsWith($url, 'http://play')){
+      $url = explode('http://play.spotify.com/', $url);
+    }else{
+      $url = explode('http://open.spotify.com/', $url);
+    }
+    $url = explode('/', $url[1]);
+
     $infos = dpiscald_spotify_get_media_infos_from_url ( $url, $id[count($id)-1] );
-    $entity->title = $infos->name;
+    $wrapper->base_id->set ( md5($id[0]) );
+    if (isset($infos->name)) {
+      $entity->title = $infos->name;
+    } else {
+      $entity->title = 'spotify default title';
+    }
+
     if(isset($infos->album->images[0])){
       $file = $importer->createFile ( $infos->album->images[0]->url, scald_atom_thumbnail_path ( $entity->type ) );
       $wrapper->scald_thumbnail->set ( ( array ) $file );
     }
-    $entity->data['url'] = $infos->uri;
+
+    $entity->data['url'] = 'spotify:'.implode(':', $url);
     $entity->data['orig_identifier'] = $url;
   } catch (Exception $e) {
     dpi_log('dpiscald', "import", "Impossible d'importer le media Spotify : " . $url);
