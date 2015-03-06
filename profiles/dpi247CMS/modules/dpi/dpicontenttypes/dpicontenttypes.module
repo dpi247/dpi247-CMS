@@ -177,7 +177,7 @@ function dpicontenttypes_cron() {
    */
   if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
     $results = db_query("SELECT DISTINCT *
-                          FROM {dpicontenttypes_temp_nodetopublish}
+                          FROM dpicontenttypes_temp_nodetopublish
                           WHERE FROM_UNIXTIME(date_info) < NOW() 
                           AND action = 1
                           ORDER BY date_info ASC");
@@ -202,7 +202,7 @@ function dpicontenttypes_cron() {
    */
   if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
     $results = db_query("SELECT DISTINCT *
-                          FROM {dpicontenttypes_temp_nodetopublish}
+                          FROM dpicontenttypes_temp_nodetopublish
                           WHERE FROM_UNIXTIME(date_info) < NOW() 
                           AND action = 0
                           ORDER BY date_info ASC");

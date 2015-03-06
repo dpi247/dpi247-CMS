@@ -360,7 +360,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
       drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
 
       //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
-
+      if(position == 0) $position = 1;
       $query2 = db_select($destination_table, 'd');
       //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
       $query2->condition('d.field_destinations_tid', $tid, '=');

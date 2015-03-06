@@ -21,7 +21,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+      
       $this->savePackage($dom, $package);
 
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
@@ -162,14 +162,21 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildAutopublishDate($dom, $wrapper, $entity) {
     $embargodate = NULL;
     $unpublishdate = NULL;
-    if(strtolower($dom->getElementsByTagName("AutoPublish")->item(0)->nodeValue) == "true"){
-      if ($dom->hasAttribute("EmbargoDate")) {
-        $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
-      }else{
-        Logger::logError('importer', 0, 'embargonotfound', t('No embargo date with autopublish true !'));
+    if ($dom->hasAttribute("EmbargoDate")) {
+      $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
+      if ($embargodate > time()){
+        $entity->status = 0;
+      } else {
+        $entity->status = 1;
       }
-      if ($dom->hasAttribute("UnPublishDate")) {
-        $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+    } else {
+      $embargodate = time();
+      $entity->status = 1;
+    }
+    if ($dom->hasAttribute("UnPublishDate")) {
+      $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+      if ($unpublishdate < time()){
+        $entity->status = 0;
       }
     }
     $wrapper->field_autopublishdate->set(array(
