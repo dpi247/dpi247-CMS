@@ -40,6 +40,7 @@ class IsNodeRestricted extends PaywallPolitics {
     require_once DRUPAL_ROOT . '/includes/menu.inc';
     require_once DRUPAL_ROOT . '/includes/path.inc';
 
+    $url=urldecode($url);
     $url=drupal_get_normal_path($url,'fr');
 
 
