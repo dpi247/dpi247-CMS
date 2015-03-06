@@ -87,9 +87,11 @@ function dpiscald_storify_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_storify_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -204,22 +206,26 @@ function dpiscald_storify_parse_id($string, $check) {
 }
 
 function dpiscald_storify_get_import_info($importer, & $entity, & $wrapper, $urls){
-  $id = dpiscald_storify_parse_id ( $urls, FALSE );
-  $wrapper->base_id->set ( $id );
-  $url = $urls;
-  if (startsWith($url,'https')){
-    $url = explode('https://storify.com/',$url);
-  } else {
-    $url = explode('http://storify.com/',$url);
-  }               
-  $url = $url[1];
-  $infos = dpiscald_storify_get_media_infos_from_url ( $url );
-  $infos = $infos->content;                
-  $entity->title = $infos->title;                
-  $entity->data['url'] = $url;
-  $entity->data['orig_identifier'] = $urls;   
-  if(isset($infos->thumbnail)){
-    $file = $importer->createFile ( $infos->thumbnail, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_storify_parse_id ( $urls, FALSE );
+    $wrapper->base_id->set ( $id );
+    $url = $urls;
+    if (startsWith($url,'https')){
+      $url = explode('https://storify.com/',$url);
+    } else {
+      $url = explode('http://storify.com/',$url);
+    }               
+    $url = $url[1];
+    $infos = dpiscald_storify_get_media_infos_from_url ( $url );
+    $infos = $infos->content;                
+    $entity->title = $infos->title;                
+    $entity->data['url'] = $url;
+    $entity->data['orig_identifier'] = $urls;   
+    if(isset($infos->thumbnail)){
+      $file = $importer->createFile ( $infos->thumbnail, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Storify : " . $url);
   }
 }

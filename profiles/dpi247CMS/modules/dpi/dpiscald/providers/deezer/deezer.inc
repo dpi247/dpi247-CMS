@@ -85,9 +85,11 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_deezer_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -263,5 +265,6 @@ function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url)
     $wrapper->scald_thumbnail->set ( ( array ) $file );
     $entity->data ['url'] = 'http://www.deezer.com/plugins/player?type=' . $id [0] . '&id=' . $id [1];
   } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Deezer : " . $url);
   }
 }

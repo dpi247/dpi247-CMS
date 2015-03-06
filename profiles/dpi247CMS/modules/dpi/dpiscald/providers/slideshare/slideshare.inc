@@ -86,9 +86,11 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_slideshare_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -192,13 +194,17 @@ function dpiscald_slideshare_parse_id($string, $check) {
 }
 
 function dpiscald_slideshare_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_slideshare_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( $id );
-  $infos = dpiscald_slideshare_get_media_infos_from_url ( $url );
-  $entity->title = $infos->title;
-  $entity->data['html'] = $infos->html;
-  if(isset($infos->thumbnail_url)){
-    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_slideshare_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id );
+    $infos = dpiscald_slideshare_get_media_infos_from_url ( $url );
+    $entity->title = $infos->title;
+    $entity->data['html'] = $infos->html;
+    if(isset($infos->thumbnail_url)){
+      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Slideshare : " . $url);
   }
 }

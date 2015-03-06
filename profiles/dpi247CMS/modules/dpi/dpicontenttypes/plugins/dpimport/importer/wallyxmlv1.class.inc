@@ -21,7 +21,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+      
       $this->savePackage($dom, $package);
 
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
@@ -162,14 +162,21 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildAutopublishDate($dom, $wrapper, $entity) {
     $embargodate = NULL;
     $unpublishdate = NULL;
-    if($wrapper->field_autopublish->value()){
-      if ($dom->hasAttribute("EmbargoDate")) {
-        $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
-      }else{
-        Logger::logError('importer', 0, 'embargonotfound', t('No embargo date with autopublish true !'));
+    if ($dom->hasAttribute("EmbargoDate")) {
+      $embargodate = $this->getDateStampFromDateTime($dom->getAttributeNode("EmbargoDate")->value);
+      if ($embargodate > time()){
+        $entity->status = 0;
+      } else {
+        $entity->status = 1;
       }
-      if ($dom->hasAttribute("UnPublishDate")) {
-        $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+    } else {
+      $embargodate = time();
+      $entity->status = 1;
+    }
+    if ($dom->hasAttribute("UnPublishDate")) {
+      $unpublishdate = $this->getDateStampFromDateTime($dom->getAttributeNode("UnPublishDate")->value);
+      if ($unpublishdate < time()){
+        $entity->status = 0;
       }
     }
     $wrapper->field_autopublishdate->set(array(
@@ -637,8 +644,9 @@ class WallyXmlV1 extends PackageHelper {
         // @see buildCrops()
         // @see dpicontenttypes_node_presave()
         $wrapper->field_embededobjects->set($embededobject);
-
-        $entity->temp_crops[$atom->sid] = $atom->temp_crops;
+        if(isset($atom->temp_crops) && $atom->temp_crops!=null){
+          $entity->temp_crops[$atom->sid] = $atom->temp_crops;
+        }
       }
     }
   }
@@ -978,10 +986,14 @@ class WallyXmlV1 extends PackageHelper {
 
   function _replace_inline_object(& $package) {
     try {
+      
       $text = current($package->field_textbody);
       $text = current($text);
       $text = $text["value"];
-      $embeddedObjects = current($package->field_embededobjects);
+      
+      if(isset($package->field_embededobjects)){
+        $embeddedObjects = current($package->field_embededobjects);
+      }        
 
       if (isset($text) && isset($embeddedObjects) && !empty($embeddedObjects)) {
         foreach ($embeddedObjects as $k => $embed) {

@@ -27,6 +27,7 @@ function dpiscald_infogram_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get the URL.
   $url = $form_state['values']['identifier'];
+  $url = _dpiscald_infogram_url_cleaner($url);
   
   // Get media infos.
   $infos = dpiscald_infogram_get_media_infos_from_url($url);
@@ -123,6 +124,7 @@ function dpiscald_infogram_theme() {
 function dpiscald_infogram_get_media_infos_from_url($url, $id_elem = NULL) {
   // Pour infogram, on a que l'nformation de l'id pour le title / name
   $id = dpiscald_infogram_parse_id($url, FALSE);
+  $infos = new stdClass;
   $infos->title = $id;
   $infos->name = $id;
 
@@ -176,23 +178,37 @@ function dpiscald_infogram_parse_id($string, $check) {
   $string = trim($string);
   // get something else like a page post (i don't have any video example to play with)
   preg_match("/infogr\.am\/(.*)$/siU", $string, $match);
-  if (isset($match[0])) {
+  if (isset($match[1])) {
     $id = $match[1];
   }
 
   return $id;
 }
 
-function dpiscald_infogram_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_infogram_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( $id );
-  $infos = dpiscald_infogram_get_media_infos_from_url ( $url );
-  $entity->title = $infos->name;
-  if(isset($infos->thumbnail_url)){
-    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+function _dpiscald_infogram_url_cleaner($url) {
+  $parts = parse_url($url);
+  $clean_url = $url;
+  if (!empty($parts['scheme']) && !empty($parts['host']) && !empty($parts['path'])) {
+    $clean_url = $parts['scheme'] . '://' . $parts['host'] . $parts['path'];
   }
-  $entity->base_id = $id;
-  $entity->data['url'] = $url;
-  $entity->data['id'] = $id;
+  return $clean_url;
+}
+
+function dpiscald_infogram_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $url = _dpiscald_infogram_url_cleaner($url);
+    $id = dpiscald_infogram_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id );
+    $infos = dpiscald_infogram_get_media_infos_from_url ( $url );
+    $entity->title = $infos->name;
+    if(isset($infos->thumbnail_url)){
+      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->base_id = $id;
+    $entity->data['url'] = $url;
+    $entity->data['id'] = $id;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Infogram : " . $url);
+  }
 }

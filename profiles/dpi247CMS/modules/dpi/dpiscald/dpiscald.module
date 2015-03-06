@@ -631,3 +631,14 @@ function dpiscald_scald_player_settings_form($form, &$form_state) {
 function _dpiscald_get_type_with_a_dpiplayer() {
   return array('youtube', 'dailymotion', 'vimeo', 'soundcloud', 'deezer', 'spotify', 'googlemap', 'scribblelive', 'facebook_status', 'infogram', 'idalgo');
 }
+
+/**
+ * Implements hook_dpilog_register().
+ */
+function dpiscald_dpilog_register(){
+  return array(
+    "dpiscald"=>array(
+      "actions"=>array("import"),
+    ),
+  );
+}
