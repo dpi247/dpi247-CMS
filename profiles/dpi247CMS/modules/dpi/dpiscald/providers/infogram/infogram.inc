@@ -124,6 +124,7 @@ function dpiscald_infogram_theme() {
 function dpiscald_infogram_get_media_infos_from_url($url, $id_elem = NULL) {
   // Pour infogram, on a que l'nformation de l'id pour le title / name
   $id = dpiscald_infogram_parse_id($url, FALSE);
+  $infos = new stdClass;
   $infos->title = $id;
   $infos->name = $id;
 
@@ -177,7 +178,7 @@ function dpiscald_infogram_parse_id($string, $check) {
   $string = trim($string);
   // get something else like a page post (i don't have any video example to play with)
   preg_match("/infogr\.am\/(.*)$/siU", $string, $match);
-  if (isset($match[0])) {
+  if (isset($match[1])) {
     $id = $match[1];
   }
 

@@ -39,10 +39,13 @@ function dpiscald_spotify_build_render(&$atom, $context, $options, $mode, $confi
 
 function dpiscald_spotify_get_theme_parameters($atom, $context, $options, $mode, $config) {
 	return array( 
-		'base_url' => $atom->data['url'],
-		'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
-		'width' => $config->player['spotify']['settings']['width'], 
-		'height' => $config->player['spotify']['settings']['height'], 
-		'origin' => current_path()
+		'vars' => array(
+			'base_url' => $atom->data['url'],
+			'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
+			'width' => $config->player['spotify']['settings']['width'], 
+			'height' => $config->player['spotify']['settings']['height'], 
+			'origin' => current_path(),
+		),
+		'atom' => $atom,
 	);
 }
