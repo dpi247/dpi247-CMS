@@ -44,7 +44,7 @@ class IsNodeRestricted extends PaywallPolitics {
     $url=drupal_get_normal_path($url,'fr');
 
 
-    $urls = explode ( '/', '/'.$url );
+    $urls = explode ( '/', $url );
 
 
 
