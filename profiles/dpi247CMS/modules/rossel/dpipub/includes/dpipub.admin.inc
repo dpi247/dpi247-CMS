@@ -197,7 +197,7 @@ function pub_blocks_admin_form_validate($form, &$form_state) {
       form_set_error('blocks', t('Select at least one block.'));
       break;
     case 'create':
-      $result = db_select('zz_pub_UMI', 'p')
+      $existing_position = db_select('zz_pub_UMI', 'p')
                   ->fields('p')
                   ->condition('position', $form_state['values']['position'],'=')
                   ->countQuery()->execute()->fetchField();
@@ -222,7 +222,9 @@ function pub_blocks_admin_form_submit($form, &$form_state) {
   switch ($op) {
     case 'delete':
       foreach (element_children($form['blocks']) as $name) {
-        db_query('DELETE FROM {zz_pub_UMI} WHERE position = "%s"', $name);
+        db_delete('zz_pub_UMI')
+          ->condition('position', $name)
+          ->execute();
       }
       break;
     case 'create':
