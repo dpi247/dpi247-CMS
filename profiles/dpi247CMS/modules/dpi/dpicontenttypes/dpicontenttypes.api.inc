@@ -792,13 +792,13 @@ function dpicontenttypes_api_insert_autopublish($element) {
       );
 
       db_merge('dpicontenttypes_temp_nodetopublish')
-          ->key(array('nid' => $element->nid, 'action' => $element->action ))
+          ->key(array('nid' => $element->nid, 'action' => $element->action))
           ->fields($fields)
           ->execute();
       $return = TRUE;
       dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Successful insertion of the temporary line to the node @nid", array("@nid" => $element->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Catch an error into db_merge execution with error : ".$exc->getMessage()));
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Catch an error into db_merge execution with error : " . $exc->getMessage()));
     }
   }
   else {
@@ -821,7 +821,7 @@ function dpicontenttypes_api_delete_autopublish($node) {
       $return = TRUE;
       dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution with message : ".$exc->getMessage()));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution with message : " . $exc->getMessage()));
     }
   }
   else {
@@ -843,7 +843,7 @@ function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
           ->condition('action', $action)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line for node @nid with action @action", array("@nid" => $node->nid, '@action' => ($action == 0) ? 'unpublish' : 'publish')));
     } catch (Exception $exc) {
       dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution"));
     }
@@ -878,7 +878,8 @@ function dpicontenttypes_api_check_autopublish($node) {
       else {
         $node->status = 0;
       }
-    }else{
+    }
+    else {
       $node->status = 1;
     }
   }
@@ -887,7 +888,7 @@ function dpicontenttypes_api_check_autopublish($node) {
   }
 }
 
-function dpicontenttypes_api_truncate_autopublish(){
+function dpicontenttypes_api_truncate_autopublish() {
   $return = FALSE;
   try {
     db_truncate('dpicontenttypes_temp_nodetopublish')->execute();
@@ -895,6 +896,6 @@ function dpicontenttypes_api_truncate_autopublish(){
     $return = TRUE;
   } catch (Exception $exc) {
     dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table impossible"));
-  } 
+  }
   return $return;
 }

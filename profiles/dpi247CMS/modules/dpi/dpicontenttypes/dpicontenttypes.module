@@ -218,7 +218,7 @@ function dpicontenttypes_cron() {
           /* Sav node & delete row from tmp */
           node_save($node);       
           dpicontenttypes_api_delete_by_action_autopublish($node, 0);
-          dpi_log('dpi_autopublish', "action_cron_unpublish", t("dpi_autopublish : node with nid !nid is publish", array('!nid' => $row->nid)));
+          dpi_log('dpi_autopublish', "action_cron_unpublish", t("dpi_autopublish : node with nid !nid is unpublish", array('!nid' => $row->nid)));
         } catch (Exception $exc) {
           dpi_log('dpi_autopublish', "error_unpublish_node", t("dpi_autopublish : was a problem for the unpublication of the node !nid", array('!nid' => $row->nid)));
         }
