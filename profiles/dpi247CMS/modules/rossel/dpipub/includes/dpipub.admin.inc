@@ -197,7 +197,10 @@ function pub_blocks_admin_form_validate($form, &$form_state) {
       form_set_error('blocks', t('Select at least one block.'));
       break;
     case 'create':
-      $existing_position = db_result(db_query('SELECT count(pid) FROM {zz_pub_UMI} where position="%s"',$form_state["values"]["position"]));
+      $result = db_select('zz_pub_UMI', 'p')
+                  ->fields('p')
+                  ->condition('position', $form_state['values']['position'],'=')
+                  ->countQuery()->execute()->fetchField();
 
       if($form_state['values']['position']==""){
         form_set_error('position', t('The position field could not be empty.'));
