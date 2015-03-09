@@ -124,7 +124,7 @@ function dpicontenttypes_cron() {
   /* Get the date of today to test cron run */
   $today = strtotime(date('Y-m-d'));
   $last_run_timestamp = dpi_variable_get('dpicontenttypes_embargo_last_run', time() - 86400);
-  dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Start cron embargo"));
+  dpi_log('dpi_autopublish', "start_autopublish_log", t("dpi_autopublish : Start cron embargo"));
   /**
    * Step 1
    */
@@ -170,6 +170,7 @@ function dpicontenttypes_cron() {
       );      
       dpicontenttypes_api_insert_autopublish((object) $default_options);
     }
+    dpi_log('dpi_autopublish', "tmp_autopublish_update", t("dpi_autopublish : table tmp for embargo updated"));
   }
   
   /**
@@ -191,10 +192,11 @@ function dpicontenttypes_cron() {
           /* Sav node & delete row from tmp */
           node_save($node);       
           dpicontenttypes_api_delete_by_action_autopublish($node, 1);
+          dpi_log('dpi_autopublish', "action_cron_autopublish", t("dpi_autopublish : node with nid !nid is publish", array('!nid' => $row->nid)));
         } catch (Exception $exc) {
-          //@todo log
+          dpi_log('dpi_autopublish', "error_autopublish_node", t("dpi_autopublish : was a problem for the publication of the node !nid", array('!nid' => $row->nid)));
         }
-    }
+    }    
   }
   
   /**
@@ -216,12 +218,13 @@ function dpicontenttypes_cron() {
           /* Sav node & delete row from tmp */
           node_save($node);       
           dpicontenttypes_api_delete_by_action_autopublish($node, 0);
+          dpi_log('dpi_autopublish', "action_cron_unpublish", t("dpi_autopublish : node with nid !nid is publish", array('!nid' => $row->nid)));
         } catch (Exception $exc) {
-          //@todo log
+          dpi_log('dpi_autopublish', "error_unpublish_node", t("dpi_autopublish : was a problem for the unpublication of the node !nid", array('!nid' => $row->nid)));
         }
     }
   }
-  
+  dpi_log('dpi_autopublish', "end_autopublish_log", t("dpi_autopublish : End cron embargo"));
   // Remove old external files
   _dpicontenttypes_cron_remove_external_files();
 }
@@ -1014,7 +1017,7 @@ function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
 function dpicontenttypes_dpilog_register(){
   return array(
     "dpi_autopublish"=>array(
-      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", "delete_autopublish_table", "action_cron_autopublish", "action_cron_unpublish" ,'error_autopublish_node'),
+      "actions"=>array("start_autopublish_log", "end_autopublish_log", "tmp_autopublish_update" , "insert_autopublish_node", "delete_autopublish_node", "delete_autopublish_table", "action_cron_autopublish", "action_cron_unpublish" ,'error_autopublish_node', 'error_unpublish_node', 'add_tmp_table_embargo', 'del_tmp_table_embargo'),
     )
   );
 }

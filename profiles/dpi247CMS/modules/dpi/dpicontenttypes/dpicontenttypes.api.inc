@@ -796,13 +796,13 @@ function dpicontenttypes_api_insert_autopublish($element) {
           ->fields($fields)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : insert success for node with nid @nid", array("@nid" => $element->nid)));
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Successful insertion of the temporary line to the node @nid", array("@nid" => $element->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Catch an error into db_merge execution"));
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Catch an error into db_merge execution with error : ".$exc->getMessage()));
     }
   }
   else {
-    dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
   return $return;
 }
@@ -819,13 +819,13 @@ function dpicontenttypes_api_delete_autopublish($node) {
           ->condition('nid', $node->nid)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Suppression success for node with nid @nid", array("@nid" => $node->nid)));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Catch an error into db_delete execution"));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution with message : ".$exc->getMessage()));
     }
   }
   else {
-    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
   return $return;
 }
@@ -843,13 +843,13 @@ function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
           ->condition('action', $action)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Suppression success for node with nid @nid", array("@nid" => $node->nid)));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Catch an error into db_delete execution"));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution"));
     }
   }
   else {
-    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
   return $return;
 }
@@ -883,7 +883,7 @@ function dpicontenttypes_api_check_autopublish($node) {
     }
   }
   else {
-    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
 }
 
@@ -891,9 +891,10 @@ function dpicontenttypes_api_truncate_autopublish(){
   $return = FALSE;
   try {
     db_truncate('dpicontenttypes_temp_nodetopublish')->execute();
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table success"));
     $return = TRUE;
   } catch (Exception $exc) {
-    dpi_log('dpi_autopublish', "delete_autopublish_table", t("dpi_autopublish : Truncate table impossible"));
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table impossible"));
   } 
   return $return;
 }
