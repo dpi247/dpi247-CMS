@@ -140,14 +140,14 @@ function dpiblocks_get_export_import_form($form, & $form_state){
   $form['export'] = array(
     '#title' => t('Export'),
     '#type' => 'textarea',
-    '#description' => t ('Appeller la fonction dpiblocks_api_import_accroche_types en lui passant en paramètre le tableau suivant, Ou importer le directement de le textarea suivant :'),
+    '#description' => t ('Appeller la fonction dpiblocks_api_import_accroche_types en lui passant en paramètre le tableau suivant sous forme de chaine de caractère, Ou importer le directement de le textarea suivant depuis votre nouvelle instance.'),
     '#default_value' => dpiblocks_api_get_string_accroche_infos(),
   );
   
   $form['import'] = array(
     '#title' => t('import'),
     '#type' => 'textarea',
-    '#description' => t ('Complétez le champ suivant par un tableau contenant les informations des accroches suivantes :'),
+    '#description' => t ('Complétez le champ suivant par un tableau contenant les informations des accroches suivantes.'),
     '#default_value' => isset( $context['keywords']) ? drupal_implode_tags($context['keywords']) : '',
   );
   
