@@ -130,7 +130,7 @@ function dpiblocks_menu() {
     'title' => 'Update accroche',
     'description' => 'Update accroche type',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpiblocks_accroche_admin_add_form', 4),
+    'page arguments' => array('dpiblocks_accroche_admin_add_form', 5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
   );
@@ -139,7 +139,7 @@ function dpiblocks_menu() {
     'title' => 'Delete accroche',
     'description' => 'delete accroche type',
     'page callback' => 'dpiblocks_accroche_admin_del',
-    'page arguments' => array(4),
+    'page arguments' => array(5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
   );
@@ -147,7 +147,8 @@ function dpiblocks_menu() {
   $items[DPI_ADMIN_PATH.'/accroche/accroche_export'] = array(
     'title' => 'Export/Import accroche',
     'description' => 'Export or import accroche element',
-    'page callback' => 'dpiblocks_get_accroche_info',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_get_export_import_form'),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
     'type' => MENU_LOCAL_TASK,
