@@ -54,7 +54,7 @@ function dpipub_menu() {
     'weight' => 3,
   );
   
-  $items['admin/dpi247/rossel/pubcron'] = array(
+  $items['admin/dpi247/rossel/pub/pubcron'] = array(
     'title' => t('Run pub "cron"'),
     'page callback' => 'pub_cron_run',
     'access arguments' => array('manage pub'),
