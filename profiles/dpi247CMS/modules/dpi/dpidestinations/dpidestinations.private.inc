@@ -291,9 +291,52 @@ function _dpidestinations_virtualrank_update_item(&$item,$nid) {
     $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank'],$nid);
   }
   else {
-    $item['rank'] = 0;
+    //leave the rankk as it was
+    //@todo: find the old rank with a querry ?
+     $item['rank'] = 0;
   }
 }
+
+/**
+ * 
+ * @param type $tid
+ * @param type $target
+ * @param type $position
+ * @param type $nid
+ */
+function _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,$nid, $destination_table) {
+  
+  /*
+   * $controller = new TargetBlockController('targetblock');
+   * $targetblock = $controller->load_targetblock_by_termid_and_target($tid, $target);
+   * 
+   * $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+   * $rank_max_value = $wrapper->rank_max_value->value(); 
+   */
+  
+  $query = db_select($destination_table, 'd');
+  $query->condition('d.field_destinations_tid', $tid, '=');
+  $query->condition('d.field_destinations_target', $target, '=');
+  $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
+  //@todo:limit the query for performance reason ?
+  //$query->range(0, $rank_max_value); // Offset is the first argument, second argument is  
+  
+  $number_of_packages_in_target=$query->fields(NULL, array('field'))->countQuery()->execute()->fetchField();
+  
+  // USING OFFSET for efficency
+  if($position == 0 || $position == 1 || $position == 2) {
+    $offset = 0;
+  } else {
+    $offset = $position - 2;
+  }
+  
+  if($offset>($number_of_packages_in_target-1)){    
+    $offset = max($number_of_packages_in_target-1,0);
+  }
+  
+  return $offset;
+}
+
 
 /**
  * Update the virtualrank of an item
@@ -312,14 +355,9 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
   if($actual_time_rank!==NULL and $actual_time_rank>$time_rank_in_position){
     $position++;
   }
+  
+  $offset= _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,$nid, $destination_table);
 
-
-  // USING OFFSET for efficency
-  if($position == 0 || $position == 1 || $position == 2) {
-    $offset = 0;
-  } else {
-    $offset = $position - 2;
-  }
 
   $query = db_select($destination_table, 'd');
   //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
@@ -363,7 +401,6 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
       drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
 
       //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
-      if(position == 0) $position = 1;
       $query2 = db_select($destination_table, 'd');
       //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
       $query2->condition('d.field_destinations_tid', $tid, '=');
