@@ -34,10 +34,25 @@ function atom_package_scald_prerender($atom, $context, $options, $mode) {
   if ($mode == 'atom') {
     $node_info = node_load($atom->data['nid']);
     $node_info->field_atompackage = array();
-    $atom->rendered->player = theme('atom_package_player',
+    $package_type = field_get_items('node', $node_info, 'field_packagetype');
+    if (isset($package_type[0])) {
+      $term = taxonomy_term_load($package_type[0]['tid']);
+      if ($term->name == 'Hors-texte') {
+        // Hors texte
+        $theme_name = 'atom_package_player_hors_texte';
+        $view_mode = 'dpi_hors_texte';
+        drupal_alter('dpi_atom_hors_texte_view_mode_alter', $view_mode);
+      } else {
+        // Article secondaire
+        $theme_name = 'atom_package_player';
+        $view_mode = 'dpi_article_secondaire';
+        drupal_alter('dpi_atom_article_view_mode_alter', $view_mode);
+      }
+    }
+    $atom->rendered->player = theme($theme_name,
       array('vars' =>
         array(
-          'node'    => node_view($node_info, 'dpi_atom_embedd'),
+          'node'    => node_view($node_info, $view_mode),
         ),
         'atom' => $atom, 
       )
@@ -50,6 +65,10 @@ function atom_package_theme(){
     'atom_package_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'atom_package_player'
+    ),
+    'atom_package_player_hors_texte' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'atom_package_player_hors_texte'
     ),
   );
 }
