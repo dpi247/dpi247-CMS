@@ -25,8 +25,7 @@ function ccimapping_cropsync_form_cropings_editor_form($form, $form_state) {
   );
 
   $form['fyi']['markup'] = array(
-    '#type' => 'markup',
-    '#value' => '<pre>'.htmlentities(ccimapping_cropsync_get_cropings_fromWS()).'</pre>',
+    '#markup' => '<pre>'.htmlentities(ccimapping_cropsync_get_cropings_fromWS()).'</pre>',
   );
 
   return $form;
@@ -66,7 +65,6 @@ function ccimapping_cropsync_form_cropings_editor_form_submit($form, $form_state
       drupal_set_message(t('The cropings have been sent to CCI'));
     } catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService error while sending the Cropings XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
     }
 
     /*dsm($client->__getLastRequest(), 'submit req');
@@ -116,7 +114,7 @@ function ccimapping_cropsync_get_cropings_fromWS() {
       return $result->return;
     } catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService error while getting the Cropings XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
+      //dsm($exception);
     }
 
     /*dsm($client->__getLastRequest(), 'req');

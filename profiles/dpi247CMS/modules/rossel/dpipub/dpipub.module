@@ -19,8 +19,8 @@ function dpipub_perm() {
  */
 function dpipub_menu() {
   $items = array();
-  $items['admin/rossel/pub'] = array(
-    'title' => t('Pub configuration'),
+  $items['admin/dpi247/rossel/pub'] = array(
+    'title' => t('DPI Pub configuration'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pub_page_admin_form'),
     'access arguments' => array('manage pub'),
@@ -28,13 +28,13 @@ function dpipub_menu() {
     'file' => 'includes/dpipub.admin.inc',
   );
 
-  $items['admin/rossel/pub/adtech'] = array(
+  $items['admin/dpi247/rossel/pub/adtech'] = array(
     'title' => t('Pub adTech configuration'),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
 
-  $items['admin/rossel/pub/purl'] = array(
+  $items['admin/dpi247/rossel/pub/purl'] = array(
     'title' => t('Pub Purl configuration'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pub_page_admin_purl_form'),
@@ -44,7 +44,7 @@ function dpipub_menu() {
     'weight' => 2,
   );
 
-  $items['admin/rossel/pub/openx'] = array(
+  $items['admin/dpi247/rossel/pub/openx'] = array(
     'title' => t('Pub OpenX configuration'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pub_page_admin_openx_form'),
@@ -54,34 +54,40 @@ function dpipub_menu() {
     'weight' => 3,
   );
   
-  $items['admin/rossel/pubcron'] = array(
+  $items['admin/dpi247/rossel/pub/pubcron'] = array(
     'title' => t('Run pub "cron"'),
     'page callback' => 'pub_cron_run',
     'access arguments' => array('manage pub'),
     'description' => t('Run ads cron.'),
   	'file' => 'includes/dpipub.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 6,
   );
   
-  $items['admin/rossel/pubblocks'] = array(
+  $items['admin/dpi247/rossel/pub/pubblocks'] = array(
     'title' => t('Manage blocks'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pub_blocks_admin_form'),
     'access arguments' => array('manage pub'),
     'description' => t('Manage existing ads blocks and create new ones.'),
     'file' => 'includes/dpipub.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
   );
   
-  $items['admin/rossel/pubcache'] = array(
+  $items['admin/dpi247/rossel/pub/pubcache'] = array(
     'title' => t('Manage cache'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pub_cache_admin_form'),
     'access arguments' => array('manage pub'),
     'description' => t('View and delete existing cached ads.'),
     'file' => 'includes/dpipub.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 6,
   );
   
-  $items ['admin/rossel/pub/dfp'] = array (
-    'title' => 'PUB DFP CONFIGURATION',
+  $items ['admin/dpi247/rossel/pub/dfp'] = array (
+    'title' => 'Pub Dfp configuration',
     'type' => MENU_NORMAL_ITEM,
     'page callback' => 'dfpmodule_settings_url',
     'access arguments' => array (

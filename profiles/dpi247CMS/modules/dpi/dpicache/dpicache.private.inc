@@ -81,7 +81,25 @@ function dpicache_regenerate_cache_entries_since_time($time){
   $query = db_select($table_cache_entries, 'dce');
   $query->fields('dce',array('name','hash','data_type','creation_date','parameters'));
   $query->where('dce.expiration_date > '.$time.' AND dce.last_run+dce.update_freq < '.$time);
-  dpicache_regenerate_cache_entries_process($query);
+  
+  //@todo modification pour éviter d'utiliser la fonction car celle-ci pos eproblème actuellement
+  //dpicache_regenerate_cache_entries_process($query);
+  
+  /* suppression des caches concernés */
+  foreach($query->execute() as $entry){
+    try {
+      $cid = $entry->name.'_'.$entry->hash;
+      cache_clear_all($cid, 'cache_dpicache');
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_INFO );
+    } catch (Exception $e) {
+      dpi_log ( 'dpicache', "manual_regeneration_of_cache_name", t ( "Manual cache suppression: @cache_name success !!!", array (
+        '@cache_name' => $entry->name.'_'.$entry->hash,
+      ) ), array (), NULL, WATCHDOG_CRITICAL );
+    }
+  }
+  
   return TRUE;
 }
 

@@ -10,7 +10,7 @@
 function dpiblocks_get_accroche_info() {
   drupal_add_css(drupal_get_path('module', 'dpiblocks')."/css/dpiblocks.css");
   
-  $render = l('Add accroche', 'admin/dpi247/accroche/add', array('attributes' => array('class' => 'dpiblocks_buton')));
+  $render = l('Add accroche', 'admin/dpi247/accroche/accroche/add', array('attributes' => array('class' => 'dpiblocks_buton')));
   $rows = array();
   $header = array (
     array ('data' => t ( 'Readable name' )),
@@ -24,7 +24,7 @@ function dpiblocks_get_accroche_info() {
       array('data' => $array_val[0]),
       array('data' => $k),
       array('data' => $array_val[1]),
-      array('data' => l('Edit', 'admin/dpi247/accroche/add/'.$k)." - ".l('Delete', 'admin/dpi247/accroche/del/'.$k)),
+      array('data' => l('Edit', 'admin/dpi247/accroche/accroche/add/'.$k)." - ".l('Delete', 'admin/dpi247/accroche/accroche/del/'.$k)),
     );
   }
   
@@ -134,3 +134,45 @@ function dpiblocks_accroche_admin_del($machine_name){
   }
 }
 
+function dpiblocks_get_export_import_form($form, & $form_state){
+  $form = array();  
+  
+  $form['export'] = array(
+    '#title' => t('Export'),
+    '#type' => 'textarea',
+    '#description' => t ('Appeller la fonction dpiblocks_api_import_accroche_types en lui passant en paramètre le tableau suivant sous forme de chaine de caractère, Ou importer le directement de le textarea suivant depuis votre nouvelle instance.'),
+    '#default_value' => dpiblocks_api_get_string_accroche_infos(),
+  );
+  
+  $form['import'] = array(
+    '#title' => t('import'),
+    '#type' => 'textarea',
+    '#description' => t ('Complétez le champ suivant par un tableau contenant les informations des accroches suivantes.'),
+    '#default_value' => isset( $context['keywords']) ? drupal_implode_tags($context['keywords']) : '',
+  );
+  
+  $form['submit'] = array(
+  '#type' => 'submit',
+  '#value' => t('Import'),
+ );
+  
+  return $form;
+}
+
+function dpiblocks_get_export_import_form_validate($form, & $form_state){
+  if(!isset($form_state['values']) || $form_state['values']['import'] == ""){
+    form_set_error('import', t('Veuillez complétez correctement l\'import'));
+  }
+  $test = json_decode($form_state['values']['import'], true);
+  if(!is_array($test)){
+    form_set_error('import', t('Veuillez complétez correctement l\'import'));
+  }
+}
+
+function dpiblocks_get_export_import_form_submit($form, & $form_state){
+  if(dpiblocks_api_import_accroche_types($form_state['values']['import'])){
+    drupal_set_message('Import réussis sans erreur');
+  }else{
+    drupal_set_message('Une erreur est survenue durant l\'import', 'error');
+  }
+}

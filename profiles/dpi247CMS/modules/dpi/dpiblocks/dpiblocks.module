@@ -106,10 +106,18 @@ function dpiblocks_menu() {
     'description' => 'Create a new accroche type',
     'page callback' => 'dpiblocks_get_accroche_info',
     'access arguments' => array('manage flow plugins'),
-    'file' => 'includes/accroche.admin.inc',
+    'file' => 'includes/accroche.admin.inc',    
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/add'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche'] = array(
+    'title' => 'DPI blocks Accroche',
+    'description' => 'Create a new accroche type',
+    'access arguments' => array('manage flow plugins'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/add'] = array(
     'title' => 'Manage accroche',
     'description' => 'Create a new accroche type',
     'page callback' => 'drupal_get_form',
@@ -118,22 +126,33 @@ function dpiblocks_menu() {
     'file' => 'includes/accroche.admin.inc',
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/add/%'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/add/%'] = array(
     'title' => 'Update accroche',
     'description' => 'Update accroche type',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpiblocks_accroche_admin_add_form', 4),
+    'page arguments' => array('dpiblocks_accroche_admin_add_form', 5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/del/%'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/del/%'] = array(
     'title' => 'Delete accroche',
     'description' => 'delete accroche type',
     'page callback' => 'dpiblocks_accroche_admin_del',
-    'page arguments' => array(4),
+    'page arguments' => array(5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/accroche_export'] = array(
+    'title' => 'Export/Import accroche',
+    'description' => 'Export or import accroche element',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_get_export_import_form'),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
   );
   
   $items['my_module_set_target'] = array(

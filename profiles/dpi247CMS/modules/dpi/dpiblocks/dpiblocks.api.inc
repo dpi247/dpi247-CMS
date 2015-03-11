@@ -54,3 +54,17 @@ function dpiblocks_api_get_plugin_by_name($plugin_name) {
   return $plugin;
 }
 
+function dpiblocks_api_get_string_accroche_infos(){
+  return json_encode(variable_get ( 'dpiblocks_accroche_settings', array () ));
+}
+
+function dpiblocks_api_import_accroche_types($json_string){  
+  try {
+    $array = json_decode($json_string, true);
+    $tmp = variable_get ( 'dpiblocks_accroche_settings', array () );
+    variable_set('dpiblocks_accroche_settings', array_merge($tmp, $array));
+    return TRUE;
+  } catch (Exception $exc) {
+    return FALSE;
+  }
+}
