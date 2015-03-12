@@ -23,7 +23,7 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
           break;
         case 1 :
           if ($col_k == 1 && variable_get ( "dpisso_paywall_get_type_of_paywall", 0 ) == $row_k) {
-            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset( $parameters_access->freemium->nbViewCookie))?  $parameters_access->freemium->nbViewCookie : 0) );
+            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset($parameters_access->freemium->validityTypeCookie))? $parameters_access->freemium->validityTypeCookie : 0) );
             $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeCookie))? $parameters_access->freemium->validityTypeCookie : "months") );
             $rows ['r' . $row_k] ['c' . $col_k] = array (
               '#nb_element' => 2,
@@ -31,8 +31,8 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
               $active_part_form 
             );
           } elseif ($col_k == 2 && variable_get ( "dpisso_paywall_get_type_of_paywall", 0 ) == $row_k) {
-            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset( $parameters_access->freemium->nbViewCookie))?  $parameters_access->freemium->nbViewCookie : 0) );
-            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeCookie))? $parameters_access->freemium->validityTypeCookie : "months") );
+            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset($parameters_access->freemium->nbViewLM))? $parameters_access->freemium->nbViewLM : 0) );
+            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeLM))? $parameters_access->freemium->validityTypeLM : "months") );
             $rows ['r' . $row_k] ['c' . $col_k] = array (
               '#nb_element' => 2,
               $elem_form,
