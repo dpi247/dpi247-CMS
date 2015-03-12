@@ -24,7 +24,7 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
         case 1 :
           if ($col_k == 1 && variable_get ( "dpisso_paywall_get_type_of_paywall", 0 ) == $row_k) {
             $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, $parameters_access->freemium->nbViewCookie );
-            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, $parameters_access->freemium->validityTypeCookie );
+            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeCookie))? $parameters_access->freemium->validityTypeCookie : "months") );
             $rows ['r' . $row_k] ['c' . $col_k] = array (
               '#nb_element' => 2,
               $elem_form,
