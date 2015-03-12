@@ -122,6 +122,10 @@ function dpiscald_storify_theme() {
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/storify/dpiscald_storify_player'
       ),
+      'dpiscald_storify_player_html5' => array(
+          'variables' => array('vars' => NULL, 'atom' => NULL),
+          'template' => 'templates/players/dpiscald_storify_player_html5'
+      ),
   );
 }
 
