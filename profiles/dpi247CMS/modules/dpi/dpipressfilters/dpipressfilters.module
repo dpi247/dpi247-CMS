@@ -110,39 +110,22 @@ function dpipressfilters_permission() {
 /**
  * Implémentation du hook filter 
  * On déclare les filtres Hermès et CCI. 
+ * Implements hook_filter_info()
  */
-function dpipressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
-  switch ($op) {
-    case 'list':
-      $list = array();
-  	  $filters = dpipressfilters_getfilters();
-  	  if ($filters != NULL){
-  	    foreach ($filters as $filter){
-  	      $list[$filter->fid] = $filter->name;
-  	    }
-  	  }
-      return $list;
-
-    case 'description':
-      $filter = dpipressfilters_getfilterbyid($delta);
-      $description = '';
-      if ($filter != NULL){
-        $description = $filter->description;
-      }
-      return $description;
-
-    case 'process':
-      return dpipressfilters_filter_process($delta, $text, $format);
-
-    case 'no cache':  
-	    return FALSE; //doit etre à FALSE en production
-
-    case 'settings':
-      return dpipressfilters_form_filter_settings_form($delta, $format);
-      
-    default:
-      return $text;
+function dpipressfilters_filter_info() {
+  $filters = array();
+  $custom_filters = dpipressfilters_getfilters();
+  foreach($custom_filters as $filter){
+    $id = $filter->fid;
+    $filters[$id] = array(
+      'title' => $filter->name,
+      'description' => $filter->description,
+      'process callback' => 'dpipressfilters_filter_process',
+      'settings callback' => 'dpipressfilters_form_filter_settings_form',
+      'cache' => TRUE,
+    );
   }
+  return $filters;
 }
 
 /**
