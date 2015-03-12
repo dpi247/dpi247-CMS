@@ -34,7 +34,7 @@ function dpistate_add_state_form($form, &$form_state) {
   $form ['add'] ['link'] = array (
     '#type' => 'link',
     '#title' => t ( 'Add' ),
-    '#href' => 'admin/config/dpistate/settings/add' 
+    '#href' => 'admin/dpi247/dpistate/settings/add' 
   );
   
   return $form;
@@ -145,8 +145,8 @@ function dpistate_replace_state_type_from_int_to_string($type) {
 
 function dpistate_add_link_for_operation($id) {
   $array_links = array(
-  	l('Edit', 'admin/config/dpistate/settings/edit/' . $id ),
-	l('Delete', 'admin/config/dpistate/settings/delete/' . $id )
+  	l('Edit', 'admin/dpi247/dpistate/settings/edit/' . $id ),
+    l('Delete', 'admin/dpi247/dpistate/settings/delete/' . $id )
   );
   
   return implode(' - ',$array_links);

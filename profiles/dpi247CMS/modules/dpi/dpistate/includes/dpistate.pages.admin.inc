@@ -147,7 +147,7 @@ function dpistate_reorder_informations_to_save($infos, $form) {
  * @param integer $k          
  * @return form element
  */
-function dpistate_get_form_element_by_type($data_list, $v, $k, $records) {
+/*function dpistate_get_form_element_by_type($data_list, $v, $k, $records) {
   $return = NULL;
   switch ($data_list [$k] ['type']) {
     case 0 :
@@ -205,7 +205,7 @@ function dpistate_get_form_element_by_type($data_list, $v, $k, $records) {
       break;
   }
   return $return;
-}
+}*/
 
 function dpistate_get_settings_row_data($row, $values) {
 	$options = array();
