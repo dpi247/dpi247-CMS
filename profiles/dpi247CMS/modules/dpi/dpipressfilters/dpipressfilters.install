@@ -129,7 +129,7 @@ function dpipressfilters_update_6001() {
     drupal_write_record('dpipressfilters_tags', $new_filter, array('tid'));
   }
   
-  return array();
+  return "Update 6001 OK";
 }
 
 /**
@@ -157,7 +157,7 @@ function dpipressfilters_update_6002() {
     drupal_write_record('dpipressfilters_tags', $tag);
   }
 
-  return array();
+  return "Update 6002 OK";
 }
 
 /**
@@ -169,7 +169,7 @@ function dpipressfilters_update_6003() {
     $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
     db_add_field('dpipressfilters_tags', 'weight', $schema['fields']['weight']);
   }
-  return array();
+  return "Update 6003 OK";
 }
 
 /**
@@ -191,5 +191,5 @@ function dpipressfilters_update_6004(){
 	if (!in_array('filter', $existing_indexes)) {
 	  db_add_index('dpipressfilters_tags', 'filter', array('filter'));
 	}
-	return array();
+	return "Update 6004 OK";
 }
