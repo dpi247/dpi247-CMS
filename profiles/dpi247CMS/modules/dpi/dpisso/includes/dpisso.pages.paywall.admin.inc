@@ -10,7 +10,6 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
   $access_matrice = dpisso_get_matrice_table_form ();
   $y = dpisso_get_row_title ();
   $x = dpisso_get_header_table ();
-  
   $rows = array ();
   foreach ( $access_matrice as $row_k => $row ) {
     foreach ( $row as $col_k => $col ) {
