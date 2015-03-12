@@ -80,25 +80,30 @@ function dpiblocks_ajax_callback_target_from_entity($form, &$form_state) {
 }
 
 function dpidestinations_reform_virtual_rank_submit($form, &$form_state){  
-  if($form_state['values']['select']){
-    /* one targetblock */
-    dpidestinations_update_virtual_rank_for_saturation($form_state['values']['destination']['destination_section'],$form_state['values']['destination']['destination_target']);
-  }else{
-    /* all targetblock */
-    $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
-    if(is_array($tids)){      
-      $keys = array_keys($tids);
-      foreach($keys as $tid){
-        if(isset($tid) && $tid != ""){
-          $targets = __dpidestinations_get_selectoption_get_targets_for_sectionterm(intval($tid));
-          if(is_array($targets)){
-            foreach($targets as $k_target => $v_target){
-              dpidestinations_update_virtual_rank_for_saturation($tid, $k_target);
+  try {
+    if($form_state['values']['select']){
+      /* one targetblock */
+      dpidestinations_update_virtual_rank_for_saturation($form_state['values']['destination']['destination_section'],$form_state['values']['destination']['destination_target']);
+    }else{
+      /* all targetblock */
+      $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
+      if(is_array($tids)){      
+        $keys = array_keys($tids);
+        foreach($keys as $tid){
+          if(isset($tid) && $tid != ""){
+            $targets = __dpidestinations_get_selectoption_get_targets_for_sectionterm(intval($tid));
+            if(is_array($targets)){
+              foreach($targets as $k_target => $v_target){
+                dpidestinations_update_virtual_rank_for_saturation($tid, $k_target);
+              }
             }
           }
         }
       }
     }
+    drupal_set_message('Updating with success');
+  } catch (Exception $exc) {
+    drupal_set_message('Updating with error', 'error');  
   }
 }
 
@@ -107,7 +112,7 @@ function dpidestinations_update_virtual_rank_for_saturation($tid, $target){
   if($results){
     module_load_include('inc', 'dpidestinations', 'dpidestinations.api');
     $max_rank_value = (isset($results[0]->field_destinations_virtual_rank)) ? $results[0]->field_destinations_virtual_rank*2 : 0;
-    $min_rank_value = (isset($results[count($results)-1]->field_destinations_virtual_rank)) ? $results[count($results)-1]->field_destinations_virtual_rank : 0;         
+    $min_rank_value = (isset($results[count($results)-1]->field_destinations_virtual_rank)) ? $results[count($results)-1]->field_destinations_virtual_rank : 0;
     $nb_result = count($results)-1;    
     if( $nb_result > 0 ){
       $range = $max_rank_value - $min_rank_value;
