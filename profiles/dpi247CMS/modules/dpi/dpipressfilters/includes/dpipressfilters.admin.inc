@@ -240,7 +240,7 @@ function dpipressfilters_form_deletefilter_form($form_state, $fid){
   );
   
   $form = confirm_form($add_form, $question, 'admin/dpi/dpipressfilters/settings');
-  $form['#redirect'] = 'admin/dpi/dpipressfilters/settings';
+  $form_state['redirect'] = 'admin/dpi/dpipressfilters/settings';
   return $form;
 }
 
