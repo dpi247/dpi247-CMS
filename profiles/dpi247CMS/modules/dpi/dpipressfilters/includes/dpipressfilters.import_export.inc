@@ -1,7 +1,9 @@
 <?php
 
 function dpipressfilters_form_config_import_export_form($form_state) {
-  drupal_add_js(drupal_get_path('module', 'dpipressfilters').'/scripts/export_config.js');
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'dpipressfilters').'/scripts/export_config.js' => array('type' => 'file')
+  );
   
   $form['export'] = array(
     '#type' => 'fieldset',
