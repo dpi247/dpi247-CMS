@@ -105,7 +105,7 @@ function dpipressfilters_schema() {
  * Implementation of hook_update_N
  * Remove columns "html_tag" and "classes" and add column "settings"
  */
-function dpipressfilters_update_6001() {
+function dpipressfilters_update_7001() {
   $db_filters = db_query('SELECT * FROM {dpipressfilters_tags}');
   
   db_drop_field('dpipressfilters_tags', 'html_tag');
@@ -129,14 +129,14 @@ function dpipressfilters_update_6001() {
     drupal_write_record('dpipressfilters_tags', $new_filter, array('tid'));
   }
   
-  return "Update 6001 OK";
+  return "Update 7001 OK";
 }
 
 /**
  * Implementation of hook_update_N
  * Reinstall tables with new text settings and add column "description"
  */
-function dpipressfilters_update_6002() {
+function dpipressfilters_update_7002() {
   $db_filters = db_query('SELECT * FROM {dpipressfilters}');
   $db_tags = db_query('SELECT * FROM {dpipressfilters_tags}');
   
@@ -157,26 +157,26 @@ function dpipressfilters_update_6002() {
     drupal_write_record('dpipressfilters_tags', $tag);
   }
 
-  return "Update 6002 OK";
+  return "Update 7002 OK";
 }
 
 /**
  * Implementation of hook_update_N
  * Add a 'weight' column to dpipressfilters_tags
  */
-function dpipressfilters_update_6003() {
+function dpipressfilters_update_7003() {
   if (!db_column_exists('dpipressfilters_tags', 'weight')) {
     $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
     db_add_field('dpipressfilters_tags', 'weight', $schema['fields']['weight']);
   }
-  return "Update 6003 OK";
+  return "Update 7003 OK";
 }
 
 /**
  * Implementation of hook_update_N
  * Add several indexes to dpipressfilters_tags
  */
-function dpipressfilters_update_6004(){
+function dpipressfilters_update_7004(){
 	$existing_indexes = array();
 	$db_indexes = db_query("SHOW INDEX FROM {dpipressfilters_tags}");
 	while($db_index = db_fetch_array($db_indexes)) {
@@ -191,5 +191,5 @@ function dpipressfilters_update_6004(){
 	if (!in_array('filter', $existing_indexes)) {
 	  db_add_index('dpipressfilters_tags', 'filter', array('filter'));
 	}
-	return "Update 6004 OK";
+	return "Update 7004 OK";
 }
