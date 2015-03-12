@@ -1,7 +1,5 @@
-core = "6.x"
+core = "7.x"
 dependencies[] = "filter"
 description = "Ajoute des filtres permettant le remplacement des balises de logiciels de presse [Hermès][CCI]. Aperçu visuel des balises dans TinyMCE"
 name = "DPI Press Filters"
-package = "DPI"
-project = "dpi"
-version = "6.x-1.0"
+package = DPI
