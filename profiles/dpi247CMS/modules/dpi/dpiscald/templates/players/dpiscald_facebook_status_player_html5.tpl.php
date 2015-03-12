@@ -12,12 +12,6 @@
  */
 ?>
 
-<?php
-print $vars['data_href'];
-
-print $vars['width'];
-?>
-
 <div class="gr-media gr-media--facebook">
     <div class="fb-post" data-href="<?php print $vars['data_href']; ?>" data-width="<?php print $vars['width']; ?>"></div>
     <div class="gr-media__placeholder gr-media__placeholder--warning">
