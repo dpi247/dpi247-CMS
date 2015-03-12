@@ -4,19 +4,6 @@
 * Install, update and uninstall functions for the dpipressfilters module.
 */
 
-/**
- * Implementation of hook_uninstall().
- */
-function dpipressfilters_uninstall(){
-  drupal_uninstall_schema('dpipressfilters');
-}
-
-/**
- * Implementation of hook_install().
- */
-function dpipressfilters_install() {
-  drupal_install_schema('dpipressfilters');
-}
 
 /**
  * Implementation of hook_schema().
