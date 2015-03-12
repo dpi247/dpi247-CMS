@@ -1,7 +1,7 @@
 <?php
 
-function wallypressfilters_form_config_import_export_form($form_state) {
-  drupal_add_js(drupal_get_path('module', 'wallypressfilters').'/scripts/export_config.js');
+function dpipressfilters_form_config_import_export_form($form_state) {
+  drupal_add_js(drupal_get_path('module', 'dpipressfilters').'/scripts/export_config.js');
   
   $form['export'] = array(
     '#type' => 'fieldset',
@@ -10,7 +10,7 @@ function wallypressfilters_form_config_import_export_form($form_state) {
     '#collapsed' => TRUE,
   );
   
-  $filters = wallypressfilters_getfilters();
+  $filters = dpipressfilters_getfilters();
   $filters_options = array();
   foreach ($filters as $filter) {
     $filters_options[$filter->fid] = $filter->name;
@@ -30,7 +30,7 @@ function wallypressfilters_form_config_import_export_form($form_state) {
     '#type' => 'textarea',
     '#title' => t('Exported XML'),
     '#id' => 'export-area',
-    '#prefix' => '<br><img id="export-loading" src="/'.drupal_get_path('module', 'wallypressfilters').'/images/export-loading.gif" />',
+    '#prefix' => '<br><img id="export-loading" src="/'.drupal_get_path('module', 'dpipressfilters').'/images/export-loading.gif" />',
   );
   
   $form['import'] = array(
@@ -50,35 +50,35 @@ function wallypressfilters_form_config_import_export_form($form_state) {
   $form['import']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Import'),
-    '#submit' => array('wallypressfilters_form_config_import_export_form_import_submit'),
+    '#submit' => array('dpipressfilters_form_config_import_export_form_import_submit'),
   );
   
   return $form;
 }
 
-function wallypressfilters_form_config_import_export_form_import_submit($form, $form_state) {
+function dpipressfilters_form_config_import_export_form_import_submit($form, $form_state) {
   $values = $form_state['values'];
   $import_text = $values['import_area'];
   
   $dom = new DomDocument('1.0', 'UTF-8');
   if ($dom->loadXML(trim($import_text))) {
-    _wallypressfilters_import_export_import_from_dom($dom);
+    _dpipressfilters_import_export_import_from_dom($dom);
     drupal_set_message(t('Import done'));
   } else {
     drupal_set_message(t('No XML to import or XML unreadable.'), 'error');
   }
 }
 
-function wallypressfilters_config_export($fid) {
-  $filter = wallypressfilters_getfilterbyid($fid);
-  $tags = wallypressfilters_getalltagsfromfilter($filter->name);
-  $dom = _wallypressfilters_import_export_generate_dom($filter, $tags);
+function dpipressfilters_config_export($fid) {
+  $filter = dpipressfilters_getfilterbyid($fid);
+  $tags = dpipressfilters_getalltagsfromfilter($filter->name);
+  $dom = _dpipressfilters_import_export_generate_dom($filter, $tags);
   
-  module_load_include('inc', 'wallytoolbox', 'includes/wallytoolbox.helpers');
+  module_load_include('inc', 'dpitoolbox', 'includes/dpitoolbox.helpers');
   print $dom->saveXML();
 }
 
-function _wallypressfilters_import_export_generate_dom($filter, $tags) {
+function _dpipressfilters_import_export_generate_dom($filter, $tags) {
   $dom = new DomDocument('1.0', 'UTF-8');
   $dom_filter = $dom->appendChild($dom->createElement('Filter'));
   $dom_filter->setAttribute('fid', $filter->fid);
@@ -102,18 +102,18 @@ function _wallypressfilters_import_export_generate_dom($filter, $tags) {
   return $dom;
 }
 
-function _wallypressfilters_import_export_import_from_dom($dom) {
+function _dpipressfilters_import_export_import_from_dom($dom) {
   $filter = new stdClass();
   $dom_filter = $dom->getElementsByTagName('Filter')->item(0);
   $filter->name = $dom_filter->getElementsByTagName('Name')->item(0)->nodeValue;
   $filter->description = $dom_filter->getElementsByTagName('Description')->item(0)->nodeValue;
 
-  if ($orig_filter = wallypressfilters_getfilterbyname($filter->name)) {
+  if ($orig_filter = dpipressfilters_getfilterbyname($filter->name)) {
     $filter->fid = $orig_filter->fid;
-    drupal_write_record('wallypressfilters', $filter, array('fid'));
-    db_query("DELETE FROM {wallypressfilters_tags} WHERE filter = '%s'", $filter->name);
+    drupal_write_record('dpipressfilters', $filter, array('fid'));
+    db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s'", $filter->name);
   } else {
-    drupal_write_record('wallypressfilters', $filter);
+    drupal_write_record('dpipressfilters', $filter);
   }
 
   $dom_tags = $dom->getElementsByTagName('Tags');
@@ -129,7 +129,7 @@ function _wallypressfilters_import_export_import_from_dom($dom) {
         $new_tag->tag = $tag->getElementsByTagName('TagName')->item(0)->nodeValue;
         $new_tag->description = $tag->getElementsByTagName('TagDescription')->item(0)->nodeValue;
         $new_tag->settings = unserialize($tag->getElementsByTagName('Settings')->item(0)->nodeValue);
-        drupal_write_record('wallypressfilters_tags', $new_tag);
+        drupal_write_record('dpipressfilters_tags', $new_tag);
       }
     }
   }

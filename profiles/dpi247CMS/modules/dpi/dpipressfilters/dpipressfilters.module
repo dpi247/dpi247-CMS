@@ -14,82 +14,82 @@
  *
  * Création des pages d'admin permettant de définir
  */
-function wallypressfilters_menu() {
+function dpipressfilters_menu() {
   $items = array();
   
-  $items['admin/wally/wallypressfilters/settings'] = array(
-    'title' => 'Wally Filter Settings',
-    'page callback'    => 'wallypressfilters_page_admin',
+  $items['admin/dpi/dpipressfilters/settings'] = array(
+    'title' => 'DPI Filter Settings',
+    'page callback'    => 'dpipressfilters_page_admin',
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Allows administrators to create custom press filter.'),
-    'file'             => 'includes/wallypressfilters.admin.inc',
+    'file'             => 'includes/dpipressfilters.admin.inc',
   );
   
-  $items['admin/wally/wallypressfilters/settings/general'] = array(
+  $items['admin/dpi/dpipressfilters/settings/general'] = array(
     'title'            => t('General'),
-    'page callback'    => 'wallypressfilters_page_admin',
+    'page callback'    => 'dpipressfilters_page_admin',
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Allows administrators to create custom press filter.'),
-    'file'             => 'includes/wallypressfilters.admin.inc',
+    'file'             => 'includes/dpipressfilters.admin.inc',
     'weight'           => 0,
     'type'             => MENU_DEFAULT_LOCAL_TASK,
   );
   
-  $items['admin/wally/wallypressfilters/settings/add'] = array(
+  $items['admin/dpi/dpipressfilters/settings/add'] = array(
     'title'            => t('Create filter'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('wallypressfilters_form_addfilter_form'),
+    'page arguments'   => array('dpipressfilters_form_addfilter_form'),
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Allows administrators to create custom press filter.'),
-    'file'             => 'includes/wallypressfilters.admin.inc',
+    'file'             => 'includes/dpipressfilters.admin.inc',
     'weight'           => 1,
     'type'             => MENU_LOCAL_TASK,
   );
   
-  $items['admin/wally/wallypressfilters/settings/import-export'] = array(
+  $items['admin/dpi/dpipressfilters/settings/import-export'] = array(
     'title'            => t('Import/Export'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('wallypressfilters_form_config_import_export_form'),
+    'page arguments'   => array('dpipressfilters_form_config_import_export_form'),
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Import and export filters settings.'),
-    'file'             => 'includes/wallypressfilters.import_export.inc',
+    'file'             => 'includes/dpipressfilters.import_export.inc',
     'weight'           => 2,
     'type'             => MENU_LOCAL_TASK,
   );
   
-  $items['admin/wally/wallypressfilters/settings/edit/%'] = array(
+  $items['admin/dpi/dpipressfilters/settings/edit/%'] = array(
     'title'            => t('Edit filter'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('wallypressfilters_form_addfilter_form', 5),
+    'page arguments'   => array('dpipressfilters_form_addfilter_form', 5),
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Allows administrators to create custom press filter.'),
-    'file'             => 'includes/wallypressfilters.admin.inc',
+    'file'             => 'includes/dpipressfilters.admin.inc',
   );
 
-  $items['admin/wally/wallypressfilters/settings/delete/%'] = array(
+  $items['admin/dpi/dpipressfilters/settings/delete/%'] = array(
     'title'            => t('Delete filter'),
     'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('wallypressfilters_form_deletefilter_form', 5),
+    'page arguments'   => array('dpipressfilters_form_deletefilter_form', 5),
     'access arguments' => array('administer custom press filter'),
     'description'      => t('Allows administrators to create custom press filter.'),
-    'file'             => 'includes/wallypressfilters.admin.inc',
+    'file'             => 'includes/dpipressfilters.admin.inc',
   );
 
-  $items['wallypressfilters/mapping/%/%'] = array(
+  $items['dpipressfilters/mapping/%/%'] = array(
     'title'            => t('Filters mapping'),
-    'page callback'    => 'wallypressfilters_mapping_export',
+    'page callback'    => 'dpipressfilters_mapping_export',
     'page arguments'   => array(2, 3),
     'access callback'  => 1,
-    'file'             => 'includes/wallypressfilters.mapping.inc',
+    'file'             => 'includes/dpipressfilters.mapping.inc',
     'type'             => MENU_CALLBACK,
   );
   
-  $items['wallypressfilters/config/export/%'] = array(
+  $items['dpipressfilters/config/export/%'] = array(
       'title'            => t('Filters export'),
-      'page callback'    => 'wallypressfilters_config_export',
+      'page callback'    => 'dpipressfilters_config_export',
       'page arguments'   => array(3),
       'access callback'  => 1,
-      'file'             => 'includes/wallypressfilters.import_export.inc',
+      'file'             => 'includes/dpipressfilters.import_export.inc',
       'type'             => MENU_CALLBACK,
   );
 
@@ -99,7 +99,7 @@ function wallypressfilters_menu() {
 /**
  * Implementation of hook_perm
  */
-function wallypressfilters_perm() {
+function dpipressfilters_perm() {
   return array('administer custom press filter');
 }
 
@@ -107,11 +107,11 @@ function wallypressfilters_perm() {
  * Implémentation du hook filter 
  * On déclare les filtres Hermès et CCI. 
  */
-function wallypressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
+function dpipressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
   switch ($op) {
     case 'list':
       $list = array();
-  	  $filters = wallypressfilters_getfilters();
+  	  $filters = dpipressfilters_getfilters();
   	  if ($filters != NULL){
   	    foreach ($filters as $filter){
   	      $list[$filter->fid] = $filter->name;
@@ -120,7 +120,7 @@ function wallypressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
       return $list;
 
     case 'description':
-      $filter = wallypressfilters_getfilterbyid($delta);
+      $filter = dpipressfilters_getfilterbyid($delta);
       $description = '';
       if ($filter != NULL){
         $description = $filter->description;
@@ -128,13 +128,13 @@ function wallypressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
       return $description;
 
     case 'process':
-      return wallypressfilters_filter_process($delta, $text, $format);
+      return dpipressfilters_filter_process($delta, $text, $format);
 
     case 'no cache':  
 	    return FALSE; //doit etre à FALSE en production
 
     case 'settings':
-      return wallypressfilters_form_filter_settings_form($delta, $format);
+      return dpipressfilters_form_filter_settings_form($delta, $format);
       
     default:
       return $text;
@@ -147,9 +147,9 @@ function wallypressfilters_filter($op, $delta = 0, $format = -1, $text = '') {
  * @return
  *   an array containing all the filter objects
  */
-function wallypressfilters_getfilters(){
+function dpipressfilters_getfilters(){
   $filters = NULL;
-  $result = db_query("SELECT * FROM {wallypressfilters}");
+  $result = db_query("SELECT * FROM {dpipressfilters}");
   while ($obj = db_fetch_object($result)){
     $filters[] = $obj;
   }
@@ -164,13 +164,13 @@ function wallypressfilters_getfilters(){
  * @return
  *   The filter object
  */
-function wallypressfilters_getfilterbyname($name){
+function dpipressfilters_getfilterbyname($name){
   static $cache;
   
   if(isset($cache[$name])){
 	return $cache[$name];
   }
-  $result = db_query("SELECT * FROM {wallypressfilters} WHERE name = '%s'", $name);
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE name = '%s'", $name);
   $filter = NULL;
   while ($obj = db_fetch_object($result)){
     $filter = $obj;
@@ -187,12 +187,12 @@ function wallypressfilters_getfilterbyname($name){
  * @return
  *   The filter object
  */
-function wallypressfilters_getfilterbyid($fid){
+function dpipressfilters_getfilterbyid($fid){
   static $cache;
   if(isset($cache[$fid])) {
   	return $cache[$fid];
   }
-  $result = db_query("SELECT * FROM {wallypressfilters} WHERE fid = '%s'", $fid);
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE fid = '%s'", $fid);
   $filter = NULL;
   while ($obj = db_fetch_object($result)) {
     $filter = $obj;
@@ -210,8 +210,8 @@ function wallypressfilters_getfilterbyid($fid){
  * @return
  *   an array containing all the tag of the filter
  */
-function wallypressfilters_getalltagsfromfilter($filter_name){
-  $result = db_query("SELECT * FROM {wallypressfilters_tags} WHERE filter = '%s' ORDER BY weight ASC", $filter_name);
+function dpipressfilters_getalltagsfromfilter($filter_name){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = '%s' ORDER BY weight ASC", $filter_name);
   $tags = array();
   while ($obj = db_fetch_object($result)){
     $obj->settings = unserialize($obj->settings);
@@ -228,8 +228,8 @@ function wallypressfilters_getalltagsfromfilter($filter_name){
  * @return
  *   an array containing all the tag of the filter
  */
-function wallypressfilters_gettagsfromfilter($filter_name){
-  $result = db_query("SELECT * FROM {wallypressfilters_tags} WHERE filter = '%s' AND format IS NULL ORDER BY weight ASC", $filter_name);
+function dpipressfilters_gettagsfromfilter($filter_name){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = '%s' AND format IS NULL ORDER BY weight ASC", $filter_name);
   $tags = array();
   while ($obj = db_fetch_object($result)){
     $obj->settings = unserialize($obj->settings);
@@ -250,13 +250,13 @@ function wallypressfilters_gettagsfromfilter($filter_name){
  * @return
  *   an array containing all the tag of the filter
  */
-function wallypressfilters_gettagsfromfilterandformat_admin($filter_name, $format){
+function dpipressfilters_gettagsfromfilterandformat_admin($filter_name, $format){
     $result = db_query("SELECT t.*
-                        FROM {wallypressfilters_tags} t
+                        FROM {dpipressfilters_tags} t
                         WHERE t.filter = '%s'
                         AND (t.format = %d OR t.format IS NULL)
                         AND t.tid IN (
-                        SELECT MAX(tid) FROM {wallypressfilters_tags}
+                        SELECT MAX(tid) FROM {dpipressfilters_tags}
                           WHERE filter = '%s'
                           AND (format = %d OR format IS NULL)
                           GROUP BY tag
@@ -284,14 +284,14 @@ function wallypressfilters_gettagsfromfilterandformat_admin($filter_name, $forma
  * @return
  *   an array containing all the tag of the filter
  */
-function wallypressfilters_gettagsfromfilterandformat($filter_name, $format){
+function dpipressfilters_gettagsfromfilterandformat($filter_name, $format){
   static $tags;
   if(isset($tags[$filter_name][$format])){
 	return $tags[$filter_name][$format];
   }
   else{
   	$result = db_query("SELECT MAX( t.tid ) , t.filter, t.format, t.type, t.tag, t.description, t.settings
-                      FROM {wallypressfilters_tags} t
+                      FROM {dpipressfilters_tags} t
                       WHERE t.filter = '%s'
                       AND (t.format = %d)
                       GROUP BY tag
@@ -317,8 +317,8 @@ function wallypressfilters_gettagsfromfilterandformat($filter_name, $format){
  * @return
  *   The tag object
  */
-function wallypressfilters_gettagbynameandfilter($tag, $filter){
-  $result = db_query("SELECT * FROM {wallypressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
+function dpipressfilters_gettagbynameandfilter($tag, $filter){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
   $tag = NULL;
   while ($obj = db_fetch_object($result)){
     $tag = $obj;
@@ -337,8 +337,8 @@ function wallypressfilters_gettagbynameandfilter($tag, $filter){
  * @return
  *   The tag object
  */
-function wallypressfilters_gettagsbynameandfilter($tag, $filter){
-  $result = db_query("SELECT * FROM {wallypressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
+function dpipressfilters_gettagsbynameandfilter($tag, $filter){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
   $tags = array();
   while ($obj = db_fetch_object($result)){
     $obj->settings = unserialize($obj->settings);
@@ -351,9 +351,9 @@ function wallypressfilters_gettagsbynameandfilter($tag, $filter){
  * Fonction de déclation du formulaire de préférences pour le remplacement des balises HErmes
  * On déclare quelles balises doivent etre remplacées par quelles balises html
  */
-function wallypressfilters_form_filter_settings_form($fid, $format){
-  $filter = wallypressfilters_getfilterbyid($fid);
-  $tags = wallypressfilters_gettagsfromfilterandformat_admin($filter->name, $format);
+function dpipressfilters_form_filter_settings_form($fid, $format){
+  $filter = dpipressfilters_getfilterbyid($fid);
+  $tags = dpipressfilters_gettagsfromfilterandformat_admin($filter->name, $format);
 
   $form['filter_'.$fid]['#tree'] = TRUE;
 
@@ -423,7 +423,7 @@ function wallypressfilters_form_filter_settings_form($fid, $format){
       );
 
       $settings = $tag->settings ? $tag->settings : array();
-      $defaults = array_merge(_wallypressfilters_settings_defaults(), $settings);
+      $defaults = array_merge(_dpipressfilters_settings_defaults(), $settings);
 
       $tag_form['operation'] = array(
         '#type'          => 'select',
@@ -508,21 +508,21 @@ function wallypressfilters_form_filter_settings_form($fid, $format){
 /**
  * Alter the filter_admin_configure form to add own validate and submit
  */
-function wallypressfilters_form_filter_admin_configure_alter(&$form) {
+function dpipressfilters_form_filter_admin_configure_alter(&$form) {
   if (!isset($form['#validate'])) {
     $form['#validate'] = array();
   }
-  array_unshift($form['#validate'], 'wallypressfilters_form_filter_settings_form_validate');
+  array_unshift($form['#validate'], 'dpipressfilters_form_filter_settings_form_validate');
   if (!isset($form['#submit'])) {
     $form['#submit'] = array();
   }
-  array_unshift($form['#submit'], 'wallypressfilters_form_filter_settings_form_submit');
+  array_unshift($form['#submit'], 'dpipressfilters_form_filter_settings_form_submit');
 }
 
 /**
- * Validation of the form wallypressfilters_form_filter_settings_form
+ * Validation of the form dpipressfilters_form_filter_settings_form
  */
-function wallypressfilters_form_filter_settings_form_validate($form, &$form_state) {
+function dpipressfilters_form_filter_settings_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $format_id = $values['format'];
 
@@ -588,14 +588,14 @@ function wallypressfilters_form_filter_settings_form_validate($form, &$form_stat
 }
 
 /**
- * Submit of the form wallypressfilters_form_filter_settings_form
+ * Submit of the form dpipressfilters_form_filter_settings_form
  */
-function wallypressfilters_form_filter_settings_form_submit($form, &$form_state) {
+function dpipressfilters_form_filter_settings_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   foreach ($values as $key => $value) {
     if (substr($key, 0, 7) === 'filter_') {
       foreach ($value as $filter_name => $filter){
-        $filter_infos = wallypressfilters_getfilterbyname($filter_name);
+        $filter_infos = dpipressfilters_getfilterbyname($filter_name);
         $format = $filter['format'];
 
         foreach ($filter as $type => $tags) {
@@ -615,10 +615,10 @@ function wallypressfilters_form_filter_settings_form_submit($form, &$form_state)
               $obj->settings = $settings;
               if ($tag_infos['format'] == NULL){
                 $obj->format = $format;
-                drupal_write_record('wallypressfilters_tags', $obj);
+                drupal_write_record('dpipressfilters_tags', $obj);
               } else {
                 $obj->tid = $tag_id;
-                drupal_write_record('wallypressfilters_tags', $obj, array('tid'));
+                drupal_write_record('dpipressfilters_tags', $obj, array('tid'));
               }
             }
           }
@@ -642,25 +642,25 @@ function wallypressfilters_form_filter_settings_form_submit($form, &$form_state)
  * @return
  * The text replaced with the tags
  */
-function wallypressfilters_filter_process($fid, $text, $format) {
-  module_load_include('inc', 'wallypressfilters', 'includes/wallypressfilters.filters');
+function dpipressfilters_filter_process($fid, $text, $format) {
+  module_load_include('inc', 'dpipressfilters', 'includes/dpipressfilters.filters');
   
-  $filter = wallypressfilters_getfilterbyid($fid);
-  $tags = wallypressfilters_gettagsfromfilterandformat($filter->name, $format);
+  $filter = dpipressfilters_getfilterbyid($fid);
+  $tags = dpipressfilters_gettagsfromfilterandformat($filter->name, $format);
 
   foreach ($tags as $tag) {
     $settings = $tag->settings;
     switch ($settings['operation']) {
       case 'replace':
-        $text = wallypressfilters_replace_tags($tag->tag, $settings, $text);
+        $text = dpipressfilters_replace_tags($tag->tag, $settings, $text);
         break;
 
       case 'strip':
-        $text = wallypressfilters_strip_tags($tag->tag, $settings, $text);
+        $text = dpipressfilters_strip_tags($tag->tag, $settings, $text);
         break;
 
       case 'skip':
-        $text = wallypressfilters_skip_tags($tag->tag, $settings, $text);
+        $text = dpipressfilters_skip_tags($tag->tag, $settings, $text);
         break;
     }
   }
@@ -668,7 +668,7 @@ function wallypressfilters_filter_process($fid, $text, $format) {
   return $text;
 }
 
-function _wallypressfilters_settings_defaults () {
+function _dpipressfilters_settings_defaults () {
   return array(
     'operation' => 'strip',
     'replace-method' => 'basic',

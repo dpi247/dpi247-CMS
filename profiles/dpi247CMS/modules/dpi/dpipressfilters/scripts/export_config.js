@@ -14,7 +14,7 @@ function updateExport() {
 			var exportFilter = $(this).attr('value');
 			$.ajax({
 				type: "GET",
-				url: "/wallypressfilters/config/export/"+exportFilter,
+				url: "/dpipressfilters/config/export/"+exportFilter,
 				cache: true,
 				complete: function(data) {
 					$("#export-area").text(data.responseText);

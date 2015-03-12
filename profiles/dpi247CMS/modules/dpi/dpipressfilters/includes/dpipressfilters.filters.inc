@@ -6,7 +6,7 @@
  * @param array $settings settings of this replacement
  * @param string $text text to process
  */
-function wallypressfilters_replace_tags($tag, $settings, $text) {
+function dpipressfilters_replace_tags($tag, $settings, $text) {
   $tag_regex = "@<$tag(\s.*)?>(.*)<\/$tag(\s.*)?>@sU";
   $tag_matches = array();
   preg_match_all($tag_regex, $text, $tag_matches);
@@ -59,7 +59,7 @@ function wallypressfilters_replace_tags($tag, $settings, $text) {
  * @param array $settings settings of this replacement
  * @param string $text text to process
  */
-function wallypressfilters_strip_tags($tag, $settings, $text) {
+function dpipressfilters_strip_tags($tag, $settings, $text) {
   $tag_regex = "@<$tag(\s.*)?>(.*)<\/$tag>@U";
   $text = preg_replace($tag_regex, '$2', $text);
   return $text;
@@ -71,7 +71,7 @@ function wallypressfilters_strip_tags($tag, $settings, $text) {
  * @param array $settings settings of this replacement
  * @param string $text text to process
  */
-function wallypressfilters_skip_tags($tag, $settings, $text) {
+function dpipressfilters_skip_tags($tag, $settings, $text) {
   $tag_regex = "@<$tag(\s.*)?>.*<\/$tag>@U";
   $text = preg_replace($tag_regex, '', $text);
   return $text;

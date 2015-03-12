@@ -1,6 +1,6 @@
 <?php
 
-function wallypressfilters_mapping_export($filter_name/*, $format*/) {
+function dpipressfilters_mapping_export($filter_name/*, $format*/) {
   $mapping = new stdClass();
   $mapping->filter = $filter_name;
   $mapping->formats = array();
@@ -14,7 +14,7 @@ function wallypressfilters_mapping_export($filter_name/*, $format*/) {
         'name' => $format_infos->name,
       );
       
-      $tags = wallypressfilters_gettagsfromfilterandformat($filter_name, $format);
+      $tags = dpipressfilters_gettagsfromfilterandformat($filter_name, $format);
       foreach ($tags as $tag) {
         if (!isset($mapping->tags[$tag->tag])) {
           $mapping->tags[$tag->tag] = array(

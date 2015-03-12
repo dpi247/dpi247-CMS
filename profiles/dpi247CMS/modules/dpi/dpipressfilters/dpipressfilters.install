@@ -3,24 +3,24 @@
 /**
  * Implementation of hook_uninstall().
  */
-function wallypressfilters_uninstall(){
-  drupal_uninstall_schema('wallypressfilters');
+function dpipressfilters_uninstall(){
+  drupal_uninstall_schema('dpipressfilters');
 }
 
 /**
  * Implementation of hook_install().
  */
-function wallypressfilters_install() {
-  drupal_install_schema('wallypressfilters');
+function dpipressfilters_install() {
+  drupal_install_schema('dpipressfilters');
 }
 
 /**
  * Implementation of hook_schema().
  */
-function wallypressfilters_schema() {
+function dpipressfilters_schema() {
   $schema = array();
 
-  $schema['wallypressfilters'] = array(
+  $schema['dpipressfilters'] = array(
     'description' => 'Contains all the custom filters and their informations',
     'fields' => array(
       'fid' => array(
@@ -48,7 +48,7 @@ function wallypressfilters_schema() {
   		),
   );
 
-  $schema['wallypressfilters_tags'] = array(
+  $schema['dpipressfilters_tags'] = array(
     'description' => 'Contains all the tags',
     'fields' => array(
       'tid' => array(
@@ -114,16 +114,16 @@ function wallypressfilters_schema() {
  * Implementation of hook_update_N
  * Remove columns "html_tag" and "classes" and add column "settings"
  */
-function wallypressfilters_update_6001() {
+function dpipressfilters_update_6001() {
   $ret = array();
   
-  $db_filters = db_query('SELECT * FROM {wallypressfilters_tags}');
+  $db_filters = db_query('SELECT * FROM {dpipressfilters_tags}');
   
-  db_drop_field($ret, 'wallypressfilters_tags', 'html_tag');
-  db_drop_field($ret, 'wallypressfilters_tags', 'classes');
-  $schema = drupal_get_schema('wallypressfilters_tags', TRUE);
-  db_add_field($ret, 'wallypressfilters_tags', 'settings', $schema['fields']['settings']);
-  db_add_field($ret, 'wallypressfilters_tags', 'type', $schema['fields']['type']);
+  db_drop_field($ret, 'dpipressfilters_tags', 'html_tag');
+  db_drop_field($ret, 'dpipressfilters_tags', 'classes');
+  $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
+  db_add_field($ret, 'dpipressfilters_tags', 'settings', $schema['fields']['settings']);
+  db_add_field($ret, 'dpipressfilters_tags', 'type', $schema['fields']['type']);
   
   while($filter = db_fetch_array($db_filters)) {
     $new_filter = $filter;
@@ -137,7 +137,7 @@ function wallypressfilters_update_6001() {
       'html_tag' => $filter['html_tag'],
       'classes' => $filter['classes'],
     );
-    drupal_write_record('wallypressfilters_tags', $new_filter, array('tid'));
+    drupal_write_record('dpipressfilters_tags', $new_filter, array('tid'));
   }
   
   return $ret;
@@ -147,27 +147,27 @@ function wallypressfilters_update_6001() {
  * Implementation of hook_update_N
  * Reinstall tables with new text settings and add column "description"
  */
-function wallypressfilters_update_6002() {
+function dpipressfilters_update_6002() {
   $ret = array();
 
-  $db_filters = db_query('SELECT * FROM {wallypressfilters}');
-  $db_tags = db_query('SELECT * FROM {wallypressfilters_tags}');
+  $db_filters = db_query('SELECT * FROM {dpipressfilters}');
+  $db_tags = db_query('SELECT * FROM {dpipressfilters_tags}');
   
-  db_drop_table($ret, 'wallypressfilters');
-  db_drop_table($ret, 'wallypressfilters_tags');
+  db_drop_table($ret, 'dpipressfilters');
+  db_drop_table($ret, 'dpipressfilters_tags');
 
-  $schema_filters = drupal_get_schema('wallypressfilters', TRUE);
-  $schema_tags = drupal_get_schema('wallypressfilters_tags', TRUE);
+  $schema_filters = drupal_get_schema('dpipressfilters', TRUE);
+  $schema_tags = drupal_get_schema('dpipressfilters_tags', TRUE);
 
-  db_create_table($ret, 'wallypressfilters', $schema_filters);
-  db_create_table($ret, 'wallypressfilters_tags', $schema_tags);
+  db_create_table($ret, 'dpipressfilters', $schema_filters);
+  db_create_table($ret, 'dpipressfilters_tags', $schema_tags);
   
   while($filter = db_fetch_array($db_filters)) {
-    drupal_write_record('wallypressfilters', $filter);
+    drupal_write_record('dpipressfilters', $filter);
   }
   while($tag = db_fetch_array($db_tags)) {
     $tag['settings'] = unserialize($tag['settings']);
-    drupal_write_record('wallypressfilters_tags', $tag);
+    drupal_write_record('dpipressfilters_tags', $tag);
   }
 
   return $ret;
@@ -175,36 +175,36 @@ function wallypressfilters_update_6002() {
 
 /**
  * Implementation of hook_update_N
- * Add a 'weight' column to wallypressfilters_tags
+ * Add a 'weight' column to dpipressfilters_tags
  */
-function wallypressfilters_update_6003() {
+function dpipressfilters_update_6003() {
   $ret = array();
-  if (!db_column_exists('wallypressfilters_tags', 'weight')) {
-    $schema = drupal_get_schema('wallypressfilters_tags', TRUE);
-    db_add_field($ret, 'wallypressfilters_tags', 'weight', $schema['fields']['weight']);
+  if (!db_column_exists('dpipressfilters_tags', 'weight')) {
+    $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
+    db_add_field($ret, 'dpipressfilters_tags', 'weight', $schema['fields']['weight']);
   }
   return $ret;
 }
 
 /**
  * Implementation of hook_update_N
- * Add several indexes to wallypressfilters_tags
+ * Add several indexes to dpipressfilters_tags
  */
-function wallypressfilters_update_6004(){
+function dpipressfilters_update_6004(){
 	$ret = array();
 	$existing_indexes = array();
-	$db_indexes = db_query("SHOW INDEX FROM {wallypressfilters_tags}");
+	$db_indexes = db_query("SHOW INDEX FROM {dpipressfilters_tags}");
 	while($db_index = db_fetch_array($db_indexes)) {
 	  $existing_indexes[] = $db_index['Column_name'];
 	}
 	if (!in_array('tag', $existing_indexes)) {
-	  db_add_index($ret, 'wallypressfilters_tags', 'tag', array('tag'));
+	  db_add_index($ret, 'dpipressfilters_tags', 'tag', array('tag'));
 	}
 	if (!in_array('format', $existing_indexes)) {
-	  db_add_index($ret, 'wallypressfilters_tags', 'format', array('format'));
+	  db_add_index($ret, 'dpipressfilters_tags', 'format', array('format'));
 	}
 	if (!in_array('filter', $existing_indexes)) {
-	  db_add_index($ret, 'wallypressfilters_tags', 'filter', array('filter'));
+	  db_add_index($ret, 'dpipressfilters_tags', 'filter', array('filter'));
 	}
 	return $ret;
 }

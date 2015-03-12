@@ -3,10 +3,10 @@
 /**
  * Page callback for the administration of filters
  */
-function wallypressfilters_page_admin(){
+function dpipressfilters_page_admin(){
   $content = '';
   
-  $filters = wallypressfilters_getfilters();    
+  $filters = dpipressfilters_getfilters();    
   
   if ($filters != NULL){
     $header = array(t('Name'), t('Description'), t('Operations'));
@@ -14,7 +14,7 @@ function wallypressfilters_page_admin(){
       $rows[] = array(
         $filter->name,
         $filter->description,
-        '<a href = "/admin/wally/wallypressfilters/settings/edit/'.$filter->fid.'">'.t('Edit').'</a>, <a href = "/admin/wally/wallypressfilters/settings/delete/'.$filter->fid.'">'.t('Delete').'</a>',
+        '<a href = "/admin/dpi/dpipressfilters/settings/edit/'.$filter->fid.'">'.t('Edit').'</a>, <a href = "/admin/dpi/dpipressfilters/settings/delete/'.$filter->fid.'">'.t('Delete').'</a>',
       );
     }
     $content .= theme_table($header,$rows);
@@ -28,10 +28,10 @@ function wallypressfilters_page_admin(){
 /**
  * Form to create/edit filter
  */
-function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
-  $form['wallypressfilters']['#tree'] = TRUE;
+function dpipressfilters_form_addfilter_form($form_state, $fid = NULL){
+  $form['dpipressfilters']['#tree'] = TRUE;
 
-  $form['wallypressfilters']['name'] = array(
+  $form['dpipressfilters']['name'] = array(
     '#type'        => 'textfield',
     '#title'       => t('Name'),
     '#description' => t('The unique Name of the filter.'),
@@ -40,7 +40,7 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
     '#required'    => TRUE,
   );
   
-  $form['wallypressfilters']['description'] = array(
+  $form['dpipressfilters']['description'] = array(
     '#type'        => 'textfield',
     '#title'       => t('Description'),
     '#description' => t('A description of the filter'),
@@ -48,7 +48,7 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
     '#maxlength'   => 1000,
   );
 
-  $form['wallypressfilters']['tags'] = array(
+  $form['dpipressfilters']['tags'] = array(
     '#type'          => 'textarea',
     '#title'         => t('List of the tags'),
     '#description'   => t('The tags who will be filtered. Enter one value per line, without the "&lt;", "&gt;".<br>
@@ -60,7 +60,7 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
   );
   
   /*
-  $form['wallypressfilters']['markers'] = array(
+  $form['dpipressfilters']['markers'] = array(
     '#type'          => 'textarea',
     '#title'         => t('List of the markers'),
     '#description'   => t('The markers who will be filtered. Enter one value per line, without the "&lt;", "&gt;".<br>
@@ -73,11 +73,11 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
   */
 
   if ($fid != NULL){
-    $filter = wallypressfilters_getfilterbyid($fid);
-    $form['wallypressfilters']['fid'] = array('#type' => 'value', '#value' => $filter->fid);
-    $tags = wallypressfilters_gettagsfromfilter($filter->name);
-    $form['wallypressfilters']['name']['#default_value'] = $filter->name;
-    $form['wallypressfilters']['description']['#default_value'] = $filter->description;
+    $filter = dpipressfilters_getfilterbyid($fid);
+    $form['dpipressfilters']['fid'] = array('#type' => 'value', '#value' => $filter->fid);
+    $tags = dpipressfilters_gettagsfromfilter($filter->name);
+    $form['dpipressfilters']['name']['#default_value'] = $filter->name;
+    $form['dpipressfilters']['description']['#default_value'] = $filter->description;
 
     $tags_default_value = $markers_default_value = $attr_rel_tags_default_value = '';
     $tag_space = $marker_space = $attr_rel_tags_space = '';
@@ -94,8 +94,8 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
           break;*/
     //  }
     }
-    $form['wallypressfilters']['tags']['#default_value'] = $tags_default_value;
-    //$form['wallypressfilters']['markers']['#default_value'] = $markers_default_value;
+    $form['dpipressfilters']['tags']['#default_value'] = $tags_default_value;
+    //$form['dpipressfilters']['markers']['#default_value'] = $markers_default_value;
   }
 
   $form['sumbit'] = array(
@@ -107,31 +107,31 @@ function wallypressfilters_form_addfilter_form($form_state, $fid = NULL){
 }
 
 /**
- * Validation of the wallypresfilters_form_addfilter_form
+ * Validation of the dpipresfilters_form_addfilter_form
  */
-function wallypressfilters_form_addfilter_form_validate($form, &$form_state){
-  $form_state['values']['wallypressfilters']['name'] = strtolower(check_plain($form_state['values']['wallypressfilters']['name']));
-  $form_state['values']['wallypressfilters']['description'] = check_plain($form_state['values']['wallypressfilters']['description']);
+function dpipressfilters_form_addfilter_form_validate($form, &$form_state){
+  $form_state['values']['dpipressfilters']['name'] = strtolower(check_plain($form_state['values']['dpipressfilters']['name']));
+  $form_state['values']['dpipressfilters']['description'] = check_plain($form_state['values']['dpipressfilters']['description']);
   
   // If it's edition
-  if (isset($form_state['values']['wallypressfilters']['fid'])){
+  if (isset($form_state['values']['dpipressfilters']['fid'])){
     $form_state['values']['update'] = array('fid');
   } else {
     // Check if the name is correct
-    if (preg_match('/[^a-z0-9_]/', $form_state['values']['wallypressfilters']['name'])) {
-      form_set_error('wallypressfilters][name', t('Filter name must be alphanumeric or underscores only.'));
+    if (preg_match('/[^a-z0-9_]/', $form_state['values']['dpipressfilters']['name'])) {
+      form_set_error('dpipressfilters][name', t('Filter name must be alphanumeric or underscores only.'));
     } 
     // Check if the name already exists
-    elseif (wallypressfilters_getfilterbyname($form_state['values']['wallypressfilters']['name']) != NULL){
-      form_set_error('wallypressfilters][name', t('A filter with this name already exists.'));
+    elseif (dpipressfilters_getfilterbyname($form_state['values']['dpipressfilters']['name']) != NULL){
+      form_set_error('dpipressfilters][name', t('A filter with this name already exists.'));
     }
     $form_state['values']['update'] = array();
   }
   
-  $form_state['values']['wallypresstags'] = array();
+  $form_state['values']['dpipresstags'] = array();
 
   $weight = 0;
-  $tags = explode("\r\n", $form_state['values']['wallypressfilters']['tags']);
+  $tags = explode("\r\n", $form_state['values']['dpipressfilters']['tags']);
   foreach ($tags as $tmp_tag) {
     list($tag, $description) = explode('|', $tmp_tag);
 
@@ -141,14 +141,14 @@ function wallypressfilters_form_addfilter_form_validate($form, &$form_state){
     }
     
     // Check is the tag exists two times
-    if (array_key_exists($tag, $form_state['values']['wallypresstags'])) {
-      form_set_error('wallypressfilters][tags', t('There can not be two identical tags.'));
+    if (array_key_exists($tag, $form_state['values']['dpipresstags'])) {
+      form_set_error('dpipressfilters][tags', t('There can not be two identical tags.'));
     } else {
       $update = array();
-      $form_state['values']['wallypresstags'][$tag] = array(
+      $form_state['values']['dpipresstags'][$tag] = array(
         'tag' => $tag,
         'description' => $description,
-        'filter' => $form_state['values']['wallypressfilters']['name'],
+        'filter' => $form_state['values']['dpipressfilters']['name'],
         'type' => 'tag',
         'update' => $update,
         'weight' => $weight++,
@@ -156,7 +156,7 @@ function wallypressfilters_form_addfilter_form_validate($form, &$form_state){
     }
   }
   /*
-  $markers = explode("\r\n", $form_state['values']['wallypressfilters']['markers']);
+  $markers = explode("\r\n", $form_state['values']['dpipressfilters']['markers']);
   foreach ($markers as $tmp_marker) {
     list($marker, $description) = explode('|', $tmp_marker);
     
@@ -165,14 +165,14 @@ function wallypressfilters_form_addfilter_form_validate($form, &$form_state){
       ;
     }
     // Check is the marker exists two times
-    elseif (array_key_exists($marker, $form_state['values']['wallypresstags'])) {
-      form_set_error('wallypressfilters][markers', t('There can not be two identical markers.'));
+    elseif (array_key_exists($marker, $form_state['values']['dpipresstags'])) {
+      form_set_error('dpipressfilters][markers', t('There can not be two identical markers.'));
     } else {
       $update = array();
-      $form_state['values']['wallypresstags'][$marker] = array(
+      $form_state['values']['dpipresstags'][$marker] = array(
         'tag' => $marker,
         'description' => $description ? $description : '',
-        'filter' => $form_state['values']['wallypressfilters']['name'],
+        'filter' => $form_state['values']['dpipressfilters']['name'],
         'type' => 'marker',
         'update' => $update,
       );
@@ -182,27 +182,27 @@ function wallypressfilters_form_addfilter_form_validate($form, &$form_state){
 }
 
 /**
- * Submit of the wallypresfilters_form_addfilter_form
+ * Submit of the dpipresfilters_form_addfilter_form
  */
-function wallypressfilters_form_addfilter_form_submit($form, &$form_state){
+function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
   // Save filter
-  $result = drupal_write_record('wallypressfilters', $form_state['values']['wallypressfilters'], $form_state['values']['update']);
+  $result = drupal_write_record('dpipressfilters', $form_state['values']['dpipressfilters'], $form_state['values']['update']);
   $message = '';
   if ($result) {
     $message = t('The filter as been created/updated');
     
-    foreach ($form_state['values']['wallypresstags'] as $tag){
+    foreach ($form_state['values']['dpipresstags'] as $tag){
       // Save tags
-      if ($old_tags = wallypressfilters_gettagsbynameandfilter($tag['tag'], $form_state['values']['wallypressfilters']['name'])) {
+      if ($old_tags = dpipressfilters_gettagsbynameandfilter($tag['tag'], $form_state['values']['dpipressfilters']['name'])) {
         $update = array('tid');
         foreach ($old_tags as $old_tag) {
           $new_tag = array_merge((array)$old_tag, $tag);
-          $result = drupal_write_record('wallypressfilters_tags', $new_tag, $update);
+          $result = drupal_write_record('dpipressfilters_tags', $new_tag, $update);
         }
         $action = 'updated';
       } else {
-        $tag['settings'] = _wallypressfilters_settings_defaults();
-        $result = drupal_write_record('wallypressfilters_tags', $tag);
+        $tag['settings'] = _dpipressfilters_settings_defaults();
+        $result = drupal_write_record('dpipressfilters_tags', $tag);
         $action = 'created';
       }
       if ($result) {
@@ -213,9 +213,9 @@ function wallypressfilters_form_addfilter_form_submit($form, &$form_state){
     }
 
     // Delete tags and markers
-    foreach (wallypressfilters_gettagsfromfilter($form_state['values']['wallypressfilters']['name']) as $filter_tags) {
-      if (!array_key_exists($filter_tags->tag, $form_state['values']['wallypresstags'])) {
-        db_query("DELETE FROM {wallypressfilters_tags} WHERE filter = '%s' AND type = '%s' AND tag = '%s'", $filter_tags->filter, $filter_tags->type, $filter_tags->tag);
+    foreach (dpipressfilters_gettagsfromfilter($form_state['values']['dpipressfilters']['name']) as $filter_tags) {
+      if (!array_key_exists($filter_tags->tag, $form_state['values']['dpipresstags'])) {
+        db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s' AND type = '%s' AND tag = '%s'", $filter_tags->filter, $filter_tags->type, $filter_tags->tag);
         $message .= '<br>'.t('The !tag_type "@tag" has been deleted', array('!tag_type' => $filter_tags->type, '@tag' => $filter_tags->tag));
       }
     }
@@ -223,14 +223,14 @@ function wallypressfilters_form_addfilter_form_submit($form, &$form_state){
     $message = t('The filter as not been created/udpated');
   }
   drupal_set_message(t($message));
-  drupal_goto('admin/wally/wallypressfilters/settings/general');
+  drupal_goto('admin/dpi/dpipressfilters/settings/general');
 }
 
 /**
  * Form to delete a filter
  */
-function wallypressfilters_form_deletefilter_form($form_state, $fid){
-  $filter = wallypressfilters_getfilterbyid($fid);
+function dpipressfilters_form_deletefilter_form($form_state, $fid){
+  $filter = dpipressfilters_getfilterbyid($fid);
   $question = t('Are you sure you want to delete "@filter_name" filter?', array('@filter_name' => $filter->name));
   
   $add_form = array();
@@ -239,18 +239,18 @@ function wallypressfilters_form_deletefilter_form($form_state, $fid){
     '#value' => $fid,
   );
   
-  $form = confirm_form($add_form, $question, 'admin/wally/wallypressfilters/settings');
-  $form['#redirect'] = 'admin/wally/wallypressfilters/settings';
+  $form = confirm_form($add_form, $question, 'admin/dpi/dpipressfilters/settings');
+  $form['#redirect'] = 'admin/dpi/dpipressfilters/settings';
   return $form;
 }
 
 /**
- * Submit of the wallypressfilters_form_deletefilter_form
+ * Submit of the dpipressfilters_form_deletefilter_form
  */
-function wallypressfilters_form_deletefilter_form_submit($form, &$form_state){
-  $filter = wallypressfilters_getfilterbyid($form_state['values']['fid']);
-  $result = db_query("DELETE FROM {wallypressfilters} WHERE fid = %d", $filter->fid);
-  $result2 = db_query("DELETE FROM {wallypressfilters_tags} WHERE filter = '%s'", $filter->name);
+function dpipressfilters_form_deletefilter_form_submit($form, &$form_state){
+  $filter = dpipressfilters_getfilterbyid($form_state['values']['fid']);
+  $result = db_query("DELETE FROM {dpipressfilters} WHERE fid = %d", $filter->fid);
+  $result2 = db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s'", $filter->name);
   if ($result & $result2){
     drupal_set_message(t('The filter as correctly been deleted'));
   } else {
