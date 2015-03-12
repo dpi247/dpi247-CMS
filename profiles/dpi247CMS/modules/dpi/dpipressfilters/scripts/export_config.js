@@ -1,9 +1,12 @@
-Drupal.behaviors.pressFiltersExportConfig = function(context) {
-	$("#export-loading").hide();
-	$("#export-submit").click(function () {
-		$("#export-loading").show();
-		updateExport();
-	});
+Drupal.behaviors.pressFiltersExportConfig = {
+	attach: function(context) {
+		$("#export-loading").hide();
+		$("#export-submit").click(function () {
+			$("#export-loading").show();
+			updateExport();
+		});
+	},
+  detach: function(contact) {}
 };
 
 function updateExport() {
