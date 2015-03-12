@@ -106,15 +106,13 @@ function dpipressfilters_schema() {
  * Remove columns "html_tag" and "classes" and add column "settings"
  */
 function dpipressfilters_update_6001() {
-  $ret = array();
-  
   $db_filters = db_query('SELECT * FROM {dpipressfilters_tags}');
   
-  db_drop_field($ret, 'dpipressfilters_tags', 'html_tag');
-  db_drop_field($ret, 'dpipressfilters_tags', 'classes');
+  db_drop_field('dpipressfilters_tags', 'html_tag');
+  db_drop_field('dpipressfilters_tags', 'classes');
   $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
-  db_add_field($ret, 'dpipressfilters_tags', 'settings', $schema['fields']['settings']);
-  db_add_field($ret, 'dpipressfilters_tags', 'type', $schema['fields']['type']);
+  db_add_field('dpipressfilters_tags', 'settings', $schema['fields']['settings']);
+  db_add_field('dpipressfilters_tags', 'type', $schema['fields']['type']);
   
   while($filter = db_fetch_array($db_filters)) {
     $new_filter = $filter;
@@ -131,7 +129,7 @@ function dpipressfilters_update_6001() {
     drupal_write_record('dpipressfilters_tags', $new_filter, array('tid'));
   }
   
-  return $ret;
+  return array();
 }
 
 /**
@@ -139,19 +137,17 @@ function dpipressfilters_update_6001() {
  * Reinstall tables with new text settings and add column "description"
  */
 function dpipressfilters_update_6002() {
-  $ret = array();
-
   $db_filters = db_query('SELECT * FROM {dpipressfilters}');
   $db_tags = db_query('SELECT * FROM {dpipressfilters_tags}');
   
-  db_drop_table($ret, 'dpipressfilters');
-  db_drop_table($ret, 'dpipressfilters_tags');
+  db_drop_table('dpipressfilters');
+  db_drop_table('dpipressfilters_tags');
 
   $schema_filters = drupal_get_schema('dpipressfilters', TRUE);
   $schema_tags = drupal_get_schema('dpipressfilters_tags', TRUE);
 
-  db_create_table($ret, 'dpipressfilters', $schema_filters);
-  db_create_table($ret, 'dpipressfilters_tags', $schema_tags);
+  db_create_table('dpipressfilters', $schema_filters);
+  db_create_table('dpipressfilters_tags', $schema_tags);
   
   while($filter = db_fetch_array($db_filters)) {
     drupal_write_record('dpipressfilters', $filter);
@@ -161,7 +157,7 @@ function dpipressfilters_update_6002() {
     drupal_write_record('dpipressfilters_tags', $tag);
   }
 
-  return $ret;
+  return array();
 }
 
 /**
@@ -169,12 +165,11 @@ function dpipressfilters_update_6002() {
  * Add a 'weight' column to dpipressfilters_tags
  */
 function dpipressfilters_update_6003() {
-  $ret = array();
   if (!db_column_exists('dpipressfilters_tags', 'weight')) {
     $schema = drupal_get_schema('dpipressfilters_tags', TRUE);
-    db_add_field($ret, 'dpipressfilters_tags', 'weight', $schema['fields']['weight']);
+    db_add_field('dpipressfilters_tags', 'weight', $schema['fields']['weight']);
   }
-  return $ret;
+  return array();
 }
 
 /**
@@ -182,20 +177,19 @@ function dpipressfilters_update_6003() {
  * Add several indexes to dpipressfilters_tags
  */
 function dpipressfilters_update_6004(){
-	$ret = array();
 	$existing_indexes = array();
 	$db_indexes = db_query("SHOW INDEX FROM {dpipressfilters_tags}");
 	while($db_index = db_fetch_array($db_indexes)) {
 	  $existing_indexes[] = $db_index['Column_name'];
 	}
 	if (!in_array('tag', $existing_indexes)) {
-	  db_add_index($ret, 'dpipressfilters_tags', 'tag', array('tag'));
+	  db_add_index('dpipressfilters_tags', 'tag', array('tag'));
 	}
 	if (!in_array('format', $existing_indexes)) {
-	  db_add_index($ret, 'dpipressfilters_tags', 'format', array('format'));
+	  db_add_index('dpipressfilters_tags', 'format', array('format'));
 	}
 	if (!in_array('filter', $existing_indexes)) {
-	  db_add_index($ret, 'dpipressfilters_tags', 'filter', array('filter'));
+	  db_add_index('dpipressfilters_tags', 'filter', array('filter'));
 	}
-	return $ret;
+	return array();
 }
