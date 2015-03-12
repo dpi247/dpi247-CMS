@@ -28,5 +28,5 @@ function dpipressfilters_mapping_export($filter_name/*, $format*/) {
     }
   }
 
-  drupal_json($mapping);
+  drupal_json_output($mapping);
 }
