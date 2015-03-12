@@ -100,7 +100,11 @@ function dpipressfilters_menu() {
  * Implementation of hook_perm
  */
 function dpipressfilters_perm() {
-  return array('administer custom press filter');
+  return array('administer custom press filter' => array(
+    'title' => t('Administer custom press filters'),
+    'description' => t('Allow to add/remove/edit press filters')
+    )
+  );
 }
 
 /**
