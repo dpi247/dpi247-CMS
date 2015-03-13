@@ -255,7 +255,7 @@ function dpipressfilters_form_deletefilter_form_submit($form, &$form_state){
   $filter = dpipressfilters_getfilterbyid($form_state['values']['fid']);
   $$result = db_delete('dpipressfilters')->condition('fid',$filter->fid)->execute();
   $result2 = db_delete('dpipressfilters_tags')->condition('filter',$filter->name)->execute();
-  if ($result & $result2){
+  if ($result && $result2){
     drupal_set_message(t('The filter as correctly been deleted'));
   } else {
     drupal_set_message(t('The filter couldn\'t be correctly deleted'));
