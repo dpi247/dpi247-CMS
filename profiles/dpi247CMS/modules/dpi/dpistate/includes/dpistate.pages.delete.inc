@@ -62,5 +62,5 @@ function dpistate_delete_form_submit($form, $form_state) {
       drupal_set_message ( 'Error while deleting data', 'error' );
     }
   }
-  drupal_goto ( 'admin/config/dpistate/settings' );
+  drupal_goto ( 'admin/dpi247/dpistate' );
 }

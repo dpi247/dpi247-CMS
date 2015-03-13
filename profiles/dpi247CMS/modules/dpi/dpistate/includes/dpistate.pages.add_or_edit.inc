@@ -216,14 +216,14 @@ function dpistate_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
     if (dpistate_api_update_state_by_id ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
-	  drupal_goto('admin/config/dpistate/settings');
+      drupal_goto('admin/dpi247/dpistate');
     } else {
       drupal_set_message ( 'Error while updating data !', 'error' );
     }
   } else {
     if (dpistate_api_add_state ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'] )) {
       drupal_set_message ( 'Data saved successfully' );
-	  drupal_goto('admin/config/dpistate/settings');
+      drupal_goto('admin/dpi247/dpistate');
     } else {
       drupal_set_message ( 'Error while saving data !', 'error' );
     }

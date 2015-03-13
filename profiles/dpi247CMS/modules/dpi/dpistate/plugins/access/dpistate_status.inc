@@ -24,7 +24,7 @@ $plugin = array (
  * @param array $conf
  * @return multiple:array
  */
-function state_status_ctools_access_settings($form, &$form_state, $conf) {
+function dpistate_status_ctools_access_settings($form, &$form_state, $conf) {
   module_load_include ( '../../../dpistate/plugins/access/php', 'dpistate', 'dpistate.api' );
   $data_list = dpistate_api_get_all_states();
   $rows = array ();

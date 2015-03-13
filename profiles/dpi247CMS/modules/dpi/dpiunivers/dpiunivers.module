@@ -1,7 +1,4 @@
 <?php
-/**
- * @author NMO
- */
 module_load_include ( 'php', 'dpiunivers', 'dpiunivers.api' );
 
 /**
