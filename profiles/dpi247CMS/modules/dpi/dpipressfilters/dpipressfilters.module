@@ -17,7 +17,7 @@
 function dpipressfilters_menu() {
   $items = array();
   
-  $items['admin/dpi/dpipressfilters/settings'] = array(
+  $items['admin/config/content/dpipressfilters/settings'] = array(
     'title' => 'DPI Filter Settings',
     'page callback'    => 'dpipressfilters_page_admin',
     'access arguments' => array('administer custom press filter'),
@@ -25,7 +25,7 @@ function dpipressfilters_menu() {
     'file'             => 'includes/dpipressfilters.admin.inc',
   );
   
-  $items['admin/dpi/dpipressfilters/settings/general'] = array(
+  $items['admin/config/content/dpipressfilters/settings/general'] = array(
     'title'            => t('General'),
     'page callback'    => 'dpipressfilters_page_admin',
     'access arguments' => array('administer custom press filter'),
@@ -35,7 +35,7 @@ function dpipressfilters_menu() {
     'type'             => MENU_DEFAULT_LOCAL_TASK,
   );
   
-  $items['admin/dpi/dpipressfilters/settings/add'] = array(
+  $items['admin/config/content/dpipressfilters/settings/add'] = array(
     'title'            => t('Create filter'),
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpipressfilters_form_addfilter_form'),
@@ -46,7 +46,7 @@ function dpipressfilters_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
   
-  $items['admin/dpi/dpipressfilters/settings/import-export'] = array(
+  $items['admin/config/content/dpipressfilters/settings/import-export'] = array(
     'title'            => t('Import/Export'),
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpipressfilters_form_config_import_export_form'),
@@ -57,7 +57,7 @@ function dpipressfilters_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
   
-  $items['admin/dpi/dpipressfilters/settings/edit/%'] = array(
+  $items['admin/config/content/dpipressfilters/settings/edit/%'] = array(
     'title'            => t('Edit filter'),
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpipressfilters_form_addfilter_form', 5),
@@ -66,7 +66,7 @@ function dpipressfilters_menu() {
     'file'             => 'includes/dpipressfilters.admin.inc',
   );
 
-  $items['admin/dpi/dpipressfilters/settings/delete/%'] = array(
+  $items['admin/config/content/dpipressfilters/settings/delete/%'] = array(
     'title'            => t('Delete filter'),
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('dpipressfilters_form_deletefilter_form', 5),

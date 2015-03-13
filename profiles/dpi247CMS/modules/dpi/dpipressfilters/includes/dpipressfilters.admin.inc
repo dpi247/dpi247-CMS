@@ -14,7 +14,7 @@ function dpipressfilters_page_admin(){
       $rows[] = array(
         $filter->name,
         $filter->description,
-        '<a href = "/admin/dpi/dpipressfilters/settings/edit/'.$filter->fid.'">'.t('Edit').'</a>, <a href = "/admin/dpi/dpipressfilters/settings/delete/'.$filter->fid.'">'.t('Delete').'</a>',
+        '<a href = "/admin/config/content/dpipressfilters/settings/edit/'.$filter->fid.'">'.t('Edit').'</a>, <a href = "/admin/config/content/dpipressfilters/settings/delete/'.$filter->fid.'">'.t('Delete').'</a>',
       );
     }
     $content .= theme_table($header,$rows);
@@ -227,7 +227,7 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
     $message = t('The filter as not been created/udpated');
   }
   drupal_set_message(t($message));
-  drupal_goto('admin/dpi/dpipressfilters/settings/general');
+  drupal_goto('admin/config/content/dpipressfilters/settings/general');
 }
 
 /**
@@ -243,8 +243,8 @@ function dpipressfilters_form_deletefilter_form($form_state, $fid){
     '#value' => $fid,
   );
   
-  $form = confirm_form($add_form, $question, 'admin/dpi/dpipressfilters/settings');
-  $form_state['redirect'] = 'admin/dpi/dpipressfilters/settings';
+  $form = confirm_form($add_form, $question, 'admin/config/content/dpipressfilters/settings');
+  $form_state['redirect'] = 'admin/config/content/dpipressfilters/settings';
   return $form;
 }
 
