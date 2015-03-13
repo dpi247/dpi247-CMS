@@ -301,6 +301,7 @@ function dpiscald_vimeo_parse_id($string, $check) {
   $id = NULL;
   $string = trim($string);
   $string = str_replace("channels/staffpicks/", "", $string);
+  $string = str_replace("https", "http", $string);
   if (!preg_match(VIMEO_ID_REGEXP, $string)) {
     // The string ID is not easy to parse, let's try to analyze it
     if (preg_match(VIMEO_WEB_REGEXP, $string, $m)) {
