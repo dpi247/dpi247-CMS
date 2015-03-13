@@ -17,7 +17,7 @@ function dpipressfilters_page_admin(){
         '<a href = "/admin/config/content/dpipressfilters/settings/edit/'.$filter->fid.'">'.t('Edit').'</a>, <a href = "/admin/config/content/dpipressfilters/settings/delete/'.$filter->fid.'">'.t('Delete').'</a>',
       );
     }
-    $content .= theme_table($header,$rows);
+    $content .= theme('table', array('header' => $header, 'rows' => $rows));
   } else {
     $content .= t('There is no filter. To add one click on "Create filter".');
   }
