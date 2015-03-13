@@ -215,7 +215,11 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
     // Delete tags and markers
     foreach (dpipressfilters_gettagsfromfilter($form_state['values']['dpipressfilters']['name']) as $filter_tags) {
       if (!array_key_exists($filter_tags->tag, $form_state['values']['dpipresstags'])) {
-        db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s' AND type = '%s' AND tag = '%s'", $filter_tags->filter, $filter_tags->type, $filter_tags->tag);
+        db_delete('dpipressfilters_tags')
+          ->condition('filter',$filter_tags->filter)
+          ->condition('type',$filter_tags->type)
+          ->condition('tag',$filter_tags->tag)
+          ->execeute();
         $message .= '<br>'.t('The !tag_type "@tag" has been deleted', array('!tag_type' => $filter_tags->type, '@tag' => $filter_tags->tag));
       }
     }
@@ -249,8 +253,8 @@ function dpipressfilters_form_deletefilter_form($form_state, $fid){
  */
 function dpipressfilters_form_deletefilter_form_submit($form, &$form_state){
   $filter = dpipressfilters_getfilterbyid($form_state['values']['fid']);
-  $result = db_query("DELETE FROM {dpipressfilters} WHERE fid = %d", $filter->fid);
-  $result2 = db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s'", $filter->name);
+  $$result = db_delete('dpipressfilters')->condition('fid',$filter->fid)->execute();
+  $result2 = db_delete('dpipressfilters_tags')->condition('filter',$filter->name)->execute();
   if ($result & $result2){
     drupal_set_message(t('The filter as correctly been deleted'));
   } else {

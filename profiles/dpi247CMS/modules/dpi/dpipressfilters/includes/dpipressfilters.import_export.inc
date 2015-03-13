@@ -113,7 +113,9 @@ function _dpipressfilters_import_export_import_from_dom($dom) {
   if ($orig_filter = dpipressfilters_getfilterbyname($filter->name)) {
     $filter->fid = $orig_filter->fid;
     drupal_write_record('dpipressfilters', $filter, array('fid'));
-    db_query("DELETE FROM {dpipressfilters_tags} WHERE filter = '%s'", $filter->name);
+    db_delete('dpipressfilters_tags')
+      ->condition('filter',$filter->name)
+      ->execeute();
   } else {
     drupal_write_record('dpipressfilters', $filter);
   }

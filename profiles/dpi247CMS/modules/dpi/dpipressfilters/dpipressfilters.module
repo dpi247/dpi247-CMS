@@ -137,7 +137,7 @@ function dpipressfilters_filter_info() {
 function dpipressfilters_getfilters(){
   $filters = NULL;
   $result = db_query("SELECT * FROM {dpipressfilters}");
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $filters[] = $obj;
   }
   return $filters;
@@ -157,9 +157,9 @@ function dpipressfilters_getfilterbyname($name){
   if(isset($cache[$name])){
 	return $cache[$name];
   }
-  $result = db_query("SELECT * FROM {dpipressfilters} WHERE name = '%s'", $name);
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE name = :name", array(':name'=>$name));
   $filter = NULL;
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $filter = $obj;
   }
   $cache[$name]=$filter;
@@ -179,9 +179,9 @@ function dpipressfilters_getfilterbyid($fid){
   if(isset($cache[$fid])) {
   	return $cache[$fid];
   }
-  $result = db_query("SELECT * FROM {dpipressfilters} WHERE fid = '%s'", $fid);
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE fid = :fid", array(':fid'=>$fid));
   $filter = NULL;
-  while ($obj = db_fetch_object($result)) {
+  foreach($result as $obj) {
     $filter = $obj;
   }
   $cache[$fid] = $filter;
@@ -198,9 +198,9 @@ function dpipressfilters_getfilterbyid($fid){
  *   an array containing all the tag of the filter
  */
 function dpipressfilters_getalltagsfromfilter($filter_name){
-  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = '%s' ORDER BY weight ASC", $filter_name);
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = :filter_name ORDER BY weight ASC", array(':filter_name'=>$filter_name));
   $tags = array();
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $obj->settings = unserialize($obj->settings);
     $tags[] = $obj;
   }
@@ -216,9 +216,9 @@ function dpipressfilters_getalltagsfromfilter($filter_name){
  *   an array containing all the tag of the filter
  */
 function dpipressfilters_gettagsfromfilter($filter_name){
-  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = '%s' AND format IS NULL ORDER BY weight ASC", $filter_name);
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = :filter_name AND format IS NULL ORDER BY weight ASC", array(':filter_name'=>$filter_name));
   $tags = array();
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $obj->settings = unserialize($obj->settings);
     $tags[] = $obj;
   }
@@ -240,19 +240,19 @@ function dpipressfilters_gettagsfromfilter($filter_name){
 function dpipressfilters_gettagsfromfilterandformat_admin($filter_name, $format){
     $result = db_query("SELECT t.*
                         FROM {dpipressfilters_tags} t
-                        WHERE t.filter = '%s'
-                        AND (t.format = %d OR t.format IS NULL)
+                        WHERE t.filter = :filter_name
+                        AND (t.format = :format OR t.format IS NULL)
                         AND t.tid IN (
                         SELECT MAX(tid) FROM {dpipressfilters_tags}
-                          WHERE filter = '%s'
-                          AND (format = %d OR format IS NULL)
+                          WHERE filter = :filter_name
+                          AND (format = :format OR format IS NULL)
                           GROUP BY tag
                         )
                         ORDER BY weight ASC
-                        ", $filter_name, $format, $filter_name, $format);
+                        ", array(':filter_name'=>$filter_name, ':format'=>$format));
 
   $tags = array();
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $obj->settings = unserialize($obj->settings);
     $tags[] = $obj;
   }
@@ -279,14 +279,14 @@ function dpipressfilters_gettagsfromfilterandformat($filter_name, $format){
   else{
   	$result = db_query("SELECT MAX( t.tid ) , t.filter, t.format, t.type, t.tag, t.description, t.settings
                       FROM {dpipressfilters_tags} t
-                      WHERE t.filter = '%s'
-                      AND (t.format = %d)
+                      WHERE t.filter = :filter_name
+                      AND (t.format = :format )
                       GROUP BY tag
                       ORDER BY weight ASC
-                      ", $filter_name, $format);
+                      ", array(':filter_name'=>$filter_name, ':format'=>$format));
 
 	$tags[$filter_name][$format] = array();
-	while ($obj = db_fetch_object($result)){
+	foreach($result as $obj){
 	  $obj->settings = unserialize($obj->settings);
 	  $tags[$filter_name][$format][] = $obj;
 	}
@@ -305,9 +305,9 @@ function dpipressfilters_gettagsfromfilterandformat($filter_name, $format){
  *   The tag object
  */
 function dpipressfilters_gettagbynameandfilter($tag, $filter){
-  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = :tag AND filter = :filter ORDER BY weight ASC", array(':tag'=>$tag, ':filter'=>$filter));
   $tag = NULL;
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $tag = $obj;
     $tag->settings = unserialize($tag->settings);
   }
@@ -325,9 +325,9 @@ function dpipressfilters_gettagbynameandfilter($tag, $filter){
  *   The tag object
  */
 function dpipressfilters_gettagsbynameandfilter($tag, $filter){
-  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = '%s' AND filter = '%s' ORDER BY weight ASC", $tag, $filter);
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = :tag AND filter = :filter ORDER BY weight ASC", array(':tag'=>$tag, ':filter'=>$filter));
   $tags = array();
-  while ($obj = db_fetch_object($result)){
+  foreach($result as $obj){
     $obj->settings = unserialize($obj->settings);
     $tags[] = $obj;
   }
