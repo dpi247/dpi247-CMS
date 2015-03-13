@@ -32,6 +32,8 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   $type = $parse_id[0];
   $id = $parse_id[1];
 
+  $atom->data['type_deezer'] = $type;
+
   // Get media infos.
   $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
   
@@ -121,7 +123,7 @@ function dpiscald_deezer_theme() {
           'template' => 'providers/deezer/dpiscald_deezer_player'
       ),
       'dpiscald_deezer_player_html5' => array(
-          'variables' => array( 'base_url' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+          'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'templates/players/dpiscald_deezer_player_html5'
     ),
   );
