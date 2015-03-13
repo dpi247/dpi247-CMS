@@ -28,7 +28,7 @@ function dpipressfilters_page_admin(){
 /**
  * Form to create/edit filter
  */
-function dpipressfilters_form_addfilter_form($form_state, $fid = NULL){
+function dpipressfilters_form_addfilter_form($form, $form_state, $fid = NULL){
   $form['dpipressfilters']['#tree'] = TRUE;
 
   $form['dpipressfilters']['name'] = array(
@@ -233,7 +233,7 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
 /**
  * Form to delete a filter
  */
-function dpipressfilters_form_deletefilter_form($form_state, $fid){
+function dpipressfilters_form_deletefilter_form($form, $form_state, $fid){
   $filter = dpipressfilters_getfilterbyid($fid);
   $question = t('Are you sure you want to delete "@filter_name" filter?', array('@filter_name' => $filter->name));
   
