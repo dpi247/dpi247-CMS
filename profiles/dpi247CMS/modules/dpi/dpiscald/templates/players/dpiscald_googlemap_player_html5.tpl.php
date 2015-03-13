@@ -1,4 +1,10 @@
-<iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" 
-src="<?=$urlN?>"></iframe>
-<br /><small><a href="<?=$urlN?>" 
-style="color:#0000FF;text-align:left">Agrandir le plan</a></small>
+<div class="gr-media gr-media--16_9 gr-media--googlemap">
+    <iframe class="gr-media__content" src="<?php print $urlN; ?>" frameborder="0" style="border:0"></iframe>
+</div>
+
+<?php /* en 4:3
+<div class="gr-media gr-media--4_3 gr-media--googlemap">
+    <iframe class="gr-media__content" src="<?php print $urlN; ?>" frameborder="0" style="border:0"></iframe>
+</div>
+*/
+?>
