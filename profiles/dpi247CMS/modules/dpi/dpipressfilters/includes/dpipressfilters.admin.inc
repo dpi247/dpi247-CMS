@@ -133,7 +133,7 @@ function dpipressfilters_form_addfilter_form_validate($form, &$form_state){
   $weight = 0;
   $tags = explode("\r\n", $form_state['values']['dpipressfilters']['tags']);
   foreach ($tags as $tmp_tag) {
-    list($tag, $description) = explode('|', $tmp_tag);
+    list($tag, $description) = explode('|', $tmp_tag.'|');
 
     // Check if the tag is correct
     if ($tag == '') {
