@@ -135,7 +135,7 @@ function dpipressfilters_filter_info() {
  *   an array containing all the filter objects
  */
 function dpipressfilters_getfilters(){
-  $filters = NULL;
+  $filters = array();
   $result = db_query("SELECT * FROM {dpipressfilters}");
   foreach($result as $obj){
     $filters[] = $obj;
