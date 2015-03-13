@@ -30,7 +30,7 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   // Get media infos.
   $infos = dpiscald_slideshare_get_media_infos_from_url($url);
-  
+
   $atom->base_id = md5($url);
 
   $atom->title = $infos->title;
@@ -39,6 +39,8 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
   $atom->type = 'slideshare';
 
   $atom->data['html'] = $infos->html;
+  $atom->data['slideshow_id'] = $infos->slideshow_id;
+
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
@@ -121,6 +123,10 @@ function dpiscald_slideshare_theme() {
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/slideshare/dpiscald_slideshare_player'
       ),
+      'dpiscald_slideshare_player_html5' => array(
+          'variables' => array('vars' => NULL, 'atom' => NULL),
+          'template' => 'templates/players/dpiscald_slideshare_player_html5'
+      ),
   );
 }
 
@@ -200,6 +206,7 @@ function dpiscald_slideshare_get_import_info($importer, & $entity, & $wrapper, $
     $infos = dpiscald_slideshare_get_media_infos_from_url ( $url );
     $entity->title = $infos->title;
     $entity->data['html'] = $infos->html;
+    $entity->data['slideshow_id'] = $infos->slideshow_id;
     if(isset($infos->thumbnail_url)){
       $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
       $wrapper->scald_thumbnail->set ( ( array ) $file );
