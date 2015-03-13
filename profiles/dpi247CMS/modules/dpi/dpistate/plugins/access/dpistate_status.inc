@@ -13,8 +13,45 @@ $plugin = array (
   'description' => t ( 'Control access by dpistate status argument.' ),
   'callback' => 'dpistate_status_ctools_access_check',
   'settings form' => 'dpistate_status_ctools_access_settings',
-  'summary' => 'dpistate_status_ctools_access_summary' 
+  'settings form submit' => 'dpistate_status_ctools_access_settings_submit',
+  'summary' => 'dpistate_status_ctools_access_summary',
+  'get child' => 'dpistate_dpistate_status_ctools_access_get_child',
+  'get children' => 'dpistate_dpistate_status_ctools_access_get_children',
 );
+
+/**
+ * 
+ * @param type $plugin
+ * @param type $parent
+ * @param type $child
+ * @return type
+ */
+function dpistate_dpistate_status_ctools_access_get_child($plugin, $parent, $child){
+  $plugins = dpistate_dpistate_status_ctools_access_get_children($plugin, $parent);
+  return $plugins[$parent . ':' . $child];
+}
+
+/**
+ * 
+ * @param type $plugin
+ * @param type $parent
+ * @return type
+ */
+function dpistate_dpistate_status_ctools_access_get_children($plugin, $parent){
+  module_load_include ( '../../../dpistate/plugins/access/php', 'dpistate', 'dpistate.api' );
+  $plugins = array();
+  $data_list = dpistate_api_get_all_states();
+  foreach($data_list as $data){
+    $machine_name = preg_replace('@[^a-z0-9-]+@','_', strtolower($data['label']));
+    $plugins[$machine_name] = array(
+      'title' => t ( "DpiState : ".$data['label'] ),
+      'description' => t ( 'Control access by dpistate status argument.' ),
+      'keyword' => 'dpistate_status',
+      'name' => $parent,
+    );
+  }
+  return $plugins;
+}
 
 /**
  * This function is use to create form about view settings
@@ -26,28 +63,41 @@ $plugin = array (
  */
 function dpistate_status_ctools_access_settings($form, &$form_state, $conf) {
   module_load_include ( '../../../dpistate/plugins/access/php', 'dpistate', 'dpistate.api' );
+  if(isset($conf) && !empty($conf) && isset($conf['type'])){
+    $form_state['input']['type'] = $conf['type'];
+  }
   $data_list = dpistate_api_get_all_states();
   $rows = array ();
-  
-  foreach ( $data_list as $k => $v ) {
-    if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
-      dpistate_api_change_date_format ( $data_list, $v, $k );
+  $data = NULL;
+  foreach($data_list as $data){
+    $machine_name = preg_replace('@[^a-z0-9-]+@','_', strtolower($data['label']));
+    if($machine_name == $form_state['input']['type']){
+      $tmp_data_list = array($data);
+      break;
     }
-    $rows ['row_' . $v ['id']] = dpistate_get_form_element_by_type ( $data_list, $v ['id'], $k, $conf, 'row_' . $v ['id'] );
   }
-  
-  foreach ( $rows as $k => $v ) {
-    $form ['settings'] [$k] = array (
-      '#type' => 'fieldset',
-      '#title' => t ( 'Change parameter for :' ) 
+
+  if(isset($tmp_data_list)){
+    foreach ( $tmp_data_list as $k => $v ) {
+      if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
+        dpistate_api_change_date_format ( $tmp_data_list, $v, $k );
+      }
+      $info_form = dpistate_get_form_element_by_type($v, $conf, 'row_' . $v ['id']);
+    }
+
+    $form ['type'] = array('#type' => 'hidden', '#value' => $form_state['input']['type']);
+    $form ['settings'] = array(
+      '#tree' => TRUE,
     );
-    
-    foreach ( $v as $value_form => $val ) {
-      $form ['settings'] [$k] [$value_form] = $val;
+    foreach ( $info_form as $value_form => $val ) {      
+      $form ['settings'] [$value_form] = $val;
     }
   }
-  
   return $form;
+}
+
+function dpistate_status_ctools_access_settings_submit($form, &$form_state){
+  $form_state['values']['settings']['type'] = $form_state['values']['type'];
 }
 
 /**
@@ -209,78 +259,57 @@ function dpistate_status_ctools_access_summary($conf, $state) {
  * @param integer $k          
  * @return form element
  */
-function dpistate_get_form_element_by_type($data_list, $v, $k, $conf, $name) {
+function dpistate_get_form_element_by_type($v, $conf, $name) {
   $return = NULL;
-  switch ($data_list [$k] ['type']) {
+  switch ($v ['type']) {
     case 0 :
       $return = array (
-        'activate_' . $v . '_0' => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset ( $conf [$name] ['activate_' . $v . '_0'] )) ? $conf [$name] ['activate_' . $v . '_0'] : FALSE 
+        'label_' . $v ['id'] . '_0' => array (
+          '#markup' => $v ['label'] 
         ),
-        'label_' . $v . '_0' => array (
-          '#markup' => $data_list [$k] ['label'] 
-        ),
-        'options_' . $v . '_0' => array (
+        'options_' . $v ['id'] . '_0' => array (
           '#type' => 'select',
-          '#options' => range ( 0, $data_list [$k] ['value'] ),
-          '#default_value' => (isset ( $conf [$name] ['options_' . $v . '_0'] )) ? $conf [$name] ['options_' . $v . '_0'] : 0 
+          '#options' => range ( 0, $v ['value'] ),
+          '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_0'] )) ? $conf ['options_' . $v ['id'] . '_0'] : 0 
         ),
-        'operation_' . $v . '_0' => array (
+        'operation_' . $v ['id'] . '_0' => array (
           '#type' => 'select',
           '#options' => array (
             '=' => '=',
             '<' => '<',
             '>' => '>' 
           ),
-          '#default_value' => (isset ( $conf [$name] ['operation_' . $v . '_0'] )) ? $conf [$name] ['operation_' . $v . '_0'] : '=' 
+          '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_0'] )) ? $conf ['operation_' . $v ['id'] . '_0'] : '=' 
         ) 
       );
       break;
     case 1 :
       $return = array (
-        'activate_' . $v . '_1' => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset ( $conf [$name] ['activate_' . $v . '_1'] )) ? $conf [$name] ['activate_' . $v . '_1'] : FALSE 
+        'label_' . $v ['id'] . '_1' => array (
+          '#markup' => $v ['label'] 
         ),
-        'label_' . $v . '_1' => array (
-          '#markup' => $data_list [$k] ['label'] 
-        ),
-        'options_' . $v . '_1' => array (
+        'options_' . $v ['id'] . '_1' => array (
           '#type' => 'select',
-          '#options' => $data_list [$k] ['value'],
-          '#default_value' => (isset ( $conf [$name] ['options_' . $v . '_1'] )) ? $conf [$name] ['options_' . $v . '_1'] : '' 
+          '#options' => $v ['value'],
+          '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_1'] )) ? $conf ['options_' . $v ['id'] . '_1'] : '' 
         ),
-        'operation_' . $v . '_1' => array (
-          '#type' => 'select',
-          '#options' => array (
-            '=' => '=' 
-          ) 
-        ) 
       );
       break;
     case 2 :
       $return = array (
-        'activate_' . $v . '_2' => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset ( $conf [$name] ['activate_' . $v . '_2'] )) ? $conf [$name] ['activate_' . $v . '_2'] : FALSE 
-        ),
-        'options_' . $v . '_2' => array (
+        'options_' . $v ['id'] . '_2' => array (
           '#markup' => t ( 'Activate state : @state for date => @date', array (
-            '@state' => $data_list [$k] ['label'],
-            '@date' => $data_list [$k] ['value'] 
+            '@state' => $v ['label'],
+            '@date' => $v ['value'] 
           ) ) 
         ),
-        'operation_' . $v . '_2' => array (
+        'operation_' . $v ['id'] . '_2' => array (
           '#type' => 'select',
           '#options' => array (
             'inside' => 'inside',
             'outside' => 'outside' 
           ),
-          '#default_value' => (isset ( $conf [$name] ['operation_' . $v . '_2'] )) ? $conf [$name] ['operation_' . $v . '_2'] : 'inside' 
+          '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_2'] )) ? $conf ['operation_' . $v ['id'] . '_2'] : 'inside' 
         ) 
       );
       break;
