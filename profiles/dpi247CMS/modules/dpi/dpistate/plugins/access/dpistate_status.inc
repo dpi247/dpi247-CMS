@@ -110,50 +110,58 @@ function dpistate_status_ctools_access_settings_submit($form, &$form_state){
 function dpistate_status_ctools_access_check($conf, $state = NULL) {
   module_load_include ( '../../../dpistate/plugins/access/php', 'dpistate', 'dpistate.api' );
   module_load_include ( '../../../dpistate/plugins/access/inc', 'dpistate', 'plugins/access/dpistate_status' );
+  
   $general_value = variable_get ( 'dpistate_value_at_moment', NULL );
   $access = FALSE;
-  $cpt_activity = 0;
-  if (isset ( $general_value )) {
-    foreach ( $conf as $elem_key => $elem_val ) {
-      $id = explode ( '_', $elem_key );
-      $id = $id [1];
-      if (current ( $elem_val )) {
-        reset ( $elem_val );
-        $first_key = key ( $elem_val );
-        $first_key = explode ( '_', $first_key );
-        
-        switch (intval ( $first_key [2] )) {
-          case 0 : // case of numeric
-            if (($var = dpistate_get_access_for_numeric_type ( $general_value, $id, $elem_val )) == - 1) {
-              return FALSE;
-            } elseif ($var == 1) {
-              $access = TRUE;
-            }
-            break;
-          case 1 : // case of text
-            if (($var = dpistate_get_access_for_text_type ( $general_value, $elem_val, $id )) == - 1) {
-              return FALSE;
-            } elseif ($var == 1) {
-              $access = TRUE;
-            }
-            break;
-          case 2 : // case of date
-            if(($var = dpistate_get_access_for_date_type($elem_val, $id)) == -1){
-              return FALSE;
-            }elseif ($var == 1){
-              $access = TRUE;
-            }
-            break;
-        }
-        $cpt_activity ++;
-      }
+  
+  /* Define id for result search */
+  $array_key = array_keys($conf);
+  $id = explode ( '_', current($array_key) );
+  $id = $id [1];
+  
+  /* to know type of test that you need to do */
+  $data_list = dpistate_api_get_all_states();
+  foreach($data_list as $data){
+    $machine_name = preg_replace('@[^a-z0-9-]+@','_', strtolower($data['label']));
+    if($machine_name == $conf['type']){
+      $tmp_data_list = array($data);
+      break;
     }
   }
-  
-  if ($cpt_activity == 0) {
-    $access = TRUE;
+
+  if(isset($tmp_data_list)){
+    $tmp_data_list = current($tmp_data_list);
+    switch ($tmp_data_list["type"]){
+      case 0:
+          //test numeric
+          if (($var = dpistate_get_access_for_numeric_type ( $general_value, $id, $conf )) == - 1) {
+            return FALSE;
+          } elseif ($var == 1) {
+            $access = TRUE;
+          }
+          break;
+        break;
+      case 1:
+          //test text
+          if (($var = dpistate_get_access_for_text_type ( $general_value, $conf, $id )) == - 1) {
+            return FALSE;
+          } elseif ($var == 1) {
+            $access = TRUE;
+          }
+        break;
+      case 2:
+          //test date
+          if(($var = dpistate_get_access_for_date_type($conf, $id)) == -1){
+            return FALSE;
+          }elseif ($var == 1){
+            $access = TRUE;
+          }
+        break;
+      default:
+          //log error 
+        break;
+    }        
   }
-  
   return $access;
 }
 
@@ -248,15 +256,21 @@ function dpistate_get_access_for_date_type($elem_val, $id) {
  * @return String
  */
 function dpistate_status_ctools_access_summary($conf, $state) {
-  return t ( 'Dpistate has defined rules' );
+  $tmp_conf = $conf;
+  $str = "Dpistate = type : " . $tmp_conf["type"] . ", ";
+  unset($tmp_conf["type"]);  
+  foreach($tmp_conf as $k => $v){
+    $tmp_k = explode('_', $k);    
+    $str .= $tmp_k[0]." : " . $v . ", ";
+  }
+  return t ( '@str', array( '@str' => substr($str, 0, -2) ) );
 }
 
 /**
  * This function return right form element necessary for the form
- *
- * @param array $data_list          
- * @param integer $v          
- * @param integer $k          
+ * @param array $v
+ * @param integer $conf
+ * @param integer $name
  * @return form element
  */
 function dpistate_get_form_element_by_type($v, $conf, $name) {
