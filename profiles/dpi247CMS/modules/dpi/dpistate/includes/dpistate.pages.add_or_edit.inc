@@ -105,36 +105,9 @@ function dpistate_add_form($form, &$form_state, $id) {
       
       break;
     case 2 :
-      $format = 'd-m-Y H:i';
-	  if (isset ( $state['value'] )) {
-		 $date_start =  $state['value'][0].':00';
-		 $date_end = $state['value'][1].':00';
-	  } else {
-      	$date_start = $date_end = format_date ( REQUEST_TIME, 'custom', $format );
-	  }
-      
-      $form ['value_fieldset'] ['input'] ['date_start'] = array (
-        '#description' => t ( 'Select a start/end date' ),
-        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-        '#title' => t ( 'Select start date' ),
-        '#default_value' => $date_start,
-        '#date_format' => $format,
-        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-        '#date_year_range' => '-0:+10' 
+      $form ["value_fieldset"] ['input'] = array(
+        "#markup" => t('The date is define into the settings'),
       );
-      
-      $form ['value_fieldset'] ['input'] ['date_end'] = array (
-        '#description' => t ( 'Select a start/end date' ),
-        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-        '#title' => t ( 'Select end date' ),
-        '#default_value' => $date_end,
-        '#date_format' => $format,
-        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-        '#date_year_range' => '-0:+10' 
-      );
-      
       break;
   }
   
@@ -170,8 +143,7 @@ function dpistate_add_form_validate($form, &$form_state) {
   $type = $form_state ['values'] ['dpistate_types'];
   
   if ($type == 2) {
-    $value [] = $form_state ['values'] ['date_start'];
-    $value [] = $form_state ['values'] ['date_end'];
+    $value [] = array();    
   } else {
     $value = $form_state ['values'] ['input'];
   }
@@ -192,13 +164,10 @@ function dpistate_add_form_validate($form, &$form_state) {
             $textAr = explode ( "\r\n", $text );
             $textAr = array_filter ( $textAr, 'trim' );
             $form_state ['values'] ['input'] = $textAr;
-          }
+          }         
         break;
       case 2 :
-          if (! (strtotime ( $value [0] ) < strtotime ( $value [1] ))) {
-            form_set_error ( 'value_fieldset', t ( 'End date must be greater than start date' ) );
-          }
-          $form_state ['values'] ['input'] = $value;
+          $form_state ['values'] ['input'] = array();
         break;
     }
   } else {

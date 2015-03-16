@@ -17,23 +17,22 @@ function dpistate_settings_form($form, &$form_state) {
   $form = array ();
   $data_list = dpistate_api_get_all_states();
   $rows = array ();
-  
+
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpistate_api_change_date_format ( $data_list, $v, $k );
     }
     $val_recorded = variable_get(VARIABLE_NAME, array());
-	
-   // $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
-	$rows ['row_' . $v['id']] = dpistate_get_settings_row_data($v,isset($val_recorded[$v['id']])?$val_recorded[$v['id']]:array());
+
+    // $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
+    $rows ['row_' . $v['id']] = dpistate_get_settings_row_data($v,isset($val_recorded[$v['id']])?$val_recorded[$v['id']]:array());
   }
-  
+
   $form ['table'] = array (
     '#theme' => 'dpistate_table_theme',
     '#header' => array (
       t ( 'Name' ),
-      t ( 'Options' ) ,
-	  t ( 'Active' )
+      t ( 'Options' )
     ),
     'rows' => $rows 
   );
@@ -44,6 +43,16 @@ function dpistate_settings_form($form, &$form_state) {
   );
   
   return $form;
+}
+
+function dpistate_settings_form_validate($form, & $form_state){
+  foreach($form_state['values'] as $value){
+    if(is_array($value) && isset($value['start']) && isset($value['end'])){
+      if (! (strtotime ( $value ['start'] ) < strtotime ( $value ['end'] ))) {
+        form_set_error ( 'value_fieldset', t ( 'End date must be greater than start date' ) );
+      }
+    }
+  }
 }
 
 /**
@@ -111,26 +120,23 @@ function dpistate_reorder_informations_to_save($infos, $form) {
   $return = array ();
   foreach ( $infos as $k => $v ) {
     $val_info = explode ( '_', $k );
-    if (isset ( $val_info [1] ) && isset ( $val_info [0] ) && $val_info [0] == 'activate') {
+    if (isset ( $val_info [1] )) {
       
       switch ($val_info [2]) {
         case 0 :
           $return [$val_info [1]] = array (
-            'actif' => $v,
             'value' => $infos ['options_' . $val_info [1] . '_0'], 
           );
           break;
         case 1 :
           $return [$val_info [1]] = array (
-            'actif' => $v,
             'value' => $form['table']['rows']['row_'.$val_info [1]]['options_'.$val_info [1].'_1']['#options'][$infos ['options_' . $val_info [1] . '_1']],
             'index' =>   $infos ['options_' . $val_info [1] . '_1'],
           );
           break;
         case 2 :
           $return [$val_info [1]] = array (
-            'actif' => $v,
-            'value' => 'Valeur date',
+            'value' => $v,
           );
           break;
       }
@@ -138,10 +144,15 @@ function dpistate_reorder_informations_to_save($infos, $form) {
   }
   return $return;
 }
-
+/**
+ * 
+ * @param type $row
+ * @param type $values
+ * @return array
+ * 
+*/
 function dpistate_get_settings_row_data($row, $values) {
 	$options = array();
-	
 	switch ($row['type']) {
 		case 0:
 			$options = array (
@@ -158,29 +169,39 @@ function dpistate_get_settings_row_data($row, $values) {
 			);
 			break;
 		case 2:
-			//echo "ici<pre>".print_r($row['value'],true);die();
-			$date_start = date('d/m/Y H:i',strtotime($row['value'][0]));
-			$date_end = date('d/m/Y H:i',strtotime($row['value'][1]));
-			$options = array (
-				  '#markup' => t ( 'Activate state : @state for date => @datestart to @dateend', array (
-					'@state' => $row['label'],
-					'@datestart' => $date_start,
-					'@dateend' => $date_end,
-				  )));
+			$format = 'd-m-Y H:i';
+			$options = array(
+        'start' => array(
+          '#description' => t('Select a start/end date'),
+          '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+          '#title' => t('Select start date'),
+          '#default_value' => (isset($values['value']["start"]))? $values['value']["start"] : date($format),
+          '#date_format' => $format,
+          '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+          '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+          '#date_year_range' => '-0:+10'
+        ),
+        'end' => array(
+          '#description' => t ( 'Select a start/end date' ),
+        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+        '#title' => t ( 'Select end date' ),
+        '#default_value' => (isset($values['value']["end"]))? $values['value']["end"] : date($format),
+        '#date_format' => $format,
+        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+        '#date_year_range' => '-0:+10' 
+        ),
+        "#tree" => TRUE,
+      );
 			break;	
 	}
 	
 	$return = array (
-        'label_' . $row['id'] . '_' . $row['type'] => array (
-          '#markup' => $row['label'] 
-        ),
-        'options_' . $row['id'] . '_' . $row['type'] => $options,
-        'activate_' . $row['id'] . '_' . $row['type'] => array (
-          '#type' => 'checkbox',
-          '#title' => t ( 'Active' ),
-          '#default_value' => (isset($values['actif']))? $values['actif'] : TRUE,
-        ),
-      );
+    'label_' . $row['id'] . '_' . $row['type'] => array (
+      '#markup' => $row['label'] 
+    ),
+    'options_' . $row['id'] . '_' . $row['type'] => $options,        
+  );
 	  
 	 return $return;
 }

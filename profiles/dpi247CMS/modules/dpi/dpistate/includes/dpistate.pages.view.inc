@@ -184,6 +184,6 @@ function dpistate_values_to_string($type, $values) {
 			return implode(' | ',$values);
 			break;
 		case 2:
-			return t('From').date(' d/m/y H:i ',strtotime($values[0])).t('to').date(' d/m/y H:i',strtotime($values[1]));
+			return t('Date values is define into settings');
 	}
 }
