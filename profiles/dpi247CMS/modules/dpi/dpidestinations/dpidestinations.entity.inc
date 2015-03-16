@@ -16,7 +16,7 @@ function dpidestinations_entity_info(){
     'fieldable' => FALSE,
     'module'=>"dpidestinations",
     // Make use the class' label() and uri() implementation by default.
-    'label callback' => 'entity_class_label',
+    //'label callback' => 'entity_class_label', //@todo Genère une erreur est ce vraiment obligatoire ?
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
       'id' => 'targetid',
