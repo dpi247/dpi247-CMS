@@ -20,11 +20,11 @@ $plugin = array (
 );
 
 /**
- * 
- * @param type $plugin
- * @param type $parent
- * @param type $child
- * @return type
+ * This function return one child for access plugins
+ * @param array $plugin
+ * @param array $parent
+ * @param array $child
+ * @return array
  */
 function dpistate_dpistate_status_ctools_access_get_child($plugin, $parent, $child){
   $plugins = dpistate_dpistate_status_ctools_access_get_children($plugin, $parent);
@@ -32,10 +32,10 @@ function dpistate_dpistate_status_ctools_access_get_child($plugin, $parent, $chi
 }
 
 /**
- * 
- * @param type $plugin
- * @param type $parent
- * @return type
+ * This function return all children for the plugin access
+ * @param array $plugin
+ * @param array $parent
+ * @return array
  */
 function dpistate_dpistate_status_ctools_access_get_children($plugin, $parent){
   module_load_include ( '../../../dpistate/plugins/access/php', 'dpistate', 'dpistate.api' );
@@ -82,7 +82,7 @@ function dpistate_status_ctools_access_settings($form, &$form_state, $conf) {
       if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
         dpistate_api_change_date_format ( $tmp_data_list, $v, $k );
       }
-      $info_form = dpistate_get_form_element_by_type($v, $conf, 'row_' . $v ['id']);
+      $info_form = dpistate_get_form_element_by_type($v, $conf, 'row_' . $v ['id'], $tmp_data_list);
     }
 
     $form ['type'] = array('#type' => 'hidden', '#value' => $form_state['input']['type']);
@@ -96,6 +96,11 @@ function dpistate_status_ctools_access_settings($form, &$form_state, $conf) {
   return $form;
 }
 
+/**
+ * This function replace type of element into the right part of the form at the submition
+ * @param array $form
+ * @param array $form_state
+ */
 function dpistate_status_ctools_access_settings_submit($form, &$form_state){
   $form_state['values']['settings']['type'] = $form_state['values']['type'];
 }
@@ -272,18 +277,15 @@ function dpistate_status_ctools_access_summary($conf, $state) {
  * @param integer $name
  * @return form element
  */
-function dpistate_get_form_element_by_type($v, $conf, $name) {
+function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
   $return = NULL;
+  $general_value = variable_get ( 'dpistate_value_at_moment', NULL );
   switch ($v ['type']) {
     case 0 :
+      drupal_add_css(drupal_get_path("module", "dpistate")."/css/dpistate_settings_form.css");      
       $return = array (
         'label_' . $v ['id'] . '_0' => array (
-          '#markup' => $v ['label'] 
-        ),
-        'options_' . $v ['id'] . '_0' => array (
-          '#type' => 'select',
-          '#options' => range ( 0, $v ['value'] ),
-          '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_0'] )) ? $conf ['options_' . $v ['id'] . '_0'] : 0 
+          '#markup' => $v ['label']." (Actual value is ".((isset($general_value[$v["id"]]["value"]))? $general_value[$v["id"]]["value"] : "undifined" ).")",
         ),
         'operation_' . $v ['id'] . '_0' => array (
           '#type' => 'select',
@@ -292,17 +294,30 @@ function dpistate_get_form_element_by_type($v, $conf, $name) {
             '<' => '<',
             '>' => '>' 
           ),
-          '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_0'] )) ? $conf ['operation_' . $v ['id'] . '_0'] : '=' 
-        ) 
+          '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_0'] )) ? $conf ['operation_' . $v ['id'] . '_0'] : '=',
+          '#attributes' => array(
+            'class' => array('inline-dpistate'), // change to just 'text' for Drupal 6
+          ),
+        ), 
+        'options_' . $v ['id'] . '_0' => array (
+          '#type' => 'select',
+          '#options' => range ( 0, $v ['value'] ),
+          '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_0'] )) ? $conf ['options_' . $v ['id'] . '_0'] : 0,
+          '#attributes' => array(
+            'class' => array('aa-dpistate'), // change to just 'text' for Drupal 6
+          ),
+        ),
+        
       );
       break;
     case 1 :
       $return = array (
         'label_' . $v ['id'] . '_1' => array (
-          '#markup' => $v ['label'] 
+          '#markup' => $v ['label']. " : Actual value is '". ((isset($general_value[$v["id"]]["value"]))? $general_value[$v["id"]]["value"] : "undifined" )."'",
         ),
         'options_' . $v ['id'] . '_1' => array (
           '#type' => 'select',
+          '#description' => t('the selected value must be worth the present value if you want that the block is displayed'),
           '#options' => $v ['value'],
           '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_1'] )) ? $conf ['options_' . $v ['id'] . '_1'] : '' 
         ),
@@ -311,13 +326,15 @@ function dpistate_get_form_element_by_type($v, $conf, $name) {
     case 2 :
       $return = array (
         'options_' . $v ['id'] . '_2' => array (
-          '#markup' => t ( 'Activate state : @state for date => @date', array (
-            '@state' => $v ['label'],
-            '@date' => $v ['value'] 
+          '#markup' => t ( '@label : Actual values is for start date @start and for end date @end', array (
+            '@label' => $v ['label'],
+            '@start' => ((isset($general_value[$v["id"]]["value"]["start"]))? $general_value[$v["id"]]["value"]["start"] : "undifined" ),
+            '@end' => ((isset($general_value[$v["id"]]["value"]["end"]))? $general_value[$v["id"]]["value"]["end"] : "undifined" ),
           ) ) 
         ),
         'operation_' . $v ['id'] . '_2' => array (
           '#type' => 'select',
+          "#description" => t('You can choose inside or outside for the date element. It\'s test with actual date.'),
           '#options' => array (
             'inside' => 'inside',
             'outside' => 'outside' 

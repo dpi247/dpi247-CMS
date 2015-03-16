@@ -175,6 +175,13 @@ function dpistate_change_date_format(& $data_list, $v, $k) {
   }
 }
 
+/**
+ * This function return a string to know what this state do.
+ * 
+ * @param integer $type
+ * @param array $values
+ * @return string
+ */
 function dpistate_values_to_string($type, $values) {
 	switch($type) {
 		case 0:

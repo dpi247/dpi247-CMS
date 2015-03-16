@@ -45,6 +45,12 @@ function dpistate_settings_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Validate for the date's type, that the start date is before end date
+ * 
+ * @param array $form
+ * @param array $form_state
+ */
 function dpistate_settings_form_validate($form, & $form_state){
   foreach($form_state['values'] as $value){
     if(is_array($value) && isset($value['start']) && isset($value['end'])){
@@ -144,10 +150,12 @@ function dpistate_reorder_informations_to_save($infos, $form) {
   }
   return $return;
 }
+
 /**
+ * This function define form element that we need to use for settings
  * 
- * @param type $row
- * @param type $values
+ * @param array $row
+ * @param array $values
  * @return array
  * 
 */
@@ -172,7 +180,6 @@ function dpistate_get_settings_row_data($row, $values) {
 			$format = 'd-m-Y H:i';
 			$options = array(
         'start' => array(
-          '#description' => t('Select a start/end date'),
           '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
           '#title' => t('Select start date'),
           '#default_value' => (isset($values['value']["start"]))? $values['value']["start"] : date($format),
@@ -181,15 +188,14 @@ function dpistate_get_settings_row_data($row, $values) {
           '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
           '#date_year_range' => '-0:+10'
         ),
-        'end' => array(
-          '#description' => t ( 'Select a start/end date' ),
-        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-        '#title' => t ( 'Select end date' ),
-        '#default_value' => (isset($values['value']["end"]))? $values['value']["end"] : date($format),
-        '#date_format' => $format,
-        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-        '#date_year_range' => '-0:+10' 
+        'end' => array(         
+          '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
+          '#title' => t ( 'Select end date' ),
+          '#default_value' => (isset($values['value']["end"]))? $values['value']["end"] : date($format),
+          '#date_format' => $format,
+          '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+          '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+          '#date_year_range' => '-0:+10' 
         ),
         "#tree" => TRUE,
       );
