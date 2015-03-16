@@ -151,7 +151,7 @@ function dpistate_status_ctools_access_check($conf, $state = NULL) {
         break;
       case 2:
           //test date
-          if(($var = dpistate_get_access_for_date_type($conf, $id)) == -1){
+          if(($var = dpistate_get_access_for_date_type($general_value, $conf, $id)) == -1){
             return FALSE;
           }elseif ($var == 1){
             $access = TRUE;
@@ -226,19 +226,18 @@ function dpistate_get_access_for_text_type($general_value, $elem_val, $id) {
  * @param integer $id
  * @return number
  */
-function dpistate_get_access_for_date_type($elem_val, $id) {
+function dpistate_get_access_for_date_type($general_value, $elem_val, $id) {
   $access = 0;
-  $result = dpistate_api_get_one_state ( $id );
   switch ($elem_val ['operation_' . $id . '_2']) {
     case 'outside' :
-      if (strtotime ( $result ['value'] [0] ) > time () || time () > strtotime ( $result ['value'] [1] )) {
+      if (strtotime ( $general_value [$id] ['value'] ["start"] ) > time () || time () > strtotime ( $general_value [$id] ['value'] ["end"] )) {
         $access = 1;
       } else {
         $access = - 1;
       }
       break;
     case 'inside' :
-      if (strtotime ( $result ['value'] [0] ) < time () && time () < strtotime ( $result ['value'] [1] )) {
+      if (strtotime ( $general_value [$id] ['value'] ["start"] ) < time () && time () < strtotime ( $general_value [$id] ['value'] ["end"] )) {
         $access = 1;
       } else {
         $access = - 1;
