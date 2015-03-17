@@ -359,51 +359,22 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
     '#type' => 'value',
     '#value' => $format,
   );
-  
-  /*$form['filter'][$filter->name]['tag'] = array(
-    '#type'        => 'fieldset',
-    '#title'       => t('Tags'),
-    '#collapsible' => TRUE,
-  );*/
-  
-  /*$form['filter'][$filter->name]['marker'] = array(
-    '#type'        => 'fieldset',
-    '#title'       => t('Markers'),
-    '#collapsible' => TRUE,
-  );*/
 
   if (!empty($tags)) {
     ctools_include('dependent');
     ctools_add_js('dependent');
 
     $operations = array(
-      //'tag' => array(
-        'replace' => t('Replace'),
-        'strip' => t('Strip'),
-        'skip' => t('Skip'),
-      //),
-      /*'marker' => array(
-        'ignore' => t('Ignore'),
-        'replace' => t('Replace'),
-        'attr_replace' => t('Replace following attributes'),
-        'strip' => t('Strip'),
-        'convert' => t('Convert to text'),
-      ),*/
+      'replace' => t('Replace'),
+      'strip' => t('Strip'),
+      'skip' => t('Skip'),
     );
-    
+
     $sub_operations = array(
-      //'tag' => array(
-        'replace' => array(
-          'basic' => t('Basic'),
-          'advanced' => t('Advanced'),
-        ),
-      //),
-      /*'marker' => array(
-        'attr_replace' => array(
-          'to_marker' => t('Convert to another marker'),
-          'convert' => t('Convert to string'),
-        ),
-      ),*/
+      'replace' => array(
+        'basic' => t('Basic'),
+        'advanced' => t('Advanced'),
+      ),
     );
 
     foreach ($tags as $tag) {
@@ -423,9 +394,9 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
         '#options'       => $operations ? $operations : array(),
         '#default_value' => $defaults['operation'],
       );
-      
+
       $dependency_filter_name = str_replace('_', '-', $filter->name);
-      
+
       $tag_form['replace-method'] = array(
         '#type'          => 'select',
         '#title'         => t('Replacement method'),
@@ -434,7 +405,7 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
         '#dependency'    => array('edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-operation' => array('replace')),
         '#process'       => array('ctools_dependent_process'),
       );
-      
+
       $tag_form['basic-pattern'] = array(
         '#type'          => 'textfield',
         '#title'         => t('Pattern used to replace the !tag_type "@tag"', array('!tag_type' => $tag->type, '@tag' => $tag->tag)),
@@ -449,7 +420,7 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
         '#dependency_count' => 2,
         '#process'       => array('ctools_dependent_process'),
       );
-      
+
       $tag_form['advanced-php'] = array(
         '#type'          => 'textarea',
         '#title'         => t('PHP code'),
@@ -477,14 +448,14 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
 
       $tag_form['format'] = array(
         '#type'  => 'value',
-        '#value' => $tag->format, 
+        '#value' => $tag->format,
       );
 
       $tag_form['tag'] = array(
         '#type'  => 'value',
         '#value' => $tag->tag,
       );
-      
+
       $tag_form['description'] = array(
         '#type'  => 'value',
         '#value' => $tag->description,
