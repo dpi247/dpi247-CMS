@@ -116,7 +116,7 @@ function dpipressfilters_filter_info() {
   $filters = array();
   $custom_filters = dpipressfilters_getfilters();
   foreach($custom_filters as $filter){
-    $id = $filter->fid;
+    $id = $filter->name;
     $filters[$id] = array(
       'title' => $filter->name,
       'description' => $filter->description,
@@ -334,23 +334,28 @@ function dpipressfilters_gettagsbynameandfilter($tag, $filter){
   return $tags;
 }
 
+
 /**
  * Fonction de déclation du formulaire de préférences pour le remplacement des balises HErmes
  * On déclare quelles balises doivent etre remplacées par quelles balises html
  */
-function dpipressfilters_form_filter_settings_form($fid, $format){
-  $filter = dpipressfilters_getfilterbyid($fid);
-  $tags = dpipressfilters_gettagsfromfilterandformat_admin($filter->name, $format);
+function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter, $format, $defaults){
+  $filter->settings += $defaults;
 
-  $form['filter_'.$fid]['#tree'] = TRUE;
+  $fid = $filter->name;
+  $filter_dpi = dpipressfilters_getfilterbyname($fid);
+  $tags = dpipressfilters_gettagsfromfilterandformat_admin($filter->name, $format->name);
 
-  $form['filter_'.$fid][$filter->name] = array(
+
+  $settings['filter_'.$fid]['#tree'] = TRUE;
+
+  $settings['filter_'.$fid][$filter->name] = array(
     '#type' => 'fieldset',
     '#title' => t($filter->name.' filter'),
     '#collapsible' => TRUE,
   );
 
-  $form['filter_'.$fid][$filter->name]['format'] = array(
+  $settings['filter_'.$fid][$filter->name]['format'] = array(
     '#type' => 'value',
     '#value' => $format,
   );
@@ -409,8 +414,8 @@ function dpipressfilters_form_filter_settings_form($fid, $format){
     		'#collapsed'   => TRUE,
       );
 
-      $settings = $tag->settings ? $tag->settings : array();
-      $defaults = array_merge(_dpipressfilters_settings_defaults(), $settings);
+      $settings_tag = $tag->settings ? $tag->settings : array();
+      $defaults = array_merge(_dpipressfilters_settings_defaults(), $settings_tag);
 
       $tag_form['operation'] = array(
         '#type'          => 'select',
@@ -484,12 +489,11 @@ function dpipressfilters_form_filter_settings_form($fid, $format){
         '#type'  => 'value',
         '#value' => $tag->description,
       );
-
-      $form['filter_'.$fid][$filter->name][$tag->type][$tag->tid] = $tag_form;
+      $settings['filter_'.$fid][$filter->name][$tag->type][$tag->tid] = $tag_form;
     }
   }
 
-  return $form;
+  return $settings;
 }
 
 /**
