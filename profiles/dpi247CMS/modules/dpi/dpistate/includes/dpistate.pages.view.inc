@@ -124,15 +124,18 @@ function dpistate_generate_rows($data_list = array()) {
 
 function dpistate_replace_state_type_from_int_to_string($type) {
 	switch ($type) {
-		case 0 :
-		  return "Numeric";
+		case '0' :
+        return "Numeric";
 		  break;
-		case 1 :
-		  return "Text";
+		case '1' :
+        return "Text";
 		  break;
-		case 2 :
-		  return "Date";
+		case '2' :
+        return "Date";
 		  break;
+    default:
+        return $type;
+      break;
   }
 }
 
@@ -184,13 +187,21 @@ function dpistate_change_date_format(& $data_list, $v, $k) {
  */
 function dpistate_values_to_string($type, $values) {
 	switch($type) {
-		case 0:
-			return '0 '.t('to').' '.$values;
+		case '0':
+        return '0 '.t('to').' '.$values;
 			break;	
-		case 1:
-			return implode(' | ',$values);
+		case '1':
+        return implode(' | ',$values);
 			break;
-		case 2:
-			return t('Date values is define into settings');
+		case '2':
+        return t('Date values is define into settings');
+    default:
+        $strs = module_invoke_all('dpistate_get_value_table_view', $type, $values);
+        $string = "";
+        foreach($strs as $str){
+          $string .= $str;
+        }
+        return $string;
+      break;
 	}
 }

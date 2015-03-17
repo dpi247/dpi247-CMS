@@ -162,21 +162,21 @@ function dpistate_reorder_informations_to_save($infos, $form) {
 function dpistate_get_settings_row_data($row, $values) {
 	$options = array();
 	switch ($row['type']) {
-		case 0:
+		case '0':
 			$options = array (
 			  '#type' => 'select',
 			  '#options' => range ( 0, $row['value'] ),
 			  '#default_value' => (isset($values['value']))? $values['value'] : FALSE,
 			);
 			break;
-		case 1:
+		case '1':
 			$options = array (
 			  '#type' => 'select',
 			  '#options' => $row['value'],
 			  '#default_value' => (isset($values['index']))? $values['index'] : FALSE,
 			);
 			break;
-		case 2:
+		case '2':
 			$format = 'd-m-Y H:i';
 			$options = array(
         'start' => array(
@@ -200,6 +200,9 @@ function dpistate_get_settings_row_data($row, $values) {
         "#tree" => TRUE,
       );
 			break;	
+    default:
+        $options = current(module_invoke_all('dpistate_define_options_settings', $row, $values));
+      break;
 	}
 	
 	$return = array (

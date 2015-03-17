@@ -90,3 +90,55 @@ function dpiunivers_permission() {
     ) 
   );
 }
+
+function dpiunivers_dpistate_get_options(){
+  return array(
+     'univers' => t('Univers')
+  );
+}
+
+function dpiunivers_dpistate_get_form_element($type, $state){
+  return array(
+    '#markup' => t('Element is defined into the settings element'),
+  );
+}
+
+function dpiunivers_dpistate_get_value_table_view($type, $values){
+  switch ($type) {
+    case 'univers':
+        return t('Univers avec le theme "@theme" et le menu associé "@menu"', array(
+          '@theme' => (isset($values['dpiunivers_theme'])? $values['dpiunivers_theme'] : "undefined"),
+          '@menu' => (isset($values['dpiunivers_menu'])? $values['dpiunivers_menu'] : "undefined"),
+        ));
+      break;
+    default:
+      break;
+  }
+}
+
+function dpiunivers_dpistate_define_options_settings($row, $values){
+  $return_form_part = array();
+  switch($row["type"]){
+    case 'univers' :                
+        $themes = list_themes();
+        $lthemes = array();
+        foreach ($themes as $theme) {
+          $lthemes[$theme->name] = $theme->name;  
+        }
+        $return_form_part['dpiunivers_theme'] = array (
+          '#type' => 'select',
+          '#title' => t ( 'Select the associated theme' ),
+          '#options' => $lthemes,
+          '#default_value' => (isset ( $row ["value"] ['dpiunivers_theme'] )) ? $row ["value"] ['dpiunivers_theme'] : false,
+        );
+        $menus = menu_get_menus();
+        $return_form_part['dpiunivers_menu'] = array (
+          '#type' => 'select',
+          '#title' => t ( 'Select the associated menu' ),
+          '#options' => $menus,
+          '#default_value' => (isset ( $row ["value"] ['dpiunivers_menu'] )) ? $row ["value"] ['dpiunivers_menu'] : false,
+        );
+      break;
+  }
+  return array($return_form_part);     
+}

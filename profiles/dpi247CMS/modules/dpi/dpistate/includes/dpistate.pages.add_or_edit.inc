@@ -50,15 +50,20 @@ function dpistate_add_form($form, &$form_state, $id) {
     '#required' => TRUE 
   );
   
+  $options = array (
+    0 => t ( 'Numeric' ),
+    1 => t ( 'Text' ),
+    2 => t ( 'Date' ) 
+  );
+  
+  $external_options = module_invoke_all("dpistate_get_options");
+  $options = array_merge($options, $external_options);
+  
   $form ['dpistate_types'] = array (
     '#type' => 'radios',
     '#title' => t ( 'State\'s type' ),
-    '#options' => array (
-      0 => t ( 'Numeric' ),
-      1 => t ( 'Text' ),
-      2 => t ( 'Date' ) 
-    ),
-    '#default_value' => (isset ( $state ['type'] )) ? $state ['type'] : 0,
+    '#options' => $options,
+    '#default_value' => (isset ( $state ['type'] )) ? $state ['type'] : '0',
     '#multiple' => FALSE,
     '#description' => t ( 'Select a state type' ),
     '#ajax' => array (
@@ -82,11 +87,11 @@ function dpistate_add_form($form, &$form_state, $id) {
   if (isset ( $form_state ['values'] ['dpistate_types'] )) {
     $type = $form_state ['values'] ['dpistate_types'];
   } else {
-    $type = (isset ( $state ['type'] )) ? $state ['type'] : 0;
+    $type = (isset ( $state ['type'] )) ? $state ['type'] : '0';
   }
   
   switch ($type) {
-    case 0 :
+    case '0' :
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Numeric values only' ),
         '#type' => 'textfield',
@@ -95,7 +100,7 @@ function dpistate_add_form($form, &$form_state, $id) {
       );
       
       break;
-    case 1 :
+    case '1' :
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Text only' ),
         '#type' => 'textarea',
@@ -104,10 +109,14 @@ function dpistate_add_form($form, &$form_state, $id) {
       );
       
       break;
-    case 2 :
+    case '2' :
       $form ["value_fieldset"] ['input'] = array(
         "#markup" => t('The date is define into the settings'),
       );
+      break;
+    default :
+        $array_form = module_invoke_all("dpistate_get_form_element", $type, (isset ( $state ['value'] )) ? $state ['value'] : null);
+        $form ["value_fieldset"]["input"] = $array_form + array( "#tree" => TRUE );        
       break;
   }
   
@@ -145,34 +154,36 @@ function dpistate_add_form_validate($form, &$form_state) {
   if ($type == 2) {
     $value [] = array();    
   } else {
-    $value = $form_state ['values'] ['input'];
+    $value = (isset($form_state ['values'] ['input'])) ? $form_state ['values'] ['input'] : NULL;
   }
   
-  if (! empty ( $value )) {
-    switch ($type) {
-      case 0 :
-          if (! is_numeric ( $value )) {
-            form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
-          }
-        break;
-      case 1 :
-          if (! is_string ( $value )) {
-            form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
-          } else {
-            $array_formated = array ();
-            $text = trim ( $value );
-            $textAr = explode ( "\r\n", $text );
-            $textAr = array_filter ( $textAr, 'trim' );
-            $form_state ['values'] ['input'] = $textAr;
-          }         
-        break;
-      case 2 :
-          $form_state ['values'] ['input'] = array();
-        break;
-    }
-  } else {
-    form_set_error ( 'value_fieldset', t ( 'Please enter a value' ) );
+  switch ($type) {
+    case "0" :
+        if (! is_numeric ( $value )) {
+          form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
+        }
+      break;
+    case "1" :
+        if (! is_string ( $value )) {
+          form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
+        } else {
+          $array_formated = array ();
+          $text = trim ( $value );
+          $textAr = explode ( "\r\n", $text );
+          $textAr = array_filter ( $textAr, 'trim' );
+          $form_state ['values'] ['input'] = $textAr;
+        }         
+      break;
+    case "2" :
+        $form_state ['values'] ['input'] = array();
+      break;
+    default:
+        $form_state ['values'] ['input'] = $value;
+      break;
   }
+//  } else {
+//    form_set_error ( 'value_fieldset', t ( 'Please enter a value' ) );
+//  }
 }
 
 /**
@@ -182,6 +193,7 @@ function dpistate_add_form_validate($form, &$form_state) {
  * @param array $form_state          
  */
 function dpistate_add_form_submit($form, $form_state) {
+  dsm($form_state);
   if (isset ( $form_state ['values'] ['store'] )) {
     if (dpistate_api_update_state_by_id ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
