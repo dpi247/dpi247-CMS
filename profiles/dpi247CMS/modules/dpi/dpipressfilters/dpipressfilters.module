@@ -341,128 +341,106 @@ function dpipressfilters_gettagsbynameandfilter($tag, $filter){
  */
 function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter, $format, $defaults){
   $filter->settings += $defaults;
-
   $fid = $filter->name;
-  $filter_dpi = dpipressfilters_getfilterbyname($fid);
   $tags = dpipressfilters_gettagsfromfilterandformat_admin($filter->name, $format->name);
 
-
-  $settings['filter_'.$fid]['#tree'] = TRUE;
-
-  $settings['filter_'.$fid][$filter->name] = array(
-    '#type' => 'fieldset',
-    '#title' => t($filter->name.' filter'),
-    '#collapsible' => TRUE,
+  $operations = array(
+    'replace' => t('Replace'),
+    'strip' => t('Strip'),
+    'skip' => t('Skip'),
   );
 
-  $settings['filter_'.$fid][$filter->name]['format'] = array(
-    '#type' => 'value',
-    '#value' => $format,
+  $sub_operations = array(
+    'replace' => array(
+      'basic' => t('Basic'),
+      'advanced' => t('Advanced'),
+    ),
   );
 
-  if (!empty($tags)) {
+  $settings["#tree"] = TRUE;
+  if(empty($tags)){
+    // No tag, no config
+    $settings['html'] = array(
+     '#type' => 'markup',
+     '#markup' => t("There is no tag to configure."),
+    );
+    return $settings;
+  }
 
-    $operations = array(
-      'replace' => t('Replace'),
-      'strip' => t('Strip'),
-      'skip' => t('Skip'),
+  foreach ($tags as $tag) {
+    $tag_form = array(
+      '#type'        => 'fieldset',
+      '#title'       => $tag->description.' ('.$tag->tag.')',
+      '#collapsible' => TRUE,
+      '#collapsed'   => TRUE,
+    );
+    // Simple access
+    $tag_form['#tagname'] = $tag->tag;
+    $tag_tid = $tag->tid;
+
+    $settings_tag = empty($filter->settings[$tag_tid]) ? _dpipressfilters_settings_defaults() : $filter->settings[$tag_tid];
+
+    $tag_form['operation'] = array(
+      '#type'          => 'select',
+      '#title'         => t('Operation'),
+      '#options'       => $operations ? $operations : array(),
+      '#default_value' => $settings_tag['operation'],
     );
 
-    $sub_operations = array(
-      'replace' => array(
-        'basic' => t('Basic'),
-        'advanced' => t('Advanced'),
-      ),
+    $tag_form['replace-method'] = array(
+      '#type'          => 'select',
+      '#title'         => t('Replacement method'),
+      '#options'       => $sub_operations['replace'] ? $sub_operations['replace'] : array(),
+      '#default_value' => $settings_tag['replace-method'],
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace')
+        )
+      )
     );
 
-    foreach ($tags as $tag) {
-      $tag_form = array(
-    		'#type'        => 'fieldset',
-    		'#title'       => $tag->description.' ('.$tag->tag.')',
-    		'#collapsible' => TRUE,
-    		'#collapsed'   => TRUE,
-      );
-
-      $settings_tag = $tag->settings ? $tag->settings : array();
-      $defaults = array_merge(_dpipressfilters_settings_defaults(), $settings_tag);
-
-      $tag_form['operation'] = array(
-        '#type'          => 'select',
-        '#title'         => t('Operation'),
-        '#options'       => $operations ? $operations : array(),
-        '#default_value' => $defaults['operation'],
-      );
-
-      $tag_form['replace-method'] = array(
-        '#type'          => 'select',
-        '#title'         => t('Replacement method'),
-        '#options'       => $sub_operations['replace'] ? $sub_operations['replace'] : array(),
-        '#default_value' => $defaults['replace-method'],
-        '#states' => array(
-          'visible' => array(
-            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace')
-          )
+    $tag_form['basic-pattern'] = array(
+      '#type'          => 'textfield',
+      '#title'         => t('Pattern used to replace the !tag_type "@tag"', array('!tag_type' => $tag->type, '@tag' => $tag->tag)),
+      '#default_value' => $settings_tag['basic-pattern'],
+      '#description'   => t('Recognized patterns are $tag.body and $tag.attr-name<br>
+          Where $tag.body is the content of the tag and $tag.attr-name is the value of the attribute named "attr-name".<br>
+          Any non-pattern string is also accepted and will be added without modifications.<br>
+          Example : <i><code>!ex_code</code></i>', array('!ex_code' => htmlentities('<x class="$tag.myclass new-class">$tag.body</x>'))),
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][replace-method]"]' => array('value' => 'basic'),
         )
-      );
+      )
+    );
 
-      $tag_form['basic-pattern'] = array(
-        '#type'          => 'textfield',
-        '#title'         => t('Pattern used to replace the !tag_type "@tag"', array('!tag_type' => $tag->type, '@tag' => $tag->tag)),
-        '#default_value' => $defaults['basic-pattern'],
-        '#description'   => t('Recognized patterns are $tag.body and $tag.attr-name<br>
-            Where $tag.body is the content of the tag and $tag.attr-name is the value of the attribute named "attr-name".<br>
-            Any non-pattern string is also accepted and will be added without modifications.<br>
-            Example : <i><code>!ex_code</code></i>', array('!ex_code' => htmlentities('<x class="$tag.myclass new-class">$tag.body</x>'))),
-        '#states' => array(
-          'visible' => array(
-            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
-            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][replace-method]"]' => array('value' => 'basic'),
-          )
+    $tag_form['advanced-php'] = array(
+      '#type'          => 'textarea',
+      '#title'         => t('PHP code'),
+      '#default_value' => $settings_tag['advanced-php'],
+      '#description'   => t('Use <i>return $string;</i> at the end of your code,
+          the matching tag (and its content) will be replaced by this string.<br>
+          <b style="color:red;">Use this with caution! This code will be executed every time the filter is applied.</b><br>
+          An associative array is given, this array contains the tag name, body and attributes, for example :<br>
+          $tag = array(<br>
+          &nbsp&nbsp"tag_name" => "name-of-the-tag",<br>
+          &nbsp&nbsp"body" => "body-of-the-tag",<br>
+          &nbsp&nbsp"attributes" => array(<br>
+          &nbsp&nbsp&nbsp&nbsp"a1" => "v1",<br>
+          &nbsp&nbsp&nbsp&nbsp"a2" => "v2",<br>
+          &nbsp&nbsp&nbsp&nbsp...<br>
+          &nbsp&nbsp),<br>
+          );'),
+      '#rows'          => 15,
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][replace-method]"]' => array('value' => 'advanced'),
         )
-      );
-
-      $tag_form['advanced-php'] = array(
-        '#type'          => 'textarea',
-        '#title'         => t('PHP code'),
-        '#default_value' => $defaults['advanced-php'],
-        '#description'   => t('Use <i>return $string;</i> at the end of your code,
-            the matching tag (and its content) will be replaced by this string.<br>
-            <b style="color:red;">Use this with caution! This code will be executed every time the filter is applied.</b><br>
-            An associative array is given, this array contains the tag name, body and attributes, for example :<br>
-            $tag = array(<br>
-            &nbsp&nbsp"tag_name" => "name-of-the-tag",<br>
-            &nbsp&nbsp"body" => "body-of-the-tag",<br>
-            &nbsp&nbsp"attributes" => array(<br>
-            &nbsp&nbsp&nbsp&nbsp"a1" => "v1",<br>
-            &nbsp&nbsp&nbsp&nbsp"a2" => "v2",<br>
-            &nbsp&nbsp&nbsp&nbsp...<br>
-            &nbsp&nbsp),<br>
-            );'),
-        '#rows'          => 15,
-        '#states' => array(
-          'visible' => array(
-            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
-            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][replace-method]"]' => array('value' => 'advanced'),
-          )
-        )
-      );
-
-      $tag_form['format'] = array(
-        '#type'  => 'value',
-        '#value' => $tag->format,
-      );
-
-      $tag_form['tag'] = array(
-        '#type'  => 'value',
-        '#value' => $tag->tag,
-      );
-
-      $tag_form['description'] = array(
-        '#type'  => 'value',
-        '#value' => $tag->description,
-      );
-      $settings['filter_'.$fid][$filter->name][$tag->type][$tag->tid] = $tag_form;
-    }
+      )
+    );
+    $settings[$tag_tid] = $tag_form;
   }
 
   return $settings;
