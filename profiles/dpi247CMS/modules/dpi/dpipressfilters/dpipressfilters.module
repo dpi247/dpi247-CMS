@@ -361,8 +361,6 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
   );
 
   if (!empty($tags)) {
-    ctools_include('dependent');
-    ctools_add_js('dependent');
 
     $operations = array(
       'replace' => t('Replace'),
@@ -395,15 +393,16 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
         '#default_value' => $defaults['operation'],
       );
 
-      $dependency_filter_name = str_replace('_', '-', $filter->name);
-
       $tag_form['replace-method'] = array(
         '#type'          => 'select',
         '#title'         => t('Replacement method'),
         '#options'       => $sub_operations['replace'] ? $sub_operations['replace'] : array(),
         '#default_value' => $defaults['replace-method'],
-        '#dependency'    => array('edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-operation' => array('replace')),
-        '#process'       => array('ctools_dependent_process'),
+        '#states' => array(
+          'visible' => array(
+            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace')
+          )
+        )
       );
 
       $tag_form['basic-pattern'] = array(
@@ -414,11 +413,12 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
             Where $tag.body is the content of the tag and $tag.attr-name is the value of the attribute named "attr-name".<br>
             Any non-pattern string is also accepted and will be added without modifications.<br>
             Example : <i><code>!ex_code</code></i>', array('!ex_code' => htmlentities('<x class="$tag.myclass new-class">$tag.body</x>'))),
-        '#dependency'    => array(
-            'edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-operation' => array('replace'),
-            'edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-replace-method' => array('basic')),
-        '#dependency_count' => 2,
-        '#process'       => array('ctools_dependent_process'),
+        '#states' => array(
+          'visible' => array(
+            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][replace-method]"]' => array('value' => 'basic'),
+          )
+        )
       );
 
       $tag_form['advanced-php'] = array(
@@ -439,11 +439,12 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
             &nbsp&nbsp),<br>
             );'),
         '#rows'          => 15,
-        '#dependency'    => array(
-            'edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-operation' => array('replace'),
-            'edit-filter-'.$fid.'-'.$dependency_filter_name.'-'.$tag->type.'-'.$tag->tid.'-replace-method' => array('advanced')),
-        '#dependency_count' => 2,
-        '#process'       => array('ctools_dependent_process'),
+        '#states' => array(
+          'visible' => array(
+            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+            'select[name="filters['.$fid.'][settings][filter_'.$fid.']['.$filter->name.'][tag]['.$tag->tid.'][replace-method]"]' => array('value' => 'advanced'),
+          )
+        )
       );
 
       $tag_form['format'] = array(
