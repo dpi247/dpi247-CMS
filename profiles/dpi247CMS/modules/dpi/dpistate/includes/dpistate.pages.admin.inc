@@ -16,14 +16,13 @@
 function dpistate_settings_form($form, &$form_state) {
   $form = array ();
   $data_list = dpistate_api_get_all_states();
-  $rows = array ();
-
+  $val_recorded = variable_get(VARIABLE_NAME, array());
+  $rows =  array();  
+  
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpistate_api_change_date_format ( $data_list, $v, $k );
-    }
-    $val_recorded = variable_get(VARIABLE_NAME, array());
-
+    }        
     // $rows ['row_' . $v ['id']] = dpicontext_get_form_element_by_type ( $data_list, $v ['id'], $k, $val_recorded );
     $rows ['row_' . $v['id']] = dpistate_get_settings_row_data($v,isset($val_recorded[$v['id']])?$val_recorded[$v['id']]:array());
   }
@@ -34,7 +33,7 @@ function dpistate_settings_form($form, &$form_state) {
       t ( 'Name' ),
       t ( 'Options' )
     ),
-    'rows' => $rows 
+    'rows' => $rows,
   );
   
   $form ['submit'] = array (
@@ -129,21 +128,24 @@ function dpistate_reorder_informations_to_save($infos, $form) {
     if (isset ( $val_info [1] )) {
       
       switch ($val_info [2]) {
-        case 0 :
+        case '0' :
           $return [$val_info [1]] = array (
             'value' => $infos ['options_' . $val_info [1] . '_0'], 
           );
           break;
-        case 1 :
+        case '1' :
           $return [$val_info [1]] = array (
             'value' => $form['table']['rows']['row_'.$val_info [1]]['options_'.$val_info [1].'_1']['#options'][$infos ['options_' . $val_info [1] . '_1']],
             'index' =>   $infos ['options_' . $val_info [1] . '_1'],
           );
           break;
-        case 2 :
+        case '2' :
           $return [$val_info [1]] = array (
             'value' => $v,
           );
+          break;
+        default:
+            $return [$val_info [1]] = current(module_invoke_all('dpistate_define_info_to_save', $val_info[2], $v));
           break;
       }
     }
@@ -201,7 +203,7 @@ function dpistate_get_settings_row_data($row, $values) {
       );
 			break;	
     default:
-        $options = current(module_invoke_all('dpistate_define_options_settings', $row, $values));
+        $options = current(module_invoke_all('dpistate_define_options_settings', $row, $values)) + array( "#tree" => TRUE );
       break;
 	}
 	

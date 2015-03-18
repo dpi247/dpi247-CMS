@@ -3,5 +3,6 @@ description = "Create customs universes"
 package = DPI
 core = 7.x
 dependencies[] = system
+dependencies[] = dpistate
 files[]= dpiunivers.module
 files[]= dpiunivers.install

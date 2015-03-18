@@ -129,16 +129,26 @@ function dpiunivers_dpistate_define_options_settings($row, $values){
           '#type' => 'select',
           '#title' => t ( 'Select the associated theme' ),
           '#options' => $lthemes,
-          '#default_value' => (isset ( $row ["value"] ['dpiunivers_theme'] )) ? $row ["value"] ['dpiunivers_theme'] : false,
+          '#default_value' => (isset ( $values ['dpiunivers_theme'] )) ? $values ['dpiunivers_theme'] : false,
         );
         $menus = menu_get_menus();
         $return_form_part['dpiunivers_menu'] = array (
           '#type' => 'select',
           '#title' => t ( 'Select the associated menu' ),
           '#options' => $menus,
-          '#default_value' => (isset ( $row ["value"] ['dpiunivers_menu'] )) ? $row ["value"] ['dpiunivers_menu'] : false,
+          '#default_value' => (isset ( $values ['dpiunivers_menu'] )) ? $values ['dpiunivers_menu'] : false,
         );
       break;
   }
   return array($return_form_part);     
+}
+
+function dpiunivers_dpistate_define_info_to_save($type, $values){
+  $return_values_saved = array();
+  switch($type){
+    case 'univers' :                
+        $return_values_saved = $values;
+      break;
+  }
+  return array($return_values_saved);
 }
