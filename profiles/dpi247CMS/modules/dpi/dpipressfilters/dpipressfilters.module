@@ -377,8 +377,22 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
     // Simple access
     $tag_form['#tagname'] = $tag->tag;
     $tag_tid = $tag->tid;
-
-    $settings_tag = empty($filter->settings[$tag_tid]) ? _dpipressfilters_settings_defaults() : $filter->settings[$tag_tid];
+    // Get settings for this tag :
+    if(empty($filter->settings[$tag_tid])){
+      // New tag.
+      // Try to get special default configuration in database
+      if(!empty($tag->settings)){
+        $settings_tag = $tag->settings;
+      }
+      else {
+        // No config in database, use very default config
+        $settings_tag = _dpipressfilters_settings_defaults();
+      }
+    }
+    else {
+      // Settings already set for this tag
+      $settings_tag = $filter->settings[$tag_tid];
+    }
 
     $tag_form['operation'] = array(
       '#type'          => 'select',
