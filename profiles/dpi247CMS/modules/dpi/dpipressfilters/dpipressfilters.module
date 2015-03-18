@@ -469,7 +469,16 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
 }
 
 /**
+ * Alter form filter settings, "form_filter_admin_format_form"
+ * Implements hook_form_FORM_ID_alter()
+ */
+function dpipressfilters_form_filter_admin_format_form_alter(&$form, &$form_state, $form_id){
+  $form['#validate'][] = 'dpipressfilters_form_filter_settings_form_validate';
+}
+
+/**
  * Alter the filter_admin_configure form to add own validate and submit
+ * @todo  DELETE USELESS FUNCTION ?
  */
 function dpipressfilters_form_filter_admin_configure_alter(&$form) {
   if (!isset($form['#validate'])) {
@@ -486,6 +495,7 @@ function dpipressfilters_form_filter_admin_configure_alter(&$form) {
  * Validation of the form dpipressfilters_form_filter_settings_form
  */
 function dpipressfilters_form_filter_settings_form_validate($form, &$form_state) {
+  return; //@TODO
   $values = $form_state['values'];
   $format_id = $values['format'];
 
