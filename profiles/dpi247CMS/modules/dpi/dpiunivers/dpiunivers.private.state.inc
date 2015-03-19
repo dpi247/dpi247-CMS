@@ -43,8 +43,14 @@ function dpiunivers_get_current_univer(){
   $univers = dpiunivers_api_get_all_universes();
   $return = "undefined";
   if(!empty($univers) && is_array($univers)){
-    $key = array_rand($univers);
-    $return = $univers[$key];
+    $default_value = variable_get('dpiunivers_default_univer', NULL);
+    if(isset($default_value)){      
+      $return = (array) dpiunivers_api_get_one_univers(intval($default_value));
+    }else{
+      $key = array_rand($univers);
+      $return = $univers[$key];
+    }
+    drupal_alter('dpiunivers_alter_current_univers', $return);
   }
   return $return;
 }
