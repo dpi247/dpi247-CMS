@@ -382,7 +382,7 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
       // New tag.
       // Try to get special default configuration in database
       if(!empty($tag->settings)){
-        $settings_tag = $tag->settings;
+        $settings_tag = array_merge(_dpipressfilters_settings_defaults(),$tag->settings);
       }
       else {
         // No config in database, use very default config
