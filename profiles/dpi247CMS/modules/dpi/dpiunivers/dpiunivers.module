@@ -88,3 +88,27 @@ function dpiunivers_permission() {
     ) 
   );
 }
+
+function dpiunivers_custom_theme(){
+  $univer = dpiunivers_get_current_univer();
+  if(isset($univer) && !empty($univer) && isset($univer["theme"])){
+    return $univer["theme"];
+  }
+}
+
+function dpiunivers_preprocess_page(& $variables){
+  $univer = dpiunivers_get_current_univer();
+  if(isset($univer) && !empty($univer) && isset($univer["menu"])){
+    $menu_links = menu_load_links($univer["menu"]);
+    $menus = array();
+    foreach($menu_links as $link){
+      $menus['menu-'.$link['mlid']] = $link["options"] + array(
+        'href' => $link["link_path"],
+        'title' => $link["link_title"],
+      );     
+    }
+    if(!empty($menus)){
+      $variables["main_menu"] = $menus;
+    }    
+  }
+}
