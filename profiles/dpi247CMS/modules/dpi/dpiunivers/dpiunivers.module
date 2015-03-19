@@ -15,12 +15,9 @@ function dpiunivers_menu() {
     'description' => 'Allow admin to create specific dpiunivers.',
     'position' => 'right',
     'weight' => - 5,
-    'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array (
       'administer dpiunivers' 
     ),
-    'file' => 'system.admin.inc',
-    'file_path' => drupal_get_path ( 'module', 'system' ) 
   );
   
   $items ['admin/config/dpiunivers/settings'] = array (
