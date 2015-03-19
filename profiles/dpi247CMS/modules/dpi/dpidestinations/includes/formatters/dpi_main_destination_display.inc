@@ -120,6 +120,13 @@ function dpidestinations_field_formatter_settings_form_dpi_main_destination_disp
 					'yes' => 'Yes',
 					'no' => 'No',
 			),
+	);
+
+	$element['element_html_link_custom_class'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Custom class(es) link'),
+			'#description' => t('The custom class assigned to the link'),
+			'#default_value' => $settings['element_html_link_custom_class'],
 	);	
 	
 }
@@ -162,6 +169,9 @@ function _dpi_main_destination_display_element_link_render($settings, $term, $va
 		$render['#value'] = $value;
 		$render['#tag'] = 'a';
 		$render['#attributes']['href'] = '/'.$term_link;
+		if (!empty($settings['element_html_link_custom_class'])) {
+			$render['#attributes']['class'] = $settings['element_html_link_custom_class'];
+		}
 		$render['#theme_wrappers'] = array(0 => 'dpi_render_wrapper');
 
 		return $render;
