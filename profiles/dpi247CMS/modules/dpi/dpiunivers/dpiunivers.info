@@ -6,3 +6,4 @@ dependencies[] = system
 dependencies[] = dpistate
 files[]= dpiunivers.module
 files[]= dpiunivers.install
+files[] = dpiunivers.entity.class.inc

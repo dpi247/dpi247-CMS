@@ -42,7 +42,7 @@ function dpiunivers_api_get_one_univers($id) {
       'menu',
       'id' 
     ) )->execute ();
-    while( $row = $query->fetchAssoc () ) {
+    while( $row = $query->fetchObject () ) {
       $return = $row;
     }
     return $return;
