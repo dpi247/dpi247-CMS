@@ -1,17 +1,21 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * This function define a new type of dpistate
+ * @return array
  */
-
 function dpistate_dpistate_get_options(){
   return array(
      'weekdays' => t('Days of the week')
   );
 }
 
+/**
+ * Return form elements for the type of dpistate
+ * @param array $type
+ * @param array $state
+ * @return array
+ */
 function dpistate_dpistate_get_form_element($type, $state){
   switch($type){
     case 'weekdays':
@@ -22,6 +26,12 @@ function dpistate_dpistate_get_form_element($type, $state){
   }  
 }
 
+/**
+ * This function return string present into the view table in dpistate menu
+ * @param array $type
+ * @param array $values
+ * @return array
+ */
 function dpistate_dpistate_get_value_table_view($type, $values){
   switch ($type) {
     case 'weekdays':
@@ -32,6 +42,12 @@ function dpistate_dpistate_get_value_table_view($type, $values){
   }
 }
 
+/**
+ * Return form for dpistate settings
+ * @param array $row
+ * @param array $values
+ * @return array
+ */
 function dpistate_dpistate_define_options_settings($row, $values){  
   switch($row["type"]){
     case 'weekdays' :    
@@ -57,6 +73,12 @@ function dpistate_dpistate_define_options_settings($row, $values){
   }  
 }
 
+/**
+ * Return value from the dpistate form to be saved
+ * @param String $type
+ * @param array $values
+ * @return array
+ */
 function dpistate_dpistate_define_info_to_save($type, $values){  
   switch($type){
     case 'weekdays' :                
@@ -65,6 +87,13 @@ function dpistate_dpistate_define_info_to_save($type, $values){
   }
 }
 
+/**
+ * This function return label, operation, options for the current dpistate (present when you add access rules)
+ * @param array $v
+ * @param array $general_value
+ * @param array $conf
+ * @return array
+ */
 function dpistate_dpistate_define_access_plugins_form($v, $general_value, $conf){
   switch($v["type"]){
     case "weekdays":
@@ -104,6 +133,13 @@ function dpistate_dpistate_define_access_plugins_form($v, $general_value, $conf)
   }
 }
 
+/**
+ * This function return the boolean access for the current element
+ * @param array $v
+ * @param array $general_value
+ * @param array $conf
+ * @return int
+ */
 function dpistate_dpistate_get_access_info($v, $general_value, $conf){  
   switch($v["type"]){
     case "weekdays":

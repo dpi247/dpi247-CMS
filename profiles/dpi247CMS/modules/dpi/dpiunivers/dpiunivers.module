@@ -4,7 +4,6 @@ module_load_include ( 'inc', 'dpiunivers', 'dpiunivers.private.state' );
 
 /**
  * Implementation of hook_menu
- *
  * @return multitype:array
  */
 function dpiunivers_menu() {
@@ -77,7 +76,6 @@ function dpiunivers_menu() {
 
 /**
  * Implementation of hook_permission
- *
  * @return multitype:array
  */
 function dpiunivers_permission() {
@@ -89,6 +87,10 @@ function dpiunivers_permission() {
   );
 }
 
+/**
+ * This function get the current univers and return the theme associated
+ * @return String
+ */
 function dpiunivers_custom_theme(){
   $univer = dpiunivers_get_current_univer();
   if(isset($univer) && !empty($univer) && isset($univer["theme"])){
@@ -96,6 +98,10 @@ function dpiunivers_custom_theme(){
   }
 }
 
+/**
+ * This function get the current univers and modify the menu to add the menu associate at this univers
+ * @param array $variables
+ */
 function dpiunivers_preprocess_page(& $variables){
   $univer = dpiunivers_get_current_univer();
   if(isset($univer) && !empty($univer) && isset($univer["menu"])){

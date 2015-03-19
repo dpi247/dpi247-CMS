@@ -1,16 +1,9 @@
 <?php
-
-/**
- * @author NMO
- */
-
 /**
  * This function is callback from menu for render page
- *
  * @return string
  */
 function dpiunivers_view_page() {
-
   $output = array ();
   $form = drupal_get_form ( 'dpiunivers_add_univers_form' );
   $output = drupal_render ( $form );
@@ -20,7 +13,6 @@ function dpiunivers_view_page() {
 
 /**
  * This function is use to create form
- *
  * @param array $form          
  * @param array $form_state          
  * @return multitype:array
@@ -65,6 +57,11 @@ function dpiunivers_add_univers_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * This function save element submitted
+ * @param array $form
+ * @param array $form_state
+ */
 function dpiunivers_add_univers_form_submit($form, & $form_state){
   if(isset($form_state["values"]["select"])){
     variable_set('dpiunivers_default_univer', $form_state["values"]["select"]);
@@ -76,7 +73,6 @@ function dpiunivers_add_univers_form_submit($form, & $form_state){
 
 /**
  * This function generate table for view informations
- *
  * @return render(table)
  */
 function dpiunivers_view_table() {
@@ -107,7 +103,6 @@ function dpiunivers_view_table() {
 
 /**
  * This function is use to generate header for table 
- * 
  * @return multiple:array
  */
 
@@ -124,13 +119,11 @@ function dpiunivers_generate_header() {
 
 /**
  * This function is use to generate rows for table
- * 
  * @param array $data_list
  */
 
 function dpiunivers_generate_rows($data_list = array()) {
-	$rows = array();
-	
+	$rows = array();	
 	if (sizeof($data_list)==0) { // record yet
 		$rows[]=array(
 			t('No record yet')
@@ -144,15 +137,13 @@ function dpiunivers_generate_rows($data_list = array()) {
 				dpiunivers_add_link_for_operation($data['id'])
 			); 
 		 }
-	}	
-	
+	}		
 	return $rows;
 }
 
 
 /**
  * This function is use to add operation link from table
- * 
  * @param integer $id
  * @return string
  */
@@ -160,8 +151,7 @@ function dpiunivers_generate_rows($data_list = array()) {
 function dpiunivers_add_link_for_operation($id) {
   $array_links = array(
   	l('Edit', 'admin/config/dpiunivers/settings/edit/' . $id ),
-	l('Delete', 'admin/config/dpiunivers/settings/delete/' . $id )
-  );
-  
+    l('Delete', 'admin/config/dpiunivers/settings/delete/' . $id )
+  );  
   return implode(' - ',$array_links);
 }

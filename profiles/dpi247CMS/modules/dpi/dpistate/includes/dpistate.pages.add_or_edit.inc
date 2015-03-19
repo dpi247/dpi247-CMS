@@ -181,9 +181,6 @@ function dpistate_add_form_validate($form, &$form_state) {
         $form_state ['values'] ['input'] = $value;
       break;
   }
-//  } else {
-//    form_set_error ( 'value_fieldset', t ( 'Please enter a value' ) );
-//  }
 }
 
 /**
@@ -193,7 +190,6 @@ function dpistate_add_form_validate($form, &$form_state) {
  * @param array $form_state          
  */
 function dpistate_add_form_submit($form, $form_state) {
-  dsm($form_state);
   if (isset ( $form_state ['values'] ['store'] )) {
     if (dpistate_api_update_state_by_id ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );

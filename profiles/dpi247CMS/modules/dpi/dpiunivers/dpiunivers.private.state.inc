@@ -1,11 +1,9 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Define default dpistate settings
+ * @return array
  */
-
 function dpiunivers_default_dpistate(){
   return array(
     'dpiunivers' => array(
@@ -18,6 +16,12 @@ function dpiunivers_default_dpistate(){
   );
 }
 
+/**
+ * This function define element into the table settings
+ * @param array $row
+ * @param array $values
+ * @return array|form
+ */
 function dpiunivers_dpistate_define_options_settings($row, $values){   
   switch($row["type"]){
     case 'callback' :           
@@ -31,6 +35,12 @@ function dpiunivers_dpistate_define_options_settings($row, $values){
   }     
 }
 
+/**
+ * This function return the value that we need to save
+ * @param array $type
+ * @param array $values
+ * @return array
+ */
 function dpiunivers_dpistate_define_info_to_save($type, $values){
   switch($type){
     case 'callback' :                
@@ -39,6 +49,10 @@ function dpiunivers_dpistate_define_info_to_save($type, $values){
   }
 }
 
+/**
+ * This function return the univers value from condition
+ * @return array
+ */
 function dpiunivers_get_current_univer(){
   $univers = dpiunivers_api_get_all_universes();
   $return = "undefined";

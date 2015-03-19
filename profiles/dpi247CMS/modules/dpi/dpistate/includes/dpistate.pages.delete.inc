@@ -19,7 +19,7 @@ function dpistate_delete($id = NULL) {
  * We add a simple verification
  *
  * @param array $form          
- * @param array $form_state          
+ * @param array $form_state
  * @param integer $id          
  * @return multitype:string The
  */
@@ -51,8 +51,8 @@ function dpistate_delete_form($form, &$form_state, $id) {
 /**
  * This function is use to create form submition
  *
- * @param unknown $form          
- * @param unknown $form_state          
+ * @param array $form          
+ * @param array $form_state          
  */
 function dpistate_delete_form_submit($form, $form_state) {
   if ($form_state ['values'] ['op'] == 'Submit') {
