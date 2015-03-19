@@ -22,8 +22,9 @@ function dpiunivers_dpistate_define_options_settings($row, $values){
   switch($row["type"]){
     case 'callback' :           
         $return_form_part = array();
+        $val = dpiunivers_get_current_univer();
         $return_form_part['info'] = array (
-          '#markup' => 'current univer is ' .  dpiunivers_get_current_univer(),          
+          '#markup' => 'current univer is ' . $val['label'] ,          
         );
         return array($return_form_part);  
       break;
@@ -39,5 +40,11 @@ function dpiunivers_dpistate_define_info_to_save($type, $values){
 }
 
 function dpiunivers_get_current_univer(){
-  return "undifined";
+  $univers = dpiunivers_api_get_all_universes();
+  $return = "undefined";
+  if(!empty($univers) && is_array($univers)){
+    $key = array_rand($univers);
+    $return = $univers[$key];
+  }
+  return $return;
 }
