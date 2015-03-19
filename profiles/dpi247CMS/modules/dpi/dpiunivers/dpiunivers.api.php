@@ -112,3 +112,20 @@ function dpiunivers_api_delete_univers_by_id($id) {
     return FALSE;
   }
 }
+
+/**
+ * get informations just for univers from dpistate database
+ */
+function dpiunivers_api_get_univers(){
+  module_load_include('php', 'dpistate', 'dpistate.api');
+  $all_states = dpistate_api_get_all_states();
+  $all_values = variable_get("dpistate_value_at_moment", array());
+  $univers = array();
+  foreach($all_states as $state){
+    if($state['type'] == 'univers'){
+      $state["value"] = (isset($all_values[$state["id"]]))? $all_values[$state["id"]] : NULL;
+      $univers[] = $state;
+    }
+  }
+  return $univers;
+}

@@ -137,7 +137,7 @@ function dpistate_status_ctools_access_check($conf, $state = NULL) {
   if(isset($tmp_data_list)){
     $tmp_data_list = current($tmp_data_list);
     switch ($tmp_data_list["type"]){
-      case 0:
+      case '0':
           //test numeric
           if (($var = dpistate_get_access_for_numeric_type ( $general_value, $id, $conf )) == - 1) {
             return FALSE;
@@ -146,7 +146,7 @@ function dpistate_status_ctools_access_check($conf, $state = NULL) {
           }
           break;
         break;
-      case 1:
+      case '1':
           //test text
           if (($var = dpistate_get_access_for_text_type ( $general_value, $conf, $id )) == - 1) {
             return FALSE;
@@ -154,7 +154,7 @@ function dpistate_status_ctools_access_check($conf, $state = NULL) {
             $access = TRUE;
           }
         break;
-      case 2:
+      case '2':
           //test date
           if(($var = dpistate_get_access_for_date_type($general_value, $conf, $id)) == -1){
             return FALSE;
@@ -163,7 +163,7 @@ function dpistate_status_ctools_access_check($conf, $state = NULL) {
           }
         break;
       default:
-          //log error 
+          $access = current(module_invoke_all('dpistate_get_access_info',$tmp_data_list, $general_value[$id], $conf));
         break;
     }        
   }
@@ -281,7 +281,7 @@ function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
   $return = NULL;
   $general_value = variable_get ( 'dpistate_value_at_moment', NULL );
   switch ($v ['type']) {
-    case 0 :
+    case '0' :
       drupal_add_css(drupal_get_path("module", "dpistate")."/css/dpistate_settings_form.css");      
       $return = array (
         'label_' . $v ['id'] . '_0' => array (
@@ -296,7 +296,7 @@ function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
           ),
           '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_0'] )) ? $conf ['operation_' . $v ['id'] . '_0'] : '=',
           '#attributes' => array(
-            'class' => array('inline-dpistate'), // change to just 'text' for Drupal 6
+            'class' => array('inline-dpistate'),
           ),
         ), 
         'options_' . $v ['id'] . '_0' => array (
@@ -304,13 +304,13 @@ function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
           '#options' => range ( 0, $v ['value'] ),
           '#default_value' => (isset ( $conf ['options_' . $v ['id'] . '_0'] )) ? $conf ['options_' . $v ['id'] . '_0'] : 0,
           '#attributes' => array(
-            'class' => array('aa-dpistate'), // change to just 'text' for Drupal 6
+            'class' => array('aa-dpistate'), 
           ),
         ),
         
       );
       break;
-    case 1 :
+    case '1' :
       $return = array (
         'label_' . $v ['id'] . '_1' => array (
           '#markup' => $v ['label']. " : Actual value is '". ((isset($general_value[$v["id"]]["value"]))? $general_value[$v["id"]]["value"] : "undifined" )."'",
@@ -323,7 +323,7 @@ function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
         ),
       );
       break;
-    case 2 :
+    case '2' :
       $return = array (
         'options_' . $v ['id'] . '_2' => array (
           '#markup' => t ( '@label : Actual values is for start date @start and for end date @end', array (
@@ -342,6 +342,9 @@ function dpistate_get_form_element_by_type($v, $conf, $name, $data) {
           '#default_value' => (isset ( $conf ['operation_' . $v ['id'] . '_2'] )) ? $conf ['operation_' . $v ['id'] . '_2'] : 'inside' 
         ) 
       );
+      break;
+    default:
+        $return = module_invoke_all('dpistate_define_access_plugins_form', $v, $general_value, $conf);
       break;
   }
   return $return;

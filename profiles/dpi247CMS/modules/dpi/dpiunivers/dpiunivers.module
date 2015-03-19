@@ -98,9 +98,13 @@ function dpiunivers_dpistate_get_options(){
 }
 
 function dpiunivers_dpistate_get_form_element($type, $state){
-  return array(
-    '#markup' => t('Element is defined into the settings element'),
-  );
+  switch($type){
+    case 'univers':
+        return array(
+          '#markup' => t('Element is defined into the settings element'),
+        );
+      break;
+  }
 }
 
 function dpiunivers_dpistate_get_value_table_view($type, $values){
@@ -110,16 +114,14 @@ function dpiunivers_dpistate_get_value_table_view($type, $values){
           '@theme' => (isset($values['dpiunivers_theme'])? $values['dpiunivers_theme'] : "undefined"),
           '@menu' => (isset($values['dpiunivers_menu'])? $values['dpiunivers_menu'] : "undefined"),
         ));
-      break;
-    default:
-      break;
+      break;    
   }
 }
 
-function dpiunivers_dpistate_define_options_settings($row, $values){
-  $return_form_part = array();
+function dpiunivers_dpistate_define_options_settings($row, $values){   
   switch($row["type"]){
-    case 'univers' :                
+    case 'univers' :           
+        $return_form_part = array();
         $themes = list_themes();
         $lthemes = array();
         foreach ($themes as $theme) {
@@ -138,17 +140,42 @@ function dpiunivers_dpistate_define_options_settings($row, $values){
           '#options' => $menus,
           '#default_value' => (isset ( $values ['dpiunivers_menu'] )) ? $values ['dpiunivers_menu'] : false,
         );
+        return array($return_form_part);  
       break;
-  }
-  return array($return_form_part);     
+  }     
 }
 
 function dpiunivers_dpistate_define_info_to_save($type, $values){
-  $return_values_saved = array();
   switch($type){
     case 'univers' :                
-        $return_values_saved = $values;
+        return array($values);
       break;
   }
-  return array($return_values_saved);
+}
+
+function dpiunivers_custom_theme(){
+//  $menu_item=menu_get_item();  
+//  $path=$menu_item['path'];
+//  $univers = dpiunivers_api_get_univers();
+//  //dsm($menu_item, 'menu');
+//  //dsm($univers, 'univers');
+//  if(is_array($univers)){
+//    foreach($univers as $univer){
+//      $sql = "
+//      SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
+//      FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
+//      WHERE ml.menu_name = :menu
+//      ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
+//      $result = db_query($sql, array(':menu' => $product_element['product_type']), array('fetch' => PDO::FETCH_ASSOC));
+//      $links = array();
+//
+//      foreach ($result as $item) {
+//        $links[] = $item;
+//      }
+//
+//      $tree = menu_tree_data($links);
+//    }
+//    
+//  }
+  
 }

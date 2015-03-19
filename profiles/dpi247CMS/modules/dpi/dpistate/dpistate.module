@@ -3,6 +3,7 @@
  * @author GVD - LBA
  */
 module_load_include ( 'php', 'dpistate', 'dpistate.api' );
+module_load_include ( 'inc', 'dpistate', 'dpistate.private' );
 
 define('VARIABLE_NAME', 'dpistate_value_at_moment');
 
