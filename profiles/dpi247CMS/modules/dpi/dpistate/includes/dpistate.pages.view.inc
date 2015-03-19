@@ -10,7 +10,6 @@
  * @return string
  */
 function dpistate_view_page() {
-
   $output = array ();
   $form = drupal_get_form ( 'dpistate_add_state_form' );
   $output = drupal_render ( $form );

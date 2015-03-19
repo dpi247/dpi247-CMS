@@ -15,10 +15,14 @@
  */
 function dpistate_settings_form($form, &$form_state) {
   $form = array ();
+  
+  $default_value = module_invoke_all('default_dpistate');
+  
   $data_list = dpistate_api_get_all_states();
+  $data_list = array_merge($default_value, $data_list);
   $val_recorded = variable_get(VARIABLE_NAME, array());
   $rows =  array();  
-  
+
   foreach ( $data_list as $k => $v ) {
     if (is_array ( $v ['value'] ) && $v ['type'] == 2) {
       dpistate_api_change_date_format ( $data_list, $v, $k );
@@ -203,7 +207,8 @@ function dpistate_get_settings_row_data($row, $values) {
       );
 			break;	
     default:
-        $options = current(module_invoke_all('dpistate_define_options_settings', $row, $values)) + array( "#tree" => TRUE );
+        $val = module_invoke_all('dpistate_define_options_settings', $row, $values);
+        $options = current($val) + array( "#tree" => TRUE );
       break;
 	}
 	
