@@ -28,6 +28,7 @@ function dpidestinations_field_formatter_info() {
 				'element_html_tag_bootstrap_class' => '- None -',
 				'element_html_tag_custom_class' => '',
 				'element_html_link' => 'no',
+				'element_html_link_custom_class' => '',
 			),				
 		),	
 		'dpi_destinations_display' => array(
