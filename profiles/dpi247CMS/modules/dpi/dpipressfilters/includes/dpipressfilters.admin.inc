@@ -189,7 +189,7 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
   $result = drupal_write_record('dpipressfilters', $form_state['values']['dpipressfilters'], $form_state['values']['update']);
   $message = '';
   if ($result) {
-    $message = t('The filter as been created/updated');
+    $message = "The press filter as been created/updated. Don't forget ".l("to configure tags behaviour for all text formats", 'admin/config/content/formats').".";
     
     foreach ($form_state['values']['dpipresstags'] as $tag){
       // Save tags
@@ -226,7 +226,7 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
   } else {
     $message = t('The filter as not been created/udpated');
   }
-  drupal_set_message(t($message));
+  drupal_set_message($message);
   drupal_goto('admin/config/content/dpipressfilters/settings/general');
 }
 
