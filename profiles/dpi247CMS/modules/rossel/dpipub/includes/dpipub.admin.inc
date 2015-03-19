@@ -7,48 +7,48 @@
 function pub_page_admin_form($form_state) {
   $form = array();
 
-  $form['pub_website'] = array(
+  $form['pubadtech_website'] = array(
     '#type' => 'textfield',
     '#title' => t('Website name'),
     '#description' => t('The website name used to the ads requests.'),
-    '#default_value' => variable_get('pub_website', ''),
+    '#default_value' => variable_get('pubadtech_website', ''),
     '#size' => 80,
     '#maxlength' => 512,
     '#required' => TRUE,
   );
   
-  $form['pub_provider'] = array(
+  $form['pubadtech_provider'] = array(
     '#type' => 'textfield',
     '#title' => t('Ads provider'),
     '#description' => t('The ads provider (Examples : AdTech, AOS).'),
-    '#default_value' => variable_get('pub_provider', 'AdTech'),
+    '#default_value' => variable_get('pubadtech_provider', 'AdTech'),
     '#size' => 80,
     '#maxlength' => 512,
     '#required' => TRUE,
   );
   
-  $form['pub_get_xml'] = array(
+  $form['pubadtech_get_xml'] = array(
     '#type' => 'textfield',
     '#title' => t('URL used for getting blocks informations'),
-    '#default_value' => variable_get('pub_get_xml', 'http://gps1.intranet.rossel/private/script/ZZsqls.cgi?key=dumpTagsAdtech&format=xml'),
+    '#default_value' => variable_get('pubadtech_get_xml', 'http://gps1.intranet.rossel/private/script/ZZsqls.cgi?key=dumpTagsAdtech&format=xml'),
     '#size' => 80,
     '#maxlength' => 512,
     '#required' => TRUE,
   );
   
-  $form['pub_webserv'] = array(
+  $form['pubadtech_webserv'] = array(
     '#type' => 'textfield',
     '#title' => t('URL of the webservice returning the ads'),
-    '#default_value' => variable_get('pub_webserv', 'http://172.21.132.180:8080/Wally-Tags/rest/wally/script/detail'),
+    '#default_value' => variable_get('pubadtech_webserv', 'http://172.21.132.180:8080/Wally-Tags/rest/wally/script/detail'),
     '#size' => 80,
     '#maxlength' => 512,
     '#required' => TRUE,
   );
   
-  $form['pub_header'] = array(
+  $form['pubadtech_header'] = array(
     '#type' => 'textfield',
     '#title' => t('URL of the webservice returning the header javascript content'),
-    '#default_value' => variable_get('pub_header', ''),
+    '#default_value' => variable_get('pubadtech_header', ''),
     '#size' => 80,
     '#maxlength' => 512,
   );
