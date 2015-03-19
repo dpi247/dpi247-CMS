@@ -394,6 +394,11 @@ function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter,
       $settings_tag = $filter->settings[$tag_tid];
     }
 
+    $tag_form['tagname'] = array(
+      '#type'          => 'value',
+      '#value'         => $tag->tag,
+    );
+
     $tag_form['operation'] = array(
       '#type'          => 'select',
       '#title'         => t('Operation'),
@@ -607,29 +612,26 @@ function dpipressfilters_form_filter_settings_form_submit($form, &$form_state) {
  * @return
  * The text replaced with the tags
  */
-function dpipressfilters_filter_process($fid, $text, $format) {
+function dpipressfilters_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   module_load_include('inc', 'dpipressfilters', 'includes/dpipressfilters.filters');
-  
-  $filter = dpipressfilters_getfilterbyid($fid);
-  $tags = dpipressfilters_gettagsfromfilterandformat($filter->name, $format);
 
-  foreach ($tags as $tag) {
-    $settings = $tag->settings;
-    switch ($settings['operation']) {
+  $tags_config = $filter->settings;
+  foreach ($tags_config as $tag_id => $tag_settings) {
+    switch ($tag_settings['operation']) {
       case 'replace':
-        $text = dpipressfilters_replace_tags($tag->tag, $settings, $text);
-        break;
-
-      case 'strip':
-        $text = dpipressfilters_strip_tags($tag->tag, $settings, $text);
+        $text = dpipressfilters_replace_tags($tag_settings['tagname'], $tag_settings, $text);
         break;
 
       case 'skip':
-        $text = dpipressfilters_skip_tags($tag->tag, $settings, $text);
+        $text = dpipressfilters_skip_tags($tag_settings['tagname'], $tag_settings, $text);
+        break;
+
+      case 'strip':
+      default:
+        $text = dpipressfilters_strip_tags($tag_settings['tagname'], $tag_settings, $text);
         break;
     }
   }
-
   return $text;
 }
 
