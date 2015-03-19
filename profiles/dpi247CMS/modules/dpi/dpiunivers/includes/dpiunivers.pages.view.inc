@@ -37,7 +37,41 @@ function dpiunivers_add_univers_form($form, &$form_state) {
     '#href' => 'admin/config/dpiunivers/settings/add' 
   );
   
+  $form ['default'] = array (
+    '#title' => t ( 'Choose a default value for dpiunivers' ),
+    '#type' => 'fieldset' 
+  );
+  
+  $univers = dpiunivers_api_get_all_universes();
+  $labels = array();
+  if(isset($univers)){
+    foreach($univers as $univer){
+      $labels[$univer["id"]] = $univer["label"];
+    }
+  }
+  
+  $form ['default'] ['select'] = array (
+    '#type' => 'select',
+    '#title' => t ( 'Select univers' ),
+    "#options" => $labels,
+    "#default_value" => variable_get("dpiunivers_default_univer", NULL),
+  );
+  
+  $form ['default'] ["submit"] = array(    
+    "#type" => "submit",
+    "#value" => t('Submit'),
+  );
+  
   return $form;
+}
+
+function dpiunivers_add_univers_form_submit($form, & $form_state){
+  if(isset($form_state["values"]["select"])){
+    variable_set('dpiunivers_default_univer', $form_state["values"]["select"]);
+    drupal_set_message("Settings saved");
+  }else{
+    drupal_set_message("No settings specified");
+  }  
 }
 
 /**
