@@ -233,7 +233,7 @@ function dpipressfilters_form_addfilter_form_submit($form, &$form_state){
 /**
  * Form to delete a filter
  */
-function dpipressfilters_form_deletefilter_form($form, $form_state, $fid){
+function dpipressfilters_form_deletefilter_form($form, &$form_state, $fid){
   $filter = dpipressfilters_getfilterbyid($fid);
   $question = t('Are you sure you want to delete "@filter_name" filter?', array('@filter_name' => $filter->name));
   
@@ -253,13 +253,15 @@ function dpipressfilters_form_deletefilter_form($form, $form_state, $fid){
  */
 function dpipressfilters_form_deletefilter_form_submit($form, &$form_state){
   $filter = dpipressfilters_getfilterbyid($form_state['values']['fid']);
+  $tags = dpipressfilters_getalltagsfromfilter($filter->name);
   $result = db_delete('dpipressfilters')->condition('fid',$filter->fid)->execute();
   $result2 = db_delete('dpipressfilters_tags')->condition('filter',$filter->name)->execute();
   $result3 = db_delete('filter')->condition('module','dpipressfilters')->condition('name',$filter->name)->execute();
   cache_clear_all('filter_list_format','cache');
-  if ($result && $result2 && $result3){
+  if ($result && empty($tags) || $result && $result2 && $result3){
     drupal_set_message(t('The filter as correctly been deleted'));
   } else {
     drupal_set_message(t('The filter couldn\'t be correctly deleted'),'warning');
   }
+  drupal_goto('admin/config/content/dpipressfilters/settings');
 }
