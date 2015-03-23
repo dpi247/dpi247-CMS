@@ -13,9 +13,10 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
   );
 
   $active = array(
-    0 => t('Redéfinir le virtual rank de toutes les destinations'), 
-    1 => t('Redéfinir le virtual rank d\'une destination'),
-    2 => t('Redéfinir un virtual rank pour les valeurs null'),
+    0 => t('None'),
+    1 => t('Redéfinir le virtual rank de toutes les destinations'), 
+    2 => t('Redéfinir le virtual rank d\'une destination'),
+    3 => t('Redéfinir un virtual rank pour les valeurs null'),
   );
 
   $form['select'] = array(
@@ -30,7 +31,7 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     "#markup" => t('Modifie le virtual rank identique pour une même destination afin d\'éviter la saturation'),
     '#states' => array(
       'visible' => array(
-        ':input[name="select"]' => array('value' => 0),
+        ':input[name="select"]' => array('value' => 1),
       ),
     ),
   );
@@ -41,7 +42,7 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     "#tree" => TRUE,
     '#states' => array(
       'visible' => array(
-        ':input[name="select"]' => array('value' => 1),
+        ':input[name="select"]' => array('value' => 2),
       ),
     ),
   );
@@ -53,12 +54,12 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     '#options' => dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE),
     '#ajax' => array(
       'callback' => 'dpiblocks_ajax_callback_target_from_entity',
-      'wrapper' => 'form_target',
+      'wrapper' => 'destination-add-form',
       'method' => 'replace'
     ),
     '#states' => array(
       'visible' => array(
-        ':input[name="select"]' => array('value' => 1),
+        ':input[name="select"]' => array('value' => 2),
       ),
     ),
     '#default_value' => (isset($form_state ['values']['destination'] ['destination_section'])) ? $form_state ['values']['destination'] ['destination_section'] : ''
@@ -79,7 +80,7 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     '#default_value' => (isset($form_state ['values']['destination'] ['destination_target'])) ? $form_state ['values'] ['destination'] ['destination_target'] : '',
     '#states' => array(
       'visible' => array(
-        ':input[name="select"]' => array('value' => 1),
+        ':input[name="select"]' => array('value' => 2),
       ),
     ),
   );
@@ -89,24 +90,28 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     "#markup" => t('Set la valeur 0 dans chacun des éléments aillant null comme virtual rank'),
     '#states' => array(
       'visible' => array(
-        ':input[name="select"]' => array('value' => 2),
+        ':input[name="select"]' => array('value' => 3),
       ),
     ),
   );
   
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Execute'));
+  //$form['submit'] = array('#type' => 'submit', '#value' => t('Execute'));
 
   return $form;
 }
 
 function dpiblocks_ajax_callback_target_from_entity($form, &$form_state) {
-  return $form;
+  dsm($form);
+  return $form["destination"];
 }
 
 function dpidestinations_reform_virtual_rank_submit($form, &$form_state){  
   try {
     switch($form_state['values']['select']){
       case 0:
+          //nothing to do
+        break;
+      case 1:
           /* all targetblock */
           $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
           if(is_array($tids)){      
@@ -124,12 +129,12 @@ function dpidestinations_reform_virtual_rank_submit($form, &$form_state){
           }
           drupal_set_message('Updating with success');
         break;
-      case 1:
+      case 2:
           /* One targetblock */
           dpidestinations_update_virtual_rank_for_saturation($form_state['values']['destination']['destination_section'],$form_state['values']['destination']['destination_target']);
           drupal_set_message('Updating with success');
         break;
-      case 2:
+      case 3:
           /* set 0 to null value */
           $return_msg = dpidestinations_change_null_virtual_rank_value(0);
           drupal_set_message($return_msg);

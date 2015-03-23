@@ -104,18 +104,18 @@ function dpidestinations_menu() {
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
   
-  $items['admin/dpi247/dpidestinations/reorder_virtual_rank'] = array(
-    'title' => t('Manage virtual rank'),
-    'description' => 'Reset virtual rank informations.',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 12,
-    'access arguments' => array('administer targets'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpidestinations_reform_virtual_rank'),
-    'file' => 'dpidestinations.virtual_rank.reorder.inc',
-    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
-  );
-  
+//  $items['admin/dpi247/dpidestinations/reorder_virtual_rank'] = array(
+//    'title' => t('Manage virtual rank'),
+//    'description' => 'Reset virtual rank informations.',
+//    'type' => MENU_LOCAL_TASK,
+//    'weight' => 12,
+//    'access arguments' => array('administer targets'),
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('dpidestinations_reform_virtual_rank'),
+//    'file' => 'dpidestinations.virtual_rank.reorder.inc',
+//    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+//  );
+//  
   $items['admin/content/reorder_targetblock'] = array(
     'title' => t('Reorder'),
     'description' => 'Reorder targetblock rank.',
