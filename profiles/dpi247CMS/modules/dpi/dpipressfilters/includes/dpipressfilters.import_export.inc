@@ -71,6 +71,65 @@ function dpipressfilters_form_config_import_export_form_import_submit($form, $fo
   }
 }
 
+/**
+ * Get current settings for all formats which have
+ * this filter enabled.
+ * @param  {String} $filter Name of the filter.
+ * @return {Array}          Keys are formats names.
+ *                          Values are settings.
+ */
+function dpipressfilters_get_formats_config($filter){
+  $all_configs = array();
+  // list all all available format
+  $available_formats = array_keys(filter_formats());
+  foreach($available_formats as $format){
+    // extract current settings for all formats where filter is enabled.
+    $format_info = filter_list_format($format);
+    if(empty($format_info[$filter]))
+      continue;
+    $filter_settings = $format_info[$filter];
+    if(!isset($filter_settings->status) || !$filter_settings->status)
+      continue;
+    $all_configs[$format] = $filter_settings->settings;
+  }
+  return $all_configs;
+}
+
+
+/**
+ * Set new settings for an input format.
+ * @param  {String} $filter    Name of the filter.
+ * @param  {String} $format    Name of the text/input format.
+ * @param  {Array}  $settings  Settings for this filter.
+ * @return {Boolean}           Success or failure.
+ */
+function dpipressfilters_set_format_config($filter, $format, $settings){
+  if(!is_array($settings) || empty($settings))
+    return FALSE;
+  $available_formats = array_keys(filter_formats());
+  if(!in_array($format, $available_formats))
+    return FALSE;
+  // Retrieve current info
+  $current_format = filter_list_format($format);
+  $current_filter_format = empty($current_format[$filter]) ? FALSE : $current_format[$filter];
+
+  // Insert or update value
+  $r = db_merge('filter')
+      ->key(array('format' => $format, 'name' => $filter))
+      ->fields(array(
+          "format" => $format,
+          "module" => 'dpipressfilters',
+          "name" => $filter,
+          "weight" => ($current_filter_format ? $current_filter_format->weight : 0),
+          "status" => 1,
+          "settings" => serialize($settings)
+      ))
+      ->execute();
+  return !!$r;
+}
+
+
+
 function dpipressfilters_config_export($fid) {
   $filter = dpipressfilters_getfilterbyid($fid);
   $tags = dpipressfilters_getalltagsfromfilter($filter->name);
@@ -87,6 +146,7 @@ function _dpipressfilters_import_export_generate_dom($filter, $tags) {
   $dom_name = $dom_filter->appendChild($dom->createElement('Name', $filter->name));
   $dom_description = $dom_filter->appendChild($dom->createElement('Description', $filter->description));
   $dom_tags = $dom_filter->appendChild($dom->createElement('Tags'));
+  $formats_settings = dpipressfilters_get_formats_config($filter->name);
 
   foreach ($tags as $tag) {
     $dom_tag = $dom_tags->appendChild($dom->createElement('Tag'));
@@ -100,6 +160,10 @@ function _dpipressfilters_import_export_generate_dom($filter, $tags) {
     $dom_settings->appendChild($settings);*/
     $dom_tag->appendChild($dom->createElement('Settings', serialize($tag->settings)));
   }
+  $fsettings = $dom->createCDATASection(serialize($formats_settings));
+  $dom_fsettings = $dom->createElement('FormatsSettings');
+  $dom_fsettings->appendChild($fsettings);
+  $dom_filter->appendChild($dom_fsettings);
   
   return $dom;
 }
@@ -115,10 +179,12 @@ function _dpipressfilters_import_export_import_from_dom($dom) {
     drupal_write_record('dpipressfilters', $filter, array('fid'));
     db_delete('dpipressfilters_tags')
       ->condition('filter',$filter->name)
-      ->execeute();
+      ->execute();
   } else {
     drupal_write_record('dpipressfilters', $filter);
   }
+
+  $mapping_tids = array();
 
   $dom_tags = $dom->getElementsByTagName('Tags');
   if ($dom_tags->item(0)) {
@@ -134,7 +200,33 @@ function _dpipressfilters_import_export_import_from_dom($dom) {
         $new_tag->description = $tag->getElementsByTagName('TagDescription')->item(0)->nodeValue;
         $new_tag->settings = unserialize($tag->getElementsByTagName('Settings')->item(0)->nodeValue);
         drupal_write_record('dpipressfilters_tags', $new_tag);
+        $mapping_tids[$new_tag->tag] = $new_tag->tid;
       }
     }
   }
+  unset($dom_tags);
+
+  $dom_fsettings = $dom->getElementsByTagName('FormatsSettings');
+  if ($dom_fsettings->item(0)) {
+    $fsettings_serialiazed = $dom_fsettings->item(0)->nodeValue;
+    unset($dom_fsettings);
+    $fsettings = unserialize($fsettings_serialiazed);
+    if(!$fsettings){
+      drupal_set_message("Settings for text formats can't be imported. You must ".l("configure tags behaviour for all text formats", 'admin/config/content/formats').".",'warning');
+      return;
+    }
+    foreach($fsettings as $input_format => $settings){
+      // Convert old tag ID to new tag ID
+      $new_settings = array();
+      foreach($settings as $old_tid => $conf){
+        $new_tid = $mapping_tids[$conf['tagname']];
+        $new_settings[$new_tid] = $conf;
+      }
+      // Save settings
+      dpipressfilters_set_format_config($filter->name, $input_format, $new_settings);
+    }
+  }
+
+  // Clear cache
+  cache_clear_all('filter_list_format','cache');
 }
