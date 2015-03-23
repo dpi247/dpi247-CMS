@@ -30,22 +30,6 @@ function dpidestinations_field_formatter_info() {
 				'element_html_link' => 'no',
 				'element_html_link_custom_class' => '',
 			),				
-		),	
-		'dpi_destinations_display' => array(
-			'label' => t('DPI All destinations terms'),
-			'field types' => array('destination'),
-			'settings'  => array(
-				'wrapper_html_tag' => '- None -',
-				'wrapper_html_tag_bootstrap_class' => '- None -',
-				'wrapper_html_tag_custom_class' => '',
-				'element_html_tag' => '- None -',
-				'element_html_tag_bootstrap_class' => '- None -',
-				'element_html_tag_custom_class' => '',
-				'element_html_link' => 'no',
-				'element_prefixe' => '',
-				'element_suffixe' => '',
-				'separator_option' => '',
-			),				
 		),
 		'dpi_taxonomy_content' => array(
 			'label' => t('DPI Taxonomy content'),
@@ -80,10 +64,6 @@ function dpidestinations_field_formatter_settings_form($field, $instance, $view_
 		case 'dpi_main_destination_display':
 			module_load_include('inc','dpidestinations','includes/formatters/dpi_main_destination_display');
 			dpidestinations_field_formatter_settings_form_dpi_main_destination_display($field, $instance, $view_mode, $form, $form_state, $element);
-			break;	
-		case 'dpi_destinations_display':
-			module_load_include('inc','dpidestinations','includes/formatters/dpi_destinations_display');
-			dpidestinations_field_formatter_settings_form_dpi_destinations_display($field, $instance, $view_mode, $form, $form_state, $element);
 			break;
 		case 'dpi_taxonomy_content':
 			module_load_include('inc','dpidestinations','includes/formatters/dpi_taxonomy_content');
@@ -123,10 +103,6 @@ function dpidestinations_field_formatter_view($entity_type, $entity, $field, $in
 		module_load_include('inc','dpidestinations','includes/formatters/dpi_main_destination_display');
 		dpidestinations_field_formatter_view_dpi_main_destination_display($entity_type, $entity, $field, $instance, $langcode, $items, $display, $element);
 		break;
-	case 'dpi_destinations_display':
-		module_load_include('inc','dpidestinations','includes/formatters/dpi_destinations_display');
-		dpidestinations_field_formatter_view_dpi_destinations_display($entity_type, $entity, $field, $instance, $langcode, $items, $display, $element);
-		break;
 	case 'dpi_taxonomy_content':
 		module_load_include('inc','dpidestinations','includes/formatters/dpi_taxonomy_content');
 		dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type, $entity, $field, $instance, $langcode, $items, $display, $element);
@@ -147,10 +123,6 @@ function dpidestinations_field_formatter_settings_summary($field, $instance, $vi
 		case 'dpi_main_destination_display':
 			module_load_include('inc','dpidestinations','includes/formatters/dpi_main_destination_display');
 			dpidestinations_field_formatter_settings_summary_dpi_main_destination_display($field, $instance, $view_mode, $summary);
-			break;	
-		case 'dpi_destinations_display':
-			module_load_include('inc','dpidestinations','includes/formatters/dpi_destinations_display');
-			dpidestinations_field_formatter_settings_summary_dpi_destinations_display($field, $instance, $view_mode, $summary);
 			break;
 		case 'dpi_taxonomy_content':
 			module_load_include('inc','dpidestinations','includes/formatters/dpi_taxonomy_content');
