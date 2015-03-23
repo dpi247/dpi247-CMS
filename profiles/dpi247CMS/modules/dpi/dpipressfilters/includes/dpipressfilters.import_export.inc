@@ -25,7 +25,7 @@ function dpipressfilters_form_config_import_export_form($form_state) {
   
   $form['export']['submit'] = array(
     '#type' => 'markup',
-    '#value' => '<input type="button" id="export-submit" value="'.t('Export').'"  class="form-submit" />',
+    '#markup' => '<input type="button" id="export-submit" value="'.t('Export').'"  class="form-submit" />',
   );
   
   $form['export']['export_area'] = array(
