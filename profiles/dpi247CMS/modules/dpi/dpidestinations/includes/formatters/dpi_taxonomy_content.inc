@@ -50,9 +50,17 @@ function dpidestinations_field_formatter_settings_form_dpi_taxonomy_content($fie
 			'#default_value' => $settings['element_html_tag'],
 			'#options' => array(
 					'- None -' => '- None -',
+					'h1' => 'h1',
+					'h2' => 'h2',
+					'h3' => 'h3',
+					'h4' => 'h4',
+					'h5' => 'h5',
+					'blockquote' => 'blockquote',
 					'span' => 'span',
 					'div' => 'div',
 					'p' => 'p',
+					'small' => 'small',
+					'strong' => 'strong',
 			),
 	);
 	
