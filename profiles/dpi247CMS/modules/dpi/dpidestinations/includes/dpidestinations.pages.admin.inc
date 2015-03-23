@@ -520,17 +520,6 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#suffix' => '</div>',
   );
   
-  module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder');  
-  $form["Virtual_rank"]=array(
-    '#type'=>'fieldset',
-    '#title' => t('Virtual rank'),
-    '#collapsible' => TRUE,
-    '#description' => t('Manage virtual rank'),
-    '#group' => 'config_form'
-  );
-  
-  $form["Virtual_rank"][] = dpidestinations_reform_virtual_rank($form, $form_state);
-  
   $form["submit"] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -547,10 +536,6 @@ function dpidestinations_form_configuration_form_submit($form, &$form_state){
   _dpidestinations_variable_set('dpidestinations_virtualrank_delta',$values['dpidestinations_virtualrank_delta']);
   _dpidestinations_variable_set('dpidestination_max_reserved_position',$values['dpidestination_max_reserved_position']);
   _dpidestinations_variable_set('dpidestinations_targetview_reorder_default',array($values['view_name'],$values['view_display']));
-  
-  if(isset($form_state['values']['select']) && intval($form_state['values']['select']) > 0){
-    dpidestinations_reform_virtual_rank_submit($form, $form_state);
-  }
 }
 
 function _dpidestinations_ajaxcallback_viewname_viewdisplay_config( $form, $form_state){

@@ -95,13 +95,12 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     ),
   );
   
-  //$form['submit'] = array('#type' => 'submit', '#value' => t('Execute'));
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Execute'));
 
   return $form;
 }
 
 function dpiblocks_ajax_callback_target_from_entity($form, &$form_state) {
-  dsm($form);
   return $form["destination"];
 }
 
