@@ -275,7 +275,7 @@ class WallyXmlV1 extends PackageHelper {
           }
           else {
             // If destination does not exists and no rank -> default
-            $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'default';
+            $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? (intval($destination->getAttributeNode("DestinationRank")->value) != 0) ? $destination->getAttributeNode("DestinationRank")->value : 'default' : 'default';
           }
           // Add destination only once. If a destinations with the same tid and target exists, the destination is not readded
           if (!array_key_exists($dest ['tid'] . '-' . $dest ['target'], $keys)) {
