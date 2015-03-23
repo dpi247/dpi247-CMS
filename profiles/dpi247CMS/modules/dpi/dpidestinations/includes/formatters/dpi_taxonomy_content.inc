@@ -1,7 +1,7 @@
 <?php
 function dpidestinations_field_formatter_settings_form_dpi_taxonomy_content($field, $instance, $view_mode, $form, &$form_state, &$element){
 	$settings = $instance['display'][$view_mode]['settings'];
-	
+
 	$element['wrapper_html_tag'] = array(
 			'#type' => 'select',
 			'#title' => t('Wrapper\'s Tag'),
@@ -150,7 +150,6 @@ function dpidestinations_field_formatter_settings_form_dpi_taxonomy_content($fie
 
 function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type, $entity, $field, $instance, $langcode, $items, $display, &$element){
 	$settings = $display['settings'];
-
 	if (count($items) > 0 && isset($settings['element_prefixe']) && !empty($settings['element_prefixe']) ) {
 		// on ajoute  le prefixe
 		$element[] = _dpi_taxonomy_content_simple_element_text_render($settings,'element_prefixe');
@@ -197,21 +196,30 @@ function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type,
 function _dpi_taxonomy_content_element_link_render($settings, $term, $value){
 
 	if($settings['element_html_link']!="no"){
-
-		$render = array();
+		$classes_link = "";
+		if ($settings['element_html_link_bootstrap_class'] != "- None -") {
+			$classes_link = $settings['element_html_link_bootstrap_class'] . " " . $settings['element_html_link_custom_class'];
+		} else {
+			$classes_link = $settings['element_html_link_custom_class'];
+		}
 		if ($term->vocabulary_machine_name == "sections") {
 			$term_link = drupal_get_path_alias('section/'.$term->tid);
 		} else {
 			$term_link = drupal_get_path_alias('taxonomy/term/'.$term->tid);
 		}
-		$render['#value'] = $value;
-		$render['#tag'] = 'a';
-		$render['#attributes']['href'] = '/'.$term_link;
-		$render['#theme_wrappers'] = array(0 => 'dpi_render_wrapper');
+		$render = array(
+			'#value' => $value,
+			'#tag' => 'a',
+			'#attributes' => array(
+				'href' => $term_link,
+				'class' => array($classes_link),
+			),
+			'#theme_wrappers' => array(0 => 'dpi_render_wrapper'),
+		);
 
 		return $render;
 
-	}else{
+	} else {
 		return $value;
 	}
 }
