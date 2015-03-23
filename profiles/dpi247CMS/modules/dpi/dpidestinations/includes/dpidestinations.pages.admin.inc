@@ -415,6 +415,7 @@ function dpidestinations_page_administration_destinations(){
 
 function dpidestinations_page_administration_configuration(){
   // @todo : quel est l'intérêt des 4 premières lignes?
+  $rank_max_value = 5;
   $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   _dpidestinations_variable_get('dpidestinations_destination_vid',2);
@@ -518,7 +519,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#prefix' => '<div id="dropdown-view-display">',
     '#suffix' => '</div>',
   );
-
+  
   $form["submit"] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -528,7 +529,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
 }
 
 function dpidestinations_form_configuration_form_submit($form, &$form_state){
-
+  module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder'); 
   $values=$form_state['values'];
 
   _dpidestinations_variable_set('dpidestinations_section_vid',$values['dpidestinations_section_vid']);
