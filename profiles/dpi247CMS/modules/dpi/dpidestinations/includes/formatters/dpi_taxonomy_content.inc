@@ -311,7 +311,7 @@ function _dpi_taxonomy_content_element_tag_field_formatter_settings_summary($set
 
 function _dpi_taxonomy_content_theme_ui_element_link_field_formatter_settings_summary($settings){
 	if ($settings['element_html_link']!="no") {
-		$summary = t('The element is outputed as a link to the section page<br/>');
+		$summary = t('The element is outputed as a link to the taxonomy page with Bootstrap class(es) "@b_class" and custom class(es) "@c_class"<br/>', array('@b_class' => $settings['element_html_link_bootstrap_class'], '@c_class' => $settings['element_html_link_custom_class']));
 	}else{
 		$summary = t('The element is not outputed as a link<br/>');
 	}
