@@ -421,20 +421,76 @@ function dpicontenttypes_field_default_field_instances() {
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 23,
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_mediabox',
+          'type_number' => 'all',
+        ),
+        'type' => 'dpi_mediabox',
+        'weight' => 17 
       ),
-      'teaser' => array(
+      'targetblock_big' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 6 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 2 
+      ),
+      'targetblock_red' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 6 
+      ),
+      'targetblock_small' => array (
         'label' => 'above',
-        'settings' => array(),
+        'settings' => array (),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 26 
       ),
+      'teaser' => array (
+        'label' => 'hidden',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 10 
+      ) 
     ),
     'entity_type' => 'node',
     'field_name' => 'field_embededobjects',
@@ -638,20 +694,59 @@ function dpicontenttypes_field_default_field_instances() {
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 30,
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
+        'weight' => 9 
       ),
-      'teaser' => array(
+      'targetblock_big' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
+        'weight' => 9 
+      ),
+      'targetblock_medium' => array (
         'label' => 'above',
-        'settings' => array(),
+        'settings' => array (),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 13 
       ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 10 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 12 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 13 
+      ) 
     ),
     'entity_type' => 'node',
     'field_name' => 'field_linkslists',
@@ -2876,20 +2971,76 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 23,
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_mediabox',
+          'type_number' => 'all',
+        ),
+        'type' => 'dpi_mediabox',
+        'weight' => 17 
       ),
-      'teaser' => array(
+      'targetblock_big' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 6 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 2 
+      ),
+      'targetblock_red' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
+        'weight' => 6 
+      ),
+      'targetblock_small' => array (
         'label' => 'above',
-        'settings' => array(),
+        'settings' => array (),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 26 
       ),
+      'teaser' => array (
+        'label' => 'hidden',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 10 
+      ) 
     ),
     'entity_type' => 'node',
     'field_name' => 'field_embededobjects',
@@ -3092,20 +3243,59 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array(),
-        'type' => 'title',
-        'weight' => 30,
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
+        'weight' => 9 
       ),
-      'teaser' => array(
+      'targetblock_big' => array (
+        'label' => 'hidden',
+        'module' => 'dpicontenttypes',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
+        'weight' => 9 
+      ),
+      'targetblock_medium' => array (
         'label' => 'above',
-        'settings' => array(),
+        'settings' => array (),
         'type' => 'hidden',
-        'weight' => 0,
+        'weight' => 13 
       ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 10 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 12 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 13 
+      ) 
     ),
     'entity_type' => 'node',
     'field_name' => 'field_linkslists',

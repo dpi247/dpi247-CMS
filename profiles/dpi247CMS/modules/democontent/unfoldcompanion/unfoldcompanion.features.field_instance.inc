@@ -821,29 +821,58 @@ function unfoldcompanion_field_default_field_instances() {
       'default' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_mediabox',
+          'type_number' => 'all',
+        ),
         'type' => 'dpi_mediabox',
         'weight' => 17 
       ),
       'targetblock_big' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 6 
       ),
       'targetblock_medium' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'dpi_simpleimg',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 2 
       ),
       'targetblock_red' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'dpi_mediabox',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 6 
       ),
       'targetblock_small' => array (
@@ -1163,15 +1192,29 @@ function unfoldcompanion_field_default_field_instances() {
       'default' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
         'weight' => 9 
       ),
       'targetblock_big' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list_small',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
         'weight' => 9 
       ),
       'targetblock_medium' => array (
@@ -2683,29 +2726,58 @@ function unfoldcompanion_field_default_field_instances() {
       'default' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_mediabox',
+          'type_number' => 'all',
+        ),
         'type' => 'dpi_mediabox',
         'weight' => 17 
       ),
       'targetblock_big' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 6 
       ),
       'targetblock_medium' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'dpi_simpleimg',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => TRUE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 2 
       ),
       'targetblock_red' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'dpi_mediabox',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => TRUE,
+          'type_links_list' => FALSE,
+          'type_video' => FALSE,
+          'context' => 'dpi_simpleimg',
+        ),
+        'type' => 'first_element',
         'weight' => 6 
       ),
       'targetblock_small' => array (
@@ -3025,15 +3097,29 @@ function unfoldcompanion_field_default_field_instances() {
       'default' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
         'weight' => 9 
       ),
       'targetblock_big' => array (
         'label' => 'hidden',
         'module' => 'dpicontenttypes',
-        'settings' => array (),
-        'type' => 'links_list_small',
+        'settings' => array (
+          'type_atom_package' => FALSE,
+          'type_audio' => FALSE,
+          'type_image' => FALSE,
+          'type_links_list' => TRUE,
+          'type_video' => FALSE,
+          'context' => 'full',          
+        ),
+        'type' => 'first_element',
         'weight' => 9 
       ),
       'targetblock_medium' => array (
