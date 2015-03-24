@@ -106,8 +106,7 @@ class WallyXmlV1 extends PackageHelper {
     }
     else {
       $wrapper->language->set("fr");
-    }    
-    
+    }        
     $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
     $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
     $this->buildAutopublishDate($dom, $wrapper, $entity);

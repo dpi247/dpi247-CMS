@@ -222,7 +222,12 @@ abstract class PackageHelper extends Importer {
   protected function getDefaultTextFormat() {
     static $default_format = '';
     if (empty($default_format)) {
-      $default_format = filter_default_format();
+      $dispatcher_text_format = $this->getDispatcher()->getTextFormat();
+      if(!$dispatcher_text_format || $dispatcher_text_format == ""){
+        $default_format = filter_default_format();
+      }else{
+        $default_format = $dispatcher_text_format;
+      }
     }
     return $default_format;
   }

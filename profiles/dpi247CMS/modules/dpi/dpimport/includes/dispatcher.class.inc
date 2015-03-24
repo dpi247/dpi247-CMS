@@ -117,6 +117,15 @@ abstract class Dispatcher {
   }
   
   /**
+   * Return the text format of the class
+   * 
+   * @return String
+   */
+  public function getTextFormat(){
+    return $this->text_format;
+  }
+  
+  /**
    * Process a XML file source
    *
    * @param string $source          
