@@ -139,7 +139,7 @@ function dpipressfilters_config_export($fid) {
   print $dom->saveXML();
 }
 
-function _dpipressfilters_import_export_generate_dom($filter, $tags) {
+function _dpipressfilters_import_export_generate_dom($filter, $tags, $export_formats_settings=FALSE) {
   $dom = new DomDocument('1.0', 'UTF-8');
   $dom_filter = $dom->appendChild($dom->createElement('Filter'));
   $dom_filter->setAttribute('fid', $filter->fid);
@@ -155,16 +155,19 @@ function _dpipressfilters_import_export_generate_dom($filter, $tags) {
     $dom_tag->appendChild($dom->createElement('Type', $tag->type));
     $dom_tag->appendChild($dom->createElement('TagName', $tag->tag));
     $dom_tag->appendChild($dom->createElement('TagDescription', $tag->description));
-    /*$settings = $dom->createCDATASection(serialize($tag->settings));
+    $settings = $dom->createCDATASection(json_encode($tag->settings));
     $dom_settings = $dom_tag->appendChild($dom->createElement('Settings'));
-    $dom_settings->appendChild($settings);*/
-    $dom_tag->appendChild($dom->createElement('Settings', serialize($tag->settings)));
+    $dom_settings->appendChild($settings);
+    $dom_tag->appendChild($dom_settings);
   }
-  $fsettings = $dom->createCDATASection(serialize($formats_settings));
-  $dom_fsettings = $dom->createElement('FormatsSettings');
-  $dom_fsettings->appendChild($fsettings);
-  $dom_filter->appendChild($dom_fsettings);
-  
+  // This enable export of overrided settings for each text format.
+  if($export_formats_settings){
+    $fsettings = $dom->createCDATASection(json_encode($formats_settings));
+    $dom_fsettings = $dom->createElement('FormatsSettings');
+    $dom_fsettings->appendChild($fsettings);
+    $dom_filter->appendChild($dom_fsettings);
+  }
+
   return $dom;
 }
 
@@ -198,7 +201,7 @@ function _dpipressfilters_import_export_import_from_dom($dom) {
         $new_tag->type = $tag->getElementsByTagName('Type')->item(0)->nodeValue;
         $new_tag->tag = $tag->getElementsByTagName('TagName')->item(0)->nodeValue;
         $new_tag->description = $tag->getElementsByTagName('TagDescription')->item(0)->nodeValue;
-        $new_tag->settings = unserialize($tag->getElementsByTagName('Settings')->item(0)->nodeValue);
+        $new_tag->settings = json_decode($tag->getElementsByTagName('Settings')->item(0)->nodeValue,TRUE);
         drupal_write_record('dpipressfilters_tags', $new_tag);
         $mapping_tids[$new_tag->tag] = $new_tag->tid;
       }
@@ -210,7 +213,7 @@ function _dpipressfilters_import_export_import_from_dom($dom) {
   if ($dom_fsettings->item(0)) {
     $fsettings_serialiazed = $dom_fsettings->item(0)->nodeValue;
     unset($dom_fsettings);
-    $fsettings = unserialize($fsettings_serialiazed);
+    $fsettings = json_decode($fsettings_serialiazed,TRUE);
     if(!$fsettings){
       drupal_set_message("Settings for text formats can't be imported. You must ".l("configure tags behaviour for all text formats", 'admin/config/content/formats').".",'warning');
       return;
