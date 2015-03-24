@@ -13,7 +13,7 @@ function dpicache_ctools_plugin_post_alter(&$plugin, &$info) {
   // Every time the configuration of a panel is saved, the default hook on the
   // panel-context is invoked.  Replace that hook, in order to check for the
   // presence of ESI panes, and switch the rendering pipeline if necessary.
-  if ($plugin['name'] == 'panel_context') {    
+  if ($plugin['name'] == 'panel_context' ||$plugin['name'] =='dpipanels_context' || $plugin['name']=='dpisectionspanels_context') {
     // Replace the default 'save' operation - panels_panel_context_save();
     $plugin['save'] = 'dpicache__panel_context_save';
   }
@@ -54,8 +54,10 @@ function dpicache__panel_context_save(&$handler, $update) {
     $display = panels_load_display($handler->did);
   }
 
+  dsm($handler);
   if (_dpicache_panels__display_uses_esi($display)) {
-    if ($handler->conf['pipeline'] == 'standard' || $handler->conf['pipeline'] == 'ipe') {
+    if ($handler->conf['pipeline'] == 'standard' || $handler->conf['pipeline'] == 'dpiviewer' || $handler->conf['pipeline'] == 'ipe') {
+      dsm(TOasty);
       $handler->conf['original_pipeline'] = $handler->conf['pipeline'];
       $handler->conf['pipeline'] = "dpicacheesi";
     }
@@ -178,18 +180,20 @@ function dpicache_esi_panels_url($pane, $display) {
   // - $display->args       Are *always* passed.
   // - $display->context    A pane can only accept a single context.
   // - $display->cache_key  The cache key provides the name of the task/subtask.
-
+kprint_r($pane);
   if (!empty($pane->configuration['context'])) {
     // If the context originates from the *TASK* plugin (which is typical), the
     // task name is required in order to generate the task contexts
     // ($base_context in panels_panel_context_render()).
     // Additional contexts may be supplied directly by the display.
-    $task_name = _esi_panels__get_taskname($display->cache_key);
-
+    $task_name = _dpicache_panels__get_taskname($display->cache_key);
     $url .= "/{$task_name}";
+
+
   }
 
   if($pane->cache['settings']["granularity"]['args']){
+
     // Add all the display arguments to the end of the URL.
     $url .= '/' . implode('/', $display->args);
   }
@@ -244,6 +248,8 @@ function dpicache_esi_panels_url($pane, $display) {
  * @see esi_panels_esi_component_info().
  */
 function dpicacheesi_panels__esi_pane_prepare($component_key) {
+  //remove cache granularity /Cache=ROLE
+
   // The URL pattern approximately corresponds to the function arguments:
   // 1. A component key, which is a colon-separated set of pieces of
   //    information: the theme name, the display ID and the pane ID.
@@ -258,7 +264,12 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
   list($theme, $did, $pid) = explode(':', $component_key);
 
   // Check for optional args.
+
   $args = array_slice(func_get_args(), 1);
+
+  array_pop($args);
+
+
   // The URL is always the last argument.
   $url = array_pop($args);
 
@@ -276,7 +287,8 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
   if (!empty($pane->configuration['context'])) {
     // The task name is always the first of the optional arguments.
     $task_name = array_shift($args);
-    list($task, $subtask) = _esi_panels__get_task_identifier($task_name);
+    list($task, $subtask) = _dpicache_panels__get_task_identifier($task_name);
+
 
     $pane->esi_meta['task'] = $task;
     $pane->esi_meta['subtask'] = $subtask;
@@ -289,6 +301,7 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
       'url' => base64_decode($url),
   );
 
+  //print '<pre>'.print_r($pane,1).'</pre>';die();
   dpicacheesi_panels__restore_context($pane);
 
   return $pane;
@@ -301,6 +314,7 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
  */
 function dpicacheesi_panels__restore_context(&$pane) {
   // Restore the theme.
+
   global $theme;
   $theme = $pane->esi_meta['theme'];
 
@@ -320,7 +334,8 @@ function dpicacheesi_panels__restore_context(&$pane) {
     // Use the task-name and the original display arguments to generate the
     // arguments that were passed to the context constructor.
     // E.g. The node_view task takes "1" and returns node_load(1).
-    $base_context_arguments = esi_panels__get_base_context_arguments($pane->esi_meta['task'], $pane->esi_meta['subtask'], $pane->esi_meta['display_args']);
+    $base_context_arguments = dpicacheesi__get_base_context_arguments($pane->esi_meta['task'], $pane->esi_meta['subtask'], $pane->esi_meta['display_args']);
+
     $base_contexts = ctools_context_handler_get_task_contexts($task, $subtask, $base_context_arguments);
 
 
@@ -335,14 +350,21 @@ function dpicacheesi_panels__restore_context(&$pane) {
     // Load the relevant handler
     $handlers = page_manager_load_sorted_handlers($task, $subtask ? $subtask['name'] : '', TRUE);
     $id = ctools_context_handler_get_render_handler($task, $subtask, $handlers, $base_contexts, $pane->esi_meta['display_args']);
+
+
+
     if ($id) {
+
       $handler = $handlers[$id];
+
       $contexts = ctools_context_handler_get_handler_contexts($base_contexts, $handler);
+
     }
 
     $pane->esi_meta['display_contexts'] = $contexts;
   }
 }
+
 
 /**
  * Render the HTML for a single block.
@@ -364,10 +386,15 @@ function dpicacheesi_panels__esi_pane_render($pane) {
   // if ($pane->access && !empty($pane->display_contexts) && ctools_access($pane->access, $pane->display_contexts)) {
   //   return '';
   // }
+  kprint_r($content_type);
+print $content_type;
+
+
 
 
   $content = ctools_content_render($pane->type, $pane->subtype, $pane->configuration, array(), $pane->esi_meta['display_args'], $pane->esi_meta['display_contexts']);
 
+  //print $content;
   if (empty($content)) {
     return '';
   }
