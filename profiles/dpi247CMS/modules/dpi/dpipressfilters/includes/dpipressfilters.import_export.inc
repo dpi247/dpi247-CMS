@@ -139,7 +139,7 @@ function dpipressfilters_config_export($fid) {
   print $dom->saveXML();
 }
 
-function _dpipressfilters_import_export_generate_dom($filter, $tags) {
+function _dpipressfilters_import_export_generate_dom($filter, $tags, $export_formats_settings=FALSE) {
   $dom = new DomDocument('1.0', 'UTF-8');
   $dom_filter = $dom->appendChild($dom->createElement('Filter'));
   $dom_filter->setAttribute('fid', $filter->fid);
@@ -160,11 +160,14 @@ function _dpipressfilters_import_export_generate_dom($filter, $tags) {
     $dom_settings->appendChild($settings);
     $dom_tag->appendChild($dom_settings);
   }
-  $fsettings = $dom->createCDATASection(json_encode($formats_settings));
-  $dom_fsettings = $dom->createElement('FormatsSettings');
-  $dom_fsettings->appendChild($fsettings);
-  $dom_filter->appendChild($dom_fsettings);
-  
+  // This enable export of overrided settings for each text format.
+  if($export_formats_settings){
+    $fsettings = $dom->createCDATASection(json_encode($formats_settings));
+    $dom_fsettings = $dom->createElement('FormatsSettings');
+    $dom_fsettings->appendChild($fsettings);
+    $dom_filter->appendChild($dom_fsettings);
+  }
+
   return $dom;
 }
 
