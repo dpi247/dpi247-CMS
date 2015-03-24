@@ -872,7 +872,11 @@ function dpicontenttypes_api_check_autopublish($node) {
           $node->status = 1;
         }
         else {
-          $node->status = 0;
+          if(intval($date['value']) == intval($date['value2'])){
+            $node->status = 1; //that mean no use unpublish date
+          }else{
+            $node->status = 0; 
+          }          
         }
       }
       else {

@@ -61,6 +61,7 @@ function dpidestinations_field_is_empty($item, $field) {
 }
 
 function dpidestinations_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items){
+
   _dpidestinations_virtualrank_update_items($items, entity_id($entity_type, $entity));
 
 }

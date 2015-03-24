@@ -101,6 +101,10 @@ function dpiscald_videortl_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/videortl/dpiscald_videortl_player_live'
     ),
+    'dpiscald_videortl_player_html5' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'templates/players/dpiscald_videortl_player_html5'
+    ),
   );
 }
 

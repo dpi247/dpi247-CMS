@@ -2,17 +2,17 @@
 
 /**
  * @file
- * slideshare include
+ * ustream include
  */
 
 /**
  * Implements hook_scald_add_form().
  */
-function dpiscald_slideshare_scald_add_form(&$form, &$form_state) {
+function dpiscald_ustream_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('slideshare URL'),
-    //'#element_validate' => array('dpiscald_slideshare_validate_id'),
+    '#title' => t('ustream URL'),
+    //'#element_validate' => array('dpiscald_ustream_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
   );
@@ -21,7 +21,7 @@ function dpiscald_slideshare_scald_add_form(&$form, &$form_state) {
 /**
  * Implements hook_scald_add_form_fill().
  */
-function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
+function dpiscald_ustream_scald_add_form_fill(&$atoms, $form, $form_state) {
   
   $atom = is_array($atoms) ? reset($atoms) : $atoms;
 
@@ -29,17 +29,17 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
   $url = $form_state['values']['identifier'];
 
   // Get media infos.
-  $infos = dpiscald_slideshare_get_media_infos_from_url($url);
+  $infos = dpiscald_ustream_get_media_infos_from_url($url);
 
   $atom->base_id = md5($url);
 
   $atom->title = $infos->title;
 
   $atom->provider = 'dpiscald';
-  $atom->type = 'slideshare';
+  $atom->type = 'ustream';
 
-  $atom->data['html'] = $infos->html;
-  $atom->data['slideshow_id'] = $infos->slideshow_id;
+  $atom->data['id'] = $infos->id;
+  $atom->data['mode'] = $infos->mode;
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
@@ -66,7 +66,7 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
     }
 
     $thumb = drupal_http_request($thumbnail_url);
-    $dir = 'public://slideshare';
+    $dir = 'public://ustream';
     if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
       $dest = $dir . '/' . $atom->base_id . '.jpg';
       $file = file_save_data($thumb->data, $dest);
@@ -87,7 +87,7 @@ function dpiscald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
 /**
  * Implements hook_scald_fetch().
  */
-function dpiscald_slideshare_scald_fetch($atom, $type) {
+function dpiscald_ustream_scald_fetch($atom, $type) {
   if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
     $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
     if (file_exists($file)) {
@@ -99,12 +99,13 @@ function dpiscald_slideshare_scald_fetch($atom, $type) {
 /**
  * Implements hook_scald_prerender().
  */
-function dpiscald_slideshare_scald_prerender($atom, $context, $options, $mode) {
+function dpiscald_ustream_scald_prerender($atom, $context, $options, $mode) {
   if ($mode == 'atom') {
-    $atom->rendered->player = theme('dpiscald_slideshare_player',
+    $atom->rendered->player = theme('dpiscald_ustream_player',
       array('vars' =>
         array(
-          'html'      => $atom->data['html'],
+          'id'            => $atom->data['id'],
+          'mode'          => $atom->data['mode'],
           'title'         => $atom->title,
           'thumbnail'     => $atom->rendered->thumbnail_source_url,
         ),
@@ -117,15 +118,15 @@ function dpiscald_slideshare_scald_prerender($atom, $context, $options, $mode) {
 /**
  * Implements hook_theme().
  */
-function dpiscald_slideshare_theme() {
+function dpiscald_ustream_theme() {
   return array(
-      'dpiscald_slideshare_player' => array(
+      'dpiscald_ustream_player' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
-          'template' => 'providers/slideshare/dpiscald_slideshare_player'
+          'template' => 'providers/ustream/dpiscald_ustream_player'
       ),
-      'dpiscald_slideshare_player_html5' => array(
+      'dpiscald_ustream_player_html5' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
-          'template' => 'templates/players/dpiscald_slideshare_player_html5'
+          'template' => 'templates/players/dpiscald_ustream_player_html5'
       ),
   );
 }
@@ -134,18 +135,14 @@ function dpiscald_slideshare_theme() {
 /**
  * Get media infos from url.
  */
-function dpiscald_slideshare_get_media_infos_from_url($url, $id_elem = NULL) {
-  $api_url = 'http://fr.slideshare.net/api/oembed/2?url=';
+function dpiscald_ustream_get_media_infos_from_url($url, $id_elem = NULL) {
+  $id = dpiscald_ustream_parse_id($url, false);
+  $infos = new stdclass;
+  $infos->title = "Ustream - " . $id[1];
+  $infos->id = $id[1];
+  $infos->mode = $id[0];
 
-  $url = $api_url . $url . '&format=json';
-  $response = drupal_http_request($url);
-  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
-    $infos = json_decode($response->data);
-    return $infos;
-  }
-  else {
-    return FALSE;
-  }
+  return $infos;
 }
 
 /**
@@ -158,7 +155,7 @@ function dpiscald_slideshare_get_media_infos_from_url($url, $id_elem = NULL) {
  *   FALSE if the media was never imported, the scald identifier of
  *   the media otherwise.
  */
-function dpiscald_slideshare_already_imported($id) {
+function dpiscald_ustream_already_imported($id) {
   $query = array('provider' => 'dpiscald', 'base_id' => $id);
   return scald_search($query, FALSE, TRUE);
 }
@@ -166,52 +163,47 @@ function dpiscald_slideshare_already_imported($id) {
 /**
  * Form element validation handler for media url.
  */
-function dpiscald_slideshare_validate_id($element, &$form_state) {
+function dpiscald_ustream_validate_id($element, &$form_state) {
   $url = $form_state['values']['identifier'];
   if (!valid_url($url, TRUE)) {
     form_error($element, t('Invalid media url, you must specify an absolute url.'));
   }
-  if (startsWith($url,'https')){
-    $url = explode('https://fr.slideshare.net/',$url);
-  } else {
-    $url = explode('http://fr.slideshare.net/',$url);
-  }
-  $url = $url[1];
   $id = md5($url);
-  if (dpiscald_slideshare_already_imported($id)) {
+  if (dpiscald_ustream_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
 }
 
 /**
- * Parse an slideshare ID and check validity
+ * Parse an ustream ID and check validity
  *
  */
-function dpiscald_slideshare_parse_id($string, $check) {
+function dpiscald_ustream_parse_id($string, $check) {
   $id = NULL;
   $string = trim($string);
 
-  $infos = dpiscald_slideshare_get_media_infos_from_url($string);
-  if (isset($infos->slideshow_id)) {
-    $id = $infos->slideshow_id;
+  if (preg_match('#^http://www.ustream.tv/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $match)){
+    $id = array($match[1], $match[2]);
+  } elseif (preg_match('#^https://www.ustream.tv/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $match)) {
+    $id = array($match[1], $match[2]);
   }
 
   return $id;
 }
 
-function dpiscald_slideshare_get_import_info($importer, & $entity, & $wrapper, $url){
+function dpiscald_ustream_get_import_info($importer, & $entity, & $wrapper, $url){
   try {
-    $id = dpiscald_slideshare_parse_id ( $url, FALSE );
-    $wrapper->base_id->set ( $id );
-    $infos = dpiscald_slideshare_get_media_infos_from_url ( $url );
+    $id = dpiscald_ustream_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($url) );
+    $infos = dpiscald_ustream_get_media_infos_from_url ( $url );
     $entity->title = $infos->title;
-    $entity->data['html'] = $infos->html;
-    $entity->data['slideshow_id'] = $infos->slideshow_id;
+    $entity->data['id'] = $infos->id;
+    $entity->data['mode'] = $infos->mode;
     if(isset($infos->thumbnail_url)){
       $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
       $wrapper->scald_thumbnail->set ( ( array ) $file );
     }
   } catch (Exception $e) {
-    dpi_log('dpiscald', "import", "Impossible d'importer le media Slideshare : " . $url);
+    dpi_log('dpiscald', "import", "Impossible d'importer le media ustream : " . $url);
   }
 }

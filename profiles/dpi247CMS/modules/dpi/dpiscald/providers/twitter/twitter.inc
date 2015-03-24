@@ -36,6 +36,8 @@ function dpiscald_twitter_scald_add_form_fill(&$atoms, $form, $form_state) {
   // We use the permalink md5 as identifier.
   $atom->base_id = md5($url);
 
+  $atom->data['url'] = $url;
+
   preg_match('/<title>(.*?)<\/title>/', $response->data, $title);
   $title = html_entity_decode($title[1], ENT_QUOTES);
   $atom->title = $title;
@@ -93,6 +95,18 @@ function dpiscald_twitter_scald_prerender($atom, $context, $options, $mode) {
       $atom->rendered->player = $atom->data['html'];
     }
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpiscald_twitter_theme() {
+  return array(
+    'dpiscald_twitter_player_html5' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'templates/players/dpiscald_twitter_player_html5'
+    ),
+  );
 }
 
 
@@ -177,6 +191,7 @@ function dpiscald_twitter_get_import_info($importer, & $entity, & $wrapper, $url
     $wrapper->base_id->set ( $id );
     $infos = dpiscald_twitter_get_media_infos_from_url ( $url );
     $entity->data['html'] = $infos->html;
+    $entity->data['url'] = $url;
     $response = drupal_http_request($url);
     preg_match('/<title>(.*?)<\/title>/', $response->data, $title);
     $title = html_entity_decode($title[1], ENT_QUOTES);

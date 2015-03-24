@@ -50,15 +50,20 @@ function dpistate_add_form($form, &$form_state, $id) {
     '#required' => TRUE 
   );
   
+  $options = array (
+    0 => t ( 'Numeric' ),
+    1 => t ( 'Text' ),
+    2 => t ( 'Date' ) 
+  );
+  
+  $external_options = module_invoke_all("dpistate_get_options");
+  $options = array_merge($options, $external_options);
+  
   $form ['dpistate_types'] = array (
     '#type' => 'radios',
     '#title' => t ( 'State\'s type' ),
-    '#options' => array (
-      0 => t ( 'Numeric' ),
-      1 => t ( 'Text' ),
-      2 => t ( 'Date' ) 
-    ),
-    '#default_value' => (isset ( $state ['type'] )) ? $state ['type'] : 0,
+    '#options' => $options,
+    '#default_value' => (isset ( $state ['type'] )) ? $state ['type'] : '0',
     '#multiple' => FALSE,
     '#description' => t ( 'Select a state type' ),
     '#ajax' => array (
@@ -82,11 +87,11 @@ function dpistate_add_form($form, &$form_state, $id) {
   if (isset ( $form_state ['values'] ['dpistate_types'] )) {
     $type = $form_state ['values'] ['dpistate_types'];
   } else {
-    $type = (isset ( $state ['type'] )) ? $state ['type'] : 0;
+    $type = (isset ( $state ['type'] )) ? $state ['type'] : '0';
   }
   
   switch ($type) {
-    case 0 :
+    case '0' :
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Numeric values only' ),
         '#type' => 'textfield',
@@ -95,7 +100,7 @@ function dpistate_add_form($form, &$form_state, $id) {
       );
       
       break;
-    case 1 :
+    case '1' :
       $form ['value_fieldset'] ['input'] = array (
         '#title' => t ( 'Text only' ),
         '#type' => 'textarea',
@@ -104,37 +109,14 @@ function dpistate_add_form($form, &$form_state, $id) {
       );
       
       break;
-    case 2 :
-      $format = 'd-m-Y H:i';
-	  if (isset ( $state['value'] )) {
-		 $date_start =  $state['value'][0].':00';
-		 $date_end = $state['value'][1].':00';
-	  } else {
-      	$date_start = $date_end = format_date ( REQUEST_TIME, 'custom', $format );
-	  }
-      
-      $form ['value_fieldset'] ['input'] ['date_start'] = array (
-        '#description' => t ( 'Select a start/end date' ),
-        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-        '#title' => t ( 'Select start date' ),
-        '#default_value' => $date_start,
-        '#date_format' => $format,
-        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-        '#date_year_range' => '-0:+10' 
+    case '2' :
+      $form ["value_fieldset"] ['input'] = array(
+        "#markup" => t('The date is define into the settings'),
       );
-      
-      $form ['value_fieldset'] ['input'] ['date_end'] = array (
-        '#description' => t ( 'Select a start/end date' ),
-        '#type' => 'date_select', // types 'date_text' and 'date_timezone' are also supported. See .inc file.
-        '#title' => t ( 'Select end date' ),
-        '#default_value' => $date_end,
-        '#date_format' => $format,
-        '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
-        '#date_increment' => 1, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
-        '#date_year_range' => '-0:+10' 
-      );
-      
+      break;
+    default :
+        $array_form = module_invoke_all("dpistate_get_form_element", $type, (isset ( $state ['value'] )) ? $state ['value'] : null);
+        $form ["value_fieldset"]["input"] = $array_form + array( "#tree" => TRUE );        
       break;
   }
   
@@ -170,39 +152,34 @@ function dpistate_add_form_validate($form, &$form_state) {
   $type = $form_state ['values'] ['dpistate_types'];
   
   if ($type == 2) {
-    $value [] = $form_state ['values'] ['date_start'];
-    $value [] = $form_state ['values'] ['date_end'];
+    $value [] = array();    
   } else {
-    $value = $form_state ['values'] ['input'];
+    $value = (isset($form_state ['values'] ['input'])) ? $form_state ['values'] ['input'] : NULL;
   }
   
-  if (! empty ( $value )) {
-    switch ($type) {
-      case 0 :
-          if (! is_numeric ( $value )) {
-            form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
-          }
-        break;
-      case 1 :
-          if (! is_string ( $value )) {
-            form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
-          } else {
-            $array_formated = array ();
-            $text = trim ( $value );
-            $textAr = explode ( "\r\n", $text );
-            $textAr = array_filter ( $textAr, 'trim' );
-            $form_state ['values'] ['input'] = $textAr;
-          }
-        break;
-      case 2 :
-          if (! (strtotime ( $value [0] ) < strtotime ( $value [1] ))) {
-            form_set_error ( 'value_fieldset', t ( 'End date must be greater than start date' ) );
-          }
-          $form_state ['values'] ['input'] = $value;
-        break;
-    }
-  } else {
-    form_set_error ( 'value_fieldset', t ( 'Please enter a value' ) );
+  switch ($type) {
+    case "0" :
+        if (! is_numeric ( $value )) {
+          form_set_error ( 'value_fieldset', t ( 'Please enter number.' ) );
+        }
+      break;
+    case "1" :
+        if (! is_string ( $value )) {
+          form_set_error ( 'value_fieldset', t ( 'Please enter a valid texts.' ) );
+        } else {
+          $array_formated = array ();
+          $text = trim ( $value );
+          $textAr = explode ( "\r\n", $text );
+          $textAr = array_filter ( $textAr, 'trim' );
+          $form_state ['values'] ['input'] = $textAr;
+        }         
+      break;
+    case "2" :
+        $form_state ['values'] ['input'] = array();
+      break;
+    default:
+        $form_state ['values'] ['input'] = $value;
+      break;
   }
 }
 
@@ -216,14 +193,14 @@ function dpistate_add_form_submit($form, $form_state) {
   if (isset ( $form_state ['values'] ['store'] )) {
     if (dpistate_api_update_state_by_id ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'], $form_state ['values'] ['store'] )) {
       drupal_set_message ( 'Data updated successfully' );
-	  drupal_goto('admin/config/dpistate/settings');
+      drupal_goto('admin/dpi247/dpistate');
     } else {
       drupal_set_message ( 'Error while updating data !', 'error' );
     }
   } else {
     if (dpistate_api_add_state ( $form_state ['values'] ['dpistate_label'], $form_state ['values'] ['dpistate_types'], $form_state ['values'] ['input'] )) {
       drupal_set_message ( 'Data saved successfully' );
-	  drupal_goto('admin/config/dpistate/settings');
+      drupal_goto('admin/dpi247/dpistate');
     } else {
       drupal_set_message ( 'Error while saving data !', 'error' );
     }

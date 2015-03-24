@@ -38,11 +38,15 @@ function dpiscald_deezer_build_render(&$atom, $context, $options, $mode, $config
 }
 
 function dpiscald_deezer_get_theme_parameters($atom, $context, $options, $mode, $config) {
-	return array( 
-		'base_url' => $atom->data['url'],
-		'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
-		'width' => $config->player['deezer']['settings']['width'], 
-		'height' => $config->player['deezer']['settings']['height'], 
-		'origin' => current_path()
+	return array(
+		'vars' => array(
+			'deezer_type' => $atom->data['type_deezer'],
+			'base_url' => $atom->data['url'],
+			'html_id' => 'player_'.$atom->base_id.drupal_html_id(), 
+			'width' => $config->player['deezer']['settings']['width'], 
+			'height' => $config->player['deezer']['settings']['height'], 
+			'origin' => current_path()
+		),
+		'atom' => $atom,
 	);
 }

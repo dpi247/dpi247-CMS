@@ -2,7 +2,6 @@
 
 /**
  * Implementation of hook_schema
- * 
  * @return multitype:array
  */
 function dpiunivers_schema() {
