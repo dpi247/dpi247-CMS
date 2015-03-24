@@ -434,7 +434,7 @@ function dpicontenttypes_field_default_field_instances() {
           'context' => 'dpi_mediabox',
           'type_number' => 'all',
         ),
-        'type' => 'dpi_mediabox',
+        'type' => 'media_box',
         'weight' => 17 
       ),
       'targetblock_big' => array (
@@ -2984,7 +2984,7 @@ function dpicontenttypes_field_default_field_instances_package_gallery(){
           'context' => 'dpi_mediabox',
           'type_number' => 'all',
         ),
-        'type' => 'dpi_mediabox',
+        'type' => 'media_box',
         'weight' => 17 
       ),
       'targetblock_big' => array (
