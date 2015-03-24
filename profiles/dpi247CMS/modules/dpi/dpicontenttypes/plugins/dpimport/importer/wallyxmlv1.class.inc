@@ -106,8 +106,8 @@ class WallyXmlV1 extends PackageHelper {
     }
     else {
       $wrapper->language->set("fr");
-    }
-    // @todo path_autho check alias
+    }    
+    
     $this->buildEditorialPublicationDate($dom, $wrapper, $entity);
     $this->buildEditorialUpdateDate($dom, $wrapper, $entity);
     $this->buildAutopublishDate($dom, $wrapper, $entity);
