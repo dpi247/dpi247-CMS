@@ -8,6 +8,7 @@ abstract class Dispatcher {
    *
    */
   protected $zip;
+  protected $text_format;
   protected $cron;
   protected $cron_frequency;
   protected $temp_folder;
@@ -27,6 +28,7 @@ abstract class Dispatcher {
   public function Dispatcher($importer, $settings) {
     $this->importer = $importer;
     $this->zip = isset ( $settings ['zip'] ) ? $settings ['zip'] : 0;
+    $this->text_format = isset ( $settings ['text_format'] ) ? $settings ['text_format'] : NULL;
     $this->cron = isset ( $settings ['cron'] ) ? $settings ['cron'] : 0;
     $this->cron_frequency = isset ( $settings ['cron_frequency'] ) ? $settings ['cron_frequency'] : 10;
     $this->temp_folder = isset ( $settings ['temp_folder'] ) ? $settings ['temp_folder'] : NULL;
@@ -408,6 +410,23 @@ abstract class Dispatcher {
       '#required' => TRUE 
     );
     
+    $all_formats = filter_formats();
+    $els = array();
+    if($all_formats && is_array($all_formats)){
+      foreach($all_formats as $format){
+        $els[$format->format] = $format->name;
+      }
+    }
+    
+    $form ['dispatcher'] ['text_format'] = array (
+      '#type' => 'select',
+      '#title' => t ( 'Choose text format for textfield' ),
+      '#description' => '',
+      '#options' => $els,
+      '#default_value' => isset ( $values ['text_format'] ) ? $values ['text_format'] : 0,
+      '#required' => TRUE 
+    );
+    
     $form ['dispatcher'] ['cron'] = array (
       '#type' => 'select',
       '#title' => t ( 'Are the data imported by a CRON job?' ),
@@ -467,7 +486,7 @@ abstract class Dispatcher {
   public function submitSettingsForm($values, $form_state_multistep) {
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep["default"] ["name"];
     $old = umask ( 0 );
-    if (mkdir ( $default_path . "/done", 0777, true )) {
+    if (@mkdir ( $default_path . "/done", 0777, true )) {
       if (mkdir ( $default_path . "/tmp", 0777, true )) {
         if (! mkdir ( $default_path . "/error", 0777, true )) {
           rmdir ( $default_path . "/tmp" );
@@ -487,6 +506,7 @@ abstract class Dispatcher {
     
     $dispatcher_settings = array (
       'zip' => $values ['zip'],
+      'text_format' => $values ['text_format'],
       'cron' => $values ['cron'],
       'cron_frequency' => $values ['cron_frequency'],
       'temp_folder' =>  $form_state_multistep ["default"] ["name"] . "/tmp",
@@ -506,6 +526,7 @@ abstract class Dispatcher {
   public function initializeForm() {
     return array (
       'zip' => $this->isZip (),
+      'text_format' => $this->text_format,
       'cron' => $this->isCron (),
       'cron_frequency' => $this->cron_frequency,
       'temp_folder' => $this->temp_folder,
