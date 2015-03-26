@@ -1024,4 +1024,79 @@ class WallyXmlV1 extends PackageHelper {
     }
   }
 
+  function buildTaxonomy($dom, $package_wrapper, $entity){
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $package_wrapper, $entity);
+  }
+  
+  function buildVocabulary($dom, $package_wrapper, $entity){
+    try {
+      $taxonomy_name = $dom->getAttribute('VocabularyName');
+      /* glitch for tags that would be free tags */
+      if($taxonomy_name == "Tags"){
+        $taxonomy_name = "Free Tags";
+      }
+      $conditions = array('name' => trim($taxonomy_name));
+      $vocabularies = taxonomy_vocabulary_load_multiple(FALSE, $conditions);
+      
+      /* test que le vocabulaire exist bien dans le drupal */
+      if($vocabularies && !empty($vocabularies)){
+        $dispatcher = $this->getDispatcher();
+        $dispatcher->processChildren($dom, $package_wrapper, $entity);
+        global $global_list_term;
+        if(is_array($global_list_term) && !empty($global_list_term)){
+          $t_machine_name = strtolower($taxonomy_name);
+          $t_machine_name = str_replace(' ', '', $t_machine_name);
+          $field_name = 'field_'.strtolower($t_machine_name);  
+          $package_wrapper->$field_name->set($global_list_term);
+          $global_list_term = array();
+        }
+      }else{
+        Logger::logWarning('importer', 2, 'pathnotfound', t('Taxonomy term don\'t exist into this instance of drupal : @term' , array(
+          '@term' => $taxonomy_name,
+        )));
+      }      
+    }
+    catch (Exception $exc) {
+      print_r($exc->getMessage());
+      Logger::logError('importer', 0, 'provideruri', t('Taxonomy term cannot be imported : ' . $exc->getMessage()));
+    }
+  }
+  
+  function buildTerm($dom, $wrapper, $entity, $dom_parent){   
+    global $global_list_term;
+    if(!is_array($global_list_term))
+      $global_list_term = array();
+    
+    $term = $dom->getAttribute('Name');
+    $taxonomy_name = $dom_parent->getAttribute('VocabularyName');
+    $t_machine_name = strtolower($taxonomy_name);
+    $t_machine_name = str_replace(' ', '', $t_machine_name);
+    $field_name = 'field_' . $t_machine_name;    
+    $conditions = array('name' => trim($taxonomy_name));
+    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE, $conditions);
+    $vocabulary = current($vocabularies);
+    
+    /* check if term exist */
+    $sql = "SELECT tid FROM taxonomy_term_data WHERE vid=:vid AND name=:name";
+    $tid = db_query($sql, array(
+      ':vid' => $vocabulary->vid,
+      ':name' => $term,
+    ))->fetchObject();
+
+    /* sav term at the first */
+    if(isset($tid) && isset($tid->tid) && is_numeric($tid->tid)){
+      $term_taxo = new stdClass();
+      $term_taxo->tid = $tid->tid;
+    }else{
+      $term_taxo = new stdClass();
+      $term_taxo->name = $term;
+      $term_taxo->vid = $vocabulary->vid;
+      taxonomy_term_save($term_taxo);
+    }    
+    
+    /* add new tid into the specifique element */
+    $global_list_term[] = $term_taxo->tid;
+  } 
+  
 }

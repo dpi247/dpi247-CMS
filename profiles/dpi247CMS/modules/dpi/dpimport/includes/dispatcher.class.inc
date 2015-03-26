@@ -194,8 +194,7 @@ abstract class Dispatcher {
    * @param Object $object2          
    */
   function processChildren($dom, $object, $object2) {
-    $importer = $this->getImporter ();
-    
+    $importer = $this->getImporter ();    
     foreach ( $dom->childNodes as $child ) {
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
@@ -205,7 +204,11 @@ abstract class Dispatcher {
           if($method_name == 'builddestinations'){
             $importer->$method_name ( $child, $object, $object2, $dom );
           }else{
-            $importer->$method_name ( $child, $object, $object2 );
+            if($method_name == 'buildterm'){
+              $importer->$method_name ( $child, $object, $object2, $dom );
+            }else{
+              $importer->$method_name ( $child, $object, $object2 );
+            }            
           }          
         }
       }
