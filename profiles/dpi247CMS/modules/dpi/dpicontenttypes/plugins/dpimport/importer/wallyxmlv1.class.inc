@@ -1035,6 +1035,8 @@ class WallyXmlV1 extends PackageHelper {
       /* glitch for tags that would be free tags */
       if($taxonomy_name == "Tags"){
         $taxonomy_name = "Free Tags";
+      }elseif ($taxonomy_name == "Authors") {
+        $taxonomy_name = "DPI Authors";
       }
       $conditions = array('name' => trim($taxonomy_name));
       $vocabularies = taxonomy_vocabulary_load_multiple(FALSE, $conditions);
@@ -1045,6 +1047,9 @@ class WallyXmlV1 extends PackageHelper {
         $dispatcher->processChildren($dom, $package_wrapper, $entity);
         global $global_list_term;
         if(is_array($global_list_term) && !empty($global_list_term)){
+          if($taxonomy_name == "DPI Authors"){
+            $taxonomy_name = "Authors";
+          }
           $t_machine_name = strtolower($taxonomy_name);
           $t_machine_name = str_replace(' ', '', $t_machine_name);
           $field_name = 'field_'.strtolower($t_machine_name);  
@@ -1070,6 +1075,11 @@ class WallyXmlV1 extends PackageHelper {
     
     $term = $dom->getAttribute('Name');
     $taxonomy_name = $dom_parent->getAttribute('VocabularyName');
+    if($taxonomy_name == "Tags"){
+      $taxonomy_name = "Free Tags";
+    }elseif ($taxonomy_name == "Authors") {
+      $taxonomy_name = "DPI Authors";
+    }
     $t_machine_name = strtolower($taxonomy_name);
     $t_machine_name = str_replace(' ', '', $t_machine_name);
     $field_name = 'field_' . $t_machine_name;    

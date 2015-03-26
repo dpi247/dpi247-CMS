@@ -237,26 +237,27 @@ function _dpicontenttypes_entityinsertembargoinformation($node){
   $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
   $useautopublishdate = current($useautopublishdates);
   $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
-  $autopublishdate = current($autopublishdates);
-  
-  if ($useautopublishdate) {        
-    $infos = new stdClass();
-    $infos->nid = $node->nid;
-    $infos->status = $node->status;
-    
-    if ( $autopublishdate['value'] != NULL && $node->status == 0 && intval($autopublishdate['value']) > time()){
-      $infos->date = $autopublishdate['value'];
-      $infos->action = 1;
-      $infos->timezone = $autopublishdate['timezone'];    
-      dpicontenttypes_api_insert_autopublish($infos); 
-    }
+  if(isset($autopublishdates) && is_array($autopublishdates) && count($autopublishdates)>=1){
+    $autopublishdate = current($autopublishdates);
+    if ($useautopublishdate) {        
+      $infos = new stdClass();
+      $infos->nid = $node->nid;
+      $infos->status = $node->status;
 
-    if ($autopublishdate['value2'] != NULL && intval($autopublishdate['value2']) > time()){
-      $infos->action = 0;
-      $infos->date = $autopublishdate['value2'];
-      dpicontenttypes_api_insert_autopublish($infos);
+      if ( $autopublishdate['value'] != NULL && $node->status == 0 && intval($autopublishdate['value']) > time()){
+        $infos->date = $autopublishdate['value'];
+        $infos->action = 1;
+        $infos->timezone = $autopublishdate['timezone'];    
+        dpicontenttypes_api_insert_autopublish($infos); 
+      }
+
+      if ($autopublishdate['value2'] != NULL && intval($autopublishdate['value2']) > time()){
+        $infos->action = 0;
+        $infos->date = $autopublishdate['value2'];
+        dpicontenttypes_api_insert_autopublish($infos);
+      }
     }
-  }
+  }  
 }
 
 /**
