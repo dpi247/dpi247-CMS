@@ -271,6 +271,14 @@ class WallyXmlV1 extends PackageHelper {
           if ($wrapper->nid->value() != NULL && $this->destinationexists($wrapper, $dest)) {
             // If destination already exists and no rank -> DNC
             $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 'DNC';
+            /* need to reset virtual rank */
+            $sql = "SELECT field_destinations_virtual_rank as virtual_rank FROM field_data_field_destinations WHERE field_destinations_tid=:tid AND field_destinations_target=:target AND entity_id=:eid";
+            $rez = db_query($sql, array(
+              ':tid' => $dest ['tid'],
+              ':target' => $dest ['target'],
+              ':eid' => $wrapper->nid->value(),
+            ))->fetchObject();
+            $dest ['virtual_rank'] = $rez->virtual_rank;
           }
           else {
             // If destination does not exists and no rank -> default
