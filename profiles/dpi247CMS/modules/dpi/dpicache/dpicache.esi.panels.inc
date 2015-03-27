@@ -54,10 +54,8 @@ function dpicache__panel_context_save(&$handler, $update) {
     $display = panels_load_display($handler->did);
   }
 
-  dsm($handler);
   if (_dpicache_panels__display_uses_esi($display)) {
     if ($handler->conf['pipeline'] == 'standard' || $handler->conf['pipeline'] == 'dpiviewer' || $handler->conf['pipeline'] == 'ipe') {
-      dsm(TOasty);
       $handler->conf['original_pipeline'] = $handler->conf['pipeline'];
       $handler->conf['pipeline'] = "dpicacheesi";
     }
@@ -180,7 +178,6 @@ function dpicache_esi_panels_url($pane, $display) {
   // - $display->args       Are *always* passed.
   // - $display->context    A pane can only accept a single context.
   // - $display->cache_key  The cache key provides the name of the task/subtask.
-kprint_r($pane);
   if (!empty($pane->configuration['context'])) {
     // If the context originates from the *TASK* plugin (which is typical), the
     // task name is required in order to generate the task contexts
@@ -386,8 +383,6 @@ function dpicacheesi_panels__esi_pane_render($pane) {
   // if ($pane->access && !empty($pane->display_contexts) && ctools_access($pane->access, $pane->display_contexts)) {
   //   return '';
   // }
-  kprint_r($content_type);
-print $content_type;
 
 
 

@@ -174,11 +174,20 @@ function dpicache_esi_panels_context_arguments($task, $subtask = '', $args = arr
       // @TODO.
       // return array($keys);
 
-    case 'term_view':
-      // @TODO.
-      //  return array($terms, $depth);
+		case 'term_view':
+		$tid = array_shift($args);
+		$tid = array_shift($args);
 
-    case 'user_view':
+		return taxonomy_term_load($tid);
+			//  return array($terms, $depth);
+		case 'sections':
+		$tid = array_shift($args);
+
+		return taxonomy_term_load($tid);
+			// @TODO.
+			//  return array($terms, $depth);
+
+		case 'user_view':
       $uid = array_shift($args);
       $account = user_load($uid);
       return array($account);
