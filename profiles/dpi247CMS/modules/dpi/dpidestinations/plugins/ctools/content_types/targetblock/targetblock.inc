@@ -119,6 +119,7 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
   
   $targetviews = &drupal_static ( 'dpidestinations_targetviews' );
   $targetviews_values = &drupal_static ( 'dpidestinations_targetview_valuess' );
+  $pager_info = &drupal_static ('dpidestinations_targetview_pager');
   
   if (! isset ( $targetviews [$destination_term_id] [$target_machine_name] )) {
     $targetview = $target_wrapper->targetview->value ();
@@ -127,10 +128,24 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
     // see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
     $targetview->dom_id = uniqid ();
     $targetview->execute ();
+    $pager_info = (isset($targetview->query->pager)) ? $targetview->query->pager : NULL;
     
     $targetviews_values [$destination_term_id] [$target_machine_name] = $targetview->result;
-    $targetviews [$destination_term_id] [$target_machine_name] = $targetview;
+    $targetviews [$destination_term_id] [$target_machine_name] = $targetview;        
   }
+  
+  /**
+   * Use static variable to sav pager into it.
+   * After that if the pager need to be added we add it to the view else
+   * We delete it.
+   * Then we don't reload view for splitted block but we use a static variable
+   */
+  if($targetblock && $targetblock->use_pager && !$targetblock->hide_pager){
+    $targetviews [$destination_term_id] [$target_machine_name]->query->pager = $pager_info;
+  }else{
+    unset($targetviews [$destination_term_id] [$target_machine_name]->query->pager);
+  }
+
   return $targetviews [$destination_term_id] [$target_machine_name];
 }
 
