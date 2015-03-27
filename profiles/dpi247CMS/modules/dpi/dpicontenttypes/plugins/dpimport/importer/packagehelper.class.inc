@@ -62,7 +62,11 @@ abstract class PackageHelper extends Importer {
     switch($action){
       case 'Delete':
         if ($temp_node != NULL) {
-          // @todo delete node
+          try {
+            node_delete($temp_node->nid);
+          }catch (Exception $exc) {
+            Logger::logError('importer', 0, 'xmldelete', t('There was an error occuring during delete'));
+          }          
         } else {
           Logger::logError('importer', 0, 'xmldelete', t('The package doesn\'t exist. It can\'t be deleted. Package rejected.'));
         }
@@ -218,7 +222,12 @@ abstract class PackageHelper extends Importer {
   protected function getDefaultTextFormat() {
     static $default_format = '';
     if (empty($default_format)) {
-      $default_format = filter_default_format();
+      $dispatcher_text_format = $this->getDispatcher()->getTextFormat();
+      if(!$dispatcher_text_format || $dispatcher_text_format == ""){
+        $default_format = filter_default_format();
+      }else{
+        $default_format = $dispatcher_text_format;
+      }
     }
     return $default_format;
   }

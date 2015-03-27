@@ -28,7 +28,7 @@ function dpiunivers_dpistate_define_options_settings($row, $values){
         $return_form_part = array();
         $val = dpiunivers_get_current_univer();
         $return_form_part['info'] = array (
-          '#markup' => 'current univer is ' . $val['label'] ,          
+          '#markup' => 'current univer is ' . ((isset($val['label'])) ? $val['label'] : "undifined") ,          
         );
         return array($return_form_part);  
       break;
@@ -64,7 +64,7 @@ function dpiunivers_get_current_univer(){
       $key = array_rand($univers);
       $return = $univers[$key];
     }
-    drupal_alter('dpiunivers_alter_current_univers', $return);
+    drupal_alter('dpiunivers_alter_current_univers', $return, $univers);
   }
   return $return;
 }

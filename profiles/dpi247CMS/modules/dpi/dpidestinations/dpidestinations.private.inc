@@ -252,7 +252,6 @@ function _targetblock_metadata_getter($object, $options, $property_name) {
  */
 function _dpidestinations_virtualrank_update_items(&$items,$nid) {
   foreach($items as &$item) {
-
     _dpidestinations_virtualrank_update_item($item,$nid);
   }
 }
