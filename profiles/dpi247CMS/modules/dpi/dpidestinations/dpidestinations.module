@@ -485,9 +485,12 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
     return 'plugins/ctools/content_types';
   }
-  if ($module == 'page_manager' && $plugin == 'tasks') {
-    return 'plugins/page_manager/tasks';
-  }
+	if ($module == 'ctools' && $plugin == 'access') {
+		return 'plugins/ctools/access';
+	}
+	if ($module == 'page_manager' && $plugin == 'tasks') {
+		return 'plugins/page_manager/tasks';
+	}
   if ($module == 'page_manager' && $plugin == 'task_handlers') {
     return 'plugins/page_manager/task_handlers';
   }

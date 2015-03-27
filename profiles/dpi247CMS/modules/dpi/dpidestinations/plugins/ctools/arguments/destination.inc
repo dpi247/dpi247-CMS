@@ -19,7 +19,6 @@ $plugin = array(
 	'keyword' => 'destination',
   'description' => t('Creates a single taxonomy term from a taxonomy ID or taxonomy term name.'),
   //'context' => 'dpidestinations_context_create_section',
-	'context' => 'dpidestinations_destination_context',
 	'context' => 'ctools_destination_context',
 
   'default' => array('input_form' => 'tid', 'breadcrumb' => TRUE, 'transform' => FALSE),
@@ -121,7 +120,7 @@ function dpidestinations_destination_context($arg = NULL, $conf = NULL, $empty =
 
 
 		$task = $conf['task'];
-		$task = page_manager_get_task('sections');
+	$task = page_manager_get_task('sections');
 
 		$handlers = page_manager_load_sorted_handlers($task, '', TRUE);
 
@@ -212,7 +211,6 @@ function ctools_destination_context($arg = NULL, $conf = NULL, $empty = FALSE) {
 	//@todo: we shouldn't hard code the argument_destination_1 name r should it be sections_dpisectionspanels_context_2 ?
 
 	$id = ctools_context_handler_get_render_handler($task, NULL, $handlers,array("sections_dpisectionspanels_context_2"=> $context), array());
-
 
 	if (isset($handlers[$id])) {
 
