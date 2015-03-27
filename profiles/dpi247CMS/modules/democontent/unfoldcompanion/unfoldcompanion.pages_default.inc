@@ -255,7 +255,9 @@ function unfoldcompanion_default_page_manager_handlers() {
     'template_rule' => NULL,
     '' => NULL,
     'override_by_rank' => 0,
-    'override_title_text' => '%destination:name',
+		'context' => 'argument_destination_1',
+
+		'override_title_text' => '%destination:name',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -290,7 +292,9 @@ function unfoldcompanion_default_page_manager_handlers() {
     'template_rule' => NULL,
     '' => NULL,
     'override_by_rank' => 0,
-    'override_title_text' => '%destination:name: A voir aussi',
+		'context' => 'argument_destination_1',
+
+		'override_title_text' => '%destination:name: A voir aussi',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -370,7 +374,9 @@ function unfoldcompanion_default_page_manager_handlers() {
     'template_rule' => NULL,
     '' => NULL,
     'override_by_rank' => 0,
-    'override_title_text' => 'Dpi247 Votre partenaire',
+		'context' => 'argument_destination_1',
+
+		'override_title_text' => 'Dpi247 Votre partenaire',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -405,7 +411,9 @@ function unfoldcompanion_default_page_manager_handlers() {
     'template_rule' => NULL,
     '' => NULL,
     'override_by_rank' => 0,
-    'override_title_text' => '%destination:name',
+		'context' => 'argument_destination_1',
+
+		'override_title_text' => '%destination:name',
   );
   $pane->cache = array();
   $pane->style = array(
@@ -440,7 +448,8 @@ function unfoldcompanion_default_page_manager_handlers() {
     'template_rule' => NULL,
     '' => NULL,
     'override_by_rank' => 0,
-    'override_title_text' => '%destination:name: A voir aussi',
+		'context' => 'argument_destination_1',
+		'override_title_text' => '%destination:name: A voir aussi',
   );
   $pane->cache = array();
   $pane->style = array(
