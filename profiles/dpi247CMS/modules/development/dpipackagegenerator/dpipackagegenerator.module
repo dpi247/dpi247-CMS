@@ -21,6 +21,9 @@ function dpipackagegenerator_menu() {
  * Implements hook_node_presave().
  */
 function dpipackagegenerator_node_presave($node) {
+
+  //Avoid too long display title
+  $node->field_displaytitle[$node->language] [0] ['value']=substr($node->field_displaytitle[$node->language] [0] ['value'],0,150);
   
   // see: http://www.wunderkraut.com/blog/generating-realistic-test-content/2011-03-07
   if ($node->type == 'package' && isset ( $node->devel_generate )) {

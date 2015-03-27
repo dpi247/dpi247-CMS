@@ -1,5 +1,9 @@
 <?php
 
+
+
+
+
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
@@ -453,16 +457,25 @@ function dpidestinations_default_panels_renderer_pipeline() {
 function dpidestinations_ctools_plugin_api($owner, $api) {
   if ($owner == 'panels' && $api == 'pipelines') {
     return array(
-      'version' => 1,
-      'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
+        'version' => 1,
+        'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
     );
   }
+
+  if ($owner == 'panels_mini' && $api == 'panels_default') {
+    return array('version' => 1);
+  }
+  if ($owner == 'page_manager' && $api == 'pages_default') {
+    return array('version' => 1);
+  }
+
 }
 
 /**
  * Implementation of hook_ctools_plugin_directory()
  */
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
+
   if ($module == 'ctools' && $plugin == 'arguments') {
     return 'plugins/ctools/arguments';
   }
