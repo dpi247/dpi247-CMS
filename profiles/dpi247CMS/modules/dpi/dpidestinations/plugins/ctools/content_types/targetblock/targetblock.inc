@@ -4,14 +4,20 @@
  * Plugin definition.
  */
 $plugin = array (
+	'single' => TRUE,
   'title' => t ( 'TargetBlock' ),
   'description' => t ( 'Crafted links to create content (nodes) for a given group.' ),
   // 'required context' => new ctools_context_required(t('Destination'), 'destination'),
   'category' => t ( 'Target' ),
   'group' => t ( 'DPI Core' ),
   'admin info' => 'dpidestinations_targetblock_admin_info',
+
   
-  'all contexts' => TRUE 
+  //'all contexts' => TRUE
+	'required context' => new ctools_context_required(t('Section'), array('section')),
+	'defaults' => array(
+
+	),
 );
 
 /**
@@ -29,8 +35,11 @@ function dpidestinations_targetblock_content_type_content_types($plugin) {
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
       // 'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t ( 'Target' ),
-      'group' => t ( 'DPI Core' ) 
-    // 'all contexts' => TRUE,
+      'group' => t ( 'DPI Core' ) ,
+			'admin info' => 'dpidestinations_targetblock_admin_info',
+			'required context' => new ctools_context_required(t('Section'), array('section')),
+
+			// 'all contexts' => TRUE,
         );
   }
   
@@ -68,13 +77,16 @@ function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
  * Render callback.
  */
 function dpidestinations_targetblock_content_type_render($subtype, $conf, $args, $context) {
-  $module = 'dpidestinations';
+
+
+	$module = 'dpidestinations';
   $block = new stdClass ();
   $block->module = $module;
-  
-  $destination_term_id = $context ['argument_destination_1']->data->tid;
-  $did = $context ['argument_destination_1']->data->handler->did;
-  
+
+  $destination_term_id = $context->data->tid;
+  $did = $context->data->handler->did;
+
+
   $target_name = $subtype;
   $split_delta = $conf ["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title ( $conf );
@@ -85,14 +97,21 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
   }
   global $user;
   $roles = implode('_', $user->roles);
-  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles, $pager_info);
+
+	$ctools_content_type=dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles, $pager_info);
+
+	return $ctools_content_type;
 }
 
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
   $block = new stdClass ();  
   $conf = dpidestinations_api_get_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)));
-  
-  $targetBlockController = new TargetBlockController ( 'targetblock' );
+
+
+
+
+
+	$targetBlockController = new TargetBlockController ( 'targetblock' );
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( $did, $target_name, $split_delta );
   $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
   $target = $targetblock_wrapper->target->value ();
@@ -179,7 +198,10 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
  * Edit form.
  */
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
-  $targetblockController = new TargetBlockController ( 'targetblock' );
+
+
+
+	$targetblockController = new TargetBlockController ( 'targetblock' );
   $targetController = new TargetController ( 'target' );
   $targetblock = $targetblockController->load_targetblock_by_panels_panelpid ( $form_state ['pane']->pid );
   // This is a new targetblock
