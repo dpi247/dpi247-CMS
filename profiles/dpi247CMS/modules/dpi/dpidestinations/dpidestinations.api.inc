@@ -278,7 +278,10 @@ function dpidestinations_api_get_panelsdisplay_for_sectionterm($term_id) {
  */
 function dpidestinations_api_get_virtual_rank_of_position_for_targetblock($position,$tid,$target)
 {
-
+  /* cas particulier du $position = 0 */
+  if($position == 0){
+    $position = 1;
+  }
   //@todo: avoid hard coding of the table...
   $destination_table = 'field_data_field_destinations';
 

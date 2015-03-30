@@ -24,7 +24,8 @@ function dfpmodule_positions_blocks() {
   
   
   $output = theme('table',$rows);
-  $output .= drupal_render(drupal_get_form('dfpmodule_positions_refresh_form'));
+  $val_form = drupal_get_form('dfpmodule_positions_refresh_form');
+  $output .= drupal_render($val_form);
   return $output;
 }
 
@@ -71,7 +72,8 @@ function dfpmodule_positions_refresh_form_submit(){
  * @return get_form
  */
 function dfpmodule_settings_url() {
-  $output = drupal_render(drupal_get_form ( 'dfp_settings_url_form' ));
+  $form = drupal_get_form ( 'dfp_settings_url_form' );
+  $output = drupal_render($form);
   $output .= dfpmodule_positions_blocks();
   return $output;
 }

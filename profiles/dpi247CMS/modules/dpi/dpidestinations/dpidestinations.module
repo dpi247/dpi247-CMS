@@ -1,5 +1,9 @@
 <?php
 
+
+
+
+
 module_load_include('inc', 'dpidestinations','dpidestinations.api');
 module_load_include('inc', 'dpidestinations','dpidestinations.private');
 module_load_include('inc', 'dpidestinations','dpidestinations.helpers');
@@ -101,6 +105,18 @@ function dpidestinations_menu() {
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_page_administration_configuration',
     'file' => 'dpidestinations.pages.admin.inc',
+    'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
+  );
+  
+  $items['admin/dpi247/dpidestinations/reorder_virtual_rank'] = array(
+    'title' => t('Manage virtual rank'),
+    'description' => 'Reset virtual rank informations.',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 12,
+    'access arguments' => array('administer targets'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpidestinations_reform_virtual_rank'),
+    'file' => 'dpidestinations.virtual_rank.reorder.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
   
@@ -441,16 +457,25 @@ function dpidestinations_default_panels_renderer_pipeline() {
 function dpidestinations_ctools_plugin_api($owner, $api) {
   if ($owner == 'panels' && $api == 'pipelines') {
     return array(
-      'version' => 1,
-      'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
+        'version' => 1,
+        'path' => drupal_get_path('module', 'dpidestinations') . '/includes',
     );
   }
+
+  if ($owner == 'panels_mini' && $api == 'panels_default') {
+    return array('version' => 1);
+  }
+  if ($owner == 'page_manager' && $api == 'pages_default') {
+    return array('version' => 1);
+  }
+
 }
 
 /**
  * Implementation of hook_ctools_plugin_directory()
  */
 function dpidestinations_ctools_plugin_directory($module, $plugin) {
+
   if ($module == 'ctools' && $plugin == 'arguments') {
     return 'plugins/ctools/arguments';
   }
@@ -460,9 +485,12 @@ function dpidestinations_ctools_plugin_directory($module, $plugin) {
   if ($module == 'ctools' && $plugin == 'content_types') {
     return 'plugins/ctools/content_types';
   }
-  if ($module == 'page_manager' && $plugin == 'tasks') {
-    return 'plugins/page_manager/tasks';
-  }
+	if ($module == 'ctools' && $plugin == 'access') {
+		return 'plugins/ctools/access';
+	}
+	if ($module == 'page_manager' && $plugin == 'tasks') {
+		return 'plugins/page_manager/tasks';
+	}
   if ($module == 'page_manager' && $plugin == 'task_handlers') {
     return 'plugins/page_manager/task_handlers';
   }

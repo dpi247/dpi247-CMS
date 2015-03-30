@@ -52,7 +52,7 @@ function dpiscald_facebook_status_scald_fetch($atom, $type) {
     $uri = 'public://atoms/facebook_status.png';
     $files = file_load_multiple(array(), array('uri' => $uri));
     $file = reset($files);
-    if (isset($file)) {
+    if ($file != NULL) {
       file_usage_add($file, 'dpiscald', 'facebook_status', $atom->sid);
       $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
     }
@@ -215,18 +215,22 @@ function dpiscald_facebook_status_parse_id($string, $check) {
 }
 
 function dpiscald_facebook_status_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_facebook_status_parse_id ( $url, FALSE );
-  $wrapper->base_id->set ( md5($id) );
-  $infos = dpiscald_facebook_status_get_media_infos_from_url ( $url );
-  $entity->title = $infos->title;
-  if(isset($infos->thumbnail_url)){
-    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $id = dpiscald_facebook_status_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $infos = dpiscald_facebook_status_get_media_infos_from_url ( $url );
+    $entity->title = $infos->title;
+    if(isset($infos->thumbnail_url)){
+      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['id'] = $infos->base_id;
+    $entity->data['orig_identifier'] = $url;
+    $entity->base_id = $infos->base_id;
+    $entity->data['user_id'] = $infos->user_id;
+    $entity->data['data_href'] = $infos->data_href;
+    $entity->data['country'] = $infos->country; 
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Facebook status : " . $url);
   }
-  $entity->data['id'] = $infos->id;
-  $entity->data['orig_identifier'] = $url;
-  $entity->base_id = $infos->base_id;
-  $entity->data['user_id'] = $infos->user_id;
-  $entity->data['data_href'] = $infos->data_href;
-  $entity->data['country'] = $infos->country; 
 }

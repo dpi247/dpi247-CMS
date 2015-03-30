@@ -110,7 +110,7 @@ class dpisocial_google_social_network extends dpisocial_social_network {
 	}
 
 	public function getShareButtonHtmlPersonnalized($nid, $url) {
-		return '<button class="btn btn-social btn-google-plus" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i><span class="label">'.$this->getNbShares($nid, $url).'</span></button>'	;
+		return '<button class="btn btn-social-icon btn-google-plus" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i><span class="label">'.$this->getNbShares($nid, $url).'</span></button>'	;
 	}
 	
 }

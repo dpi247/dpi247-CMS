@@ -3,6 +3,7 @@
  * @author GVD - LBA
  */
 module_load_include ( 'php', 'dpistate', 'dpistate.api' );
+module_load_include ( 'inc', 'dpistate', 'dpistate.private' );
 
 define('VARIABLE_NAME', 'dpistate_value_at_moment');
 
@@ -14,21 +15,9 @@ define('VARIABLE_NAME', 'dpistate_value_at_moment');
 function dpistate_menu() {
   $items = array();
   
-  $items ['admin/config/dpistate'] = array (
-    'title' => 'Create customs dpistate',
-    'description' => 'Allow admin to create specific dpistate.',
-    'position' => 'right',
-    'weight' => - 5,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array (
-      'administer dpistate' 
-    ),
-    'file' => 'system.admin.inc',
-    'file_path' => drupal_get_path ( 'module', 'system' ) 
-  );
-  
-  $items ['admin/config/dpistate/settings'] = array (
-    'title' => 'Customs states settings',
+  $items ['admin/dpi247/dpistate'] = array (
+    'title' => 'Dpi state : Manage web site state',
+    'description' => 'Allow admin to create specific dpistate and allow admin to define the state of the web site.',    
     'description' => 'Modify state\'s propreties.',
     'page callback' => 'dpistate_view_page',
     'access callback' => TRUE,
@@ -36,10 +25,17 @@ function dpistate_menu() {
       'administer dpistate' 
     ),
     'file' => 'dpistate.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes',    
   );
   
-  $items ['admin/config/dpistate/settings/settings'] = array (
+  $items ['admin/dpi247/dpistate/view'] = array (
+    'title' => 'List',
+    'description' => 'View states',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  
+  $items ['admin/dpi247/dpistate/settings'] = array (
     'title' => 'Settings',
     'description' => 'Set states options',
     'type' => MENU_LOCAL_TASK,
@@ -51,17 +47,12 @@ function dpistate_menu() {
       'administer dpistate' 
     ),
     'file' => 'dpistate.pages.admin.inc',
-    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
+    'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
   );
   
-  $items ['admin/config/dpistate/settings/view'] = array (
-    'title' => 'List',
-    'description' => 'View states',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    "weight" => - 40 
-  );
-  
-  $items ['admin/config/dpistate/settings/add'] = array (
+  $items ['admin/dpi247/dpistate/settings/add'] = array (
     'title' => 'Add customs state settings',
     'description' => 'Add state\'s propreties.',
     'page callback' => 'dpistate_add_or_edit',
@@ -72,7 +63,7 @@ function dpistate_menu() {
     'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
   );
   
-  $items ['admin/config/dpistate/settings/edit/%'] = array (
+  $items ['admin/dpi247/dpistate/settings/edit/%'] = array (
     'title' => 'Add customs states settings',
     'description' => 'Add state\'s propreties.',
     'page callback' => 'dpistate_add_or_edit',
@@ -86,7 +77,7 @@ function dpistate_menu() {
     'file path' => drupal_get_path ( 'module', 'dpistate' ) . '/includes' 
   );
   
-  $items ['admin/config/dpistate/settings/delete/%'] = array (
+  $items ['admin/dpi247/dpistate/settings/delete/%'] = array (
     'title' => 'Add customs states settings',
     'description' => 'Add state\'s propreties.',
     'page callback' => 'dpistate_delete',

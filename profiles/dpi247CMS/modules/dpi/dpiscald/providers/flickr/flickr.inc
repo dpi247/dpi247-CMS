@@ -64,9 +64,11 @@ function dpiscald_flickr_scald_add_form_fill(&$atom, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_flickr_scald_fetch($atom, $type) {
-  $image_uri = $atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'];
-  if (file_exists ( $image_uri )) {
-    $atom->file_source = $atom->thumbnail_source = $image_uri;
+  if (isset($atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'])) {
+    $image_uri = $atom->scald_thumbnail [LANGUAGE_NONE] [0] ['uri'];
+    if (file_exists ( $image_uri )) {
+      $atom->file_source = $atom->thumbnail_source = $image_uri;
+    }
   }
 }
 
@@ -529,17 +531,21 @@ function dpiscald_flickr_update_atom(&$atom, $infos, $bypass = FALSE) {
 }
 
 function dpiscald_flickr_get_import_info($importer, & $entity, & $wrapper, $url){
-  $id = dpiscald_flickr_parse_id ( 'photo', $url );
-  $wrapper->base_id->set ( $id );
-  $info = dpiscald_flickr_image ( $id );
-  $element = new stdClass();
-  dpiscald_flickr_update_atom($element, $info, TRUE);
-  $wrapper->base_id->set( $element->base_id );
-  if(isset($element->scald_thumbnail[LANGUAGE_NONE][0])){
-    $wrapper->scald_thumbnail->set( ( array ) $element->scald_thumbnail[LANGUAGE_NONE][0] );
-  }             
-  if(isset($element->title->_content)){
-    $entity->title = $element->title->_content;
-  }     
-  $entity->data['orig_identifier'] = $url;  
+  try {
+    $id = dpiscald_flickr_parse_id ( 'photo', $url );
+    $wrapper->base_id->set ( $id );
+    $info = dpiscald_flickr_image ( $id );
+    $element = new stdClass();
+    dpiscald_flickr_update_atom($element, $info, TRUE);
+    $wrapper->base_id->set( $element->base_id );
+    if(isset($element->scald_thumbnail[LANGUAGE_NONE][0])){
+      $wrapper->scald_thumbnail->set( ( array ) $element->scald_thumbnail[LANGUAGE_NONE][0] );
+    }             
+    if(isset($element->title->_content)){
+      $entity->title = $element->title->_content;
+    }     
+    $entity->data['orig_identifier'] = $url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Flickr : " . $url);
+  }
 }

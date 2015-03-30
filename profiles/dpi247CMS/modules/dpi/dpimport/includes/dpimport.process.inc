@@ -31,7 +31,20 @@ function dpimport_page_process_import($importer_name){
     Logger::logError('importer', 0, 'importer_002', t('There is no importer with this name.'));
   }
   if ($return == NULL){
-    $return = Logger::printLog();
+    $return = Logger::printLog();    
+  }
+  
+  if(Logger::error()){
+    $strErr = "";
+    $val = Logger::getLogError();
+    if(is_array($val)){
+      foreach($val as $msg){
+        $strErr .= $msg->message." \n";
+      }
+    }    
+    dpi_log('dpi_imports', "logger_error", t("Import occuring an error with message : ".$strErr));
+  }else{
+    dpi_log('dpi_imports', "logger_msg", t("Import succes with no error"));
   }
   
   print $return;
@@ -43,14 +56,19 @@ function dpimport_page_process_import($importer_name){
  * @param Importer $importer
  */
 function dpimport_process_import($importer, $dispatcher) {
-  $sources = $dispatcher->extractSources();
-  if ($sources != NULL){
-    foreach ($sources as $source){
-      if ($source['temp_source'] != NULL){
-        $dispatcher->process($source['temp_source']);
+  try {
+    $sources = $dispatcher->extractSources();
+    if ($sources != NULL){
+      foreach ($sources as $source){
+        if ($source['temp_source'] != NULL){
+          $dispatcher->process($source['temp_source']);
+        }
+        $dispatcher->moveSource($source);
       }
-      $dispatcher->moveSource($source);
     }
+  } catch (Exception $exc) {
+    Logger::logError('importer', 0, 'importer_002', t('General error into process : '.$exc->getMessage()));
+    $dispatcher->moveSource($source);    
   }
 }
 

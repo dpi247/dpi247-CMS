@@ -101,6 +101,10 @@ function dpiscald_videortl_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/videortl/dpiscald_videortl_player_live'
     ),
+    'dpiscald_videortl_player_html5' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'templates/players/dpiscald_videortl_player_html5'
+    ),
   );
 }
 
@@ -223,21 +227,25 @@ function dpiscald_videortl_parse_domain($string, $check) {
 }
 
 function dpiscald_videortl_get_import_info($importer, & $entity, & $wrapper, $url){
-  $identifier = dpiscald_videortl_parse_id($url, TRUE);
-  $key = dpiscald_videortl_parse_key($url, TRUE);
-  $live_id = dpiscald_videortl_parse_liveid($url, TRUE);
-  $domain = dpiscald_videortl_parse_domain($url, TRUE);
-  $entity->base_id = $identifier;
-  $wrapper->base_id->set ( md5($identifier) );
-  $infos = dpiscald_videortl_get_media_infos_from_url ( $url );
-  if(isset($infos->thumbnail_url)){
-    $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
-    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $identifier = dpiscald_videortl_parse_id($url, TRUE);
+    $key = dpiscald_videortl_parse_key($url, TRUE);
+    $live_id = dpiscald_videortl_parse_liveid($url, TRUE);
+    $domain = dpiscald_videortl_parse_domain($url, TRUE);
+    $entity->base_id = $identifier;
+    $wrapper->base_id->set ( md5($identifier) );
+    $infos = dpiscald_videortl_get_media_infos_from_url ( $url );
+    if(isset($infos->thumbnail_url)){
+      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->title = $infos['title'];
+    $entity->data['video_key'] = $key;
+    $entity->data['video_id'] = $identifier;
+    $entity->data['video_liveid'] = $live_id;
+    $entity->data['video_domain'] = $domain;
+    $entity->data['orig_identifier'] = $url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Video RTL : " . $url);
   }
-  $entity->title = $infos['title'];
-  $entity->data['video_key'] = $key;
-  $entity->data['video_id'] = $identifier;
-  $entity->data['video_liveid'] = $live_id;
-  $entity->data['video_domain'] = $domain;
-  $entity->data['orig_identifier'] = $url;
 }

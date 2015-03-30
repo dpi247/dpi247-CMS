@@ -786,23 +786,23 @@ function dpicontenttypes_api_insert_autopublish($element) {
       $fields = array(
         'nid' => $element->nid,
         'status' => $element->status,
-        'date' => $element->date,
+        'date_info' => $element->date,
         'action' => $element->action,
         'date_timezone' => $element->timezone,
       );
 
       db_merge('dpicontenttypes_temp_nodetopublish')
-          ->key(array('nid' => $element->nid, 'action' => $element->action ))
+          ->key(array('nid' => $element->nid, 'action' => $element->action))
           ->fields($fields)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : insert success for node with nid @nid", array("@nid" => $element->nid)));
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Successful insertion of the temporary line to the node @nid", array("@nid" => $element->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Catch an error into db_merge execution"));
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Catch an error into db_merge execution with error : " . $exc->getMessage()));
     }
   }
   else {
-    dpi_log('dpi_autopublish', "insert_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
   return $return;
 }
@@ -819,22 +819,43 @@ function dpicontenttypes_api_delete_autopublish($node) {
           ->condition('nid', $node->nid)
           ->execute();
       $return = TRUE;
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Suppression success for node with nid @nid", array("@nid" => $node->nid)));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
     } catch (Exception $exc) {
-      dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Catch an error into db_delete execution"));
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution with message : " . $exc->getMessage()));
     }
   }
   else {
-    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
   return $return;
 }
+
 /**
- * $node = node_load(67);
-  dsm($node, 'start');
-  module_load_include('inc', 'dpicontenttypes', 'dpicontenttypes.api');
-  dpicontenttypes_api_check_autopublish($node);
-  dsm($node, 'end');
+ * This function delete informations about autopublish node pass by parameter
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
+  $return = FALSE;
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    try {
+      db_delete('dpicontenttypes_temp_nodetopublish')
+          ->condition('nid', $node->nid)
+          ->condition('action', $action)
+          ->execute();
+      $return = TRUE;
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line for node @nid with action @action", array("@nid" => $node->nid, '@action' => ($action == 0) ? 'unpublish' : 'publish')));
+    } catch (Exception $exc) {
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution"));
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
+/**
+ * 
  * @param type $node
  */
 function dpicontenttypes_api_check_autopublish($node) {
@@ -845,36 +866,40 @@ function dpicontenttypes_api_check_autopublish($node) {
       $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
       $autopublishdate = current($autopublishdates);
       if (isset($autopublishdate['value'])) {
-        $embargo_date = $autopublishdate;
-        $embargo_timzone_db = $embargo_date['timezone_db'] ? $embargo_date['timezone_db'] : 'UTC';
-        if ($form_date = date_make_date($embargo_date['value'], $embargo_timzone_db)) {
-          $form_date = (object) date_timezone_set($form_date, timezone_open($embargo_date['timezone']));
-          $form_date = unserialize(serialize($form_date));
-          $safe_embargo_date = $form_date->date;
-        }
-        $unpublish_date = $autopublishdate;
-        $unpublish_timzone_db = $unpublish_date['timezone_db'] ? $unpublish_date['timezone_db'] : 'UTC';
-        if ($form_date = date_make_date($unpublish_date['value2'], $unpublish_timzone_db)) {
-          $form_date = (object) date_timezone_set($form_date, timezone_open($unpublish_date['timezone']));
-          $form_date = unserialize(serialize($form_date));
-          $safe_unpublish_date = $form_date->date;
-        }
-
-        if (strtotime($safe_embargo_date) <= time() && ($autopublishdate['value2'] == NULL || strtotime($safe_unpublish_date) >= time())) {
+        $date = $autopublishdate;
+        //@todo Confirmer la validité en fonction du fuseau horaire        
+        if (intval($date['value']) <= time() && ($date['value2'] == NULL || intval($date['value2']) >= time())) {
           $node->status = 1;
         }
         else {
-          $node->status = 0;
+          if(intval($date['value']) == intval($date['value2'])){
+            $node->status = 1; //that mean no use unpublish date
+          }else{
+            $node->status = 0; 
+          }          
         }
       }
       else {
         $node->status = 0;
       }
-    }else{
+    }
+    else {
       $node->status = 1;
     }
   }
   else {
-    dpi_log('dpi_autopublish', "delete_autopublish_node", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
   }
+}
+
+function dpicontenttypes_api_truncate_autopublish() {
+  $return = FALSE;
+  try {
+    db_truncate('dpicontenttypes_temp_nodetopublish')->execute();
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table success"));
+    $return = TRUE;
+  } catch (Exception $exc) {
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table impossible"));
+  }
+  return $return;
 }

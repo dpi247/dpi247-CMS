@@ -163,3 +163,16 @@ function dpimport_cron(){
   dpimport_deleteoldfiles($importers);
   dpimport_process_cron_imports($importers);
 }
+
+/**
+ * Implementation of hook_dpilog_register
+ * 
+ * @return array
+ */
+function dpimport_dpilog_register(){
+  return array(
+    "dpi_imports"=>array(
+      "actions"=>array("logger_error", "logger_msg"),
+    )
+  );
+}

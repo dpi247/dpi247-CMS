@@ -18,18 +18,19 @@ $plugin = array (
 function dpiblocks_accroche_content_type_content_types($plugins) {
   $types = array ();
   $layouts = _dpiblocks_accroche_get_all_teaser ();
-  
-  foreach ( $layouts as $key => $layout ) {
-    $types [$key] = array (
-      'title' => check_plain ( $layout [0] ),
-      'subtype' => $key,
-      'description' => check_plain ( $layout [0] ),
-      'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
-      'category' => 'Accroche',
-      'group' => 'DPI Core', 
-      'all contexts' => TRUE
-    ); 
-  }
+  if(is_array($layouts)){
+    foreach ( $layouts as $key => $layout ) {
+      $types [$key] = array (
+        'title' => check_plain ( $layout [0] ),
+        'subtype' => $key,
+        'description' => check_plain ( $layout [0] ),
+        'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
+        'category' => 'Accroche',
+        'group' => 'DPI Core', 
+        'all contexts' => TRUE
+      ); 
+    }
+  }  
   
   /* foreach on entity */
   $entities = entity_load('accroche');

@@ -37,6 +37,7 @@ function dpicommons_menu() {
     'title' => 'DPI247 Finalize install process',
     'description' => 'Save section page manager tasks in DB',
     'page callback' => '_dpicommons_finalize_install_process',
+    'access callback' => TRUE,
     'access arguments' => TRUE,
     'type'=>MENU_CALLBACK,
     'file' => 'dpicommons.pages.admin.inc',

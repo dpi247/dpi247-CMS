@@ -73,9 +73,11 @@ function dpiscald_kewego_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_kewego_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -179,6 +181,6 @@ function dpiscald_kewego_get_import_info($importer, & $entity, & $wrapper, $url)
     $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
     $wrapper->scald_thumbnail->set ( ( array ) $file );  
   } catch (Exception $e) {
-    
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Kewego : " . $url);
   }
 }

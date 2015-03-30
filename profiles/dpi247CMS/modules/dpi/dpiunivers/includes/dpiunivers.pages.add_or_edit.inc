@@ -38,7 +38,7 @@ function dpiunivers_add_form($form, &$form_state, $id) {
     
     '#type' => 'textfield',
     '#title' => t ( 'Enter your univers\' name here' ),
-    '#default_value' => (isset ( $univers ['label'] )) ? $univers ['label'] : "",
+    '#default_value' => (isset ( $univers->label )) ? $univers->label : "",
     '#size' => 60,
     '#maxlength' => 128,
     '#required' => TRUE 
@@ -55,7 +55,7 @@ function dpiunivers_add_form($form, &$form_state, $id) {
   	'#type' => 'select',
 	'#title' => t ( 'Select the associated theme' ),
     '#options' => $lthemes,
-    '#default_value' => (isset ( $univers ['theme'] )) ? $univers ['theme'] : false,
+    '#default_value' => (isset ( $univers->theme )) ? $univers->theme : false,
   );
   
   $menus = menu_get_menus();
@@ -64,7 +64,7 @@ function dpiunivers_add_form($form, &$form_state, $id) {
   	'#type' => 'select',
 	'#title' => t ( 'Select the associated menu' ),
     '#options' => $menus,
-    '#default_value' => (isset ( $univers ['menu'] )) ? $univers ['menu'] : false,
+    '#default_value' => (isset ( $univers->menu )) ? $univers->menu : false,
   );
   
   

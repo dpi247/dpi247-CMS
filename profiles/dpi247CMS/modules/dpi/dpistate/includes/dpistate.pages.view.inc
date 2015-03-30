@@ -10,7 +10,6 @@
  * @return string
  */
 function dpistate_view_page() {
-
   $output = array ();
   $form = drupal_get_form ( 'dpistate_add_state_form' );
   $output = drupal_render ( $form );
@@ -34,7 +33,7 @@ function dpistate_add_state_form($form, &$form_state) {
   $form ['add'] ['link'] = array (
     '#type' => 'link',
     '#title' => t ( 'Add' ),
-    '#href' => 'admin/config/dpistate/settings/add' 
+    '#href' => 'admin/dpi247/dpistate/settings/add' 
   );
   
   return $form;
@@ -124,15 +123,18 @@ function dpistate_generate_rows($data_list = array()) {
 
 function dpistate_replace_state_type_from_int_to_string($type) {
 	switch ($type) {
-		case 0 :
-		  return "Numeric";
+		case '0' :
+        return "Numeric";
 		  break;
-		case 1 :
-		  return "Text";
+		case '1' :
+        return "Text";
 		  break;
-		case 2 :
-		  return "Date";
+		case '2' :
+        return "Date";
 		  break;
+    default:
+        return $type;
+      break;
   }
 }
 
@@ -145,8 +147,8 @@ function dpistate_replace_state_type_from_int_to_string($type) {
 
 function dpistate_add_link_for_operation($id) {
   $array_links = array(
-  	l('Edit', 'admin/config/dpistate/settings/edit/' . $id ),
-	l('Delete', 'admin/config/dpistate/settings/delete/' . $id )
+  	l('Edit', 'admin/dpi247/dpistate/settings/edit/' . $id ),
+    l('Delete', 'admin/dpi247/dpistate/settings/delete/' . $id )
   );
   
   return implode(' - ',$array_links);
@@ -175,15 +177,30 @@ function dpistate_change_date_format(& $data_list, $v, $k) {
   }
 }
 
+/**
+ * This function return a string to know what this state do.
+ * 
+ * @param integer $type
+ * @param array $values
+ * @return string
+ */
 function dpistate_values_to_string($type, $values) {
 	switch($type) {
-		case 0:
-			return '0 '.t('to').' '.$values;
+		case '0':
+        return '0 '.t('to').' '.$values;
 			break;	
-		case 1:
-			return implode(' | ',$values);
+		case '1':
+        return implode(' | ',$values);
 			break;
-		case 2:
-			return t('From').date(' d/m/y H:i ',strtotime($values[0])).t('to').date(' d/m/y H:i',strtotime($values[1]));
+		case '2':
+        return t('Date values is define into settings');
+    default:
+        $strs = module_invoke_all('dpistate_get_value_table_view', $type, $values);
+        $string = "";
+        foreach($strs as $str){
+          $string .= $str;
+        }
+        return $string;
+      break;
 	}
 }

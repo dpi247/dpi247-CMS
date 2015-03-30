@@ -115,19 +115,116 @@ function dpicontenttypes_menu(){
  * Implementation of hook_cron
  */
 function dpicontenttypes_cron() {
+  /**
+  * Three steps for embargo creation
+  * 1 : 1/Days, set tmp table
+  * 2 : 1/Call, publish element from tmp table
+  * 3 : 1/Call, unpublish element from tmp table
+  */
   /* Get the date of today to test cron run */
   $today = strtotime(date('Y-m-d'));
   $last_run_timestamp = dpi_variable_get('dpicontenttypes_embargo_last_run', time() - 86400);
+  dpi_log('dpi_autopublish', "start_autopublish_log", t("dpi_autopublish : Start cron embargo"));
+  /**
+   * Step 1
+   */
   if ($last_run_timestamp < $today) {
     dpi_variable_set('dpicontenttypes_embargo_last_run', $today);
+    /* Clear table temporaire complète */
+    dpicontenttypes_api_truncate_autopublish();
+    /* Get all results from node table for autopublish date and unpublish date */
+    $results = db_query("SELECT DISTINCT n.nid, n.status, auto.field_autopublishdate_value as date
+              			   FROM {node} n 
+              			   LEFT JOIN {field_data_field_autopublish} cfe ON cfe.entity_id = n.nid
+              			   LEFT JOIN {field_data_field_autopublishdate} auto ON auto.entity_id = n.nid
+              			   WHERE (CAST(FROM_UNIXTIME(auto.field_autopublishdate_value) as date) = CURDATE())
+                       AND (n.type = 'package' OR n.type = 'package_gallery')
+              			   AND cfe.field_autopublish_value = 1");
     
-    /* flush caching before modification */
-    /**
-     * @todo Flush caching
-     */
+    foreach($results as $row){
+      $default_options = array(
+        'nid' => $row->nid,
+        'status' => $row->status,
+        'date' => $row->date,
+        'action' => 1,
+        'timezone' => 'Europe/Berlin', //@todo trouver une solution pour le timezone
+      );      
+      dpicontenttypes_api_insert_autopublish((object) $default_options);
+    }
+    
+    $results = db_query("SELECT DISTINCT n.nid, n.status, auto.field_autopublishdate_value2 as date
+              			   FROM {node} n 
+              			   LEFT JOIN {field_data_field_autopublish} cfe ON cfe.entity_id = n.nid
+              			   LEFT JOIN {field_data_field_autopublishdate} auto ON auto.entity_id = n.nid
+              			   WHERE (CAST(FROM_UNIXTIME(auto.field_autopublishdate_value2) as date) = CURDATE())
+                       AND (n.type = 'package' OR n.type = 'package_gallery')
+              			   AND cfe.field_autopublish_value = 1");
+    
+    foreach($results as $row){
+      $default_options = array(
+        'nid' => $row->nid,
+        'status' => $row->status,
+        'date' => $row->date,
+        'action' => 0,
+        'timezone' => 'Europe/Berlin', //@todo trouver une solution pour le timezone
+      );      
+      dpicontenttypes_api_insert_autopublish((object) $default_options);
+    }
+    dpi_log('dpi_autopublish', "tmp_autopublish_update", t("dpi_autopublish : table tmp for embargo updated"));
   }
   
+  /**
+   * Step 2
+   */
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    $results = db_query("SELECT DISTINCT *
+                          FROM dpicontenttypes_temp_nodetopublish
+                          WHERE FROM_UNIXTIME(date_info) < NOW() 
+                          AND action = 1
+                          ORDER BY date_info ASC");
+    foreach($results as $row){
+        try {
+          $node = node_load($row->nid);
+          $node->status = 1;
+          /* alter to change node information before save */
+          drupal_alter('dpi_node_embargo_released', $node);
+
+          /* Sav node & delete row from tmp */
+          node_save($node);       
+          dpicontenttypes_api_delete_by_action_autopublish($node, 1);
+          dpi_log('dpi_autopublish', "action_cron_autopublish", t("dpi_autopublish : node with nid !nid is publish", array('!nid' => $row->nid)));
+        } catch (Exception $exc) {
+          dpi_log('dpi_autopublish', "error_autopublish_node", t("dpi_autopublish : was a problem for the publication of the node !nid", array('!nid' => $row->nid)));
+        }
+    }    
+  }
   
+  /**
+   * Step 3
+   */
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    $results = db_query("SELECT DISTINCT *
+                          FROM dpicontenttypes_temp_nodetopublish
+                          WHERE FROM_UNIXTIME(date_info) < NOW() 
+                          AND action = 0
+                          ORDER BY date_info ASC");
+    foreach($results as $row){
+        try {
+          $node = node_load($row->nid);
+          $node->status = 0;
+          /* alter to change node information before save */
+          drupal_alter('dpi_node_embargo_released', $node);
+
+          /* Sav node & delete row from tmp */
+          node_save($node);       
+          dpicontenttypes_api_delete_by_action_autopublish($node, 0);
+          dpi_log('dpi_autopublish', "action_cron_unpublish", t("dpi_autopublish : node with nid !nid is unpublish", array('!nid' => $row->nid)));
+        } catch (Exception $exc) {
+          dpi_log('dpi_autopublish', "error_unpublish_node", t("dpi_autopublish : was a problem for the unpublication of the node !nid", array('!nid' => $row->nid)));
+        }
+    }
+  }
+  dpi_log('dpi_autopublish', "end_autopublish_log", t("dpi_autopublish : End cron embargo"));
   // Remove old external files
   _dpicontenttypes_cron_remove_external_files();
 }
@@ -178,6 +275,20 @@ function dpicontenttypes_node_create($node) {
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
       rules_invoke_event('dpicontenttypes_rules_event_package_create', $node);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_node_create
+ *
+ * @param object $node
+ */
+function dpicontenttypes_node_update($node) {
+  _dpicontenttypes_entityinsertembargoinformation($node);
+  if(function_exists("rules_invoke_event")){
+    if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
+      rules_invoke_event('dpicontenttypes_rules_event_package_update', $node);
     }
   }
 }
@@ -906,7 +1017,7 @@ function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
 function dpicontenttypes_dpilog_register(){
   return array(
     "dpi_autopublish"=>array(
-      "actions"=>array("insert_autopublish_node", "delete_autopublish_node", 'error_autopublish_node'),
+      "actions"=>array("start_autopublish_log", "end_autopublish_log", "tmp_autopublish_update", "delete_autopublish_table", "action_cron_autopublish", "action_cron_unpublish" ,'error_autopublish_node', 'error_unpublish_node', 'add_tmp_table_embargo', 'del_tmp_table_embargo'),
     )
   );
 }

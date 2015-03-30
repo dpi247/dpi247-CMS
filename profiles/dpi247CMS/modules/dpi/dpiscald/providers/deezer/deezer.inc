@@ -32,6 +32,8 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
   $type = $parse_id[0];
   $id = $parse_id[1];
 
+  $atom->data['type_deezer'] = $type;
+
   // Get media infos.
   $infos = dpiscald_deezer_get_media_infos_from_url($type, $id);
   
@@ -85,9 +87,11 @@ function dpiscald_deezer_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_deezer_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -119,7 +123,7 @@ function dpiscald_deezer_theme() {
           'template' => 'providers/deezer/dpiscald_deezer_player'
       ),
       'dpiscald_deezer_player_html5' => array(
-          'variables' => array( 'base_url' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+          'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'templates/players/dpiscald_deezer_player_html5'
     ),
   );
@@ -218,6 +222,14 @@ function dpiscald_deezer_parse_id($string, $check) {
     if (preg_match('#http?://www\.deezer\.com/([a-zA-Z0-9\-_]*)/([a-zA-Z0-9\-_]+)#', $string, $m)) {
       // This string os a full dailymotion URL
       $id = array( $m[1], $m[2]);
+      if (!in_array($id[0], array('track', 'album', 'playlist'))) {
+        $parts = parse_url($string);
+        parse_str($parts['query'], $query);
+        if (!empty($query['id']) && !empty($query['type'])) {
+          $id = array($query['type'], $query['id']);
+        }
+      }
+
     }
     elseif (preg_match('#^https://www.deezer.com/([a-zA-Z0-9]+)(_.*)?$#', $string, $m)) {
       // This string os a full dailymotion URL
@@ -242,7 +254,7 @@ function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url)
   try {
     $entity->provider = 'dpiscald';
     $id = dpiscald_deezer_parse_id ( $url, FALSE );
-    $wrapper->base_id->set ( $id [1] );
+    $wrapper->base_id->set ( md5($url) );
     $infos = dpiscald_deezer_get_media_infos_from_url ( $id [0], $id [1] );
     if ($id [0] == "tracks") {
       $thumbnail_url = $infos->album->cover;
@@ -254,6 +266,8 @@ function dpiscald_deezer_get_import_info($importer, & $entity, & $wrapper, $url)
     $file = $importer->createFile ( $thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
     $wrapper->scald_thumbnail->set ( ( array ) $file );
     $entity->data ['url'] = 'http://www.deezer.com/plugins/player?type=' . $id [0] . '&id=' . $id [1];
+    $entity->data ['type_deezer'] = $id [0];
   } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Deezer : " . $url);
   }
 }

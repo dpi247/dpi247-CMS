@@ -77,8 +77,13 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     'custom settings' => FALSE,
   );
 
-  $entity_info['node']['view modes']['dpi_atom_embedd'] = array(
-    'label' => t('DPI Atom embedd'),
+  $entity_info['node']['view modes']['dpi_hors_texte'] = array(
+    'label' => t('DPI Atom hors texte'),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['dpi_article_secondaire'] = array(
+    'label' => t('DPI Atom article secondaire'),
     'custom settings' => TRUE,
   );
 

@@ -137,7 +137,7 @@ class FolderDispatcher extends Dispatcher {
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep ["default"] ["name"];
     $old = umask(0);
     
-    if (mkdir($default_path . "/todo", 0777 )) {
+    if (@mkdir($default_path . "/todo", 0777 )) {
       $dispatcher_settings = parent::submitSettingsForm($values, $form_state_multistep);
       $dispatcher_settings ['source_url'] = $default_path . "/todo";
       drupal_set_message("Creating : " . $default_path . "/todo");

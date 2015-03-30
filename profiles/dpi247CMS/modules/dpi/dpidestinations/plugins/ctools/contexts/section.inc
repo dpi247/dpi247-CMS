@@ -12,20 +12,21 @@
  */
 $plugin = array(
   'title' => t("Section term"),
-  'description' => t('A single taxonomy term object.'),
-  'context' => 'dpidestinations_context_create_section',
+  'description' => t('A single section term object.'),
+  'context' => 'dpidestinations_destination_context',
+	'context'=>  'ctools_context_create_section',
   'edit form' => 'dpidestinations_context_section_settings_form',
   'defaults' => array(
     'vid' => '',
     'tid' => '',
   ),
-  'keyword' => 'term',
-  'context name' => 'term',
+  'keyword' => 'section',
+  'context name' => 'section',
   'convert list' => array(
-    'tid' => t('Term ID'),
-    'name' => t('Term name'),
+    'tid' => t('Section ID'),
+    'name' => t('Section name'),
     'name_dashed' => t('Term name, lowercased and spaces converted to dashes'),
-    'description' => t('Term Description'),
+    'description' => t('Section Description'),
     'vid' => t('Vocabulary ID'),
   ),
   'convert' => 'dpidestinations_context_section_convert',
@@ -34,33 +35,31 @@ $plugin = array(
   'no required context ui' => TRUE,
 );
 
-/**
- * It's important to remember that $conf is optional here, because contexts
- * are not always created from the UI.
- */
 
-function dpidestinations_context_create_section($empty, $data = NULL, $conf = FALSE) {
-  $context = new ctools_context('term');
-  $context->plugin = 'term';
-  if ($empty) {
-    $context->toto='toto';
-    
-    return $context;
-  }
+function ctools_context_create_section($empty, $data = NULL, $conf = FALSE) {
+	$context = new ctools_context('section');
+	$context->plugin = 'section';
 
-  if ($conf && isset($data['tid'])) {
-    $data = taxonomy_term_load($data['tid']);
-  }
+	if ($empty) {
+		return $context;
+	}
 
-  if (!empty($data)) {
-    $context->data        = $data;
-    $context->title       = $data->name;
-    $context->argument    = $data->tid;
-    $context->description = $data->description;
-    
-    return $context;
-  }
+	if ($conf && isset($data['tid'])) {
+		$data = taxonomy_term_load($data['tid']);
+	}
+
+	if (!empty($data)) {
+		$context->data        = $data;
+		$context->title       = $data->name;
+		$context->argument    = $data->tid;
+		$context->description = $data->description;
+		return $context;
+	}
 }
+
+
+
+
 
 function dpidestinations_context_section_settings_form($form, &$form_state) {
   $conf = $form_state['conf'];
@@ -167,3 +166,41 @@ function dpidestinations_context_section_convert($context, $type) {
       return $context->data->description;
   }
 }
+
+
+
+
+/**
+ * It's important to remember that $conf is optional here, because contexts
+ * are not always created from the UI.
+ */
+
+/*
+function dpidestinations_context_create_section($empty, $data = NULL, $conf = FALSE) {
+  $context = new ctools_context('section');
+  $context->plugin = 'section';
+  dsm(OKCUOID);
+  if ($empty) {
+    $context->toto='toto';
+
+    return $context;
+  }
+
+  dsm($data);
+  if ($conf && isset($data['tid'])) {
+    $data = taxonomy_term_load($data['tid']);
+  }
+
+  if (!empty($data)) {
+    $context->data        = $data;
+    $context->title       = $data->name;
+    $context->argument    = $data->tid;
+    $context->description = $data->description;
+
+    return $context;
+  }
+}
+*/
+
+
+

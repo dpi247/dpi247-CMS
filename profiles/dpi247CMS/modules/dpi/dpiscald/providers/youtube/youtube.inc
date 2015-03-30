@@ -374,10 +374,14 @@ function dpiscald_youtube_parse_id($string, $check) {
 }
 
 function dpiscald_youtube_get_import_info($importer, & $entity, & $wrapper, $url){
-  $value = str_replace ( '\\', '', $url );
-  $id = dpiscald_youtube_parse_id ( $value, FALSE );
-  $wrapper->base_id->set ( $id );
-  $info = dpiscald_youtube_video ( $id );
-  $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
-  $wrapper->scald_thumbnail->set ( ( array ) $file );
+  try {
+    $value = str_replace ( '\\', '', $url );
+    $id = dpiscald_youtube_parse_id ( $value, FALSE );
+    $wrapper->base_id->set ( $id );
+    $info = dpiscald_youtube_video ( $id );
+    $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Youtube : " . $url);
+  }
 }

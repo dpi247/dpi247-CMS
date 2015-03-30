@@ -1,4 +1,7 @@
 <?php
+
+header('Content-Type: text/html; charset=utf-8');
+
 /**
  * @file The PHP page for all Acess Manager bootstrap callbacks
  */

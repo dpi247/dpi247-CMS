@@ -1,0 +1,1 @@
+<iframe class="gr-media__content" src="http://www.ustream.tv/embed/<?php print $vars['mode']; ?>/<?php print $vars['id']; ?>?v=3&amp;wmode=direct" frameborder="0"></iframe>
