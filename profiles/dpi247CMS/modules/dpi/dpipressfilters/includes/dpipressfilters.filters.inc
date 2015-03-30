@@ -7,7 +7,7 @@
  * @param string $text text to process
  */
 function dpipressfilters_replace_tags($tag, $settings, $text) {
-  // First, replace auto-closed tags by open+close tags
+  // First, replace self-closing tags by open+close tags
   $text = preg_replace('/<('.$tag.'[^>]*)\/>/', '<$1></'.$tag.'>', $text);
   // Then match all parts of the text that match the tag and its content
   $tag_regex = "@<$tag(\s.*)?>(.*)<\/$tag(\s.*)?>@sU";
@@ -44,8 +44,11 @@ function dpipressfilters_replace_tags($tag, $settings, $text) {
           break;
       
         case 'advanced':
+          $old_tag = $tag;
           $tag = $tag_values;
           $replacement = eval($settings['advanced-php']);
+          $tag = $old_tag;
+          unset($old_tag);
           break;
       }
 
