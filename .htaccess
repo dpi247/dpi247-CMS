@@ -111,10 +111,10 @@ DirectoryIndex index.php index.html index.htm
   
   #Manage thumbnail for dpistyle url
   #If image is already generate by the view mode, we don't need to process drupal.
-  #then we just return the url for the image. Else we process normally to generate image
-  RewriteCond %{REQUEST_FILENAME} -f 
-  RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|png)$ [NC]
+  #then we just return the url for the image. Else we process normally to generate image  
   RewriteCond %{REQUEST_URI} !^.*/dpistyle/*.$
+  RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|png)$ [NC]  
+  RewriteCond %{REQUEST_FILENAME} -f 
   RewriteRule .* - [L]
 
   # Pass all requests not referring directly to files in the filesystem to
