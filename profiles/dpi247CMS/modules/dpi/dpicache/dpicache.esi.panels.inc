@@ -338,6 +338,7 @@ function dpicacheesi_panels__restore_context(&$pane) {
     // Use the task-name and the original display arguments to generate the
     // arguments that were passed to the context constructor.
     // E.g. The node_view task takes "1" and returns node_load(1).
+
     $base_context_arguments = dpicacheesi__get_base_context_arguments($pane->esi_meta['task'], $pane->esi_meta['subtask'], $pane->esi_meta['display_args']);
 
     $base_contexts = ctools_context_handler_get_task_contexts($task, $subtask, $base_context_arguments);
@@ -357,15 +358,19 @@ function dpicacheesi_panels__restore_context(&$pane) {
 
 
 
+		$pane->esi_meta['display_contexts'] =array();
+
     if ($id) {
 
       $handler = $handlers[$id];
+			//kprint_r($handler);
+			//kprint_r($base_contexts);
 
       $contexts = ctools_context_handler_get_handler_contexts($base_contexts, $handler);
+			$pane->esi_meta['display_contexts'] = $contexts;
 
     }
 
-    $pane->esi_meta['display_contexts'] = $contexts;
   }
 }
 
@@ -381,7 +386,9 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 
   // Much of this is from the "standard" display renderer:
   // see panels_renderer_standard::prepare().
-  ctools_include('content');
+	ctools_include('plugins');
+
+	ctools_include('content');
   $content_type = ctools_get_content_type($pane->type);
 
   // Check access control; if the user doesn't have access, simply return an
@@ -396,6 +403,9 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 
   $content = ctools_content_render($pane->type, $pane->subtype, $pane->configuration, array(), $pane->esi_meta['display_args'], $pane->esi_meta['display_contexts']);
 
+
+	//kprint_r($pane);
+	//kprint_r($content);
   //print $content;
   if (empty($content)) {
     return '';
