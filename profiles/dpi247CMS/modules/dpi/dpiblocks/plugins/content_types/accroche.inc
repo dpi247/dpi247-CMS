@@ -116,7 +116,8 @@ function _dpiblocks_accroche_get_view_name() {
  * @return stdClass
  */
 function dpiblocks_accroche_render($subtype, $conf, $args, $contexts) {
-  $accessArg = (user_access('administer')) ? 'administer' : 'anonymous_user';
+  global $user;
+  $accessArg = implode('_', $user->roles);
   $elements = dpicache_get_cache_entry('dpiblocks_accroche_feed', $subtype, $accessArg);
   /* Prepare render element and return it */
   $block = new stdClass ();

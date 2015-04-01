@@ -335,10 +335,10 @@ function dpisocial_node_view($node, $view_mode, $langcode) {
   $mailto = "mailto:?subject=" . $suject . "&body=" . $body;
   
   if (variable_get ( 'dpisocial_add_email_link', 0 )) {
-    $content .= '<button onClick="location.href=\'' . $mailto . '\'" class="btn btn-social-icon btn-linkedin" type="button"><i class="fa fa-envelope-o"></i><span class="label"></span></button>';
+    $content .= '<button onClick="location.href=\'' . $mailto . '\'" class="btn btn-social-icon" type="button"><i class="fa fa-envelope-o"></i><span class="label"></span></button>';
   }
   if (variable_get ( 'dpisocial_add_print_link', 0 )) {
-    $content .= '<button onClick="window.print();" class="btn btn-social-icon btn-linkedin" type="button"><i class="fa fa-print"></i><span class="label"></span></button>';
+    $content .= '<button onClick="window.print();" class="btn btn-social-icon" type="button"><i class="fa fa-print"></i><span class="label"></span></button>';
   }
   
   $content = theme ( 'dpisocial_share_button', array (

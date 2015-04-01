@@ -38,7 +38,7 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
   array_shift($args);
   array_shift($args);
   $target = implode('/', $args);
-
+ 
   // Check that the style is defined, the scheme is valid, and the image
   // derivative token is valid. (Sites which require image derivatives to be
   // generated without a token can set the 'image_allow_insecure_derivatives'
@@ -55,9 +55,8 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
     return MENU_ACCESS_DENIED;
   }
 
-  $image_uri = $scheme . '://' . $target;
-  $image_uri = explode('?', $image_uri);
-  $image_uri = $image_uri[0];
+  /* use source thumbnail to generate element */
+  $image_uri = $atom->thumbnail_source;
   
   $derivative_uri = _dpicontenttypes_image_style_path($style['name'], $entity->entity_id, $atom->sid, $image_uri);
 

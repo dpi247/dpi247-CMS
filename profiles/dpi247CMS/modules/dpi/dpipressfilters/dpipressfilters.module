@@ -613,6 +613,10 @@ function dpipressfilters_form_filter_settings_form_submit($form, &$form_state) {
  * The text replaced with the tags
  */
 function dpipressfilters_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+  if(trim($text) == '')
+    return $text;
+  if(strpos($text, '<') === -1)
+    return $text;
   module_load_include('inc', 'dpipressfilters', 'includes/dpipressfilters.filters');
 
   $tags_config = $filter->settings;

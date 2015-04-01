@@ -395,23 +395,42 @@ class WallyXmlV1 extends PackageHelper {
    */
   public function buildPackageLayout($dom, $wrapper, $entity) {
     $value = $dom->nodeValue;
-    $vid = dpi_variable_get('dpi_packagelayout', NULL);
-    $vocabulary = taxonomy_vocabulary_load($vid);
-    $vocabulary_name = $vocabulary->machine_name;
-    if ($value == 'Hors-texte') {
-      $vocabulary_name = "package_type";
+    
+    /* Manage package layout */
+    if($value == 'Hors-texte'){
+      $item = taxonomy_get_term_by_name($value, "package_type");
+      if (!empty($item)) {
+        $wrapper->field_packagetype->set(array_shift($item));
+      }else {
+        Logger::logWarning('importer', 2, 'packagetype', t('The package layout !package_layout can not be found', array(
+          '!package_layout' => $value
+        )));
+      }
+    }else{
+      $item = taxonomy_get_term_by_name("Article", "package_type");
+      if (!empty($item)) {
+        $wrapper->field_packagetype->set(array_shift($item));
+      }else {
+        Logger::logWarning('importer', 2, 'packagetype', t('The package layout !package_layout can not be found', array(
+          '!package_layout' => $value
+        )));
+      }
     }
-    else {
-      $value = "Article";
-    }
-    $item = taxonomy_get_term_by_name($value, $vocabulary_name);
-    if (!empty($item)) {
-      $wrapper->field_packagetype->set(array_shift($item));
-    }
-    else {
-      Logger::logWarning('importer', 2, 'packagelayout', t('The package layout !package_layout can not be found', array(
-        '!package_layout' => $value
-      )));
+    
+    /* Manage package type */
+    if($value != 'Hors-texte' && $value != 'Article'){
+      $vid = dpi_variable_get('dpi_packagelayout', NULL);
+      $vocabulary = taxonomy_vocabulary_load($vid);
+      $vocabulary_name = $vocabulary->machine_name;
+      $item = taxonomy_get_term_by_name($value, $vocabulary_name);
+      if (!empty($item)) {
+        $wrapper->field_packagelayout->set(array_shift($item));
+      }
+      else {
+        Logger::logWarning('importer', 2, 'packagelayout', t('The package layout !package_layout can not be found', array(
+          '!package_layout' => $value
+        )));
+      }
     }
   }
 
