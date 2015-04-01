@@ -108,10 +108,13 @@ DirectoryIndex index.php index.html index.htm
   # If your site is running in a VirtualDocumentRoot at http://example.com/,
   # uncomment the following line:
   # RewriteBase /
-
-  RewriteCond %{REQUEST_FILENAME} -f
-  RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|css|js|txt|xml|png)$ [NC]
-  RewriteCond %{REQUEST_URI} !^.*/dpistyle/.*$
+  
+  #Manage thumbnail for dpistyle url
+  #If image is already generate by the view mode, we don't need to process drupal.
+  #then we just return the url for the image. Else we process normally to generate image
+  RewriteCond %{REQUEST_FILENAME} -f 
+  RewriteCond %{REQUEST_URI} \.(gif|jpg|jpeg|png)$ [NC]
+  RewriteCond %{REQUEST_URI} !^.*/dpistyle/*.$
   RewriteRule .* - [L]
 
   # Pass all requests not referring directly to files in the filesystem to
