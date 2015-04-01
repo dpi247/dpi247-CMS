@@ -207,7 +207,6 @@ function dpicache_esi_panels_url($pane, $display) {
       break;
     case DRUPAL_CACHE_PER_ROLE;
       $url .= '/CACHE=ROLE';
-
       break;
     case DRUPAL_CACHE_PER_USER;
       // Always add the current page URL.
@@ -267,9 +266,14 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
   array_pop($args);
 
 
-  // The URL is always the last argument.
-  $url = array_pop($args);
-
+  // The URL is always the last argument. Check if we have a specified url or set to a fake url
+	if(count($args)>>0) {
+		$url = array_pop($args);
+	}
+	else{
+		//Sometimes we need an url (for menu block for example so we simply set the url to /esi/...
+		$url=base64_encode($_GET['q']);
+	}
   // Task-name and context identifier are next in the URL, if context is used
   // by the pane.
   $display = panels_load_display($did);
@@ -299,7 +303,9 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
   );
 
   //print '<pre>'.print_r($pane,1).'</pre>';die();
+
   dpicacheesi_panels__restore_context($pane);
+
 
   return $pane;
 }
@@ -314,6 +320,7 @@ function dpicacheesi_panels__restore_context(&$pane) {
 
   global $theme;
   $theme = $pane->esi_meta['theme'];
+
 
   $_GET['q'] = $pane->esi_meta['url'];
   $_SERVER['REQUEST_URI'] = $pane->esi_meta['url'];
