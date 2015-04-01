@@ -243,28 +243,32 @@ function dpicache_esi_panels_url($pane, $display) {
  *
  * @see esi_panels_esi_component_info().
  */
-function dpicacheesi_panels__esi_pane_prepare($component_key) {
-  //remove cache granularity /Cache=ROLE
+function dpicacheesi_panels__esi_pane_prepare($component_key)
+{
+	//remove cache granularity /Cache=ROLE
 
-  // The URL pattern approximately corresponds to the function arguments:
-  // 1. A component key, which is a colon-separated set of pieces of
-  //    information: the theme name, the display ID and the pane ID.
-  // 2. An optional task name.
-  // 3. A variable number of arguments to the display.
-  // 4. The original URL.
+	// The URL pattern approximately corresponds to the function arguments:
+	// 1. A component key, which is a colon-separated set of pieces of
+	//    information: the theme name, the display ID and the pane ID.
+	// 2. An optional task name.
+	// 3. A variable number of arguments to the display.
+	// 4. The original URL.
 
-  // Use the parameters to reconstruct:
-  // - Display
-  // - Pane
-  // - Contexts
-  list($theme, $did, $pid) = explode(':', $component_key);
+	// Use the parameters to reconstruct:
+	// - Display
+	// - Pane
+	// - Contexts
+	list($theme, $did, $pid) = explode(':', $component_key);
 
-  // Check for optional args.
+	// Check for optional args.
 
-  $args = array_slice(func_get_args(), 1);
+	$args = array_slice(func_get_args(), 1);
 
-  array_pop($args);
 
+
+	if (stristr($args[count($args)+1],"CACHE")){
+		array_pop($args);
+  }
 
   // The URL is always the last argument. Check if we have a specified url or set to a fake url
 	if(count($args)>>0) {
