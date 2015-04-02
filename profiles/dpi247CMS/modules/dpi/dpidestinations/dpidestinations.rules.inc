@@ -314,6 +314,11 @@ function dpidestinations_clear_cache_of_node_content($node) {
   }
 }
 
+/**
+ * Invalidation targetblock cash entry
+ * 
+ * @param targetblock $targetblock
+ */
 function dpidestinations_targetblock_regenerate_cache($targetblock){
   dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $targetblock->did.'_%_'.$targetblock->target );
 }
