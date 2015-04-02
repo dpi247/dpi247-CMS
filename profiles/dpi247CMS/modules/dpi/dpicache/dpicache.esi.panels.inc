@@ -207,7 +207,6 @@ function dpicache_esi_panels_url($pane, $display) {
       break;
     case DRUPAL_CACHE_PER_ROLE;
       $url .= '/CACHE=ROLE';
-
       break;
     case DRUPAL_CACHE_PER_USER;
       // Always add the current page URL.
@@ -244,32 +243,41 @@ function dpicache_esi_panels_url($pane, $display) {
  *
  * @see esi_panels_esi_component_info().
  */
-function dpicacheesi_panels__esi_pane_prepare($component_key) {
-  //remove cache granularity /Cache=ROLE
+function dpicacheesi_panels__esi_pane_prepare($component_key)
+{
+	//remove cache granularity /Cache=ROLE
 
-  // The URL pattern approximately corresponds to the function arguments:
-  // 1. A component key, which is a colon-separated set of pieces of
-  //    information: the theme name, the display ID and the pane ID.
-  // 2. An optional task name.
-  // 3. A variable number of arguments to the display.
-  // 4. The original URL.
+	// The URL pattern approximately corresponds to the function arguments:
+	// 1. A component key, which is a colon-separated set of pieces of
+	//    information: the theme name, the display ID and the pane ID.
+	// 2. An optional task name.
+	// 3. A variable number of arguments to the display.
+	// 4. The original URL.
 
-  // Use the parameters to reconstruct:
-  // - Display
-  // - Pane
-  // - Contexts
-  list($theme, $did, $pid) = explode(':', $component_key);
+	// Use the parameters to reconstruct:
+	// - Display
+	// - Pane
+	// - Contexts
+	list($theme, $did, $pid) = explode(':', $component_key);
 
-  // Check for optional args.
+	// Check for optional args.
 
-  $args = array_slice(func_get_args(), 1);
-
-  array_pop($args);
+	$args = array_slice(func_get_args(), 1);
 
 
-  // The URL is always the last argument.
-  $url = array_pop($args);
 
+	if (stristr($args[count($args)+1],"CACHE")){
+		array_pop($args);
+  }
+
+  // The URL is always the last argument. Check if we have a specified url or set to a fake url
+	if(count($args)>>0) {
+		$url = array_pop($args);
+	}
+	else{
+		//Sometimes we need an url (for menu block for example so we simply set the url to /esi/...
+		$url=base64_encode($_GET['q']);
+	}
   // Task-name and context identifier are next in the URL, if context is used
   // by the pane.
   $display = panels_load_display($did);
@@ -299,7 +307,9 @@ function dpicacheesi_panels__esi_pane_prepare($component_key) {
   );
 
   //print '<pre>'.print_r($pane,1).'</pre>';die();
+
   dpicacheesi_panels__restore_context($pane);
+
 
   return $pane;
 }
@@ -314,6 +324,7 @@ function dpicacheesi_panels__restore_context(&$pane) {
 
   global $theme;
   $theme = $pane->esi_meta['theme'];
+
 
   $_GET['q'] = $pane->esi_meta['url'];
   $_SERVER['REQUEST_URI'] = $pane->esi_meta['url'];
@@ -331,6 +342,7 @@ function dpicacheesi_panels__restore_context(&$pane) {
     // Use the task-name and the original display arguments to generate the
     // arguments that were passed to the context constructor.
     // E.g. The node_view task takes "1" and returns node_load(1).
+
     $base_context_arguments = dpicacheesi__get_base_context_arguments($pane->esi_meta['task'], $pane->esi_meta['subtask'], $pane->esi_meta['display_args']);
 
     $base_contexts = ctools_context_handler_get_task_contexts($task, $subtask, $base_context_arguments);
@@ -350,15 +362,19 @@ function dpicacheesi_panels__restore_context(&$pane) {
 
 
 
+		$pane->esi_meta['display_contexts'] =array();
+
     if ($id) {
 
       $handler = $handlers[$id];
+			//kprint_r($handler);
+			//kprint_r($base_contexts);
 
       $contexts = ctools_context_handler_get_handler_contexts($base_contexts, $handler);
+			$pane->esi_meta['display_contexts'] = $contexts;
 
     }
 
-    $pane->esi_meta['display_contexts'] = $contexts;
   }
 }
 
@@ -372,9 +388,13 @@ function dpicacheesi_panels__restore_context(&$pane) {
 function dpicacheesi_panels__esi_pane_render($pane) {
 
 
+	module_load_include('inc','panels','includes/plugins');
+
   // Much of this is from the "standard" display renderer:
   // see panels_renderer_standard::prepare().
-  ctools_include('content');
+	ctools_include('plugins');
+
+	ctools_include('content');
   $content_type = ctools_get_content_type($pane->type);
 
   // Check access control; if the user doesn't have access, simply return an
@@ -389,6 +409,9 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 
   $content = ctools_content_render($pane->type, $pane->subtype, $pane->configuration, array(), $pane->esi_meta['display_args'], $pane->esi_meta['display_contexts']);
 
+
+	//kprint_r($pane);
+	//kprint_r($content);
   //print $content;
   if (empty($content)) {
     return '';
