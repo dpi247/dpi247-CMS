@@ -357,9 +357,13 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
     'parameters' 
   ) );
   $query->condition ( 'dce.name', $cache_type );
-  
+    
   if ($category != NULL) {
-    $query->condition ( 'dce.category', $category );
+    if(strstr($category, '%') != FALSE){
+      $query->condition ( 'dce.category', $category , 'LIKE' );
+    }else{
+      $query->condition ( 'dce.category', $category );
+    }    
   }
   /**
    * @todo problem avec le cache régénérate donc on a courcircuité le tout pour venir supprimer le

@@ -465,3 +465,22 @@ function targetblock_form($form, &$form_state, $targetblock) {
   }
   return $form;
 }
+
+function dpidestinations_entity_insert($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_insert', $entity);
+  }
+}
+
+function dpidestinations_entity_delete($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_delete', $entity);
+  }
+}
+
+
+function dpidestinations_entity_update($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_update', $entity);
+  }
+}
