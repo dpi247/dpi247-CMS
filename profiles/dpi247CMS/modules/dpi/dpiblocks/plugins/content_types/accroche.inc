@@ -35,7 +35,7 @@ function dpiblocks_accroche_content_type_content_types($plugins) {
   /* foreach on entity */
   $entities = entity_load('accroche');
   foreach($entities as $aid => $entity){
-    $types ['accroche_'.$entity->machine_name] = array (
+    $types [PREFIX_ACCROCHE.$entity->machine_name] = array (
       'title' => check_plain ( $entity->title ),
       'subtype' => $entity->machine_name,
       'description' => check_plain ( $entity->title ),
@@ -390,5 +390,5 @@ function _dpiblocks_accroche_get_entity_by_subtype($machine_name){
   // Create a new accroche controller
   $customContentController = new AccrocheController('accroche');
   // Return the accroche entity
-  return $customContentController->load_by_machine_name($machine_name);
+  return $customContentController->load_by_machine_name(substr($machine_name, strlen(PREFIX_ACCROCHE)));
 }

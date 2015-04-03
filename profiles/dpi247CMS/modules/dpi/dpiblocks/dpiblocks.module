@@ -5,7 +5,7 @@ module_load_include('inc', 'dpiblocks','dpiblocks.private');
 // Load all entity function for remotehtml and custom content
 module_load_include('inc', 'dpiblocks','dpiblocks.entity');
 module_load_include ( 'inc', 'dpidestinations', 'dpidestinations.api' );
-
+define("PREFIX_ACCROCHE", "accroche_");
 
 /**
  * Implementation of hook_menu()
