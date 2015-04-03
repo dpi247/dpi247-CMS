@@ -54,7 +54,7 @@ function dpicache__panel_context_save(&$handler, $update) {
     $display = panels_load_display($handler->did);
   }
 
-  if (_dpicache_panels__display_uses_esi($display)) {
+  if (isset($display) && _dpicache_panels__display_uses_esi($display)) {
     if ($handler->conf['pipeline'] == 'standard' || $handler->conf['pipeline'] == 'dpiviewer' || $handler->conf['pipeline'] == 'ipe') {
       $handler->conf['original_pipeline'] = $handler->conf['pipeline'];
       $handler->conf['pipeline'] = "dpicacheesi";
