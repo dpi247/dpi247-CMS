@@ -575,3 +575,13 @@ function dpicache_dpidashboard_status_item() {
 	
 	return $status;	
 }
+
+function dpicache_entity_insert($entity, $entity_type){  
+  if($entity_type == "comment"){
+    dpicache_invalidate_comment_esi_block($entity);
+  }
+}
+
+function dpicache_invalidate_comment_esi_block($entity){
+  //dsm($entity);
+}
