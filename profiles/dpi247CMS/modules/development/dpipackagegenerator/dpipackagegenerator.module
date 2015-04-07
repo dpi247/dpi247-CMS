@@ -67,6 +67,9 @@ function dpipackagegenerator_node_presave($node) {
         dpipackagegenerator_get_pool_of_taxonomy ( $node, $parents_term [$number] ['type'], $parents_term [$number] ['range'] );
       }
     }
+    
+    /* Unset field external reference */
+    $node->field_externalurl = array();
   }
 }
 
@@ -127,9 +130,13 @@ function dpipackagegenerator_get_pool_of_embeddedobjects(& $node, $number) {
   $atoms = entity_load ( 'scald_atom', array (), array (
     'type' => 'image' 
   ) );
+  
   if ($number > 0) {
+    $used_atoms = array();
     if (count ( $atoms ) > 1) {
-      $used_atoms = array_rand ( $atoms, $number );
+      for($i=0;$i<$number; $i++){
+        $used_atoms[] = array_rand ( $atoms);
+      }      
     }
     $lang = (isset ( $node->language )) ? $node->language : 'und';
     if (is_array ( $used_atoms )) {
