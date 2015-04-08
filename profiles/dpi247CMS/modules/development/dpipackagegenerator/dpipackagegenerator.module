@@ -104,7 +104,11 @@ function dpipackagegenerator_get_pool_of_linklists(& $node, $number) {
     $atoms = entity_load ( 'scald_atom', array (), array (
       'type' => 'links_list' 
     ) );
-    $used_atoms = array_rand ( $atoms, $number );
+
+    $used_atoms = array();
+    for($i=0;$i<$number; $i++){
+      $used_atoms[] = array_rand ( $atoms);
+    }      
     $lang = (isset ( $node->language )) ? $node->language : 'und';
     if (is_array ( $used_atoms )) {
       foreach ( $used_atoms as $atom ) {
