@@ -1,9 +1,14 @@
 <?php 
 
-function dpidestinations_get_reorder_form($term = NULL,$target = NULL){
+function dpidestinations_get_reorder_form($term = NULL,$target = NULL, $number = NULL){
   if (isset($term) && isset($target)){
     $infos = dpidestinations_define_result_by_term($term, $target);
-    $nodes = $infos->result;
+    if(isset($number)){
+      $nodes = array_slice($infos->result, 0, $number);
+      dsm($nodes);
+    }else{
+      $nodes = $infos->result;
+    }    
     $targetblock = $infos->targetblock;
   }
   
@@ -13,9 +18,9 @@ function dpidestinations_get_reorder_form($term = NULL,$target = NULL){
     $val = array(
       '#markup' => t("Aucun élément n'est associé à cette destination"),
     );
-    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name),$val);
+    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name, $number),$val);
   }else{
-    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name),drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target));
+    return array(drupal_get_form('dpidestinations_destination_define_target_form', $term->tid, $target->machine_name, $number),drupal_get_form('dpidestinations_page_targetview_reorder_form',$nodes,$term->tid ,$targetblock->target));
   }
 }
 
@@ -41,7 +46,7 @@ function dpidestinations_define_result_by_term($term, $target){
   return $return;
 }
 
-function dpidestinations_destination_define_target_form($form, & $form_state, $tid = NULL, $machName = NULL){
+function dpidestinations_destination_define_target_form($form, & $form_state, $tid = NULL, $machName = NULL, $number = NULL){
   $form['accroche'] = array(
     '#type' => 'fieldset',
     '#title' => t('Select the destination that you wish to reorder'),
@@ -51,6 +56,13 @@ function dpidestinations_destination_define_target_form($form, & $form_state, $t
     '#tree' => TRUE,
     '#prefix' => '<div id="accroche-form">',
     '#suffix' => '</div>',
+  );
+  
+  $form ["accroche"]['numberitems'] = array(
+    '#type' => 'textfield',
+    '#title' => t ( 'Enter a number of items' ),
+    '#description' => t("If you don't choose, we show you all results"),
+    '#default_value' => (isset($number))? $number : "100",
   );
   
   $form ['accroche']['selectsection'] = array (
@@ -87,6 +99,7 @@ function dpidestinations_destination_define_target_form($form, & $form_state, $t
     '#value' => t('Reorder'),
     '#id' => 'getelement',
   );
+ 
   
   return $form;
 }
@@ -95,7 +108,7 @@ function dpidestinations_destination_define_target_form_submit($form, & $form_st
   $op = $form_state['triggering_element']['#id'];
   switch ($op){
     case 'getelement':
-        drupal_goto('admin/content/reorder_targetblock/'.$form_state['values']['accroche']['selectsection'].'/'.$form_state['values']['accroche']['selecttarget']);
+        drupal_goto('admin/content/reorder_targetblock/'.$form_state['values']['accroche']['selectsection'].'/'.$form_state['values']['accroche']['selecttarget'].'/'.$form_state['values']['accroche']['numberitems']);
       break;
     default:        
       break;

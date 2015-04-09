@@ -131,14 +131,14 @@ function dpidestinations_menu() {
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
   
-  $items['admin/content/reorder_targetblock/%taxonomy_term/%dpidestinations_api_target_machinename'] = array(
+  $items['admin/content/reorder_targetblock/%taxonomy_term/%dpidestinations_api_target_machinename/%'] = array(
     'title' => t('Reorder'),
     'description' => 'Reorder targetblock rank.',
     'type' => MENU_LOCAL_TASK,
     'weight' => 11,
     'access arguments' => array('administer targets'),
     'page callback' => 'dpidestinations_get_reorder_form',
-    'page arguments' => array(3,4),    
+    'page arguments' => array(3,4,5),    
     'file' => 'dpidestinations.pages.admin-reorder.inc',
     'file path' => drupal_get_path('module', 'dpidestinations').'/includes',
   );
