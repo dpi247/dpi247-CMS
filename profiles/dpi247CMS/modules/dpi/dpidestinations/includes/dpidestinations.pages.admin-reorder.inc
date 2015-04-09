@@ -5,7 +5,6 @@ function dpidestinations_get_reorder_form($term = NULL,$target = NULL, $number =
     $infos = dpidestinations_define_result_by_term($term, $target);
     if(isset($number)){
       $nodes = array_slice($infos->result, 0, $number);
-      dsm($nodes);
     }else{
       $nodes = $infos->result;
     }    
