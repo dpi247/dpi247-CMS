@@ -662,3 +662,12 @@ function dpicontenttypes_update_7012(){
     field_update_field($instance);
   }
 }
+
+/**
+ * Unable bulk operation module for admin/content view
+ */
+function dpicontenttypes_update_7013(){
+  $modules = array('views_bulk_operations');
+  $enable_dependencies = TRUE; 
+  module_enable($modules, $enable_dependencies);
+}

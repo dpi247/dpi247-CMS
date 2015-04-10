@@ -22,6 +22,8 @@ dependencies[] = rules
 dependencies[] = pathauto
 dependencies[] = atom_package
 dependencies[] = atom_package_gallery
+dependencies[] = views
+dependencies[] = views_bulk_operations
 explanation = Field type(s) in use - see <a href="/admin/reports/fields">Field list</a>
 features[features_api][] = api:2
 features[taxonomy][] = authors
@@ -60,5 +62,6 @@ files[] = plugins/dpimport/importer/dpixmlv1.class.inc
 files[] = plugins/dpimport/importer/wallyxmlv1.class.inc
 files[] = plugins/dpimport/importer/wallyxmlpreview.class.inc
 files[] = includes/prenode.class.inc
+files[] = views/dpicontenttypes.views_default.inc
 stylesheets[all][] = css/dpiatom_reference.css
 stylesheets[all][] = providers/atom_package/atom_package.css

@@ -1021,3 +1021,13 @@ function dpicontenttypes_dpilog_register(){
     )
   );
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function dpicontenttypes_views_api() {
+  return array (
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpicontenttypes')."/views",
+  );
+}
