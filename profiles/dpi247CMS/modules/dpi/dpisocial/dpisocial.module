@@ -77,15 +77,28 @@ function dpisocial_menu() {
  * Implements hook_theme().
  */
 function dpisocial_theme() {
-  return array (
-    'dpisocial_share_button' => array (
+  ctools_include ( 'plugins' );
+  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
+  
+  $theme = array();
+  $theme['dpisocial_share_button'] = array (
       'variables' => array (
         'html_button' => '' 
       ),
       'template' => 'dpisocial_share_button',
       'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
-    ) 
-  );
+    );
+  foreach ( $social_network as $snetwork ) {
+    $theme['dpisocial_custom_share_'.$snetwork ['type']] = array (
+      'variables' => array (
+        'url' => NULL,
+        'count' => 0
+      ),
+      'template' => 'dpisocial_custom_share_'.$snetwork ['type'],
+      'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
+    );
+  }
+  return $theme;
 }
 
 /**
