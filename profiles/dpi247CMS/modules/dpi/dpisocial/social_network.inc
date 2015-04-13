@@ -74,7 +74,9 @@ abstract class dpisocial_social_network {
 	
 	public function getShareButtonHtmlPersonnalized($nid, $url) {
 		// return '<button class="btn btn-social-icon btn-'.$this->whoAmI.'" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i><span class="label">'.$this->getNbShares($nid, $url).'</span></button>'	;
-		return '<button class="btn btn-social-icon btn-'.$this->whoAmI.'" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i></button>';
+		//print $this->whoAmI;
+		return theme("dpisocial_custom_share_".$this->whoAmI, array("url"=>$this->getShareUrl($url), "count"=>$this->apiGetNbShares($url)));
+		//return '<button class="btn btn-social-icon btn-'.$this->whoAmI.'" type="button" onclick="dpisocial_share_this(\''.$this->getShareUrl($nid, $url).'\', \''.$this->whoAmI.'\');"><i class="fa fa-'.$this->whoAmI.'"></i></button>';
 	}
 	
 	public function getShareUrl($url) {	
