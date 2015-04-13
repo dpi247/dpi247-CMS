@@ -563,8 +563,8 @@ function dpicache_dpidashboard_status_item() {
 			default:
 				$vanishstatus = 3;
 				$varnishmessage = t('Server is not responding');
-		}
-		$status[] = 	
+		}	
+	$status[] = 	
 		array(
 			'title'		=> 'Varnish ['.$server.'] status',
 			'status'	=> $vanishstatus,
@@ -583,5 +583,62 @@ function dpicache_entity_insert($entity, $entity_type){
 }
 
 function dpicache_invalidate_comment_esi_block($entity){
-  //dsm($entity);
+  if(isset($entity->nid)){
+    $handler = dpicache_get_did_by_nid($entity->nid);
+    if(isset($handler)){
+      $contents = dpicache_get_content_from_handler($handler);
+      if(isset($contents) && is_array($contents)){
+        /* Get pid informations */
+        $pids = array();
+        foreach($contents as $pid => $vinfo){
+          if($vinfo->type == "node_comments"){
+            $pids[] = $vinfo;
+          }
+        }
+        
+        /* Invalide pid informations */
+        foreach($pids as $pane){
+          $url = "esi/panels_pane/";          
+          $url .= implode(':', array(
+              '*',
+              $pane->did,
+              $pane->pid,
+          ));
+          /* task */
+          $url .= '/node_view/'.$entity->nid;
+          //invalide
+          if($pane->cache['settings']["granularity"]['page']) {
+            $url .= '/' . base64_encode("node/".$entity->nid);
+          }
+          $url .= '/*';
+          dpicache_api_varnish_purge_pattern ( '/' . $url );
+        }        
+      }
+    }
+  }
+}
+
+function dpicache_get_did_by_nid($nid){
+  ctools_include('context');
+  ctools_include('context-task-handler');
+  ctools_include('plugins');
+  
+  $section = node_load($nid);
+  $task= page_manager_get_task('node_view');
+  $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
+  $sorted_handlers = page_manager_load_sorted_handlers($task, '', TRUE);
+  $id = ctools_context_handler_get_render_handler($task, NULL, $sorted_handlers,$contexts, array());
+  $handler = $sorted_handlers[$id];
+
+  return (isset($handler)) ? $handler : NULL;
+}
+
+function dpicache_get_content_from_handler($handler){
+  $return = NULL;
+  ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');      
+  if(isset($handler) && function_exists('panels_panel_context_get_display')){     
+    $display = panels_panel_context_get_display($handler);
+    $return = $display->content;
+  } 
+  return $return;
 }
