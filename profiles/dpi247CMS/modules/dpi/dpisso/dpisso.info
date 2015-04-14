@@ -4,6 +4,6 @@ description = "DPI SSO include the sso authentification, the access manager,the 
 package = DPI
 
 dependencies[] = libraries
-
+dependencies[] = dpicommons
 
 files[] = includes/dpisso.paywallpolitics.class.inc

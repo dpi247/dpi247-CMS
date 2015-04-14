@@ -118,6 +118,11 @@ function dpicommons_theme() {
         'jsprint' => FALSE,
       ),
     ),
+    'checkboxgrid' => array(
+      'render element' => 'element',
+      'file' => 'theme.inc',
+      'path' => drupal_get_path ( 'module', 'dpicommons' ) . '/theme' 
+    ),
   );
 }
 

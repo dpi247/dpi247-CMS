@@ -3,6 +3,7 @@ description = Provides several providers for dpi.
 package = Scald Providers
 core = 7.x
 dependencies[] = scald
+dependencies[] = dpicommons
 stylesheets[all][] = providers/twitter/twitter.css
 stylesheets[all][] = providers/embedly/embedly.css
 stylesheets[all][] = providers/picktochart/picktochart.css
