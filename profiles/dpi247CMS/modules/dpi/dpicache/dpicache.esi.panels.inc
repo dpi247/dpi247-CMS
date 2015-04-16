@@ -399,10 +399,11 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 
   // Check access control; if the user doesn't have access, simply return an
   // empty string.
-  // ctools_include('context');
-  // if ($pane->access && !empty($pane->display_contexts) && ctools_access($pane->access, $pane->display_contexts)) {
-  //   return '';
-  // }
+  ctools_include('context');
+
+	if ($pane->access && !ctools_access($pane->access, $pane->esi_meta['display_contexts'])) {
+     return '';
+   }
 
 
 
