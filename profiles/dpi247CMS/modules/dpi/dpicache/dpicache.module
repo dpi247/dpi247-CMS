@@ -598,18 +598,12 @@ function dpicache_invalidate_comment_esi_block($entity){
         
         /* Invalide pid informations */
         foreach($pids as $pane){
-          $url = "\/esi\/panels_pane\/";          
+          $url = "/esi/panels_pane/";          
           $url .= implode(':', array(
               '.*',
               $pane->did,
               $pane->pid,
-          ));
-          /* task */
-          $url .= '\/node_view\/'.$entity->nid;
-          //invalide
-          if($pane->cache['settings']["granularity"]['page']) {
-            $url .= '\/' . base64_encode("node/".$entity->nid);
-          }
+          ));          
           $url .= '.*';
           dpicache_api_varnish_purge_pattern ( $url );
         }        
