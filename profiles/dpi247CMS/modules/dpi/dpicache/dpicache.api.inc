@@ -396,7 +396,7 @@ function dpicache_api_regenerate_all_cache_entry_callback($cache_type, $category
  * @param unknown $pattern          
  */
 function dpicache_api_varnish_purge_pattern($pattern) {
-  $host = $_SERVER ['SERVER_NAME'].':8080';
+  $host = $_SERVER ['SERVER_NAME'];
   varnish_purge ( $host, $pattern );
 }
 

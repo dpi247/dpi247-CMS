@@ -58,10 +58,12 @@ function _varnish_purge($host, $pattern) {
   $bantype = variable_get('varnish_bantype', VARNISH_DEFAULT_BANTYPE);
   switch ($bantype) {
     case VARNISH_BANTYPE_NORMAL:
-      _varnish_terminal_run(array("$command req.http.host ~ $host && req.url ~ \"$pattern\""));
+      //_varnish_terminal_run(array("$command req.http.host ~ $host && req.url ~ \"$pattern\""));
+      _varnish_terminal_run(array("$command req.url ~ \"$pattern\""));
       break;
     case VARNISH_BANTYPE_BANLURKER:
-      _varnish_terminal_run(array("$command obj.http.x-host ~ $host && obj.http.x-url  ~ \"$pattern\""));
+      //_varnish_terminal_run(array("$command obj.http.x-host ~ $host && obj.http.x-url  ~ \"$pattern\""));
+      _varnish_terminal_run(array("$command obj.http.x-url  ~ \"$pattern\""));
       break;
     default:
       // We really should NEVER get here. Log WATCHDOG_ERROR. I can only see this happening if a user switches between different versions of the module where we remove a ban type.
