@@ -582,6 +582,18 @@ function dpicache_entity_insert($entity, $entity_type){
   }
 }
 
+function dpicache_entity_delete($entity, $entity_type){  
+  if($entity_type == "comment"){
+    dpicache_invalidate_comment_esi_block($entity);
+  }
+}
+
+function dpicache_entity_update($entity, $entity_type){  
+  if($entity_type == "comment"){
+    dpicache_invalidate_comment_esi_block($entity);
+  }
+}
+
 function dpicache_invalidate_comment_esi_block($entity){
   if(isset($entity->nid)){
     $handler = dpicache_get_did_by_nid($entity->nid);
