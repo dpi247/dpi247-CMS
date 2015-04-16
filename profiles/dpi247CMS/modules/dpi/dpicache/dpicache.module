@@ -599,7 +599,7 @@ function dpicache_invalidate_comment_esi_block($entity){
         /* Invalide pid informations */
         foreach($pids as $pane){
           $url = "/esi/panels_pane/.*";          
-          $url .= urlencode(implode(':', array(
+          $url .= urlencode(":".implode(':', array(
               $pane->did,
               $pane->pid,
           )));          
