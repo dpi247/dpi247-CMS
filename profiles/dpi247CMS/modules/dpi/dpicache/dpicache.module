@@ -591,7 +591,7 @@ function dpicache_invalidate_comment_esi_block($entity){
         /* Get pid informations */
         $pids = array();
         foreach($contents as $pid => $vinfo){
-          if($vinfo->type == "node_comments"){
+          if($vinfo->type == "node_comments" || $vinfo->type == "node_comment_form"){
             $pids[] = $vinfo;
           }
         }
