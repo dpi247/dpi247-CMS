@@ -604,8 +604,7 @@ function dpicache_invalidate_comment_esi_block($entity){
               $pane->did,
               $pane->pid,
           ));          
-          $url .= '.*';
-          dpicache_api_varnish_purge_pattern ( $url );
+          dpicache_api_varnish_purge_pattern ( urlencode($url) );
         }        
       }
     }
