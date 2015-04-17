@@ -180,14 +180,8 @@ class TargetBlockController extends EntityAPIControllerExportable {
   }
 
   public function save($entity, DatabaseTransaction $transaction = NULL) {
-    $targetblocks = $this->load_targetblocks_by_did_and_target($entity->did, $entity->target);
-    $return = NULL;
     $this->syncrohize_global_settings_of_targetblocks($entity, 'save');
     $result = parent::save($entity);
-    $conf = $this->load_targetblock_panels_conf($entity);
-    if (isset($conf)) {
-      $this->syncrohize_global_settings_with_panels_pane($entity, unserialize($conf->configuration));
-    }
     return $result;
   }
 
@@ -224,8 +218,6 @@ class TargetBlockController extends EntityAPIControllerExportable {
               $targetblocks [$targetblockid]->split_delta = $split_delta;
               $targetblocks [$targetblockid]->offset = $offset;
               $targetblocks [$targetblockid]->prevent_sync_recurssion = TRUE;
-              $targetblocks [$targetblockid]->use_pager = $entity->use_pager;
-              $targetblocks [$targetblockid]->pager_type = $entity->pager_type;
               $split_delta = $split_delta + 1;
               $offset += $targetblocks [$targetblockid]->node_count_for_targetblockinstance;
 
@@ -285,11 +277,6 @@ class TargetBlockController extends EntityAPIControllerExportable {
 
   function syncrohize_global_settings_with_panels_pane($entity, $conf) {
     $entity = (array) $entity;
-    foreach ($conf as $k => $v) {
-      if (isset($entity[$k]) && $entity[$k] != $v) {
-        $conf[$k] = $entity[$k];
-      }
-    }
     try {
       db_update('panels_pane')
           ->fields(array(

@@ -748,7 +748,31 @@ function dpidestinations_tokens($type, $tokens, array $data = array(), array $op
   return $replacements;
 }
 
-
+function dpidestinations_panels_pane_update($pane)  {
+  $sav_infos_updated = variable_get("dpidestinations_targetblock_updated_conf_value", array());  
+  if(count($sav_infos_updated)>0 && isset($sav_infos_updated[$pane->did][$pane->pid])){
+    $targetblockController = new TargetBlockController('targetblock'); 
+    $targetblock_entity = $targetblockController->load_targetblock_by_did_target_and_splitdelta($pane->did, $pane->subtype, $pane->configuration["split_delta"]);
+    $targetconf = $targetblockController->load_targetblock_panels_conf($targetblock_entity);
+    $conf = unserialize($targetconf->configuration);
+    foreach($sav_infos_updated[$pane->did][$pane->pid] as $k => $v){
+      $pane->configuration[$k] = $v;      
+      $targetblock_entity->$k = $v;
+      $conf[$k] = $v;
+    }
+    $targetblockController->syncrohize_global_settings_with_panels_pane($targetblock_entity, $conf);
+    targetblock_save($targetblock_entity);
+    unset($sav_infos_updated[$pane->did][$pane->pid]);
+    if(count($sav_infos_updated[$pane->did])==0){
+      unset($sav_infos_updated[$pane->did]);
+    }
+    if(isset($sav_infos_updated['msg'])){
+      drupal_set_message($sav_infos_updated['msg']);
+      unset($sav_infos_updated['msg']);
+    }    
+    variable_set('dpidestinations_targetblock_updated_conf_value', $sav_infos_updated);    
+  }
+}
 
 
 

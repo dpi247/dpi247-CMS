@@ -496,6 +496,30 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
      * else{ if(isset($form_state ['conf'] ['targetblock_rank_settings'])){ unset($form_state ['conf'] ['targetblock_rank_settings']); } }
      */
   
+  
+  /* Synchro */
+  $targetblockController = new TargetBlockController("targetblock");
+  $targetblocks = $targetblockController->load_targetblocks_by_did_and_target($form_state["pane"]->did, $form_state["pane"]->subtype);
+  if(count($targetblocks)>1){
+    $sav_infos_updated = variable_get("dpidestinations_targetblock_updated_conf_value", array());
+    $msg = (isset($sav_infos_updated['msg'])) ? $sav_infos_updated['msg'] : "Synchronization of splitted targetblock : ";    
+    foreach($targetblocks as $targetblockid => $targetblock){   
+      $msg .= $targetblock->target . ' ('.$targetblockid.') - ';
+      /* Save only other element because this one is gonna save by ctools */
+      if(($targetblock->use_pager != intval($form_state["values"]["use_pager"])) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["use_pager"] != intval($form_state["values"]["use_pager"]))){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["use_pager"] = $form_state ['values'] ['use_pager'];
+      }
+      if(($targetblock->pager_type != $form_state["values"]["pager_type"]) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["pager_type"] != $form_state["values"]["pager_type"])){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["pager_type"] = $form_state ['values'] ['pager_type'];
+      }
+      if(($targetblock->rank_max_value != $form_state["values"]["rank_max_value"]) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["rank_max_value"] != intval($form_state["values"]["rank_max_value"]))){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["rank_max_value"] = $form_state ['values'] ['rank_max_value'];
+      }    
+    }
+    $sav_infos_updated['msg'] = substr($msg, 0, -2) . " | ";
+    variable_set('dpidestinations_targetblock_updated_conf_value', $sav_infos_updated);
+  }  
+  
   // We log the change to allow override when edit of another pane before page is saved
   // @see: dpidestinations_targetblock_content_type_edit_form()
   // @see: _dpidestinations_targetblock_content_type_helper_targetblock_override_global_settings()
