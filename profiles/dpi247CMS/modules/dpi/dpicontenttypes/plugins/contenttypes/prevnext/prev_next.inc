@@ -21,7 +21,6 @@ $plugin = array(
  * @return array $form
  */
 function dpidestinations_prev_next_articles_edit_form($form, &$form_state) {
-
   $conf = $form_state['conf'];
 
   $prev_next = array(
@@ -69,7 +68,13 @@ function dpidestinations_prev_next_articles_render($subtype, $conf, $panel_args,
   return $block;
 }
 
-function dpidestinations_get_prev_links_content($context, $conf){  
+/**
+ * This function generate the content of prev next and return the theme associate
+ * @param array $context
+ * @param array $conf
+ * @return theme
+ */
+function dpidestinations_get_prev_links_content($context, $conf){
   $node_prev_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, FALSE);
   $node_next_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, TRUE);
   
@@ -78,7 +83,6 @@ function dpidestinations_get_prev_links_content($context, $conf){
 
 /**
  * Return the node informations for previous or next article
- * 
  * @param $context the current context
  * @param $conf the configuration ctools
  * @param $next if true, return the next article, else the previous
@@ -96,9 +100,9 @@ function dpidestinations_prev_next_articles_get_infos_node($context, $conf, $nex
     $term = current($terms);  
     if (isset($term['tid']) && isset($term['virtual_rank']) && isset($term['target'])) {
       $results = dpidestinations_prev_next_articles_build_query($term['tid'], $term['target'], $term['virtual_rank'], $next);
-      if (isset($results) && is_array($results) && isset($results[0])) {
-        $link = 'node/'.$results[0]->entity_id;
-        return array('title'=>$results[0]->title, 'link'=> '/'.$link, 'alias' => '/'.drupal_get_path_alias($link));
+      if (isset($results)) {
+        $link = 'node/'.$results->entity_id;
+        return array('title'=>$results->title, 'link'=> '/'.$link, 'alias' => '/'.drupal_get_path_alias($link));
       }
     }
   }  
@@ -127,10 +131,9 @@ function dpidestinations_prev_next_articles_build_query($tid, $target, $timerank
     ->condition('d.field_destinations_tid', $tid, '=')
     ->condition('d.field_destinations_target', $target, 'LIKE')
     ->condition('d.delta', 0, '=')
+    ->condition('n.status', 1, '=')
     ->orderBy('d.field_destinations_virtual_rank', $order)
-    ->range(0, 1);
-  
-  $results = $query->execute();
+    ->range(0, 1);  
 
-  return $results->fetchAll();
+  return $query->execute()->fetchObject();
 }
