@@ -59,6 +59,7 @@ function dpidestinations_prev_next_articles_edit_form_validate(&$form, &$form_st
  */
 function dpidestinations_prev_next_articles_render($subtype, $conf, $panel_args, &$context) {  
   drupal_add_css(drupal_get_path('module', 'dpicontenttypes').'/css/prev_next.css');
+  drupal_add_js(drupal_get_path('module', 'dpicontenttypes').'/js/prev_next.js');
   
   //@todo mettre dpi cache si possible ?
   $rendered_list_links = dpidestinations_get_prev_links_content($context, $conf);

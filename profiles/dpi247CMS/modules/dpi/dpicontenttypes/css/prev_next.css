@@ -59,6 +59,7 @@ and open the template in the editor.
   right: 5%;
   top: 45%;
   min-height: 48px;
+  text-align: right;
 }
 
 .dpi-next a:hover{
