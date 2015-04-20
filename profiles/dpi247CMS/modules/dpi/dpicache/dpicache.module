@@ -102,6 +102,14 @@ function dpicache_permission() {
   );
 }
 
+
+function dpicache_init(){
+
+	if(arg(0)=='esi' and (arg(1)=='block' ||arg(1)=='panels_pane')){
+		$GLOBALS['conf']['cache'] = FALSE;
+	}
+}
+
 /**
  * Implementation of hook_cron
  */
@@ -582,6 +590,18 @@ function dpicache_entity_insert($entity, $entity_type){
   }
 }
 
+function dpicache_entity_delete($entity, $entity_type){  
+  if($entity_type == "comment"){
+    dpicache_invalidate_comment_esi_block($entity);
+  }
+}
+
+function dpicache_entity_update($entity, $entity_type){  
+  if($entity_type == "comment"){
+    dpicache_invalidate_comment_esi_block($entity);
+  }
+}
+
 function dpicache_invalidate_comment_esi_block($entity){
   if(isset($entity->nid)){
     $handler = dpicache_get_did_by_nid($entity->nid);
@@ -591,27 +611,26 @@ function dpicache_invalidate_comment_esi_block($entity){
         /* Get pid informations */
         $pids = array();
         foreach($contents as $pid => $vinfo){
-          if($vinfo->type == "node_comments"){
+          if($vinfo->type == "node_comments" || $vinfo->type == "node_comment_form"){
             $pids[] = $vinfo;
           }
         }
         
         /* Invalide pid informations */
         foreach($pids as $pane){
-          $url = "esi/panels_pane/";          
-          $url .= implode(':', array(
-              '*',
+          $url = "/esi/panels_pane/.*";          
+          $url .= urlencode(":".implode(':', array(
               $pane->did,
               $pane->pid,
-          ));
+          )));
           /* task */
           $url .= '/node_view/'.$entity->nid;
           //invalide
           if($pane->cache['settings']["granularity"]['page']) {
-            $url .= '/' . base64_encode("node/".$entity->nid);
+            $url .= '/' . urlencode(base64_encode("node/".$entity->nid));
           }
-          $url .= '/*';
-          dpicache_api_varnish_purge_pattern ( '/' . $url );
+          $url .= '.*';
+          dpicache_api_varnish_purge_pattern ( $url );
         }        
       }
     }
