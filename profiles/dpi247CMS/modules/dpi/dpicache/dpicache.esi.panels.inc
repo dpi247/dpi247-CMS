@@ -452,8 +452,11 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 		}
 
 		// fallback
-		return "<!-- ESI content -->".theme('panels_pane', array('content' => $content, 'pane' => $pane, 'display' => $pane->esi_meta['display']));
+		return "<!-- ESI pane with content -->".theme('panels_pane', array('content' => $content, 'pane' => $pane, 'display' => $pane->esi_meta['display']));
 	}
+
+	return "<!-- ESI blank content pane -->".theme('panels_pane', array('content' => $content, 'pane' => $pane, 'display' => $pane->esi_meta['display']));
+
 }
 
 /**
