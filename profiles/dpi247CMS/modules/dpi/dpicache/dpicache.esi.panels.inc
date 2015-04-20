@@ -415,7 +415,7 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 	//kprint_r($content);
   //print $content;
   if (empty($content)) {
-    return '';
+		return '<!-- ESI no content -->';
   }
 
   foreach (module_implements('panels_pane_content_alter') as $module) {
