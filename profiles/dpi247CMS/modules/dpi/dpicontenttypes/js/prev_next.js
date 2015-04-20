@@ -5,15 +5,14 @@
  */
 
 
-window.addEventListener("keyup", myScript, true);
+window.addEventListener("keyup", prevNextKeyPress, true);
 
-function myScript(e){
-    console.log(e.keyCode);
-     if(e.keyCode == 37){         
-         var a = document.getElementById('dpi-prev-a').click();
-     } else if (e.keyCode == 39) { // right
-         var a = document.getElementById('dpi-next-a').click();
-     }
+function prevNextKeyPress(e){
+    if(e.keyCode == 37){         
+        document.getElementById('dpi-prev-a').click();
+    } else if (e.keyCode == 39) {
+        document.getElementById('dpi-next-a').click();
+    }
 }
 
 
