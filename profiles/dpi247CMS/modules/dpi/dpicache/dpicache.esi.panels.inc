@@ -198,7 +198,7 @@ function dpicache_esi_panels_url($pane, $display) {
   if($pane->cache['settings']["granularity"]['page']) {
 
     // Always add the current page URL.
-    $url .= '/' . base64_encode($_GET['q']);
+    $url .= '/test/' . base64_encode($_GET['q']);
   }
 
 
@@ -402,7 +402,7 @@ function dpicacheesi_panels__esi_pane_render($pane) {
   ctools_include('context');
 
 	if ($pane->access && !ctools_access($pane->access, $pane->esi_meta['display_contexts'])) {
-     return '';
+		return '<!-- ESI no access -->';
    }
 
 
