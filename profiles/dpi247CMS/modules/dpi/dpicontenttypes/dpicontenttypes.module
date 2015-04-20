@@ -378,6 +378,12 @@ function dpicontenttypes_theme() {
       'path' => drupal_get_path('module', 'dpicontenttypes'),
       'file' => 'dpicontenttypes.effects.inc',
     ),
+    'dpidestinations_prev_next' => $base + array(
+      'variables' => array(
+        'content' => NULL,
+      ),
+      'template' => 'prev-next',
+    ),
   );
 }
 
@@ -774,6 +780,9 @@ function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
   }
   if ($module == 'dpimport' && $plugin == 'importer') {
     return 'plugins/dpimport/' . $plugin;
+  }
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/contenttypes';
   }
 }
 
