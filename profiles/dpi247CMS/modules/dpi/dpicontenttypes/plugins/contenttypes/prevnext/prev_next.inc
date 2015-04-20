@@ -21,7 +21,6 @@ $plugin = array(
  * @return array $form
  */
 function dpidestinations_prev_next_articles_edit_form($form, &$form_state) {
-
   $conf = $form_state['conf'];
 
   $prev_next = array(
@@ -69,6 +68,12 @@ function dpidestinations_prev_next_articles_render($subtype, $conf, $panel_args,
   return $block;
 }
 
+/**
+ * This function generate the content of prev next and return the theme associate
+ * @param array $context
+ * @param array $conf
+ * @return theme
+ */
 function dpidestinations_get_prev_links_content($context, $conf){
   $node_prev_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, FALSE);
   $node_next_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, TRUE);
@@ -78,7 +83,6 @@ function dpidestinations_get_prev_links_content($context, $conf){
 
 /**
  * Return the node informations for previous or next article
- * 
  * @param $context the current context
  * @param $conf the configuration ctools
  * @param $next if true, return the next article, else the previous
