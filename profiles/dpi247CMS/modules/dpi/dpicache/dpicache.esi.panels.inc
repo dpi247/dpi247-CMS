@@ -402,7 +402,7 @@ function dpicacheesi_panels__esi_pane_render($pane) {
   ctools_include('context');
 
 	if ($pane->access && !ctools_access($pane->access, $pane->esi_meta['display_contexts'])) {
-     return '';
+		return '<!-- ESI no access -->';
    }
 
 
