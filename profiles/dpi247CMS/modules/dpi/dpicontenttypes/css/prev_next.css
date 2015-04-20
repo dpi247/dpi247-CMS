@@ -21,7 +21,6 @@ and open the template in the editor.
 }
 
 .dpi-prev a{
-  padding: 5px;
   display: block;
   position: fixed;
   z-index: 0;
