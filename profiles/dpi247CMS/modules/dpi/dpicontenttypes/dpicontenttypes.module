@@ -378,6 +378,12 @@ function dpicontenttypes_theme() {
       'path' => drupal_get_path('module', 'dpicontenttypes'),
       'file' => 'dpicontenttypes.effects.inc',
     ),
+    'dpidestinations_prev_next' => $base + array(
+      'variables' => array(
+        'content' => NULL,
+      ),
+      'template' => 'prev-next',
+    ),
   );
 }
 
@@ -775,6 +781,9 @@ function dpicontenttypes_ctools_plugin_directory($module, $plugin) {
   if ($module == 'dpimport' && $plugin == 'importer') {
     return 'plugins/dpimport/' . $plugin;
   }
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/contenttypes';
+  }
 }
 
 /**
@@ -1019,5 +1028,15 @@ function dpicontenttypes_dpilog_register(){
     "dpi_autopublish"=>array(
       "actions"=>array("start_autopublish_log", "end_autopublish_log", "tmp_autopublish_update", "delete_autopublish_table", "action_cron_autopublish", "action_cron_unpublish" ,'error_autopublish_node', 'error_unpublish_node', 'add_tmp_table_embargo', 'del_tmp_table_embargo'),
     )
+  );
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function dpicontenttypes_views_api() {
+  return array (
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dpicontenttypes')."/views",
   );
 }

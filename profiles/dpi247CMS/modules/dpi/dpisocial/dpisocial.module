@@ -77,15 +77,28 @@ function dpisocial_menu() {
  * Implements hook_theme().
  */
 function dpisocial_theme() {
-  return array (
-    'dpisocial_share_button' => array (
+  ctools_include ( 'plugins' );
+  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
+  
+  $theme = array();
+  $theme['dpisocial_share_button'] = array (
       'variables' => array (
         'html_button' => '' 
       ),
       'template' => 'dpisocial_share_button',
       'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
-    ) 
-  );
+    );
+  foreach ( $social_network as $snetwork ) {
+    $theme['dpisocial_custom_share_'.$snetwork ['type']] = array (
+      'variables' => array (
+        'url' => NULL,
+        'count' => 0
+      ),
+      'template' => 'dpisocial_custom_share_'.$snetwork ['type'],
+      'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
+    );
+  }
+  return $theme;
 }
 
 /**
@@ -319,11 +332,13 @@ function dpisocial_node_view($node, $view_mode, $langcode) {
       }
     }
   }
-  
-  usort ( $buttons, "dpisocial_cmp_share_buttons" );
+  if ((!empty($buttons))&&(is_array($buttons)))
+    usort ( $buttons, "dpisocial_cmp_share_buttons" );
   $content = "";
-  foreach ( $buttons as $b ){
-    $content .= $b ['html'];
+  if (!empty($buttons)){ 
+    foreach ( $buttons as $b ){
+      $content .= $b ['html'];
+    }
   }
   $body = str_replace ( "'", "\'", variable_get ( 'dpisocial_add_email_body', '' ) );
   $body = token_replace ( $body, array (
