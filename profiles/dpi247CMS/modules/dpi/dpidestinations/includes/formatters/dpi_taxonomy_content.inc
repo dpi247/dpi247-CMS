@@ -211,9 +211,9 @@ function _dpi_taxonomy_content_element_link_render($settings, $term, $value){
 			$classes_link = $settings['element_html_link_custom_class'];
 		}
 		if ($term->vocabulary_machine_name == "sections") {
-			$term_link = drupal_get_path_alias('section/'.$term->tid);
+			$term_link = base_path().drupal_get_path_alias('section/'.$term->tid);
 		} else {
-			$term_link = drupal_get_path_alias('taxonomy/term/'.$term->tid);
+			$term_link = base_path().drupal_get_path_alias('taxonomy/term/'.$term->tid);
 		}
 		$render = array(
 			'#value' => $value,
