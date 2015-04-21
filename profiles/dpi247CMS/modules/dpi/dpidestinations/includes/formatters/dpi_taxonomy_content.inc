@@ -248,7 +248,7 @@ function _dpi_taxonomy_content_wrapper_tag_render($settings,$value){
 		return $render;
 
 	}else{
-		return $value;
+		return array($value);
 	}
 }
 
