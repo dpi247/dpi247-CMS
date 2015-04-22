@@ -100,7 +100,7 @@ function dpidestinations_prev_next_articles_get_infos_node($context, $conf, $nex
     $term = current($terms);  
     if (isset($term['tid']) && isset($term['virtual_rank']) && isset($term['target'])) {
       $results = dpidestinations_prev_next_articles_build_query($term['tid'], $term['target'], $term['virtual_rank'], $next);
-      if (isset($results)) {
+      if (isset($results) && $results!=null) {
         $link = 'node/'.$results->entity_id;
         return array('title'=>$results->title, 'link'=> '/'.$link, 'alias' => '/'.drupal_get_path_alias($link));
       }
