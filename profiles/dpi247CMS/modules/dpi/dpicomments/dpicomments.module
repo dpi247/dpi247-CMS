@@ -245,7 +245,7 @@ function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   if (!empty($form['field_signature']) && !empty($form['field_signature']['#language']) )
     $language = $form['field_signature']['#language'];
-  else $language = null;
+  else $language = LANGUAGE_NONE;
   $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 
   // Adding javascript to check max limit of character
