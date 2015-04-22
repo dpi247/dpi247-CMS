@@ -182,7 +182,7 @@ function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type,
 			'#markup' => $term->name,
 		);
     if (($cpt == $settings['nb_elements'])&&($settings['nb_elements'] != 0))
-      $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, array('#type'=>'markup','#markup'=>'...'));
+      $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, array('#type'=>'markup','#markup'=>'&hellip;'));
     else if ($cpt == count($items))
       $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, FALSE);
     else
