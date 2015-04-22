@@ -270,10 +270,9 @@ function dpisocial_field_extra_fields() {
   $extrafield_name_share_article = 'dpisocial_share';
   $values = array (
     'page',
-    'article',
-    'package',
-    'package_gallery' 
+    'article'
   );  
+  $values = array_merge($values, array_keys(node_type_get_types()));
   foreach ($values  as $node_type ) {
     $extra ['node'] [$node_type] ['display'] [$extrafield_name_share_article] = array (
       'label' => t ( 'DPI Social Boutons de partage' ),
@@ -332,11 +331,13 @@ function dpisocial_node_view($node, $view_mode, $langcode) {
       }
     }
   }
-  
-  usort ( $buttons, "dpisocial_cmp_share_buttons" );
+  if ((!empty($buttons))&&(is_array($buttons)))
+    usort ( $buttons, "dpisocial_cmp_share_buttons" );
   $content = "";
-  foreach ( $buttons as $b ){
-    $content .= $b ['html'];
+  if (!empty($buttons)){ 
+    foreach ( $buttons as $b ){
+      $content .= $b ['html'];
+    }
   }
   $body = str_replace ( "'", "\'", variable_get ( 'dpisocial_add_email_body', '' ) );
   $body = token_replace ( $body, array (

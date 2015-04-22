@@ -152,7 +152,13 @@ function dpidestinations_field_formatter_settings_form_dpi_taxonomy_content($fie
 			'#description' => t('The separator to use, including leading and trailing spaces'),
 			'#default_value' => $settings['separator_option'],
 	);
-	
+
+  $element['nb_elements'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Define the number of visible elements. If 0, all values will be displayed.'),
+      '#description' => t('The number of visible elements'),
+      '#default_value' => $settings['nb_elements'],
+  );  	
 }
 
 
@@ -162,8 +168,10 @@ function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type,
 		// on ajoute  le prefixe
 		$element[] = _dpi_taxonomy_content_simple_element_text_render($settings,'element_prefixe');
 	}
-
-	foreach ($items as $item) {
+	$separator = _dpi_taxonomy_content_simple_element_text_render($settings, 'separator_option');
+  $cpt=0;
+  foreach ($items as $item) {
+  	$cpt++;
 		$render=array();
 	
 		$term_id = $item['tid'];
@@ -173,22 +181,17 @@ function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type,
 			'#type' => 'markup',
 			'#markup' => $term->name,
 		);
-			
-		$render = _dpi_taxonomy_content_element_link_render($settings, $term, $render);
-		$render = _dpi_taxonomy_content_element_tag_render($settings,$render);
+    if (($cpt == $settings['nb_elements'])&&($settings['nb_elements'] != 0))
+      $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, array('#type'=>'markup','#markup'=>'&hellip;'));
+    else if ($cpt == count($items))
+      $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, FALSE);
+    else
+      $render = _dpi_taxonomy_content_element_link_render($settings, $term, $render, $separator);
+    $render = _dpi_taxonomy_content_element_tag_render($settings,$render);
 
-		$element[] = $render;
-
-		if (isset($settings['separator_option']) && !empty($settings['separator_option'])) {
-			// on ajout le séparateur
-			$element[] = _dpi_taxonomy_content_simple_element_text_render($settings, 'separator_option');
-		}
-
-	}
-
-	if (isset($settings['separator_option']) && !empty($settings['separator_option'])) {
-		// Si il y a un séparateur, on supprimer le dernier
-		array_pop($element);
+    $element[] = $render;
+    if ($cpt == $settings['nb_elements'])
+      break;
 	}
 
 	if (count($items) > 0 && isset($settings['element_suffixe']) && !empty($settings['element_suffixe']) ) {
@@ -201,7 +204,7 @@ function dpidestinations_field_formatter_view_dpi_taxonomy_content($entity_type,
 }
 
 
-function _dpi_taxonomy_content_element_link_render($settings, $term, $value){
+function _dpi_taxonomy_content_element_link_render($settings, $term, $value, $separator){
 
 	if($settings['element_html_link']!="no"){
 		$classes_link = "";
@@ -211,9 +214,9 @@ function _dpi_taxonomy_content_element_link_render($settings, $term, $value){
 			$classes_link = $settings['element_html_link_custom_class'];
 		}
 		if ($term->vocabulary_machine_name == "sections") {
-			$term_link = drupal_get_path_alias('section/'.$term->tid);
+			$term_link = base_path().drupal_get_path_alias('section/'.$term->tid);
 		} else {
-			$term_link = drupal_get_path_alias('taxonomy/term/'.$term->tid);
+			$term_link = base_path().drupal_get_path_alias('taxonomy/term/'.$term->tid);
 		}
 		$render = array(
 			'#value' => $value,
@@ -224,12 +227,12 @@ function _dpi_taxonomy_content_element_link_render($settings, $term, $value){
 			),
 			'#theme_wrappers' => array(0 => 'dpi_render_wrapper'),
 		);
-
-		return $render;
+    $render = array($render,$separator);
 
 	} else {
-		return $value;
+		$render = array($value,$separator);
 	}
+  return $render;
 }
 
 function _dpi_taxonomy_content_wrapper_tag_render($settings,$value){
@@ -248,7 +251,7 @@ function _dpi_taxonomy_content_wrapper_tag_render($settings,$value){
 		return $render;
 
 	}else{
-		return $value;
+		return array($value);
 	}
 }
 

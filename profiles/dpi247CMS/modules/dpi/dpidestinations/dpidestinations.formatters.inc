@@ -47,6 +47,7 @@ function dpidestinations_field_formatter_info() {
 				'element_prefixe' => '',
 				'element_suffixe' => '',
 				'separator_option' => '',
+        'nb_elements' => 0
 			),				
 		),
   );
