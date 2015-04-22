@@ -270,10 +270,9 @@ function dpisocial_field_extra_fields() {
   $extrafield_name_share_article = 'dpisocial_share';
   $values = array (
     'page',
-    'article',
-    'package',
-    'package_gallery' 
+    'article'
   );  
+  $values = array_merge($values, array_keys(node_type_get_types()));
   foreach ($values  as $node_type ) {
     $extra ['node'] [$node_type] ['display'] [$extrafield_name_share_article] = array (
       'label' => t ( 'DPI Social Boutons de partage' ),
