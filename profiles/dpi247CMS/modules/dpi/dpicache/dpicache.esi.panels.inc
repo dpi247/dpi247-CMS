@@ -198,7 +198,7 @@ function dpicache_esi_panels_url($pane, $display) {
 	if($pane->cache['settings']["granularity"]['page']) {
 
 		// Always add the current page URL.
-		$url .= '/test/' . base64_encode($_GET['q']);
+		$url .= '/' . base64_encode($_GET['q']);
 	}
 
 
