@@ -243,8 +243,9 @@ function dpicomments_votingapi_metadata_alter(&$data) {
 function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   // Setting default signature value
   global $user;
-
-  $language = $form['field_signature']['#language'];
+  if (!empty($form['field_signature']) && !empty($form['field_signature']['#language']) )
+    $language = $form['field_signature']['#language'];
+  else $language = null;
   $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
 
   // Adding javascript to check max limit of character
