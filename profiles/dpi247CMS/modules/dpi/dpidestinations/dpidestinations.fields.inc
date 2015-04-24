@@ -94,7 +94,7 @@ function dpidestinations_field_widget_info() {
  *
  * 'destination_default_widget' define four form element that are simple selectbox
  */
-function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {  
   // STEP 0:
   //Generate a specific key used to identify this element to restore a default
   // value upon AJAX submission regardless of where this element is in the
@@ -119,6 +119,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     'rank' => 0,
     'virtual_rank' => 0,
   );
+
   if (!empty($form_state['destinationsfield'][$element_key])) {
     // Use the value from the form_state if available.
     $destinations = $form_state['destinationsfield'][$element_key];
@@ -147,7 +148,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     //$destinations = (array)$instance['default_value'][0];
     $destinations['item_already_exist'] = FALSE;
   }
-
+  
   $is_update = FALSE;
   if(isset($destinations['temp_db_value']) && is_array($destinations['temp_db_value']) &&
       $destinations['temp_db_value']['tid'] == $destinations['tid'] &&
@@ -157,7 +158,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 
   // STEP 2:
   // Determine available options and change destination if need it
-
+  
   $tids_options = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
   if(FALSE && !$is_update) {
     $destinations['tid'] = '';
@@ -190,29 +191,51 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     case 'destination_default_widget':
       // Make this a fieldset with the four fields.
       $widget += array(
-      '#type' => 'fieldset',
-      '#attributes' => array('class' => array('field-destinations-widget')),
+        '#type' => 'fieldset',
+        '#attributes' => array('class' => array('field-destinations-widget')),
       );
-
-      $widget['tid'] = array(
-        '#type' => 'select',
-        '#options' => $tids_options,
-        '#default_value' => $destinations['tid'],
-        '#title' => t('Section'),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The section page where the node will be placed'),
-        '#limit_validation_errors' => array(),
-        '#ajax' => array(
-          // When 'event' occurs, Drupal will perform an ajax request in the
-          // background. Usually the default value is sufficient (eg. change for
-          // select elements), but valid values include any jQuery event,
-          // most notably 'mousedown', 'blur', and 'submit'.
-          // 'event' => 'change',
-          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method' => 'replace',
-        ),
-      );
+      
+      if(count($tids_options)>50){
+        $widget['tid'] = array(
+          '#type' => 'textfield', 
+          '#title' => t('Section'),
+          '#autocomplete_path' => 'destinations/autocomplete/input[name="tid"]',
+          '#description' => t('The section page where the node will be placed'),
+          '#default_value' => isset($tids_options[$destinations['tid']])? $tids_options[$destinations['tid']] : '',
+          '#weight' => -1, 
+          '#limit_validation_errors' => array(),
+          '#ajax' => array(
+            // When 'event' occurs, Drupal will perform an ajax request in the
+            // background. Usually the default value is sufficient (eg. change for
+            // select elements), but valid values include any jQuery event,
+            // most notably 'mousedown', 'blur', and 'submit'.
+            // 'event' => 'change',
+            'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+            'wrapper' => 'dropdown-target-replace_'.$delta,
+            'method' => 'replace',
+          ),
+        );
+      }else{
+        $widget['tid'] = array(
+          '#type' => 'select',
+          '#options' => $tids_options,
+          '#default_value' => $destinations['tid'],
+          '#title' => t('Section'),
+          '#attributes' => array('class' => array('field-destinations-widget-tid')),
+          '#description' => t('The section page where the node will be placed'),
+          '#limit_validation_errors' => array(),
+          '#ajax' => array(
+            // When 'event' occurs, Drupal will perform an ajax request in the
+            // background. Usually the default value is sufficient (eg. change for
+            // select elements), but valid values include any jQuery event,
+            // most notably 'mousedown', 'blur', and 'submit'.
+            // 'event' => 'change',
+            'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+            'wrapper' => 'dropdown-target-replace_'.$delta,
+            'method' => 'replace',
+          ),
+        );
+      }
 
       $widget['target'] = array(
         '#type' => 'select',
@@ -258,7 +281,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
       $widget['virtual_rank'] = array(
         '#type' => 'value',
         '#value' => $destinations['virtual_rank'],
-      );
+      );     
 
       break;
   }
@@ -282,8 +305,22 @@ function dpidestinations_rebuildonchange_validate($element, &$form_state) {
 
     //Search through the form values to find the current address.
     $destination = drupal_array_get_nested_value($form_state['values'], $parents);
+    
     // Store the present address values in the form state for retrieval by the
     // widget form regardless of where the widget sits in the $form array.
+    $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
+  }
+  
+  if($form_state['triggering_element']['#type'] == 'textfield'){
+    // If the country was changed, rebuild the form.
+    if ($element['#default_value'] != $element['#value']) {
+      $form_state['rebuild'] = TRUE;
+    }   
+    
+    $parents = $element['#parents'];
+    array_pop($parents);       
+    
+    $destination = drupal_array_get_nested_value($form_state['values'], $parents);    
     $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
   }
 }
