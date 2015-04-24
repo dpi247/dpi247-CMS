@@ -8,11 +8,11 @@ sites/*/modules
 sites/*/importer
 sites/all/libraries
 sites/*
+includes/database/autoslave
 
 #ignore eclipse settings
 .settings/*
 .project
-.gitignore
 .buildpath
 robots.txt
 
