@@ -59,7 +59,13 @@ function dpiblocks_accroche_plugin_edit_form($form,& $form_state){
   form_load_include($form_state, 'inc', 'dpiblocks', 'plugins/content_types/accroche');
   form_load_include($form_state, 'inc', 'dpiblocks', 'includes/custom_accroche.admin');
   
-  $entity = _dpiblocks_accroche_get_entity_by_subtype(substr($form_state['pane']->subtype, strlen(PREFIX_ACCROCHE)));
+  //test if prefix is use (define the entity by prefix after register)
+  if(strstr($form_state['pane']->subtype, PREFIX_ACCROCHE)!==FALSE){
+    $entity = _dpiblocks_accroche_get_entity_by_subtype(substr($form_state['pane']->subtype, strlen(PREFIX_ACCROCHE)));
+  }  else{
+    $entity = _dpiblocks_accroche_get_entity_by_subtype($form_state['pane']->subtype);
+  }
+  
   if(isset($entity) && empty($entity)  && isset($form_state['subtype_name'])){
     $entity = new stdClass();
     $entity->layout = $form_state['subtype_name'];
