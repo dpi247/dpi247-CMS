@@ -306,7 +306,7 @@ function dpicontenttypes_views_default_views() {
   $handler->display->display_options['fields']['field_destinations']['table'] = 'field_data_field_destinations';
   $handler->display->display_options['fields']['field_destinations']['field'] = 'field_destinations';
   $handler->display->display_options['fields']['field_destinations']['click_sort_column'] = 'tid';
-  $handler->display->display_options['fields']['field_destinations']['type'] = 'ena_destinations_display';
+  $handler->display->display_options['fields']['field_destinations']['type'] = 'dpi_main_destination_display';
   $handler->display->display_options['fields']['field_destinations']['settings'] = array(
     'wrapper_html_tag' => '- None -',
     'wrapper_html_tag_bootstrap_class' => '- None -',
@@ -315,9 +315,7 @@ function dpicontenttypes_views_default_views() {
     'element_html_tag_bootstrap_class' => '- None -',
     'element_html_tag_custom_class' => '',
     'element_html_link' => 'yes',
-    'element_prefixe' => '',
-    'element_suffixe' => '',
-    'separator_option' => '',
+    'element_html_link_custom_class' => '',
   );
   $handler->display->display_options['fields']['field_destinations']['delta_offset'] = '0';
   /* Field: Content: Package Layout */
