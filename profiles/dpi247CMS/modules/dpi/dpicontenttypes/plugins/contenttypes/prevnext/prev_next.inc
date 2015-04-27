@@ -5,14 +5,30 @@
  */
 $plugin = array(
     'title' => t('Navigation inter-articles'),
-    'single' => FALSE,
-    'required context' => new ctools_context_required(t('Node'), 'node'),
-    'description' => t('Affiche un lien vers l\'article précédent et suivant du node en cours'),
-    'category' => t ( 'Naviguation' ),
-    'group' => t ( 'DPI Core' ), 
-    'edit form' => 'dpidestinations_prev_next_articles_edit_form',
-    'render callback' => 'dpidestinations_prev_next_articles_render',
+    'description' => t('Affiche un lien vers l\'article précédent et suivant du node en cours'),  
+    'edit form' => 'dpicontenttypes_prev_next_articles_edit_form',
+    'render callback' => 'dpicontenttypes_prev_next_articles_render',
+    'category' => 'Naviguation',    
+    'group' => 'DPI Core',
+    'required context' => new ctools_context_required(t('Node'), 'node'),  
 );
+
+/**
+ * This function create the block use to do naviguation
+ * @param Array $plugins
+ */
+function dpicontenttypes_accroche_content_type_content_types($plugins) {
+  $types = array ();  
+  $types ["node_naviguation"] = array (
+    'title' => t('Navigation inter-articles'),
+    'description' => t('Affiche un lien vers l\'article précédent et suivant du node en cours'),
+    'icon' => drupal_get_path ( "module", "dpicontenttypes" ) . '/icons/navigation.ico',
+    'category' => 'Naviguation',
+    'group' => 'DPI Core', 
+    'required context' => new ctools_context_required(t('Node'), 'node'),  
+  );   
+  return $types;
+}
 
 /**
  * Declares edit form
@@ -20,7 +36,7 @@ $plugin = array(
  * @param array $form_state
  * @return array $form
  */
-function dpidestinations_prev_next_articles_edit_form($form, &$form_state) {
+function dpicontenttypes_prev_next_articles_edit_form($form, &$form_state) {
   $conf = $form_state['conf'];
 
   $prev_next = array(
@@ -44,7 +60,7 @@ function dpidestinations_prev_next_articles_edit_form($form, &$form_state) {
  * @param array $form
  * @param array $form_state
  */
-function dpidestinations_prev_next_articles_edit_form_validate(&$form, &$form_state) {
+function dpicontenttypes_prev_next_articles_edit_form_validate(&$form, &$form_state) {
   $form_state['conf']['prev_next'] = $form_state['values']['prev_next'];
 }
 
@@ -56,12 +72,12 @@ function dpidestinations_prev_next_articles_edit_form_validate(&$form, &$form_st
  * @param array $context
  * @return object $block
  */
-function dpidestinations_prev_next_articles_render($subtype, $conf, $panel_args, &$context) {  
+function dpicontenttypes_prev_next_articles_render($subtype, $conf, $panel_args, &$context) {  
   drupal_add_css(drupal_get_path('module', 'dpicontenttypes').'/css/prev_next.css');
   drupal_add_js(drupal_get_path('module', 'dpicontenttypes').'/js/prev_next.js');
   
   //@todo mettre dpi cache si possible ?
-  $rendered_list_links = dpidestinations_get_prev_links_content($context, $conf);
+  $rendered_list_links = dpicontenttypes_get_prev_links_content($context, $conf);
   
   $block = new stdClass();
   $block->content = $rendered_list_links;
@@ -74,9 +90,9 @@ function dpidestinations_prev_next_articles_render($subtype, $conf, $panel_args,
  * @param array $conf
  * @return theme
  */
-function dpidestinations_get_prev_links_content($context, $conf){
-  $node_prev_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, FALSE);
-  $node_next_infos = dpidestinations_prev_next_articles_get_infos_node($context, $conf, TRUE);
+function dpicontenttypes_get_prev_links_content($context, $conf){
+  $node_prev_infos = dpicontenttypes_prev_next_articles_get_infos_node($context, $conf, FALSE);
+  $node_next_infos = dpicontenttypes_prev_next_articles_get_infos_node($context, $conf, TRUE);
   
   return theme('dpidestinations_prev_next', array('prev' => $node_prev_infos, 'next' => $node_next_infos));
 }
@@ -88,7 +104,7 @@ function dpidestinations_get_prev_links_content($context, $conf){
  * @param $next if true, return the next article, else the previous
  * @return array() node informations (title and link)
  */
-function dpidestinations_prev_next_articles_get_infos_node($context, $conf, $next = TRUE) {  
+function dpicontenttypes_prev_next_articles_get_infos_node($context, $conf, $next = TRUE) {  
   if (($next && !$conf['prev_next']['show_next']) || (!$next && !$conf['prev_next']['show_prev'])) {
     // dans la conf du bloc, on a choisi d'afficher qu'un seul des deux articles (prédcedent et suivant)
     return array();
@@ -99,7 +115,7 @@ function dpidestinations_prev_next_articles_get_infos_node($context, $conf, $nex
   if(isset($terms) && is_array($terms)){
     $term = current($terms);  
     if (isset($term['tid']) && isset($term['virtual_rank']) && isset($term['target'])) {
-      $results = dpidestinations_prev_next_articles_build_query($term['tid'], $term['target'], $term['virtual_rank'], $next);
+      $results = dpicontenttypes_prev_next_articles_build_query($term['tid'], $term['target'], $term['virtual_rank'], $next);
       if (isset($results) && $results!=null) {
         $link = 'node/'.$results->entity_id;
         return array('title'=>$results->title, 'link'=> '/'.$link, 'alias' => '/'.drupal_get_path_alias($link));
@@ -119,7 +135,7 @@ function dpidestinations_prev_next_articles_get_infos_node($context, $conf, $nex
  * @param $next if true, return the next article, else the previous
  * @return array() : query results
  */
-function dpidestinations_prev_next_articles_build_query($tid, $target, $timerank, $next = TRUE) {
+function dpicontenttypes_prev_next_articles_build_query($tid, $target, $timerank, $next = TRUE) {
   $op = $next?'<':'>';
   $order = $next?'DESC':'ASC';
   $query = db_select('field_data_field_destinations', 'd');
