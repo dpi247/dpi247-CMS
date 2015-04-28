@@ -74,12 +74,14 @@ function _dpicontenttypes_cropings_generate_edition_link(&$item, $entity_type, $
 }
 
 function _dpicontenttypes_cropings_generate_edit_link(&$item, $entity_type, $eid, $aid){
-  $item['edit-atom-btn'] = array(
-    '#markup' => l(t('Edit atom'), 'atom/'.$aid.'/edit/nojs'),
-    '#weight' => 103,
-    '#prefix' => '<div class="pad-10">',
-    '#suffix' => '</div>',
-  );
+  if(isset($item['sid']['#default_value']) && $item['sid']['#default_value']!=""){
+    $item['edit-atom-btn'] = array(
+      '#markup' => l(t('Edit atom'), 'atom/'.$item['sid']['#default_value'].'/edit/nojs'),
+      '#weight' => 103,
+      '#prefix' => '<div class="pad-10">',
+      '#suffix' => '</div>',
+    );
+  }  
 }
 
 

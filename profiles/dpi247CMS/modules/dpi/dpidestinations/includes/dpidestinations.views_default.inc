@@ -64,7 +64,7 @@ function dpidestinations_views_default_views() {
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
 /* Display: Master */
-  $handler = $view->new_display ( 'default', 'Master', 'default' );
+  $handler = $view->new_display ( 'targetview', 'Master', 'default' );
   $handler->display->display_options ['use_more_always'] = FALSE;
   $handler->display->display_options ['access'] ['type'] = 'perm';
   $handler->display->display_options ['cache'] ['type'] = 'none';
