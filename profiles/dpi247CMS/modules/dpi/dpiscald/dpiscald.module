@@ -602,7 +602,7 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
                 'options' => array('entity' => array("type" => "node", "id" => $dpi_nid_context))
               );              
               $default_theme = 'dpicontenttypes_image_render_context';
-              drupal_alter('dpicontenttypes_default_theme_image_inline', $default_theme, $arguments, $transcoder, $tmp_context);
+              drupal_alter('dpicontenttypes_default_theme_image_inline', $default_theme, $arguments, $tmp_context);
               $atoms_info[] = theme($default_theme, $arguments);
             break;
           default:
