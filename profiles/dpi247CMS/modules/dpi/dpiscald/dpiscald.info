@@ -4,6 +4,7 @@ package = Scald Providers
 core = 7.x
 dependencies[] = scald
 dependencies[] = dpicommons
+dependencies[] = dpicontenttypes
 stylesheets[all][] = providers/twitter/twitter.css
 stylesheets[all][] = providers/embedly/embedly.css
 stylesheets[all][] = providers/picktochart/picktochart.css
