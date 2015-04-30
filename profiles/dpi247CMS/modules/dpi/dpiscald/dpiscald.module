@@ -555,7 +555,7 @@ function dpiscald_menu_alter(&$items){
  * @param unknown $output
  * @param unknown $context
  */
-function dpiscald_field_attach_view_alter(&$output, $context){
+function dpiscald_field_attach_view_alter(&$output, $context){  
   if (variable_get('mee_store_sas', TRUE)) {
     list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
     $fields = field_info_instances($context['entity_type'], $bundle);
@@ -563,14 +563,14 @@ function dpiscald_field_attach_view_alter(&$output, $context){
       if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
         foreach (element_children($output[$name]) as $key) {
           $info_context = 'full';
-          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode']);
+          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode'], $output[$name]["#object"]->nid);
         }
       }
     }
   }
 }
 
-function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL) {
+function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL, $dpi_nid_context = NULL) {
   if (empty($context)) {
     $context = 'title';
   }
@@ -589,6 +589,21 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
           case 'atom_package_gallery':
               $node = node_load(intval($atom->data['nid']));
               $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+            break;
+          case "scald_image":
+              $transcoders = scald_transcoders();
+              $contexts = scald_contexts();
+              $context_config = $contexts[$tmp_context];
+              $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
+              $arguments = array(
+                'context' => $tmp_context,
+                'atom' => scald_atom_load(intval($id)),
+                'style_name' => $transcoder['style'],
+                'options' => array('entity' => array("type" => "node", "id" => $dpi_nid_context))
+              );              
+              $default_theme = 'dpicontenttypes_image_render_context';
+              drupal_alter('dpicontenttypes_default_theme_image_inline', $default_theme, $arguments, $tmp_context);
+              $atoms_info[] = theme($default_theme, $arguments);
             break;
           default:
               $atoms_info[] = scald_render($id, $tmp_context);

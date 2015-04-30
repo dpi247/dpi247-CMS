@@ -184,11 +184,6 @@ function target_delete_multiple($target_ids) {
   entity_delete_multiple('target', $target_ids);
 }
 
-
-function target_access_admin_callback(){
-  return TRUE;
-}
-
 function target_page_title($target){
   return $target->machine_name;
 }
@@ -330,11 +325,6 @@ function targetblock_delete($targetblock) {
  */
 function targetblock_delete_multiple($targetblock_ids) {
   entity_delete_multiple('targetblock', $targetblock_ids);
-}
-
-
-function targetblock_access_admin_callback(){
-  return TRUE;
 }
 
 function targetblock_page_title($targetblock){
@@ -483,4 +473,28 @@ function dpidestinations_entity_update($entity, $entity_type){
   if($entity_type == "targetblock"){
     rules_invoke_event('targetblock_update', $entity);
   }
+}
+
+/**
+ * Access function for target entity
+ * @param type $op
+ * @param type $entity
+ * @param type $account
+ * @param type $entity_type
+ * @return type
+ */
+function target_access_admin_callback($op, $entity, $account = NULL, $entity_type) {
+  return user_access('administer targets', $account);
+}
+
+/**
+ * Access function for targetblock entity
+ * @param type $op
+ * @param type $entity
+ * @param type $account
+ * @param type $entity_type
+ * @return type
+ */
+function targetblock_access_admin_callback($op, $entity, $account = NULL, $entity_type) {
+  return user_access('administer targets', $account);
 }
