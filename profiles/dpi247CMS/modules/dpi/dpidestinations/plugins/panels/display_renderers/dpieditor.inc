@@ -78,19 +78,20 @@ class dpidestinations_renderer_dpieditor extends panels_renderer_editor {
         $groups[$group_key]['content'][$type_name][$content_title] = $content_type;
         $groups[$group_key]['content'][$type_name][$content_title]['type_name'] = $type_name;
         $groups[$group_key]['content'][$type_name][$content_title]['subtype_name'] = $subtype_name;
-      }
+      }      
     }
 
     foreach($groups as $group_key => $group) {
       $groups[$group_key]['categories'] = $this->get_categories($groups[$group_key]['content']);
       unset($groups[$group_key]['content']);
     }
-
     // Now sort
     natcasesort($group_names);
     foreach ($group_names as $group => $name) {
       $output[$group] = $groups[$group];
     }
+    //allow to change configuration of dpi menu.
+    drupal_alter('dpieditor_alter_panels_group', $output);
     return $output;
   }
 
