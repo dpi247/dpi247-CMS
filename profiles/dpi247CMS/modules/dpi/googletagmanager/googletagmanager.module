@@ -23,14 +23,14 @@ define('GOOGLEANALYTICS_PAGES', "admin\nadmin/*\nbatch\nnode/add*\nnode/*/*\nuse
 function googletagmanager_menu(){
   $items = array();
 
-  $items['admin/config/googletagmanager'] = array(
-    'title'            => 'Google Tag Manager',
-    'description'      => 'Configure the settings used to generate your Google Tag Manager code.',
-    'weight'           => 99,
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('googletagmanager_admin_settings_form'),
-    'file'             => 'googletagmanager.admin.inc',
-    'access arguments' => array('administrer googletagmanager')  
+  $items ['admin/dpi247/googletagmanager'] = array (
+    'title' => t ( 'DPI Google Tag Manager' ),
+    'description' => t ( 'Configure the settings used to generate your Google Tag Manager code.' ),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array ('googletagmanager_admin_settings_form'),    
+    'file' => 'googletagmanager.admin.inc',
+    'file path' => drupal_get_path('module', 'googletagmanager').'/includes',
+    'access arguments' => array('administrer googletagmanager'),
   );
 
   return $items;
