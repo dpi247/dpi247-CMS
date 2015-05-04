@@ -770,7 +770,7 @@ function dpidestinations_panels_pane_update($pane) {
 function dpidestinations_get_destinations_from_textfield($value) {
   $return = array();
   $tids = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
-  if(isset($tids) && !empty($tids) && isset($value) && $value!="") {
+  if (isset($tids) && !empty($tids) && isset($value) && $value != "") {
     $return = dpidestinations_regexp_destination_from_value($value, $tids);
   }
   drupal_json_output($return);
@@ -786,9 +786,43 @@ function dpidestinations_regexp_destination_from_value($search_string, $destinat
   $return = array();
   foreach ($destinations as $k => $v) {
     preg_match('/.*' . $search_string . '.*$/i', $v, $matches);
-    if (!empty($matches) && $v!="Add a new destination") {
+    if (!empty($matches) && $v != "Add a new destination") {
       $return[$k] = $v;
     }
   }
   return $return;
+}
+
+/**
+ * Alter taxonomy term form to propose a cxheckbox to elet a term to sections term
+ * @param array $form
+ * @param array $form_state
+ */
+function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
+
+  $form["field_electtermtosection"] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Elect this term to a section term'),
+    '#weight' => 99,
+  );
+
+  $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
+  
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ */
+function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
+  /* 3 Steps to elect a term to section :
+   * 
+   * 1. Sav informations to database because we need to give informations about url after suppression of it.
+   * 2. Elect term to section term tem add it to section/%term menu.
+   * 3. Générate url alias for the new section term (taxonomy/term/%term need to change by sections/%section_term)
+   * 4. Get Articles and add the new destinations.
+   */
+  
 }

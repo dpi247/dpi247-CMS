@@ -249,6 +249,49 @@ function dpidestinations_schema() {
      'primary key' => array('targetblockid'),
    );
   */
+  
+//  $schema['dpidestinations_topic_term_elu'] = array (
+//    'description' => 'Informations about topic term elu. This table gonna sav informations to restore after election.',
+//    'fields' => array(
+//      'topicid' => array(
+//        'description' => 'Primary key for our table of topic term elu',
+//        'type' => 'serial',
+//        'unsigned' => TRUE,
+//        'not null' => TRUE,
+//      ),
+//      'tid' => array(
+//        'type' => 'int',
+//        'not null' => TRUE,
+//        'description' => 'This is the term id from my term.',
+//      ),
+//      'tvalue' => array(
+//        'type' => 'varchar',
+//        'length' => '1000',
+//        'not null' => TRUE,
+//        'description' => 'This is the varchar value of the term.',
+//      ),
+//      'originalurls' => array(
+//        'type' => 'varchar',
+//        'length' => '1000',
+//        'not null' => TRUE,
+//        'description' => 'This is the term id from my term.',
+//      ),
+//      'newurls' => array(
+//        'type' => 'int',
+//        'type' => 'varchar',
+//        'length' => '1000',
+//        'not null' => TRUE,
+//        'description' => 'This is the term id from my term.',
+//      ),
+//      'timestamptodelete' => array(
+//        'description' => 'This time is gonna set after suppression term to redirect user one week after deletation',
+//        'type' => 'varchar',
+//        'length' => '1000',
+//        'not null' => FALSE,
+//      ),
+//    ),
+//    'primary key' => array('topicid'),
+//  );
 
   return $schema;
 }
