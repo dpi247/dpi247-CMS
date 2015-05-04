@@ -248,48 +248,48 @@ function dpidestinations_schema() {
    );
   */
   
-//  $schema['dpidestinations_topic_term_elu'] = array (
-//    'description' => 'Informations about topic term elu. This table gonna sav informations to restore after election.',
-//    'fields' => array(
-//      'topicid' => array(
-//        'description' => 'Primary key for our table of topic term elu',
-//        'type' => 'serial',
-//        'unsigned' => TRUE,
-//        'not null' => TRUE,
-//      ),
-//      'tid' => array(
-//        'type' => 'int',
-//        'not null' => TRUE,
-//        'description' => 'This is the term id from my term.',
-//      ),
-//      'tvalue' => array(
-//        'type' => 'varchar',
-//        'length' => '1000',
-//        'not null' => TRUE,
-//        'description' => 'This is the varchar value of the term.',
-//      ),
-//      'originalurls' => array(
-//        'type' => 'varchar',
-//        'length' => '1000',
-//        'not null' => TRUE,
-//        'description' => 'This is the term id from my term.',
-//      ),
-//      'newurls' => array(
-//        'type' => 'int',
-//        'type' => 'varchar',
-//        'length' => '1000',
-//        'not null' => TRUE,
-//        'description' => 'This is the term id from my term.',
-//      ),
-//      'timestamptodelete' => array(
-//        'description' => 'This time is gonna set after suppression term to redirect user one week after deletation',
-//        'type' => 'varchar',
-//        'length' => '1000',
-//        'not null' => FALSE,
-//      ),
-//    ),
-//    'primary key' => array('topicid'),
-//  );
+  $schema['dpidestinations_topic_term_elu'] = array (
+    'description' => 'Informations about topic term elu. This table gonna sav informations to restore after election.',
+    'fields' => array(
+      'topicid' => array(
+        'description' => 'Primary key for our table of topic term elu',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'tid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'tvalue' => array(
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the varchar value of the term.',
+      ),
+      'originalurls' => array(
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'newurls' => array(
+        'type' => 'int',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'timestamptodelete' => array(
+        'description' => 'This time is gonna set after suppression term to redirect user one week after deletation',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('topicid'),
+  );
 
   return $schema;
 }
@@ -402,5 +402,15 @@ function dpidestinations_update_7003() {
 function dpidestinations_update_7004() {
   if (db_table_exists('dpidestinations_targetblock_config')) {
     db_query("ALTER TABLE dpidestinations_targetblock_config MODIFY serialize_conf longblob NULL")->execute();
+  }
+}
+
+/**
+ * 
+ */
+function dpidestinations_update_7005(){
+  if (!db_table_exists('dpidestinations_topic_term_elu')) {
+    $schema = drupal_get_schema('dpidestinations_topic_term_elu', TRUE);
+    db_create_table('dpidestinations_topic_term_elu', $schema);
   }
 }
