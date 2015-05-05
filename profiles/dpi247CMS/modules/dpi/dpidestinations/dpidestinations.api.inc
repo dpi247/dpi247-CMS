@@ -410,3 +410,46 @@ function dpidestinations_api_get_config_cache_entries($name){
     drupal_set_message(t("Une erreur est survenue lors de la récupération de la configuration de cache"), "error");
   }
 }
+
+/**
+ * 
+ * @param type $fields
+ * @return type
+ */
+function dpidestinations_api_set_topic_term_elu($fields){
+  try {
+    return db_insert('dpidestinations_topic_term_elu')
+      ->fields($fields)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+/**
+ * 
+ * @param type $id
+ */
+function dpidestinations_api_delete_topic_term_elu($tid){
+  try {
+    return db_delete('dpidestinations_topic_term_elu')
+      ->condition('tid', $tid)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+function dpidestinations_api_topic_term_elu_is_present($tid){
+  try {
+    return db_select('dpidestinations_topic_term_elu', 'd')
+        ->fields('d')
+        ->condition('tid', $tid)
+        ->execute()->fetchAssoc();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}

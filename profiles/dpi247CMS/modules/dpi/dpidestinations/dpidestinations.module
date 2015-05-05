@@ -798,12 +798,12 @@ function dpidestinations_regexp_destination_from_value($search_string, $destinat
  * @param array $form
  * @param array $form_state
  */
-function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
-
+function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {  
   $form["field_electtermtosection"] = array(
     '#type' => 'checkbox',
     '#title' => t('Elect this term to a section term'),
     '#weight' => 99,
+    '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->tid)!=NULL)? TRUE : FALSE,
   );
 
   $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
@@ -824,5 +824,25 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
    * 3. Générate url alias for the new section term (taxonomy/term/%term need to change by sections/%section_term)
    * 4. Get Articles and add the new destinations.
    */
-  
+  if(isset($form_state['values']['field_electtermtosection'])){
+    if($form_state['values']['field_electtermtosection'] == 1 && dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])==NULL){
+      $parameters = array(
+        'tid' => $form_state['values']['tid'],
+        'tvalue' => $form_state['values']['name'],
+        'originalurls' => serialize($form_state['values']['path']),
+        'newurls' => serialize(array()),      
+      );
+      dpidestinations_api_set_topic_term_elu($parameters);
+    }else{
+      /**
+       * Si il est présent en DB on ajoute une date de 
+       * suppression qui sera traité par un CRON
+       */
+      if(dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])!=NULL){
+        //@todo didn't delete element but set timetodelete and create CRON to delete at time
+        dpidestinations_api_delete_topic_term_elu($form_state['values']['tid']);
+      }
+    }
+    dsm($form_state);    
+  }
 }
