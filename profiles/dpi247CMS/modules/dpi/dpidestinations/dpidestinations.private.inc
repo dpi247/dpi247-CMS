@@ -252,7 +252,9 @@ function _targetblock_metadata_getter($object, $options, $property_name) {
  */
 function _dpidestinations_virtualrank_update_items(&$items,$nid) {
   foreach($items as &$item) {
-    _dpidestinations_virtualrank_update_item($item,$nid);
+    if($item['target']!="none"){
+      _dpidestinations_virtualrank_update_item($item,$nid);
+    }    
   }
 }
 
@@ -695,6 +697,10 @@ function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id
     $options[$subtype]=$target->label;
   }
 
+  if(_dpidestinations_variable_get('dpidestination_allow_none_value_target',FALSE)){
+    $options = array( "none" => t('Aucun')) + $options;
+  }
+  
   return $options;
 }
 
