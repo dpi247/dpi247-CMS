@@ -412,9 +412,9 @@ function dpidestinations_api_get_config_cache_entries($name){
 }
 
 /**
- * 
- * @param type $fields
- * @return type
+ * This function insert topic term to database
+ * @param array $fields
+ * @return Boolean
  */
 function dpidestinations_api_set_topic_term_elu($fields){
   try {
@@ -428,8 +428,8 @@ function dpidestinations_api_set_topic_term_elu($fields){
 }
 
 /**
- * 
- * @param type $id
+ * This function delete topic term to database
+ * @param array $id
  */
 function dpidestinations_api_delete_topic_term_elu($tid){
   try {
@@ -442,6 +442,11 @@ function dpidestinations_api_delete_topic_term_elu($tid){
   }
 }
 
+/**
+ * This function retrieve topic term by his tid.
+ * @param String $tid
+ * @return Taxonomy_term
+ */
 function dpidestinations_api_topic_term_elu_is_present($tid){
   try {
     return db_select('dpidestinations_topic_term_elu', 'd')
@@ -451,5 +456,54 @@ function dpidestinations_api_topic_term_elu_is_present($tid){
   }
   catch (Exception $exc) {
     echo $exc->getTraceAsString();
+  }
+}
+
+/**
+ * This function add term to section taxonomy.
+ * @param String $term
+ */
+function dpidestinations_api_elect_term_to_section($term){
+  $dest_voc = 'sections';
+  $dest_vid = _dpidestinations_variable_get ( 'dpidestinations_section_vid', 0 );
+  if ($dest_vid) {
+    $base_term = new stdClass ();
+    $base_term->vid = $dest_vid;
+    $base_term->vocabulary_machine_name = $dest_voc;
+    $copied_term = clone $base_term;
+    $copied_term->name = $term;
+    taxonomy_term_save ( $copied_term );
+  }
+}
+
+/**
+ * This function delete sections term. 
+ * @param String $term
+ */
+function dpidestinations_api_delete_term_to_section($term){
+  $terms = taxonomy_get_term_by_name($term, 'sections');
+  if(is_array($terms) && count($terms)>0){
+     $section_term = current($terms);
+     taxonomy_term_delete($section_term->tid);
+  }
+}
+
+function dpidestinations_api_add_destinations_for_node_list($nodes, $destination){
+  if(isset($nodes) && is_array($nodes)){
+    foreach ($nodes as $nid){
+      /* Generate node and wrapper to set element */
+      $node = node_load($nid);
+      $wrapper =  entity_metadata_wrapper('node', $node);
+
+      /* Get element and add destination */
+      $list_items = field_get_items('node', $node, 'field_destinations');
+      $list_items[] = $destination;
+      
+      /* Set new list of element */
+      $wrapper->field_destinations->set($list_items);
+
+      /* Update informations about node */
+      node_save($node);
+    }
   }
 }

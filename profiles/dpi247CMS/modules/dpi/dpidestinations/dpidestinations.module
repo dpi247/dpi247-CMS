@@ -802,6 +802,7 @@ function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
   $form["field_electtermtosection"] = array(
     '#type' => 'checkbox',
     '#title' => t('Elect this term to a section term'),
+    '#description' => t('Attention !'),
     '#weight' => 99,
     '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->tid)!=NULL)? TRUE : FALSE,
   );
@@ -812,7 +813,7 @@ function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
 }
 
 /**
- * 
+ * This function alter taxonomy form submit to sav information about topic term if it's necessary.
  * @param array $form
  * @param array $form_state
  */
@@ -826,23 +827,34 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
    */
   if(isset($form_state['values']['field_electtermtosection'])){
     if($form_state['values']['field_electtermtosection'] == 1 && dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])==NULL){
+      /* Générate parameters */
       $parameters = array(
         'tid' => $form_state['values']['tid'],
         'tvalue' => $form_state['values']['name'],
         'originalurls' => serialize($form_state['values']['path']),
         'newurls' => serialize(array()),      
-      );
+      );      
+      /* Generate sections term */
+      dpidestinations_api_elect_term_to_section($form_state['values']['name']);
+      
+      /* Set element to  */
+      $nodes = taxonomy_select_nodes($term->tid);
+      //@toto generate destination
+      dpidestinations_api_add_destinations_for_node_list($nodes, $destination);
+      
+      /* Generate records to topic term database */
       dpidestinations_api_set_topic_term_elu($parameters);
     }else{
       /**
        * Si il est présent en DB on ajoute une date de 
        * suppression qui sera traité par un CRON
        */
-      if(dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])!=NULL){
+      if(dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])!=NULL){        
+        /* Delete sections term */
+        dpidestinations_api_delete_term_to_section($form_state['values']['name']);        
         //@todo didn't delete element but set timetodelete and create CRON to delete at time
         dpidestinations_api_delete_topic_term_elu($form_state['values']['tid']);
       }
     }
-    dsm($form_state);    
   }
 }
