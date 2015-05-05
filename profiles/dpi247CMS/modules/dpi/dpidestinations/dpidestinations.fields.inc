@@ -166,6 +166,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 
   $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])) {
+    //@todo placer la défault value en fonction des valeurs définies dans le tableau de admin/dpi247/dpidestinations
     $destinations['target'] = current(array_keys($target_options));
   }
   if($destinations['target']!="none"){

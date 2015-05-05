@@ -698,7 +698,7 @@ function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id
   }
 
   if(_dpidestinations_variable_get('dpidestination_allow_none_value_target',FALSE)){
-    $options = array( "none" => t('Aucun')) + $options;
+    $options = $options + array( "none" => t('Aucun'));
   }
   
   return $options;
