@@ -84,7 +84,6 @@ function ccimapping_form_productinfo_editor_form_submit($form, $form_state) {
           drupal_set_message(t('The productinfo has been sent to CCI'));
         } catch (SoapFault $exception) {
           cciadmin_api_output_webservice_error('WebService Error when sending the Product Info XML', $exception->faultstring, $exception->faultcode);
-          dsm($exception);
         }
       }
     /*} else {
@@ -126,7 +125,6 @@ function ccimapping_get_productinfo_fromWS() {
       return $result->return;
     } catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService Error when getting the Product Info XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
     }
   }
 

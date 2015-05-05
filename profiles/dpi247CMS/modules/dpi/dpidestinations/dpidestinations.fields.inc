@@ -166,18 +166,25 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 
   $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])) {
+    //@todo placer la défault value en fonction des valeurs définies dans le tableau de admin/dpi247/dpidestinations
     $destinations['target'] = current(array_keys($target_options));
   }
-  $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
-  if(!isset($layout_options[$destinations['layout']])) {
-    $destinations['layout'] = current($layout_options);
-  }
-  if($is_update) {
-    $destinations['rank'] = 'DNC';
-  }
-  $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
-  if(!isset($rank_options[$destinations['rank']])) {
-    $destinations['rank'] = current($rank_options);
+  if($destinations['target']!="none"){
+    $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
+    if(!isset($layout_options[$destinations['layout']])) {
+      $destinations['layout'] = current($layout_options);
+    }
+    if($is_update) {
+      $destinations['rank'] = 'DNC';
+    }
+    $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
+    if(!isset($rank_options[$destinations['rank']])) {
+      $destinations['rank'] = current($rank_options);
+    }
+  }else{
+    $rank_options = array( 0 => "none" );
+    $destinations['rank'] = 0;
+    $layout_options = array();
   }
 
   // STEP 3:

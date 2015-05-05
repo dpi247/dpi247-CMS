@@ -41,7 +41,7 @@ function entity_metadata_destination_property_callback(&$info, $entity_type, $fi
         'raw getter callback' => 'entity_property_verbatim_get',
       ),
       'target' => array(
-        'type' => 'token',
+        'type' => 'text',
         'label' => t('Target'),
         'sanitized' => TRUE,
         'getter callback' => 'entity_metadata_field_text_get',

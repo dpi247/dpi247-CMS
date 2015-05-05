@@ -70,7 +70,6 @@ function ccimapping_form_packagetype_editor_form_submit($form, $form_state) {
         }
         catch (SoapFault $exception) {
           cciadmin_api_output_webservice_error('WebService error while sending the Package Type XML', $exception->faultstring, $exception->faultcode);
-          dsm($exception);
         }
       }
     }
@@ -117,7 +116,6 @@ function ccimapping_get_packagetype_fromWS() {
     }
     catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService error while getting the Package Type XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
     }
   }
 
