@@ -804,7 +804,7 @@ function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
     '#title' => t('Elect this term to a section term'),
     '#description' => t('Attention !'),
     '#weight' => 99,
-    '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->tid)!=NULL)? TRUE : FALSE,
+    '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->name)!=NULL)? TRUE : FALSE,
   );
 
   $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
@@ -818,7 +818,7 @@ function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
  * @param array $form_state
  */
 function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
-  /* 3 Steps to elect a term to section :
+  /* 4 Steps to elect a term to section :
    * 
    * 1. Sav informations to database because we need to give informations about url after suppression of it.
    * 2. Elect term to section term tem add it to section/%term menu.
@@ -826,7 +826,7 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
    * 4. Get Articles and add the new destinations.
    */
   if(isset($form_state['values']['field_electtermtosection'])){
-    if($form_state['values']['field_electtermtosection'] == 1 && dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])==NULL){
+    if($form_state['values']['field_electtermtosection'] == 1 && dpidestinations_api_topic_term_elu_is_present($form_state['values']['name'])==NULL){
       /* Générate parameters */
       $parameters = array(
         'tid' => $form_state['values']['tid'],
@@ -838,22 +838,64 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
       dpidestinations_api_elect_term_to_section($form_state['values']['name']);
       
       /* Set element to  */
-      $nodes = taxonomy_select_nodes($term->tid);
-      //@toto generate destination
-      dpidestinations_api_add_destinations_for_node_list($nodes, $destination);
+      $nodes = taxonomy_select_nodes($form_state['values']['tid']);
+
+      /* Create new destinations */
+      $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+      foreach ($tids as $k => $v){
+        if($v == $form_state['values']['name']){
+          $tid = $k;
+          break;
+        }
+      }
       
-      /* Generate records to topic term database */
-      dpidestinations_api_set_topic_term_elu($parameters);
+      if(isset($tid)){
+        $parameters['tid'] = $tid;
+        $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($tid);
+        $destinations = array(
+          'tid' => $tid,
+          'target' => (isset($target_options['main_content'])) ? 'main_content' : current(array_keys($target_options)),
+          'layout' => '',
+          'rank' => 0,
+          'virtual_rank' => 0,
+        );
+        $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
+        $destinations['layout'] = current($layout_options);
+        
+        /* Generate element into to new destinations */
+        dpidestinations_api_add_destinations_for_node_list($nodes, $destinations);
+
+        /* Generate records to topic term database */
+        dpidestinations_api_set_topic_term_elu($parameters);
+      }else{
+        /* if not good record stop process and delete new section */
+        dpidestinations_api_delete_term_to_section($form_state['values']['name']);  
+      }
     }else{
       /**
        * Si il est présent en DB on ajoute une date de 
        * suppression qui sera traité par un CRON
        */
-      if(dpidestinations_api_topic_term_elu_is_present($form_state['values']['tid'])!=NULL){        
+      $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+      foreach ($tids as $k => $v){
+        if($v == $form_state['values']['name']){
+          $tid = $k;
+          break;
+        }
+      }
+
+      $is_present = dpidestinations_api_topic_term_elu_is_present($form_state['values']['name'])!=NULL;
+      if(isset($tid) && $is_present){
+        /* Delete destinations for all node into the destinations destinations */
+        dpidestinations_api_del_destinations_for_all_nodes($form_state['values']['tid']);
+        
         /* Delete sections term */
         dpidestinations_api_delete_term_to_section($form_state['values']['name']);        
+        
         //@todo didn't delete element but set timetodelete and create CRON to delete at time
-        dpidestinations_api_delete_topic_term_elu($form_state['values']['tid']);
+        dpidestinations_api_delete_topic_term_elu($tid, $form_state['values']['name']);
+      }else{
+        drupal_set_message('La section n\'existe pas');
       }
     }
   }

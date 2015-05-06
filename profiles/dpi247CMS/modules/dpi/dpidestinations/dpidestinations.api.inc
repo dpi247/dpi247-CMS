@@ -431,14 +431,15 @@ function dpidestinations_api_set_topic_term_elu($fields){
  * This function delete topic term to database
  * @param array $id
  */
-function dpidestinations_api_delete_topic_term_elu($tid){
+function dpidestinations_api_delete_topic_term_elu($tid, $name){
   try {
     return db_delete('dpidestinations_topic_term_elu')
+      ->condition('tvalue', $name)
       ->condition('tid', $tid)
       ->execute();
   }
   catch (Exception $exc) {
-    echo $exc->getTraceAsString();
+    drupal_set_message('error : '.$exc->getMessage());
   }
 }
 
@@ -447,11 +448,11 @@ function dpidestinations_api_delete_topic_term_elu($tid){
  * @param String $tid
  * @return Taxonomy_term
  */
-function dpidestinations_api_topic_term_elu_is_present($tid){
+function dpidestinations_api_topic_term_elu_is_present($name){
   try {
     return db_select('dpidestinations_topic_term_elu', 'd')
         ->fields('d')
-        ->condition('tid', $tid)
+        ->condition('tvalue', $name)
         ->execute()->fetchAssoc();
   }
   catch (Exception $exc) {
@@ -506,4 +507,53 @@ function dpidestinations_api_add_destinations_for_node_list($nodes, $destination
       node_save($node);
     }
   }
+}
+
+/**
+ * This function delete destination for all node with destinations tid pass by parameter
+ * @param Integer $tid
+ */
+function dpidestinations_api_del_destinations_for_all_nodes($tid){
+  $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+  $nids = dpidestinations_api_get_nid_for_tid($tid);
+  if(is_array($nids)){
+    foreach($nids as $nid){
+      /* Generate node and wrapper to set element */
+      $node = node_load($nid->entity_id);
+      $wrapper =  entity_metadata_wrapper('node', $node);
+      
+      /* Get element and delete destination */
+      $list_items = field_get_items('node', $node, 'field_destinations');
+      $new_list_items = array();
+      foreach ($list_items as $item){
+        if($item['tid']!=$tid){
+          $new_list_items[] = $item;
+        }
+      }
+      
+      /* Set new list of element */
+      $wrapper->field_destinations->set($new_list_items);
+      
+      /* Update informations about node */
+      node_save($node);
+    }
+  }
+}
+
+/**
+ * This function return all nid with destinations tid passe by parameter
+ * @param integer $tid
+ * @return array(Object)
+ */
+function dpidestinations_api_get_nid_for_tid($tid){
+  try {
+    return db_select('field_data_field_destinations', 'f')->distinct()
+        ->fields('f', array('entity_id'))
+        ->condition('field_destinations_tid', $tid)
+        ->execute()
+        ->fetchAll();
+  }
+  catch (Exception $exc) {
+    drupal_set_message("Une erreur est survenue dans le query de la fonction dpidestinations_api_get_nid_for_tid");
+  }   
 }
