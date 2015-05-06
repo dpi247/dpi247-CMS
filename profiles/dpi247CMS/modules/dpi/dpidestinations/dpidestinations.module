@@ -799,15 +799,18 @@ function dpidestinations_regexp_destination_from_value($search_string, $destinat
  * @param array $form_state
  */
 function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {  
-  $form["field_electtermtosection"] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Elect this term to a section term'),
-    '#description' => t('Attention !'),
-    '#weight' => 99,
-    '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->name)!=NULL)? TRUE : FALSE,
-  );
 
-  $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
+  if(isset($form_state['term']->vocabulary_machine_name) && $form_state['term']->vocabulary_machine_name!='sections' && (!isset($form_state['confirm_delete']) || !$form_state['confirm_delete'])){
+    $form["field_electtermtosection"] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Elect this term to a section term'),
+      '#description' => t('Attention !'),
+      '#weight' => 99,
+      '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->name)!=NULL)? TRUE : FALSE,
+    );
+
+    $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
+  }  
   
   return $form;
 }
@@ -895,8 +898,6 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
         
         /* Update term to topic term table */
         dpidestinations_api_update_topic_term_elu($tid, $form_state['values']['name'], $is_present);
-      }else{
-        drupal_set_message('La section n\'existe pas, le topic term sera supprimer.');
       }
     }
   }
