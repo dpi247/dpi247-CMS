@@ -831,9 +831,10 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
       $parameters = array(
         'tid' => $form_state['values']['tid'],
         'tvalue' => $form_state['values']['name'],
-        'originalurls' => serialize($form_state['values']['path']),
-        'newurls' => serialize(array()),      
-      );      
+        'originalurls' => $form_state['values']['path']['alias'],
+        'newurls' => 'sections/'.$form_state['values']['name'],      
+      );
+      
       /* Generate sections term */
       dpidestinations_api_elect_term_to_section($form_state['values']['name']);
       
@@ -864,7 +865,7 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
         
         /* Generate element into to new destinations */
         dpidestinations_api_add_destinations_for_node_list($nodes, $destinations);
-
+        
         /* Generate records to topic term database */
         dpidestinations_api_set_topic_term_elu($parameters);
       }else{
@@ -884,19 +885,44 @@ function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
         }
       }
 
-      $is_present = dpidestinations_api_topic_term_elu_is_present($form_state['values']['name'])!=NULL;
-      if(isset($tid) && $is_present){
+      $is_present = dpidestinations_api_topic_term_elu_is_present($form_state['values']['name']);
+      if(isset($tid) && $is_present!=NULL){
         /* Delete destinations for all node into the destinations destinations */
         dpidestinations_api_del_destinations_for_all_nodes($form_state['values']['tid']);
         
         /* Delete sections term */
         dpidestinations_api_delete_term_to_section($form_state['values']['name']);        
         
-        //@todo didn't delete element but set timetodelete and create CRON to delete at time
-        dpidestinations_api_delete_topic_term_elu($tid, $form_state['values']['name']);
+        /* Update term to topic term table */
+        dpidestinations_api_update_topic_term_elu($tid, $form_state['values']['name'], $is_present);
       }else{
-        drupal_set_message('La section n\'existe pas');
+        drupal_set_message('La section n\'existe pas, le topic term sera supprimer.');
       }
     }
+  }
+}
+
+/**
+ * We use this hook to redirect element after taxonomy term elect to section term
+ */
+function dpidestinations_init(){
+  $destination = drupal_get_path_alias(current_path());
+  $topic_term = dpidestinations_api_topic_term_elu_is_present_by_url($destination);
+  if($topic_term !=NULL){
+    drupal_goto('http://'. $_SERVER['HTTP_HOST'].'/'.$topic_term['newurls']);
+  }
+}
+
+/**
+ * At the start, we redirect element from A to B. After deleting section, we 
+ * redirect element from B to A for a few time. But when this time passed we delete 
+ * element with this cron.
+ */
+function dpidestinations_cron(){
+  $today = strtotime(date('Y-m-d'));
+  $last_run_timestamp = dpi_variable_get('dpidestinations_topic_term_delete_last_run', time() - 86400);
+  if ($last_run_timestamp < $today) {
+    dpi_variable_set('dpidestinations_topic_term_delete_last_run', $today);
+    dpidestinations_api_delete_topic_term_elu_by_timestamp();
   }
 }

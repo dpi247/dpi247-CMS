@@ -461,6 +461,23 @@ function dpidestinations_api_topic_term_elu_is_present($name){
 }
 
 /**
+ * 
+ * @param type $url
+ * @return type
+ */
+function dpidestinations_api_topic_term_elu_is_present_by_url($url){
+  try {
+    return db_select('dpidestinations_topic_term_elu', 'd')
+        ->fields('d')
+        ->condition('originalurls', $url)
+        ->execute()->fetchAssoc();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+/**
  * This function add term to section taxonomy.
  * @param String $term
  */
@@ -489,6 +506,11 @@ function dpidestinations_api_delete_term_to_section($term){
   }
 }
 
+/**
+ * This functio is use to add destinations to a node list.
+ * @param Array $nodes
+ * @param Array $destination
+ */
 function dpidestinations_api_add_destinations_for_node_list($nodes, $destination){
   if(isset($nodes) && is_array($nodes)){
     foreach ($nodes as $nid){
@@ -556,4 +578,43 @@ function dpidestinations_api_get_nid_for_tid($tid){
   catch (Exception $exc) {
     drupal_set_message("Une erreur est survenue dans le query de la fonction dpidestinations_api_get_nid_for_tid");
   }   
+}
+
+/**
+ * This function is use to update topic term after suppression
+ * @param Integer $tid
+ * @param String $tvalue
+ * @param Array $old_value
+ */
+function dpidestinations_api_update_topic_term_elu($tid, $tvalue, $old_value){
+  try {
+    db_update('dpidestinations_topic_term_elu') 
+      ->fields(array(
+        'originalurls' => $old_value['newurls'],
+        'newurls' => $old_value['originalurls'],
+        'timestamptodelete' => time() + (variable_get("dpidestinations_topic_term_days_save", 7) * 24 * 60 * 60),
+      ))
+      ->condition('tid', $tid)
+      ->condition('tvalue', $tvalue)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    drupal_set_message("Une erreur est survenue dans le query de la fonction dpidestinations_api_update_topic_term_elu : ".$exc->getMessage());
+  } 
+}
+
+/**
+ * This function is use by cron to delete topic term after x days
+ * @return Boolean
+ */
+function dpidestinations_api_delete_topic_term_elu_by_timestamp(){
+  dsm(time());
+  try {
+    return db_delete('dpidestinations_topic_term_elu')
+      ->condition('timestamptodelete', time(), "<=")
+      ->execute();
+  }
+  catch (Exception $exc) {
+    drupal_set_message('error deleting cron : '.$exc->getMessage());
+  }
 }
