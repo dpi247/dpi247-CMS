@@ -467,7 +467,14 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#description' => t('The rank mak value can be defined in each targetblock but cannot be bigger than the absolute rank max value'),
     '#default_value'=>_dpidestinations_variable_get('dpidestination_max_reserved_position',10),
   );
-
+  
+  $form["default"]['dpidestination_allow_none_value_target']=array(
+    "#type"=>'checkbox',
+    '#title' => t('Allow none value for target'),
+    '#description' => t('This checkbox allow to define a none value for target.'),
+    '#default_value'=>_dpidestinations_variable_get('dpidestination_allow_none_value_target',FALSE),
+  );
+  
   $help="This value is used as a multiplicator in the timerank calculation when a package is placed on the first position of a destination<br/>";
 
   $form["advanced"]['dpidestinations_virtualrank_delta']=array(
@@ -534,6 +541,7 @@ function dpidestinations_form_configuration_form_submit($form, &$form_state){
 
   _dpidestinations_variable_set('dpidestinations_section_vid',$values['dpidestinations_section_vid']);
   _dpidestinations_variable_set('dpidestinations_virtualrank_delta',$values['dpidestinations_virtualrank_delta']);
+  _dpidestinations_variable_set('dpidestination_allow_none_value_target',$values['dpidestination_allow_none_value_target']);
   _dpidestinations_variable_set('dpidestination_max_reserved_position',$values['dpidestination_max_reserved_position']);
   _dpidestinations_variable_set('dpidestinations_targetview_reorder_default',array($values['view_name'],$values['view_display']));
 }

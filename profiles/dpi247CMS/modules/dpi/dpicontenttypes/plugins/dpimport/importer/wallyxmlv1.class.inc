@@ -290,8 +290,13 @@ class WallyXmlV1 extends PackageHelper {
             $destination_list [] = $dest;
           }
         }
-        else {
-          Logger::logWarning('importer', 2, 'pathnotfound', t('Position not found. Destination rejected'));
+        else {          
+          /* Destinations without target */
+          $dest ['tid'] = $terms [0]->tid;
+          $dest ['target'] = 'none';
+          $dest ['layout'] = $destination->getAttributeNode("DocumentLayout")->value;
+          $dest ['rank'] = $destination->hasAttribute("DestinationRank") ? $destination->getAttributeNode("DestinationRank")->value : 0;
+          $destination_list [] = $dest;
         }
       }
       else {
@@ -418,7 +423,7 @@ class WallyXmlV1 extends PackageHelper {
     }
     
     /* Manage package type */
-    if($value != 'Hors-texte' && $value != 'Article'){
+    if($value != 'Hors-texte' && $value != 'Article' && $value != 'Aucun'){
       $vid = dpi_variable_get('dpi_packagelayout', NULL);
       $vocabulary = taxonomy_vocabulary_load($vid);
       $vocabulary_name = $vocabulary->machine_name;
