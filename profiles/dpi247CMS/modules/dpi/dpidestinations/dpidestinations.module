@@ -803,8 +803,8 @@ function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {
   if(isset($form_state['term']->vocabulary_machine_name) && $form_state['term']->vocabulary_machine_name!='sections' && (!isset($form_state['confirm_delete']) || !$form_state['confirm_delete'])){
     $form["field_electtermtosection"] = array(
       '#type' => 'checkbox',
-      '#title' => t('Elect this term to a section term'),
-      '#description' => t('Attention !'),
+      '#title' => t('Elire se terme de taxonomie en temps que terme de section'),
+      '#description' => t('Si vous effectuez cette action, le terme selectionné se placera automatiquement dans la liste du menu. Le terme de taxonomie redirigera automatiquement vers la section. Après la suppression de celui-ci, le terme de section redirigera vers le terme de taxonomie durant une durée qui est par défault de 7 jours. Celle-ci est paramètrable via l\'admin de gestion.'),
       '#weight' => 99,
       '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->name)!=NULL)? TRUE : FALSE,
     );
