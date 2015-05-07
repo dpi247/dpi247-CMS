@@ -410,3 +410,211 @@ function dpidestinations_api_get_config_cache_entries($name){
     drupal_set_message(t("Une erreur est survenue lors de la récupération de la configuration de cache"), "error");
   }
 }
+
+/**
+ * This function insert topic term to database
+ * @param array $fields
+ * @return Boolean
+ */
+function dpidestinations_api_set_topic_term_elu($fields){
+  try {
+    return db_insert('dpidestinations_topic_term_elu')
+      ->fields($fields)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+/**
+ * This function delete topic term to database
+ * @param array $id
+ */
+function dpidestinations_api_delete_topic_term_elu($tid, $name){
+  try {
+    return db_delete('dpidestinations_topic_term_elu')
+      ->condition('tvalue', $name)
+      ->condition('tid', $tid)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    drupal_set_message('error : '.$exc->getMessage());
+  }
+}
+
+/**
+ * This function retrieve topic term by his tid.
+ * @param String $tid
+ * @return Taxonomy_term
+ */
+function dpidestinations_api_topic_term_elu_is_present($name){
+  try {
+    return db_select('dpidestinations_topic_term_elu', 'd')
+        ->fields('d')
+        ->condition('tvalue', $name)
+        ->execute()->fetchAssoc();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+/**
+ * 
+ * @param type $url
+ * @return type
+ */
+function dpidestinations_api_topic_term_elu_is_present_by_url($url){
+  try {
+    return db_select('dpidestinations_topic_term_elu', 'd')
+        ->fields('d')
+        ->condition('originalurls', $url)
+        ->execute()->fetchAssoc();
+  }
+  catch (Exception $exc) {
+    echo $exc->getTraceAsString();
+  }
+}
+
+/**
+ * This function add term to section taxonomy.
+ * @param String $term
+ */
+function dpidestinations_api_elect_term_to_section($term){
+  $dest_voc = 'sections';
+  $dest_vid = _dpidestinations_variable_get ( 'dpidestinations_section_vid', 0 );
+  if ($dest_vid) {
+    $base_term = new stdClass ();
+    $base_term->vid = $dest_vid;
+    $base_term->vocabulary_machine_name = $dest_voc;
+    $copied_term = clone $base_term;
+    $copied_term->name = $term;
+    taxonomy_term_save ( $copied_term );
+  }
+}
+
+/**
+ * This function delete sections term. 
+ * @param String $term
+ */
+function dpidestinations_api_delete_term_to_section($term){
+  $terms = taxonomy_get_term_by_name($term, 'sections');
+  if(is_array($terms) && count($terms)>0){
+     $section_term = current($terms);
+     taxonomy_term_delete($section_term->tid);
+  }
+}
+
+/**
+ * This functio is use to add destinations to a node list.
+ * @param Array $nodes
+ * @param Array $destination
+ */
+function dpidestinations_api_add_destinations_for_node_list($nodes, $destination){
+  if(isset($nodes) && is_array($nodes)){
+    foreach ($nodes as $nid){
+      /* Generate node and wrapper to set element */
+      $node = node_load($nid);
+      $wrapper =  entity_metadata_wrapper('node', $node);
+
+      /* Get element and add destination */
+      $list_items = field_get_items('node', $node, 'field_destinations');
+      $list_items[] = $destination;
+      
+      /* Set new list of element */
+      $wrapper->field_destinations->set($list_items);
+
+      /* Update informations about node */
+      node_save($node);
+    }
+  }
+}
+
+/**
+ * This function delete destination for all node with destinations tid pass by parameter
+ * @param Integer $tid
+ */
+function dpidestinations_api_del_destinations_for_all_nodes($tid){
+  $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+  $nids = dpidestinations_api_get_nid_for_tid($tid);
+  if(is_array($nids)){
+    foreach($nids as $nid){
+      /* Generate node and wrapper to set element */
+      $node = node_load($nid->entity_id);
+      $wrapper =  entity_metadata_wrapper('node', $node);
+      
+      /* Get element and delete destination */
+      $list_items = field_get_items('node', $node, 'field_destinations');
+      $new_list_items = array();
+      foreach ($list_items as $item){
+        if($item['tid']!=$tid){
+          $new_list_items[] = $item;
+        }
+      }
+      
+      /* Set new list of element */
+      $wrapper->field_destinations->set($new_list_items);
+      
+      /* Update informations about node */
+      node_save($node);
+    }
+  }
+}
+
+/**
+ * This function return all nid with destinations tid passe by parameter
+ * @param integer $tid
+ * @return array(Object)
+ */
+function dpidestinations_api_get_nid_for_tid($tid){
+  try {
+    return db_select('field_data_field_destinations', 'f')->distinct()
+        ->fields('f', array('entity_id'))
+        ->condition('field_destinations_tid', $tid)
+        ->execute()
+        ->fetchAll();
+  }
+  catch (Exception $exc) {
+    drupal_set_message("Une erreur est survenue dans le query de la fonction dpidestinations_api_get_nid_for_tid");
+  }   
+}
+
+/**
+ * This function is use to update topic term after suppression
+ * @param Integer $tid
+ * @param String $tvalue
+ * @param Array $old_value
+ */
+function dpidestinations_api_update_topic_term_elu($tid, $tvalue, $old_value){
+  try {
+    db_update('dpidestinations_topic_term_elu') 
+      ->fields(array(
+        'originalurls' => $old_value['newurls'],
+        'newurls' => $old_value['originalurls'],
+        'timestamptodelete' => time() + (variable_get("dpidestinations_topic_term_days_save", 7) * 24 * 60 * 60),
+      ))
+      ->condition('tid', $tid)
+      ->condition('tvalue', $tvalue)
+      ->execute();
+  }
+  catch (Exception $exc) {
+    drupal_set_message("Une erreur est survenue dans le query de la fonction dpidestinations_api_update_topic_term_elu : ".$exc->getMessage());
+  } 
+}
+
+/**
+ * This function is use by cron to delete topic term after x days
+ * @return Boolean
+ */
+function dpidestinations_api_delete_topic_term_elu_by_timestamp(){
+  dsm(time());
+  try {
+    return db_delete('dpidestinations_topic_term_elu')
+      ->condition('timestamptodelete', time(), "<=")
+      ->execute();
+  }
+  catch (Exception $exc) {
+    drupal_set_message('error deleting cron : '.$exc->getMessage());
+  }
+}

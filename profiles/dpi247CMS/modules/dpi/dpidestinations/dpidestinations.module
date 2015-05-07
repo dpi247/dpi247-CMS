@@ -770,7 +770,7 @@ function dpidestinations_panels_pane_update($pane) {
 function dpidestinations_get_destinations_from_textfield($value) {
   $return = array();
   $tids = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
-  if(isset($tids) && !empty($tids) && isset($value) && $value!="") {
+  if (isset($tids) && !empty($tids) && isset($value) && $value != "") {
     $return = dpidestinations_regexp_destination_from_value($value, $tids);
   }
   drupal_json_output($return);
@@ -786,9 +786,144 @@ function dpidestinations_regexp_destination_from_value($search_string, $destinat
   $return = array();
   foreach ($destinations as $k => $v) {
     preg_match('/.*' . $search_string . '.*$/i', $v, $matches);
-    if (!empty($matches) && $v!="Add a new destination") {
+    if (!empty($matches) && $v != "Add a new destination") {
       $return[$k] = $v;
     }
   }
   return $return;
+}
+
+/**
+ * Alter taxonomy term form to propose a cxheckbox to elet a term to sections term
+ * @param array $form
+ * @param array $form_state
+ */
+function dpidestinations_form_taxonomy_form_term_alter(&$form, &$form_state) {  
+
+  if(isset($form_state['term']->vocabulary_machine_name) && $form_state['term']->vocabulary_machine_name!='sections' && (!isset($form_state['confirm_delete']) || !$form_state['confirm_delete'])){
+    $form["field_electtermtosection"] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Elire se terme de taxonomie en temps que terme de section'),
+      '#description' => t('Si vous effectuez cette action, le terme selectionné se placera automatiquement dans la liste du menu. Le terme de taxonomie redirigera automatiquement vers la section. Après la suppression de celui-ci, le terme de section redirigera vers le terme de taxonomie durant une durée qui est par défault de 7 jours. Celle-ci est paramètrable via l\'admin de gestion.'),
+      '#weight' => 99,
+      '#default_value' => (isset($form_state['term']->tid) && dpidestinations_api_topic_term_elu_is_present($form_state['term']->name)!=NULL)? TRUE : FALSE,
+    );
+
+    $form['#submit'][] = 'dpidestinations_taxonomy_form_term_submit';
+  }  
+  
+  return $form;
+}
+
+/**
+ * This function alter taxonomy form submit to sav information about topic term if it's necessary.
+ * @param array $form
+ * @param array $form_state
+ */
+function dpidestinations_taxonomy_form_term_submit($form, &$form_state){
+  /* 4 Steps to elect a term to section :
+   * 
+   * 1. Sav informations to database because we need to give informations about url after suppression of it.
+   * 2. Elect term to section term tem add it to section/%term menu.
+   * 3. Générate url alias for the new section term (taxonomy/term/%term need to change by sections/%section_term)
+   * 4. Get Articles and add the new destinations.
+   */
+  if(isset($form_state['values']['field_electtermtosection'])){
+    if($form_state['values']['field_electtermtosection'] == 1 && dpidestinations_api_topic_term_elu_is_present($form_state['values']['name'])==NULL){
+      /* Générate parameters */
+      $parameters = array(
+        'tid' => $form_state['values']['tid'],
+        'tvalue' => $form_state['values']['name'],
+        'originalurls' => $form_state['values']['path']['alias'],
+        'newurls' => 'sections/'.$form_state['values']['name'],      
+      );
+      
+      /* Generate sections term */
+      dpidestinations_api_elect_term_to_section($form_state['values']['name']);
+      
+      /* Set element to  */
+      $nodes = taxonomy_select_nodes($form_state['values']['tid']);
+
+      /* Create new destinations */
+      $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+      foreach ($tids as $k => $v){
+        if($v == $form_state['values']['name']){
+          $tid = $k;
+          break;
+        }
+      }
+      
+      if(isset($tid)){
+        $parameters['tid'] = $tid;
+        $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($tid);
+        $destinations = array(
+          'tid' => $tid,
+          'target' => (isset($target_options['main_content'])) ? 'main_content' : current(array_keys($target_options)),
+          'layout' => '',
+          'rank' => 0,
+          'virtual_rank' => 0,
+        );
+        $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
+        $destinations['layout'] = current($layout_options);
+        
+        /* Generate element into to new destinations */
+        dpidestinations_api_add_destinations_for_node_list($nodes, $destinations);
+        
+        /* Generate records to topic term database */
+        dpidestinations_api_set_topic_term_elu($parameters);
+      }else{
+        /* if not good record stop process and delete new section */
+        dpidestinations_api_delete_term_to_section($form_state['values']['name']);  
+      }
+    }else{
+      /**
+       * Si il est présent en DB on ajoute une date de 
+       * suppression qui sera traité par un CRON
+       */
+      $tids = dpidestinations_api_get_all_sections_term_available_as_select_options(TRUE);
+      foreach ($tids as $k => $v){
+        if($v == $form_state['values']['name']){
+          $tid = $k;
+          break;
+        }
+      }
+
+      $is_present = dpidestinations_api_topic_term_elu_is_present($form_state['values']['name']);
+      if(isset($tid) && $is_present!=NULL){
+        /* Delete destinations for all node into the destinations destinations */
+        dpidestinations_api_del_destinations_for_all_nodes($form_state['values']['tid']);
+        
+        /* Delete sections term */
+        dpidestinations_api_delete_term_to_section($form_state['values']['name']);        
+        
+        /* Update term to topic term table */
+        dpidestinations_api_update_topic_term_elu($tid, $form_state['values']['name'], $is_present);
+      }
+    }
+  }
+}
+
+/**
+ * We use this hook to redirect element after taxonomy term elect to section term
+ */
+function dpidestinations_init(){
+  $destination = drupal_get_path_alias(current_path());
+  $topic_term = dpidestinations_api_topic_term_elu_is_present_by_url($destination);
+  if($topic_term !=NULL){
+    drupal_goto('http://'. $_SERVER['HTTP_HOST'].'/'.$topic_term['newurls']);
+  }
+}
+
+/**
+ * At the start, we redirect element from A to B. After deleting section, we 
+ * redirect element from B to A for a few time. But when this time passed we delete 
+ * element with this cron.
+ */
+function dpidestinations_cron(){
+  $today = strtotime(date('Y-m-d'));
+  $last_run_timestamp = dpi_variable_get('dpidestinations_topic_term_delete_last_run', time() - 86400);
+  if ($last_run_timestamp < $today) {
+    dpi_variable_set('dpidestinations_topic_term_delete_last_run', $today);
+    dpidestinations_api_delete_topic_term_elu_by_timestamp();
+  }
 }

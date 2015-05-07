@@ -195,58 +195,101 @@ function dpidestinations_schema() {
   );
 
   /*
-    $schema['dpidestinations_destinationvariant'] = array (
-    'description' => 'The target entity table',
+   $schema['dpidestinations_destinationvariant'] = array (
+     'description' => 'The target entity table',
+     'fields' => array(
+       'page_manager_handlers_did' => array(
+         'description' => 'The machine name of the target',
+         'type' => 'varchar',
+         'length' => '255',
+         'not null' => TRUE
+       ),
+       'pager_override' => array(
+         'description' => 'The machine name of the target',
+         'type' => 'varchar',
+         'length' => '255',
+         'not null' => TRUE
+       ),
+       'split_flag' => array(
+         'description' => 'The machine name of the target',
+         'type' => 'varchar',
+         'length' => '255',
+         'not null' => TRUE
+       ),
+       'split_number' => array(
+         'description' => 'The machine name of the target',
+         'type' => 'varchar',
+         'length' => '255',
+         'not null' => TRUE
+       ),
+       'split_total' => array(
+         'description' => 'The machine name of the target',
+         'type' => 'varchar',
+         'length' => '255',
+         'not null' => TRUE
+       ),
+       'status' => array(
+         'type' => 'int',
+         'not null' => TRUE,
+         // Set the default to ENTITY_CUSTOM without using the constant as it is
+         // not safe to use it at this point.
+         'default' => ENTITY_CUSTOM,
+         'size' => 'tiny',
+         'description' => 'The exportable status of the entity.',
+       ),
+       'module' => array(
+         'description' => 'The name of the providing module if the entity has been defined in code.',
+         'type' => 'varchar',
+         'length' => 255,
+         'not null' => FALSE,
+       ),
+     ),
+     'primary key' => array('targetblockid'),
+   );
+  */
+  
+  $schema['dpidestinations_topic_term_elu'] = array (
+    'description' => 'Informations about topic term elu. This table gonna sav informations to restore after election.',
     'fields' => array(
-    'page_manager_handlers_did' => array(
-    'description' => 'The machine name of the target',
-    'type' => 'varchar',
-    'length' => '255',
-    'not null' => TRUE
+      'topicid' => array(
+        'description' => 'Primary key for our table of topic term elu',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'tid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'tvalue' => array(
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the varchar value of the term.',
+      ),
+      'originalurls' => array(
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'newurls' => array(
+        'type' => 'int',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'timestamptodelete' => array(
+        'description' => 'This time is gonna set after suppression term to redirect user one week after deletation',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => FALSE,
+      ),
     ),
-    'pager_override' => array(
-    'description' => 'The machine name of the target',
-    'type' => 'varchar',
-    'length' => '255',
-    'not null' => TRUE
-    ),
-    'split_flag' => array(
-    'description' => 'The machine name of the target',
-    'type' => 'varchar',
-    'length' => '255',
-    'not null' => TRUE
-    ),
-    'split_number' => array(
-    'description' => 'The machine name of the target',
-    'type' => 'varchar',
-    'length' => '255',
-    'not null' => TRUE
-    ),
-    'split_total' => array(
-    'description' => 'The machine name of the target',
-    'type' => 'varchar',
-    'length' => '255',
-    'not null' => TRUE
-    ),
-    'status' => array(
-    'type' => 'int',
-    'not null' => TRUE,
-    // Set the default to ENTITY_CUSTOM without using the constant as it is
-    // not safe to use it at this point.
-    'default' => ENTITY_CUSTOM,
-    'size' => 'tiny',
-    'description' => 'The exportable status of the entity.',
-    ),
-    'module' => array(
-    'description' => 'The name of the providing module if the entity has been defined in code.',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => FALSE,
-    ),
-    ),
-    'primary key' => array('targetblockid'),
-    );
-   */
+    'primary key' => array('topicid'),
+  );
 
   return $schema;
 }
@@ -359,5 +402,15 @@ function dpidestinations_update_7003() {
 function dpidestinations_update_7004() {
   if (db_table_exists('dpidestinations_targetblock_config')) {
     db_query("ALTER TABLE dpidestinations_targetblock_config MODIFY serialize_conf longblob NULL")->execute();
+  }
+}
+
+/**
+ * 
+ */
+function dpidestinations_update_7005(){
+  if (!db_table_exists('dpidestinations_topic_term_elu')) {
+    $schema = drupal_get_schema('dpidestinations_topic_term_elu', TRUE);
+    db_create_table('dpidestinations_topic_term_elu', $schema);
   }
 }

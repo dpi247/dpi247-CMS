@@ -1077,7 +1077,7 @@ class WallyXmlV1 extends PackageHelper {
       if($vocabularies && !empty($vocabularies)){
         $dispatcher = $this->getDispatcher();
         $dispatcher->processChildren($dom, $package_wrapper, $entity);
-        global $global_list_term;
+        $global_list_term = &drupal_static('sav_global_list_term');
         if(is_array($global_list_term) && !empty($global_list_term)){
           if($taxonomy_name == "DPI Authors"){
             $taxonomy_name = "Authors";
@@ -1085,8 +1085,18 @@ class WallyXmlV1 extends PackageHelper {
           $t_machine_name = strtolower($taxonomy_name);
           $t_machine_name = str_replace(' ', '', $t_machine_name);
           $field_name = 'field_'.strtolower($t_machine_name);  
+          if(isset($entity->type) && $entity->type != "package"){
+            switch($t_machine_name){
+              case "authors":
+                  $field_name = 'scald_'.strtolower($t_machine_name);
+                 break;
+              case "thumbnail":
+                   $field_name = 'scald_'.strtolower($t_machine_name);
+                 break;
+            }
+          }
           $package_wrapper->$field_name->set($global_list_term);
-          $global_list_term = array();
+          drupal_static_reset('sav_global_list_term');
         }
       }else{
         Logger::logWarning('importer', 2, 'pathnotfound', t('Taxonomy term don\'t exist into this instance of drupal : @term' , array(
@@ -1101,10 +1111,7 @@ class WallyXmlV1 extends PackageHelper {
   }
   
   function buildTerm($dom, $wrapper, $entity, $dom_parent){   
-    global $global_list_term;
-    if(!is_array($global_list_term))
-      $global_list_term = array();
-    
+    $global_list_term = &drupal_static('sav_global_list_term', array());    
     $term = $dom->getAttribute('Name');
     $taxonomy_name = $dom_parent->getAttribute('VocabularyName');
     if($taxonomy_name == "Tags"){
