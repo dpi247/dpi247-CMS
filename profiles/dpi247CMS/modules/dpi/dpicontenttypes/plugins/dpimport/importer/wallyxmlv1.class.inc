@@ -1085,7 +1085,9 @@ class WallyXmlV1 extends PackageHelper {
           $t_machine_name = strtolower($taxonomy_name);
           $t_machine_name = str_replace(' ', '', $t_machine_name);
           $field_name = 'field_'.strtolower($t_machine_name);  
-          $package_wrapper->$field_name->set($global_list_term);
+          if(isset($package_wrapper->$field_name)){
+            $package_wrapper->$field_name->set($global_list_term);
+          }
           $global_list_term = array();
         }
       }else{
