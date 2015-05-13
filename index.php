@@ -92,7 +92,7 @@ if(function_exists('libraries_load') && is_array(libraries_load ('ssophptoolbox'
 }
 
 /* test de connexion via le login token -> co automatique */
-if(isset($drupal_session_auto_connect) && $drupal_session_auto_connect == TRUE && (!isset($_COOKIE['dpisso_is_connected']) || !user_is_logged_in()) && (!isset($destroy_session) || $destroy_session != TRUE)){
+if( dpi247_activate_autoconntect() && isset($drupal_session_auto_connect) && $drupal_session_auto_connect == TRUE && (!isset($_COOKIE['dpisso_is_connected']) || !user_is_logged_in()) && (!isset($destroy_session) || $destroy_session != TRUE)){
     require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
     $profile=$SsoSession->getProfile();
     $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
@@ -102,6 +102,15 @@ if(isset($drupal_session_auto_connect) && $drupal_session_auto_connect == TRUE &
     dpisso_user_external_login_register($loginId, 'dpisso',$sso_user_infos);
     $federationConfig = LoginManager::getCookieInfo();
     LoginManager::setCookie ( 'dpisso_is_connected', true, Time()+3600*24*52, $federationConfig["domain"], $federationConfig["path"]);
+}
+
+
+function dpi247_activate_autoconntect(){
+
+	if(count(stristr($_SERVER['SERVER_NAME'],variable_get('dpi247_servername_no_autoconnect','master')))){
+		return false;
+	}
+	return TRUE;
 }
 
 menu_execute_active_handler ();
