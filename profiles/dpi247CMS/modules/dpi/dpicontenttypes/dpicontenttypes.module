@@ -285,7 +285,7 @@ function dpicontenttypes_node_create($node) {
  * @param object $node
  */
 function dpicontenttypes_node_update($node) {
-  _dpicontenttypes_entityinsertembargoinformation($node);
+  _dpicontenttypes_entityinsertembargoinformation($node);  
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
       rules_invoke_event('dpicontenttypes_rules_event_package_update', $node);
@@ -302,6 +302,7 @@ function dpicontenttypes_node_update($node) {
  */
 function dpicontenttypes_node_presave($node) {
   dpicontenttypes_api_check_autopublish($node);
+  _dpicontenttypes_entityinserteditorialpublicationdate($node);
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
       rules_invoke_event('dpicontenttypes_rules_event_package_edited', $node);

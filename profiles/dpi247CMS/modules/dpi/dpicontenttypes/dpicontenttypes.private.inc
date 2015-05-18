@@ -261,6 +261,28 @@ function _dpicontenttypes_entityinsertembargoinformation($node){
 }
 
 /**
+ * This function change editorial publication date if embargo is used
+ * @param object $node
+ */
+function _dpicontenttypes_entityinserteditorialpublicationdate(&$node){  
+  /* Gestion de la date éditorial de publication */
+  $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+  $useautopublishdate = current($useautopublishdates);  
+  /* Si on utilise l'embargo et que celui-ci à un status à non publié 
+   * et que la date d'embargo est plus grande que maintenant */
+  if(isset($useautopublishdate['value']) && $useautopublishdate['value']){
+    $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+    $autopublishdate = current($autopublishdates);
+    if (isset($autopublishdate['value']) && intval($autopublishdate['value']) > time()) {
+      $wrapper = entity_metadata_wrapper('node', $node);
+      if(is_object($wrapper)){
+        $wrapper->field_editorialpublicationdate->set($autopublishdate['value']);
+      }
+    }
+  }
+}
+
+/**
  * Delete dpiproperties from the database
  * 
  * @param Object $object
