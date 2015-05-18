@@ -5,7 +5,6 @@ function dpilog_get_logs_query_based_on_filters( $filters){
   $query->join('users', 'u', 'l.user = u.uid'); //JOIN node with users
   $query->fields('l', array('lid', 'log_name', 'action', 'message', 'user', 'timestamp', 'id', 'severity', 'thread_id'));
   $query->fields('u', array('name'));
-  $query = $query->extend('PagerDefault')->limit(30);
   $query->orderby('l.timestamp', 'DESC');
 
   foreach($filters as $filter_name=>$filter_value){
