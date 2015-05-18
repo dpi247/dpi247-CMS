@@ -1,5 +1,10 @@
 <?php
 
+
+module_load_include('class.php','panels','plugins/display_renderers/panels_renderer_standard');
+module_load_include('class.php','panels','plugins/display_renderers/panels_renderer_editor');
+
+
 $plugin = array(
   'renderer' => 'dpidestinations_renderer_dpieditor',
 );
@@ -9,7 +14,7 @@ $plugin = array(
  * @file
  * Class file to control the main Panels editor.
  */
-      
+
 class dpidestinations_renderer_dpieditor extends panels_renderer_editor {
   function init($plugin, &$display) {
     parent::init($plugin, $display);
@@ -36,10 +41,11 @@ class dpidestinations_renderer_dpieditor extends panels_renderer_editor {
       $output = t('There are no content types you may add to this display.');
     } else {
       $output = theme('dpidestinations_add_content_modal', array('renderer' => $this, 'groups' => $groups, 'categories' => $categories, 'category' => $category, 'group' => $group, 'region' => $region));
-    
+
     }
     $this->commands[] = ctools_modal_command_display($title, $output);
   }
+
 
   /**
    * Create a list of groups from all of the content type.
@@ -78,7 +84,7 @@ class dpidestinations_renderer_dpieditor extends panels_renderer_editor {
         $groups[$group_key]['content'][$type_name][$content_title] = $content_type;
         $groups[$group_key]['content'][$type_name][$content_title]['type_name'] = $type_name;
         $groups[$group_key]['content'][$type_name][$content_title]['subtype_name'] = $subtype_name;
-      }      
+      }
     }
 
     foreach($groups as $group_key => $group) {
@@ -193,7 +199,7 @@ class dpidestinations_renderer_ipe extends dpidestinations_renderer_dpieditor {
     ctools_add_css('panels_ipe', 'panels_ipe');
 
     ctools_add_css('ctools-modal', 'dpidestinations');
-    
+
     drupal_add_js(array('PanelsIPECacheKeys' => array($this->clean_key)), 'setting');
 
     drupal_add_library('system', 'ui.draggable');

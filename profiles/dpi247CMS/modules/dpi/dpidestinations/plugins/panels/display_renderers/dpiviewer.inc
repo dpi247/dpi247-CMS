@@ -4,7 +4,6 @@
 // @todo: CVhange this
 module_load_include('inc','dpidestinations','plugins/panels/display_renderers/dpieditor');
 
-
 $plugin = array(
   'renderer' => 'dpidestinations_renderer_dpiviewer',
 );
