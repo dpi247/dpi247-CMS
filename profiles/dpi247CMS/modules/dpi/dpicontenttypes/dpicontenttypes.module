@@ -942,7 +942,7 @@ function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $op
                   $atom = scald_atom_load($embed['sid']);
                   $preset = "500x500";
                   drupal_alter('dpicontenttypes_tokens_preset', $embed, $atom, $preset);                  
-                  $name = dpiflexiscald_api_get_path_for_atom($atom, $preset);
+                  $name = dpicontenttypes_api_image_style_url($preset,  $data['node']->nid, $atom->sid, $atom->file_source);
                 break;
               }
             }
