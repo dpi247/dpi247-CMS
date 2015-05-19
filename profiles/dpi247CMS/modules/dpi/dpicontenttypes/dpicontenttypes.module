@@ -939,12 +939,14 @@ function dpicontenttypes_tokens($type, $tokens, array $data = array(), array $op
             $embeddedObjects = field_get_items('node', $data['node'], 'field_embededobjects');
             foreach($embeddedObjects as $embed){
               if($embed['type'] == 'image'){
-                  module_load_include('inc', 'dpicommons', 'dpicommons.api');
-                  $atom = scald_atom_load($embed['sid']);
-                  $preset = "500x500";
+                module_load_include('inc', 'dpicommons', 'dpicommons.api');
+                $atom = scald_atom_load($embed['sid']);
+                if($atom->file_source){
+                  $preset = "FirstImageUrl";
                   drupal_alter('dpicontenttypes_tokens_preset', $embed, $atom, $preset);                  
                   $name = dpicontenttypes_api_image_style_url($preset,  $data['node']->nid, $atom->sid, $atom->file_source);
-                break;
+                  break;
+                }                  
               }
             }
           }
@@ -1040,4 +1042,54 @@ function dpicontenttypes_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'dpicontenttypes')."/views",
   );
+}
+
+/**
+ * This function define default preset for token first image url
+ * @return array
+ */
+function dpicontenttypes_image_default_styles(){
+  $styles = array();
+  
+  // Exported image style: 500x500.
+  $styles['FirstImageUrl'] = array(
+    'name' => 'FirstImageUrl',
+    'label' => 'FirstImageUrl',
+    'effects' => array(
+      13 => array(
+        'label' => 'DPI Crop',
+        'help' => 'Crop an image using user-defined dimensions, following a given ratio. The croping values for a given image can vary in every package it is used.',
+        'effect callback' => 'dpicontenttypes_dpicrop_effect',
+        'form callback' => 'dpicontenttypes_dpicrop_form',
+        'summary theme' => 'dpicontenttypes_dpicrop_summary',
+        'module' => 'dpicontenttypes',
+        'name' => 'dpicontenttypes_dpicrop',
+        'data' => array(
+          'width' => 500,
+          'height' => 500,
+          'xoffset' => 'center_max',
+          'yoffset' => 'center_max',
+        ),
+        'weight' => 1,
+      ),
+      14 => array(
+        'label' => 'Scale',
+        'help' => 'Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.',
+        'effect callback' => 'image_scale_effect',
+        'dimensions callback' => 'image_scale_dimensions',
+        'form callback' => 'image_scale_form',
+        'summary theme' => 'image_scale_summary',
+        'module' => 'image',
+        'name' => 'image_scale',
+        'data' => array(
+          'width' => 500,
+          'height' => 500,
+          'upscale' => 1,
+        ),
+        'weight' => 2,
+      ),
+    ),
+  );
+  
+  return $styles;
 }
