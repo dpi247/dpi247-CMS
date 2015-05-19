@@ -398,9 +398,10 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $virtual_rank = (int)$virtual_rank;
 
     if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
-      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
-      drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
-
+      module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder');      
+      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));      
+      //drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));      
+      
       //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
       $query2 = db_select($destination_table, 'd');
       //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
