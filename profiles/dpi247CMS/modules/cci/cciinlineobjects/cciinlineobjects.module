@@ -36,32 +36,30 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
           if ($current_field = $entity_wrapper->{$field_instance['field_name']}->value()) {
             $text = $current_field['value'];
             /*$tag_regex = "@<ccix:inline(\s.*)?>.*<\/ccix:inline(\s.*)?>@sU"; => modification de la regexp pour qu'elle fonctionne */
-            $tag_regex_tocheck = array("/<ccix:inline(.*?)\/>/i",  "/<ccix:inline(.*?)<\/ccix:inline>/i");
-            foreach($tag_regex_tocheck as $tag_regex) {
-              $tag_matches = array();
-              // Get all ccix:inline tags in the text
-              preg_match_all($tag_regex, $text, $tag_matches);
-              if (!empty($tag_matches[0])) {
-                foreach ($tag_matches[0] as $match_id => $match_val) {
-                  // Extract attributes from the tag
-                  $tag_values = _cciinlineobjects_inline_objects_get_tag_values(trim($tag_matches[1][$match_id]));
-                  if (isset($tag_values['extref']) && !empty($tag_values['extref']) && isset($embed_objects_by_ext_ref[$tag_values['extref']])) {
-                    // We have a matching object
-                    $matching_embed = $embed_objects_by_ext_ref[$tag_values['extref']];
-                    $matching_sid = $matching_embed['sid'];
-                    $scald_tag = "[scald=$matching_sid:$scald_context]";
-                    $text = str_replace($match_val, $scald_tag, $text);
+            $tag_regex = "/<ccix:inline(.*?)\/>/i";
+            $tag_matches = array();
+            // Get all ccix:inline tags in the text
+            preg_match_all($tag_regex, $text, $tag_matches);
+            if (!empty($tag_matches[0])) {
+              foreach ($tag_matches[0] as $match_id => $match_val) {
+                // Extract attributes from the tag
+                $tag_values = _cciinlineobjects_inline_objects_get_tag_values(trim($tag_matches[1][$match_id]));
+                if (isset($tag_values['extref']) && !empty($tag_values['extref']) && isset($embed_objects_by_ext_ref[$tag_values['extref']])) {
+                  // We have a matching object
+                  $matching_embed = $embed_objects_by_ext_ref[$tag_values['extref']];
+                  $matching_sid = $matching_embed['sid'];
+                  $scald_tag = "[scald=$matching_sid:$scald_context]";
+                  $text = str_replace($match_val, $scald_tag, $text);
 
-                    // Save original tag values in the atom's dpiproperties
-                    $dpiproperties = $matching_embed['dpiproperties'];
-                    $dpiproperties_wrapper = entity_metadata_wrapper('dpiproperties', $dpiproperties, array('bundle' => 'scald_atom'));
-                    $dpiproperties_wrapper->field_cciinline_orig_attr->set(serialize($tag_values));
-                    dpiproperties_save($dpiproperties);
+                  // Save original tag values in the atom's dpiproperties
+                  $dpiproperties = $matching_embed['dpiproperties'];
+                  $dpiproperties_wrapper = entity_metadata_wrapper('dpiproperties', $dpiproperties, array('bundle' => 'scald_atom'));
+                  $dpiproperties_wrapper->field_cciinline_orig_attr->set(serialize($tag_values));
+                  dpiproperties_save($dpiproperties);
 
-                    // Update the new value in the text field
-                    $current_field['value'] = $text;
-                    $entity_wrapper->{$field_instance['field_name']}->set($current_field);
-                  }
+                  // Update the new value in the text field
+                  $current_field['value'] = $text;
+                  $entity_wrapper->{$field_instance['field_name']}->set($current_field);
                 }
               }
             }
