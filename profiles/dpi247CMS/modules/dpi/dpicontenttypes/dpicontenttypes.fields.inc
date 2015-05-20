@@ -173,21 +173,24 @@ function dpicontenttypes_field_presave($entity_type, $entity, $field, $instance,
     $field_to_analyse = 'field_textbody';
     $language = isset($entity->language) ? $entity->language : NULL;
     $field_to_analyse_items = field_get_items($entity_type, $entity,  $field_to_analyse, $language);
-    foreach($field_to_analyse_items as $field_to_analyse_item) {
-      if (isset($field_to_analyse_item['mee']['resource_manager']) && is_array($field_to_analyse_item['mee']['resource_manager'])) {
-        foreach($field_to_analyse_item['mee']['resource_manager'] as $sid => $mee) {
-          if($atom = scald_atom_load($sid)) {
-            $values = array(
-              'sid' => $atom->sid,
-              'type' => $atom->type,
-              'provider' => $atom->provider,
-              'inline' => 1,
-            );
-            $add_items[] = $values;
+    if (!empty($field_to_analyse_items)){   
+      foreach($field_to_analyse_items as $field_to_analyse_item) {
+        if (isset($field_to_analyse_item['mee']['resource_manager']) && is_array($field_to_analyse_item['mee']['resource_manager'])) {
+          foreach($field_to_analyse_item['mee']['resource_manager'] as $sid => $mee) {
+            if($atom = scald_atom_load($sid)) {
+              $values = array(
+                'sid' => $atom->sid,
+                'type' => $atom->type,
+                'provider' => $atom->provider,
+                'inline' => 1,
+              );
+              $add_items[] = $values;
+            }
           }
         }
       }
     }
+
     foreach($add_items as $add_item) {
       $items[] = $add_item;
     }

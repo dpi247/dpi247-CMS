@@ -861,7 +861,8 @@ function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
 function dpicontenttypes_api_check_autopublish($node) {
   if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
     $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
-    $useautopublishdate = current($useautopublishdates);
+    if (!empty($useautopublishdates))
+      $useautopublishdate = current($useautopublishdates);
     if (isset($useautopublishdate['value']) && $useautopublishdate['value']) {
       $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
       $autopublishdate = current($autopublishdates);
