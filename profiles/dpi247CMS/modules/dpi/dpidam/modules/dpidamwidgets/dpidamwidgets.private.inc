@@ -472,6 +472,7 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
   module_load_include('inc', 'dpidam', 'includes/DAMSearch');
   $search = new DAMSearch($profile['pid']);
   $search_query = $search->getSearchQuery();
+  $search_query->setQueryParameter("withEmbargo", "now");
 
   // Check optionsal parameters.
   
