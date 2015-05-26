@@ -25,16 +25,6 @@ function dpidamwidgets_preprocess_damsearch_render_result(&$vars) {
     } else {
       $vars['thumbnail']['small'] = '';
     }
-    if ($medium = _dpidam_get_dam_image($thumbnail_name, 'thM')) {
-      $vars['thumbnail']['medium'] = theme('image', array('attributes' => array(), 'path' => $medium->uri));
-    } else {
-      $vars['thumbnail']['medium'] = '';
-    }
-    if ($big = _dpidam_get_dam_image($thumbnail_name, 'high')) {
-      $vars['thumbnail']['big'] = theme('image', array('attributes' => array(), 'path' => $big->uri));
-    } else {
-      $vars['thumbnail']['big'] = '';
-    }
   }
 
   $vars['prodId'] = (isset($result->prodId) && is_array($result->prodId)) ? $result->prodId : FALSE;

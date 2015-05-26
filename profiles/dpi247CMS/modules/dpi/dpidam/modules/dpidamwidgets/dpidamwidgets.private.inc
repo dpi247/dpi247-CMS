@@ -32,6 +32,7 @@ function _dpidamwidgets_generate_advanced_search_form(&$form, $profile) {
     '#title' => t('Searched words'),
     '#description' => t('Use commas to perform the search on several words'),
     '#default_value' => isset($_GET['words']) ? filter_xss($_GET['words']) : '',
+    '#required' => TRUE,
   );
 
   $form['excludes'] = array(
@@ -53,6 +54,7 @@ function _dpidamwidgets_generate_simple_search_form(&$form, $profile) {
     '#type' => 'textfield',
     '#title' => '',
     '#default_value' => $q,
+    '#required' => TRUE,
   );
 
   if(isset($profile["settings"]["sort"]["weight"])) {
@@ -60,8 +62,8 @@ function _dpidamwidgets_generate_simple_search_form(&$form, $profile) {
   }
 
   if(isset($profile["settings"]["sort"]["date"])) {
-    $sort_options["date asc"]=t('Date Asceding');
     $sort_options["date desc"]=t('Date Descending');
+    $sort_options["date asc"]=t('Date Asceding');
   }
 
   if (count($sort_options)) {
@@ -473,7 +475,7 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
 
   // Check optionsal parameters.
   
-  if ($profile["settings"]["defaultoperant"] == "AND") {
+  if ($profile["settings"]["defaultoperand"] == "AND") {
     $search_query->setQueryParameter("mm", "100%");
   }
   
