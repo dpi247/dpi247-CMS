@@ -475,7 +475,7 @@ function _dpidamwidgets_get_search_results($words, $excludes, $facets, $profile,
 
   // Check optionsal parameters.
   
-  if ($profile["settings"]["defaultoperand"] == "AND") {
+  if ($profile["settings"]["defaultoperant"] == "AND") {
     $search_query->setQueryParameter("mm", "100%");
   }
   
