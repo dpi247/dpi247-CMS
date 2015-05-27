@@ -184,6 +184,118 @@ function dpidam_schema() {
 }
 
 /**
+ * Hook_enable to add field for right of reply
+ */
+function dpidam_enable(){
+  $field_title = array(
+    'label' => 'DPIDAM Right of reply Title',
+    'field_name' => 'dpidam_right_of_reply_title',
+    'type' => 'text',
+  );
+  field_create_field($field_title);
+ 
+  $instance_title = array(
+    'field_name' => $field_title['field_name'],
+    'entity_type' => 'node',
+    'bundle' => 'package',
+    'required' => 0,
+    'label' => $field_title['label'],
+    'display' => array(
+      'default' => array(
+        'type' => 'hidden', 
+      ),
+      'teaser' => array(
+        'type' => 'hidden', 
+      )
+    ),
+  );
+  field_create_instance($instance_title);
+  
+  $instance_title = array(
+    'label' => $field_title['label'],
+    'field_name' => $field_title['field_name'],
+    'entity_type' => 'node',
+    'bundle' => 'package_gallery',
+    'required' => 0,
+    'display' => array(
+      'default' => array(
+        'type' => 'hidden', 
+      ),
+      'teaser' => array(
+        'type' => 'hidden', 
+      )
+    ),
+  );
+  field_create_instance($instance_title);
+  
+  $field_body = array(
+    'label' => 'DPIDAM Right of reply Body',
+    'field_name' => 'dpidam_right_of_reply_body',
+    'type' => 'text',
+  );
+  field_create_field($field_body);
+ 
+  $instance_body = array(
+    'label' => $field_body['label'],
+    'field_name' => $field_body['field_name'],
+    'entity_type' => 'node',
+    'bundle' => 'package',
+    'required' => 0,
+    'display' => array(
+      'default' => array(
+        'type' => 'hidden', 
+      ),
+      'teaser' => array(
+        'type' => 'hidden', 
+      )
+    ),
+  );
+  field_create_instance($instance_body);
+  
+  $instance_body = array(
+    'label' => $field_body['label'],
+    'field_name' => $field_body['field_name'],
+    'entity_type' => 'node',
+    'bundle' => 'package_gallery',
+    'required' => 0,
+    'display' => array(
+      'default' => array(
+        'type' => 'hidden', 
+      ),
+      'teaser' => array(
+        'type' => 'hidden', 
+      )
+    ),
+  );
+  field_create_instance($instance_body);
+}
+
+/**
+ * Hook_disable to delete right of reply from node
+ */
+function dpidam_disable(){
+  $instance_title = array(
+    'field_name' => 'dpidam_right_of_reply_title',
+    'entity_type' => 'node',
+    'bundle' => 'package',
+  );
+  field_delete_instance($instance_title);
+  $instance_title["bundle"] = "package_gallery";
+  field_delete_instance($instance_title);
+  field_delete_field($instance_title['field_name']);
+  
+  $instance_body = array(
+    'field_name' => 'dpidam_right_of_reply_body',
+    'entity_type' => 'node',
+    'bundle' => 'package',
+  );
+  field_delete_instance($instance_body);
+  $instance_body["bundle"] = "package_gallery";
+  field_delete_instance($instance_body);
+  field_delete_field($instance_body['field_name']);
+}
+
+/**
  * Redéfinitions de la terminologie Archives
  */
 function dpidam_update_7001(){
@@ -191,4 +303,11 @@ function dpidam_update_7001(){
   $term = current($term);
   $term->name = "Archives";
   taxonomy_term_save($term);
+}
+
+/**
+ * Activation du hook_enable qui ne l'était pas jusqu'à présent
+ */
+function dpidam_update_7002(){
+  dpidam_enable();
 }
