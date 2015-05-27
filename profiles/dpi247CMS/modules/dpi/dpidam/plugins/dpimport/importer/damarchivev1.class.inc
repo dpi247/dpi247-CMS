@@ -32,6 +32,46 @@ class DamArchiveV1 extends WallyXmlPreview {
   }
 
   /**
+   * Intercept dom at element <Package>
+   *
+   * @param DOM $dom
+   */
+  public function buildPackage($dom) {
+    Logger::logExecution('package', TRUE);
+    $package = $this->constructPackage($dom);
+    if (!Logger::error()) {
+      // Allow to alter entity before save
+      $dispatcher = $this->getDispatcher();
+      $package_wrapper = entity_metadata_wrapper('node', $package);
+      module_invoke_all('dpimport_entity_presave', $package_wrapper, $package, 'node', $this, $dispatcher);
+
+      $this->_replace_inline_object($package);
+      /* Hack to change external url */
+      $this->_buildExternalUrl($package);
+
+      $this->savePackage($dom, $package);      
+      
+      if(isset($package->temp_crops) && is_array($package->temp_crops)){
+        foreach ($package->temp_crops as $atom_id => $crops_infos) {          
+          /* Test pour ajouter d'office un default cropping */
+          $keys_crop = array_keys($crops_infos);
+          if(!empty($crops_infos) && !in_array('default', $keys_crop)){
+            $crops_infos['default'] = current($crops_infos);
+          }
+          /* Set the niew value to crop base */
+          _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+        } 
+      }
+    }
+
+    // Set the CurrentLog to the previous one to stop children growing.
+    Logger::setCurrentToPreviousExecution();
+
+    // Indicates that the dispatcher must not process the children
+    return FALSE;
+  }
+  
+  /**
    * Set field Destination
    *
    * @param DOM $dom
@@ -95,5 +135,9 @@ class DamArchiveV1 extends WallyXmlPreview {
         'format' => $format
       ));
     }
+  }
+  
+  public function buildFreeAccess($dom, $wrapper, $entity) {    
+    $entity->freeaccess = $dom->nodeValue;
   }
 }
