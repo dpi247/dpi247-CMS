@@ -38,7 +38,7 @@ class DamArchiveV1 extends WallyXmlPreview {
    * @param EntityDrupalWrapper $wrapper
    * @param Object $entity
    */
-  public function buildDestinations($dom, $wrapper, $entity) {
+  public function buildDestinations($dom, $wrapper, $entity, $globalDom) {
     $items = dpi_variable_get('dpidam_archive_defaultdestination', array());
     if ($items && !empty($items)) {
       $wrapper->field_destinations->set($items);
@@ -63,5 +63,29 @@ class DamArchiveV1 extends WallyXmlPreview {
       }
     }
     $entity->custom_fields = $temp_custom_fields;
+  }
+  
+  /**
+   * Ajout du droit de réponse titre dans le wrapper
+   * @param type $dom
+   * @param type $wrapper
+   * @param type $entity
+   */
+  public function buildRightOfReplyTitle($dom, $wrapper, $entity){
+    if(isset($wrapper->dpidam_right_of_reply_title)){
+      $wrapper->dpidam_right_of_reply_title->set($dom->nodeValue);
+    }    
+  }
+  
+  /**
+   * Ajout du droit de réponse body dans le wrapper
+   * @param type $dom
+   * @param type $wrapper
+   * @param type $entity
+   */
+  public function buildRightOfReplyBody($dom, $wrapper, $entity){
+    if(isset($wrapper->dpidam_right_of_reply_body)){
+      $wrapper->dpidam_right_of_reply_body->set($dom->nodeValue);
+    }
   }
 }
