@@ -23,8 +23,10 @@ function dpidam_page_admin_search() {
 
   $table_vars = array('header' => $header, 'rows' => $rows);
   $output = !empty($rows) ? theme('table', $table_vars) : '';
-  $output .= drupal_render(drupal_get_form('dpidam_page_admin_search_add_new_profile_form'));
-  $output .= drupal_render(drupal_get_form('dpidam_page_admin_search_general_settings_form'));
+  $tmp_form = drupal_get_form('dpidam_page_admin_search_add_new_profile_form');
+  $output .= drupal_render($tmp_form);
+  $tmp_form_general = drupal_get_form('dpidam_page_admin_search_general_settings_form');
+  $output .= drupal_render($tmp_form_general);
 
   return $output;
 }
