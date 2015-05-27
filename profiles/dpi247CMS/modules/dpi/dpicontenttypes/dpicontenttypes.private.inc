@@ -267,7 +267,8 @@ function _dpicontenttypes_entityinsertembargoinformation($node){
 function _dpicontenttypes_entityinserteditorialpublicationdate(&$node){  
   /* Gestion de la date éditorial de publication */
   $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
-  $useautopublishdate = current($useautopublishdates);  
+  if (!empty($useautopublishdates))
+    $useautopublishdate = current($useautopublishdates);  
   /* Si on utilise l'embargo et que celui-ci à un status à non publié 
    * et que la date d'embargo est plus grande que maintenant */
   if(isset($useautopublishdate['value']) && $useautopublishdate['value']){
