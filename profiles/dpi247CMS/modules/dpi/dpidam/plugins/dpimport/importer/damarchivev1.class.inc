@@ -73,7 +73,11 @@ class DamArchiveV1 extends WallyXmlPreview {
    */
   public function buildRightOfReplyTitle($dom, $wrapper, $entity){
     if(isset($wrapper->dpidam_right_of_reply_title)){
-      $wrapper->dpidam_right_of_reply_title->set($dom->nodeValue);
+      $format = $this->getDefaultTextFormat();
+      $wrapper->dpidam_right_of_reply_title->set(array(
+        'value' => $dom->nodeValue,
+        'format' => $format
+      ));
     }    
   }
   
@@ -85,7 +89,11 @@ class DamArchiveV1 extends WallyXmlPreview {
    */
   public function buildRightOfReplyBody($dom, $wrapper, $entity){
     if(isset($wrapper->dpidam_right_of_reply_body)){
-      $wrapper->dpidam_right_of_reply_body->set($dom->nodeValue);
+      $format = $this->getDefaultTextFormat();
+      $wrapper->dpidam_right_of_reply_body->set(array(
+        'value' => $dom->nodeValue,
+        'format' => $format
+      ));
     }
   }
 }
