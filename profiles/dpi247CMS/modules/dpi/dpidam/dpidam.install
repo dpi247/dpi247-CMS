@@ -188,18 +188,40 @@ function dpidam_schema() {
  */
 function dpidam_enable(){
   $field_title = array(
-    'label' => 'DPIDAM Right of reply Title',
     'field_name' => 'dpidam_right_of_reply_title',
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 600,
+    ),
+    'translatable' => 0,
     'type' => 'text',
   );
   field_create_field($field_title);
  
   $instance_title = array(
+    'label' => 'DPIDAM Right of reply Title',
     'field_name' => $field_title['field_name'],
     'entity_type' => 'node',
     'bundle' => 'package',
     'required' => 0,
-    'label' => $field_title['label'],
     'display' => array(
       'default' => array(
         'type' => 'hidden', 
@@ -208,11 +230,24 @@ function dpidam_enable(){
         'type' => 'hidden', 
       )
     ),
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array (
+        'size' => 60 
+      ),
+      'type' => 'text_textfield',
+      'weight' => 30
+    ) ,
   );
   field_create_instance($instance_title);
   
   $instance_title = array(
-    'label' => $field_title['label'],
+    'label' => 'DPIDAM Right of reply Title',
     'field_name' => $field_title['field_name'],
     'entity_type' => 'node',
     'bundle' => 'package_gallery',
@@ -225,18 +260,53 @@ function dpidam_enable(){
         'type' => 'hidden', 
       )
     ),
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array (
+        'size' => 60 
+      ),
+      'type' => 'text_textfield',
+      'weight' => 30
+    ) ,
   );
   field_create_instance($instance_title);
   
   $field_body = array(
-    'label' => 'DPIDAM Right of reply Body',
     'field_name' => 'dpidam_right_of_reply_body',
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 600,
+    ),
+    'translatable' => 0,
     'type' => 'text',
   );
   field_create_field($field_body);
  
   $instance_body = array(
-    'label' => $field_body['label'],
+    'label' => 'DPIDAM Right of reply Body',
     'field_name' => $field_body['field_name'],
     'entity_type' => 'node',
     'bundle' => 'package',
@@ -249,11 +319,24 @@ function dpidam_enable(){
         'type' => 'hidden', 
       )
     ),
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array (
+        'size' => 60 
+      ),
+      'type' => 'text_textfield',
+      'weight' => 31
+    ) ,
   );
   field_create_instance($instance_body);
   
   $instance_body = array(
-    'label' => $field_body['label'],
+    'label' => 'DPIDAM Right of reply Body',
     'field_name' => $field_body['field_name'],
     'entity_type' => 'node',
     'bundle' => 'package_gallery',
@@ -266,6 +349,19 @@ function dpidam_enable(){
         'type' => 'hidden', 
       )
     ),
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array (
+        'size' => 60 
+      ),
+      'type' => 'text_textfield',
+      'weight' => 31
+    ) ,
   );
   field_create_instance($instance_body);
 }
