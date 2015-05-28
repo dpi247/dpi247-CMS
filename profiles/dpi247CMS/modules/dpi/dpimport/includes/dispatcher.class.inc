@@ -324,9 +324,9 @@ abstract class Dispatcher {
     // Check if directory exists.
     if (! is_dir ( $directory )) {
       if (($mode & FILE_CREATE_DIRECTORY) && @mkdir ( $directory, 0775, TRUE )) {
-        drupal_set_message ( t ( 'The directory %directory has been created.', array (
+        watchdog ( 'dpimport', t ( 'The directory %directory has been created.', array (
           '%directory' => $directory 
-        ) ) );
+        ) ), WATCHDOG_NOTICE);
         @chmod ( $directory, 0775 ); // Necessary for non-webserver users.
       } else {
         if ($form_item) {
@@ -341,9 +341,9 @@ abstract class Dispatcher {
     // Check to see if the directory is writable.
     if (! is_writable ( $directory )) {
       if (($mode & FILE_MODIFY_PERMISSIONS) && @chmod ( $directory, 0775 )) {
-        drupal_set_message ( t ( 'The permissions of directory %directory have been changed to make it writable.', array (
+        watchdog ( 'dpimport', t ( 'The permissions of directory %directory have been changed to make it writable.', array (
           '%directory' => $directory 
-        ) ) );
+        ) ) , WATCHDOG_CRITICAL);
       } else {
         form_set_error ( $form_item, t ( 'The directory %directory is not writable', array (
           '%directory' => $directory 
