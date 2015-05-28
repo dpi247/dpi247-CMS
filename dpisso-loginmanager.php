@@ -44,7 +44,7 @@ $SsoSession->initLoginManager();
 
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
-  LoginManager::setCookie ( 'dpisso_is_connected', true , Time()+3600*24*52);
+  LoginManager::setCookie ( 'dpisso_is_connected', true , Time() + 3600*24*52, $_SERVER['HTTP_HOST'], '/');
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
   $sso_user_infos['mail']=$profile->mail;
@@ -56,7 +56,7 @@ if($login_id=$SsoSession->getLoginId()){
 //We are on the logout operation
 else{
   //@todo: We should remove the loginToken cookie on logout to prevent loop and no man's land.
-  LoginManager::deleteCookie ( 'dpisso_is_connected' );
+  LoginManager::setCookie ( 'dpisso_is_connected', false , Time() - 36000, $_SERVER['HTTP_HOST'], '/');
   dpisso_api_user_logout();
    //@todo: should i call the Login manager ?
 }
