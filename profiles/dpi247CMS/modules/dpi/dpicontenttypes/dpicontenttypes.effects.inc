@@ -39,10 +39,10 @@ function theme_dpicontenttypes_dpicrop_summary($variables) {
   $data = $variables['data'];
 
   $output = check_plain($data['width']) . 'x' . check_plain($data['height']);
-  $output .= ', Ratio : '.round($data['width']/$data['height'], 2);
-  $output .= ', X offset : '.$data['xoffset'];
-  $output .= ', Y offset : '.$data['yoffset'];
-  $output = '('.$output.')';
+  $output .= ', Ratio : ' . round($data['width'] / $data['height'], 2);
+  $output .= ', X offset : ' . $data['xoffset'];
+  $output .= ', Y offset : ' . $data['yoffset'];
+  $output = '(' . $output . ')';
 
   return $output;
 }
@@ -59,8 +59,8 @@ function theme_dpicontenttypes_dpicrop_summary($variables) {
 function theme_dpicontenttypes_dpicropcopy_summary($variables) {
   $data = $variables['data'];
 
-  $output = 'Copied crop : '.$data['copied_style'];
-  $output = '('.$output.')';
+  $output = 'Copied crop : ' . $data['copied_style'];
+  $output = '(' . $output . ')';
 
   return $output;
 }
@@ -138,8 +138,8 @@ function dpicontenttypes_dpicropcopy_form($data = array()) {
     if ($style['effects']) {
       foreach ($style['effects'] as $effect_id => $effect) {
         if ($effect['name'] == 'dpicontenttypes_dpicrop') {
-          $ratio = round($effect['data']['width']/$effect['data']['height'], 2);
-          $existing_effects[$style['name']] = $style['name'].' (ratio: '.$ratio.')';
+          $ratio = round($effect['data']['width'] / $effect['data']['height'], 2);
+          $existing_effects[$style['name']] = $style['name'] . ' (ratio: ' . $ratio . ')';
           $effects_ids[$style['name']] = $effect_id;
           break;
         }
@@ -202,42 +202,56 @@ function dpicontenttypes_dpicrop_form_validate($form, $form_state, $data) {
  */
 function dpicontenttypes_dpicrop_effect(&$image, $data) {
   if (isset($data['entity']) && isset($data['atom'])) {
+
     $entity = $data['entity'];
     $atom = $data['atom'];
     $style = $data['style'];
     list($eid, $revision, $bundle) = entity_extract_ids($entity->entity_type, $entity);
 
-    $cropings = _dpicontenttypes_get_saved_cropings_for_entity_and_atom($entity->entity_type, $eid, $atom->sid, $style['name']);
+    if (isset($entity->damarchive) && $entity->damarchive) {
+      $all_cropings = cache_get(md5('node_' . $eid . '_' . $atom->sid));
+      if (!is_array($all_cropings)) {
+        $all_cropings = (array) $all_cropings;
+      }
+      $cropings = (isset($all_cropings['data'][$style['name']]) && !empty($all_cropings['data'][$style['name']])) ? $all_cropings['data'][$style['name']] : array();
+    }else {
+      $cropings = _dpicontenttypes_get_saved_cropings_for_entity_and_atom($entity->entity_type, $eid, $atom->sid, $style['name']);
+    }
+    
     if ($cropings && is_array($cropings) && !empty($cropings)) {
       $crop = $cropings;
       $data['xoffset'] = $crop[0];
       $data['yoffset'] = $crop[1];
       $data['width'] = $crop[2];
       $data['height'] = $crop[3];
-    }
 
-    if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {
-      // If the effect has a "center_max" value as parameter, we have to maximise the crop
-      if (image_scale_and_crop($image, $data['width'], $data['height'])) {
-        return TRUE;
-      }
-    } else {
-      // Simply apply the crop effect
-      if (!is_numeric($data['xoffset'])) {
-        $data['xoffset'] = image_filter_keyword($data['xoffset'], $image->info['width'], $data['width']);
-      }
-      if (!is_numeric($data['yoffset'])) {
-        $data['yoffset'] = image_filter_keyword($data['yoffset'], $image->info['height'], $data['height']);
-      }
-      if (image_crop($image, $data['xoffset'], $data['yoffset'], $data['width'], $data['height'])) {
-        return TRUE;
-      }
-    }
 
-    watchdog('image', 'Image dpicrop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+      if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {
+        // If the effect has a "center_max" value as parameter, we have to maximise the crop
+        if (image_scale_and_crop($image, $data['width'], $data['height'])) {
+          return TRUE;
+        }
+      }
+      else {
+        // Simply apply the crop effect
+        if (!is_numeric($data['xoffset'])) {
+          $data['xoffset'] = image_filter_keyword($data['xoffset'], $image->info['width'], $data['width']);
+        }
+        if (!is_numeric($data['yoffset'])) {
+          $data['yoffset'] = image_filter_keyword($data['yoffset'], $image->info['height'], $data['height']);
+        }
+        if (image_crop($image, $data['xoffset'], $data['yoffset'], $data['width'], $data['height'])) {
+          return TRUE;
+        }
+      }
+
+      watchdog('image', 'Image dpicrop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    }
+    return FALSE;
   }
-
-  return FALSE;
+  else {
+    return TRUE;
+  }
 }
 
 /**
@@ -261,7 +275,15 @@ function dpicontenttypes_dpicropcopy_effect(&$image, $data) {
     $atom = $data['atom'];
     list($eid, $revision, $bundle) = entity_extract_ids($entity->entity_type, $entity);
 
-    $cropings = _dpicontenttypes_get_saved_cropings_for_entity_and_atom($entity->entity_type, $eid, $atom->sid, $copied_stylename);
+    if (isset($entity->damarchive) && $entity->damarchive) {
+      $all_cropings = cache_get(md5('node_' . $eid . '_' . $atom->sid));
+      if (!is_array($all_cropings)) {
+        $all_cropings = (array) $all_cropings;
+      }
+      $cropings = (isset($all_cropings['data'][$copied_stylename]) && !empty($all_cropings['data'][$copied_stylename])) ? $all_cropings['data'][$copied_stylename] : array();
+    }else {
+      $cropings = _dpicontenttypes_get_saved_cropings_for_entity_and_atom($entity->entity_type, $eid, $atom->sid, $copied_stylename);
+    }    
     if ($cropings && is_array($cropings) && !empty($cropings)) {
       $datas_found = TRUE;
       $crop = $cropings;
@@ -269,38 +291,40 @@ function dpicontenttypes_dpicropcopy_effect(&$image, $data) {
       $data['yoffset'] = $crop[1];
       $data['width'] = $crop[2];
       $data['height'] = $crop[3];
-    }
 
-    if (!$datas_found) {
-      $effects_ids = $data['effects_ids'];
-      $data['effect_id'] = $effects_ids[$copied_stylename];
-      $crop = $copied_style['effects'][$data['effect_id']]['data'];
-      $data['xoffset'] = $crop['xoffset'];
-      $data['yoffset'] = $crop['yoffset'];
-      $data['width'] = $crop['width'];
-      $data['height'] = $crop['height'];
-    }
+      if (!$datas_found) {
+        $effects_ids = $data['effects_ids'];
+        $data['effect_id'] = $effects_ids[$copied_stylename];
+        $crop = $copied_style['effects'][$data['effect_id']]['data'];
+        $data['xoffset'] = $crop['xoffset'];
+        $data['yoffset'] = $crop['yoffset'];
+        $data['width'] = $crop['width'];
+        $data['height'] = $crop['height'];
+      }
 
-    if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {
-      // If the effect has a "center_max" value as parameter, we have to maximise the crop
-      if (image_scale_and_crop($image, $data['width'], $data['height'])) {
-        return TRUE;
+      if ($data['xoffset'] === 'center_max' || $data['yoffset'] === 'center_max') {
+        // If the effect has a "center_max" value as parameter, we have to maximise the crop
+        if (image_scale_and_crop($image, $data['width'], $data['height'])) {
+          return TRUE;
+        }
       }
-    } else {
-      // Simply apply the crop effect
-      if (!is_numeric($data['xoffset'])) {
-        $data['xoffset'] = image_filter_keyword($data['xoffset'], $image->info['width'], $data['width']);
+      else {
+        // Simply apply the crop effect
+        if (!is_numeric($data['xoffset'])) {
+          $data['xoffset'] = image_filter_keyword($data['xoffset'], $image->info['width'], $data['width']);
+        }
+        if (!is_numeric($data['yoffset'])) {
+          $data['yoffset'] = image_filter_keyword($data['yoffset'], $image->info['height'], $data['height']);
+        }
+        if (image_crop($image, $data['xoffset'], $data['yoffset'], $data['width'], $data['height'])) {
+          return TRUE;
+        }
       }
-      if (!is_numeric($data['yoffset'])) {
-        $data['yoffset'] = image_filter_keyword($data['yoffset'], $image->info['height'], $data['height']);
-      }
-      if (image_crop($image, $data['xoffset'], $data['yoffset'], $data['width'], $data['height'])) {
-        return TRUE;
-      }
+      watchdog('image', 'Image dpicrop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
     }
-
-    watchdog('image', 'Image dpicrop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    return FALSE;
   }
-
-  return FALSE;
+  else {
+    return TRUE;
+  }
 }

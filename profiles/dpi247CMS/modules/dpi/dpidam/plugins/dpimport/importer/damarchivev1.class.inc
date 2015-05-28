@@ -59,7 +59,8 @@ class DamArchiveV1 extends WallyXmlPreview {
             $crops_infos['default'] = current($crops_infos);
           }
           /* Set the niew value to crop base */
-          _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
+          $cid = md5('node_'.$package->nid.'_'.$atom_id);
+          cache_set($cid, $crops_infos);
         } 
       }
     }
