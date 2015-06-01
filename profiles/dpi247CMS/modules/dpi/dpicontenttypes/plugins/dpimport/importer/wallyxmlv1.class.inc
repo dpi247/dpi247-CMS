@@ -21,7 +21,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-      
+
       $this->savePackage($dom, $package);
 
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
@@ -1046,10 +1046,14 @@ class WallyXmlV1 extends PackageHelper {
 
   function _buildExternalUrl(& $package) {
     try {
-      $extUrl = current($package->field_externalurl);
-      $extUrl = current($extUrl);
-      if (!isset($extUrl["url"]) || $extUrl["url"] == "") {
-        $package->field_externalurl = array();
+      if(isset($package->field_externalurl) && is_array($package->field_externalurl)){
+        $extUrl = current($package->field_externalurl);
+        if(isset($package->field_externalurl) && is_array($package->field_externalurl)){
+          $extUrl = current($extUrl);
+          if (!isset($extUrl["url"]) || $extUrl["url"] == "") {
+            $package->field_externalurl = array();
+          }
+        }        
       }
     } catch (Exception $e) {
       

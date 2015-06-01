@@ -30,6 +30,7 @@ function _dpidam_post($postfields, $target_url, $content_type = NULL, $raw = FAL
     curl_setopt($ch, CURLOPT_UPLOAD, 1);
     curl_setopt($ch, CURLOPT_INFILE, $postfields);
   } else {
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
   }
 

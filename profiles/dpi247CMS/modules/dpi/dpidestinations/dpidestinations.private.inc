@@ -114,13 +114,15 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
  */
 function _dpidestinations_get_pagemanager_handler_name_for_displayid($did) {
   $db_names = db_select('page_manager_handlers', 'p')
-    ->fields('p', array('name'))
-    ->condition('p.did', $did)
+    ->fields('p')
     ->execute();
   $name = FALSE;
-  foreach ($db_names as $db_name) {
-    $name = $db_name;
-    break;
+  foreach ($db_names as $db_name) {    
+    $conf = unserialize($db_name->conf);
+    if(isset($conf['did']) && $conf['did'] == $did){
+      $name = $db_name;
+      break;
+    }    
   }
   return $name;
 }

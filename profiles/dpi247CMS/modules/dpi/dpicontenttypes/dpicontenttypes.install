@@ -285,7 +285,8 @@ function dpicontenttypes_schema() {
       ),
       'eid' => array(
         'description' => 'The id of the entity attached to this croping',
-        'type' => 'int',
+        'type' => 'varchar', //change for dam
+        'length' => 255,
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
@@ -670,4 +671,13 @@ function dpicontenttypes_update_7013(){
   $modules = array('views_bulk_operations');
   $enable_dependencies = TRUE; 
   module_enable($modules, $enable_dependencies);
+}
+
+/**
+ * change type of dpicontenttypes_cropings eid because dam use uniqid with letter and then need tu use it.
+ */
+function dpicontenttypes_update_7014(){
+  if (db_table_exists('dpicontenttypes_cropings')) {
+    db_query("ALTER TABLE dpicontenttypes_cropings MODIFY eid varchar(255)")->execute();
+  }
 }

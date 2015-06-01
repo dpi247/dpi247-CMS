@@ -23,7 +23,8 @@ function dpidam_page_admin_sources() {
 
   $table_vars = array('header' => $header, 'rows' => $rows);
   $output = !empty($rows) ? theme('table', $table_vars) : '';
-  $output .= drupal_render(drupal_get_form('dpidam_page_admin_sources_add_new_source_form'));
+  $tmp_form = drupal_get_form('dpidam_page_admin_sources_add_new_source_form');
+  $output .= drupal_render($tmp_form);
 
   return $output;
 }

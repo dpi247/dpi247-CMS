@@ -354,3 +354,33 @@ function dpidam_ctools_plugin_directory($module, $plugin) {
     return 'plugins/dpimport/' . $plugin;
   }
 }
+
+
+function dpidam_node_view($node, $view_mode, $langcode){
+  if(isset($node->damarchive) && $node->damarchive){
+    $content = "";
+    if(isset($node->noindex) && $node->noindex){
+      /* noindex */
+      $content .= "noindex, ";
+    }
+    /* follow and no archive */
+    $content .= "follow, noarchive";
+    
+    $element = array(
+      '#tag' => 'meta',
+      '#attributes' => array( 
+        'name' => 'robots',
+        'content' => $content,
+      ),
+    );
+    drupal_add_html_head($element, 'dpidam_no_index');
+  }
+}
+
+function dpidam_crop_style_effect_alter(&$entity, &$style){
+  if(isset($entity->damarchive) && $entity->damarchive){
+    //@todo booster la chose pour tester si un des présets du noeud existe sur le drupal l'utiliser sinon on met default par défaut.
+    $style['name'] = 'default';
+    $style['label'] = 'default';
+  }
+}

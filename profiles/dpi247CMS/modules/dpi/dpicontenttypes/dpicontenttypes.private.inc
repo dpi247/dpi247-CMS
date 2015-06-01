@@ -471,9 +471,15 @@ function _dpicontenttypes_cropings_update_cropings($entity_type, $eid, $aid, $cr
     $new_croping->cropings = serialize($cropings);
     $new_croping->temp = $temp ? 1 : 0;
     if ($existing_croping) {
-      drupal_write_record('dpicontenttypes_cropings', $new_croping, 'cid');
+      unset($new_croping['cid']);
+      db_update('dpicontenttypes_cropings')
+        ->fields((array)$new_croping)
+        ->condition('cid', $new_croping["cid"])
+        ->execute();
     } else {
-      drupal_write_record('dpicontenttypes_cropings', $new_croping);
+      db_insert('dpicontenttypes_cropings')
+        ->fields((array)$new_croping)
+        ->execute();
     }
   }
   return;

@@ -77,15 +77,12 @@ function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
  * Render callback.
  */
 function dpidestinations_targetblock_content_type_render($subtype, $conf, $args, $context) {
-
-
 	$module = 'dpidestinations';
   $block = new stdClass ();
   $block->module = $module;
 
   $destination_term_id = $context->data->tid;
-  $did = $context->data->handler->did;
-
+  $did = $context->data->handler->conf['did'];
 
   $target_name = $subtype;
   $split_delta = $conf ["split_delta"];
@@ -106,10 +103,6 @@ function dpidestinations_targetblock_content_type_render($subtype, $conf, $args,
 function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
   $block = new stdClass ();  
   $conf = dpidestinations_api_get_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)));
-
-
-
-
 
 	$targetBlockController = new TargetBlockController ( 'targetblock' );
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( $did, $target_name, $split_delta );

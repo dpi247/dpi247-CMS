@@ -4,6 +4,8 @@
  * Packages synchronization settings form.
  */
 function dpidam_page_admin_packages_sync_form($form, $form_state) {
+  global $base_url;
+  
   $form['dpidam_updateurl'] = array(
     '#type' => 'textfield',
     '#title' => t('URL to send the updated alias'),
@@ -34,6 +36,16 @@ function dpidam_page_admin_packages_sync_form($form, $form_state) {
     '#required' => TRUE,
   );
 
+  $form['dpidam_main_domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Host and protocol used to DAM for URL alias (default value: %base_domain)',array("%base_domain"=>$base_url)),
+    '#description' => "Use <i>protocol://host</i> format. If left blank, the default value is : <i>".$base_url."</i>",
+    '#default_value' => dpi_variable_get('dpi_main_domain', ''),
+    '#size' => 80,
+    '#maxlenght' => 512,
+    '#required' => FALSE,
+  );
+  
   $form['#submit'][] = 'dpidam_page_admin_packages_sync_form_submit';
   return dpi_system_settings_form($form, TRUE);
 }
@@ -54,6 +66,12 @@ function dpidam_page_admin_packages_sync_form_validate($form, $form_state) {
 
   if (!is_numeric($values['dpidam_cronmaxnumber']) || $values['dpidam_cronmaxnumber'] < 0) {
     form_set_error('dpidam_cronmaxnumber', t('The maximum number of packages must be a numeric value greater than 0'));
+  }
+  
+  if(!empty($form_state['values']['dpidam_main_domain'])){
+    if(!preg_match('/^[a-z]+:\/\/[a-z0-9_\.-]+$/',$form_state['values']['dpidam_main_domain'])){
+      form_set_error('dpidam_main_domain', t('Domain must be this format : <i>protocol://host</i>. Without trailing slash.'));
+    }
   }
 }
 
