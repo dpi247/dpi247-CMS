@@ -39,18 +39,15 @@ class IsNodeRestricted extends PaywallPolitics {
   public function issecurepage($url, $roles = null) {
     require_once DRUPAL_ROOT . '/includes/menu.inc';
     require_once DRUPAL_ROOT . '/includes/path.inc';
-
     $url=urldecode($url);
+    $url=preg_replace('/^\//', '', $url);
     $url=drupal_get_normal_path($url,'fr');
-
 
     $urls = explode ( '/', $url );
 
-
-
-    if ($urls [1] == 'node' and ! isset ( $urls [3] )) {
+    if ($urls [0] == 'node' and ! isset ( $urls [2] )) {
       $is_restricted = db_query ( 'SELECT field_restrictedaccess_value FROM {field_data_field_restrictedaccess} as m WHERE  m.entity_id = :nid', array (
-          ':nid' => $urls [2]
+          ':nid' => $urls [1]
       ) )->fetchField ();
 
       // Fetch next row as a stdClass object.
