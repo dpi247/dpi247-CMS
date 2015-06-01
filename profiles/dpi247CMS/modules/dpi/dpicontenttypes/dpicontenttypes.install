@@ -286,9 +286,9 @@ function dpicontenttypes_schema() {
       'eid' => array(
         'description' => 'The id of the entity attached to this croping',
         'type' => 'varchar', //change for dam
-        'length' => 255,
-        'unsigned' => TRUE,
+        'length' => 255,        
         'not null' => TRUE,
+        'default' => '',
       ),
       'aid' => array(
         'description' => 'The id of the atom attached to this croping',
