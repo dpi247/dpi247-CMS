@@ -235,7 +235,8 @@ function _dpicontenttypes_entityinsertscaldatom($node){
  */
 function _dpicontenttypes_entityinsertembargoinformation($node){
   $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
-  $useautopublishdate = current($useautopublishdates);
+  if (!empty($useautopublishdates))
+    $useautopublishdate = current($useautopublishdates);
   $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
   if(isset($autopublishdates) && is_array($autopublishdates) && count($autopublishdates)>=1){
     $autopublishdate = current($autopublishdates);
