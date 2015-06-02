@@ -41,11 +41,11 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
             // Get all ccix:inline tags in the text
             preg_match_all($tag_regex, $text, $tag_matches);
             if (!empty($tag_matches[0])) {
-              foreach ($tag_matches[0] as $match_id => $match_val) {
+              foreach ($tag_matches[0] as $match_id => $match_val) {                
                 // Extract attributes from the tag
                 $tag_values = _cciinlineobjects_inline_objects_get_tag_values(trim($tag_matches[1][$match_id]));
-                if (isset($tag_values['extref']) && !empty($tag_values['extref']) && isset($embed_objects_by_ext_ref[$tag_values['extref']])) {
-                  // We have a matching object
+                if (isset($tag_values['extref']) && $tag_values['extref']!="" && isset($embed_objects_by_ext_ref[$tag_values['extref']])) {
+                  // We have a matching object                  
                   $matching_embed = $embed_objects_by_ext_ref[$tag_values['extref']];
                   $matching_sid = $matching_embed['sid'];
                   $scald_tag = "[scald=$matching_sid:$scald_context]";
