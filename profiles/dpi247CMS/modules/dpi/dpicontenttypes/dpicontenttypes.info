@@ -22,8 +22,10 @@ dependencies[] = rules
 dependencies[] = pathauto
 dependencies[] = atom_package
 dependencies[] = atom_package_gallery
+dependencies[] = atom_package_link
 dependencies[] = views
 dependencies[] = views_bulk_operations
+dependencies[] = dpiscald
 explanation = Field type(s) in use - see <a href="/admin/reports/fields">Field list</a>
 features[features_api][] = api:2
 features[taxonomy][] = authors
