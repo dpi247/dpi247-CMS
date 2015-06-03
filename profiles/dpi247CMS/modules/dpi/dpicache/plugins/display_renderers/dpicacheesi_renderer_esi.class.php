@@ -117,7 +117,33 @@ class dpicacheesi_renderer_esi extends panels_renderer_standard {
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 
-  /**
+
+	/**
+	 * Render all prepared panes, first by dispatching to their plugin's render
+	 * callback, then handing that output off to the pane's style plugin.
+	 *
+	 * @return array
+	 *   The array of rendered panes, keyed on pane pid.
+	 */
+	function render_panes() {
+		ctools_include('content');
+
+		// First, render all the panes into little boxes.
+		$this->rendered['panes'] = array();
+		foreach ($this->prepared['panes'] as $pid => $pane) {
+			if (empty($pane->cache) OR  $pane->cache['method'] == 'dpicacheesi') {
+
+				$content = $this->render_pane($pane);
+				if ($content) {
+					$this->rendered['panes'][$pid] = $content;
+				}
+			}
+		}
+		return $this->rendered['panes'];
+	}
+
+
+	/**
    * Parse the rendered panes, replacing the ESI-handled panes with ESI tags.
    */
   function handle_esi() {
