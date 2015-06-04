@@ -1,0 +1,6 @@
+name = Dpi atom package link Providers
+description = Provides for atom package link.
+package = Scald Providers
+core = 7.x
+dependencies[] = scald
+stylesheets[all][] = atom_package_link.css

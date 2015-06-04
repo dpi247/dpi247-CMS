@@ -21,7 +21,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+      
       $this->savePackage($dom, $package);
 
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
@@ -950,17 +950,38 @@ class WallyXmlV1 extends PackageHelper {
     $uri_info = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
     if (strstr($uri_info, 'extref://') != FALSE) {
       $tmpExternalRef = substr($uri_info, 9);
+      
+      /* Récupération de l'atom_package lié au nid de l'external reference */
       $query = "SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref ) LIMIT 1";
       $args = array(
         ':extref' => $tmpExternalRef
-      );
+      );      
       $result = db_query($query, $args)->fetchField();
-      if (isset($result) && $var = scald_atom_load(intval($result))) {
-        $atom = new stdClass ();
-        $atom->sid = $result;
-        $atom->type = $var->type;
-        $atom->provider = $var->provider;
-        return $atom;
+      
+      if (isset($result) && $result != "") {        
+        /* Création de link atom package */
+        $link_atom = scald_atom_defaults('atom_package_link');
+        $link_atom->provider = "atom_package_link";
+        $link_atom->type = "atom_package";
+        $link_atom->title = $dom->getElementsByTagName('Title')->item(0)->nodeValue;
+        $link_atom->data = array(
+          'title' => $dom->getElementsByTagName('Title')->item(0)->nodeValue,
+          'external_reference' => $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue,
+          'uri' => $dom->getElementsByTagName('URI')->item(0)->nodeValue,
+          'sid' => $result,
+        );
+        $link_atom->dpiproperties = new DPIPropertiesEntity(array('type' => 'scald_atom'), 'dpiproperties');
+        $link_atom->dpiproperties->external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
+
+        $sid = scald_atom_save($link_atom);    
+        /* Renvois des informations sur la link atom package pour les ajouter au object embedé */
+        if(isset($link_atom->sid) && isset($sid)){
+          $atom = new stdClass ();
+          $atom->sid = $sid;
+          $atom->type = $link_atom->type;
+          $atom->provider = $link_atom->provider;
+          return $atom; 
+        }
       }
     }
     else {

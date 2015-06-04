@@ -604,6 +604,17 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
               $default_theme = 'dpicontenttypes_image_render_context';
               drupal_alter('dpicontenttypes_default_theme_image_inline', $default_theme, $arguments, $tmp_context);
               $atoms_info[] = theme($default_theme, $arguments);
+            break;      
+          case 'atom_package_link':
+              if(isset($atom->data['sid']) && $var = scald_atom_load($atom->data['sid'])){
+                if($var->provider == 'atom_package'){
+                  $node = node_load(intval($var->data['nid']));
+                  $atoms_info[] = theme('atom_package_inline', array('node' => $node));
+                }elseif($var->provider == 'atom_package_gallery'){
+                  $node = node_load(intval($var->data['nid']));
+                  $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+                }
+              }
             break;
           default:
               $atoms_info[] = scald_render($id, $tmp_context);

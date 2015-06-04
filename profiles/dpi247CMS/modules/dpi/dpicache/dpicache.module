@@ -414,10 +414,12 @@ function dpicache_form_block_admin_configure_alter(&$form, $form_state) {
 function dpicache_block_admin_configure_submit($form, &$form_state) {
 
   //We remove drupal role and relace with esi role visibility
+	if($form_state['values']['esi_enabled']){
   $role_visibility=$form_state["values"]['roles'];
   foreach($form_state["values"]['roles'] as $id){
     $form_state["values"]['roles'][$id]=0;
   }
+	}
   // The regular block-configuration form only saves particular fields. This
   // submit handler stores the ESI-specific data.
   dpicache__set_esi_settings($form_state['values']['module'], $form_state['values']['delta'], (bool) $form_state['values']['esi_enabled'], (int) $form_state['values']['esi_ttl'],$role_visibility);
