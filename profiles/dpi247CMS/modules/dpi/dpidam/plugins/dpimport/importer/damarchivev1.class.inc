@@ -142,9 +142,9 @@ class DamArchiveV1 extends WallyXmlPreview {
     $freeAccess = $dom->nodeValue;
     if(isset($freeAccess) && $freeAccess!=""){
       if($freeAccess == "false"){
-        $wrapper->field_restrictedaccess->set(0);
-      }else{
         $wrapper->field_restrictedaccess->set(1);
+      }else{
+        $wrapper->field_restrictedaccess->set(0);
       }
     }    
   }
