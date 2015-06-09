@@ -64,8 +64,6 @@ class WallyXmlV1 extends PackageHelper {
             $package->tmpinline = $tmp_inline;
           }          
         }
-        dsm($package);
-        die();
       }
       
       // Allow to alter entity after process
@@ -91,9 +89,9 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-      dsm($package);
-      die();
-      $this->savePackage($dom, $package);
+
+      $this->savePackage($dom, $package);      
+      $this->_save_external_package_informations($package);
       
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
         foreach ($package->temp_crops as $atom_id => $crops_infos) {
@@ -1262,14 +1260,14 @@ class WallyXmlV1 extends PackageHelper {
             'original_cci_link' => $sa_info['cci_inline_true_value'],
           );
           db_insert('dpicontenttypes_inline_export_information') // Table name no longer needs {}
-          ->fields($fields)
-          ->execute();
+            ->fields($fields)
+            ->execute();
         }
         catch (Exception $exc) {
           Logger::logWarning('importer', 2, 'dpicontenttypes_inline_export_information', t('Error with registering of retrieve information. base cci : !type', array(
             '!type' => original_cci_link
           )));
-        }                
+        }
       }
     }
   }
