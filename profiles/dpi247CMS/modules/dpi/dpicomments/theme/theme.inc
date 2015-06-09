@@ -105,9 +105,10 @@ function theme_dpicomments_comment_wrapper($variables){
     );
 
   if ($element['show_more_comment_link']) {
+  	$options=array('attributes'=>array('class'=>array('comment-more')));
     $output['links']=array(
       'type'=>'markup',
-      '#markup'=>l('Plus de commentaires','node/'.$element['nid'].'/comments'),
+      '#markup'=>l(t('See more comments'),'node/'.$element['nid'].'/comments',$options),
       );
   }
 
