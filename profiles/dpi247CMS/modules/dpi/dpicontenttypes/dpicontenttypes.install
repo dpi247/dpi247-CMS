@@ -404,6 +404,37 @@ function dpicontenttypes_schema() {
     'primary key' => array('nid', 'action'),
   );
 
+  $schema['dpicontenttypes_inline_export_information'] = array(
+    'description' => 'Contains all information for recreating base xml imported from cci-newsgate',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'sid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'ext_ref' => array(
+        'description' => 'external reference from scald atom ',
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => NULL,
+      ),
+      'original_cci_link' => array(
+        'description' => 'original link, replace scald information for export',
+        'type' => 'blob',
+        'length' => 'long',
+        'default' => NULL,
+      ),
+    ),
+    'primary key' => array('nid', 'sid'),
+  );
+  
   return $schema;
 }
 
@@ -679,5 +710,15 @@ function dpicontenttypes_update_7013(){
 function dpicontenttypes_update_7014(){
   if (db_table_exists('dpicontenttypes_cropings')) {
     db_query("ALTER TABLE dpicontenttypes_cropings MODIFY eid varchar(255)")->execute();
+  }
+}
+
+/**
+ * Install the dpicontenttypes_inline_export_information table
+ */
+function dpicontenttypes_update_7015() {
+  if (!db_table_exists('dpicontenttypes_inline_export_information')) {
+    $schema = drupal_get_schema('dpicontenttypes_inline_export_information', TRUE);
+    db_create_table('dpicontenttypes_inline_export_information', $schema);
   }
 }

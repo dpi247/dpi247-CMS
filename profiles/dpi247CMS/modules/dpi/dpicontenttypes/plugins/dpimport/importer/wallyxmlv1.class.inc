@@ -5,6 +5,76 @@ require_once 'packagehelper.class.inc';
 class WallyXmlV1 extends PackageHelper {
 
   /**
+   * Construct the node base on the DOM element
+   * Surcharge de la méthode car besoin d'un remplacement des inlines dans le textbody
+   * @param DOM $dom
+   */
+  protected function constructPackage($dom) {
+    $dispatcher = $this->getDispatcher();
+    $package = $this->createOrLoadEntity($dom);
+    $package_wrapper = entity_metadata_wrapper('node', $package);
+    if (!Logger::error()) {
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_beforeprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
+
+      $this->setPackageAttributes($dom, $package_wrapper, $package);
+      if (!Logger::error()) {
+        $dispatcher->processChildren($dom, $package_wrapper, $package);
+      }
+      
+      /* Change external reference into the textbody to be recognize by the system */
+      if(isset($package->tmpinline) && !empty($package->tmpinline)){
+        $field_textbody = field_get_items('node', $package, 'field_textbody');
+        if(is_array($field_textbody) && !empty($field_textbody) && isset($field_textbody[0]['value'])){
+          $text = $field_textbody[0]['value'];
+          $tag_regex = "/<ccix:inline(.*?)(<\/ccix:inline(\s.*)?>|\/>)/i";
+          $tag_matches = array();          
+          preg_match_all($tag_regex, $text, $tag_matches);
+          if (!empty($tag_matches[0])) {
+            $tmp_inline = array();
+            foreach ($tag_matches[0] as $match_id => $match_val) {
+              $tags_info = $this->cci_get_tag_value(trim($tag_matches[1][$match_id]));
+              if(isset($tags_info['extref']) && $tags_info['extref']!=""){
+                if(is_array($package->tmpinline)){
+                  foreach($package->tmpinline as $sid => $inline_infos){
+                    if($tags_info['extref'] == $inline_infos['body_ext_ref']){
+                      try {
+                        $text = str_replace($tags_info['extref'], $inline_infos["external_reference"], $text);
+                        /* Sav new textbody information */                      
+                        $format = $this->getDefaultTextFormat();
+                        $package_wrapper->field_textbody->set(array(
+                          'value' => $text,
+                          'format' => $format
+                        ));
+                        $tmp_inline[$sid] = $inline_infos + array(
+                          "cci_inline_true_value" => $match_val,
+                        );                        
+                      }
+                      catch (Exception $exc) {
+                        Logger::logWarning('importer', 2, 'inline package', t('Inline pacakage have problème with external reference %extref', array(
+                          '%extref' => $tags_info['extref']
+                        )));
+                      }
+                      break;
+                    }
+                  }
+                }                
+              }
+            }
+            $package->tmpinline = $tmp_inline;
+          }          
+        }
+        dsm($package);
+        die();
+      }
+      
+      // Allow to alter entity after process
+      module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
+    }
+    return $package;
+  }  
+  
+  /**
    * Intercept dom at element <Package>
    *
    * @param DOM $dom
@@ -21,9 +91,10 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-      
+      dsm($package);
+      die();
       $this->savePackage($dom, $package);
-
+      
       if(isset($package->temp_crops) && is_array($package->temp_crops)){
         foreach ($package->temp_crops as $atom_id => $crops_infos) {
           _dpicontenttypes_cropings_update_cropings('node', $package->nid, $atom_id, $crops_infos);
@@ -952,36 +1023,29 @@ class WallyXmlV1 extends PackageHelper {
       $tmpExternalRef = substr($uri_info, 9);
       
       /* Récupération de l'atom_package lié au nid de l'external reference */
-      $query = "SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref ) LIMIT 1";
+      $query = "SELECT dp.id, dp.external_reference FROM {dpicontenttypes_properties} dp WHERE dp.entity='scald_atom' AND dp.id IN (SELECT sa.sid FROM {scald_atoms} sa WHERE sa.title IN (SELECT n.title FROM {node} n, {dpicontenttypes_properties} dpp WHERE n.nid=dpp.id AND dpp.entity='node' AND dpp.external_reference=:extref )) LIMIT 1";
       $args = array(
         ':extref' => $tmpExternalRef
       );      
-      $result = db_query($query, $args)->fetchField();
+      $result = db_query($query, $args)->fetchObject();
       
       if (isset($result) && $result != "") {        
-        /* Création de link atom package */
-        $link_atom = scald_atom_defaults('atom_package_link');
-        $link_atom->provider = "atom_package_link";
-        $link_atom->type = "atom_package";
-        $link_atom->title = $dom->getElementsByTagName('Title')->item(0)->nodeValue;
-        $link_atom->data = array(
-          'title' => $dom->getElementsByTagName('Title')->item(0)->nodeValue,
-          'external_reference' => $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue,
-          'uri' => $dom->getElementsByTagName('URI')->item(0)->nodeValue,
-          'sid' => $result,
+        /* Sav information about external reference for inline elements */
+        $entity->tmpinline[$result->id] = array(
+          'sid' => $result->id,
+          'external_reference' => $result->external_reference,
+          'body_ext_ref' => $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue,
         );
-        $link_atom->dpiproperties = new DPIPropertiesEntity(array('type' => 'scald_atom'), 'dpiproperties');
-        $link_atom->dpiproperties->external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
-
-        $sid = scald_atom_save($link_atom);    
-        /* Renvois des informations sur la link atom package pour les ajouter au object embedé */
-        if(isset($link_atom->sid) && isset($sid)){
-          $atom = new stdClass ();
-          $atom->sid = $sid;
-          $atom->type = $link_atom->type;
-          $atom->provider = $link_atom->provider;
-          return $atom; 
-        }
+        
+        /* Return atom for nex step */
+        $scald_atom = scald_atom_load($result->id);
+        if(isset($scald_atom) && is_object($scald_atom)){
+          $atom = new stdClass();
+          $atom->sid = $scald_atom->sid;
+          $atom->type = $scald_atom->type;
+          $atom->provider = $scald_atom->provider;
+          return $atom;
+        }        
       }
     }
     else {
@@ -1173,4 +1237,40 @@ class WallyXmlV1 extends PackageHelper {
     $global_list_term[] = $term_taxo->tid;
   } 
   
+  function cci_get_tag_value($raw_attributes){
+    $tag_values = array();
+    $attr_regex = '@\w.*\s?=\s?[\'"].*[\'"]@U';
+    $attr_matches = array();
+    preg_match_all($attr_regex, $raw_attributes, $attr_matches);
+
+    foreach ($attr_matches[0] as $raw_attr) {
+      $expl_attr = explode('=', $raw_attr);
+      $tag_values[$expl_attr[0]] = trim($expl_attr[1], '\'"');
+    }
+
+    return $tag_values;
+  }
+  
+  function _save_external_package_informations($package){
+    if(isset($package->tmpinline) && is_array($package->tmpinline)){
+      foreach($package->tmpinline as $sid => $sa_info){
+        try {
+          $fields = array(
+            'nid' => $package->nid,
+            'sid' => $sid,
+            'ext_ref' => $sa_info['external_reference'],
+            'original_cci_link' => $sa_info['cci_inline_true_value'],
+          );
+          db_insert('dpicontenttypes_inline_export_information') // Table name no longer needs {}
+          ->fields($fields)
+          ->execute();
+        }
+        catch (Exception $exc) {
+          Logger::logWarning('importer', 2, 'dpicontenttypes_inline_export_information', t('Error with registering of retrieve information. base cci : !type', array(
+            '!type' => original_cci_link
+          )));
+        }                
+      }
+    }
+  }
 }
