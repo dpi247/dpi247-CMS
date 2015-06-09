@@ -22,7 +22,6 @@ dependencies[] = rules
 dependencies[] = pathauto
 dependencies[] = atom_package
 dependencies[] = atom_package_gallery
-dependencies[] = atom_package_link
 dependencies[] = views
 dependencies[] = views_bulk_operations
 dependencies[] = dpiscald
