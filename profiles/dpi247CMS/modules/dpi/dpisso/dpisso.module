@@ -153,17 +153,18 @@ function dpisso_block_view($delta = '') {
 
 function dpisso_get_connect_form() {
   libraries_load ( 'ssophptoolbox' );
-  if (file_exists ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )) {
-    $config = Config::getInstance ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini' )->getConfigurationInstance ();
-    if ($unitId = LoginManager::getUnitId ()) {
+  if (file_exists ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' )) {
+    $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+    $config = $ssoSession->config;
+    if ($unitId = $config->LM_unitId) {
       if (user_is_anonymous ()) {
-        $return = l ( 'Login', $config ['ssoServer_url'] . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Login', $config->login . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
             'class' => 'btn blue' 
           ) 
         ) );
       } else {
-        $return = l ( 'Logout', $config ['ssoServer_url'] . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Logout', $config->login . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
             'class' => 'btn blue' 
           ) 
@@ -273,15 +274,16 @@ function dpisso_libraries_info() {
 }
 
 /*
+//@todo redévelopper le status pour le dashboard
  * Implement the dashboard status item hook. Check if ssoclient config file is correct.
  */
-function dpisso_dpidashboard_status_item() {
+/*function dpisso_dpidashboard_status_item() {
   
   // Get ssoClient config from file.
   $ssoconfig = dpisso_get_config ();
   
   // If no accessmanager nor invalid uri diseable the send button.
-  if (! isset ( $ssoconfig ["ssoServer_url"] ) || ! valid_url ( $ssoconfig ["ssoServer_url"] )) {
+  if (!isset($ssoconfig) || !isset ( $ssoconfig ) || ! valid_url ( $ssoconfig ["ssoServer_url"] )) {
     
     $status = array (
       'title' => 'ssoConfig File',
@@ -308,7 +310,7 @@ function dpisso_dpidashboard_status_item() {
     }
   }
   return array($status);
-}
+}*/
 
 /*
  * Get the ssoCLient Config from file. @return array All the configuration elements.
@@ -316,10 +318,11 @@ function dpisso_dpidashboard_status_item() {
 function dpisso_get_config() {
   libraries_load ( "ssophptoolbox" );
   if (! is_file ( dpi_variable_get ( 'ssoClienInitFile', '' ) )) {
-    $ssoconfig = array ();
+    $ssoconfig = NULL;
   } else {
     $ini_file = dpi_variable_get ( 'ssoClienInitFile', '' );
-    $ssoconfig = Config::getInstance ( $ini_file )->getConfigurationInstance ();
+    $ssoSession = new SsoSession($ini_file);
+    $ssoconfig = $ssoSession->config;
   }
   return ($ssoconfig);
 }
@@ -343,7 +346,8 @@ function dpisso_get_version() {
 function dpisso_update_role_for_access_manager_to_drupal() {
   $return = FALSE;
   if (is_array ( libraries_load ( "ssophptoolbox" ) ) && file_exists(DRUPAL_ROOT . "/sites/all/libraries/ssophptoolbox/AccessManager.class.php")) {
-    $roles = AccessManager::getRoleList ();
+    $ssoSession = new SsoSession( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+    $roles = $ssoSession->accessManager->getRoleList();
     if (isset ( $roles )) {
       if (dpisso_accessmanager_synchro_roles ( $roles->services )) {
         $return = TRUE;

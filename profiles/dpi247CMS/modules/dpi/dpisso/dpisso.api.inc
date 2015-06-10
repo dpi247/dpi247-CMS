@@ -71,12 +71,14 @@ function dpisso_api_user_logout() {
 
 function dpisso_api_get_paywall_info() {
   libraries_load ( 'ssophptoolbox' );
-  return AccessManager::getPaywallInfo ();
+  $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+  return $ssoSession->accessManager->getPaywallInfo ();
 }
 
 function dpisso_api_set_paywall_info($info) {
   libraries_load ( "ssophptoolbox" );
-  return AccessManager::setPaywallInfo ( $info );
+  $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+  return $ssoSession->accessManagersetPaywallInfo ( $info );
 }
 
 

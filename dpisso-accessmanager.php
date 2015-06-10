@@ -7,7 +7,7 @@ header('Content-Type: text/html; charset=utf-8');
  */
 define ( 'DRUPAL_ROOT', getcwd () );
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-drupal_bootstrap (DRUPAL_BOOTSTRAP_SESSION);
+drupal_bootstrap (DRUPAL_BOOTSTRAP_FULL);
 
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';

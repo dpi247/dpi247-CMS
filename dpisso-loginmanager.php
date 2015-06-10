@@ -35,12 +35,9 @@ require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.ap
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
 require_once DRUPAL_ROOT . '/includes/common.inc';
+require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
 
-$config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
-
-$SsoSession= new SsoSession();
-
-$SsoSession->initLoginManager();
+$SsoSession= new SsoSession(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json');
 
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
