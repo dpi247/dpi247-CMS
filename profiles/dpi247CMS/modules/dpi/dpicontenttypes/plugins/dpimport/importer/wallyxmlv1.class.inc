@@ -89,7 +89,8 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+dsm($package);
+die();
       $this->savePackage($dom, $package);      
       $this->_save_external_package_informations($package);
       
@@ -126,6 +127,18 @@ class WallyXmlV1 extends PackageHelper {
     return $this->_createOrLoadEntityPackage($dom, $external_reference, $action);
   }
 
+  /**
+   * Set PhotoObjectType
+   *
+   * @param DOM $dom          
+   * @param EntityDrupalWrapper $package_wrapper          
+   * @param Object $entity          
+   */
+  public function buildTextObjectType($dom, $package_wrapper, $entity) {
+    $dispatcher = $this->getDispatcher();
+    $dispatcher->processChildren($dom, $package_wrapper, $entity);
+  }
+  
   /**
    * Create Atom Image
    *
@@ -540,7 +553,7 @@ class WallyXmlV1 extends PackageHelper {
    * @param EntityDrupalWrapper $wrapper          
    * @param Object $entity          
    */
-  public function buildMainStory($dom, $wrapper, $entity) {
+  public function buildMainStory($dom, $wrapper, $entity) {   
     $dispatcher = $this->getDispatcher();
     $dispatcher->processChildren($dom, $wrapper, $entity);
   }
@@ -704,12 +717,11 @@ class WallyXmlV1 extends PackageHelper {
    * @see buildCrops()
    * @see dpicontenttypes_node_presave()
    */
-  public function buildEmbeddedObjects($dom, $wrapper, $entity) {
-    // Empty the embededobjects field
-    $wrapper->field_embededobjects->set(NULL);
-    $dispatcher = $this->getDispatcher();
+  public function buildEmbeddedObjects($dom, $wrapper, $entity) {    
+    // Empty the embededobjects field    
+    $dispatcher = $this->getDispatcher();    
     $embeds = $dispatcher->processList($dom, $wrapper, $entity);
-
+    
     $embeds_list = array();
     $i = 100;
     if (!Logger::error()) {
@@ -855,6 +867,27 @@ class WallyXmlV1 extends PackageHelper {
     Logger::logExecution('photobojecttype', TRUE);
     $atom = $this->constructEntity($dom, 'scald_atom');
     Logger::setCurrentToPreviousExecution();
+    
+    /* Sav object to embeded (Package gallery element) */
+    if($dom->nodeName == 'MainObject'){
+      $package_wrapper->field_embededobjects->set(NULL);
+      $embededobject = array(
+        'sid' => $atom->sid,
+        'type' => $atom->type,
+        'provider' => $atom->provider,
+        'inline' => '0'  // @todo
+      );
+
+      //We build cropping info into entity element
+      // @see buildCrops()
+      // @see dpicontenttypes_node_presave()
+      $package_wrapper->field_embededobjects->set($embededobject);
+      if(isset($atom->temp_crops) && $atom->temp_crops!=null){
+        $entity->temp_crops[$atom->sid] = $atom->temp_crops;
+      }
+    }elseif($entity->type != 'package_gallery' && !empty(field_get_items('node', $entity, 'field_embededobjects'))){
+      $package_wrapper->field_embededobjects->set(NULL);
+    }
     return $atom;
   }
 
