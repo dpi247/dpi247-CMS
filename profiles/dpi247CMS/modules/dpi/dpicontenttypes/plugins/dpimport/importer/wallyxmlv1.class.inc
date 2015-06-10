@@ -1291,13 +1291,19 @@ class WallyXmlV1 extends PackageHelper {
             'ext_ref' => $sa_info['external_reference'],
             'original_cci_link' => $sa_info['cci_inline_true_value'],
           );
-          db_insert('dpicontenttypes_inline_export_information') // Table name no longer needs {}
+          
+          db_merge('dpicontenttypes_inline_export_information')
+            ->key(array('nid' => $fields['nid'], 'sid' => $fields['sid']))
             ->fields($fields)
             ->execute();
         }
         catch (Exception $exc) {
-          Logger::logWarning('importer', 2, 'dpicontenttypes_inline_export_information', t('Error with registering of retrieve information. base cci : !type', array(
-            '!type' => original_cci_link
+          Logger::logWarning('importer', 2, 'dpicontenttypes_inline_export_information', t('Error with registering of retrieve information. base cci : !type, nid: !nid, sid: !sid, extref: !ext_ref, !message', array(
+            '!type' => $sa_info['cci_inline_true_value'],
+            '!nid' => $package->nid,
+            '!sid' => $sid,
+            '!ext_ref' => $sa_info['external_reference'],
+            '!message' => $exc->getMessage(),
           )));
         }
       }
