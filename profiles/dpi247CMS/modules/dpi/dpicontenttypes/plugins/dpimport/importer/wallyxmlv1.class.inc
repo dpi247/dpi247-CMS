@@ -89,8 +89,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-dsm($package);
-die();
+
       $this->savePackage($dom, $package);      
       $this->_save_external_package_informations($package);
       
