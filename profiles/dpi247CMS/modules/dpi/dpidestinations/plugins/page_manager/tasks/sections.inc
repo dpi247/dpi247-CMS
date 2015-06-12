@@ -1,16 +1,12 @@
 <?php
 
 
-
-
-
-
-
  
 function dpidestinations_sections_page_manager_tasks() {
   return array(
     // This is a 'page' task and will fall under the page admin UI
     'task type' => 'page',
+		'handler type' => 'context',
 
 		'title' => t('All Sections'),
     'admin title' => t('All Sections'),
@@ -24,7 +20,6 @@ function dpidestinations_sections_page_manager_tasks() {
 
     // This is task uses 'context' handlers and must implement these to give the
     // handler data it needs.
-    'handler type' => 'context',
     'get arguments' => 'dpidestinations_sections_get_arguments',
     'get context placeholders' => 'dpidestinations_sections_get_contexts',
      
@@ -93,7 +88,8 @@ function dpidestinations_section_view_page($section,$depth = NULL) {
 
 
   if (empty($contexts) or $section->vid!=dpidestinations_api_get_sections_vocabulary_vid()) {
-    return drupal_not_found();
+
+		return MENU_NOT_FOUND;
   }
   $output = ctools_context_handler_render($task, '', $contexts, array($section->tid));
 
@@ -157,7 +153,7 @@ function dpidestinations_sections_get_arguments( $task, $subtask_id ){
 function dpidestinations_sections_get_contexts( $task, $subtask_id ){
   module_load_include('inc', 'page_manager', 'plugins/tasks/term_view');
   module_load_include('inc', 'dpidestinations', 'plugins/ctools/context/section');
-  $contexts=page_manager_term_view_get_contexts($task, $subtask_id);
+  //$contexts=page_manager_term_view_get_contexts($task, $subtask_id);
 
 
 	$contexts=ctools_context_get_placeholders_from_argument(dpidestinations_sections_get_default_arguments($task, $subtask_id));
