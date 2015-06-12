@@ -56,7 +56,8 @@ if (file_exists ( $_SERVER ['DOCUMENT_ROOT'] . "/sites/all/libraries/ssophptoolb
     }
 
 	} catch (Exception $e) {
-		echo 'Caught exception in SSOToolBox: ',  $e->getMessage(), "\n";
+	//	echo
+		$_SESSION ['messages']['error'][] = 'Caught exception in SSOToolBox: '.  $e->getMessage();
 	}
 }
 
