@@ -399,6 +399,7 @@ function dpisocial_cron() {
     $query = "INSERT INTO dpisocial_node_nbshares SET nid=:nid, network=:network, nbshares=:nbshares
 				ON DUPLICATE KEY UPDATE nbshares=:nbshares";
     db_query ( $query, $param );
+		unset($param[':nbshares']);
     $query = "DELETE FROM dpisocial_node_shares_to_update WHERE nid=:nid AND network=:network";
     db_query ( $query, $param );
   }
