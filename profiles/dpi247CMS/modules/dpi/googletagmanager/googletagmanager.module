@@ -37,9 +37,7 @@ function googletagmanager_menu(){
 		'title' => 'Google Tag Manager ESI rendering',
 		'page callback' => 'googletagmanager_esi_render_tag',
 		'access callback'=>true,
-		'access arguments' => array (
-			'administer google tag manager'
-		),
+		
 	);
 
   return $items;
