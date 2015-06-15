@@ -93,7 +93,10 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
   $processed_dest_tids = &dpisitemap_get_static_processed_dest_tids();
   $terms_settings = $settings['dpisitemap_dests_params'] ? $settings['dpisitemap_dests_params'] : array();
   foreach ($terms as $term) {
-    $dest_term_aliases = dpicommons_get_all_aliases('taxonomy/term/'.$term->tid);
+
+		$uri=entity_uri('taxonomy_term', $term);
+
+		$dest_term_aliases = dpicommons_get_all_aliases($uri['path']);
     $dest_term_aliases_strings = array();
     foreach ($dest_term_aliases as $alias) {
       $dest_term_aliases_strings[] = $alias->alias;
@@ -115,7 +118,6 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
       $processed_dest_tids[] = $term->tid;
     }
     $url = $urlset->appendChild($dom->createElement('url'));
-		$uri=entity_uri('taxonomy_term', $term);
     $nice_path = dpicommons_get_main_alias($uri['path']);
     $url->appendChild($dom->createElement('loc', $ref_base_url.'/'.$nice_path[0]->alias));
     // lastmod not handled yet
