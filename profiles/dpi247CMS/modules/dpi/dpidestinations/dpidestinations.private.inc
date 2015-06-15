@@ -86,7 +86,8 @@ function _dpidestinations_get_all_targetviews() {
 
 function _dpidestinations_get_panels_displayid_for_sectionterm($term_id) {
   $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
-  return $handler->did;
+
+  return $handler->conf['did'];
 }
 
 function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
