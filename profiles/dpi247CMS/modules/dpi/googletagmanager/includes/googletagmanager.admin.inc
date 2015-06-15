@@ -38,6 +38,28 @@ function googletagmanager_admin_settings_form($form, &$form_state){
     )
   );
 
+
+
+	$form ['esi'] = array (
+		'#type' => 'fieldset',
+		'#title' => t ( 'Esi' ),
+		'#collapsible' => FALSE
+	);
+
+	$options=array(
+		FALSE=>t('Do not use ESI, simply render the datalayer directly in page.tpl'),
+		TRUE=>t('Use ESI tag')
+	);
+	$use_esi = variable_get('googletagmanager_use_esi', FALSE);
+
+	$form['esi']['googletagmanager_use_esi'] = array(
+		'#type' => 'radios',
+		'#title' => t('Preffered method to render the datalayer'),
+		'#options' => $options,
+		'#default_value' => $use_esi,
+	);
+
+
   $form['page_vis_settings'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Page specific tracking settings'),

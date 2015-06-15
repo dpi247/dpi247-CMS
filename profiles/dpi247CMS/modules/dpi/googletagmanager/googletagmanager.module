@@ -33,6 +33,14 @@ function googletagmanager_menu(){
     'access arguments' => array('administrer googletagmanager'),
   );
 
+	$items ['googletagmanager/esi/render'] = array (
+		'title' => 'Google Tag Manager ESI rendering',
+		'page callback' => 'googletagmanager_esi_render_tag',
+		'access arguments' => array (
+			'administer google tag manager'
+		),
+	);
+
   return $items;
 }
 
@@ -86,8 +94,44 @@ function googletagmanager_preprocess_html(&$variables) {
   }
   
   //Insert the datalayer's js (in the <head> of the page).
-  googletagmanager_add_dataLayer($variables['head_title']);
+	if(variable_get('googletagmanager_use_esi', FALSE)){
+		googletagmanager_add_dataLayer_as_esi($variables);
+	}else{
+		googletagmanager_add_dataLayer($variables['head_title']);
+	}
 
+}
+
+
+/**
+ * Build and add js dataLayer to the head of the page.
+ */
+function googletagmanager_esi_add_datalayer(& $variables) {
+
+	$url="/googletagmanager/esi/render?url=".$_GET['q'];
+	$esi_tag="<esi src=".$url.">";
+	$variables['gtm_snippet']=$esi_tag.$variables['gtm_snippet'];
+}
+
+
+
+function googletagmanager_esi_render_tag(){
+	$_GET['q']=$_GET['url'];
+
+
+	$dataLayer=array();
+	googletagmanager_build_datalayer($dataLayer, $title);
+	drupal_alter('gtm_datalayer_after', $dataLayer, $title);
+
+	$datalayer_js=googletagmanager_convert_datalayer_to_json($dataLayer);
+
+	print "<script>$datalayer_js</script>";
+}
+
+
+function googletagmanager_add_dataLayer_as_esi(& $variables){
+	googletagmanager_esi_add_datalayer($variables);
+	$variables['page_top'].=$variables['gtm_snippet'];
 }
 
 /**
