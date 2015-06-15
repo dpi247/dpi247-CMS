@@ -115,7 +115,7 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
       $processed_dest_tids[] = $term->tid;
     }
     $url = $urlset->appendChild($dom->createElement('url'));
-    $nice_path = dpicommons_get_main_alias(entity_uri('taxonomy_term', $term));
+    $nice_path = dpicommons_get_main_alias('taxonomy/term/'.$term->tid);
     $url->appendChild($dom->createElement('loc', $ref_base_url.'/'.$nice_path[0]->alias));
     // lastmod not handled yet
     $url->appendChild($dom->createElement('changefreq', $term_settings['freq']));
