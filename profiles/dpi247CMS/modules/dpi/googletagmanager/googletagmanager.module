@@ -36,7 +36,7 @@ function googletagmanager_menu(){
 	$items ['googletagmanager/esi/render'] = array (
 		'title' => 'Google Tag Manager ESI rendering',
 		'page callback' => 'googletagmanager_esi_render_tag',
-		'access calback'=>true,
+		'access callback'=>true,
 		'access arguments' => array (
 			'administer google tag manager'
 		),
