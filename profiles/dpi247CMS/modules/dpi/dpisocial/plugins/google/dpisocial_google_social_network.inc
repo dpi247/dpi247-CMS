@@ -75,8 +75,9 @@ class dpisocial_google_social_network extends dpisocial_social_network {
 	}
 	
 	public function getShareUrl($nid,$url) {
+		global $base_url;
 	
-		return 'https://plus.google.com/share?url='.urlencode(drupal_get_path_alias('node/'.$nid));
+		return 'https://plus.google.com/share?url='.urlencode($base_url.'/'.drupal_get_path_alias('node/'.$nid));
 	
 	}
 	
