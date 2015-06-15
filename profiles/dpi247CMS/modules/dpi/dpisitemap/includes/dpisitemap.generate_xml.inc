@@ -96,6 +96,7 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
 
 		$uri=entity_uri('taxonomy_term', $term);
 
+		dsm($term);
 		$dest_term_aliases = dpicommons_get_all_aliases($uri['path']);
     $dest_term_aliases_strings = array();
     foreach ($dest_term_aliases as $alias) {
