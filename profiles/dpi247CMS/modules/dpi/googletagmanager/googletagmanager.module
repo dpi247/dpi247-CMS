@@ -46,19 +46,6 @@ function googletagmanager_menu(){
 
 
 
-function googletagmanager_esi_render_tag(){
-	$_GET['q']=$_GET['url'];
-
-
-	$dataLayer=array();
-	googletagmanager_build_datalayer($dataLayer, $title);
-	drupal_alter('gtm_datalayer_after', $dataLayer, $title);
-
-	$datalayer_js=googletagmanager_convert_datalayer_to_json($dataLayer);
-
-	print "<script>$datalayer_js</script>";
-}
-
 /**
  * Implements hook_permission()
  */
