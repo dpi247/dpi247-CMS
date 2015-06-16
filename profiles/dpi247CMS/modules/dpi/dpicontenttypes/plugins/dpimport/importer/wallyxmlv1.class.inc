@@ -454,7 +454,14 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildFreeAccess($dom, $wrapper, $entity) {
-    // @todo
+    $freeAccess = $dom->nodeValue;
+    if(isset($freeAccess) && $freeAccess!=""){
+      if($freeAccess == "false"){
+        $wrapper->field_restrictedaccess->set(1);
+      }else{
+        $wrapper->field_restrictedaccess->set(0);
+      }
+    }    
   }
 
   /**
