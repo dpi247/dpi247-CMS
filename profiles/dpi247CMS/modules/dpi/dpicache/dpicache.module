@@ -681,3 +681,29 @@ function dpicache_get_content_from_handler($handler)
 	}
 	return $return;
 }
+
+
+function dpicache_preprocess_page(& $variables){
+
+	if( variable_get('drupal_get_status_messages_with_javascript', FALSE)){
+		$variables['messages']='<div id="dpicache-messages-with-esi"></div>';
+
+		//drupal_add_js();
+
+		$add_js_options=array();
+		$add_js_options['type']='inline';
+		$add_js_options['requires_jquery']=TRUE;
+
+
+		$js="(function($) {
+    Drupal.behaviors.dpicachemessageswithesi = {
+      attach: function(context, settings) {
+      $('div#dpicache-messages-with-esi', context).load('/drupal_get_messages_with_javascript.php');
+    }
+  }
+})(jQuery);";
+		drupal_add_js($js,$add_js_options);
+
+
+	}
+}

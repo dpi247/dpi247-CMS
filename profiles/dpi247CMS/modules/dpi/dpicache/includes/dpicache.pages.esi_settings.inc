@@ -37,6 +37,17 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
   );
 
 
+	$form['drupal_messages_with_esi'] = array(
+		'#title' => t('Drupal messages wit ESI'),
+		'#type' => 'fieldset',
+	);
+	$form['drupal_messages_with_esi']['drupal_get_status_messages_with_javascript'] = array(
+		'#title' => t('Load drupal messages with javascript (Usefull if the system use ESI to render page elements'),
+		'#type' => 'checkbox',
+		'#default_value'=>variable_get('drupal_get_status_messages_with_javascript', FALSE),
+	);
+
+
   $form['varnish_purge'] = array(
     '#title' => t('Varnish purge method'),
     '#type' => 'fieldset',
