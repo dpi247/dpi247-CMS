@@ -10,8 +10,9 @@ function dpisitemap_generate_sitemap_xml($site_infos, $settings) {
   $dom = new DOMDocument('1.0', 'UTF-8');
   $urlset = $dom->appendChild($dom->createElementNS($namespaces['sitemap'], 'urlset'));
 
-  $dest_terms = taxonomy_get_tree(dpidestinations_api_get_sections_vocabulary_vid());
-  dpisitemap_generate_sitemap_xml_for_taxonomy($dom, $urlset, $site_infos, $settings, $dest_terms);
+  $dest_terms = taxonomy_get_tree(dpidestinations_api_get_sections_vocabulary_vid(),0,NULL,TRUE);
+  dsm($dest_terms);
+	dpisitemap_generate_sitemap_xml_for_taxonomy($dom, $urlset, $site_infos, $settings, $dest_terms);
 
   $menus = $settings['dpisitemap_handled_menus'];
   foreach ($menus as $menu_name => $menu_settings) {
@@ -94,6 +95,7 @@ function dpisitemap_generate_sitemap_xml_for_taxonomy($dom, &$urlset, $site_info
   $terms_settings = $settings['dpisitemap_dests_params'] ? $settings['dpisitemap_dests_params'] : array();
   foreach ($terms as $term) {
 
+		dsm($term);
 		$uri=entity_uri('taxonomy_term', $term);
 
 		dsm($uri,uri);
