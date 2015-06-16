@@ -9,7 +9,7 @@
  * Floodlight, and those not provided by Google tags, while
  * allowing reduce the number of errors and avoid the
  * intervention of a webmaster.
- * 
+ *
  * @author  Maximilien Richard <mri@audaxis.com>
  * @package Google Tag Manager
  * @version  1.0
@@ -20,70 +20,73 @@ define('GOOGLEANALYTICS_PAGES', "admin\nadmin/*\nbatch\nnode/add*\nnode/*/*\nuse
 /**
  * Implements hook_menu()
  */
-function googletagmanager_menu(){
-  $items = array();
+function googletagmanager_menu()
+{
+	$items = array();
 
-  $items ['admin/dpi247/googletagmanager'] = array (
-    'title' => t ( 'DPI Google Tag Manager' ),
-    'description' => t ( 'Configure the settings used to generate your Google Tag Manager code.' ),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array ('googletagmanager_admin_settings_form'),    
-    'file' => 'googletagmanager.admin.inc',
-    'file path' => drupal_get_path('module', 'googletagmanager').'/includes',
-    'access arguments' => array('administrer googletagmanager'),
-  );
-
-	$items ['googletagmanager/esi/render'] = array (
-		'title' => 'Google Tag Manager ESI rendering',
-		'page callback' => 'googletagmanager_esi_render_tag',
-		'access callback'=>true,
-		
+	$items ['admin/dpi247/googletagmanager'] = array(
+		'title' => t('DPI Google Tag Manager'),
+		'description' => t('Configure the settings used to generate your Google Tag Manager code.'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('googletagmanager_admin_settings_form'),
+		'file' => 'googletagmanager.admin.inc',
+		'file path' => drupal_get_path('module', 'googletagmanager') . '/includes',
+		'access arguments' => array('administrer googletagmanager'),
 	);
 
-  return $items;
-}
+	$items ['googletagmanager/esi/render'] = array(
+		'title' => 'Google Tag Manager ESI rendering',
+		'page callback' => 'googletagmanager_esi_render_tag',
+		'access callback' => true,
 
+	);
+
+	return $items;
+}
 
 
 /**
  * Implements hook_permission()
  */
-function googletagmanager_permission() {
-  return array(
-    'administer googletagmanager' => array(
-      'title' => t('Administer Google Tag Manager'),
-      'description' => t("Allow user to administer Google Tag Manager"),
-    ),
-  );
+function googletagmanager_permission()
+{
+	return array(
+		'administer googletagmanager' => array(
+			'title' => t('Administer Google Tag Manager'),
+			'description' => t("Allow user to administer Google Tag Manager"),
+		),
+	);
 }
 
 /**
  * Implementation of hook_theme().
  */
-function googletagmanager_theme() {
-  return array(
-    'googletagmanager_admin_custom_var_table' => array(
-      'render element' => 'element'
-    ) 
-  );
+function googletagmanager_theme()
+{
+	return array(
+		'googletagmanager_admin_custom_var_table' => array(
+			'render element' => 'element'
+		)
+	);
 }
 
 /**
- * Add a gmt_snippet variable that contains the Google Tag Manager code 
+ * Add a gmt_snippet variable that contains the Google Tag Manager code
  * that charges the gms.js of Google in the page.
  * And insert the datalayer's js (in the <head> of the page).
  *
  * @param array $variables
  *   An associative array
  */
-function googletagmanager_preprocess_html(&$variables) {
-  $id = variable_get('googletagmanager_account','GTM-');
-  
-  // 1. Check if the GTM account number has a value.
-  // 2. Track page views based on visibility value.
-  if ((!empty($id) && $id != "GTM-") && googletagmanager_visibility_pages()) {
-  
-    $variables['gtm_snippet'] = "<!-- Google Tag Manager -->
+function googletagmanager_preprocess_html(&$variables)
+{
+	$id = variable_get('googletagmanager_account', 'GTM-');
+
+	// 1. Check if the GTM account number has a value.
+	// 2. Track page views based on visibility value.
+	if ((!empty($id) && $id != "GTM-") && googletagmanager_visibility_pages()) {
+
+		$variables['gtm_snippet'] = "<!-- Google Tag Manager -->
     <noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=" . $id . "\"
     height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -92,12 +95,12 @@ function googletagmanager_preprocess_html(&$variables) {
     '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','" . $id . "');</script>
     <!-- End Google Tag Manager -->";
-  }
-  
-  //Insert the datalayer's js (in the <head> of the page).
-	if(variable_get('googletagmanager_use_esi', FALSE)){
+	}
+
+	//Insert the datalayer's js (in the <head> of the page).
+	if (variable_get('googletagmanager_use_esi', FALSE)) {
 		googletagmanager_add_dataLayer_as_esi($variables);
-	}else{
+	} else {
 		googletagmanager_add_dataLayer($variables['head_title']);
 	}
 
@@ -107,32 +110,42 @@ function googletagmanager_preprocess_html(&$variables) {
 /**
  * Build and add js dataLayer to the head of the page.
  */
-function googletagmanager_esi_add_datalayer(& $variables) {
+function googletagmanager_esi_add_datalayer(& $variables)
+{
 
-	$url="/googletagmanager/esi/render?url=".$_GET['q'];
-	$esi_tag="<esi src=".$url.">";
-	$variables['gtm_snippet']=$esi_tag.$variables['gtm_snippet'];
+	$url = "/googletagmanager/esi/render?url=" . $_GET['q'];
+	$esi_tag = "<esi src=" . $url . ">";
+	if (isset($variables['gtm_snippet']))
+		$variables['gtm_snippet'] = $esi_tag . $variables['gtm_snippet'];
+	else
+		$variables['gtm_snippet'] = $esi_tag;
+
 }
 
 
+function googletagmanager_esi_render_tag()
+{
+	$_GET['q'] = $_GET['url'];
 
-function googletagmanager_esi_render_tag(){
-	$_GET['q']=$_GET['url'];
 
-
-	$dataLayer=array();
+	$dataLayer = array();
 	googletagmanager_build_datalayer($dataLayer, $title);
 	drupal_alter('gtm_datalayer_after', $dataLayer, $title);
 
-	$datalayer_js=googletagmanager_convert_datalayer_to_json($dataLayer);
+	$datalayer_js = googletagmanager_convert_datalayer_to_json($dataLayer);
 
 	print "<script>$datalayer_js</script>";
 }
 
 
-function googletagmanager_add_dataLayer_as_esi(& $variables){
+function googletagmanager_add_dataLayer_as_esi(& $variables)
+{
 	googletagmanager_esi_add_datalayer($variables);
-	$variables['page_top'].=$variables['gtm_snippet'];
+	if (isset($variables['page_top']))
+		$variables['page_top'] .= $variables['gtm_snippet'];
+	else
+		$variables['page_top'] = $variables['gtm_snippet'];
+
 }
 
 /**
@@ -141,156 +154,159 @@ function googletagmanager_add_dataLayer_as_esi(& $variables){
  *
  * @return  void();
  */
-function googletagmanager_add_datalayer($title) {
-  $dataLayer = array();
-  googletagmanager_build_datalayer($dataLayer, $title);
-  drupal_alter('gtm_datalayer_after', $dataLayer, $title);
-  
-  $datalayer_js = googletagmanager_convert_datalayer_to_json($dataLayer);
-  drupal_add_js( $datalayer_js, 'inline', 'header' );
+function googletagmanager_add_datalayer($title)
+{
+	$dataLayer = array();
+	googletagmanager_build_datalayer($dataLayer, $title);
+	drupal_alter('gtm_datalayer_after', $dataLayer, $title);
+
+	$datalayer_js = googletagmanager_convert_datalayer_to_json($dataLayer);
+	drupal_add_js($datalayer_js, 'inline', 'header');
 }
 
 /**
  * Build dataLayer content as a collection of key-value
  * Define and add default and custom elements to datalayer
- * 
- * @param array $dataLayer  the dataLayer
- * @param string $title     the title of the current page
+ *
+ * @param array $dataLayer the dataLayer
+ * @param string $title the title of the current page
  */
-function googletagmanager_build_datalayer(&$dataLayer, $title){
-  global $user;
-  
-  // Définition des types de tokens
-  $types = array();
-  $types['user'] = $user;
+function googletagmanager_build_datalayer(&$dataLayer, $title)
+{
+	global $user;
 
-  //Define default datalayer elements
-  if (user_is_logged_in()) {
-    $dataLayer['typeUser']='Connected';
-  } else {
-    $dataLayer['typeUser']='Anonymous';
-  }
+	// Définition des types de tokens
+	$types = array();
+	$types['user'] = $user;
 
-  if(arg(0)=="node"){
-    if(is_numeric(arg(1))){
-      $dataLayer['typePage']='Article';
-      $node = node_load(arg(1));
-      // On ajoute le node au type de tokens
-      $types['node'] = $node;      
-    }
-  }
-  elseif(arg(0) == "taxonomy" && arg(1) == "term" && arg(2) != ""){
-    $term = taxonomy_term_load(arg(2));
-    $vocabulary=taxonomy_vocabulary_load($term->vid);
-    $dataLayer['typePage']='Term';
-    $dataLayer['termValue']=$term->name;
-    $dataLayer['termVocabulary']=$vocabulary->name;
+	//Define default datalayer elements
+	if (user_is_logged_in()) {
+		$dataLayer['typeUser'] = 'Connected';
+	} else {
+		$dataLayer['typeUser'] = 'Anonymous';
+	}
 
-    // On ajoute le term et le vocabulaire au types de tokens
-    $types['taxonomy'] = $term;
-    $types['vocabulary'] = $vocabulary;
-  }
+	if (arg(0) == "node") {
+		if (is_numeric(arg(1))) {
+			$dataLayer['typePage'] = 'Article';
+			$node = node_load(arg(1));
+			// On ajoute le node au type de tokens
+			$types['node'] = $node;
+		}
+	} elseif (arg(0) == "taxonomy" && arg(1) == "term" && arg(2) != "") {
+		$term = taxonomy_term_load(arg(2));
+		$vocabulary = taxonomy_vocabulary_load($term->vid);
+		$dataLayer['typePage'] = 'Term';
+		$dataLayer['termValue'] = $term->name;
+		$dataLayer['termVocabulary'] = $vocabulary->name;
 
-  if(!isset($dataLayer['typePage'])){
-    $dataLayer['typePage']='Custom';
-  }
+		// On ajoute le term et le vocabulaire au types de tokens
+		$types['taxonomy'] = $term;
+		$types['vocabulary'] = $vocabulary;
+	}
 
-  // On permet l'altération des types de tokens
-  drupal_alter('gtm_tokentypes', $types);
+	if (!isset($dataLayer['typePage'])) {
+		$dataLayer['typePage'] = 'Custom';
+	}
 
-  //Define custom datalayer elements
-  $googletagmanager_custom_vars = variable_get('googletagmanager_custom_var', array());
-  if (!empty($googletagmanager_custom_vars['slots'])) {
-    foreach ($googletagmanager_custom_vars['slots'] as $key => $value) {
-      if (drupal_strlen(trim($value['name']))==0 && drupal_strlen(trim($value['value']))==0) {
-        continue;
-      }
-      if (module_exists('token')) {
-        $name = token_replace($value['name'], $types, array('clear' => TRUE ));
-        if (arg(0)=="taxonomy" && $value['value']=="[current-page-title]") {
-          $value = $title;
-        } else {
-          $value = token_replace($value['value'], $types, array('clear' => TRUE ));
-        }
-        //Translate html entities in their character representation
-        $value=html_entity_decode($value);
-        $name=html_entity_decode($name);
-        $dataLayer[$name]=$value;
-      } else {
-        $dataLayer[$value['name']]=$value['value'];
-      }
-    }
-  }
+	// On permet l'altération des types de tokens
+	drupal_alter('gtm_tokentypes', $types);
+
+	//Define custom datalayer elements
+	$googletagmanager_custom_vars = variable_get('googletagmanager_custom_var', array());
+	if (!empty($googletagmanager_custom_vars['slots'])) {
+		foreach ($googletagmanager_custom_vars['slots'] as $key => $value) {
+			if (drupal_strlen(trim($value['name'])) == 0 && drupal_strlen(trim($value['value'])) == 0) {
+				continue;
+			}
+			if (module_exists('token')) {
+				$name = token_replace($value['name'], $types, array('clear' => TRUE));
+				if (arg(0) == "taxonomy" && $value['value'] == "[current-page-title]") {
+					$value = $title;
+				} else {
+					$value = token_replace($value['value'], $types, array('clear' => TRUE));
+				}
+				//Translate html entities in their character representation
+				$value = html_entity_decode($value);
+				$name = html_entity_decode($name);
+				$dataLayer[$name] = $value;
+			} else {
+				$dataLayer[$value['name']] = $value['value'];
+			}
+		}
+	}
 }
 
 /**
  * Return a encoded string of the given datalayer array.
- * 
+ *
  * @param array $dataLayer
  * @return string
  */
-function googletagmanager_convert_datalayer_to_json($dataLayer){
-  $json="dataLayer=[";
-  $json.=googletagmanager_removeUnicodeSequences(json_encode($dataLayer));
-  $json.="];";
+function googletagmanager_convert_datalayer_to_json($dataLayer)
+{
+	$json = "dataLayer=[";
+	$json .= googletagmanager_removeUnicodeSequences(json_encode($dataLayer));
+	$json .= "];";
 
-  //Remplace simple quote
-  $json=str_replace("'", "\'", $json);
-  $json=str_replace('&#039;', "\'", $json);
-  
-  //Since we only use php 5.3 JSON_PRETTY_PRINT and JSON_UNESCAPED_SLASHES are not available
-  // see http://be2.php.net/manual/en/json.constants.php
-  $json=str_replace('","', "\",\n\"", $json);
-  $json=str_replace('\/', "/", $json);
-  
-  return $json;
+	//Remplace simple quote
+	$json = str_replace("'", "\'", $json);
+	$json = str_replace('&#039;', "\'", $json);
+
+	//Since we only use php 5.3 JSON_PRETTY_PRINT and JSON_UNESCAPED_SLASHES are not available
+	// see http://be2.php.net/manual/en/json.constants.php
+	$json = str_replace('","', "\",\n\"", $json);
+	$json = str_replace('\/', "/", $json);
+
+	return $json;
 }
 
 /**
  * Translate all unicode sequences from the given string
- * 
+ *
  * @param $array the given string to translate
  * @return the translated string
  */
-function googletagmanager_removeUnicodeSequences($string) {
-  return preg_replace_callback("/\\\\u([a-f0-9]{4})/", function($m) {
-    return iconv('UCS-4LE', 'UTF-8', pack('V', hexdec('U'.$m[1])));
-  }, $string);
+function googletagmanager_removeUnicodeSequences($string)
+{
+	return preg_replace_callback("/\\\\u([a-f0-9]{4})/", function ($m) {
+		return iconv('UCS-4LE', 'UTF-8', pack('V', hexdec('U' . $m[1])));
+	}, $string);
 }
 
 /**
  * Based on visibility setting this function returns TRUE if GTM code should
  * be added to the current page and otherwise FALSE.
  */
-function googletagmanager_visibility_pages() {
-  static $page_match;
+function googletagmanager_visibility_pages()
+{
+	static $page_match;
 
-  if (!isset($page_match)) {
+	if (!isset($page_match)) {
 
-    $visibility = variable_get('googletagmanager_visibility', 0);
-    $setting_pages = variable_get('googletagmanager_pages', GOOGLEANALYTICS_PAGES);
-      
-      // Match path if necessary.
-    if (!empty($setting_pages)) {
-      // Convert path to lowercase. This allows comparison of the same path
-      // with different case. Ex: /Page, /page, /PAGE.
-      $pages = drupal_strtolower($setting_pages);
-      // Convert the Drupal path to lowercase
-      $path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
-      // Compare the lowercase internal and lowercase path alias (if any).
-      $page_match = drupal_match_path($path, $pages);
-      if ($path != $_GET ['q']) {
-        $page_match = $page_match || drupal_match_path($_GET['q'],$pages);
-      }
-      // When $visibility has a value of 0, the tracking code is displayed on
-      // all pages except those listed in $pages. When set to 1, it
-      // is displayed only on those pages listed in $pages.
-      $page_match = ! ($visibility xor $page_match);
-    }   
-    else {
-      $page_match = TRUE;
-    }
+		$visibility = variable_get('googletagmanager_visibility', 0);
+		$setting_pages = variable_get('googletagmanager_pages', GOOGLEANALYTICS_PAGES);
 
-  }
-  return $page_match;
+		// Match path if necessary.
+		if (!empty($setting_pages)) {
+			// Convert path to lowercase. This allows comparison of the same path
+			// with different case. Ex: /Page, /page, /PAGE.
+			$pages = drupal_strtolower($setting_pages);
+			// Convert the Drupal path to lowercase
+			$path = drupal_strtolower(drupal_get_path_alias($_GET['q']));
+			// Compare the lowercase internal and lowercase path alias (if any).
+			$page_match = drupal_match_path($path, $pages);
+			if ($path != $_GET ['q']) {
+				$page_match = $page_match || drupal_match_path($_GET['q'], $pages);
+			}
+			// When $visibility has a value of 0, the tracking code is displayed on
+			// all pages except those listed in $pages. When set to 1, it
+			// is displayed only on those pages listed in $pages.
+			$page_match = !($visibility xor $page_match);
+		} else {
+			$page_match = TRUE;
+		}
+
+	}
+	return $page_match;
 }
