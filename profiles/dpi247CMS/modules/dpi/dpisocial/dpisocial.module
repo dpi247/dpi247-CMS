@@ -5,100 +5,102 @@
  * check : http://ygerasimov.com/ctools-plugins-system
  *
  */
-module_load_include ( 'php', 'dpisocial', 'dpisocial.api' );
+module_load_include('php', 'dpisocial', 'dpisocial.api');
 
 /**
  * Implementation of hook_menu()
  */
-function dpisocial_menu() {
-  $items = array ();
-  
-  $items ['admin/dpi247/dpisocial'] = array (
-    'title' => 'DPI Social',
-    'description' => 'Settings for interactions with social networks.',
-    'page callback' => 'dpisocial_listplugin',
-    'access arguments' => array (
-      'administer dpiunivers' 
-    ),
-    'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  
-  ctools_include ( 'plugins' );
-  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-  
-  foreach ( $social_network as $snetwork ) {
-    $items ['admin/dpi247/dpisocial/' . $snetwork ['type']] = array (
-      'title' => $snetwork ['label'],
-      'page callback' => 'dpisocial_adminplugin',
-      'access callback' => TRUE,
-      'page arguments' => array (
-        $snetwork ['type'] 
-      ),
-      'access arguments' => array (
-        'administer dpisocial' 
-      ),
-      'type' => MENU_LOCAL_TASK,
-      'file' => 'dpisocial.pages.view.inc',
-      'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-    );
-  }
-  
-  // Item for add (or not) email and print links
-  $items ['admin/dpi247/dpisocial/others'] = array (
-    'title' => t ( 'Others' ),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array (
-      'dpisocial_adminplugin_others' 
-    ),
-    'access arguments' => array (
-      'administer dpisocial' 
-    ),
-    'weight' => 5,
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'dpisocial.pages.view.inc',
-    'file path' => drupal_get_path ( 'module', 'dpisocial' ) . '/includes' 
-  );
-  
-  $items ['shares_callback/%'] = array (
-    'page callback' => 'dpisocial_shareinitiated',
-    'access arguments' => array (
-      'access content' 
-    ),
-    'page arguments' => array (
-      1 
-    ) 
-  );
-  
-  return $items;
+function dpisocial_menu()
+{
+	$items = array();
+
+	$items ['admin/dpi247/dpisocial'] = array(
+		'title' => 'DPI Social',
+		'description' => 'Settings for interactions with social networks.',
+		'page callback' => 'dpisocial_listplugin',
+		'access arguments' => array(
+			'administer dpiunivers'
+		),
+		'file' => 'dpisocial.pages.view.inc',
+		'file path' => drupal_get_path('module', 'dpisocial') . '/includes'
+	);
+
+	ctools_include('plugins');
+	$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+	foreach ($social_network as $snetwork) {
+		$items ['admin/dpi247/dpisocial/' . $snetwork ['type']] = array(
+			'title' => $snetwork ['label'],
+			'page callback' => 'dpisocial_adminplugin',
+			'access callback' => TRUE,
+			'page arguments' => array(
+				$snetwork ['type']
+			),
+			'access arguments' => array(
+				'administer dpisocial'
+			),
+			'type' => MENU_LOCAL_TASK,
+			'file' => 'dpisocial.pages.view.inc',
+			'file path' => drupal_get_path('module', 'dpisocial') . '/includes'
+		);
+	}
+
+	// Item for add (or not) email and print links
+	$items ['admin/dpi247/dpisocial/others'] = array(
+		'title' => t('Others'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array(
+			'dpisocial_adminplugin_others'
+		),
+		'access arguments' => array(
+			'administer dpisocial'
+		),
+		'weight' => 5,
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'dpisocial.pages.view.inc',
+		'file path' => drupal_get_path('module', 'dpisocial') . '/includes'
+	);
+
+	$items ['shares_callback/%'] = array(
+		'page callback' => 'dpisocial_shareinitiated',
+		'access arguments' => array(
+			'access content'
+		),
+		'page arguments' => array(
+			1
+		)
+	);
+
+	return $items;
 }
 
 /**
  * Implements hook_theme().
  */
-function dpisocial_theme() {
-  ctools_include ( 'plugins' );
-  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-  
-  $theme = array();
-  $theme['dpisocial_share_button'] = array (
-      'variables' => array (
-        'html_button' => '' 
-      ),
-      'template' => 'dpisocial_share_button',
-      'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
-    );
-  foreach ( $social_network as $snetwork ) {
-    $theme['dpisocial_custom_share_'.$snetwork ['type']] = array (
-      'variables' => array (
-        'url' => NULL,
-        'count' => 0
-      ),
-      'template' => 'dpisocial_custom_share_'.$snetwork ['type'],
-      'path' => drupal_get_path ( 'module', 'dpisocial' ) . '/templates' 
-    );
-  }
-  return $theme;
+function dpisocial_theme()
+{
+	ctools_include('plugins');
+	$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+	$theme = array();
+	$theme['dpisocial_share_button'] = array(
+		'variables' => array(
+			'html_button' => ''
+		),
+		'template' => 'dpisocial_share_button',
+		'path' => drupal_get_path('module', 'dpisocial') . '/templates'
+	);
+	foreach ($social_network as $snetwork) {
+		$theme['dpisocial_custom_share_' . $snetwork ['type']] = array(
+			'variables' => array(
+				'url' => NULL,
+				'count' => 0
+			),
+			'template' => 'dpisocial_custom_share_' . $snetwork ['type'],
+			'path' => drupal_get_path('module', 'dpisocial') . '/templates'
+		);
+	}
+	return $theme;
 }
 
 /**
@@ -106,82 +108,88 @@ function dpisocial_theme() {
  *
  * Has plenty options. See ctools/help/plugins-creating.html
  */
-function dpisocial_ctools_plugin_type() {
-  return array (
-    'social_network' => array (
-      'use hooks' => TRUE 
-    ) 
-  );
+function dpisocial_ctools_plugin_type()
+{
+	return array(
+		'social_network' => array(
+			'use hooks' => TRUE
+		)
+	);
 }
 
 /**
  * Implements hook_ctools_plugin_directory().
  */
-function dpisocial_ctools_plugin_directory($module, $plugin) {
-  if (($module == 'dpisocial') && ($plugin == 'social_network')) {
-    return 'plugins';
-  }
+function dpisocial_ctools_plugin_directory($module, $plugin)
+{
+	if (($module == 'dpisocial') && ($plugin == 'social_network')) {
+		return 'plugins';
+	}
 }
 
-function dpisocial_getListActions() {
-  $actions = array (
-    'share_comment',
-    'share_article' 
-  );
-  
-  drupal_alter ( 'dpisocial_list_actions', $actions );
-  
-  return $actions;
+function dpisocial_getListActions()
+{
+	$actions = array(
+		'share_comment',
+		'share_article'
+	);
+
+	drupal_alter('dpisocial_list_actions', $actions);
+
+	return $actions;
 }
 
-function social_network_settings_form($form, &$form_state) {
-  $class = $form_state ['build_info'] ['args'] [0] ['class'];
-  
-  $nclass = new $class ();
-  
-  $form ['social_network_in_use'] = array (
-    '#title' => t ( 'Utiliser ce réseau sur le site' ),
-    '#type' => 'checkbox',
-    '#default_value' => $nclass->isNetworkInUse () 
-  );
-  
-  $form += $nclass->configForm ();
-  
-  $form ['submit'] = array (
-    '#type' => 'submit',
-    '#value' => t ( 'Save' ) 
-  );
-  
-  return $form;
+function social_network_settings_form($form, &$form_state)
+{
+	$class = $form_state ['build_info'] ['args'] [0] ['class'];
+
+	$nclass = new $class ();
+
+	$form ['social_network_in_use'] = array(
+		'#title' => t('Utiliser ce réseau sur le site'),
+		'#type' => 'checkbox',
+		'#default_value' => $nclass->isNetworkInUse()
+	);
+
+	$form += $nclass->configForm();
+
+	$form ['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Save')
+	);
+
+	return $form;
 }
 
-function social_network_settings_form_submit($form, &$form_state) {
-  $class = $form_state ['build_info'] ['args'] [0] ['class'];
-  
-  $nclass = new $class ();
-  
-  // sauvegarde l'activation du réseau
-  $nclass->setNetworkInUse ( $form_state ['values'] ['social_network_in_use'] );
-  
-  $nclass->saveConfigForm ( $form_state );
+function social_network_settings_form_submit($form, &$form_state)
+{
+	$class = $form_state ['build_info'] ['args'] [0] ['class'];
+
+	$nclass = new $class ();
+
+	// sauvegarde l'activation du réseau
+	$nclass->setNetworkInUse($form_state ['values'] ['social_network_in_use']);
+
+	$nclass->saveConfigForm($form_state);
 }
 
-function dpisocial_shareinitiated($nid) {
-  if (! empty ( $_GET ['url'] ) && ! empty ( $_GET ['network'] )) {
-    
-    $parts = explode ( ' ', $_GET ['network'] );
-    $network = $parts [0]; // get rid of something after domain
-    
-    $parts = explode ( ' ', $_GET ['url'] );
-    $url = $parts [0]; // get rid of something after domain
-                      // @todo superbe faille de sécurité ...
-    $parameters = array (
-      ':nid' => $nid,
-      ':url' => check_url ( $url ),
-      ':network' => check_plain ( $network ) 
-    );
-    db_query ( "INSERT INTO dpisocial_node_shares_to_update SET nid=:nid, url=:url , network=:network", $parameters );
-  }
+function dpisocial_shareinitiated($nid)
+{
+	if (!empty ($_GET ['url']) && !empty ($_GET ['network'])) {
+
+		$parts = explode(' ', $_GET ['network']);
+		$network = $parts [0]; // get rid of something after domain
+
+		$parts = explode(' ', $_GET ['url']);
+		$url = $parts [0]; // get rid of something after domain
+		// @todo superbe faille de sécurité ...
+		$parameters = array(
+			':nid' => $nid,
+			':url' => check_url($url),
+			':network' => check_plain($network)
+		);
+		db_query("INSERT INTO dpisocial_node_shares_to_update SET nid=:nid, url=:url , network=:network", $parameters);
+	}
 }
 
 /**
@@ -189,218 +197,227 @@ function dpisocial_shareinitiated($nid) {
  *
  * @return multitype:array
  */
-function dpisocial_permission() {
-  return array (
-    'administer dpisocial' => array (
-      'title' => t ( 'Administer dpisocial' ),
-      'description' => t ( 'Perform administration tasks for dpisocial module.' ) 
-    ) 
-  );
+function dpisocial_permission()
+{
+	return array(
+		'administer dpisocial' => array(
+			'title' => t('Administer dpisocial'),
+			'description' => t('Perform administration tasks for dpisocial module.')
+		)
+	);
 }
 
-function dpisocial_page_alter(&$page) {
-  ctools_include ( 'plugins' );
-  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-  
-  foreach ( $social_network as $snetwork ) {
-    $class = $snetwork ['handler'] ['class'];
-    $nclass = new $class ();
-    
-    if ($nclass->isNetworkInUse ()) {
-      $html = $nclass->getSocialHTML ();
-      
-      if ($html != NULL) {
-        $page ['content'] ['dpisocial'] [$nclass->whoAmI] = $html;
-      }
-      
-      $js = $nclass->getSocialJS ();
-      
-      if ($js != NULL) {
-        foreach ( $js as $s ) {
-          drupal_add_js ( $s ['script'], array (
-            'type' => $s ['type'],
-            'scope' => $s ['scope'] 
-          ) );
-        }
-      }
-    }
-  }
+function dpisocial_page_alter(&$page)
+{
+	ctools_include('plugins');
+	$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+	foreach ($social_network as $snetwork) {
+		$class = $snetwork ['handler'] ['class'];
+		$nclass = new $class ();
+
+		if ($nclass->isNetworkInUse()) {
+			$html = $nclass->getSocialHTML();
+
+			if ($html != NULL) {
+				$page ['content'] ['dpisocial'] [$nclass->whoAmI] = $html;
+			}
+
+			$js = $nclass->getSocialJS();
+
+			if ($js != NULL) {
+				foreach ($js as $s) {
+					drupal_add_js($s ['script'], array(
+						'type' => $s ['type'],
+						'scope' => $s ['scope']
+					));
+				}
+			}
+		}
+	}
 }
 
-function dpisocial_form_comment_form_alter(&$form, &$form_state, $form_id) {
-  $form ['#submit'] [] = 'dpisocial_form_comment_form_submit';
-  
-  ctools_include ( 'plugins' );
-  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-  
-  foreach ( $social_network as $snetwork ) {
-    $class = $snetwork ['handler'] ['class'];
-    $nclass = new $class ();
-    
-    if (($nclass->isNetworkInUse ()) && ($nclass->isActionActivated ( 'share_comment' ))) {
-      $nclass->addCheckboxShareComment ( $form );
-    }
-  }
+function dpisocial_form_comment_form_alter(&$form, &$form_state, $form_id)
+{
+	$form ['#submit'] [] = 'dpisocial_form_comment_form_submit';
+
+	ctools_include('plugins');
+	$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+	foreach ($social_network as $snetwork) {
+		$class = $snetwork ['handler'] ['class'];
+		$nclass = new $class ();
+
+		if (($nclass->isNetworkInUse()) && ($nclass->isActionActivated('share_comment'))) {
+			$nclass->addCheckboxShareComment($form);
+		}
+	}
 }
 
-function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id) {
-  // check de dpisocial_facebook_share_comment
-  if ($form_state ['values'] ['dpisocial_facebook_share_comment'] == 1) {
-    if ($form_state ['redirect'] == NULL) {
-      $url = current_path ();
-      $query ['share_comment'] = 1;
-      $form_state ['redirect'] = array (
-        $url,
-        array (
-          'query' => $query 
-        ) 
-      );
-    } else {
-      if (empty ( $form_state ['redirect'] [1] ['query'] ))
-        $form_state ['redirect'] [1] ['query'] = array (
-          'share_comment' => 1 
-        );
-      else
-        $form_state ['redirect'] [1] ['query'] ['share_comment'] = 1;
-    }
-  }
+function dpisocial_form_comment_form_submit(&$form, &$form_state, $form_id)
+{
+	// check de dpisocial_facebook_share_comment
+	if ($form_state ['values'] ['dpisocial_facebook_share_comment'] == 1) {
+		if ($form_state ['redirect'] == NULL) {
+			$url = current_path();
+			$query ['share_comment'] = 1;
+			$form_state ['redirect'] = array(
+				$url,
+				array(
+					'query' => $query
+				)
+			);
+		} else {
+			if (empty ($form_state ['redirect'] [1] ['query']))
+				$form_state ['redirect'] [1] ['query'] = array(
+					'share_comment' => 1
+				);
+			else
+				$form_state ['redirect'] [1] ['query'] ['share_comment'] = 1;
+		}
+	}
 }
 
-function dpisocial_field_extra_fields() {
-  $extrafield_name_share_article = 'dpisocial_share';
-  $values = array (
-    'page',
-    'article'
-  );  
-  $values = array_merge($values, array_keys(node_type_get_types()));
-  foreach ($values  as $node_type ) {
-    $extra ['node'] [$node_type] ['display'] [$extrafield_name_share_article] = array (
-      'label' => t ( 'DPI Social Boutons de partage' ),
-      'description' => t ( 'Les boutons de partage sur les différents réseaux sociaux.' ),
-      'weight' => 50,  // default weight, can be changed on display form by site-builder.
-    );
-  }
-  return $extra;
+function dpisocial_field_extra_fields()
+{
+	$extrafield_name_share_article = 'dpisocial_share';
+	$values = array(
+		'page',
+		'article'
+	);
+	$values = array_merge($values, array_keys(node_type_get_types()));
+	foreach ($values as $node_type) {
+		$extra ['node'] [$node_type] ['display'] [$extrafield_name_share_article] = array(
+			'label' => t('DPI Social Boutons de partage'),
+			'description' => t('Les boutons de partage sur les différents réseaux sociaux.'),
+			'weight' => 50,  // default weight, can be changed on display form by site-builder.
+		);
+	}
+	return $extra;
 }
 
-function dpisocial_cmp_share_buttons($b1, $b2) {
-  if ($b1 ['pos'] == $b2 ['pos']) {
-    return 0;
-  }
-  return ($b1 ['pos'] < $b2 ['pos']) ? - 1 : 1;
+function dpisocial_cmp_share_buttons($b1, $b2)
+{
+	if ($b1 ['pos'] == $b2 ['pos']) {
+		return 0;
+	}
+	return ($b1 ['pos'] < $b2 ['pos']) ? -1 : 1;
 }
 
-function dpisocial_node_view($node, $view_mode, $langcode) {
-  global $base_url;
-  
-  $extrafields = field_extra_fields_get_display ( 'node', $node->type, $view_mode );
-  
-  $urlToShare = $base_url . '/node/' . $node->nid; // lien 'systeme'
-                                               // $urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
-  
-  $extrafield_name_share_article = 'dpisocial_share';
-  
-  $isShare = false;
-  
-  if (isset ( $extrafields [$extrafield_name_share_article] ) && 
+function dpisocial_node_view($node, $view_mode, $langcode)
+{
+	global $base_url;
 
-  isset ( $extrafields [$extrafield_name_share_article] ['visible'] ) && 
+	$extrafields = field_extra_fields_get_display('node', $node->type, $view_mode);
 
-  $extrafields [$extrafield_name_share_article] ['visible']) {
-    
-    ctools_include ( 'plugins' );
-    $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-    
-    $buttons = array ();
-    
-    foreach ( $social_network as $snetwork ) {
-      $class = $snetwork ['handler'] ['class'];
-      
-      $nclass = new $class ();
-      
-      if (($nclass->isNetworkInUse ()) && ($nclass->isActionActivated ( 'share_article' ))) {
-        
-        $buttons [] = array (
-          'html' => $nclass->getShareButtonHtml ( $node->nid, $urlToShare ),
-          'pos' => dpi_variable_get ( $nclass->whoAmI . '_share_article_position', 0 ) 
-        );
-        
-        // $content.= $nclass->getShareButtonHtml($urlToShare);
-        
-        $isShare = true;
-      }
-    }
-  }
-  if ((!empty($buttons))&&(is_array($buttons)))
-    usort ( $buttons, "dpisocial_cmp_share_buttons" );
-  $content = "";
-  if (!empty($buttons)){ 
-    foreach ( $buttons as $b ){
-      $content .= $b ['html'];
-    }
-  }
-  $body = str_replace ( "'", "\'", variable_get ( 'dpisocial_add_email_body', '' ) );
-  $body = token_replace ( $body, array (
-    'node' => $node 
-  ) );
-  
-  $suject = str_replace ( "'", "\'", variable_get ( 'dpisocial_add_email_subject', '' ) );
-  
-  $mailto = "mailto:?subject=" . $suject . "&body=" . $body;
-  
-  if (variable_get ( 'dpisocial_add_email_link', 0 )) {
-    $content .= '<button onClick="location.href=\'' . $mailto . '\'" class="btn btn-social-icon" type="button"><i class="fa fa-envelope-o"></i><span class="label"></span></button>';
-  }
-  if (variable_get ( 'dpisocial_add_print_link', 0 )) {
-    $content .= '<button onClick="window.print();" class="btn btn-social-icon" type="button"><i class="fa fa-print"></i><span class="label"></span></button>';
-  }
-  
-  $content = theme ( 'dpisocial_share_button', array (
-    'html_button' => $content 
-  ) );
-  
-  $node->content [$extrafield_name_share_article] = array (
-    '#markup' => $content 
-  );
-  
-  if ($isShare) {
-    $js = '
+	$urlToShare = $base_url . '/node/' . $node->nid; // lien 'systeme'
+	// $urlToShare = 'http://www.sudinfo.be/1178952/article/2014-12-29/les-occupants-du-ferry-norman-atlantic-dont-les-trois-belges-sont-sauves-cinq-de';
+
+	$extrafield_name_share_article = 'dpisocial_share';
+
+	$isShare = false;
+
+	if (isset ($extrafields [$extrafield_name_share_article]) &&
+
+		isset ($extrafields [$extrafield_name_share_article] ['visible']) &&
+
+		$extrafields [$extrafield_name_share_article] ['visible']
+	) {
+
+		ctools_include('plugins');
+		$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+		$buttons = array();
+
+		foreach ($social_network as $snetwork) {
+			$class = $snetwork ['handler'] ['class'];
+
+			$nclass = new $class ();
+
+			if (($nclass->isNetworkInUse()) && ($nclass->isActionActivated('share_article'))) {
+
+				$buttons [] = array(
+					'html' => $nclass->getShareButtonHtml($node->nid, $urlToShare),
+					'pos' => dpi_variable_get($nclass->whoAmI . '_share_article_position', 0)
+				);
+
+				// $content.= $nclass->getShareButtonHtml($urlToShare);
+
+				$isShare = true;
+			}
+		}
+	}
+	if ((!empty($buttons)) && (is_array($buttons)))
+		usort($buttons, "dpisocial_cmp_share_buttons");
+	$content = "";
+	if (!empty($buttons)) {
+		foreach ($buttons as $b) {
+			$content .= $b ['html'];
+		}
+	}
+	$body = str_replace("'", "\'", variable_get('dpisocial_add_email_body', ''));
+	$body = token_replace($body, array(
+		'node' => $node
+	));
+
+	$suject = str_replace("'", "\'", variable_get('dpisocial_add_email_subject', ''));
+
+	$mailto = "mailto:?subject=" . $suject . "&body=" . $body;
+
+	if (variable_get('dpisocial_add_email_link', 0)) {
+		$content .= '<button onClick="location.href=\'' . $mailto . '\'" class="btn btn-social-icon" type="button"><i class="fa fa-envelope-o"></i><span class="label"></span></button>';
+	}
+	if (variable_get('dpisocial_add_print_link', 0)) {
+		$content .= '<button onClick="window.print();" class="btn btn-social-icon" type="button"><i class="fa fa-print"></i><span class="label"></span></button>';
+	}
+
+	$content = theme('dpisocial_share_button', array(
+		'html_button' => $content
+	));
+
+	$node->content [$extrafield_name_share_article] = array(
+		'#markup' => $content
+	);
+
+	if ($isShare) {
+		$js = '
 				function dpisocial_share_this(url, network) {
 					window.open(url, network,"width=550, height=300");
 					$.get( "/shares_callback/' . $node->nid . '?network="+network+"&url="+encodeURI(url));
 				}
 			';
-    drupal_add_js ( $js, 'inline' );
-  }
+		drupal_add_js($js, 'inline');
+	}
 }
 
-function dpisocial_cron() {
-  $networks = array ();
-  
-  ctools_include ( 'plugins' );
-  $social_network = ctools_get_plugins ( 'dpisocial', 'social_network' );
-  
-  foreach ( $social_network as $snetwork ) {
-    $class = $snetwork ['handler'] ['class'];
-    $nclass = new $class ();
-    $networks [$nclass->whoAmI] = $nclass;
-  }
-  
-  $query = "SELECT nid, url, network FROM dpisocial_node_shares_to_update";
-  $result = db_query ( $query );
-  
-  foreach ( $result as $row ) {
-    $nbShares = $networks [$row->network]->apiGetNbShares ( $row->url );
-    $param = array (
-      ':nid' => $row->nid,
-      ':network' => $row->network,
-      ':nbshares' => $nbShares 
-    );
-    $query = "INSERT INTO dpisocial_node_nbshares SET nid=:nid, network=:network, nbshares=:nbshares
+function dpisocial_cron()
+{
+	$networks = array();
+
+	ctools_include('plugins');
+	$social_network = ctools_get_plugins('dpisocial', 'social_network');
+
+	foreach ($social_network as $snetwork) {
+		$class = $snetwork ['handler'] ['class'];
+		$nclass = new $class ();
+		$networks [$nclass->whoAmI] = $nclass;
+	}
+
+	$query = "SELECT nid, url, network FROM dpisocial_node_shares_to_update";
+	$result = db_query($query);
+
+	foreach ($result as $row) {
+		$nbShares = $networks [$row->network]->apiGetNbShares($row->url);
+		$param = array(
+			':nid' => $row->nid,
+			':network' => $row->network,
+			':nbshares' => $nbShares
+		);
+		$query = "INSERT INTO dpisocial_node_nbshares SET nid=:nid, network=:network, nbshares=:nbshares
 				ON DUPLICATE KEY UPDATE nbshares=:nbshares";
-    db_query ( $query, $param );
+		db_query($query, $param);
 		unset($param[':nbshares']);
-    $query = "DELETE FROM dpisocial_node_shares_to_update WHERE nid=:nid AND network=:network";
-    db_query ( $query, $param );
-  }
+		$query = "DELETE FROM dpisocial_node_shares_to_update WHERE nid=:nid AND network=:network";
+		db_query($query, $param);
+	}
 }
