@@ -25,17 +25,21 @@
 define('DRUPAL_ROOT', getcwd());
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
-//drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+//drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
+
+require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
+require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
+
+/*
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.private.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
-require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
 require_once DRUPAL_ROOT . '/includes/common.inc';
-require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
+*/
 
 $SsoSession= new SsoSession(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json');
 
