@@ -220,14 +220,18 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildEditorialUpdateDate($dom, $wrapper, $entity) {
     // We don't save the editorial update date on new node.
     if ($wrapper->nid->value() != NULL) {
-      if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
-        if ($dom->hasAttribute("LastUpdateDate")) {
-          $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+      if($dom->hasAttribute("ForceLastUpdate")){
+        $wrapper->field_forceeditorialupdatedate->set($this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate")));
+        $entity->skipUpdatedate = TRUE;
+        if ($this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
+          if ($dom->hasAttribute("LastUpdateDate")) {            
+            $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+          }
+          else {
+            $editorialupdatedate = time();
+          }
+          $wrapper->field_editorialupdatedate->set($editorialupdatedate);
         }
-        else {
-          $editorialupdatedate = time();
-        }
-        $wrapper->field_editorialupdatedate->set($editorialupdatedate);
       }
     }
   }

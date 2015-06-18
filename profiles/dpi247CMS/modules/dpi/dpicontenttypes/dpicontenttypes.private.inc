@@ -285,6 +285,27 @@ function _dpicontenttypes_entityinserteditorialpublicationdate(&$node){
 }
 
 /**
+ * 
+ * @param type $node
+ */
+function _dpicontenttypes_entitymanageeditorialupdatedate($node){
+  $field_update = field_get_items('node', $node, 'field_forceeditorialupdatedate');
+  if(isset($field_update) && !empty($field_update) && (!isset($node->skipUpdatedate) || $node->skipUpdatedate!= TRUE)){
+    $field_force_update = $field_update[0]['value'];
+    $wrapper = entity_metadata_wrapper('node', $node);
+    if(isset($field_force_update) && $field_force_update){      
+      $wrapper->field_editorialupdatedate->set(time());      
+    }elseif(isset($node->nid)){
+      $old_node = node_load($node->nid);
+      if(isset($old_node) && is_object($old_node)){
+        $node->field_editorialupdatedate = $old_node->field_editorialupdatedate;
+      }
+    }    
+    $wrapper->field_forceeditorialupdatedate->set(FALSE);
+  }  
+}
+
+/**
  * Delete dpiproperties from the database
  * 
  * @param Object $object

@@ -305,6 +305,7 @@ function dpicontenttypes_node_presave($node) {
   if (!empty($useautopublishdates)){
     dpicontenttypes_api_check_autopublish($node);
   }
+  _dpicontenttypes_entitymanageeditorialupdatedate($node);
   _dpicontenttypes_entityinserteditorialpublicationdate($node);
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
@@ -409,6 +410,7 @@ function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
     $form["title"]["#required"]=FALSE;
     $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
   }
+  drupal_add_css(drupal_get_path('module', 'dpicontenttypes').'/css/node_edit_form_alter.css');
 }
 
 /**
