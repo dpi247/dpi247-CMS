@@ -38,10 +38,11 @@ function dpiscald_install() {
   scald_add_type('slideshare', 'Slideshare', 'Resource Slideshare');
   scald_add_type('idalgo', 'Idalgo', 'Resource Idalgo');
   scald_add_type('ustream', 'Ustream', 'Resource Ustream');
+  scald_add_type('link', 'Link', 'Link media');
   
   //Changer le provider par defaut des types créés, ci-dessus via le module scald, de "scald" à "dpiscald".
   $providers = array('flickr', 'soundcloud', 'youtube', 'dailymotion', 'vimeo', 'twitter', 'equipefr', 'kewego', 'googlemap',
-       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'ustream');
+       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'ustream', 'link');
   $requete='UPDATE {scald_types} SET provider=\'dpiscald\' where ';
   foreach($providers as $provider){
   	$requete.='type = \''.$provider.'\' OR ';
@@ -130,6 +131,7 @@ function dpiscald_uninstall() {
   scald_remove_type('slideshare');
   scald_remove_type('idalgo');
   scald_remove_type('ustream');
+  scald_remove_type('link');
 }
 
 /**
@@ -155,4 +157,19 @@ function dpiscald_update_7001() {
  */
 function dpiscald_update_7002(){
   scald_remove_type('coveritlive');
+}
+
+/**
+ * Add scald link type
+ */
+function dpiscald_update_7003(){
+  scald_add_type('link', 'Link', 'Link media');
+}
+
+/**
+ * Modify type of provider for link provider
+ */
+function dpiscald_update_7004(){
+  $requete="UPDATE {scald_types} SET provider='dpiscald' where type='link'";
+  db_query ( $requete );
 }
