@@ -1098,3 +1098,26 @@ function dpicontenttypes_image_default_styles(){
   
   return $styles;
 }
+
+/**
+ * Implementation of hook_views_pre_render().
+ */
+function dpicontenttypes_views_pre_render(&$view) {
+  if ($view->name == "custom_admin_content") {
+    foreach ($view->result as $key => $entity) {
+      if(empty($entity->field_field_displaytitle) && isset($entity->node_title)) {
+        $view->result[$key]->field_field_displaytitle[0]= array(
+          "rendered" => array(
+            "#markup" => '<p>' . $entity->node_title . '</p>',
+            '#access' => TRUE,
+          ),
+          "raw" => array(
+            "value" => $entity->node_title,
+            "format" => "filtered_html",
+            "safe_value" => '<p>' . $entity->node_title . '</p>',
+          )
+        );
+      }
+    }
+  }
+}
