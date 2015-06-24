@@ -544,11 +544,24 @@ function dpiscald_menu_alter(&$items){
     'file path' => drupal_get_path('module', 'dpiscald').'/includes',
   );
   
-  $items['admin/dpi247/mediacontext/management'] = array(
+    $items['admin/dpi247/mediacontext/management'] = array(
     'title' => 'Manage Context Element',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array(TRUE),
   );
+ 
+
+	$items['admin/dpi247/mediacontext/link-settings'] = array(
+		'title' => 'Manage link url list',
+		'description' => 'Manage link list',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('dpiscald_link_settings_form'),
+		'access arguments' => array(TRUE),
+		'file' => 'dpiscald.admin.link-settings.inc',
+		'file path' => drupal_get_path('module', 'dpiscald') . '/includes',
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 2,
+	);
 }
 
 /**
