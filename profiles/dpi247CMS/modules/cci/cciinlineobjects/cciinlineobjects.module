@@ -41,6 +41,7 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
             // Get all ccix:inline tags in the text
             preg_match_all($tag_regex, $text, $tag_matches);
             if (!empty($tag_matches[0])) {
+              $tmp_inline_to_export = array();
               foreach ($tag_matches[0] as $match_id => $match_val) {                
                 // Extract attributes from the tag
                 $tag_values = _cciinlineobjects_inline_objects_get_tag_values(trim($tag_matches[1][$match_id]));
@@ -50,6 +51,10 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
                   $matching_sid = $matching_embed['sid'];
                   $scald_tag = "[scald=$matching_sid:$scald_context]";
                   $text = str_replace($match_val, $scald_tag, $text);
+                  $tmp_inline_to_export[$matching_sid] = array(
+                    'external_reference' => $tag_values['extref'],
+                    'cci_inline_true_value' => $match_val,
+                  );
 
                   // Save original tag values in the atom's dpiproperties
                   $dpiproperties = $matching_embed['dpiproperties'];
@@ -61,6 +66,11 @@ function cciinlineobjects_dpimport_entity_postprocess($entity_wrapper, $entity, 
                   $current_field['value'] = $text;
                   $entity_wrapper->{$field_instance['field_name']}->set($current_field);
                 }
+              }
+              if(isset($entity->tmpinline) && is_array($entity->tmpinline)){
+                $entity->tmpinline = $entity->tmpinline + $tmp_inline_to_export;
+              }else{
+                $entity->tmpinline = $tmp_inline_to_export;
               }
             }
           }

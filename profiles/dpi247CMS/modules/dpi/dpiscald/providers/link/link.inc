@@ -81,3 +81,22 @@ function dpiscald_link_theme() {
     ),
   );
 }
+
+/**
+ * Implémentation dpiscald_provider_parse_id()
+ */
+function dpiscald_link_parse_id(){
+  //obligatoire pour l'import
+}
+
+/**
+ * Implémentation dpiscald_provider_get_import_info()
+ */
+function dpiscald_link_get_import_info($this, $entity, $wrapper, $url){
+  try {
+    $entity->data['url'] = $url;
+    $entity->data['orig_identifier'] = $url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Embedly : " . $url);
+  }
+}

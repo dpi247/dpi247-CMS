@@ -65,7 +65,7 @@ class WallyXmlV1 extends PackageHelper {
           }          
         }
       }
-      
+
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
@@ -990,7 +990,7 @@ class WallyXmlV1 extends PackageHelper {
                 Logger::logError('importer', 0, 'providerfunction', t('function cannot be found', array(
                   '!uri' => $value
                 )));
-              }              
+              }
             }
             else {
               Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array(
@@ -1091,7 +1091,7 @@ class WallyXmlV1 extends PackageHelper {
     }
     else {
       Logger::logExecution('linkbojecttype', TRUE);
-      $atom = $this->constructEntity($dom, 'scald_atom');
+      $atom = $this->constructEntity($dom, 'scald_atom'); 
       Logger::setCurrentToPreviousExecution();
       return $atom;
     }

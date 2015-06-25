@@ -879,7 +879,18 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && $request->code == 200)
       $provider = array('name' => $types['videortl']->provider, 'type' => $types['videortl']->type);
   }
-
+  
+  /* Table define into the text area in admin/dpi247/mediacontext/link-settings */
+  $tmp = variable_get('dpiscald_link_pattern', FALSE);
+  if(is_array($tmp) && !empty($tmp)){
+    foreach($tmp as $url){
+      if($url!="" && strstr($uri, trim($url))!==FALSE){
+        $provider = array('name' => $types['link']->provider, 'type' => $types['link']->type);
+        break; //skip other test
+      }
+    }
+  }
+  
   return array('dpicontenttypes' => $provider);
 }
 
