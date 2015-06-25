@@ -129,6 +129,20 @@ function dpidestinations_field_formatter_settings_form_dpi_main_destination_disp
 			'#default_value' => $settings['element_html_link_custom_class'],
 	);	
 	
+	$element['element_prefix'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Add a custom prefix to the element'),
+			'#description' => t('The text displayed before the main destination term'),
+			'#default_value' => $settings['element_prefix'],
+	);
+
+	$element['element_suffix'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Add a custom suffix to the element'),
+			'#description' => t('The text displayed after the main destinations term'),
+			'#default_value' => $settings['element_suffix'],
+	);	
+	
 }
 
 
@@ -137,14 +151,15 @@ function dpidestinations_field_formatter_view_dpi_main_destination_display($enti
 	$render=array();
 	
 	$term_id = $items[0]['tid'];
-	$term = taxonomy_term_load($term_id);;
-
+	$term = taxonomy_term_load($term_id);
+	
 	$render = array(
 		'#type' => 'markup',
 		'#markup' => $term->name,
 	);
 		
 	$render = _dpi_main_destination_display_element_link_render($settings, $term, $render);
+	$render = _dpi_main_destination_display_element_prefix_suffix_render($settings, $render);
 	$render = _dpi_main_destination_display_element_tag_render($settings,$render);
 
 	$render = _dpi_main_destination_display_wrapper_tag_render($settings,$render);
@@ -157,7 +172,7 @@ function dpidestinations_field_formatter_settings_summary_dpi_main_destination_d
 	$summary = "";
 	$summary .= _dpi_main_destination_display_element_tag_field_formatter_settings_summary($settings);
 	$summary .= _dpi_main_destination_display_wrapper_tag_field_formatter_settings_summary($settings);
-	$summary .= _dpi_main_destination_display_theme_ui_element_link_field_formatter_settings_summary($settings);	
+	$summary .= _dpi_main_destination_display_link_field_formatter_settings_summary($settings);	
 
 }
 
@@ -180,6 +195,19 @@ function _dpi_main_destination_display_element_link_render($settings, $term, $va
 		return $value;
 	}
 }
+
+function _dpi_main_destination_display_element_prefix_suffix_render($settings,$value){
+
+	$render = array(
+		"#prefix" => $settings['element_prefix'],
+		"#suffix" => $settings['element_suffix'],
+		"#type" => 'markup',
+		"#markup" => drupal_render($value),
+	);
+
+	return $render;
+}
+
 
 function _dpi_main_destination_display_wrapper_tag_render($settings,$value){
 	if (isset($settings['wrapper_html_tag']) && $settings['wrapper_html_tag']!='- None -' && $settings['wrapper_html_tag']!='') {
@@ -241,7 +269,7 @@ function _dpi_main_destination_display_wrapper_tag_field_formatter_settings_summ
 	return $summary;
 }
 
-function _dpi_main_destination_display_theme_ui_element_link_field_formatter_settings_summary($settings){
+function _dpi_main_destination_display_link_field_formatter_settings_summary($settings){
 	if ($settings['element_html_link']!="no") {
 		$summary = t('The element is outputed as a link to the section page<br/>');
 	}else{
