@@ -895,8 +895,11 @@ class WallyXmlV1 extends PackageHelper {
       if(isset($atom->temp_crops) && $atom->temp_crops!=null){
         $entity->temp_crops[$atom->sid] = $atom->temp_crops;
       }
-    }elseif($entity->type != 'package_gallery' && !empty(field_get_items('node', $entity, 'field_embededobjects'))){
-      $package_wrapper->field_embededobjects->set(NULL);
+    }elseif($entity->type != 'package_gallery'){
+      $test_error = field_get_items('node', $entity, 'field_embededobjects');
+      if(is_array($test_error) && !empty($test_error)){
+        $package_wrapper->field_embededobjects->set(NULL);
+      }      
     }
     return $atom;
   }
