@@ -148,28 +148,4 @@ class DamArchiveV1 extends WallyXmlPreview {
       }
     }    
   }
-  
-    /**
-   * Process the children of the currant dom and call a function for each one.
-   * Return an array with the return of each function
-   *
-   * @param DOM $dom          
-   * @param Object $object          
-   */
-  function processList($dom, $object, $object2) {
-    $list = array ();
-    $importer = $this->getImporter ();
-    foreach ( $dom->childNodes as $child ) {
-      dsm($child, 'type');
-      $name = strtolower ( $child->nodeName );
-      if ($name != '#text') {
-        $callback = $importer->getCallback ( $child );
-        $method_name = 'build' . $callback;
-        if (method_exists ( $importer, $method_name )) {
-          $list [] = $importer->$method_name ( $child, $object, $object2 );
-        }
-      }
-    }
-    return $list;
-  }
 }

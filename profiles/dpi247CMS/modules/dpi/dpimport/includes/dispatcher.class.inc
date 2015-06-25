@@ -226,6 +226,7 @@ abstract class Dispatcher {
     $list = array ();
     $importer = $this->getImporter ();
     foreach ( $dom->childNodes as $child ) {
+      dsm($child->getAttribute('xsi:type'), 'type');
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
         $callback = $importer->getCallback ( $child );
