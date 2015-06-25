@@ -225,10 +225,10 @@ abstract class Dispatcher {
   function processList($dom, $object, $object2) {
     $list = array ();
     $importer = $this->getImporter ();
-    foreach ( $dom->childNodes as $child ) {
-      dsm($child->getAttribute('xsi:type'), 'type');
+    foreach ( $dom->childNodes as $child ) {      
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
+        dsm($child->getAttribute('xsi:type'), 'type');
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
