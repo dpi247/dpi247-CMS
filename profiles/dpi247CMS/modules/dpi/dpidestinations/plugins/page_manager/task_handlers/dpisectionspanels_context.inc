@@ -242,13 +242,10 @@ function dpidestinations_dpisectionspanels_context_edit_content($form, &$form_st
  * Validate changes to the panel content form.
  */
 function dpidestinations_dpisectionspanels_context_edit_content_validate(&$form, &$form_state) {
-  dsm($form_state);
 	panels_panel_context_edit_content_validate($form, $form_state);
 }
 
 function dpidestinations_dpisectionspanels_context_edit_content_submit(&$form, &$form_state) {
-
-	dsm($form_state);
 	panels_panel_context_edit_content_submit($form, $form_state);
 }
 

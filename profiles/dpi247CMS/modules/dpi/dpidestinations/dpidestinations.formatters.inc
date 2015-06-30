@@ -29,6 +29,8 @@ function dpidestinations_field_formatter_info() {
 				'element_html_tag_custom_class' => '',
 				'element_html_link' => 'no',
 				'element_html_link_custom_class' => '',
+				'element_prefix' => '',
+				'element_suffix' => '',
 			),				
 		),
 		'dpi_taxonomy_content' => array(
