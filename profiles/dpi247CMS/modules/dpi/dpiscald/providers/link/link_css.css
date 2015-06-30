@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-link {
+  background: url('icons/link-color.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-link:hover {
+  background: url('icons/link-color.png') 50% 50% no-repeat;
+}
+.dnd-library-wrapper .editor-item .meta.type-link {
+ background-image: url('icons/link-color.png');
+}

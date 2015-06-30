@@ -722,3 +722,175 @@ function dpicontenttypes_update_7015() {
     db_create_table('dpicontenttypes_inline_export_information', $schema);
   }
 }
+
+/**
+ * Création du nouveau field pour la mise à jour de la date d'éditorialisation
+ */
+function dpicontenttypes_update_7016(){
+  // Exported field_base: 'field_autopublish'
+  $field_bases['field_forceeditorialupdatedate'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_forceeditorialupdatedate',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(
+        0 => '',
+        1 => '',
+      ),
+      'allowed_values_function' => '',
+    ),
+    'translatable' => 0,
+    'type' => 'list_boolean',
+  );
+  
+  field_create_field($field_bases["field_forceeditorialupdatedate"]);
+}
+/**
+ * Création des instances pour la mise à jour de la date d'éditorialisation
+ */
+function dpicontenttypes_update_7017(){
+  // Exported field_instance: 'node-package-field_autopublish'
+  $field_instances ['node-package-field_forceeditorialupdatedate'] = array (
+    'bundle' => 'package',
+    'default_value' => array (
+      0 => array (
+        'value' => 0 
+      ) 
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array (
+      'default' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 22 
+      ),
+      'targetblock_big' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ) 
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_forceeditorialupdatedate',
+    'label' => 'Force editorial update date',
+    'required' => 0,
+    'settings' => array (
+      'user_register_form' => FALSE 
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array (
+        'display_label' => 1 
+      ),
+      'type' => 'options_onoff',
+      'weight' => 11 
+    ) 
+  );
+  // Exported field_instance: 'node-package-field_autopublish'
+  $field_instances ['node-package_gallery-field_forceeditorialupdatedate'] = array (
+    'bundle' => 'package_gallery',
+    'default_value' => array (
+      0 => array (
+        'value' => 0 
+      ) 
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array (
+      'default' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 22 
+      ),
+      'targetblock_big' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ) 
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_forceeditorialupdatedate',
+    'label' => 'Force editorial update date',
+    'required' => 0,
+    'settings' => array (
+      'user_register_form' => FALSE 
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array (
+        'display_label' => 1 
+      ),
+      'type' => 'options_onoff',
+      'weight' => 11 
+    ) 
+  );
+  
+  foreach($field_instances as $field){
+    field_create_instance($field);
+  }  
+}

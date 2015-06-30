@@ -225,9 +225,15 @@ abstract class Dispatcher {
   function processList($dom, $object, $object2) {
     $list = array ();
     $importer = $this->getImporter ();
-    foreach ( $dom->childNodes as $child ) {
-      $name = strtolower ( $child->nodeName );
-      if ($name != '#text') {
+    foreach ( $dom->childNodes as $child ) {      
+      $name = strtolower ( $child->nodeName );      
+      /**
+       * $child->getAttribute('xsi:type') ne peut pas être égal a TextObjectType
+       * Car cela viens des archives qui sur certaine version papier contienne des
+       * object embeded de type text qui écrase les valeurs de l'article si on le laisse processer
+       * Voir dam ref : d-20070521-W22A4M
+       */
+      if ($name != '#text' && $child->getAttribute('xsi:type') != 'TextObjectType') {
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {

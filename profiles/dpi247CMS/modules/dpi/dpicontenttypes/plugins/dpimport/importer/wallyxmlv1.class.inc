@@ -65,7 +65,7 @@ class WallyXmlV1 extends PackageHelper {
           }          
         }
       }
-      
+
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
@@ -220,14 +220,18 @@ class WallyXmlV1 extends PackageHelper {
   protected function buildEditorialUpdateDate($dom, $wrapper, $entity) {
     // We don't save the editorial update date on new node.
     if ($wrapper->nid->value() != NULL) {
-      if ($dom->hasAttribute("ForceLastUpdate") && $this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
-        if ($dom->hasAttribute("LastUpdateDate")) {
-          $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+      if($dom->hasAttribute("ForceLastUpdate")){
+        $wrapper->field_forceeditorialupdatedate->set($this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate")));
+        $entity->skipUpdatedate = TRUE;
+        if ($this->xmlbooleantophpboolean($dom->getAttribute("ForceLastUpdate"))) {
+          if ($dom->hasAttribute("LastUpdateDate")) {            
+            $editorialupdatedate = $this->getDateStampFromDateTime($dom->getAttributeNode("LastUpdateDate")->value);
+          }
+          else {
+            $editorialupdatedate = time();
+          }
+          $wrapper->field_editorialupdatedate->set($editorialupdatedate);
         }
-        else {
-          $editorialupdatedate = time();
-        }
-        $wrapper->field_editorialupdatedate->set($editorialupdatedate);
       }
     }
   }
@@ -891,8 +895,11 @@ class WallyXmlV1 extends PackageHelper {
       if(isset($atom->temp_crops) && $atom->temp_crops!=null){
         $entity->temp_crops[$atom->sid] = $atom->temp_crops;
       }
-    }elseif($entity->type != 'package_gallery' && !empty(field_get_items('node', $entity, 'field_embededobjects'))){
-      $package_wrapper->field_embededobjects->set(NULL);
+    }elseif($entity->type != 'package_gallery'){
+      $test_error = field_get_items('node', $entity, 'field_embededobjects');
+      if(is_array($test_error) && !empty($test_error)){
+        $package_wrapper->field_embededobjects->set(NULL);
+      }      
     }
     return $atom;
   }
@@ -986,7 +993,7 @@ class WallyXmlV1 extends PackageHelper {
                 Logger::logError('importer', 0, 'providerfunction', t('function cannot be found', array(
                   '!uri' => $value
                 )));
-              }              
+              }
             }
             else {
               Logger::logError('importer', 0, 'provideruri', t('The provider can not analyse the uri !uri', array(
@@ -1087,7 +1094,7 @@ class WallyXmlV1 extends PackageHelper {
     }
     else {
       Logger::logExecution('linkbojecttype', TRUE);
-      $atom = $this->constructEntity($dom, 'scald_atom');
+      $atom = $this->constructEntity($dom, 'scald_atom'); 
       Logger::setCurrentToPreviousExecution();
       return $atom;
     }

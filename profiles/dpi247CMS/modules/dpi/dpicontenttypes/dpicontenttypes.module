@@ -305,6 +305,7 @@ function dpicontenttypes_node_presave($node) {
   if (!empty($useautopublishdates)){
     dpicontenttypes_api_check_autopublish($node);
   }
+  _dpicontenttypes_entitymanageeditorialupdatedate($node);
   _dpicontenttypes_entityinserteditorialpublicationdate($node);
   if(function_exists("rules_invoke_event")){
     if (in_array($node->type, dpicontenttypes_api_getdpicontenttypes())) {
@@ -409,6 +410,7 @@ function dpicontenttypes_form_node_form_alter(&$form, $form_state) {
     $form["title"]["#required"]=FALSE;
     $form["title"]["#element_validate"][]='_dpicontenttypes_form_validate_sync_title_with_display_title';
   }
+  drupal_add_css(drupal_get_path('module', 'dpicontenttypes').'/css/node_edit_form_alter.css');
 }
 
 /**
@@ -877,7 +879,18 @@ function dpicontenttypes_dpicontenttypes_provider($uri){
     if(isset($request->code) && $request->code == 200)
       $provider = array('name' => $types['videortl']->provider, 'type' => $types['videortl']->type);
   }
-
+  
+  /* Table define into the text area in admin/dpi247/mediacontext/link-settings */
+  $tmp = variable_get('dpiscald_link_pattern', FALSE);
+  if(is_array($tmp) && !empty($tmp)){
+    foreach($tmp as $url){
+      if($url!="" && strstr($uri, trim($url))!==FALSE){
+        $provider = array('name' => $types['link']->provider, 'type' => $types['link']->type);
+        break; //skip other test
+      }
+    }
+  }
+  
   return array('dpicontenttypes' => $provider);
 }
 
@@ -1095,4 +1108,27 @@ function dpicontenttypes_image_default_styles(){
   );
   
   return $styles;
+}
+
+/**
+ * Implementation of hook_views_pre_render().
+ */
+function dpicontenttypes_views_pre_render(&$view) {
+  if ($view->name == "custom_admin_content") {
+    foreach ($view->result as $key => $entity) {
+      if(empty($entity->field_field_displaytitle) && isset($entity->node_title)) {
+        $view->result[$key]->field_field_displaytitle[0]= array(
+          "rendered" => array(
+            "#markup" => '<p>' . $entity->node_title . '</p>',
+            '#access' => TRUE,
+          ),
+          "raw" => array(
+            "value" => $entity->node_title,
+            "format" => "filtered_html",
+            "safe_value" => '<p>' . $entity->node_title . '</p>',
+          )
+        );
+      }
+    }
+  }
 }
