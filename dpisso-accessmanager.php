@@ -2,42 +2,6 @@
 
 header('Content-Type: text/html; charset=utf-8');
 
-function load_all_module_using_ctools_plugin()
-{
-
-	/*
-	  You should maintain this list manually .
-	  All the keys of this call should belong to the array:
-
-	  module_load_include('inc','ctools','includes/plugins');
-	  dsm(ctools_get_plugins_info());
-	*/
-
-	$modules_that_uses_ctools_plugin_system = array(
-		'ctools',
-		'dpiblocks',
-		'dpicache',
-		'dpimport',
-		'dpisocial',
-		'dpisso',
-		'enabootstrap_companion',
-		'entityreference',
-		'panels',
-		'views_bulk_operations',
-		'page_manager',
-		'addressfield',
-		//'feeds',
-		//'spaces',
-		//'context',
-		//'quicktabs',
-
-	);
-
-	foreach ($modules_that_uses_ctools_plugin_system as $module_name) {
-		module_load_include('module', $module_name);
-	}
-}
-
 /**
  * @file The PHP page for all Acess Manager bootstrap callbacks
  */
@@ -116,4 +80,40 @@ function _dpissoaccessmanager_paywall_define_return($operation, $politic_instanc
         die ();
       break;
   }
+}
+
+function load_all_module_using_ctools_plugin()
+{
+
+	/*
+	  You should maintain this list manually .
+	  All the keys of this call should belong to the array:
+
+	  module_load_include('inc','ctools','includes/plugins');
+	  dsm(ctools_get_plugins_info());
+	*/
+
+	$modules_that_uses_ctools_plugin_system = array(
+		'ctools',
+		'dpiblocks',
+		'dpicache',
+		'dpimport',
+		'dpisocial',
+		'dpisso',
+		'enabootstrap_companion',
+		'entityreference',
+		'panels',
+		'views_bulk_operations',
+		'page_manager',
+		'addressfield',
+		//'feeds',
+		//'spaces',
+		//'context',
+		//'quicktabs',
+
+	);
+
+	foreach ($modules_that_uses_ctools_plugin_system as $module_name) {
+		module_load_include('module', $module_name);
+	}
 }
