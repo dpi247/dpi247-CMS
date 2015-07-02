@@ -1132,9 +1132,3 @@ function dpicontenttypes_views_pre_render(&$view) {
     }
   }
 }
-
-function dpicontenttypes_import_ban_vocabulary_node_term(){
-  return array(
-    'Concepts'
-  );
-}
