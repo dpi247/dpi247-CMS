@@ -89,7 +89,8 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-
+      dsm($package);
+      die();
       $this->savePackage($dom, $package);      
       $this->_save_external_package_informations($package);
       
@@ -1192,50 +1193,69 @@ class WallyXmlV1 extends PackageHelper {
   function buildTaxonomy($dom, $package_wrapper, $entity){
     $dispatcher = $this->getDispatcher();
     $dispatcher->processChildren($dom, $package_wrapper, $entity);
+    cache_clear_all('node_ban_vocabulary_term', 'cache');
   }
   
   function buildVocabulary($dom, $package_wrapper, $entity){
     try {
       $taxonomy_name = $dom->getAttribute('VocabularyName');
-      /* glitch for tags that would be free tags */
-      if($taxonomy_name == "Tags"){
-        $taxonomy_name = "Free Tags";
-      }elseif ($taxonomy_name == "Authors") {
-        $taxonomy_name = "DPI Authors";
-      }
-      $conditions = array('name' => trim($taxonomy_name));
-      $vocabularies = taxonomy_vocabulary_load_multiple(FALSE, $conditions);
       
-      /* test que le vocabulaire exist bien dans le drupal */
-      if($vocabularies && !empty($vocabularies)){
-        $dispatcher = $this->getDispatcher();
-        $dispatcher->processChildren($dom, $package_wrapper, $entity);
-        $global_list_term = &drupal_static('sav_global_list_term');
-        if(is_array($global_list_term) && !empty($global_list_term)){
-          if($taxonomy_name == "DPI Authors"){
-            $taxonomy_name = "Authors";
-          }
-          $t_machine_name = strtolower($taxonomy_name);
-          $t_machine_name = str_replace(' ', '', $t_machine_name);
-          $field_name = 'field_'.strtolower($t_machine_name);  
-          if(isset($entity->type) && $entity->type != "package"){
-            switch($t_machine_name){
-              case "authors":
-                  $field_name = 'scald_'.strtolower($t_machine_name);
-                 break;
-              case "thumbnail":
-                   $field_name = 'scald_'.strtolower($t_machine_name);
-                 break;
-            }
-          }
-          $package_wrapper->$field_name->set($global_list_term);
-          drupal_static_reset('sav_global_list_term');
+      /* Get value to not process */
+      if(!cache_get('node_ban_vocabulary_term')){
+        $terms = module_invoke_all("import_ban_vocabulary_node_term");
+        $ban_vocabularies = array();
+        if(isset($terms) && is_array($terms)){        
+          cache_set('node_ban_vocabulary_term', $terms);
+          $ban_vocabularies = $terms;
         }
-      }else{
-        Logger::logWarning('importer', 2, 'pathnotfound', t('Taxonomy term don\'t exist into this instance of drupal : @term' , array(
-          '@term' => $taxonomy_name,
-        )));
-      }      
+      }else{        
+        $cache = cache_get('node_ban_vocabulary_term');
+        if(isset($cache) && is_object($cache)){
+          $ban_vocabularies = $cache->data;
+        }    
+      }
+      
+      if(!in_array($taxonomy_name, $ban_vocabularies)){       
+        /* glitch for tags that would be free tags */
+        if($taxonomy_name == "Tags"){
+          $taxonomy_name = "Free Tags";
+        }elseif ($taxonomy_name == "Authors") {
+          $taxonomy_name = "DPI Authors";
+        }
+        $conditions = array('name' => trim($taxonomy_name));
+        $vocabularies = taxonomy_vocabulary_load_multiple(FALSE, $conditions);
+
+        /* test que le vocabulaire exist bien dans le drupal */
+        if($vocabularies && !empty($vocabularies)){
+          $dispatcher = $this->getDispatcher();
+          $dispatcher->processChildren($dom, $package_wrapper, $entity);
+          $global_list_term = &drupal_static('sav_global_list_term');
+          if(is_array($global_list_term) && !empty($global_list_term)){
+            if($taxonomy_name == "DPI Authors"){
+              $taxonomy_name = "Authors";
+            }
+            $t_machine_name = strtolower($taxonomy_name);
+            $t_machine_name = str_replace(' ', '', $t_machine_name);
+            $field_name = 'field_'.strtolower($t_machine_name);  
+            if(isset($entity->type) && $entity->type != "package"){
+              switch($t_machine_name){
+                case "authors":
+                    $field_name = 'scald_'.strtolower($t_machine_name);
+                   break;
+                case "thumbnail":
+                     $field_name = 'scald_'.strtolower($t_machine_name);
+                   break;
+              }
+            }
+            $package_wrapper->$field_name->set($global_list_term);
+            drupal_static_reset('sav_global_list_term');
+          }
+        }else{
+          Logger::logWarning('importer', 2, 'pathnotfound', t('Taxonomy term don\'t exist into this instance of drupal : @term' , array(
+            '@term' => $taxonomy_name,
+          )));
+        }
+      }            
     }
     catch (Exception $exc) {
       print_r($exc->getMessage());
