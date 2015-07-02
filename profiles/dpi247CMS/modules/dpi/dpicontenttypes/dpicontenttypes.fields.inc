@@ -347,6 +347,7 @@ function dpicontenttypes_field_widget_info() {
  * Implements hook_field_widget_form.
  */
 function dpicontenttypes_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  drupal_add_css(drupal_get_path('module', 'dpicontenttypes').'/css/edit-atom.css');
   $all = scald_types();
   $options = array();
   $types = dpicontenttypes_field_referenceable_types($instance);
@@ -363,7 +364,12 @@ function dpicontenttypes_field_widget_form(&$form, &$form_state, $field, $instan
       'Allowed resource formats: %types',
       array('%types' => implode(', ', $options))
   );
-
+  
+  global $theme_key;
+  if($theme_key == 'shiny'){
+    $form['#attributes'] = array('class' => array('cache_white_space'));
+  }
+  
   $element['#description'] .= ' ' . $help;
   $element['#type'] = 'textfield';
   $element['#attributes'] = array('data-types' => implode(',', array_keys($options)));

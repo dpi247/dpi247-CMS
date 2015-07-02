@@ -707,3 +707,27 @@ function dpicache_preprocess_page(& $variables){
 
 	}
 }
+
+
+
+
+/**
+ * Set HTTP headers to control caching of ESI fragments.
+ */
+function _dpicacheesi_panels_set_http_headers($pane) {
+	$ttl = $pane->cache['settings']['esi_ttl'];
+
+
+	$headers = array();
+	$headers[] = array('dpicache_esi_tll', $ttl);
+
+	// Allow other modules to alter the headers.
+	// @see hook_esi_block_cache_headers_alter().
+	//drupal_alter('esi_panels_cache_headers', $headers);
+
+	foreach($headers as $header) {
+		drupal_add_http_header($header[0], $header[1]);
+		drupal_add_http_header('COCO', 'Cool');
+		drupal_add_http_header('Cache-Control', 'YO',TRUE);
+	}
+}

@@ -489,3 +489,43 @@ function _dpicache_esi_sync_esi_visibility_to_drupal_roles()
 
 
 }
+
+
+
+
+/**
+ * Get a list of possible max age (ttl) choices.
+ *
+ * @param optional Int $current_max_age
+ * The defined max age might not amongst the pre-defined options.  Adding the
+ * current max age as a parameter allows it to be added to the list of options,
+ * ensuring the current configuration doesn't get overridden.
+ *
+ * @return Array
+ * Array of potential max-age choices. The key is the TTL (in seconds) and the
+ * value is the human-readable description of that TTL.
+ */
+function _dpicache_esi_max_age_options($current_max_age = NULL) {
+	if (is_null($current_max_age)) {
+		$current_max_age = variable_get('dpicache_esi_default_tll_block', ESI_DEFAULT_TTL);
+	}
+
+
+
+	$options = drupal_map_assoc(
+		array(0, 5, 15, 30, 60, 120, 180, 240, 300, 600, 900, 1200, 1800, 3600, 7200, 14400, 28800, 43200, 64800, 86400, 86400*2, 86400*3, 86400*4, 86400*5, 86400*6, 86400*7),
+		'format_interval');
+
+	// If the given max age isn't one of our options, add the current max age as a custom option.
+	if (!isset($options[$current_max_age])) {
+		$options[$current_max_age] = t('Custom: @time', array('@time' => format_interval($current_max_age)), array('context' => 'Cache Duration'));
+		ksort($options);
+	}
+	$options[0] = '<' . t('none', array(), array('context' => 'Cache Duration')) . '>';
+
+	$options[-1] = '<' . t('Default TTL', array(), array('context' => 'Cache Duration')) . '>';
+	ksort($options);
+
+
+	return $options;
+}

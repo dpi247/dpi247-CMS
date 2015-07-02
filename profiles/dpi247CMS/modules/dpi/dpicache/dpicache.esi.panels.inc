@@ -422,8 +422,9 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 		$function = $module . '_panels_pane_content_alter';
 		$function($content, $pane, $pane->esi_meta['display_args'], $pane->esi_meta['display_contexts']);
 	}
+	header("Cache-Control: post-check=1, pre-check=0", FALSE);
 
-	dpicacheesi_panels_set_http_headers($pane);
+	_dpicacheesi_panels_set_http_headers($pane);
 
 	// Pass long the css_id that is usually available.
 	if (!empty($pane->css['css_id'])) {
@@ -457,24 +458,6 @@ function dpicacheesi_panels__esi_pane_render($pane) {
 
 	return "<!-- ESI blank content pane -->".theme('panels_pane', array('content' => $content, 'pane' => $pane, 'display' => $pane->esi_meta['display']));
 
-}
-
-/**
- * Set HTTP headers to control caching of ESI fragments.
- */
-function dpicacheesi_panels_set_http_headers($pane) {
-	$ttl = $pane->cache['settings']['esi_ttl'];
-
-	$headers = array();
-	$headers[] = array('Cache-Control', "private, max-age=$ttl");
-
-	// Allow other modules to alter the headers.
-	// @see hook_esi_block_cache_headers_alter().
-	drupal_alter('esi_panels_cache_headers', $headers);
-
-	foreach($headers as $header) {
-		drupal_add_http_header($header[0], $header[1]);
-	}
 }
 
 /**

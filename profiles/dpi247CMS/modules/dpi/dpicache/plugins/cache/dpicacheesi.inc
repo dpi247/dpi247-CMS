@@ -82,7 +82,7 @@ function dpicache_panels_dpicacheesi_cache_get_cache($conf, $display, $args, $co
 function dpicache_panels_dpicacheesi_cache_settings_form($conf, $display, $pid) {
 
     // Use the TTL from the config if provided, or a suitable default.
-    $esi_ttl = isset($conf['esi_ttl']) ? $conf['esi_ttl'] : (int)variable_get('esi_panels_esi_default_ttl', ESI_DEFAULT_TTL);
+    $esi_ttl = isset($conf['esi_ttl']) ? $conf['esi_ttl'] : (int)variable_get('dpicache_esi_default_tll_block', ESI_DEFAULT_TTL);
 
     $pane = (isset($display->content[$pid])) ? $display->content[$pid] : FALSE;
     // Load up the pane information to examine the context.
@@ -91,9 +91,9 @@ function dpicache_panels_dpicacheesi_cache_settings_form($conf, $display, $pid) 
     $form['esi_ttl'] = array(
         '#title' => t('Cache Maximum Age (TTL)'),
         '#type' => 'select',
-        '#options' => esi_max_age_options($esi_ttl),
+        '#options' => _dpicache_esi_max_age_options($esi_ttl),
         '#default_value' => $esi_ttl,
-        '#description' => t('External page caches (proxy/browser) will not deliver cached paged older than this setting; time to live in short.'),
+        '#description' => t('External page caches (proxy/browser) will not deliver cached paged older than this setting; time to live in short <br/> Pay attention that "none" mean no TTL thus the block will be processed on each request.'),
     );
 
 
