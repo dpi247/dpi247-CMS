@@ -305,15 +305,12 @@ function dpipub_block_view($delta = ''){
       break;
     case 'metriwebgemius_block':
       /* Add element to header only for gemius */
-      $attributes = array(
-        '#tag' => 'link',
-        '#attributes' => array(
+      $attributes =  array(
           'rel' => 'dns-prefetch',
           'href' => '//gabe.hit.gemius.pl',
-        ),
       );
       drupal_add_html_head_link($attributes, 'gemius');
-      $attributes["#attributes"]['href'] = "//ls.hit.gemius.pl";
+      $attributes['href'] = "//ls.hit.gemius.pl";
       drupal_add_html_head_link($attributes, 'gemius');
       
       /* Générate block content */
