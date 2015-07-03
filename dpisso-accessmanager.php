@@ -114,6 +114,10 @@ function load_all_module_using_ctools_plugin()
 	);
 
 	foreach ($modules_that_uses_ctools_plugin_system as $module_name) {
+		/*
+		 * module_load_include() isn't yet available
 		module_load_include('module', $module_name);
+		*/
+		drupal_load('module', $module_name);
 	}
 }
