@@ -1031,7 +1031,7 @@ function dpicontenttypes_url_outbound_alter(&$path, &$options, $original_path){
       $term_load = taxonomy_term_load($tid);
       if(isset($term_load) && isset($term_load->name) && isset($term_load->vocabulary_machine_name) && $term_load->vocabulary_machine_name == "sections"){
         module_load_include('inc', 'pathauto', 'pathauto');
-        $path = "sections/".pathauto_cleanstring($term_load->name);
+        $path = drupal_get_path_alias("section/".$term_load->tid);   
       }
     }
   }
