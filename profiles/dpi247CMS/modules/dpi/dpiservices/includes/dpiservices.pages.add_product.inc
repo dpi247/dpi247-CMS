@@ -56,19 +56,23 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
     '#default_value' => (isset($product_arg)) ? $product_arg['description']: '',
   );
   
-  $presets=unserialize(dpi_variable_get("dpiservices_preset", array())) ;
+  $presets=unserialize(dpi_variable_get("dpiservices_preset", "")) ;
   if(isset($product_arg)){
     $default_preset = unserialize($product_arg['preset']);  
   }
   
-  foreach ($presets as $preset){
-    $form['fieldset'][$preset] = array(
-      '#type' => 'select',
-      '#title' => t($preset),
-      '#description' => t('Select a preset.'),
-      '#options' => $image_preset,
-      '#default_value' => (isset($default_preset[$preset]))? $default_preset[$preset]: '',
-    );
+  if(isset($presets) && is_array($presets)){
+    foreach ($presets as $preset){
+      $form['fieldset'][$preset] = array(
+        '#type' => 'select',
+        '#title' => t($preset),
+        '#description' => t('Select a preset.'),
+        '#options' => $image_preset,
+        '#default_value' => (isset($default_preset[$preset]))? $default_preset[$preset]: '',
+      );
+    }
+  }else{
+    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpijsonexporter/add_map">map settings</a>'), 'error');
   }
   
   $form['fieldset']['select_product'] = array(

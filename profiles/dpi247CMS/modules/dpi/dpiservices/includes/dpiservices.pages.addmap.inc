@@ -13,8 +13,11 @@ function dpiservices_pages_form_add_map_form(){
 
   $textarea_default_content = '';
   
-  foreach(unserialize(dpi_variable_get('dpiservices_preset', '')) as $value){
-    $textarea_default_content .= $value."\n";
+  $tmp = dpi_variable_get('dpiservices_preset', '');
+  if(isset($tmp) && $tmp!=''){
+    foreach(unserialize($tmp) as $value){
+      $textarea_default_content .= $value."\n";
+    }
   }
   
   $form['info']=array(
