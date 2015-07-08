@@ -1067,10 +1067,10 @@ function dpicontenttypes_views_api() {
 function dpicontenttypes_image_default_styles(){
   $styles = array();
   
-  // Exported image style: 500x500.
+  // Exported image style: DPI Social default
   $styles['FirstImageUrl'] = array(
     'name' => 'FirstImageUrl',
-    'label' => 'FirstImageUrl',
+    'label' => 'DPI Social default',
     'effects' => array(
       13 => array(
         'label' => 'DPI Crop',
