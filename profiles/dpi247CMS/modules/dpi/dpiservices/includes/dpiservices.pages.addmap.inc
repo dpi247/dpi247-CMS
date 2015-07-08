@@ -34,6 +34,7 @@ function dpiservices_pages_form_add_map_form(){
     '#type' => 'textarea',
     '#required' => TRUE,
     '#default_value' => $textarea_default_content,
+    '#description' => t('You can enter terms like round, quare, diamond or label to be used to export images'),
   );
   
   $form['submit'] = array(
