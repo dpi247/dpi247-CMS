@@ -78,7 +78,7 @@ function dpisso_api_get_paywall_info() {
 function dpisso_api_set_paywall_info($info) {
   libraries_load ( "ssophptoolbox" );
   $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
-  return $ssoSession->accessManagersetPaywallInfo ( $info );
+  return $ssoSession->accessManager->setPaywallInfo ( $info );
 }
 
 
