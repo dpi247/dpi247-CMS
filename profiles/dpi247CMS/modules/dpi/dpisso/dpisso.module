@@ -395,3 +395,45 @@ function dpisso_cron() {
     }
   }
 }
+
+/**
+ * Implements hook_token_info()
+ * @return array
+ */
+function dpisso_token_info() {
+  $info['tokens']['user']['ssoLogin'] = array(
+    'name' => t('Sso login token'),
+    'description' => t('Return the login id for the user'),
+  );
+  return $info;
+}
+
+/**
+ * 
+ * @param String $type
+ * @param array $tokens
+ * @param array $data
+ * @param array $options
+ * @return array
+ */
+function dpisso_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'ssoLogin':
+          libraries_load ( "ssophptoolbox" );
+          $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );          
+          $name = "anonymous";
+          if(isset($ssoSession->config->loginToken_cookie_name) && $ssoSession->config->loginToken_cookie_name!="" && isset($_COOKIE[$ssoSession->config->loginToken_cookie_name])){
+            $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
+          }elseif(isset($ssoSession->config->anonymousId_cookie_name) && $ssoSession->config->anonymousId_cookie_name!="" && isset($_COOKIE[$ssoSession->config->anonymousId_cookie_name])){
+            $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
+          }
+          $replacements[$original] = $name;
+          break;        
+      }
+    }
+  }
+  return $replacements;
+}
