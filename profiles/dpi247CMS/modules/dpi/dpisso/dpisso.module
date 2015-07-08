@@ -409,7 +409,7 @@ function dpisso_token_info() {
 }
 
 /**
- * 
+ * Implementations of hook_tokens()
  * @param String $type
  * @param array $tokens
  * @param array $data
