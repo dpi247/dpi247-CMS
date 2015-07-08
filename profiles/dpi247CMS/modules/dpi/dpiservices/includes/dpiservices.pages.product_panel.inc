@@ -44,7 +44,7 @@ function dpiservices_create_table_product() {
       $product ['description'],
       $product ['product'],
       $product ['product_type'],
-      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See informations</a>',
+      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See the result</a>',
       '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a><br /><a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
     );
   }
