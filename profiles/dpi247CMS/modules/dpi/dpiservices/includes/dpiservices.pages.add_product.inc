@@ -34,7 +34,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   
   $form['fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Add a product'),
+    '#title' => t('Create a product'),
   );
   
   $form['fieldset']['label'] = array(
