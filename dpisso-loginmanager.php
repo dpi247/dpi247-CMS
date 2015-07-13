@@ -25,37 +25,35 @@
 define('DRUPAL_ROOT', getcwd());
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-//drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.module';
+require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.api.inc';
+require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpisso/dpisso.private.inc';
 require_once DRUPAL_ROOT . '/profiles/dpi247CMS/modules/dpi/dpicache/dpicache.api.inc';
 require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/Config.class.php';
 require_once DRUPAL_ROOT . '/modules/user/user.pages.inc';
+require_once DRUPAL_ROOT . '/includes/common.inc';
+require_once DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/SsoSession.class.php';
 
-$config=Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini');
+$SsoSession= new SsoSession(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json');
 
-if(!isset($_COOKIE['monsitedpi7'])){
-  setcookie ( "monsitedpi7", md5(uniqid(rand(), true)), time()+3600*24*3);
-}
-$SsoSession= new SsoSession();
-$redirect_url=$SsoSession->processLoginManagerUrl();
 //We are on the login operation
 if($login_id=$SsoSession->getLoginId()){
-  
+  LoginManager::setCookie ( 'dpisso_is_connected', true , Time() + 3600*24*52, $_SERVER['HTTP_HOST'], '/');
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
   $sso_user_infos['mail']=$profile->mail;
   $sso_user_infos['name']=$profile->cn;
   $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
-  //@todo: sync roles with existing ones
-  dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);  
+  
+  dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);
 }
 //We are on the logout operation
 else{
-   dpisso_api_user_logout();
+  //@todo: We should remove the loginToken cookie on logout to prevent loop and no man's land.
+  LoginManager::setCookie ( 'dpisso_is_connected', false , Time() - 36000, $_SERVER['HTTP_HOST'], '/');
+  dpisso_api_user_logout();
    //@todo: should i call the Login manager ?
 }
-//Process to redirect
-header("Location: $redirect_url");
 die();

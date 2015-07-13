@@ -20,3 +20,5 @@ files[] = entity_class/flowmix.entity.class.inc
 files[] = includes/views/dpiblocks.views.inc
 files[] = includes/views/accroche_teaser_plugin_style.inc
 files[] = includes/views/dpiblocks_plugin_row_node_accroche.inc
+files[] = entity_controller/accroche.controller.class.inc
+files[] = entity_class/accroche.entity.class.inc

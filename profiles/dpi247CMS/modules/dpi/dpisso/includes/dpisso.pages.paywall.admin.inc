@@ -10,7 +10,6 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
   $access_matrice = dpisso_get_matrice_table_form ();
   $y = dpisso_get_row_title ();
   $x = dpisso_get_header_table ();
-  
   $rows = array ();
   foreach ( $access_matrice as $row_k => $row ) {
     foreach ( $row as $col_k => $col ) {
@@ -23,16 +22,16 @@ function dpisso_paywall_admin_settings_page_form($form, $form_state) {
           break;
         case 1 :
           if ($col_k == 1 && variable_get ( "dpisso_paywall_get_type_of_paywall", 0 ) == $row_k) {
-            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, $parameters_access->freemium->nbViewCookie );
-            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, $parameters_access->freemium->validityTypeCookie );
+            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset($parameters_access->freemium->nbViewCookie))? $parameters_access->freemium->nbViewCookie : 0) );
+            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeCookie))? $parameters_access->freemium->validityTypeCookie : "months") );
             $rows ['r' . $row_k] ['c' . $col_k] = array (
               '#nb_element' => 2,
               $elem_form,
               $active_part_form 
             );
           } elseif ($col_k == 2 && variable_get ( "dpisso_paywall_get_type_of_paywall", 0 ) == $row_k) {
-            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, $parameters_access->freemium->nbViewLM );
-            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, $parameters_access->freemium->validityTypeLM );
+            $elem_form = dpisso_get_select_element ( dpisso_create_table_of_variable ( 20 ), FALSE, ((isset($parameters_access->freemium->nbViewLM))? $parameters_access->freemium->nbViewLM : 0) );
+            $active_part_form = dpisso_get_select_element ( dpisso_get_selected_type_element (), TRUE, ((isset($parameters_access->freemium->validityTypeLM))? $parameters_access->freemium->validityTypeLM : "months") );
             $rows ['r' . $row_k] ['c' . $col_k] = array (
               '#nb_element' => 2,
               $elem_form,
@@ -233,6 +232,7 @@ function theme_formtable_form_table(&$variables) {
  */
 function dpisso_paywall_admin_settings_page_form_submit($form, & $form_state) {
   /* set variable of choice */
+  module_load_include('inc', 'dpisso', 'dpisso.private');
   variable_set ( "dpisso_paywall_get_type_of_paywall", $form_state ["values"] ["choose"] );
   
   /* send value */
@@ -285,7 +285,7 @@ function dpisso_set_array_info($validityCookie, $validityTypeCookie, $nbViewCook
  * Generate the specific paywall settings form.
  */
 function dpisso_paywall_admin_settings_paywallpolitic($form, $form_state) {
-  
+  module_load_include('inc', 'dpisso', 'dpisso.private');
   // get the list of all declared ctools 'paywallpolitic' pluggin
   ctools_include ( 'plugins' );
   $politics = ctools_get_plugins ( 'dpisso', 'paywallpolitic' );

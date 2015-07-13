@@ -26,7 +26,7 @@ function dpiservices_ctools_plugin_api($owner, $api) {
  */
 function dpiservices_menu() {
   $items ['admin/dpi247/dpijsonexporter'] = array (
-    'title' => 'JsonExporter',
+    'title' => 'Dpi Services',
     'description' => 'Administer return json exporter',
     'page callback' => 'dpiservices_pages_form_table_product_form',
     'access arguments' => array (
@@ -54,7 +54,7 @@ function dpiservices_menu() {
     ),
     'file' => 'dpiservices.pages.add_product.inc',
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_NORMAL_ITEM,
     'weight' => 1 
   );
   
@@ -71,8 +71,8 @@ function dpiservices_menu() {
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/add_map'] = array (
-    'title' => 'Add map',
+  $items ['admin/dpi247/dpijsonexporter/settings'] = array (
+    'title' => 'Settings',
     'description' => 'Add map',
     'page callback' => 'drupal_get_form',
     'page arguments' => array (

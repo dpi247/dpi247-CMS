@@ -84,7 +84,6 @@ function ccimapping_form_productinfo_editor_form_submit($form, $form_state) {
           drupal_set_message(t('The productinfo has been sent to CCI'));
         } catch (SoapFault $exception) {
           cciadmin_api_output_webservice_error('WebService Error when sending the Product Info XML', $exception->faultstring, $exception->faultcode);
-          dsm($exception);
         }
       }
     /*} else {
@@ -126,7 +125,6 @@ function ccimapping_get_productinfo_fromWS() {
       return $result->return;
     } catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService Error when getting the Product Info XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
     }
   }
 
@@ -179,14 +177,18 @@ function ccimapping_build_productinfo_xml(&$dom, $hierarchies_array, $nested_tax
 }
 
 function ccimapping_build_productinfo_xml_hierarchy_items($dom, &$dom_element, $hierarchies, $nested_taxonomy_tree) {
+  $default_targetblock = variable_get('dpidestinations_default_targetblock_for_section', array());
   foreach ($nested_taxonomy_tree as $key => $values) {
     $term = $values['term'];
     $level = $term->depth + 1;
-    $dom_level = $dom_element->appendChild($dom->createElement('level'.$level));
+    $dom_level = $dom_element->appendChild($dom->createElement('level'.$level));    
     $dom_level->setAttribute('name', $hierarchies[$term->tid]->name);
     foreach ($hierarchies[$term->tid]->targetblocks as $targetblock) {
       $leaf = $dom_level->appendChild($dom->createElement('leaf'));
       $leaf->setAttribute('name', $targetblock->target);
+      if(isset($default_targetblock[$term->tid]['select']) && $default_targetblock[$term->tid]['select'] == $targetblock->target){
+        $leaf->setAttribute('default', 'true');
+      }
     }
     ccimapping_build_productinfo_xml_hierarchy_items($dom, $dom_level, $hierarchies, $values['childrens']);
   }

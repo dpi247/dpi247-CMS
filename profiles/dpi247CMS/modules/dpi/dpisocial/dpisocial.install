@@ -1,0 +1,81 @@
+<?php
+
+function dpisocial_uninstall() {
+  drupal_uninstall_schema('dpisocial_node_nbshares');
+  drupal_uninstall_schema('dpisocial_node_shares_to_update');
+}
+
+function dpisocial_schema() {
+  $schema = array();
+  
+   $schema['dpisocial_node_nbshares'] = array(
+    'description' => 'The counters of shares on social networks.',
+	'fields' => array(
+	  'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {node}.nid for which the statistics are compiled.',
+      ),
+	  'network' => array(
+	  	'type' => 'varchar',
+        'length' => 60,
+        'not null' => FALSE,
+        'description' => 'The network on which the comment has been made.',
+	  ),
+      'nbshares' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The number of shares.',
+      ),
+	 ),
+	 'primary key' => array('nid','network'),
+  );
+ 
+  $schema['dpisocial_node_shares_to_update'] = array(
+    'description' => 'The list of nodes to get comments updates.',
+    'fields' => array(
+	  'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {node}.nid for which the statistics are compiled.',
+      ),
+	  'network' => array(
+	  	'type' => 'varchar',
+        'length' => 60,
+        'not null' => FALSE,
+        'description' => 'The network on which the comment has been made.',
+	  ),
+	  'url' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The url for which the statistics are compiled.',
+      ),
+	  'update_proccess_id' => array(
+	  	'type' => 'varchar',
+        'length' => 60,
+        'not null' => FALSE,
+        'description' => 'The proccess id + uniq id of the proccess that updates the number of shares.',
+	  ),
+      'start_update_timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp of the start of update for this node. To have timeout if failed.',
+      ),
+    ),
+    'primary key' => array('nid','network'),
+    'indexes' => array(
+	  'network' => array('network'),
+	  'node_update_timestamp' => array('start_update_timestamp'),
+	  'node_update_proccess_id' => array('update_proccess_id'),
+    ),
+  );
+ 
+ return $schema; 
+}

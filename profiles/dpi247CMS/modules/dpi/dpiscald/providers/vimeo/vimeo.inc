@@ -11,19 +11,6 @@ if (! (defined ( 'VIMEO_ID_REGEXP' ) && defined ( 'VIMEO_WEB_REGEXP' ) && define
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some video atoms.
- */
-function dpiscald_vimeo_scald_atom_providers() {
-  return array(
-    'video' => 'Video hosted on Vimeo'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Video hosted on Vimeo');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_vimeo_scald_add_form(&$form, &$form_state) {
@@ -49,6 +36,9 @@ function dpiscald_vimeo_scald_add_form_fill(&$atom, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'vimeo';
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
@@ -125,6 +115,10 @@ function dpiscald_vimeo_theme() {
     'dpiscald_vimeo_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/vimeo/dpiscald_vimeo_player'
+    ),
+    'dpiscald_vimeo_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_vimeo_player_html5'
     ),
   );
 }
@@ -306,6 +300,8 @@ function dpiscald_vimeo_validate_id($element, &$form_state) {
 function dpiscald_vimeo_parse_id($string, $check) {
   $id = NULL;
   $string = trim($string);
+  $string = str_replace("channels/staffpicks/", "", $string);
+  $string = str_replace("https", "http", $string);
   if (!preg_match(VIMEO_ID_REGEXP, $string)) {
     // The string ID is not easy to parse, let's try to analyze it
     if (preg_match(VIMEO_WEB_REGEXP, $string, $m)) {
@@ -331,4 +327,21 @@ function dpiscald_vimeo_parse_id($string, $check) {
     }
   }
   return $id;
+}
+
+function dpiscald_vimeo_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $value = str_replace ( '\\', '', $url );
+    $id = dpiscald_vimeo_parse_id ( $value, FALSE );
+    $wrapper->base_id->set ( $id );
+    $info = dpiscald_vimeo_video ( $id );
+    if (!empty($info->thumbnail ['src'])) {
+      $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->data['video_width'] = $info->width;
+    $entity->data['video_height'] = $info->height;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Vimeo : " . $url);
+  }
 }

@@ -40,6 +40,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   $weight_delta = round(count($nodes) / 2);
   $weight_delta =count($nodes);
   $original_weight=0;
+
   //dsm($nodes,nodes);
   foreach($nodes as $node){
     $form['nodes'][$node->nid]['weight'] = array(
@@ -60,6 +61,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     );
 
     $original_weight++;
+    
     $form['nodes'][$node->nid]['title'] = array(
       '#markup' => $node->node_title,
     );
@@ -68,8 +70,8 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
     foreach($node->field_field_authors as $author){
       $str_author .= '<a href="/'.$author["rendered"]["#href"].'">'.$author["rendered"]["#title"].'</a> ';
     }
-    $form['nodes'][$node->nid]['authors'] = array(
-      '#markup' => $str_author,
+    $form['nodes'][$node->nid]['field_field_authors'] = array(
+      '#markup' => (!empty($str_author))? $str_author : t("Undefined"),
     );
     
     $str_date = "";
@@ -80,8 +82,20 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
       '#markup' => $str_date,
     );
     
+    $str_date = "";
+    foreach($node->field_field_editorialupdatedate as $date){
+      $str_date .= $date["rendered"]["#markup"];
+    }
+    $form['nodes'][$node->nid]['field_field_editorialupdatedate'] = array(
+      '#markup' => $str_date,
+    );
+    
     $form['nodes'][$node->nid]['edit'] = array(
       '#markup' => '<a href="/node/'.$node->nid.'/edit">Edit</a>',
+    );
+    
+    $form['nodes'][$node->nid]['delete'] = array(
+      '#markup' => '<a href="/node/'.$node->nid.'/delete">Delete</a>',
     );
   }
   
@@ -96,7 +110,7 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Re order'),
+    '#value' => t('Save'),
   );
   
   return $form;
@@ -164,7 +178,8 @@ function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_sta
   $nodes_to_process=array_merge($smaller_than_boundary,$greater_than_boundary);
   */
   
-$boundary=count($form_state["values"]['nodes']);
+  $boundary=count($form_state["values"]['nodes']);
+  $nodes_to_process = array();
   foreach($order_by_new_rank as $rank=>$data){
     if(!($data['weight']==$data['original_weight'] and  $data['original_weight']==0)){
       $sum=abs($data['weight'])+abs($data['original_weight']);
@@ -184,7 +199,7 @@ $boundary=count($form_state["values"]['nodes']);
     foreach($nodes_to_process as $new_rank=>$data){
       $position=$new_rank+1;
       $nid=$data['nid'];
-      $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position);
+      $virtual_rank=_dpidestinations_virtualrank_give_virtual_rank_for_position($term_id,$target_name,$position, $nid);
       $destinations_to_update[$nid]=$virtual_rank;
 
     }

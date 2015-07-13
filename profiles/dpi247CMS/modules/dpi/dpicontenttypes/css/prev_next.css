@@ -1,0 +1,82 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 20-avr.-2015, 10:31:01
+    Author     : lba
+*/
+
+.dpi-prev-next{
+    margin-bottom: 0;
+}
+
+.dpi-prev-next li{
+    margin: 0;
+    padding-left: 0;    
+    list-style: none;
+    display: block;
+    position: relative;
+}
+
+.dpi-prev a{
+  display: block;
+  position: fixed;
+  z-index: 0;
+  left: 5%;
+  top: 45%;
+  width: 200px;
+  min-height: 48px;
+}
+
+.dpi-prev a:hover{
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.dpi-prev a span{   
+    line-height: 28px;
+    font-size: 24px;    
+}
+
+.dpi-glyph-prev{
+    margin-left: 0px;
+    display: block;
+    position: absolute;
+    left: -48px;
+    width: 48px;
+    height: 48px;
+    background:#FFF url(image/prev.png);
+}
+
+.dpi-next a{
+  display: block;
+  position: fixed;
+  width: 250px;
+  z-index: 0;
+  right: 5%;
+  top: 45%;
+  min-height: 48px;
+  text-align: right;
+}
+
+.dpi-next a:hover{
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.dpi-next a span{       
+    font-size: 24px;
+    line-height: 28px;
+}
+
+.dpi-glyph-next{
+    margin-left: 0px;
+    display: block;
+    position: absolute;
+    right: -48px;
+    width: 48px;
+    height: 48px;
+    background:#FFF url(image/next.png);
+}

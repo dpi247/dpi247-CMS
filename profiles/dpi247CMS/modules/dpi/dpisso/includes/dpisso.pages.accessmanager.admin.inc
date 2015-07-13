@@ -2,10 +2,11 @@
 function dpisso_accessmanager_admin_settings_page_form() {
 	
 	// Get ssoClient config from file.
-	$AccessId = LoginManager::getAccessId();
+	$ssoSession = new SsoSession( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
 	$ssoconfig = dpisso_get_config ();
+	$AccessId = $ssoConfig->AM_unitId;
 	if (isset ( $AccessId )) {
-		$response = AccessManager::getRemoteWhiteList ();
+		$response = $ssoSession->accessManager->getRemoteWhiteList();
 	}
 	
 	if (is_array ( $response->whiteList )) {
@@ -17,7 +18,7 @@ function dpisso_accessmanager_admin_settings_page_form() {
 	}
 	
 	// If no accessmanager nor invalid uri diseable the send button.
-	if (! valid_url ( $ssoconfig ["domain_AM"] )) {
+	if (! valid_url ( $ssoconfig->AM )) {
 		$dpisso_accessmanager_send = array (
 				"#disabled" => TRUE 
 		);
@@ -33,7 +34,7 @@ function dpisso_accessmanager_admin_settings_page_form() {
 			'#type' => 'textfield',
 			'#title' => t ( 'Access Manager URI' ),
 			'#description' => t ( " Do not indicate the scheme such as http:// neither the trailling slash. DPI will inform the Access Manager of any changes in the form bellow." ),
-			'#default_value' => $ssoconfig ["domain_AM"],
+			'#default_value' => $ssoconfig->AM,
 			'#disabled' => TRUE 
 	);
 	
@@ -96,7 +97,9 @@ function dpisso_accessmanager_admin_settings_page_form() {
  *
  */
 function dpisso_accessmanager_send_form_submit($form, &$form_state) {
-	$AccessId = LoginManager::getAccessId();
+	$ssoSession = new SsoSession( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+	$ssoconfig = dpisso_get_config ();
+	$AccessId = $ssoConfig->AM_unitId;
 	$postDatas = array ();
 	$postDatas['unitId'] = $AccessId;
 	$postDatas['whiteList'] = array(); 
@@ -106,7 +109,7 @@ function dpisso_accessmanager_send_form_submit($form, &$form_state) {
 		if (strlen(trim($v))) { 
 			if (!in_array(trim($v),$postDatas['whiteList'])) { $postDatas['whiteList'][]=trim($v); } 
 		}
-    }
+        }
     foreach( explode( "\n", $form_state['values']['dpisso_accessmanager_blackList'] ) as $v) {
     	if (strlen(trim($v))) { 
     		if (!in_array(trim($v),$postDatas['blackList'])) { $postDatas['blackList'][]=trim($v); } 
@@ -114,7 +117,7 @@ function dpisso_accessmanager_send_form_submit($form, &$form_state) {
     }
     
 	if (isset ( $postDatas ['unitId'] )) {
-		if($response = AccessManager::sendWhiteList ( $postDatas )){
+		if($response = $ssoSession->accessManager->sendWhiteList ( $postDatas )){
 		  drupal_set_message(t('Update success'));
 		}else{
 		  drupal_set_message(t('A problem occurred'), 'error');

@@ -19,5 +19,13 @@ function dpicontenttypes_node_info(){
       'title_label' => 'Title',      
       'help'=>""
     ),
+    'package_gallery' => array(
+      'name' => t("DPI Package gallery"),
+      'base' => 'package',
+      'description' => t('A package-gallery from DPI'),
+      'has_title' => 1,
+      'title_label' => 'Package gallery',
+      'help'=>""
+    ),
   );
 }

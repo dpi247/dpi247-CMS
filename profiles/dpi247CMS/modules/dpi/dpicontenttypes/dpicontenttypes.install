@@ -21,27 +21,30 @@ function dpicontenttypes_install() {
   dpiproperties_type_save($dpipropertiestype);
 
   scald_add_type('links_list', 'Links List', 'Links List');
-
   // Create base fields
   module_load_include('field_base.inc', 'dpicontenttypes');
   if ($fields = dpicontenttypes_field_default_field_bases()) {
     field_info_cache_clear();
-
     foreach ($fields as $field) {
       field_create_field($field);
     }
   }
-
+  
   // Create base fields instances
   module_load_include('field_instance.inc', 'dpicontenttypes');
   if ($instances = dpicontenttypes_field_default_field_instances()) {
     field_info_cache_clear();
-
     foreach ($instances as $field_instance) {
       field_create_instance($field_instance);
     }
   }
-
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+  
   // Hide author and date information for packages by default
   variable_set('node_submitted_package', FALSE);
 }
@@ -69,11 +72,11 @@ function dpicontenttypes_field_schema($field) {
       'type' => array(
         'type' => 'varchar',
         'not null' => FALSE,
-        'length' => '255',
+        'length' => 255,
       ),
       'provider' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
       ),
       'inline' => array(
         'type' => 'int',
@@ -195,7 +198,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The ID of the prenode',
       ),
@@ -207,7 +210,7 @@ function dpicontenttypes_schema() {
       ),
       'title' => array(
         'type' => 'varchar',
-        'length' => '255',
+        'length' => 255,
         'description' => 'Title',
       ),
     ),
@@ -220,7 +223,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -245,7 +248,7 @@ function dpicontenttypes_schema() {
     'fields' => array(
       'id' => array(
         'type' => 'varchar',
-        'length' => '128',
+        'length' => 128,
         'not null' => TRUE,
         'description' => 'The id of the object this cache is attached to.',
       ),
@@ -282,9 +285,10 @@ function dpicontenttypes_schema() {
       ),
       'eid' => array(
         'description' => 'The id of the entity attached to this croping',
-        'type' => 'int',
-        'unsigned' => TRUE,
+        'type' => 'varchar', //change for dam
+        'length' => 255,        
         'not null' => TRUE,
+        'default' => '',
       ),
       'aid' => array(
         'description' => 'The id of the atom attached to this croping',
@@ -336,8 +340,8 @@ function dpicontenttypes_schema() {
       ),
       'uri' => array(
         'description' => 'URI of the original file',
-        'type' => 'varchar',
-        'length' => 510,
+				'type' => 'varchar',
+				'length' => 512,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -357,11 +361,80 @@ function dpicontenttypes_schema() {
       ),
     ),
     'indexes' => array(
-      'uri' => array('uri'),
+      'uri' => array(array('uri',200)),
     ),
     'primary key' => array('eid'),
   );
+  
+  $schema['dpicontenttypes_temp_nodetopublish'] = array(
+    'description' => 'Contains all the node where embargo date or unpublish date are the current date',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'node status',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => TRUE,
+      ),
+      'date_info' => array(
+        'description' => 'date_info.',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+      //0 : unpublish, 1 publish
+      'action' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'date_timezone' => array(
+        'description' => 'The timezone of the field date',
+        'type' => 'text',
+        'size' => 'medium',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('nid', 'action'),
+  );
 
+  $schema['dpicontenttypes_inline_export_information'] = array(
+    'description' => 'Contains all information for recreating base xml imported from cci-newsgate',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'sid' => array(
+        'type' => 'int',
+        'description' => 'Nid',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'ext_ref' => array(
+        'description' => 'external reference from scald atom ',
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => NULL,
+      ),
+      'original_cci_link' => array(
+        'description' => 'original link, replace scald information for export',
+        'type' => 'blob',
+        'length' => 'long',
+        'default' => NULL,
+      ),
+    ),
+    'primary key' => array('nid', 'sid'),
+  );
+  
   return $schema;
 }
 
@@ -454,4 +527,370 @@ function dpicontenttypes_update_7007() {
     ->fields(array('type' => 'scald_atom'))
     ->condition('entity', 'scald_atom')
     ->execute();
+}
+
+function dpicontenttypes_update_7008(){
+  module_load_include('field_instance.inc', 'dpicontenttypes');
+  if ($instances = dpicontenttypes_field_default_field_instances_package_gallery()) {
+    field_info_cache_clear();
+  
+    foreach ($instances as $field_instance) {
+      field_create_instance($field_instance);
+    }
+  }
+}
+
+/**
+ * Modification du label embeddedobject
+ */
+function dpicontenttypes_update_7009(){
+  $field_instances = array();
+  
+  // Exported field_instance: 'node-package_gallery-field_embededobjects'
+  $field_instances['node-package_gallery-field_embededobjects'] = array(
+    'bundle' => 'package_gallery',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 23,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'image' => 'image',
+        'video' => 'video',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 6,
+    ),
+  );
+  
+  // Exported field_instance: 'node-package-field_embededobjects'
+  $field_instances['node-package-field_embededobjects'] = array(
+    'bundle' => 'package',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'dpicontenttypes',
+        'settings' => array(),
+        'type' => 'title',
+        'weight' => 23,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_embededobjects',
+    'label' => 'EmbeddedObjects',
+    'required' => 0,
+    'settings' => array(
+      'field_to_analyse' => 'field_textbody',
+      'referencable_types' => array(
+        'image' => 'image',
+        'video' => 'video',
+        'atom_package' => 'atom_package',
+      ),
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'dpicontenttypes',
+      'settings' => array(),
+      'type' => 'dpiatom_reference_textfield',
+      'weight' => 6,
+    ),
+  );
+  
+  foreach($field_instances as $instance){
+    field_update_instance($instance);
+  }
+}
+
+/**
+ * Creation of the table dpi_properties
+ */
+function dpicontenttypes_update_7010() {
+  // Creation of table dpi_properties
+  $schema = drupal_get_schema('dpicontenttypes_temp_nodetopublish', TRUE);
+  db_create_table('dpicontenttypes_temp_nodetopublish', $schema);
+}
+
+/**
+ * Creation of the table dpi_properties
+ */
+function dpicontenttypes_update_7011() {
+  db_drop_table("dpicontenttypes_temp_nodetopublish");
+  // Creation of table dpi_properties
+  $schema = drupal_get_schema('dpicontenttypes_temp_nodetopublish', TRUE);
+  db_create_table('dpicontenttypes_temp_nodetopublish', $schema);
+}
+
+/**
+ * Update du field de base de byline pour augmenter le longueur
+ */
+function dpicontenttypes_update_7012(){
+  $field_bases = array();
+  
+  // Exported field_base: 'field_byline'
+  $field_bases['field_byline'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_byline',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 1000,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+  
+  foreach($field_bases as $instance){
+    field_update_field($instance);
+  }
+}
+
+/**
+ * Unable bulk operation module for admin/content view
+ */
+function dpicontenttypes_update_7013(){
+  $modules = array('views_bulk_operations');
+  $enable_dependencies = TRUE; 
+  module_enable($modules, $enable_dependencies);
+}
+
+/**
+ * change type of dpicontenttypes_cropings eid because dam use uniqid with letter and then need tu use it.
+ */
+function dpicontenttypes_update_7014(){
+  if (db_table_exists('dpicontenttypes_cropings')) {
+    db_query("ALTER TABLE dpicontenttypes_cropings MODIFY eid varchar(255)")->execute();
+  }
+}
+
+/**
+ * Install the dpicontenttypes_inline_export_information table
+ */
+function dpicontenttypes_update_7015() {
+  if (!db_table_exists('dpicontenttypes_inline_export_information')) {
+    $schema = drupal_get_schema('dpicontenttypes_inline_export_information', TRUE);
+    db_create_table('dpicontenttypes_inline_export_information', $schema);
+  }
+}
+
+/**
+ * Création du nouveau field pour la mise à jour de la date d'éditorialisation
+ */
+function dpicontenttypes_update_7016(){
+  // Exported field_base: 'field_autopublish'
+  $field_bases['field_forceeditorialupdatedate'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_forceeditorialupdatedate',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(
+        0 => '',
+        1 => '',
+      ),
+      'allowed_values_function' => '',
+    ),
+    'translatable' => 0,
+    'type' => 'list_boolean',
+  );
+  
+  field_create_field($field_bases["field_forceeditorialupdatedate"]);
+}
+/**
+ * Création des instances pour la mise à jour de la date d'éditorialisation
+ */
+function dpicontenttypes_update_7017(){
+  // Exported field_instance: 'node-package-field_autopublish'
+  $field_instances ['node-package-field_forceeditorialupdatedate'] = array (
+    'bundle' => 'package',
+    'default_value' => array (
+      0 => array (
+        'value' => 0 
+      ) 
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array (
+      'default' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 22 
+      ),
+      'targetblock_big' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ) 
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_forceeditorialupdatedate',
+    'label' => 'Force editorial update date',
+    'required' => 0,
+    'settings' => array (
+      'user_register_form' => FALSE 
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array (
+        'display_label' => 1 
+      ),
+      'type' => 'options_onoff',
+      'weight' => 11 
+    ) 
+  );
+  // Exported field_instance: 'node-package-field_autopublish'
+  $field_instances ['node-package_gallery-field_forceeditorialupdatedate'] = array (
+    'bundle' => 'package_gallery',
+    'default_value' => array (
+      0 => array (
+        'value' => 0 
+      ) 
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array (
+      'default' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 22 
+      ),
+      'targetblock_big' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_medium' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 24 
+      ),
+      'targetblock_red' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'targetblock_small' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ),
+      'teaser' => array (
+        'label' => 'above',
+        'settings' => array (),
+        'type' => 'hidden',
+        'weight' => 23 
+      ) 
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_forceeditorialupdatedate',
+    'label' => 'Force editorial update date',
+    'required' => 0,
+    'settings' => array (
+      'user_register_form' => FALSE 
+    ),
+    'widget' => array (
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array (
+        'display_label' => 1 
+      ),
+      'type' => 'options_onoff',
+      'weight' => 11 
+    ) 
+  );
+  
+  foreach($field_instances as $field){
+    field_create_instance($field);
+  }  
 }

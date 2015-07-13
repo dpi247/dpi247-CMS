@@ -87,9 +87,11 @@ function dpiscald_storify_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_storify_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -119,6 +121,10 @@ function dpiscald_storify_theme() {
       'dpiscald_storify_player' => array(
           'variables' => array('vars' => NULL, 'atom' => NULL),
           'template' => 'providers/storify/dpiscald_storify_player'
+      ),
+      'dpiscald_storify_player_html5' => array(
+          'variables' => array('vars' => NULL, 'atom' => NULL),
+          'template' => 'templates/players/dpiscald_storify_player_html5'
       ),
   );
 }
@@ -172,5 +178,58 @@ function dpiscald_storify_validate_id($element, &$form_state) {
   $id = md5($url);
   if (dpiscald_storify_already_imported($id)) {
     form_error($element, t('Media already imported.'));
+  }
+}
+
+/**
+ * Parse an storify ID and check validity
+ *
+ */
+function dpiscald_storify_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    $parsing = parse_url($string);
+    if (isset($parsing['host']) && $parsing['host'] == "storify.com") {
+      $id = $string;
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_scribblelive_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
+}
+
+function dpiscald_storify_get_import_info($importer, & $entity, & $wrapper, $urls){
+  try {
+    $id = dpiscald_storify_parse_id ( $urls, FALSE );
+    $wrapper->base_id->set ( $id );
+    $url = $urls;
+    if (startsWith($url,'https')){
+      $url = explode('https://storify.com/',$url);
+    } else {
+      $url = explode('http://storify.com/',$url);
+    }               
+    $url = $url[1];
+    $infos = dpiscald_storify_get_media_infos_from_url ( $url );
+    $infos = $infos->content;                
+    $entity->title = $infos->title;                
+    $entity->data['url'] = $url;
+    $entity->data['orig_identifier'] = $urls;   
+    if(isset($infos->thumbnail)){
+      $file = $importer->createFile ( $infos->thumbnail, scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Storify : " . $url);
   }
 }

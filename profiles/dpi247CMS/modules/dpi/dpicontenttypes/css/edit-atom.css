@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+.pad-10 a{
+    padding: 8px;
+}
+
+.cache_white_space .description {
+    white-space: normal;
+}

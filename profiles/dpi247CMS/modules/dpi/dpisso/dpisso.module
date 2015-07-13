@@ -1,5 +1,4 @@
 <?php
-
 // @todo: crer un callback que le varnish appelle
 // pour savoir si on utilise l'authentification SSO ou l'authentification Drupal
 // Même chose pour le profile manager etc ...
@@ -10,44 +9,38 @@ module_load_include ( 'inc', 'dpisso', 'dpisso.private' );
 define ( 'DPISSO_ACCESSTOKEN_COOKIE_NAME', "dpisso-access-token" );
 define ( 'DPISSO_LONTERM_COOKIE_NAME', "dpisso-longterm" );
 
-/**
- * Implements hook_ctools_plugin_directory().
- *
- * @see dpisso_ctools_plugin_type()
- */
-function dpisso_ctools_plugin_directory($module, $plugin) {
-  if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
-    return 'plugins/paywallpolitics';
-  }
-}
 
 /**
  * Implementation of hook_menu()
  */
 function dpisso_menu() {
-
-  $items = array();
-
+  $items = array ();
   
-  $items[DPI_ADMIN_PATH.'/dpisso'] = array(
-    'title'            => t('DPI SSo Settings'),
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('dpisso_loginmanager_admin_settings_page_form'),
-    'access arguments' => array('administer dpisso'),
-    'description'      => t('Manage SSO&Paywall settings'),
-    'file'             => 'includes/dpisso.pages.general.admin.inc',
-   // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
+  $items [DPI_ADMIN_PATH . '/dpisso'] = array (
+    'title' => t ( 'DPI SSo Settings' ),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpisso_loginmanager_admin_settings_page_form' 
+    ),
+    'access arguments' => array (
+      'administer dpisso' 
+    ),
+    'description' => t ( 'Manage SSO&Paywall settings' ),
+    'file' => 'includes/dpisso.pages.general.admin.inc' 
+  // 'file path' => drupal_get_path('module', 'dpisso').'/includes',
+    );
+  
+  $items [DPI_ADMIN_PATH . '/dpisso/general'] = array (
+    'title' => t ( 'General Settings' ),
+    'access arguments' => array (
+      'administer dpisso' 
+    ),
+    'weight' => - 10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes',
+    'file' => 'dpisso.pages.general.admin.inc' 
   );
-
-  $items[DPI_ADMIN_PATH.'/dpisso/general'] = array(
-      'title'            => t('General Settings'),
-      'access arguments' => array('administer dpisso'),
-      'weight'           => -10,
-      'type'             => MENU_DEFAULT_LOCAL_TASK,
-      'file path'        => drupal_get_path('module', 'dpisso').'/includes',
-      'file'             => 'dpisso.pages.general.admin.inc',
-  );
-
+  
   $items [DPI_ADMIN_PATH . '/dpisso/loginmanager'] = array (
     'title' => t ( 'Login Manager' ),
     'page callback' => 'drupal_get_form',
@@ -91,6 +84,21 @@ function dpisso_menu() {
     'file' => 'dpisso.pages.paywall.admin.inc',
     'weight' => 0,
     'type' => MENU_LOCAL_TASK 
+  );
+  
+  $items [DPI_ADMIN_PATH . '/dpisso/bypasspaywall'] = array (
+    'title' => t ( 'Bypass paywall' ),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array (
+      'dpisso_bypasspaywall_admin_settings_page_form'
+    ),
+    'access arguments' => array (
+      'administer dpisso'
+    ),
+    'file path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes',
+    'file' => 'dpisso.bypasspaywall.admin.inc',
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK
   );
   
   $items ['dpisso/login'] = array (
@@ -143,30 +151,30 @@ function dpisso_block_view($delta = '') {
   return $block;
 }
 
-
 function dpisso_get_connect_form() {
   libraries_load ( 'ssophptoolbox' );
-  if(file_exists(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')){
-    $config = Config::getInstance(DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config/ssoClient.ini')->getConfigurationInstance();
-    if($unitId = LoginManager::getUnitId()){
+  if (file_exists ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' )) {
+    $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+    $config = $ssoSession->config;
+    if ($unitId = $config->LM_unitId) {
       if (user_is_anonymous ()) {
-        $return = l ( 'Login', $config['ssoServer_url'] . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Login', $config->login . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
-            'class' => 'btn blue'
-          )
+            'class' => 'btn blue' 
+          ) 
         ) );
       } else {
-        $return = l ( 'Logout', $config['ssoServer_url'] . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Logout', $config->login . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
           'attributes' => array (
-            'class' => 'btn blue'
-          )
+            'class' => 'btn blue' 
+          ) 
         ) );
       }
-    }else{
-      $return = t('Connexion service not available');
+    } else {
+      $return = t ( 'Connexion service not available' );
     }
-  }else{
-    $return = t('Connexion service not available, install libraries to use it.');
+  } else {
+    $return = t ( 'Connexion service not available, install libraries to use it.' );
   }
   return $return;
 }
@@ -186,20 +194,12 @@ function dpisso_permission() {
  * Implementation of hook_theme()
  */
 function dpisso_theme() {
-  $path = drupal_get_path ( 'module', 'dpisso' );
-  $base = array (
-    'file' => 'theme.inc',
-    'path' => $path . '/theme' 
-  );
-  return array (
-    'checkboxgrid' => $base + array (
-      'render element' => 'element' 
-    ),
-    'formtable_form_table' => array(
+  return array (    
+    'formtable_form_table' => array (
       'render element' => 'form',
       'file' => 'dpisso.pages.paywall.admin.inc',
-      'path' => drupal_get_path('module', 'dpisso').'/includes',
-    ),
+      'path' => drupal_get_path ( 'module', 'dpisso' ) . '/includes' 
+    ) 
   );
 }
 
@@ -216,6 +216,23 @@ function dpisso_ctools_plugin_type() {
     ) 
   );
 }
+
+
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * @see dpisso_ctools_plugin_type()
+ */
+function dpisso_ctools_plugin_directory($module, $plugin) {
+    if (($module == 'dpisso') && ($plugin == 'paywallpolitic')) {
+        return 'plugins/paywallpolitics';
+    }
+    if(($module == 'ctools') && ($plugin == 'access')){
+        return 'plugins/access';
+    }
+}
+
 
 /**
  * Implementation of hook_form_alter().
@@ -257,15 +274,16 @@ function dpisso_libraries_info() {
 }
 
 /*
+//@todo redévelopper le status pour le dashboard
  * Implement the dashboard status item hook. Check if ssoclient config file is correct.
  */
-function dpisso_dpidashboard_status_item() {
+/*function dpisso_dpidashboard_status_item() {
   
   // Get ssoClient config from file.
   $ssoconfig = dpisso_get_config ();
   
   // If no accessmanager nor invalid uri diseable the send button.
-  if (! isset ( $ssoconfig ["ssoServer_url"] ) || ! valid_url ( $ssoconfig ["ssoServer_url"] )) {
+  if (!isset($ssoconfig) || !isset ( $ssoconfig ) || ! valid_url ( $ssoconfig ["ssoServer_url"] )) {
     
     $status = array (
       'title' => 'ssoConfig File',
@@ -291,8 +309,8 @@ function dpisso_dpidashboard_status_item() {
       );
     }
   }
-  return $status;
-}
+  return array($status);
+}*/
 
 /*
  * Get the ssoCLient Config from file. @return array All the configuration elements.
@@ -300,10 +318,11 @@ function dpisso_dpidashboard_status_item() {
 function dpisso_get_config() {
   libraries_load ( "ssophptoolbox" );
   if (! is_file ( dpi_variable_get ( 'ssoClienInitFile', '' ) )) {
-    $ssoconfig = array ();
+    $ssoconfig = NULL;
   } else {
     $ini_file = dpi_variable_get ( 'ssoClienInitFile', '' );
-    $ssoconfig = Config::getInstance ( $ini_file )->getConfigurationInstance ();
+    $ssoSession = new SsoSession($ini_file);
+    $ssoconfig = $ssoSession->config;
   }
   return ($ssoconfig);
 }
@@ -320,18 +339,19 @@ function dpisso_get_federation() {
   return ($ssoFederationConfig);
 }
 
-function dpisso_get_version(){
+function dpisso_get_version() {
   return TRUE;
 }
 
-function dpisso_update_role_for_access_manager_to_drupal(){
+function dpisso_update_role_for_access_manager_to_drupal() {
   $return = FALSE;
-  if(is_array(libraries_load ( "ssophptoolbox" ))){
-    $roles = AccessManager::getRoleList();
-    if(isset($roles)){
-      if(dpisso_accessmanager_synchro_roles($roles->services)){
+  if (is_array ( libraries_load ( "ssophptoolbox" ) ) && file_exists(DRUPAL_ROOT . "/sites/all/libraries/ssophptoolbox/AccessManager.class.php")) {
+    $ssoSession = new SsoSession( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );
+    $roles = $ssoSession->accessManager->getRoleList();
+    if (isset ( $roles )) {
+      if (dpisso_accessmanager_synchro_roles ( $roles->services )) {
         $return = TRUE;
-      }  
+      }
     }
   }
   return $return;
@@ -341,23 +361,24 @@ function dpisso_update_role_for_access_manager_to_drupal(){
  * This function create role is not exist.
  * Parameter is a simple array with all informtions.
  *
- * @param array $roles - array with new roles
+ * @param array $roles
+ *          - array with new roles
  */
-function dpisso_accessmanager_synchro_roles($roles){
-  if(is_array($roles)){
+function dpisso_accessmanager_synchro_roles($roles) {
+  if (is_array ( $roles )) {
     try {
-      foreach($roles as $role){
-        if(user_role_load_by_name($role)==FALSE){
-          $new_role = new stdClass();
+      foreach ( $roles as $role ) {
+        if (user_role_load_by_name ( $role ) == FALSE) {
+          $new_role = new stdClass ();
           $new_role->name = $role;
-          user_role_save($new_role);
+          user_role_save ( $new_role );
         }
       }
-      return TRUE;  
-    } catch (Exception $e) {
+      return TRUE;
+    } catch ( Exception $e ) {
       return FALSE;
     }
-  }else{
+  } else {
     return FALSE;
   }
 }
@@ -365,13 +386,54 @@ function dpisso_accessmanager_synchro_roles($roles){
 /**
  * Implements cron function
  */
-function dpisso_cron(){
-  if(variable_get('dpisso_role_run_cron', FALSE)){
-    if(dpisso_update_role_for_access_manager_to_drupal()){
-      watchdog('dpisso_role', 'Dpisso role updated');
-    }else{
-      watchdog('dpisso_role', 'Dpisso role update occured an error');
+function dpisso_cron() {
+  if (variable_get ( 'dpisso_role_run_cron', FALSE )) {
+    if (dpisso_update_role_for_access_manager_to_drupal ()) {
+      watchdog ( 'dpisso_role', 'Dpisso role updated' );
+    } else {
+      watchdog ( 'dpisso_role', 'Dpisso role update occured an error' );
     }
   }
 }
 
+/**
+ * Implements hook_token_info()
+ * @return array
+ */
+function dpisso_token_info() {
+  $info['tokens']['user']['ssoLogin'] = array(
+    'name' => t('Sso login token'),
+    'description' => t('Return the login id for the user'),
+  );
+  return $info;
+}
+
+/**
+ * Implementations of hook_tokens()
+ * @param String $type
+ * @param array $tokens
+ * @param array $data
+ * @param array $options
+ * @return array
+ */
+function dpisso_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'ssoLogin':
+          libraries_load ( "ssophptoolbox" );
+          $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );          
+          $name = "anonymous";
+          if(isset($ssoSession->config->loginToken_cookie_name) && $ssoSession->config->loginToken_cookie_name!="" && isset($_COOKIE[$ssoSession->config->loginToken_cookie_name])){
+            $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
+          }elseif(isset($ssoSession->config->anonymousId_cookie_name) && $ssoSession->config->anonymousId_cookie_name!="" && isset($_COOKIE[$ssoSession->config->anonymousId_cookie_name])){
+            $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
+          }
+          $replacements[$original] = $name;
+          break;        
+      }
+    }
+  }
+  return $replacements;
+}

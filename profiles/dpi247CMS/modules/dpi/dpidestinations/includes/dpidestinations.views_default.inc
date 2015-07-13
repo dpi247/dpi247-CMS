@@ -39,17 +39,21 @@ function dpidestinations_views_default_views() {
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['table'] = 'field_data_field_destinations';
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['field'] = 'field_destinations_virtual_rank';
   $handler->display->display_options['sorts']['field_destinations_virtual_rank']['order'] = 'DESC';
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = '1';
 
   /* Display: Target block */
   $handler = $view->new_display('targetview', 'Target block', 'targetview_1');
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['row_plugin'] = 'targetblock_node_row';
-
-
-  $views[$view->name] = $view;
+  
+  $views [$view->name] = $view;
   // At the end, return array of default views.
-
-  $view = new view();
+  
+  $view = new view ();
   $view->name = 'targetview_reorder_default';
   $view->description = '';
   $view->tag = 'default';
@@ -59,62 +63,77 @@ function dpidestinations_views_default_views() {
   $view->api_version = '3.0';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-  /* Display: Master */
-  $handler = $view->new_display('default', 'Master', 'default');
-  $handler->display->display_options['use_more_always'] = FALSE;
-  $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['cache']['type'] = 'none';
-  $handler->display->display_options['query']['type'] = 'views_query';
-  $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['style_plugin'] = 'default';
-  $handler->display->display_options['row_plugin'] = 'fields';
+/* Display: Master */
+  $handler = $view->new_display ( 'targetview', 'Master', 'default' );
+  $handler->display->display_options ['use_more_always'] = FALSE;
+  $handler->display->display_options ['access'] ['type'] = 'perm';
+  $handler->display->display_options ['cache'] ['type'] = 'none';
+  $handler->display->display_options ['query'] ['type'] = 'views_query';
+  $handler->display->display_options ['exposed_form'] ['type'] = 'basic';
+  $handler->display->display_options ['pager'] ['type'] = 'full';
+  $handler->display->display_options ['style_plugin'] = 'default';
+  $handler->display->display_options ['row_plugin'] = 'fields';
   /* Field: Content: Title */
-  $handler->display->display_options['fields']['title']['id'] = 'title';
-  $handler->display->display_options['fields']['title']['table'] = 'node';
-  $handler->display->display_options['fields']['title']['field'] = 'title';
-  $handler->display->display_options['fields']['title']['label'] = '';
-  $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
-  $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+  $handler->display->display_options ['fields'] ['title'] ['id'] = 'title';
+  $handler->display->display_options ['fields'] ['title'] ['table'] = 'node';
+  $handler->display->display_options ['fields'] ['title'] ['field'] = 'title';
+  $handler->display->display_options ['fields'] ['title'] ['label'] = '';
+  $handler->display->display_options ['fields'] ['title'] ['alter'] ['word_boundary'] = FALSE;
+  $handler->display->display_options ['fields'] ['title'] ['alter'] ['ellipsis'] = FALSE;
   /* Field: Content: Authors */
-  $handler->display->display_options['fields']['field_authors']['id'] = 'field_authors';
-  $handler->display->display_options['fields']['field_authors']['table'] = 'field_data_field_authors';
-  $handler->display->display_options['fields']['field_authors']['field'] = 'field_authors';
-  $handler->display->display_options['fields']['field_authors']['label'] = '';
-  $handler->display->display_options['fields']['field_authors']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_authors']['delta_offset'] = '0';
+  $handler->display->display_options ['fields'] ['field_authors'] ['id'] = 'field_authors';
+  $handler->display->display_options ['fields'] ['field_authors'] ['table'] = 'field_data_field_authors';
+  $handler->display->display_options ['fields'] ['field_authors'] ['field'] = 'field_authors';
+  $handler->display->display_options ['fields'] ['field_authors'] ['label'] = '';
+  $handler->display->display_options ['fields'] ['field_authors'] ['element_label_colon'] = FALSE;
+  $handler->display->display_options ['fields'] ['field_authors'] ['delta_offset'] = '0';
   /* Field: Content: Editorial Publication date */
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['id'] = 'field_editorialpublicationdate';
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['table'] = 'field_data_field_editorialpublicationdate';
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['field'] = 'field_editorialpublicationdate';
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['label'] = '';
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_editorialpublicationdate']['settings'] = array(
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['id'] = 'field_editorialpublicationdate';
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['table'] = 'field_data_field_editorialpublicationdate';
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['field'] = 'field_editorialpublicationdate';
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['label'] = '';
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['element_label_colon'] = FALSE;
+  $handler->display->display_options ['fields'] ['field_editorialpublicationdate'] ['settings'] = array (
+    'format_type' => 'long',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '' 
+  );
+  /* Field: Content: Editorial Update Date */
+  $handler->display->display_options ['fields'] ['field_editorialupdatedate'] ['id'] = 'field_editorialupdatedate';
+  $handler->display->display_options ['fields'] ['field_editorialupdatedate'] ['table'] = 'field_data_field_editorialupdatedate';
+  $handler->display->display_options ['fields'] ['field_editorialupdatedate'] ['field'] = 'field_editorialupdatedate';
+  $handler->display->display_options ['fields'] ['field_editorialupdatedate'] ['settings'] = array (
     'format_type' => 'long',
     'fromto' => 'both',
     'multiple_number' => '',
     'multiple_from' => '',
     'multiple_to' => '',
+    'show_remaining_days' => 0 
   );
-  /* Sort criterion: Content: Post date */
-  $handler->display->display_options['sorts']['field_destinations_virtual_rank']['id'] = 'field_destinations_virtual_rank';
-  $handler->display->display_options['sorts']['field_destinations_virtual_rank']['table'] = 'field_data_field_destinations';
-  $handler->display->display_options['sorts']['field_destinations_virtual_rank']['field'] = 'field_destinations_virtual_rank';
-  $handler->display->display_options['sorts']['field_destinations_virtual_rank']['order'] = 'DESC';
-
+  /* Sort criterion: Content: Destinations (field_destinations:virtual_rank) */
+  $handler->display->display_options ['sorts'] ['field_destinations_virtual_rank'] ['id'] = 'field_destinations_virtual_rank';
+  $handler->display->display_options ['sorts'] ['field_destinations_virtual_rank'] ['table'] = 'field_data_field_destinations';
+  $handler->display->display_options ['sorts'] ['field_destinations_virtual_rank'] ['field'] = 'field_destinations_virtual_rank';
+  $handler->display->display_options ['sorts'] ['field_destinations_virtual_rank'] ['order'] = 'DESC';
   /* Filter criterion: Content: Published */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'node';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value'] = 1;
-  $handler->display->display_options['filters']['status']['group'] = 1;
-  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  $handler->display->display_options ['filters'] ['status'] ['id'] = 'status';
+  $handler->display->display_options ['filters'] ['status'] ['table'] = 'node';
+  $handler->display->display_options ['filters'] ['status'] ['field'] = 'status';
+  $handler->display->display_options ['filters'] ['status'] ['value'] = 1;
+  $handler->display->display_options ['filters'] ['status'] ['group'] = 1;
+  $handler->display->display_options ['filters'] ['status'] ['expose'] ['operator'] = FALSE;
   /* Filter criterion: Content: Type */
-  $handler->display->display_options['filters']['type']['id'] = 'type';
-  $handler->display->display_options['filters']['type']['table'] = 'node';
-  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options ['filters'] ['type'] ['id'] = 'type';
+  $handler->display->display_options ['filters'] ['type'] ['table'] = 'node';
+  $handler->display->display_options ['filters'] ['type'] ['field'] = 'type';
+  $handler->display->display_options ['filters'] ['type'] ['value'] = array (
+    'package' => 'package',
+    'package_gallery' => 'package_gallery' 
+  );
   
-  $views[$view->name] = $view;
-
+  $views [$view->name] = $view;
+  
   return $views;
 }

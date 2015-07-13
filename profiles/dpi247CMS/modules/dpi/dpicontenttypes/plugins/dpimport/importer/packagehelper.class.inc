@@ -28,7 +28,6 @@ abstract class PackageHelper extends Importer {
       if (!Logger::error()) {
         $dispatcher->processChildren($dom, $package_wrapper, $package);
       }
-
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $package_wrapper, $package, 'node', $this, $dispatcher);
     }
@@ -47,9 +46,13 @@ abstract class PackageHelper extends Importer {
   protected function _createOrLoadEntityPackage($dom, $external_reference, $action) {
     $node = new stdClass();
     $node->type = 'package';
+    if(isset($dom->getAttributeNode('xsi:type')->value) && $dom->getAttributeNode('xsi:type')->value == "GalleryPackageType"){
+      $node->type = 'package_gallery';
+    }
     $node->is_new = TRUE;
     node_object_prepare($node);
-    $node->dpiproperties = new DPIPropertiesEntity(array('type' => 'package'), 'dpiproperties');
+    $node->dpiproperties = new DPIPropertiesEntity(array('type' => $node->type), 'dpiproperties');
+    
     $temp_node = dpicontenttypes_api_getnodebyexternalreference($external_reference);
     $dpiproperties = dpiproperties_load_by_external_reference($external_reference);
     if ($dpiproperties !== FALSE){
@@ -59,7 +62,11 @@ abstract class PackageHelper extends Importer {
     switch($action){
       case 'Delete':
         if ($temp_node != NULL) {
-          // @todo delete node
+          try {
+            node_delete($temp_node->nid);
+          }catch (Exception $exc) {
+            Logger::logError('importer', 0, 'xmldelete', t('There was an error occuring during delete'));
+          }          
         } else {
           Logger::logError('importer', 0, 'xmldelete', t('The package doesn\'t exist. It can\'t be deleted. Package rejected.'));
         }
@@ -91,7 +98,6 @@ abstract class PackageHelper extends Importer {
       $node_wrapper = entity_metadata_wrapper('node', $node);
       $node_wrapper->field_external_reference->set($external_reference);
     }
-
     return $node;
   }
 
@@ -104,8 +110,10 @@ abstract class PackageHelper extends Importer {
    * @return Object $node
    */
   protected function _createOrLoadEntityScaldAtom($dom, $external_reference, $atom) {
-    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){
+    if ($temp_atom = dpicontenttypes_api_getatombyexternalreference($external_reference)){      
       $atom = $temp_atom;
+      $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
+      $atom_wrapper->field_external_reference->set($external_reference);
     } else {
       $atom_wrapper = entity_metadata_wrapper('scald_atom', $atom);
       $atom_wrapper->field_external_reference->set($external_reference);
@@ -117,7 +125,6 @@ abstract class PackageHelper extends Importer {
     } else {
       $atom->dpiproperties = new DPIPropertiesEntity(array('type' => 'scald_atom'), 'dpiproperties');
     }
-
     return $atom;
   }
 
@@ -131,8 +138,12 @@ abstract class PackageHelper extends Importer {
    */
   protected function _createOrLoadEntityPhotoObjectType($dom, $external_reference) {
     $atom = scald_atom_defaults('image');
+    /* Besoin de cloner a cause du cache static ! */
+    $atom=clone($atom);
     $atom->provider = 'scald_image';
     $atom->type = 'image';
+    $atom->field_external_reference = $external_reference;
+    $atom->external_reference_set = TRUE;
 
     return $this->_createOrLoadEntityScaldAtom($dom, $external_reference, $atom);
   }
@@ -211,7 +222,12 @@ abstract class PackageHelper extends Importer {
   protected function getDefaultTextFormat() {
     static $default_format = '';
     if (empty($default_format)) {
-      $default_format = filter_default_format();
+      $dispatcher_text_format = $this->getDispatcher()->getTextFormat();
+      if(!$dispatcher_text_format || $dispatcher_text_format == ""){
+        $default_format = filter_default_format();
+      }else{
+        $default_format = $dispatcher_text_format;
+      }
     }
     return $default_format;
   }
@@ -223,6 +239,7 @@ abstract class PackageHelper extends Importer {
    */
   protected function createOrLoadEntityLinksList($dom){
     $atom = scald_atom_defaults('links_list');
+    $atom=clone($atom);
     $atom->provider = 'dpicontenttypes';
     $atom->type = 'links_list';
     $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
@@ -264,9 +281,10 @@ abstract class PackageHelper extends Importer {
     $uri = $dom->getElementsByTagName('URI')->item(0)->nodeValue;
     $provider = dpicontenttypes_api_getprovider($uri);
     if ($provider == NULL){
-      Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri', array('!uri' => $uri)));
+      Logger::logError('importer', 0, 'provider', t('There is no provider for this uri !uri createOrLoadEntityLink', array('!uri' => $uri)));
     } else {
-      $atom = scald_atom_defaults($provider['type']);
+      $atom = scald_atom_defaults($provider['type']);   
+      $atom=clone($atom);
       $atom->provider = $provider['name'];
       $atom->type = $provider['type'];
       $external_reference = $dom->getElementsByTagName('ExternalReference')->item(0)->nodeValue;
@@ -306,6 +324,7 @@ abstract class PackageHelper extends Importer {
    */
   protected function createOrLoadEntityAudioObjectType($dom){
     $atom = scald_atom_defaults('audio');
+    $atom=clone($atom);
     $atom->provider = 'scald_audio';
     $atom->type = 'audio';
 

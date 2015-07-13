@@ -9,21 +9,8 @@ if (! (defined ( 'YOUTUBE_WEB' ) && defined ( 'YOUTUBE_OEMBED' ) && defined ( 'Y
   define('YOUTUBE_OEMBED',      'http://www.youtube.com/oembed');
   define('YOUTUBE_ID_REGEXP',   '/^[a-zA-Z0-9\-_]+$/');
   define('YOUTUBE_WEB_REGEXP',  '#https?://www\.youtube\.com/\S+[\?&]v=([a-zA-Z0-9\-_]+)#');
-  define('YOUTUBE_RSS',         'http://gdata.youtube.com/feeds/api/videos/');
+  define('YOUTUBE_RSS',         'https://www.googleapis.com/youtube/v3/videos');
   define('YOUTUBE_MEDIA',       'http://search.yahoo.com/mrss/');
-}
-
-/**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some video atoms.
- */
-function dpiscald_youtube_scald_atom_providers() {
-  return array(
-    'video' => 'Video hosted on YouTube'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Video hosted on YouTube');
 }
 
 /**
@@ -48,20 +35,23 @@ function dpiscald_youtube_scald_add_form_fill(&$atom, $form, $form_state) {
   $identifier = dpiscald_youtube_parse_id($form_state['values']['identifier'], TRUE);
 
   // Get video info
-  $infos = dpiscald_youtube_video($identifier);
+  //$infos = dpiscald_youtube_video($identifier);
+  $infos = dpiscald_youtube_video_oembed($identifier);
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'youtube';
 
   // Prefill the author
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
     'tid' => 0,
-    'taxonomy_term' => (object)(array('name' => $infos->author))
+    'taxonomy_term' => (object)(array('name' => $infos->author_name))
   );
 
-  // Prefill tags
-  $langcode = field_language('scald_atom', $atom, 'scald_tags');
+  // Prefill tags  
   foreach ($infos->tags as $index => $tag) {
     $atom->scald_tags[$langcode][$index] = array(
       'tid' => $index,  // Beware, this is not a real tid, it's just an index
@@ -73,8 +63,10 @@ function dpiscald_youtube_scald_add_form_fill(&$atom, $form, $form_state) {
   if (!isset($atom->data)) {
     $atom->data = array();
   }
-  $atom->data['video_width'] = $infos->width;
-  $atom->data['video_height'] = $infos->height;
+  $atom->data["base_url"] = $form_state['values']['identifier'];
+  $atom->data["youtube_id"] = $identifier;
+  $atom->data["video_width"] = $infos->width;
+  $atom->data["video_height"] = $infos->height;
 
   // Download a copy of the video thumbnail. This makes it possible
   // to do interesting manipulation with image styles presets.
@@ -115,8 +107,8 @@ function dpiscald_youtube_scald_prerender($atom, $context, $options, $mode) {
       array('vars' =>
         array(
           'video_id'      => $atom->base_id,
-          'video_width'   => ($atom->data['video_width'] ? $atom->data['video_width'] : 480),
-          'video_height'  => ($atom->data['video_height'] ? $atom->data['video_height'] : 365),
+          'video_width'   => (isset($atom->data['video_width']) && $atom->data['video_width']) ? $atom->data['video_width'] : 480,
+          'video_height'  => (isset($atom->data['video_height']) && $atom->data['video_height']) ? $atom->data['video_height'] : 365,
           'thumbnail'     => $atom->rendered->thumbnail_source_url,
         ),
         'atom' => $atom,
@@ -133,6 +125,10 @@ function dpiscald_youtube_theme() {
     'dpiscald_youtube_player' => array(
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/youtube/dpiscald_youtube_player'
+    ),
+    'dpiscald_youtube_player_html5' => array(
+      'variables' => array( 'video_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_youtube_player_html5'
     ),
   );
 }
@@ -153,7 +149,7 @@ function dpiscald_youtube_register($video) {
     $infos = $video;
   }
   else {
-    $infos = dpiscald_youtube_video($video);
+    $infos = dpiscald_youtube_video_oembed($video);
   }
 
   // Check if the video has already been imported to prevent duplicate
@@ -164,7 +160,7 @@ function dpiscald_youtube_register($video) {
 
   // Download a copy of the video thumbnail. This makes it possible
   // to do interesting manipulation with image styles presets.
-  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $thumb = drupal_http_request($infos->thumbnails[0]);
   $dir = 'public://youtube';
   if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
     $dest = $dir . '/' . $infos->id . '.jpg';
@@ -194,90 +190,23 @@ function dpiscald_youtube_register($video) {
  *   An array of object, each one containing an analyzed video.
  */
 function dpiscald_youtube_feed($type, $id) {
-  if ($type == 'user') {
-    $url = YOUTUBE_RSS . '?author=' . $id;
-  }
-  elseif ($type == 'tag') {
-    $url = YOUTUBE_RSS . '?category=' . $id;
-  }
-  else {
-    $url = YOUTUBE_RSS . $id;
-  }
+  $url = "https://www.googleapis.com/youtube/v3/videos?id=" . $id . "&key=". variable_get("dpiscald_youtube_api_key", '')."&part=".$type;
   $response = drupal_http_request($url);
-  $items = array();
-  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
-    $dom = new DOMDocument();
-    if ($dom->loadXML($response->data)) {
-      foreach ($dom->getElementsByTagName('entry') as $item) {
-        $items[] = dpiscald_youtube_parse_item($item);
+  $return = FALSE;
+  if ($response->code = 200 && !empty($response->data)) {
+        $data = json_decode($response->data);
+       if(isset($data->items) && is_array($data->items) && isset($data->items[0])){
+          $return = $data->items[0];
       }
-    }
   }
-  return $items;
+  return $return;
 }
 
 /**
  * Analyze the youtube feed for a specific video.
  */
 function dpiscald_youtube_video($id) {
-  $items = dpiscald_youtube_feed('video', $id);
-  return $items[0];
-}
-
-/**
- * Analyze a XML DOMElement item to extract interesting info.
- * @param $item
- *   An object of classe DOMElement corresponding to an element of the feed.
- * @return array
- *   An abject containing various video informations.
- */
-function dpiscald_youtube_parse_item($item) {
-  $info = new stdClass();
-
-  // Fetch the video ID
-  $api_url_full = $item->getElementsByTagName('id')->item(0)->nodeValue;
-  $api_url_parts = explode('/', $api_url_full);
-  $info->id = array_pop($api_url_parts);
-
-  // Video Title
-  $title = $item->getElementsByTagName('title')->item(0);
-  $info->title = $title->nodeValue;
-
-  // Video dimensions
-  // Unfortunately the YouTube API doesn't provide original video dimensions
-  // see : http://code.google.com/p/gdata-issues/issues/detail?id=1083
-  $info->width = 480;
-  $info->height = 365;
-  // Now we try to get the dimensions from the OEmbed API instead
-  if ($oembed = dpiscald_youtube_video_oembed($info->id)) {
-    $info->width = ($oembed->width ? $oembed->width : $info->width);
-    $info->height = ($oembed->height ? $oembed->height : $info->height);
-  }
-
-  // Thumbnail data
-  $thumbs = $item->getElementsByTagNameNS(YOUTUBE_MEDIA, 'thumbnail');
-  if ($thumbs->length) {
-    $thumb = $thumbs->item(0);
-    $info->thumbnail = array(
-      'src'    => $thumb->getAttribute('url'),
-      'width'  => $thumb->getAttribute('width'),
-      'height' => $thumb->getAttribute('height')
-    );
-  }
-
-  // Video tags
-  $tags = $item->getElementsByTagNameNS(YOUTUBE_MEDIA, 'keywords')->item(0)->nodeValue;
-  $info->tags = explode(', ', $tags);
-
-  // Author
-  $info->author = $item->getElementsByTagName('name')->item(0)->nodeValue;
-
-  // Creation Date
-  $info->pubDate = $item->getElementsByTagName('published')->item(0)->nodeValue;
-
-  // License
-  $info->license = 'YT';
-  return $info;
+  return dpiscald_youtube_feed('snippet', $id);
 }
 
 
@@ -379,3 +308,15 @@ function dpiscald_youtube_parse_id($string, $check) {
   return $id;
 }
 
+function dpiscald_youtube_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $value = str_replace ( '\\', '', $url );
+    $id = dpiscald_youtube_parse_id ( $value, FALSE );
+    $wrapper->base_id->set ( $id );
+    $info = dpiscald_youtube_video_oembed ( $id );
+    $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Youtube : " . $url);
+  }
+}

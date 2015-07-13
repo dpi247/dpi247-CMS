@@ -47,6 +47,7 @@ function dpistat_showstats48h_content_type_edit_form_submit(&$form, &$form_state
  * Output function for the 'shortcut' content type.
  */
 function dpistat_showstats48h_content_type_render($subtype, $conf, $panel_args, $context, $a) {
+  $block = new stdClass();
   $block->title = t('Number of visists during the last 48 hours');
   $theme_args = array(
     'nid' => $context->data->nid,

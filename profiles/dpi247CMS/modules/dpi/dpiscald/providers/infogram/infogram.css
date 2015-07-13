@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-infogram {
+  background: url('icons/infogram-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-infogram:hover {
+  background-image: url('icons/infogram-large-color.png');
+}
+.dnd-library-wrapper .editor-item .meta.type-infogram {
+ background-image: url('icons/infogram-large-color.png');
+}

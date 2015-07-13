@@ -306,19 +306,21 @@ function dpiblocks_flowmix_content_type_flowmix_get_most_recent_from_availables(
  */
 function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
   $default_settings = $form_state['plugin']['defaults'];
-
   $current_pane = FALSE;
-  if ($form_state['step'] == 'step1' && (!isset($form_state['conf']) || empty($form_state['conf']))) {
+  
+  /* 
+   * Bypass with false because bug is not Real. After test this bug is not present then we bypass this problem.
+   * We need to fix if it's real or not to get out this part of code.
+   */
+  if ($form_state['step'] == 'step1' && (!isset($form_state['conf']) || empty($form_state['conf'])) && FALSE) {
     // We have to reinitialize the cached pane at the first load of the form
     // If we didn't do that there would be a confusion between the cached pane and the current pane
     // after the submission of a new flow (when the "OK" button is pressed on the "plugin" form)
     $current_pane = $form_state['pane'];
-
     if ($current_pane->subtype != 'new_flowmix') {
       $default_settings = dpiblocks_flowmix_content_type_generate_settings_for_subtype($current_pane->subtype);
     } else {
-          $form_state['display cache']->new_pane = panels_new_pane($pane->type, $pane->subtype, TRUE);
-
+      $form_state['display cache']->new_pane = panels_new_pane($pane->type, $pane->subtype, TRUE);
     }
   }
   elseif ($form_state['step'] == 'step1' && !isset($form_state['clicked_button']) && $form_state['input'] < 5) {
@@ -384,7 +386,6 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
       '#markup'        => $flow->name,
     );
   }
-
   $form['title'] = array(
     '#type'            => 'textfield',
     '#title'           => t('Title'),
@@ -497,10 +498,9 @@ function dpiblocks_flowmix_content_type_form_summary_form($form, &$form_state) {
  */
 function dpiblocks_flowmix_content_type_form_summary_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
-
   // Check that the given URL responds
   if (!empty($values['url'])) {
-    $check_url = drupal_http_request($file_uri, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)));
+    $check_url = drupal_http_request($values['url'], array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 30)));
     module_load_include('inc', 'dpicommons', 'includes/dpicommons.helpers');
     if (!dpicommons_is_http_request_successfull($check_url)) {
       form_set_error('url', t('The URL doesn\'t respond.'));
@@ -511,7 +511,7 @@ function dpiblocks_flowmix_content_type_form_summary_form_validate(&$form, &$for
 /**
  * Submit the main form of the flowmix edition
  */
-function dpiblocks_flowmix_content_type_form_summary_form_submit(&$form, &$form_state) {
+function dpiblocks_flowmix_content_type_form_summary_form_submit($form, & $form_state) {
   $flowmix_item = &$form_state['conf']['flow_obj'];
   $submitted = $form_state['values'];
 
@@ -530,6 +530,7 @@ function dpiblocks_flowmix_content_type_form_summary_form_submit(&$form, &$form_
       }
     }
   }
+  $form_state['toto'] = 'tata';
   // The current flows couldn't have been edited at this step, get the old ones back
   $flowmix_item->flows = $form_state['settings']->flows;
 
@@ -606,7 +607,7 @@ function dpiblocks_flowmix_content_type_form_basicsetttings_form($form, $form_st
     }
     $temp_flow = &$flowmix_item->flows['temp_flow'];
     $flow_conf = dpiblocks_flowmix_content_type_form_basicsetttings_defaults($temp_flow);
-
+    
     $form['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Flow feed name'),

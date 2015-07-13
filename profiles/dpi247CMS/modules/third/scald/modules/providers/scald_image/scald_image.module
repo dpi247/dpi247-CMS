@@ -26,12 +26,33 @@ function scald_image_scald_atom_providers() {
  */
 function scald_image_scald_add_form(&$form, &$form_state) {
   $defaults = scald_atom_defaults('image');
+  $type = scald_type_load('image');
   $form['file'] = array(
     '#type' => $defaults->upload_type,
-    '#title' => t('Image'),
-    '#upload_location' => scald_atom_thumbnail_path('image'),
+    '#title' => check_plain(scald_type_property_translate($type)),
+    '#upload_location' => ScaldAtomController::getThumbnailPath('image'),
     '#upload_validators' => array('file_validate_extensions' => array('jpg jpeg png gif')),
   );
+  if ($defaults->upload_type == 'plupload') {
+    $form['scald_authors'] = array(
+      '#type' => 'textfield',
+      '#default_value' => NULL,
+      '#maxlength' => 100,
+      '#autocomplete_path' => 'taxonomy/autocomplete/scald_authors',
+      '#required' => FALSE,
+      '#title' => t('Authors'),
+      '#description' => t('Preset value for %field_name field. If left empty, the default field value will be used.', array('%field_name' => t('Authors'))),
+    );
+    $form['scald_tags'] = array(
+      '#type' => 'textfield',
+      '#default_value' => NULL,
+      '#maxlength' => 100,
+      '#autocomplete_path' => 'taxonomy/autocomplete/scald_tags',
+      '#required' => FALSE,
+      '#title' => t('Tags'),
+      '#description' => t('Preset value for %field_name field. If left empty, the default field value will be used.', array('%field_name' => t('Tags'))),
+    );
+  }
 }
 
 /**
@@ -51,13 +72,41 @@ function scald_image_scald_add_form_fill(&$atoms, $form, $form_state) {
   foreach ($atoms as $delta => $atom) {
     if (is_array($form_state['values']['file']) && module_exists('plupload')) {
       module_load_include('inc', 'scald', 'includes/scald.plupload');
-      $file = scald_plupload_save_file($form_state['values']['file'][$delta]['tmppath'], $form['file']['#upload_location'] . $form_state['values']['file'][$delta]['name']);
+      $destination = $form['file']['#upload_location'] . '/' . $form_state['values']['file'][$delta]['name'];
+      $file = scald_plupload_save_file($form_state['values']['file'][$delta]['tmppath'], $destination);
     }
     else {
       $file = file_load($form_state['values']['file']);
     }
     $atom->title = $file->filename;
     $atom->base_id = $file->fid;
+    foreach (array('author', 'tag') as $name) {
+      // hacky, because variable and field name do not really match.
+      $field_name = 'scald_' . $name . 's';
+      $langcode = field_language('scald_atom', $atom, $field_name);
+      if (empty($form_state['values'][$field_name])) {
+        continue;
+      }
+
+      // Borrowed from taxonomy_autocomplete_validate().
+      $typed_terms = drupal_explode_tags($form_state['values'][$field_name]);
+      $vocabulary = taxonomy_vocabulary_machine_name_load(variable_get('scald_' . $name . '_vocabulary', $field_name));
+      foreach ($typed_terms as $typed_term) {
+        if ($possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => $vocabulary->vid))) {
+          $term = array_pop($possibilities);
+        }
+        else {
+          $term = (object) array(
+            'vid' => $vocabulary->vid,
+            'name' => $typed_term,
+            'vocabulary_machine_name' => $vocabulary->machine_name,
+          );
+          taxonomy_term_save($term);
+        }
+        $atom->{$field_name}[$langcode][] = array('tid' => $term->tid);
+      }
+    }
+
     $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
     $atom->scald_thumbnail[$langcode][0] = (array) $file;
   }
@@ -69,12 +118,13 @@ function scald_image_scald_add_form_fill(&$atoms, $form, $form_state) {
 function scald_image_scald_transcoders() {
   $transcoders = array();
   foreach (image_styles() as $name => $style) {
+    $label = isset($style['label']) ? $style['label'] : $style['name'];
     $transcoders['style-' . $name] = array(
-      'title' => t('@style (Image style)', array('@style' => $name)),
-      'description' => t('Use the Image style @style to prepare the image', array('@style' => $name)),
+      'title' => t('@style (Image style)', array('@style' => $label)),
+      'description' => t('Use the Image style @style to prepare the image', array('@style' => $label)),
       'formats' => array(
-        'image' => 'passthrough'
-      )
+        'image' => 'passthrough',
+      ),
     );
   }
   if (module_exists('picture')) {
@@ -84,7 +134,7 @@ function scald_image_scald_transcoders() {
         'description' => t('Use the Picture group @group to prepare the image', array('@group' => $name)),
         'formats' => array(
           'image' => 'passthrough',
-        )
+        ),
       );
     }
   }
@@ -188,7 +238,11 @@ function scald_image_scald_prerender($atom, $context, $options, $mode) {
     ';
   }
   elseif ($mode == 'atom') {
-    $attributes = array();
+    // Default attributes, which can be overridden by field settings.
+    $attributes = array(
+      'alt' => $atom->title,
+      'title' => $atom->title,
+    );
     $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
     foreach (array('alt', 'title', 'width', 'height') as $attribute_name) {
       if (isset($atom->scald_thumbnail[$langcode][0][$attribute_name]) && $atom->scald_thumbnail[$langcode][0][$attribute_name]) {
@@ -203,10 +257,17 @@ function scald_image_scald_prerender($atom, $context, $options, $mode) {
       foreach ($mappings->mapping as $breakpoint_name => $multipliers) {
         if (!empty($multipliers)) {
           foreach ($multipliers as $multiplier => $image_style) {
-            if (!empty($image_style)) {
-              $fallback_image_style = $image_style;
-              break 2;
+            if (!$image_style) {
+              continue;
             }
+            // $image_style is machine name in Picture 1.x and an array in
+            // Picture 2.x.
+            if (is_array($image_style) && $image_style['mapping_type'] === '_none') {
+              continue;
+            }
+
+            $fallback_image_style = is_array($image_style) ? $image_style['image_style'] : $image_style;
+            break 2;
           }
         }
       }

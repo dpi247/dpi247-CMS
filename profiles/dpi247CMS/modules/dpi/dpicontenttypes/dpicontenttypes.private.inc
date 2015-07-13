@@ -92,12 +92,16 @@ function _dpicontenttypes_create_file_from_uri($file_uri, $destination) {
 
 
 function _dpicontenttypes_form_validate_sync_title_with_display_title(&$element, &$form_state, $form){
-
-  $language=$form["language"]["#value"];
+  $language=$form['language']['#value'];
   if(!isset($language) or $language==''){
     $language='und';
   }
-  $form_state['values']['title']=strip_tags($form_state['values']['field_displaytitle'][$language][0]['value']);
+  if(isset($form_state['values']['field_displaytitle'][$language][0]['value'])){
+    $strip = $form_state['values']['field_displaytitle'][$language][0]['value'];
+  }else{
+    $strip = $form_state['values']['field_displaytitle']['und'][0]['value'];
+  }
+  $form_state['values']['title']=strip_tags($strip);
 }
 
 /**
@@ -136,7 +140,7 @@ function _dpicontenttypes_file_check_directory_recursive($directory, $mode = 0, 
     // Check if directory exists.
     if (!is_dir($real_path)) {
       if (($mode & FILE_CREATE_DIRECTORY) && @mkdir($real_path, 0775, TRUE)) {
-        drupal_set_message(t('The directory %directory has been created.', array('%directory' => $real_path)));
+        watchdog('file system', t('The directory %directory has been created.'), array('%directory' => $real_path), WATCHDOG_INFO);
         @chmod($real_path, 0775); // Necessary for non-webserver users.
       }
       else {
@@ -150,7 +154,7 @@ function _dpicontenttypes_file_check_directory_recursive($directory, $mode = 0, 
     // Check to see if the directory is writable.
     if (!is_writable($real_path)) {
       if (($mode & FILE_MODIFY_PERMISSIONS) && @chmod($real_path, 0775)) {
-        drupal_set_message(t('The permissions of directory %directory have been changed to make it writable.', array('%directory' => $real_path)));
+        watchdog('file system', t('The permissions of directory %directory have been changed to make it writable.'), array('%directory' => $real_path), WATCHDOG_ERROR);
       }
       else {
         if ($form_item) {
@@ -192,6 +196,115 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
   dpiproperties_save($dpiproperties);
 }
 
+function _dpicontenttypes_entityinsertscaldatom($node){
+  switch ($node->type){
+    case 'package':
+        $atom = new ScaldAtom('atom_package', 'atom_package', array(          
+          'title' => $node->title,
+          'data' => array(
+            'nid' => $node->nid,
+            'author' => (isset($node->field_authors))?$node->field_authors: array(),
+          ),
+        ));
+        if($atomId = scald_atom_save($atom)){
+          drupal_set_message('Atom package '.$atomId.' created !');
+        }else{
+          drupal_set_message('Atom package not created !', 'error');
+        }
+      break;
+    case 'package_gallery':
+        $atom = new ScaldAtom('atom_package', 'atom_package_gallery', array(
+          'title' => $node->title,
+          'data' => array(
+            'nid' => $node->nid,
+            'author' => (isset($node->field_authors))?$node->field_authors: array(),
+          ),
+        ));
+        if($atomId = scald_atom_save($atom)){
+          drupal_set_message('Atom package gallery '.$atomId.' created !');
+        }else{
+          drupal_set_message('Atom package gallery not created !', 'error');
+        }
+      break;
+  }
+}
+
+/**
+ * Insertion des informations d'embargo dans la table en fonction des informations présente dans le noeud.
+ * @param stdClass $node
+ */
+function _dpicontenttypes_entityinsertembargoinformation($node){
+  $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+  if (!empty($useautopublishdates))
+    $useautopublishdate = current($useautopublishdates);
+  $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+  if(isset($autopublishdates) && is_array($autopublishdates) && count($autopublishdates)>=1){
+    $autopublishdate = current($autopublishdates);
+    if ($useautopublishdate) {        
+      $infos = new stdClass();
+      $infos->nid = $node->nid;
+      $infos->status = $node->status;
+
+      if ( $autopublishdate['value'] != NULL && $node->status == 0 && intval($autopublishdate['value']) > time()){
+        $infos->date = $autopublishdate['value'];
+        $infos->action = 1;
+        $infos->timezone = $autopublishdate['timezone'];    
+        dpicontenttypes_api_insert_autopublish($infos); 
+      }
+
+      if ($autopublishdate['value2'] != NULL && intval($autopublishdate['value2']) > time()){
+        $infos->action = 0;
+        $infos->date = $autopublishdate['value2'];
+        dpicontenttypes_api_insert_autopublish($infos);
+      }
+    }
+  }  
+}
+
+/**
+ * This function change editorial publication date if embargo is used
+ * @param object $node
+ */
+function _dpicontenttypes_entityinserteditorialpublicationdate(&$node){  
+  /* Gestion de la date éditorial de publication */
+  $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+  if (!empty($useautopublishdates))
+    $useautopublishdate = current($useautopublishdates);  
+  /* Si on utilise l'embargo et que celui-ci à un status à non publié 
+   * et que la date d'embargo est plus grande que maintenant */
+  if(isset($useautopublishdate['value']) && $useautopublishdate['value']){
+    $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+    $autopublishdate = current($autopublishdates);
+    if (isset($autopublishdate['value']) && intval($autopublishdate['value']) > time()) {
+      $wrapper = entity_metadata_wrapper('node', $node);
+      if(is_object($wrapper)){
+        $wrapper->field_editorialpublicationdate->set($autopublishdate['value']);
+      }
+    }
+  }
+}
+
+/**
+ * 
+ * @param type $node
+ */
+function _dpicontenttypes_entitymanageeditorialupdatedate($node){
+  $field_update = field_get_items('node', $node, 'field_forceeditorialupdatedate');
+  if(isset($field_update) && !empty($field_update) && (!isset($node->skipUpdatedate) || $node->skipUpdatedate!= TRUE)){
+    $field_force_update = $field_update[0]['value'];
+    $wrapper = entity_metadata_wrapper('node', $node);
+    if(isset($field_force_update) && $field_force_update){      
+      $wrapper->field_editorialupdatedate->set(time());      
+    }elseif(isset($node->nid)){
+      $old_node = node_load($node->nid);
+      if(isset($old_node) && is_object($old_node)){
+        $node->field_editorialupdatedate = $old_node->field_editorialupdatedate;
+      }
+    }    
+    $wrapper->field_forceeditorialupdatedate->set(FALSE);
+  }  
+}
+
 /**
  * Delete dpiproperties from the database
  * 
@@ -203,6 +316,18 @@ function _dpicontenttypes_entityinsertdpiproperties($object, $entity, $eid) {
 function _dpicontenttypes_entitydeletedpiproperties($object, $entity, $eid) {
   $condition = db_and()->condition('id', $eid)->condition('entity', $entity);
   db_delete('dpicontenttypes_properties')->condition($condition)->execute();
+}
+
+function _dpicontenttypes_entitydeletescaldatom($object, $entity, $nid){
+  db_delete('scald_atoms')->condition('title', $object->title)->execute();
+}
+
+/**
+ * Delete des informations d'embargo dans la table en fonction des informations présente dans le noeud.
+ * @param stdClass $node
+ */
+function _dpicontenttypes_entitydeleteembargoinformation($node){  
+  dpicontenttypes_api_delete_autopublish($node);
 }
 
 /**
@@ -367,9 +492,15 @@ function _dpicontenttypes_cropings_update_cropings($entity_type, $eid, $aid, $cr
     $new_croping->cropings = serialize($cropings);
     $new_croping->temp = $temp ? 1 : 0;
     if ($existing_croping) {
-      drupal_write_record('dpicontenttypes_cropings', $new_croping, 'cid');
+      unset($new_croping['cid']);
+      db_update('dpicontenttypes_cropings')
+        ->fields((array)$new_croping)
+        ->condition('cid', $new_croping["cid"])
+        ->execute();
     } else {
-      drupal_write_record('dpicontenttypes_cropings', $new_croping);
+      db_insert('dpicontenttypes_cropings')
+        ->fields((array)$new_croping)
+        ->execute();
     }
   }
   return;

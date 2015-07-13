@@ -5,7 +5,7 @@ module_load_include('inc', 'dpiblocks','dpiblocks.private');
 // Load all entity function for remotehtml and custom content
 module_load_include('inc', 'dpiblocks','dpiblocks.entity');
 module_load_include ( 'inc', 'dpidestinations', 'dpidestinations.api' );
-
+define("PREFIX_ACCROCHE", "accroche_");
 
 /**
  * Implementation of hook_menu()
@@ -14,7 +14,7 @@ module_load_include ( 'inc', 'dpidestinations', 'dpidestinations.api' );
 */
 function dpiblocks_menu() {
   $items[DPI_ADMIN_PATH.'/dpiblocks/flowplugins'] = array(
-    'title' => 'Flow plugins',
+    'title' => 'DPI blocks Flow plugins',
     'description' => 'Gives informations about existing flow plugins',
     'page callback' => 'dpiblocks_page_flow_plugins',
     'access arguments' => array('manage flow plugins'),
@@ -102,14 +102,22 @@ function dpiblocks_menu() {
   );
   
   $items[DPI_ADMIN_PATH.'/accroche'] = array(
-    'title' => 'View accroche',
+    'title' => 'DPI blocks Accroche',
     'description' => 'Create a new accroche type',
     'page callback' => 'dpiblocks_get_accroche_info',
     'access arguments' => array('manage flow plugins'),
-    'file' => 'includes/accroche.admin.inc',
+    'file' => 'includes/accroche.admin.inc',    
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/add'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche'] = array(
+    'title' => 'DPI blocks Accroche',
+    'description' => 'Create a new accroche type',
+    'access arguments' => array('manage flow plugins'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/add'] = array(
     'title' => 'Manage accroche',
     'description' => 'Create a new accroche type',
     'page callback' => 'drupal_get_form',
@@ -118,63 +126,77 @@ function dpiblocks_menu() {
     'file' => 'includes/accroche.admin.inc',
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/add/%'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/add/%'] = array(
     'title' => 'Update accroche',
     'description' => 'Update accroche type',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('dpiblocks_accroche_admin_add_form', 4),
+    'page arguments' => array('dpiblocks_accroche_admin_add_form', 5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
   );
   
-  $items[DPI_ADMIN_PATH.'/accroche/del/%'] = array(
+  $items[DPI_ADMIN_PATH.'/accroche/accroche/del/%'] = array(
     'title' => 'Delete accroche',
     'description' => 'delete accroche type',
     'page callback' => 'dpiblocks_accroche_admin_del',
-    'page arguments' => array(4),
+    'page arguments' => array(5),
     'access arguments' => array('manage flow plugins'),
     'file' => 'includes/accroche.admin.inc',
+  );
+  
+  $items[DPI_ADMIN_PATH.'/accroche/accroche_export'] = array(
+    'title' => 'Export/Import accroche',
+    'description' => 'Export or import accroche element',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiblocks_get_export_import_form'),
+    'access arguments' => array('manage flow plugins'),
+    'file' => 'includes/accroche.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+  
+  $items['my_module_set_target'] = array(
+    'page callback'    => 'dpiblocks_ajax_callback_define_type_entity_form',
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,    
   );
   
   return $items;
 }
 
 function dpiblocks_preprocess_node(& $vars){
-  $view_mode = $vars["view_mode"];
-  $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
-  $vars['theme_hook_suggestions'][] = 'node__'.$view_mode.'__'.$vars['type'];
-  $vars['view_mode'] = $view_mode;
+  if(isset($vars["view_mode"])){
+    $view_mode = $vars["view_mode"];
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode;
+    $vars['theme_hook_suggestions'][] = 'node__'.$view_mode.'__'.$vars['type'];
+    $vars['view_mode'] = $view_mode;
+  }
 }
 
 function dpiblocks_preprocess_panels_pane(& $vars){
   if($vars['pane']->type == "accroche"){
+    $entity = _dpiblocks_accroche_get_entity_by_subtype($vars['pane']->subtype);
     $vars["theme_hook_suggestions"][] = "panels_pane__accroche";
-    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$vars['pane']->subtype;
-    $vars["theme_hook_suggestions"][] = "accroche__".$vars['pane']->subtype;
+    $vars["theme_hook_suggestions"][] = "panels_pane__accroche__".$entity->layout;
+    $vars["theme_hook_suggestions"][] = "accroche__".$entity->layout;
   }
 }
 
 function dpiblocks_get_title_ajax($string = "") {
   // clean other node present to the string
-  if (isset ( $string ) && $string != "") {
-    $array_string = explode ( ';', $string );
-    $string = $array_string [count ( $array_string ) - 1];
-    unset ( $array_string [count ( $array_string ) - 1] );
-    $other_response = implode ( ";", $array_string );
-  }
   $matches = array ();
   if ($string) {
     $result = db_select ( 'node', 'n' )->fields ( 'n', array (
       'nid',
       'title'
-    ) )->condition ( 'title', db_like ( $string ) . '%', 'LIKE' )->range ( 0, 10 )->execute ();
+    ) )->condition ( 'n.title', '%%'. $string . '%%', 'LIKE' )->range ( 0, 10 )->execute ();
     if (isset ( $other_response ) && $other_response != "") {
       foreach ( $result as $user ) {
         $matches [$other_response . ";" . $user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
       }
     } else {
       foreach ( $result as $user ) {
-        $matches [$user->nid . ';'] = check_plain ( $user->title ) . " (nid=$user->nid)";
+        $matches [$user->title . ' ('.$user->nid.')'] = $user->title . ' ('.$user->nid.')';
       }
     }
   }
@@ -236,7 +258,7 @@ function dpiblocks_dpicache_cache_entry_register() {
     'dpiblocks_flowmix_feed' => array(
       'callback' => 'dpiblocks_flowmix_content_type_generate_feed', // Function to call
       'plugin' => 'dpicache_memcache', // Which storage?
-      'catagory' => 'dpiblocks', // Group
+      'category' => 'dpiblocks', // Group
       'data_type' => 'array', // The callback returns an array
       'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
       'refresh_interval' => 15*60, // Default refresh interval
@@ -244,6 +266,21 @@ function dpiblocks_dpicache_cache_entry_register() {
         'module' => 'dpiblocks',
         'type' => 'inc',
         'name' => 'plugins/content_types/flowmix',
+      ),
+      'bypass' => FALSE, // Has to be set to FALSE in production environments
+    ),
+    'dpiblocks_accroche_feed' => array(
+      'callback' => 'dpiblocks_accroche_content_type_generate_feed', // Function to call
+      'plugin' => 'dpicache_memcache', // Which storage?
+      'category' => 'dpiblocks_accroche', // Group
+      'category_callback' => 'dpiblocks_accroche_get_category_callback',
+      'data_type' => 'array', // The callback returns an array
+      'ttl' => 7*24*60*60, // (in seconds) Keep a cache for one week
+      'refresh_interval' => 15*60, // Default refresh interval
+      'file' => array( // File to load
+        'module' => 'dpiblocks',
+        'type' => 'inc',
+        'name' => 'plugins/content_types/accroche',
       ),
       'bypass' => FALSE, // Has to be set to FALSE in production environments
     ),
@@ -504,3 +541,19 @@ function dpiblocks_views_api() {
     'path' => drupal_get_path('module', 'dpiblocks')."/themes",
   );
 }
+
+function dpiblocks_views_post_execute(& $view){  
+  if(isset($view->name) && $view->name == "dpiblocks_accroche_default"){
+    if(isset($view->args[0]) && !empty($view->args[0])){
+      $nid_args = explode('+', $view->args[0]);
+      $result = array();
+      foreach($nid_args as $nid){
+        $tmp = new stdClass();
+        $tmp->nid = $nid;
+        $result[] = $tmp;
+      }
+      $view->result = $result;
+    }
+  }
+}
+

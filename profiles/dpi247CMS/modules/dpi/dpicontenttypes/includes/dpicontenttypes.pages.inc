@@ -38,7 +38,7 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
   array_shift($args);
   array_shift($args);
   $target = implode('/', $args);
-
+ 
   // Check that the style is defined, the scheme is valid, and the image
   // derivative token is valid. (Sites which require image derivatives to be
   // generated without a token can set the 'image_allow_insecure_derivatives'
@@ -55,9 +55,8 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
     return MENU_ACCESS_DENIED;
   }
 
-  $image_uri = $scheme . '://' . $target;
-  $image_uri = explode('?', $image_uri);
-  $image_uri = $image_uri[0];
+  /* use source thumbnail to generate element */
+  $image_uri = $atom->thumbnail_source;
   
   $derivative_uri = _dpicontenttypes_image_style_path($style['name'], $entity->entity_id, $atom->sid, $image_uri);
 
@@ -95,20 +94,26 @@ function dpicontenttypes_image_style_deliver($style, $entity, $atom, $scheme) {
     }
   }
 
-  // Add the current entity in the effect datas
-  foreach ($style['effects'] as $effect_id => $effect) {
-    if ($effect['name'] == 'dpicontenttypes_dpicrop' || $effect['name'] == 'dpicontenttypes_dpicropcopy') {
-      $style['effects'][$effect_id]['data']['entity'] = $entity;
-      $style['effects'][$effect_id]['data']['atom'] = $atom;
-      $style_copy = $style;
-      unset($style_copy['effects']);
-      $style['effects'][$effect_id]['data']['style'] = $style_copy;
-    }
-  }
-
   // Try to generate the image, unless another thread just did it while we were
   // acquiring the lock.
-  $success = file_exists($derivative_uri) || image_style_create_derivative($style, $image_uri, $derivative_uri);
+  $success = file_exists($derivative_uri);
+  
+  if(!$success){
+    // Add the current entity in the effect datas
+    foreach ($style['effects'] as $effect_id => $effect) {
+      if ($effect['name'] == 'dpicontenttypes_dpicrop' || $effect['name'] == 'dpicontenttypes_dpicropcopy') {
+        $style['effects'][$effect_id]['data']['entity'] = $entity;
+        $style['effects'][$effect_id]['data']['atom'] = $atom;
+        $style_copy = $style;
+        unset($style_copy['effects']);
+        drupal_alter('crop_style_effect', $entity, $style_copy);
+        $style['effects'][$effect_id]['data']['style'] = $style_copy;
+      }
+    }
+    
+    $success = image_style_create_derivative($style, $image_uri, $derivative_uri);
+  }
+  
 
   if (!empty($lock_acquired)) {
     lock_release($lock_name);

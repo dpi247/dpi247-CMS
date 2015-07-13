@@ -1,4 +1,0 @@
-name = Simple field
-description = A simplefield module that create a new type of field, a licence plate.
-core = 7.x
-

@@ -21,7 +21,11 @@ function dpiservices_pages_form_table_product_form() {
  * @return array
  */
 function dpiservices_create_table_product() {
+  drupal_add_css(drupal_get_path('module', 'dpiservices')."/css/dpiservices.css");
+  
   $products = dpiservices_product_get_all_product_info (10);
+  
+  $render = l(t('Add product'), 'admin/dpi247/dpijsonexporter/add', array('attributes' => array('class' => 'btn-dpiservices')));
   
   $header_row = array (
     'Label',
@@ -44,8 +48,8 @@ function dpiservices_create_table_product() {
       $product ['description'],
       $product ['product'],
       $product ['product_type'],
-      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See informations</a>',
-      '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a><br /><a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
+      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See the result</a>',
+      '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a> - <a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
     );
   }
   
@@ -59,5 +63,5 @@ function dpiservices_create_table_product() {
     'empty' => t('No data is available'),
   ) );
   
-  return $table;
+  return $render . $table;
 }

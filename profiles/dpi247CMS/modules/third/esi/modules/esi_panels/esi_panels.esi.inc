@@ -11,6 +11,13 @@
  * @see esi_panels_esi_component_info().
  */
 function esi_panels__esi_pane_prepare($component_key) {
+  // The URL pattern approximately corresponds to the function arguments:
+  // 1. A component key, which is a colon-separated set of pieces of
+  //    information: the theme name, the display ID and the pane ID.
+  // 2. An optional task name.
+  // 3. A variable number of arguments to the display.
+  // 4. The original URL.
+
   // Use the parameters to reconstruct:
   // - Display
   // - Pane
@@ -19,7 +26,7 @@ function esi_panels__esi_pane_prepare($component_key) {
 
   // Check for optional args.
   $args = array_slice(func_get_args(), 1);
-
+  // The URL is always the last argument.
   $url = array_pop($args);
 
   // Task-name and context identifier are next in the URL, if context is used
@@ -31,7 +38,10 @@ function esi_panels__esi_pane_prepare($component_key) {
     'display_contexts' => array(),
   );
 
+  // If the pane has context, attempt to load the context from the display
+  // data.
   if (!empty($pane->configuration['context'])) {
+    // The task name is always the first of the optional arguments.
     $task_name = array_shift($args);
     list($task, $subtask) = _esi_panels__get_task_identifier($task_name);
 

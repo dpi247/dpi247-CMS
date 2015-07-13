@@ -71,9 +71,11 @@ function dpiscald_picktochart_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_picktochart_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -156,5 +158,47 @@ function dpiscald_picktochart_validate_id($element, &$form_state) {
   }
   elseif (dpiscald_picktochart_already_imported($id)) {
     form_error($element, t('Media already imported.'));
+  }
+}
+
+/**
+ * Parse an picktochart ID and check validity
+ *https://magic.piktochart.com/output/4155739-testing
+ */
+function dpiscald_picktochart_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    $parsing = parse_url($string);
+    if (isset($parsing['host']) && $parsing['host'] == "magic.piktochart.com") {
+      $id = $string;
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_scribblelive_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
+}
+
+function dpiscald_picktochart_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $id = dpiscald_picktochart_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( $id );
+    $infos = dpiscald_picktochart_get_media_infos_from_url ( $url );
+    $entity->title = $infos['title'];
+    $entity->data['id'] = $infos['id'];
+    $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media Piktochart : " . $url);
   }
 }

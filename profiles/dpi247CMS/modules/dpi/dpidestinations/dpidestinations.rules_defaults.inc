@@ -21,10 +21,27 @@ function dpidestinations_default_rules_configuration() {
               },
               "DO" : [
                 { "regenerate_node" : { "node" : [ "node" ] } },
-                { "refresh_node_cash" : { "node" : [ "node" ] } }
+                { "refresh_node_cash" : { "node" : [ "node" ] } },
+                { "regenerate_accroche_cache" : { "node" : [ "node" ] } }
               ]
             }
           }';
   $configs ['rules_regenerate_cache_node'] = rules_import ( $rule );
+  $rule = '{ "rules_invalidation_cache_targetblock" : {
+              "LABEL" : "Invalidation cache targetblock",
+              "PLUGIN" : "reaction rule",
+              "OWNER" : "rules",
+              "REQUIRES" : [ "dpidestinations" ],
+              "ON" : {
+                "targetblock_insert" : [],
+                "targetblock_update" : [],
+                "targetblock_delete" : []
+              },
+              "DO" : [
+                { "regenerate_targetblock_destination" : { "node" : [ "targetblock" ] } }
+              ]
+            }
+          }';
+  $configs ['rules_regenerate_cash_targetblock'] = rules_import ( $rule );
   return $configs;
 }

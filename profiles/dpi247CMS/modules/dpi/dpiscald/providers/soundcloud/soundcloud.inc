@@ -15,19 +15,6 @@ if (! (defined ('SOUNDCLOUD_ID_REGEXP') && defined('SOUNDCLOUD_WEB_REGEXP') && d
 }
 
 /**
- * Implements hook_scald_atom_providers().
- * Tell Scald that we'll be providing some audio atoms.
- */
-function dpiscald_soundcloud_scald_atom_providers() {
-  return array(
-    'audio' => 'Audio hosted on SoundCloud'
-  );
-  // This code will never be hit, but is necessary to mark the string
-  // for translation on localize.d.o
-  t('Audio hosted on SoundCloud');
-}
-
-/**
  * Implements hook_scald_add_form().
  */
 function dpiscald_soundcloud_scald_add_form(&$form, &$form_state) {
@@ -54,6 +41,9 @@ function dpiscald_soundcloud_scald_add_form_fill(&$atoms, $form, $form_state) {
 
   $atom->base_id = $identifier;
   $atom->title = $infos->title;
+
+  $atom->provider = 'dpiscald';
+  $atom->type = 'soundcloud';
 
   // Prefill the author
   $atom->scald_authors[LANGUAGE_NONE][0] = array(
@@ -142,6 +132,10 @@ function dpiscald_soundcloud_theme() {
     'dpiscald_soundcloud_player' => array(
       'variables' => array('vars' => NULL),
       'template' => 'providers/soundcloud/dpiscald_soundcloud_player'
+    ),
+    'dpiscald_soundcloud_player_html5' => array(
+      'variables' => array( 'sound_id' => '', 'html_id' => 'player', 'width' => 640, 'height' => 390, 'origin' => ''),
+      'template' => 'templates/players/dpiscald_soundcloud_player_html5'
     ),
   );
 }
@@ -294,4 +288,23 @@ function dpiscald_soundcloud_resolve_url($track_url) {
   $type = array_pop($api_url_parts);
 
   return $type . '/' . $id;
+}
+
+function dpiscald_soundcloud_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $value = str_replace ( '\\', '', $url );
+    $id = dpiscald_soundcloud_parse_id ( $value, FALSE );
+    $wrapper->base_id->set ( $id );
+    $info = dpiscald_soundcloud_audio ( $id );
+    if (isset ( $info->thumbnail ['src'] )) {
+      $file = $importer->createFile ( $info->thumbnail ['src'], scald_atom_thumbnail_path ( $entity->type ) );
+      $wrapper->scald_thumbnail->set ( ( array ) $file );
+    }
+    $entity->title = $info->title;
+    $entity->data ['kind'] = $info->kind;
+    $entity->data ['track_count'] = $info->track_count;
+    $entity->data ['permalink_url'] = $info->permalink_url;
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media SoundCloud : " . $url);
+  }
 }

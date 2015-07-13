@@ -218,7 +218,7 @@ abstract class Importer {
    */
   protected function createOrLoadEntity($dom){
     $callback = $this->getCallback($dom);
-    $create_or_load_method = 'createOrLoadEntity'.$callback;
+    $create_or_load_method = 'createOrLoadEntity'.$callback;    
     if (method_exists($this, $create_or_load_method)){
       $entity = $this->$create_or_load_method($dom);
     } else {
@@ -267,7 +267,7 @@ abstract class Importer {
    *
    * @return Object $file
    */
-  protected function createFile($file_uri, $destination){
+  public function createFile($file_uri, $destination){
     $dispatcher = $this->getDispatcher();
     $uri = parse_url($file_uri);
     $file = NULL;
@@ -280,7 +280,7 @@ abstract class Importer {
           Logger::logWarning('importer', 2, 'fileupload', t('The file (!file) can not be uploaded', array('!file' => $uri['host'])));
         }
         break;
-      case 'http':
+      case 'http' || 'https':
         if ($data = drupal_http_request($file_uri, array('timeout' => _dpimport_variable_get('dpicommons_http_request_timeout', 3)))){
           list($file_type, $file_ext) = explode('/', $data->headers['content-type']);
           $file_name = 'http'.rand().'.'.$file_ext;
@@ -303,37 +303,31 @@ abstract class Importer {
   protected function constructEntity($dom, $entity_type, $save = TRUE) {
     $dispatcher = $this->getDispatcher();
     $callback = $this->getCallback($dom);
-    $entity = $this->createOrLoadEntity($dom);
-    if (!Logger::error()) {
+    $entity = $this->createOrLoadEntity($dom);    
+    if (!Logger::error()) {      
       // Initialize the entity
       $entity_wrapper = entity_metadata_wrapper($entity_type, $entity);
-
       // Allow to alter entity before process
       module_invoke_all('dpimport_entity_beforeprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
       // Set attributes
       $attributes_method = 'set'.$callback.'Attributes';
       if (method_exists($this, $attributes_method)) {
         $this->$attributes_method($dom, $entity_wrapper, $entity);
       }
-
       // Process children
       $dispatcher->processChildren($dom, $entity_wrapper, $entity);
-
+            
       // Allow to alter entity after process
       module_invoke_all('dpimport_entity_postprocess', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
       if (Logger::error()) {
         return NULL;
       }
-
       // Save entity
       if ($save) {
         // Allow to alter entity before save
         module_invoke_all('dpimport_entity_presave', $entity_wrapper, $entity, $entity_type, $this, $dispatcher);
-
-        $this->saveEntity($dom, $entity_type, $entity);
-      }
+          $this->saveEntity($dom, $entity_type, $entity);
+       }
     }
 
     return $entity;
@@ -347,7 +341,12 @@ abstract class Importer {
    * @param Object $entity
    */
   protected function saveEntity($dom, $entity_type, $entity){
-    entity_save($entity_type, $entity);
+    try {     
+      entity_save($entity_type, $entity);
+    } catch (Exception $e) {
+      Logger::logWarning('importer', 2, 'entitySave', t('The entity (!file) can not be saved', array('!file' => $entity_type)));
+    }
+    
   }
 
   /**

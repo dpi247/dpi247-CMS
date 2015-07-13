@@ -134,6 +134,10 @@ class dpiscald_plugin_display_library extends scald_plugin_display_library {
     unset($atom_types['vimeo']);
     unset($atom_types['youtube']);
     unset($atom_types['equipefr']);
+    unset($atom_types['deezer']);
+    unset($atom_types['spotify']);
+    unset($atom_types['ustream']);
+    unset($atom_types['videortl']);
     $buttons = array('type' => 'ul', 'title' => NULL, 'attributes' => array());
     ctools_include('ajax');
     ctools_include('modal');

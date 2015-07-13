@@ -113,8 +113,6 @@ function unfoldcompanionminimal_node_view($node, $view_mode, $langcode) {
 
   unfoldcompanionminimal_node_view_mediabox($node, $view_mode, $langcode,$extra_fields);
   unfoldcompanionminimal_node_view_package_infos($node, $view_mode, $langcode,$extra_fields);
-
-
 }
 
 
@@ -123,7 +121,35 @@ function unfoldcompanionminimal_node_view_mediabox(& $node, $view_mode, $langcod
   if (isset($extra_fields['field_mediabox']['display'][$view_mode]) && $extra_fields['field_mediabox']['display'][$view_mode]['visible']) {
     switch ($view_mode) {
       case 'full':
-        // All images and videos
+        // All scald atom package
+        if($scald_atom_package = dpicontenttypes_api_get_embeds($node, 'atom_package', 'atom_package', FALSE)){
+          $outTextElements = array();
+          $secondaryTextElements = array();
+          foreach($scald_atom_package as $atom){
+            /* load information */
+            $tmp = scald_atom_load($atom['sid']);
+            $node_info = node_load($tmp->data['nid']);
+            //@todo enlever les atom_package pour éviter le récursif
+            
+            /* Get type of elements to know style of mediabox  */
+            $types = field_get_items('node', $node, 'field_packagetype');
+            $type = reset($types);
+            $type = $type['tid'];
+
+            /* Get rendered element */
+            $node_render = node_view($node_info);
+            if($type){
+              $outTextElements[] = drupal_render($node_render);
+            }else{
+              $secondaryTextElements[] = drupal_render($node_render);
+            }
+          }
+          /* add different element to the  */
+          $node->content['field_horstexte']['#markup'] = theme('theme_package_hors_text', array('articles' => $outTextElements));
+          $node->content['field_secondaryarticle']['#markup'] = theme('theme_package_article_secondaire', array('articles' => $secondaryTextElements));
+        }
+        
+        // All images and videos        
         if ($media_box_emebeds = dpicontenttypes_api_get_embeds_view($node, $node->content, array('image', 'video'), FALSE, FALSE)) {
           foreach ($media_box_emebeds as $delta => $embed) {
             unset($node->content['field_embededobjects'][$delta]);

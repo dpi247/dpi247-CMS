@@ -11,8 +11,10 @@
  * @return array
  */
 function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $argument = ''){
+  drupal_add_css(drupal_get_path('module', 'dpiservices')."/css/dpiservices.css");
   module_load_include('inc', 'dpiservices', 'dpiservices.api');
-  $form=array();
+  
+  //$form=array();
   if(isset($argument) && $argument != ''){
     if(!$product_arg = dpiservices_api_product_get_one_product_by_label($argument)){
       drupal_set_message("Product cannot be loaded", 'error');
@@ -32,48 +34,41 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   
   $form['fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Add a product'),
+    '#title' => t('Create a product'),
   );
   
   $form['fieldset']['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Label'),
+    '#title' => t('Dpi service name'),
+    '#description' => t("Select a simple name that be used for your flow."),
     '#required' => TRUE,
     '#default_value' => (isset($product_arg)) ? $product_arg['label']: '',
   );
   
   $form['fieldset']['machine_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Machine name'),
+    '#type' => 'machine_name',
+    '#title' => t("Machine Name"),
     '#required' => TRUE,
+    '#description' => t("machine-friendly name."),
     '#default_value' => (isset($product_arg)) ? $product_arg['machine_name']: '',
+    '#machine_name' => array(
+      'exists' => 'dpiservices_check_machine_name_product_exist',
+      'source' => array('fieldset','label'),
+    ),        
   );
   
   $form['fieldset']['description'] = array(
     '#type' => 'textfield',
     '#title' => t('Description'),
+    '#description' => t("Write a simple description to recognize your feed."),
     '#required' => FALSE,
     '#default_value' => (isset($product_arg)) ? $product_arg['description']: '',
   );
   
-  $presets=unserialize(dpi_variable_get("dpiservices_preset", array())) ;
-  if(isset($product_arg)){
-    $default_preset = unserialize($product_arg['preset']);  
-  }
-  
-  foreach ($presets as $preset){
-    $form['fieldset'][$preset] = array(
-      '#type' => 'select',
-      '#title' => t($preset),
-      '#description' => t('Select a preset.'),
-      '#options' => $image_preset,
-      '#default_value' => (isset($default_preset[$preset]))? $default_preset[$preset]: '',
-    );
-  }
-  
   $form['fieldset']['select_product'] = array(
     '#type' => 'select',
     '#title' => t('Select product based on :'),
+    '#description' => t("Choose a menu that will be used to create the flow."),
     '#options' => array(
       'Menu (Recommended)' => 'Menu (Recommended)',
       'Destination' => 'Destination'
@@ -84,6 +79,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   $form['fieldset']['select_product_type'] = array(
     '#type' => 'select',
     '#title' => t('Select a type'),
+    '#description' => t("Choose the type of menu that you want to define."),
     '#options' => $value_select_menu,
     '#default_value' => (isset($product_arg)) ? $product_arg['product_type']: '',
   );
@@ -91,13 +87,46 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   $form['fieldset']['version'] = array(
     '#type' => 'select',
     '#title' => t('Select a service to be use'),
+    '#description' => t("Choose a menu that will be used to create the flow."),
     '#options' => dpiservices_get_services(),
     '#default_value' => (isset($product_arg)) ? $product_arg['version']: '',
   );
   
+  $presets=unserialize(dpi_variable_get("dpiservices_preset", "")) ;
+  if(isset($product_arg)){
+    $default_preset = unserialize($product_arg['preset']);  
+  }
+  
+  $form['fieldset']['subfieldset'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t('Images settings'), 
+    '#description' => t("Choose for each types of images the style picture"),
+    '#collapsible' => TRUE, 
+    '#collapsed' => TRUE, 
+    '#tree' => TRUE,
+  );
+  
+  if(isset($presets) && is_array($presets)){
+    foreach ($presets as $preset){
+      $form['fieldset']['subfieldset'][$preset] = array(
+        '#type' => 'select',
+        '#title' => t($preset),
+        '#description' => t('Select an image preset for !name.', array('!name' => $preset)),
+        '#options' => $image_preset,
+        '#default_value' => (isset($default_preset[$preset]))? $default_preset[$preset]: '',
+      );
+    }
+  }else{
+    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpijsonexporter/add_map">map settings</a>'), 'error');
+  }
+  
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value'=>'save',
+    '#value'=> t('Save'),
+  );
+  
+  $form['back'] = array(
+    '#markup' => l('Back', 'admin/dpi247/dpijsonexporter', array('attributes' => array('class' => 'btn-dpiservices-back'))),
   );
   
   return $form;
@@ -143,6 +172,10 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
   } else {
     drupal_set_message('Information is not correctly sended', 'error');
   }
+}
+
+function dpiservices_check_machine_name_product_exist(){
+  return FALSE;
 }
 
 /**

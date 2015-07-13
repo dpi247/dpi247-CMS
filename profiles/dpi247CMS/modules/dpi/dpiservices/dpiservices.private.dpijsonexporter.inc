@@ -72,7 +72,7 @@ function dpiservices_dpijsonexporter_product_get_element($tree, $product_element
     try {
       $wildcard = explode('/', $v['link']['link_path']);
       $node_links[] = array(
-        'id' => $wildcard[1],
+        'id' => $wildcard[2],
         'label' => $v["link"]['link_title'],
         'original_url' => $v['link']['link_path'],
         'feed' => dpiservices_dpijsonexporter_product_get_feed($v['link']['router_path'], $product_element, $wildcard),
@@ -101,9 +101,9 @@ function dpiservices_dpijsonexporter_product_get_element($tree, $product_element
 function dpiservices_dpijsonexporter_product_get_feed($path, $product_element, $wildcard){
   $feed;
   if(is_numeric(strpos($product_element["version"], "dpi"))){
-    $feed = $product_element["version"].'/dpi-section/'.$wildcard[1].'/'.$product_element["label"].'.json';
+    $feed = $product_element["version"].'/dpi-section/'.$wildcard[2].'.json';
   }else{
-    $feed = $product_element["version"].'/wally-section/'.$wildcard[1].'.json';
+    $feed = $product_element["version"].'/wally-section/'.$wildcard[2].'.json';
   }
   return $feed;
 }

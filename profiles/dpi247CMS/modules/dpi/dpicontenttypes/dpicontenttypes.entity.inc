@@ -77,13 +77,30 @@ function dpicontenttypes_entity_info_alter(&$entity_info) {
     'custom settings' => FALSE,
   );
 
+  $entity_info['node']['view modes']['dpi_hors_texte'] = array(
+    'label' => t('DPI Atom hors texte'),
+    'custom settings' => TRUE,
+  );
+
+  $entity_info['node']['view modes']['dpi_article_secondaire'] = array(
+    'label' => t('DPI Atom article secondaire'),
+    'custom settings' => TRUE,
+  );
+
   $dpiproperties_types = dpiproperties_types();
+  
   $package_type_info = new stdClass();
   $package_type_info->label = 'Package';
   $dpiproperties_types['package'] = $package_type_info;
+  
   $scald_atom_type_info = new stdClass();
   $scald_atom_type_info->label = 'Scald Atom';
   $dpiproperties_types['scald_atom'] = $scald_atom_type_info;
+  
+  $package_gallery_type_info = new stdClass();
+  $package_gallery_type_info->label = 'Package_gallery';
+  $dpiproperties_types['package_gallery'] = $package_gallery_type_info;
+  
   foreach ($dpiproperties_types as $type => $info) {
     $entity_info['dpiproperties']['bundles'][$type] = array(
       'label' => $info->label,
@@ -150,45 +167,24 @@ function dpicontenttypes_entity_property_info_alter(&$info) {
   $info['node']['bundles']['package']['properties']['field_external_reference_2'] = $external_reference_2;
   $info['node']['bundles']['package']['properties']['field_source'] = $source;
 
-  //Set to the atoms image
-  if (isset($info['scald_atom']['bundles']['image'])){
-    $info['scald_atom']['bundles']['image']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['image']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['image']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['image']['properties']['field_source'] = $source;
-    $info['scald_atom']['bundles']['image']['properties']['field_cciinline_orig_attr'] = $cciinlineobject_orig_attr;
-  }
+  //Set to the package_gallery
+  $info['node']['bundles']['package_gallery']['properties']['field_product_id'] = $product_id;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference'] = $external_reference;
+  $info['node']['bundles']['package_gallery']['properties']['field_external_reference_2'] = $external_reference_2;
+  $info['node']['bundles']['package_gallery']['properties']['field_source'] = $source;
 
-  //Set to the atoms video
-  if (isset($info['scald_atom']['bundles']['video'])){
-    $info['scald_atom']['bundles']['video']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['video']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['video']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['video']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms audio
-  if (isset($info['scald_atom']['bundles']['audio'])){
-    $info['scald_atom']['bundles']['audio']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['audio']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['audio']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms flash
-  if (isset($info['scald_atom']['bundles']['flash'])){
-    $info['scald_atom']['bundles']['flash']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['flash']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['flash']['properties']['field_source'] = $source;
-  }
-
-  //Set to the atoms linklist
-  if (isset($info['scald_atom']['bundles']['links_list'])){
-    $info['scald_atom']['bundles']['links_list']['properties']['field_product_id'] = $product_id;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference'] = $external_reference;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_external_reference_2'] = $external_reference_2;
-    $info['scald_atom']['bundles']['links_list']['properties']['field_source'] = $source;
+  // Set to the atoms
+  $scald_types = scald_types();
+  foreach(array_keys($scald_types) as $type) {
+    if ($type != 'atom_package') {
+      $info['scald_atom']['bundles'][$type]['properties']['field_product_id'] = $product_id;
+      $info['scald_atom']['bundles'][$type]['properties']['field_external_reference'] = $external_reference;
+      $info['scald_atom']['bundles'][$type]['properties']['field_external_reference_2'] = $external_reference_2;
+      $info['scald_atom']['bundles'][$type]['properties']['field_source'] = $source;
+    }
+    if ($type == 'image') {
+      $info['scald_atom']['bundles']['image']['properties']['field_cciinline_orig_attr'] = $cciinlineobject_orig_attr;
+    }
   }
 }
 

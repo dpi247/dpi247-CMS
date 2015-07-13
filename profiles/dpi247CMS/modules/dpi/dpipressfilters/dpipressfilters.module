@@ -1,0 +1,649 @@
+<?php 
+/**
+ * @author JDE
+ * Ajoute des filtres permettant le remplacement des balises de logiciels de presse [Hermès][CCI]
+ * * Hermès est implémenté pour le démarrage
+ * * CCI suivra lors du déploiement du logiciel
+ * 
+ * Des balises propres aux logiciels de presse sont envoyé en input, celles ci doivent etre remplacées afin de formater correctement le texte en HTML
+ * Exemple simple : "<GRAS>texte en gras</GRAS>" en input, l'output doit etre "<b>texte en gras</b>" dans la source HTML du site
+ * */
+
+/**
+ * Implementation of hook_menu().
+ *
+ * Création des pages d'admin permettant de définir
+ */
+function dpipressfilters_menu() {
+  $items = array();
+  
+  $items['admin/config/content/dpipressfilters/settings'] = array(
+    'title' => 'DPI Filter Settings',
+    'page callback'    => 'dpipressfilters_page_admin',
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Allows administrators to create custom press filter.'),
+    'file'             => 'includes/dpipressfilters.admin.inc',
+  );
+  
+  $items['admin/config/content/dpipressfilters/settings/general'] = array(
+    'title'            => t('General'),
+    'page callback'    => 'dpipressfilters_page_admin',
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Allows administrators to create custom press filter.'),
+    'file'             => 'includes/dpipressfilters.admin.inc',
+    'weight'           => 0,
+    'type'             => MENU_DEFAULT_LOCAL_TASK,
+  );
+  
+  $items['admin/config/content/dpipressfilters/settings/add'] = array(
+    'title'            => t('Create filter'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpipressfilters_form_addfilter_form'),
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Allows administrators to create custom press filter.'),
+    'file'             => 'includes/dpipressfilters.admin.inc',
+    'weight'           => 1,
+    'type'             => MENU_LOCAL_TASK,
+  );
+  
+  $items['admin/config/content/dpipressfilters/settings/import-export'] = array(
+    'title'            => t('Import/Export'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpipressfilters_form_config_import_export_form'),
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Import and export filters settings.'),
+    'file'             => 'includes/dpipressfilters.import_export.inc',
+    'weight'           => 2,
+    'type'             => MENU_LOCAL_TASK,
+  );
+  
+  $items['admin/config/content/dpipressfilters/settings/edit/%'] = array(
+    'title'            => t('Edit filter'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpipressfilters_form_addfilter_form', 6),
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Allows administrators to create custom press filter.'),
+    'file'             => 'includes/dpipressfilters.admin.inc',
+  );
+
+  $items['admin/config/content/dpipressfilters/settings/delete/%'] = array(
+    'title'            => t('Delete filter'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('dpipressfilters_form_deletefilter_form', 6),
+    'access arguments' => array('administer custom press filter'),
+    'description'      => t('Allows administrators to create custom press filter.'),
+    'file'             => 'includes/dpipressfilters.admin.inc',
+  );
+
+  $items['dpipressfilters/mapping/%/%'] = array(
+    'title'            => t('Filters mapping'),
+    'page callback'    => 'dpipressfilters_mapping_export',
+    'page arguments'   => array(2, 3),
+    'access callback'  => 1,
+    'file'             => 'includes/dpipressfilters.mapping.inc',
+    'type'             => MENU_CALLBACK,
+  );
+  
+  $items['dpipressfilters/config/export/%'] = array(
+      'title'            => t('Filters export'),
+      'page callback'    => 'dpipressfilters_config_export',
+      'page arguments'   => array(3),
+      'access callback'  => 1,
+      'file'             => 'includes/dpipressfilters.import_export.inc',
+      'type'             => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission
+ */
+function dpipressfilters_permission() {
+  return array('administer custom press filter' => array(
+    'title' => t('Administer custom press filters'),
+    'description' => t('Allow to add/remove/edit press filters')
+    )
+  );
+}
+
+/**
+ * Implémentation du hook filter 
+ * On déclare les filtres Hermès et CCI. 
+ * Implements hook_filter_info()
+ */
+function dpipressfilters_filter_info() {
+  $filters = array();
+  $custom_filters = dpipressfilters_getfilters();
+  foreach($custom_filters as $filter){
+    $id = $filter->name;
+    $filters[$id] = array(
+      'title' => $filter->name,
+      'description' => $filter->description,
+      'process callback' => 'dpipressfilters_filter_process',
+      'settings callback' => 'dpipressfilters_form_filter_settings_form',
+      'cache' => TRUE,
+    );
+  }
+  return $filters;
+}
+
+/**
+ * Return all the filter object in an array
+ *
+ * @return
+ *   an array containing all the filter objects
+ */
+function dpipressfilters_getfilters(){
+  $filters = array();
+  $result = db_query("SELECT * FROM {dpipressfilters}");
+  foreach($result as $obj){
+    $filters[] = $obj;
+  }
+  return $filters;
+}
+
+/**
+ * Return a filter object from its name
+ * 
+ * @param $name
+ *   The name of the filter
+ * @return
+ *   The filter object
+ */
+function dpipressfilters_getfilterbyname($name){
+  static $cache;
+  
+  if(isset($cache[$name])){
+	return $cache[$name];
+  }
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE name = :name", array(':name'=>$name));
+  $filter = NULL;
+  foreach($result as $obj){
+    $filter = $obj;
+  }
+  $cache[$name]=$filter;
+  return $filter;
+}
+
+/**
+ * Return a filter object from its id
+ *
+ * @param $fid
+ *   The id of the filter
+ * @return
+ *   The filter object
+ */
+function dpipressfilters_getfilterbyid($fid){
+  static $cache;
+  if(isset($cache[$fid])) {
+  	return $cache[$fid];
+  }
+  $result = db_query("SELECT * FROM {dpipressfilters} WHERE fid = :fid", array(':fid'=>$fid));
+  $filter = NULL;
+  foreach($result as $obj) {
+    $filter = $obj;
+  }
+  $cache[$fid] = $filter;
+  
+  return $filter;
+}
+
+/**
+ * Return all tags of a filter
+ *
+ * @param $filter_name
+ *   The name of the filter
+ * @return
+ *   an array containing all the tag of the filter
+ */
+function dpipressfilters_getalltagsfromfilter($filter_name){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = :filter_name ORDER BY weight ASC", array(':filter_name'=>$filter_name));
+  $tags = array();
+  foreach($result as $obj){
+    $obj->settings = unserialize($obj->settings);
+    $tags[] = $obj;
+  }
+  return $tags;
+}
+
+/**
+ * Return default tags of a filter
+ *
+ * @param $filter_name
+ *   The name of the filter
+ * @return
+ *   an array containing all the tag of the filter
+ */
+function dpipressfilters_gettagsfromfilter($filter_name){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE filter = :filter_name AND format IS NULL ORDER BY weight ASC", array(':filter_name'=>$filter_name));
+  $tags = array();
+  foreach($result as $obj){
+    $obj->settings = unserialize($obj->settings);
+    $tags[] = $obj;
+  }
+  return $tags;
+}
+
+/**
+ * Return all tags of a filter and a format
+ *
+ * If the tag does not exist for a format, it return the default tag
+ *
+ * @param $filter_name
+ *   The name of the filter
+ * @param $format
+ * 	The format
+ * @return
+ *   an array containing all the tag of the filter
+ */
+function dpipressfilters_gettagsfromfilterandformat_admin($filter_name, $format){
+    $result = db_query("SELECT t.*
+                        FROM {dpipressfilters_tags} t
+                        WHERE t.filter = :filter_name
+                        AND (t.format = :format OR t.format IS NULL)
+                        AND t.tid IN (
+                        SELECT MAX(tid) FROM {dpipressfilters_tags}
+                          WHERE filter = :filter_name
+                          AND (format = :format OR format IS NULL)
+                          GROUP BY tag
+                        )
+                        ORDER BY weight ASC
+                        ", array(':filter_name'=>$filter_name, ':format'=>$format));
+
+  $tags = array();
+  foreach($result as $obj){
+    $obj->settings = unserialize($obj->settings);
+    $tags[] = $obj;
+  }
+  return $tags;
+}
+
+/**
+ * Return all tags of a filter and a format
+ * 
+ * If the tag does not exist for a format, it return the default tag
+ *
+ * @param $filter_name
+ *   The name of the filter
+ * @param $format
+ * 	The format
+ * @return
+ *   an array containing all the tag of the filter
+ */
+function dpipressfilters_gettagsfromfilterandformat($filter_name, $format){
+  static $tags;
+  if(isset($tags[$filter_name][$format])){
+	return $tags[$filter_name][$format];
+  }
+  else{
+  	$result = db_query("SELECT MAX( t.tid ) , t.filter, t.format, t.type, t.tag, t.description, t.settings
+                      FROM {dpipressfilters_tags} t
+                      WHERE t.filter = :filter_name
+                      AND (t.format = :format )
+                      GROUP BY tag
+                      ORDER BY weight ASC
+                      ", array(':filter_name'=>$filter_name, ':format'=>$format));
+
+	$tags[$filter_name][$format] = array();
+	foreach($result as $obj){
+	  $obj->settings = unserialize($obj->settings);
+	  $tags[$filter_name][$format][] = $obj;
+	}
+  }
+  return $tags[$filter_name][$format];
+}
+
+/**
+ * Return a tag object from its name and its filter
+ *
+ * @param $name
+ *   The name of the tag
+ * @param $filter
+ * 	The filter of the tag
+ * @return
+ *   The tag object
+ */
+function dpipressfilters_gettagbynameandfilter($tag, $filter){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = :tag AND filter = :filter ORDER BY weight ASC", array(':tag'=>$tag, ':filter'=>$filter));
+  $tag = NULL;
+  foreach($result as $obj){
+    $tag = $obj;
+    $tag->settings = unserialize($tag->settings);
+  }
+  return $tag;
+}
+
+/**
+ * Return tags objects from its name and its filter
+ *
+ * @param $name
+ *   The name of the tag
+ * @param $filter
+ * 	The filter of the tag
+ * @return
+ *   The tag object
+ */
+function dpipressfilters_gettagsbynameandfilter($tag, $filter){
+  $result = db_query("SELECT * FROM {dpipressfilters_tags} WHERE tag = :tag AND filter = :filter ORDER BY weight ASC", array(':tag'=>$tag, ':filter'=>$filter));
+  $tags = array();
+  foreach($result as $obj){
+    $obj->settings = unserialize($obj->settings);
+    $tags[] = $obj;
+  }
+  return $tags;
+}
+
+
+/**
+ * Fonction de déclation du formulaire de préférences pour le remplacement des balises HErmes
+ * On déclare quelles balises doivent etre remplacées par quelles balises html
+ */
+function dpipressfilters_form_filter_settings_form($form, &$form_state, $filter, $format, $defaults){
+  $filter->settings += $defaults;
+  $fid = $filter->name;
+  $tags = dpipressfilters_gettagsfromfilterandformat_admin($filter->name, $format->name);
+
+  $operations = array(
+    'replace' => t('Replace'),
+    'strip' => t('Strip'),
+    'skip' => t('Skip'),
+  );
+
+  $sub_operations = array(
+    'replace' => array(
+      'basic' => t('Basic'),
+      'advanced' => t('Advanced'),
+    ),
+  );
+
+  $settings["#tree"] = TRUE;
+  if(empty($tags)){
+    // No tag, no config
+    $settings['html'] = array(
+     '#type' => 'markup',
+     '#markup' => t("There is no tag to configure."),
+    );
+    return $settings;
+  }
+
+  foreach ($tags as $tag) {
+    $tag_form = array(
+      '#type'        => 'fieldset',
+      '#title'       => $tag->description.' ('.$tag->tag.')',
+      '#collapsible' => TRUE,
+      '#collapsed'   => TRUE,
+    );
+    // Simple access
+    $tag_form['#tagname'] = $tag->tag;
+    $tag_tid = $tag->tid;
+    // Get settings for this tag :
+    if(empty($filter->settings[$tag_tid])){
+      // New tag.
+      // Try to get special default configuration in database
+      if(!empty($tag->settings)){
+        $settings_tag = array_merge(_dpipressfilters_settings_defaults(),$tag->settings);
+      }
+      else {
+        // No config in database, use very default config
+        $settings_tag = _dpipressfilters_settings_defaults();
+      }
+    }
+    else {
+      // Settings already set for this tag
+      $settings_tag = $filter->settings[$tag_tid];
+    }
+
+    $tag_form['tagname'] = array(
+      '#type'          => 'value',
+      '#value'         => $tag->tag,
+    );
+
+    $tag_form['operation'] = array(
+      '#type'          => 'select',
+      '#title'         => t('Operation'),
+      '#options'       => $operations ? $operations : array(),
+      '#default_value' => $settings_tag['operation'],
+    );
+
+    $tag_form['replace-method'] = array(
+      '#type'          => 'select',
+      '#title'         => t('Replacement method'),
+      '#options'       => $sub_operations['replace'] ? $sub_operations['replace'] : array(),
+      '#default_value' => $settings_tag['replace-method'],
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace')
+        )
+      )
+    );
+
+    $tag_form['basic-pattern'] = array(
+      '#type'          => 'textfield',
+      '#title'         => t('Pattern used to replace the !tag_type "@tag"', array('!tag_type' => $tag->type, '@tag' => $tag->tag)),
+      '#default_value' => $settings_tag['basic-pattern'],
+      '#description'   => t('Recognized patterns are $tag.body and $tag.attr-name<br>
+          Where $tag.body is the content of the tag and $tag.attr-name is the value of the attribute named "attr-name".<br>
+          Any non-pattern string is also accepted and will be added without modifications.<br>
+          Example : <i><code>!ex_code</code></i>', array('!ex_code' => htmlentities('<x class="$tag.myclass new-class">$tag.body</x>'))),
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][replace-method]"]' => array('value' => 'basic'),
+        )
+      )
+    );
+
+    $tag_form['advanced-php'] = array(
+      '#type'          => 'textarea',
+      '#title'         => t('PHP code'),
+      '#default_value' => $settings_tag['advanced-php'],
+      '#description'   => t('Use <i>return $string;</i> at the end of your code,
+          the matching tag (and its content) will be replaced by this string.<br>
+          <b style="color:red;">Use this with caution! This code will be executed every time the filter is applied.</b><br>
+          An associative array is given, this array contains the tag name, body and attributes, for example :<br>
+          $tag = array(<br>
+          &nbsp&nbsp"tag_name" => "name-of-the-tag",<br>
+          &nbsp&nbsp"body" => "body-of-the-tag",<br>
+          &nbsp&nbsp"attributes" => array(<br>
+          &nbsp&nbsp&nbsp&nbsp"a1" => "v1",<br>
+          &nbsp&nbsp&nbsp&nbsp"a2" => "v2",<br>
+          &nbsp&nbsp&nbsp&nbsp...<br>
+          &nbsp&nbsp),<br>
+          );'),
+      '#rows'          => 15,
+      '#states' => array(
+        'visible' => array(
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][operation]"]' => array('value' => 'replace'),
+          'select[name="filters['.$fid.'][settings]['.$tag->tid.'][replace-method]"]' => array('value' => 'advanced'),
+        )
+      )
+    );
+    $settings[$tag_tid] = $tag_form;
+  }
+
+  return $settings;
+}
+
+/**
+ * Alter form filter settings, "form_filter_admin_format_form"
+ * Implements hook_form_FORM_ID_alter()
+ */
+function dpipressfilters_form_filter_admin_format_form_alter(&$form, &$form_state, $form_id){
+  $form['#validate'][] = 'dpipressfilters_form_filter_settings_form_validate';
+}
+
+/**
+ * Alter the filter_admin_configure form to add own validate and submit
+ * @todo  DELETE USELESS FUNCTION ?
+ */
+function dpipressfilters_form_filter_admin_configure_alter(&$form) {
+  if (!isset($form['#validate'])) {
+    $form['#validate'] = array();
+  }
+  array_unshift($form['#validate'], 'dpipressfilters_form_filter_settings_form_validate');
+  if (!isset($form['#submit'])) {
+    $form['#submit'] = array();
+  }
+  array_unshift($form['#submit'], 'dpipressfilters_form_filter_settings_form_submit');
+}
+
+/**
+ * Validation of the form dpipressfilters_form_filter_settings_form
+ */
+function dpipressfilters_form_filter_settings_form_validate($form, &$form_state) {
+  return; //@TODO
+  $values = $form_state['values'];
+  $format_id = $values['format'];
+
+  // Get allowed tags list
+  $allowed_tags = array();
+  if (isset($values['filter_html_'.$format_id]) && $values['filter_html_'.$format_id] == 1 && isset($values['allowed_html_'.$format_id])) {
+    $allowed_tags = explode(' ', $values['allowed_html_'.$format_id]);
+  }
+
+  foreach ($values as $key => $value) {
+    if (substr($key, 0, 7) === 'filter_') {
+      foreach ($value as $filter_name => $filter) {
+        foreach ($filter as $type => $tags) {
+          if ($type != 'format') {
+            foreach ($tags as $tag_id => $tag_infos){
+              // Following chosen operation the validation may differ
+              switch ($tag_infos['operation']) {
+                case 'replace':
+                  if ($tag_infos['replace-method'] == 'basic') {
+                    // Check if replacement tags are not empty
+                    if (empty($tag_infos['basic-pattern'])) {
+                      form_set_error($key.']['.$filter_name.']['.$type.']['.$tag_id.'][tag', t('The replacement pattern set for !tag_type "@tag_to_replace" is empty', array('!tag_type' => $type, '@tag_to_replace' => $tag_infos['tag'])));
+                    } else {
+                      // Check if replacement tags are allowed
+                      $new_tags_match_regex = '@<([^\/]*)[\s>]@U';
+                      $new_tags_match = array();
+                      preg_match_all($new_tags_match_regex, $tag_infos['basic-pattern'], $new_tags_match);
+                      foreach ($new_tags_match[1] as $new_tag) {
+                        if (!empty($allowed_tags) && !in_array('<'.$new_tag.'>', $allowed_tags)){
+                          form_set_error($key.']['.$filter_name.']['.$type.']['.$tag_id.'][tag', t('The !tag_type "@tag" is not allowed', array('!tag_type' => $type, '@tag' => $new_tag)));
+                        }
+                      }
+                    }
+                  } elseif ($tag_infos['replace-method'] == 'advanced') {
+                    // Check if replacement tags are not empty
+                    if (empty($tag_infos['advanced-php'])) {
+                      form_set_error($key.']['.$filter_name.']['.$type.']['.$tag_id.'][tag', t('The PHP code set for !tag_type "@tag_to_replace" is empty', array('!tag_type' => $type, '@tag_to_replace' => $tag_infos['tag'])));
+                    } else {
+                      // Check if PHP code is correct
+                      $exception = eval($tag_infos['advanced-php']);
+                      if ($exception === FALSE) {
+                        form_set_error($key.']['.$filter_name.']['.$type.']['.$tag_id.'][tag', t('The PHP code set for !tag_type "@tag_to_replace" is not valid', array('!tag_type' => $type, '@tag_to_replace' => $tag_infos['tag'])));
+                      }
+
+                      // Check if there's a return
+                      $return_match_regex = '@return\s+[\$\'\"]@U';
+                      $return_match = array();
+                      preg_match_all($return_match_regex, $tag_infos['advanced-php'], $return_match);
+                      if (empty($return_match[0])){
+                        form_set_error($key.']['.$filter_name.']['.$type.']['.$tag_id.'][tag', t('No return found in the PHP code set for !tag_type "@tag_to_replace"', array('!tag_type' => $type, '@tag_to_replace' => $tag_infos['tag'])));
+                      }
+                    }
+                  }
+
+                  break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Submit of the form dpipressfilters_form_filter_settings_form
+ */
+function dpipressfilters_form_filter_settings_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  foreach ($values as $key => $value) {
+    if (substr($key, 0, 7) === 'filter_') {
+      foreach ($value as $filter_name => $filter){
+        $filter_infos = dpipressfilters_getfilterbyname($filter_name);
+        $format = $filter['format'];
+
+        foreach ($filter as $type => $tags) {
+          if ($type != 'format'){
+            foreach ($tags as $tag_id => $tag_infos){
+              $obj = new stdClass();
+              $obj->tag = $tag_infos['tag'];
+              $obj->description = $tag_infos['description'];
+              $obj->filter = $filter_name;
+              $obj->type = $type;
+              $settings = array(
+                'operation' => $tag_infos['operation'],
+                'replace-method' => $tag_infos['replace-method'],
+                'basic-pattern' => $tag_infos['basic-pattern'],
+                'advanced-php' => $tag_infos['advanced-php'],
+              );
+              $obj->settings = $settings;
+              if ($tag_infos['format'] == NULL){
+                $obj->format = $format;
+                drupal_write_record('dpipressfilters_tags', $obj);
+              } else {
+                $obj->tid = $tag_id;
+                drupal_write_record('dpipressfilters_tags', $obj, array('tid'));
+              }
+            }
+          }
+        }
+      }
+      unset($form_state['values'][$key]);
+    }
+  }
+}
+
+/** 
+ * This function replace tags with the tags of the filter 
+ * 
+ * @param $fid
+ *   filter id
+ * @param $text
+ *   the text to replace
+ * @param $format
+ *   the format
+ * 
+ * @return
+ * The text replaced with the tags
+ */
+function dpipressfilters_filter_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+  if(trim($text) == '')
+    return $text;
+  if(strpos($text, '<') === -1)
+    return $text;
+  module_load_include('inc', 'dpipressfilters', 'includes/dpipressfilters.filters');
+
+  $tags_config = $filter->settings;
+  foreach ($tags_config as $tag_id => $tag_settings) {
+    switch ($tag_settings['operation']) {
+      case 'replace':
+        $text = dpipressfilters_replace_tags($tag_settings['tagname'], $tag_settings, $text);
+        break;
+
+      case 'skip':
+        $text = dpipressfilters_skip_tags($tag_settings['tagname'], $tag_settings, $text);
+        break;
+
+      case 'strip':
+      default:
+        $text = dpipressfilters_strip_tags($tag_settings['tagname'], $tag_settings, $text);
+        break;
+    }
+  }
+  return $text;
+}
+
+function _dpipressfilters_settings_defaults () {
+  return array(
+    'operation' => 'strip',
+    'replace-method' => 'basic',
+    'basic-pattern' => '',
+    'advanced-php' => '',
+  );
+}

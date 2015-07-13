@@ -50,7 +50,7 @@ function dpidam_argument_damarchive_context($arg = NULL, $conf = NULL, $empty = 
   // @todo : encore nécessaire?
   //menu_set_active_trail(array()); // Avoid multiple parallel calls
 
-  $timeout = _dpimport_variable_get('dpicommons_http_request_timeout', 3);
+  $timeout = _dpimport_variable_get('dpicommons_http_request_timeout', 30);
   $request = dpi_variable_get('dpidam_archive_geturl', '');
   // Remove the "x" at the end of the request and replace it with the ID
   $request = substr($request, 0, -1).$arg;
@@ -66,7 +66,7 @@ function dpidam_argument_damarchive_context($arg = NULL, $conf = NULL, $empty = 
     if ($importer_name = dpi_variable_get('dpidam_archive_importer', '')) {
       $importer = dpimport_api_get_importer_settings($importer_name);
       $dispatcher_settings = unserialize($importer->dispatcher_settings);
-      $tmp_file_name = 'dam_archive_'.rand().'.zip';
+      $tmp_file_name = 'dam_archive_'.rand().'_'.$arg.'.zip';
       $temp_path = 'importer://'.$dispatcher_settings['source_folder'].'/'.$tmp_file_name;
       // Save the file in the importer folder
       if (file_put_contents($temp_path, $result->data)) {

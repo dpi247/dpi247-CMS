@@ -16,7 +16,7 @@ function dpidestinations_entity_info(){
     'fieldable' => FALSE,
     'module'=>"dpidestinations",
     // Make use the class' label() and uri() implementation by default.
-    'label callback' => 'entity_class_label',
+    //'label callback' => 'entity_class_label', //@todo Genère une erreur est ce vraiment obligatoire ?
     'uri callback' => 'entity_class_uri',
     'entity keys' => array(
       'id' => 'targetid',
@@ -63,7 +63,7 @@ function dpidestinations_entity_info(){
   $entities['targetblock'] = array(
     'label' => t('Target Block'),
     // seulement si on utilise le module entity API
-    'exportable' => TRUE,
+    'exportable' => FALSE,
     'entity class' => 'TargetBlockEntity',
     'controller class' => 'TargetBlockController',
     'base table' => 'dpidestinations_targetblock',
@@ -182,11 +182,6 @@ function target_delete($target) {
  */
 function target_delete_multiple($target_ids) {
   entity_delete_multiple('target', $target_ids);
-}
-
-
-function target_access_admin_callback(){
-  return TRUE;
 }
 
 function target_page_title($target){
@@ -332,11 +327,6 @@ function targetblock_delete_multiple($targetblock_ids) {
   entity_delete_multiple('targetblock', $targetblock_ids);
 }
 
-
-function targetblock_access_admin_callback(){
-  return TRUE;
-}
-
 function targetblock_page_title($targetblock){
   return $targetblock->id;
 }
@@ -464,4 +454,47 @@ function targetblock_form($form, &$form_state, $targetblock) {
     );
   }
   return $form;
+}
+
+function dpidestinations_entity_insert($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_insert', $entity);
+  }
+}
+
+function dpidestinations_entity_delete($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_delete', $entity);
+  }
+}
+
+
+function dpidestinations_entity_update($entity, $entity_type){
+  if($entity_type == "targetblock"){
+    rules_invoke_event('targetblock_update', $entity);
+  }
+}
+
+/**
+ * Access function for target entity
+ * @param type $op
+ * @param type $entity
+ * @param type $account
+ * @param type $entity_type
+ * @return type
+ */
+function target_access_admin_callback($op, $entity, $account = NULL, $entity_type) {
+  return user_access('administer targets', $account);
+}
+
+/**
+ * Access function for targetblock entity
+ * @param type $op
+ * @param type $entity
+ * @param type $account
+ * @param type $entity_type
+ * @return type
+ */
+function targetblock_access_admin_callback($op, $entity, $account = NULL, $entity_type) {
+  return user_access('administer targets', $account);
 }

@@ -5,11 +5,12 @@
 function dpisso_loginmanager_admin_settings_page_form(){
   // Get ssoClient config from file.
   $config = dpisso_get_config(); 
-	
+  $array_conf = (array) $config;
+
   // Build Settings Table
   $headers = array(t('Key'), t('Value'));
   $rows = array();
-  foreach ($config as $k=>$v) {
+  foreach ($array_conf as $k=>$v) {
   	$rows[]= array($k,$v);
   }
 

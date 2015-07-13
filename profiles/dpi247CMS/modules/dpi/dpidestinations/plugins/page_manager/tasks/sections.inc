@@ -1,20 +1,25 @@
 <?php
+
+
  
 function dpidestinations_sections_page_manager_tasks() {
   return array(
     // This is a 'page' task and will fall under the page admin UI
     'task type' => 'page',
-    'title' => t('All Sections'),
+		'handler type' => 'context',
+
+		'title' => t('All Sections'),
     'admin title' => t('All Sections'),
     'admin description' => t('When enabled, this overrides the default Drupal behavior for the all blogs at <em>/blog</em>. If no variant is selected, the default Drupal most recent blog posts will be shown.'),
     'admin path' => 'section/%section',
 
     // Menu hooks so that we can alter the node/%node menu entry to point to us.
-    'hook menu alter' => 'dpidestinations_sections_menu_alter',
+		'hook menu' => 'page_manager_term_view_menu',
+
+		'hook menu alter' => 'dpidestinations_sections_menu_alter',
 
     // This is task uses 'context' handlers and must implement these to give the
     // handler data it needs.
-    'handler type' => 'context',
     'get arguments' => 'dpidestinations_sections_get_arguments',
     'get context placeholders' => 'dpidestinations_sections_get_contexts',
      
@@ -59,7 +64,11 @@ function dpidestinations_sections_menu_alter(&$items, $task) {
  * to run with it. If no one does, it passes through to Drupal core's
  * term view, which is term_page_view().
  */
-function dpidestinations_section_view_page($section) {
+function dpidestinations_section_view_page($section,$depth = NULL) {
+
+
+  ctools_include('plugins');
+
   // Assign the term name as the page title, just as the original page
   // callback did.
 
@@ -70,17 +79,20 @@ function dpidestinations_section_view_page($section) {
   // Load my task plugin
   $task = page_manager_get_task('sections');
 
+
   // Load the term into a context.
   ctools_include('context');
   ctools_include('context-task-handler');
 
-  $contexts = ctools_context_handler_get_task_contexts($task, '', array($section));
+  $contexts = ctools_context_handler_get_task_contexts($task, '', array($section,$depth));
+
 
   if (empty($contexts) or $section->vid!=dpidestinations_api_get_sections_vocabulary_vid()) {
-    return drupal_not_found();
-  }
 
+		return MENU_NOT_FOUND;
+  }
   $output = ctools_context_handler_render($task, '', $contexts, array($section->tid));
+
 
   if ($output !== FALSE) {
     return $output;
@@ -98,8 +110,7 @@ function dpidestinations_section_view_page($section) {
   if ($function == 'taxonomy_term_page') {
     module_load_include('inc', 'taxonomy', 'taxonomy.pages');
   }
-  return '';
-  return $function($term);
+  return $function($section);
 }
 
 /**
@@ -132,32 +143,39 @@ function dpidestinations_sections_access_check($task, $subtask_id, $contexts) {
 
 function dpidestinations_sections_get_arguments( $task, $subtask_id ){
   module_load_include('inc', 'page_manager', 'plugins/tasks/term_view');
+
   $args=dpidestinations_sections_get_default_arguments($task, $subtask_id);
+
   return $args;
+
 }
 
 function dpidestinations_sections_get_contexts( $task, $subtask_id ){
   module_load_include('inc', 'page_manager', 'plugins/tasks/term_view');
-  $contexts=page_manager_term_view_get_contexts($task, $subtask_id);
-  return $contexts;
+  module_load_include('inc', 'dpidestinations', 'plugins/ctools/context/section');
+  //$contexts=page_manager_term_view_get_contexts($task, $subtask_id);
+
+
+	$contexts=ctools_context_get_placeholders_from_argument(dpidestinations_sections_get_default_arguments($task, $subtask_id));
+
+	return $contexts;
 }
 
 function dpidestinations_sections_get_default_arguments($task, $subtask_id){
   return array(
     array(
-      'keyword' => 'destination',
-      'identifier' => page_manager_term_view_get_type() == 'multiple' ? t('Term(s) being viewed') : t('Term being viewed'),
+      'keyword' => 'Destination',
+      'identifier' => page_manager_term_view_get_type() == 'multiple' ? t('Section(s) being viewed') : t('Section being viewed'),
       'id' => 1,
+			//the argument name
       'name' => 'destination',
       'settings' => array('input_form' => 'tid', 'breadcrumb' => variable_get('page_manager_taxonomy_breadcrumb', TRUE)),
       'default' => '404',
-      'toto'=> 'toto',
-      'task'=>$task,
     ),
     array(
       'keyword' => 'depth',
       'identifier' => t('Depth'),
-      'id' => 1,
+      'id' => 2,
       'name' => 'string',
       'settings' => array(),
     ),

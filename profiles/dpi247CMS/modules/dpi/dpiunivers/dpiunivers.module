@@ -1,0 +1,120 @@
+<?php
+module_load_include ( 'php', 'dpiunivers', 'dpiunivers.api' );
+module_load_include ( 'inc', 'dpiunivers', 'dpiunivers.private.state' );
+
+/**
+ * Implementation of hook_menu
+ * @return multitype:array
+ */
+function dpiunivers_menu() {
+  $items = array();
+  
+  $items ['admin/config/dpiunivers'] = array (
+    'title' => 'Create customs dpiunivers',
+    'description' => 'Allow admin to create specific dpiunivers.',
+    'position' => 'right',
+    'weight' => - 5,
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+  );
+  
+  $items ['admin/config/dpiunivers/settings'] = array (
+    'title' => 'Customs universes settings',
+    'description' => 'Modify univers\' propreties.',
+    'page callback' => 'dpiunivers_view_page',
+    'access callback' => TRUE,
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.view.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  
+  $items ['admin/config/dpiunivers/settings/add'] = array (
+    'title' => 'Add customs univers settings',
+    'description' => 'Add univers\' propreties.',
+    'page callback' => 'dpiunivers_add_or_edit',
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpiunivers/settings/edit/%'] = array (
+    'title' => 'Add customs universes settings',
+    'description' => 'Add univers\'s propreties.',
+    'page callback' => 'dpiunivers_add_or_edit',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpiunivers' 
+    ),
+    'file' => 'dpiunivers.pages.add_or_edit.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  $items ['admin/config/dpiunivers/settings/delete/%'] = array (
+    'title' => 'Delete univers',
+    'description' => 'Add state\'s propreties.',
+    'page callback' => 'dpiunivers_delete',
+    'page arguments' => array (
+      5 
+    ),
+    'access arguments' => array (
+      'administer dpistate' 
+    ),
+    'file' => 'dpiunivers.pages.delete.inc',
+    'file path' => drupal_get_path ( 'module', 'dpiunivers' ) . '/includes' 
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission
+ * @return multitype:array
+ */
+function dpiunivers_permission() {
+  return array (
+    'administer dpiuniver' => array (
+      'title' => t ( 'Administer dpiuniver' ),
+      'description' => t ( 'Perform administration tasks for dpiuniver module.' ) 
+    ) 
+  );
+}
+
+/**
+ * This function get the current univers and return the theme associated
+ * @return String
+ */
+function dpiunivers_custom_theme(){
+  $univer = dpiunivers_get_current_univer();
+  if(isset($univer) && !empty($univer) && isset($univer["theme"])){
+    return $univer["theme"];
+  }
+}
+
+/**
+ * This function get the current univers and modify the menu to add the menu associate at this univers
+ * @param array $variables
+ */
+function dpiunivers_preprocess_page(& $variables){
+  $univer = dpiunivers_get_current_univer();
+  if(isset($univer) && !empty($univer) && isset($univer["menu"])){
+    $menu_links = menu_load_links($univer["menu"]);
+    $menus = array();
+    foreach($menu_links as $link){
+      $menus['menu-'.$link['mlid']] = $link["options"] + array(
+        'href' => $link["link_path"],
+        'title' => $link["link_title"],
+      );     
+    }
+    if(!empty($menus)){
+      $variables["main_menu"] = $menus;
+    }    
+  }
+}

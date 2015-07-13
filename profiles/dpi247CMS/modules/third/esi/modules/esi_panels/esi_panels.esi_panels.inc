@@ -46,5 +46,10 @@ function page_manager_esi_panels_context_arguments($task, $subtask = '', $args =
     case 'term_view':
       // @TODO.
       //  return array($terms, $depth);
+
+    case 'user_view':
+      $uid = array_shift($args);
+      $account = user_load($uid);
+      return array($account);
   }
 }

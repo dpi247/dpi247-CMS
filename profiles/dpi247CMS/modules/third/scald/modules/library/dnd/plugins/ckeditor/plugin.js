@@ -6,18 +6,28 @@ if (typeof dnd === 'undefined') {
 
 dnd.atomCut = null;
 dnd.atomCurrent = null;
+
+/**
+ * Prevents atom from being edited inside the editor.
+ */
+dnd.protectAtom = function(element) {
+  element
+    .attr('contentEditable', false)
+    // Allows atom legend to be edited inside the editor.
+    .find('.dnd-legend-wrapper').attr('contentEditable', true)
+    .trigger('onAtomProtect');
+}
+
 dnd.getWrapperElement = function(element) {
   while (element && !(element.type === CKEDITOR.NODE_ELEMENT && element.hasClass('dnd-atom-wrapper'))) {
     element = element.getParent();
   }
   if (element) {
-    element.setAttributes({
-      contentEditable: 'false'
-    });
+    this.protectAtom($(element.$));
     this.atomCurrent = element;
   }
   return element;
-}
+};
 
 CKEDITOR.plugins.add('dnd', {
   lang: 'en',
@@ -33,15 +43,19 @@ CKEDITOR.plugins.add('dnd', {
       if (editor.mode == 'wysiwyg') {
         editor.document.appendStyleSheet(path + '../../css/editor.css');
         editor.document.appendStyleSheet(path + '../../css/editor-global.css');
-        // Prevents atom from being edited inside the editor.
-        $(editor.document.$).find('div.dnd-atom-wrapper').attr('contentEditable', false);
+        dnd.protectAtom($(editor.document.$).find('.dnd-atom-wrapper'));
+
+        if (editor && editor.element && editor.element.$ && editor.element.$.attributes['data-dnd-context']) {
+          var context = editor.element.$.attributes['data-dnd-context'].value;
+          Drupal.settings.dnd.contextDefault = context;
+        }
       }
     });
 
     CKEDITOR.dialog.add('atomProperties', this.path + 'dialogs/dnd.js' );
 
-    var command = editor.addCommand('atomProperties', new CKEDITOR.dialogCommand('atomProperties', {
-      allowedContent: 'div[*](*);iframe[*];img(*)'
+    editor.addCommand('atomProperties', new CKEDITOR.dialogCommand('atomProperties', {
+      allowedContent: 'div[*](*);iframe[*];img(*);object[*];param[*]'
     }));
 
     editor.addCommand('atomDelete', {
@@ -79,30 +93,28 @@ CKEDITOR.plugins.add('dnd', {
 
     editor.on('contentDom', function (evt) {
       editor.document.on('drop', function (evt) {
-        try {
-          evt.data.$.dataTransfer.getData('text/html');
+        var atom = Drupal.dnd.sas2array(evt.data.$.dataTransfer.getData('Text'));
+        if (atom && Drupal.dnd.Atoms[atom.sid]) {
+          var context = editor.element.$.attributes['data-dnd-context'].value;
+          Drupal.dnd.fetchAtom(context, atom.sid, function() {
+            var markup = Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[atom.sid], context, atom.options);
+            editor.insertElement(CKEDITOR.dom.element.createFromHtml(markup));
+          });
+          evt.data.preventDefault();
         }
-        catch(e) {
-          var atom = Drupal.dnd.sas2array(evt.data.$.dataTransfer.getData('Text'));
-          if (atom && Drupal.dnd.Atoms[atom.sid]) {
-            var markup = Drupal.theme('scaldEmbed', Drupal.dnd.Atoms[atom.sid], atom.context, atom.options);
-            editor.insertHtml(markup);
-            evt.data.preventDefault();
-          }
-        }
-        // Prevents atom from being edited inside the editor.
-        $(editor.document.$).find('div.dnd-atom-wrapper').attr('contentEditable', false);
+        dnd.protectAtom($(editor.document.$).find('.dnd-atom-wrapper'));
       });
 
       editor.document.on('click', function (evt) {
-        if (element = dnd.getWrapperElement(evt.data.getTarget())) {
+        var element = dnd.getWrapperElement(evt.data.getTarget());
+        if (element) {
         }
       });
 
       editor.document.on('mousedown', function (evt) {
         var element = evt.data.getTarget();
         if (element.is('img')) {
-          var element = dnd.getWrapperElement(element);
+          element = dnd.getWrapperElement(element);
           if (element) {
             evt.cancel();
             //evt.data.preventDefault(true);

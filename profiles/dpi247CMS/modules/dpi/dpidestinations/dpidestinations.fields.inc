@@ -60,9 +60,8 @@ function dpidestinations_field_is_empty($item, $field) {
   return FALSE;
 }
 
-function dpidestinations_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items){
-  _dpidestinations_virtualrank_update_items($items);
-
+function dpidestinations_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items){  
+  _dpidestinations_virtualrank_update_items($items, entity_id($entity_type, $entity));
 }
 
 /**
@@ -95,7 +94,7 @@ function dpidestinations_field_widget_info() {
  *
  * 'destination_default_widget' define four form element that are simple selectbox
  */
-function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {  
   // STEP 0:
   //Generate a specific key used to identify this element to restore a default
   // value upon AJAX submission regardless of where this element is in the
@@ -120,6 +119,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     'rank' => 0,
     'virtual_rank' => 0,
   );
+
   if (!empty($form_state['destinationsfield'][$element_key])) {
     // Use the value from the form_state if available.
     $destinations = $form_state['destinationsfield'][$element_key];
@@ -148,7 +148,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     //$destinations = (array)$instance['default_value'][0];
     $destinations['item_already_exist'] = FALSE;
   }
-
+  
   $is_update = FALSE;
   if(isset($destinations['temp_db_value']) && is_array($destinations['temp_db_value']) &&
       $destinations['temp_db_value']['tid'] == $destinations['tid'] &&
@@ -158,7 +158,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 
   // STEP 2:
   // Determine available options and change destination if need it
-
+  
   $tids_options = dpidestinations_api_get_all_sections_term_available_as_select_options($is_update);
   if(FALSE && !$is_update) {
     $destinations['tid'] = '';
@@ -166,18 +166,25 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
 
   $target_options = __dpidestinations_get_selectoption_get_targets_for_sectionterm($destinations['tid']);
   if(!isset($target_options[$destinations['target']])) {
+    //@todo placer la défault value en fonction des valeurs définies dans le tableau de admin/dpi247/dpidestinations
     $destinations['target'] = current(array_keys($target_options));
   }
-  $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
-  if(!isset($layout_options[$destinations['layout']])) {
-    $destinations['layout'] = current($layout_options);
-  }
-  if($is_update) {
-    $destinations['rank'] = 'DNC';
-  }
-  $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
-  if(!isset($rank_options[$destinations['rank']])) {
-    $destinations['rank'] = current($rank_options);
+  if($destinations['target']!="none"){
+    $layout_options = __dpidestinations_api_get_all_layouts_available_for_sectiontid_and_target($destinations['tid'], $destinations['target']);
+    if(!isset($layout_options[$destinations['layout']])) {
+      $destinations['layout'] = current($layout_options);
+    }
+    if($is_update) {
+      $destinations['rank'] = 'DNC';
+    }
+    $rank_options = __dpidestinations_api_get_all_ranks_available_for_sectiontid_and_target($destinations['tid'], $destinations['target'], $is_update);
+    if(!isset($rank_options[$destinations['rank']])) {
+      $destinations['rank'] = current($rank_options);
+    }
+  }else{
+    $rank_options = array( 0 => "none" );
+    $destinations['rank'] = 0;
+    $layout_options = array();
   }
 
   // STEP 3:
@@ -191,29 +198,51 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
     case 'destination_default_widget':
       // Make this a fieldset with the four fields.
       $widget += array(
-      '#type' => 'fieldset',
-      '#attributes' => array('class' => array('field-destinations-widget')),
+        '#type' => 'fieldset',
+        '#attributes' => array('class' => array('field-destinations-widget')),
       );
-
-      $widget['tid'] = array(
-        '#type' => 'select',
-        '#options' => $tids_options,
-        '#default_value' => $destinations['tid'],
-        '#title' => t('Section'),
-        '#attributes' => array('class' => array('field-destinations-widget-tid')),
-        '#description' => t('The section page where the node will be placed'),
-        '#limit_validation_errors' => array(),
-        '#ajax' => array(
-          // When 'event' occurs, Drupal will perform an ajax request in the
-          // background. Usually the default value is sufficient (eg. change for
-          // select elements), but valid values include any jQuery event,
-          // most notably 'mousedown', 'blur', and 'submit'.
-          // 'event' => 'change',
-          'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
-          'wrapper' => 'dropdown-target-replace_'.$delta,
-          'method' => 'replace',
-        ),
-      );
+      
+      if(count($tids_options)>50){
+        $widget['tid'] = array(
+          '#type' => 'textfield', 
+          '#title' => t('Section'),
+          '#autocomplete_path' => 'destinations/autocomplete/input[name="tid"]',
+          '#description' => t('The section page where the node will be placed'),
+          '#default_value' => isset($tids_options[$destinations['tid']])? $tids_options[$destinations['tid']] : '',
+          '#weight' => -1, 
+          '#limit_validation_errors' => array(),
+          '#ajax' => array(
+            // When 'event' occurs, Drupal will perform an ajax request in the
+            // background. Usually the default value is sufficient (eg. change for
+            // select elements), but valid values include any jQuery event,
+            // most notably 'mousedown', 'blur', and 'submit'.
+            // 'event' => 'change',
+            'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+            'wrapper' => 'dropdown-target-replace_'.$delta,
+            'method' => 'replace',
+          ),
+        );
+      }else{
+        $widget['tid'] = array(
+          '#type' => 'select',
+          '#options' => $tids_options,
+          '#default_value' => $destinations['tid'],
+          '#title' => t('Section'),
+          '#attributes' => array('class' => array('field-destinations-widget-tid')),
+          '#description' => t('The section page where the node will be placed'),
+          '#limit_validation_errors' => array(),
+          '#ajax' => array(
+            // When 'event' occurs, Drupal will perform an ajax request in the
+            // background. Usually the default value is sufficient (eg. change for
+            // select elements), but valid values include any jQuery event,
+            // most notably 'mousedown', 'blur', and 'submit'.
+            // 'event' => 'change',
+            'callback' => 'dpidestinations_ajax_callback_dependent_dropdown',
+            'wrapper' => 'dropdown-target-replace_'.$delta,
+            'method' => 'replace',
+          ),
+        );
+      }
 
       $widget['target'] = array(
         '#type' => 'select',
@@ -259,7 +288,7 @@ function dpidestinations_field_widget_form(&$form, &$form_state, $field, $instan
       $widget['virtual_rank'] = array(
         '#type' => 'value',
         '#value' => $destinations['virtual_rank'],
-      );
+      );     
 
       break;
   }
@@ -283,8 +312,22 @@ function dpidestinations_rebuildonchange_validate($element, &$form_state) {
 
     //Search through the form values to find the current address.
     $destination = drupal_array_get_nested_value($form_state['values'], $parents);
+    
     // Store the present address values in the form state for retrieval by the
     // widget form regardless of where the widget sits in the $form array.
+    $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
+  }
+  
+  if($form_state['triggering_element']['#type'] == 'textfield'){
+    // If the country was changed, rebuild the form.
+    if ($element['#default_value'] != $element['#value']) {
+      $form_state['rebuild'] = TRUE;
+    }   
+    
+    $parents = $element['#parents'];
+    array_pop($parents);       
+    
+    $destination = drupal_array_get_nested_value($form_state['values'], $parents);    
     $form_state['destinationsfield'][$destination['element_key']] = array_diff_key($destination, array('element_key' => ''));
   }
 }
@@ -367,173 +410,53 @@ function dpidestinations_field_extra_fields() {
  * Use the formatter according to given layout for destinations views
  */
 function dpidestinations_field_attach_view_alter(&$result, $context) {
-  $display = $context['display'];
-  if (!isset($display['already_altered']) &&
-      isset($display['views_view']) && isset($display['views_field'])) {
-    $view = $display['views_view'];
-    if (isset($view->targetview_tid) && isset($view->targetview_target)) {
-      // Get entity basic informations
-      $entity_type = $context['entity_type'];
-      $entity = $context['entity'];
-      list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
+  //@todo Remove this code if no comments
+//   $display = $context['display'];
+//   if (!isset($display['already_altered']) &&
+//       isset($display['views_view']) && isset($display['views_field'])) {
+//     $view = $display['views_view'];
+//     if (isset($view->targetview_tid) && isset($view->targetview_target)) {
+//       // Get entity basic informations
+//       $entity_type = $context['entity_type'];
+//       $entity = $context['entity'];
+//       list($eid, $revision, $bundle) = entity_extract_ids($entity_type, $entity);
 
-      // Get destinations from entity
-      static $static_destinations = array();
-      if (!isset($static_destinations[$eid])) {
-        $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
-        $static_destinations[$eid] = $destinations;
-      } else {
-        $destinations = $static_destinations[$eid];
-      }
+//       // Get destinations from entity
+//       static $static_destinations = array();
+//       if (!isset($static_destinations[$eid])) {
+//         $destinations = dpicommons_get_field_from_entity($entity, $entity_type, 'field_destinations');
+//         $static_destinations[$eid] = $destinations;
+//       } else {
+//         $destinations = $static_destinations[$eid];
+//       }
 
-      if ($destinations) {
-        // Get view mode from destinations
-        $view_mode = FALSE;
-        $tid = $view->targetview_tid;
-        $target = $view->targetview_target;
-        foreach ($destinations as $destination) {
-          if ($destination['tid'] == $tid && $destination['target'] == $target) {
-            $view_mode = $destination['layout'];
-            break;
-          }
-        }
+//       if ($destinations) {
+//         // Get view mode from destinations
+//         $view_mode = FALSE;
+//         $tid = $view->targetview_tid;
+//         $target = $view->targetview_target;
+//         foreach ($destinations as $destination) {
+//           if ($destination['tid'] == $tid && $destination['target'] == $target) {
+//             $view_mode = $destination['layout'];
+//             break;
+//           }
+//         }
 
-        if ($view_mode) {
-          // Load field instance
-          $views_field = $display['views_field'];
-          $field_name = $views_field->field_info['field_name'];
-          $field_instance = field_info_instance($entity_type, $field_name, $bundle);
+//         if ($view_mode) {
+//           // Load field instance
+//           $views_field = $display['views_field'];
+//           $field_name = $views_field->field_info['field_name'];
+//           $field_instance = field_info_instance($entity_type, $field_name, $bundle);
 
-          // Get correct display from the field instance, the view mode and the entity
-          $layout_display = field_get_display($field_instance, $view_mode, $entity);
-          $layout_display['already_altered'] = TRUE; // Avoid infinite loop
-          $langcode = $views_field->field_language($entity_type, $entity);
-          $result[$field_name] = field_view_field($entity_type, $entity, $field_name, $layout_display, $langcode);
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_field_formatter_info().
- *
- * We need to tell Drupal that we have one or more formatters
- * for this field. The default one will display all the information of the quadruplet
- * that define a destination
- * each other will display only one information of the quadruplet
- *
- * @see fdpidestinations_field_formatter_view()
- */
-function dpidestinations_field_formatter_info() {
-  return array(
-    // This formatter just displays the hex value in the color indicated.
-    'destination_default_formatter' => array(
-      'label' => t('Simple text-based formatter of the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_formatter' => array(
-      'label' => t('Simple text-based formatter of the term of the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    'sectiontid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name  of the destination'),
-      'field types' => array('destination'),
-    ),
-    'destination_main_tid_name_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    'destination_main_tid_name_linked_formatter' => array(
-      'label' => t('Simple text-based formatter of the term\'s name linked to the destination'),
-      'field types' => array('destination'),
-    ),
-    //@todo: http://drupal.stackexchange.com/questions/34823/what-does-the-property-type-key-do-in-hook-field-info/34826#34826
-  );
-}
-
-/**
- * Implements hook_field_formatter_view().
- *
- * Two formatters are implemented.
- * - field_example_simple_text just outputs markup indicating the color that
- *   was entered and uses an inline style to set the text color to that value.
- * - field_example_color_background does the same but also changes the
- *   background color of div.region-content.
- *
- * @see field_example_field_formatter_info()
- */
-function dpidestinations_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
-
-  switch ($display['type']) {
-    // This formatter simply outputs the field as text and with a color.
-    case 'destination_default_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'].'-'.$item['target'].'-'.$item['layout'].'-'.$item['rank'],
-        );
-      }
-      break;
-
-    case 'sectiontid_formatter':
-      foreach ($items as $delta => $item) {
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => $item['tid'],
-        );
-      }
-      break;
-
-    case 'sectiontid_name_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => taxonomy_term_title($term),
-        );
-      }
-      break;
-
-    case 'sectiontid_name_linked_formatter':
-      foreach ($items as $delta => $item) {
-        $term=taxonomy_term_load($item['tid']);
-        $element[$delta] = array(
-          '#type' => 'html_tag',
-          '#tag' => 'span',
-          '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-        );
-      }
-      break;
-
-    case 'destination_main_tid_name_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => taxonomy_term_title($term),
-      );
-      break;
-
-    case 'destination_main_tid_name__linked_formatter':
-      $term=taxonomy_term_load($item['tid']);
-      $element[0] = array(
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => l(taxonomy_term_title($term),taxonomy_term_uri($term)),
-      );
-      break;
-  }
-
-  return $element;
+//           // Get correct display from the field instance, the view mode and the entity
+//           $layout_display = field_get_display($field_instance, $view_mode, $entity);
+//           $layout_display['already_altered'] = TRUE; // Avoid infinite loop
+//           $langcode = $views_field->field_language($entity_type, $entity);
+//           $result[$field_name] = field_view_field($entity_type, $entity, $field_name, $layout_display, $langcode);
+//         }
+//       }
+//     }
+//   }
 }
 
 function dpidestinations_ajax_callback_dependent_dropdown($form, $form_state) {

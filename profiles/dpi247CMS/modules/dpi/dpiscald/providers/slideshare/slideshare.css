@@ -1,0 +1,9 @@
+.scald-menu .add-buttons .add-slideshare {
+  background: url('icons/slideshare-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-slideshare:hover {
+  background-image: url('icons/slideshare-large-color.png');
+}
+.dnd-library-wrapper .editor-item .meta.type-slideshare {
+ background-image: url('icons/slideshare-large-color.png');
+}

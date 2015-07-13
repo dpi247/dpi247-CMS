@@ -1,17 +1,20 @@
 <?php
 function dpicache_pages_form_esi_settings_form($form, &$form_state){
   $form=array();
-  $form['info']=array(
-    '#markup'=>'Attention, All required fields must be completed !!! This is the settings for using correctly the varnish & ESI. You need to complete all fields if you want to don\'t have problem with other module',
-  );
+
   $form['debug'] = array(
     '#title' => t('Debug'),
     '#type' => 'fieldset',
   );
   $form['debug']['dpicache_disable_esi'] = array(
-    '#title' => t('Disable Esi block for developpement'),
-    '#type' => 'checkbox',
-    '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
+      '#title' => t('Disable Esi block for developpement'),
+      '#type' => 'checkbox',
+      '#default_value'=>variable_get('dpicache_disable_esi', FALSE),
+  );
+  $form['debug']['dpicache_esi_add_url_in_comment'] = array(
+      '#title' => t('Add esi url as a comment in the HTML source'),
+      '#type' => 'checkbox',
+      '#default_value'=>variable_get('dpicache_esi_add_url_in_comment', FALSE),
   );
 
   $form['esi_ttl'] = array(
@@ -32,6 +35,17 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
     '#required' => TRUE,
     '#default_value'=>variable_get('dpicache_esi_default_tll_creditentials', FALSE),
   );
+
+
+	$form['drupal_messages_with_esi'] = array(
+		'#title' => t('Drupal messages wit ESI'),
+		'#type' => 'fieldset',
+	);
+	$form['drupal_messages_with_esi']['drupal_get_status_messages_with_javascript'] = array(
+		'#title' => t('Load drupal messages with javascript (Usefull if the system use ESI to render page elements'),
+		'#type' => 'checkbox',
+		'#default_value'=>variable_get('drupal_get_status_messages_with_javascript', FALSE),
+	);
 
 
   $form['varnish_purge'] = array(
@@ -70,12 +84,14 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value'=>variable_get('varnish_control_terminal', '127.0.0.1:6082'),
+    '#description' => t("It's the url from varnish terminal"),
   );
   $form['varnish_config']['varnish_control_key'] = array(
     '#title' => t('Varnish secret key'),
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value'=>variable_get('varnish_control_key', FALSE),
+    '#description' => t("It's the pass present the to /etc/varnish/secret file"),
   );
 
   $form['varnish_config']['varnish_version'] = array(

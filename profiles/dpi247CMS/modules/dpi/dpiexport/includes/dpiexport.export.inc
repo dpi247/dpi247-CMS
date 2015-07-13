@@ -97,7 +97,11 @@ function dpiexport_node_to_dpixml($node, &$files_to_zip) {
       dpiexport_node_to_dpixml_fill_links_list($dom, $linkslist_node, $node, $node_wrapper, $atom, $atom_wrapper, $atom_dpiproperties);
     }
   }
-
+  
+  //set lasturlalias
+  global $base_url;
+  $package_node->appendChild($dom->createElement('LastURLAlias', $base_url.'/'.drupal_get_path_alias('node/'.$node->nid)));
+  
   return $dom;
 }
 

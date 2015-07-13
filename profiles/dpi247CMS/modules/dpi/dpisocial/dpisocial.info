@@ -1,0 +1,9 @@
+name = DPI Social
+description = Social Networks interactions for DPI
+package = DPI
+core = 7.x
+
+dependencies[] = ctools
+
+files[] = dpisocial.install
+files[] = social_network.inc

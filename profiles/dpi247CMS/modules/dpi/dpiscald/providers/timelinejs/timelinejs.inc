@@ -62,9 +62,11 @@ function dpiscald_timelinejs_scald_add_form_fill(&$atoms, $form, $form_state) {
  * Implements hook_scald_fetch().
  */
 function dpiscald_timelinejs_scald_fetch($atom, $type) {
-  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
-  if (file_exists($file)) {
-    $atom->file_source = $atom->thumbnail_source = $file;
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
   }
 }
 
@@ -110,8 +112,7 @@ function dpiscald_timelinejs_get_media_infos_from_url($url) {
   if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
     $infos = json_decode($response->data);
     return $infos;
-  }
-  else {
+  }else {
     return FALSE;
   }
 }
@@ -142,5 +143,45 @@ function dpiscald_timelinejs_validate_id($element, &$form_state) {
   }
   elseif (dpiscald_timelinejs_already_imported($id)) {
     form_error($element, t('Media already imported.'));
+  }
+}
+
+/**
+ * Parse an timelinejs ID and check validity
+ *
+ */
+function dpiscald_timelinejs_parse_id($string, $check) {
+  $id = NULL;
+  $string = trim($string);
+  if (!preg_match('/^[a-zA-Z0-9]+$/', $string)) {
+    // The string ID is not easy to parse, let's try to analyze it
+    if (valid_url($url, TRUE)) {
+      $id = $string;
+    }
+    elseif (preg_match("/^http/", $string)) {
+      // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+      $response = drupal_http_request($string);
+      if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+        return dpiscald_scribblelive_parse_id($response->redirect_url, $check);
+      }
+    }
+  }
+  else {
+    $id = $string;
+  }
+  return $id;
+}
+
+function dpiscald_timelinejs_get_import_info($importer, & $entity, & $wrapper, $url){
+  try {
+    $id = dpiscald_timelinejs_parse_id ( $url, FALSE );
+    $wrapper->base_id->set ( md5($id) );
+    $entity->data['url'] = $url;              
+    $entity->data['orig_identifier'] = $uel;
+    $thumbnail_url = 'http://www.outsystems.com/OSCore/Component_Image.aspx?ProjectImageId=1251';
+    $file = $importer->createFile ($thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    $wrapper->scald_thumbnail->set ( ( array ) $file );
+  } catch (Exception $e) {
+    dpi_log('dpiscald', "import", "Impossible d'importer le media TimelineJS : " . $url);
   }
 }

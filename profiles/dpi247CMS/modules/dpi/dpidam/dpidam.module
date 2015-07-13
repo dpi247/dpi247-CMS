@@ -10,7 +10,7 @@ function dpidam_menu() {
   $items = array();
 
   $items['admin/dpi247/dpidam'] = array(
-    'title' => t('DPI DAM Settings'),
+    'title' => t('DPI Dam Settings'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpidam_page_admin_packages_sync_form'),
     'access arguments' => array('administer dam interactions'),
@@ -159,11 +159,22 @@ function dpidam_theme() {
 }
 
 /**
+ * Implementation of hook_dpilog_register
+ */
+function dpidam_dpilog_register() {
+  return array(
+    'dpidam' => array(
+      'actions' => array('cron'),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_cron
  */
 function dpidam_cron() {
   if (lock_acquire('dpidam_cron', 120)) {
-    print '<strong>'.t('Cron run on @date', array('@date' => date('Y-m-d H:i:s'))).'</strong><br>';
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron run on @date', array('@date' => date('Y-m-d H:i:s'))));
 
     module_load_include('inc', 'dpidam', 'includes/dpidam.cron');
 
@@ -185,11 +196,9 @@ function dpidam_cron() {
       dpidam_purge_cron();
     }
 
-    print '<br>';
-
     lock_release('dpidam_cron');
   } else {
-    print '<strong>'.t('Cron locked on @date', array('@date' => date('Y-m-d H:i:s'))).'</strong><br>';
+    dpi_log('dpidam', 'cron', 'DPI Stats '.t('Cron locked on @date', array('@date' => date('Y-m-d H:i:s'))));
   }
 }
 
@@ -343,5 +352,35 @@ function dpidam_ctools_plugin_directory($module, $plugin) {
   }
   if ($module == 'dpimport' && $plugin == 'importer') {
     return 'plugins/dpimport/' . $plugin;
+  }
+}
+
+
+function dpidam_node_view($node, $view_mode, $langcode){
+  if(isset($node->damarchive) && $node->damarchive){
+    $content = "";
+    if(isset($node->noindex) && $node->noindex){
+      /* noindex */
+      $content .= "noindex, ";
+    }
+    /* follow and no archive */
+    $content .= "follow, noarchive";
+    
+    $element = array(
+      '#tag' => 'meta',
+      '#attributes' => array( 
+        'name' => 'robots',
+        'content' => $content,
+      ),
+    );
+    drupal_add_html_head($element, 'dpidam_no_index');
+  }
+}
+
+function dpidam_crop_style_effect_alter(&$entity, &$style){
+  if(isset($entity->damarchive) && $entity->damarchive){
+    //@todo booster la chose pour tester si un des présets du noeud existe sur le drupal l'utiliser sinon on met default par défaut.
+    $style['name'] = 'default';
+    $style['label'] = 'default';
   }
 }

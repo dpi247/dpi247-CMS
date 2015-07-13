@@ -11,7 +11,7 @@
 function atom_reference_migrate_api() {
   return array(
     'api' => 2,
-    'field_handlers' => array('MigrateAtomReferenceFieldHandler'),
+    'field handlers' => array('MigrateAtomReferenceFieldHandler'),
   );
 }
 

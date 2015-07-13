@@ -4,14 +4,20 @@
  * Plugin definition.
  */
 $plugin = array (
+	'single' => TRUE,
   'title' => t ( 'TargetBlock' ),
   'description' => t ( 'Crafted links to create content (nodes) for a given group.' ),
   // 'required context' => new ctools_context_required(t('Destination'), 'destination'),
   'category' => t ( 'Target' ),
   'group' => t ( 'DPI Core' ),
   'admin info' => 'dpidestinations_targetblock_admin_info',
+
   
-  'all contexts' => TRUE 
+  //'all contexts' => TRUE
+	'required context' => new ctools_context_required(t('Section'), array('section')),
+	'defaults' => array(
+
+	),
 );
 
 /**
@@ -23,14 +29,17 @@ function dpidestinations_targetblock_content_type_content_types($plugin) {
   $targets = target_load_multiple ( FALSE );
   foreach ( $targets as $target ) {
     $types [$target->machine_name] = array (
-      'title' => check_plain ( $target->machine_name ),
+      'title' => check_plain ( $target->label ),
       'subtype' => $target->machine_name,
       'description' => check_plain ( $target->description ),
       'icon' => drupal_get_path ( "module", "dpidestinations" ) . '/images/1412086058_93156.ico',
       // 'required context' => new ctools_context_required(t('Destination'), 'destination'),
       'category' => t ( 'Target' ),
-      'group' => t ( 'DPI Core' ) 
-    // 'all contexts' => TRUE,
+      'group' => t ( 'DPI Core' ) ,
+			'admin info' => 'dpidestinations_targetblock_admin_info',
+			'required context' => new ctools_context_required(t('Section'), array('section')),
+
+			// 'all contexts' => TRUE,
         );
   }
   
@@ -68,24 +77,34 @@ function dpidestinations_targetblock_admin_info($subtype, $conf, $contexts) {
  * Render callback.
  */
 function dpidestinations_targetblock_content_type_render($subtype, $conf, $args, $context) {
-  $module = 'dpidestinations';
+	$module = 'dpidestinations';
   $block = new stdClass ();
   $block->module = $module;
-  
-  $destination_term_id = $context ['argument_destination_1']->data->tid;
-  $did = $context ['argument_destination_1']->data->handler->did;
-  
+
+  $destination_term_id = $context->data->tid;
+  $did = $context->data->handler->conf['did'];
+
   $target_name = $subtype;
   $split_delta = $conf ["split_delta"];
   $title = _dpidestinations_targetblock_content_type_helper_get_title ( $conf );
-  return dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, serialize ( $conf ) );
+  dpidestinations_api_create_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)), $conf);
+  $pager_info = "0"; // 1 par défault pour si on n'en a pas ou si le pager est a n'est pas préciser car c'est le 1er toujours
+  if($conf['use_pager'] && isset($_GET['page'])){
+    $pager_info = $_GET['page'];
+  }
+  global $user;
+  $roles = implode('_', $user->roles);
+
+	$ctools_content_type=dpicache_get_cache_entry ( 'dpidestinations_targetblock_render', $did, $destination_term_id, $target_name, $split_delta, $title, $roles, $pager_info);
+
+	return $ctools_content_type;
 }
 
-function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title, $conf) {
-  $block = new stdClass ();
-  $conf = unserialize ( $conf );
-  
-  $targetBlockController = new TargetBlockController ( 'targetblock' );
+function _dpidestinations_targetblock_content_type_render_process($did, $destination_term_id, $target_name, $split_delta, $title) {
+  $block = new stdClass ();  
+  $conf = dpidestinations_api_get_config_cache_entries(implode("_" , array($did, $destination_term_id, $target_name, $split_delta)));
+
+	$targetBlockController = new TargetBlockController ( 'targetblock' );
   $targetblock = $targetBlockController->load_targetblock_by_did_target_and_splitdelta ( $did, $target_name, $split_delta );
   $targetblock_wrapper = entity_metadata_wrapper ( 'targetblock', $targetblock );
   $target = $targetblock_wrapper->target->value ();
@@ -97,7 +116,6 @@ function _dpidestinations_targetblock_content_type_render_process($did, $destina
   $targetview = _dpidestinations_targetblock_content_type_helper_get_global_targetview ( $destination_term_id, $target_name, $targetblock );
   $targetview->dpidestinations ['conf'] = $conf_val;
   $targetview_clone = _dpidestinations_targetblock_content_type_helper_get_local_targetview ( $targetblock, $targetview );
-  
   $block->title = $title;
   $block->content = _dpidestinations_targetblock_content_type_helper_get_content ( $targetview_clone );
   $block->admin_links = _dpidestinations_targetblock_content_type_helper_get_admin_links ( $did, $destination_term_id, $target_name, $split_delta, $title );
@@ -112,6 +130,7 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
   
   $targetviews = &drupal_static ( 'dpidestinations_targetviews' );
   $targetviews_values = &drupal_static ( 'dpidestinations_targetview_valuess' );
+  $pager_info = &drupal_static ('dpidestinations_targetview_pager');
   
   if (! isset ( $targetviews [$destination_term_id] [$target_machine_name] )) {
     $targetview = $target_wrapper->targetview->value ();
@@ -120,10 +139,24 @@ function _dpidestinations_targetblock_content_type_helper_get_global_targetview(
     // see: https://drupal.org/node/1556174#comment-5943546 as we cannot use views_embed_view we generate dom_id :s
     $targetview->dom_id = uniqid ();
     $targetview->execute ();
+    $pager_info = (isset($targetview->query->pager)) ? $targetview->query->pager : NULL;
     
     $targetviews_values [$destination_term_id] [$target_machine_name] = $targetview->result;
-    $targetviews [$destination_term_id] [$target_machine_name] = $targetview;
+    $targetviews [$destination_term_id] [$target_machine_name] = $targetview;        
   }
+  
+  /**
+   * Use static variable to sav pager into it.
+   * After that if the pager need to be added we add it to the view else
+   * We delete it.
+   * Then we don't reload view for splitted block but we use a static variable
+   */
+  if($targetblock && $targetblock->use_pager && !$targetblock->hide_pager){
+    $targetviews [$destination_term_id] [$target_machine_name]->query->pager = $pager_info;
+  }else{
+    unset($targetviews [$destination_term_id] [$target_machine_name]->query->pager);
+  }
+
   return $targetviews [$destination_term_id] [$target_machine_name];
 }
 
@@ -138,7 +171,9 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
   $result_save = $targetviews_values [$term_value] [$target_value];
   
   $result = $result_save;
-  $result = array_slice ( $result, $targetblock->offset, $targetblock->node_count_for_targetblockinstance );
+  if(isset($targetblock->node_count_for_targetblockinstance) && $targetblock->node_count_for_targetblockinstance > 0){
+    $result = array_slice ( $result, $targetblock->offset, $targetblock->node_count_for_targetblockinstance );
+  }  
   
   $targetview_clone->display_handler->view->result = $result;
   $targetview_clone->result = $result;
@@ -155,9 +190,11 @@ function _dpidestinations_targetblock_content_type_helper_get_local_targetview($
  * Edit form.
  */
 function dpidestinations_targetblock_content_type_edit_form($form, &$form_state) {
-  $targetblockController = new TargetBlockController ( 'targetblock' );
+
+
+
+	$targetblockController = new TargetBlockController ( 'targetblock' );
   $targetController = new TargetController ( 'target' );
-  
   $targetblock = $targetblockController->load_targetblock_by_panels_panelpid ( $form_state ['pane']->pid );
   // This is a new targetblock
   if ($targetblock == FALSE) {
@@ -197,7 +234,14 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Number of item(s)' ),
     '#size' => 4,
     '#description' => t ( 'Number of element(s) displayed on this block' ),
-    '#required' => TRUE
+    '#required' => FALSE
+  );
+  
+  $form ['form_targetblock'] ['targetblok_instance_settings'] ['rank_max_value'] = array (
+    '#type' => 'select',
+    '#title' => t ( 'Number of reserved position' ),
+    '#options' => range ( 0, _dpidestinations_variable_get ( 'dpidestination_max_reserved_position', 10 ) ),
+    '#default_value' => ($form_state['conf']['rank_max_value']) ? $form_state['conf']['rank_max_value'] : isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 )
   );
   
   if (count ( $available_templates_override )) {
@@ -210,22 +254,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       ) + $available_templates_override 
     );
   }
-  
-  $form ['form_targetblock'] ['targetblok_instance_settings'] ['hide_pager'] = array (
-    '#type' => 'checkbox',
-    '#default_value' => $targetblock->hide_pager,
-    '#title' => t ( 'Hide the pager on this targetblock' ),
-    '#size' => 4,
-    '#description' => t ( 'Check this if you don\'t want the pager to display above this targetblock instance' ),
-    '#states' => array (
-      'visible' => array ( // action to take.
-        ':input[name="use_pager"]' =>         // element to evaluate condition on
-        array (
-          'checked' => TRUE 
-        )  // condition
-            ) 
-    ) 
-  );
   
   $form ["form_targetblock"] ['field_settings_rank'] = array(
     '#type' => 'fieldset',
@@ -332,13 +360,6 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Split & Pager' ) 
   );
   
-  $form ['form_targetblock'] ['targetblok_settings'] ['rank_max_value'] = array (
-    '#type' => 'select',
-    '#title' => t ( 'Number of reserved position' ),
-    '#options' => range ( 0, _dpidestinations_variable_get ( 'dpidestination_max_reserved_position', 10 ) ),
-    '#default_value' => isset ( $targetblock->rank_max_value ) ? $targetblock->rank_max_value : _dpidestinations_variable_get ( 'dpidestination_default_max_reserved_position', 5 ) 
-  );
-  
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] = array (
     '#type' => 'fieldset',
     '#collapsible' => FALSE 
@@ -346,7 +367,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] ['use_pager'] = array (
     '#type' => 'checkbox',
     '#title' => t ( 'Use pager' ),
-    '#default_value' => $targetblock->use_pager 
+    '#default_value' => ($form_state['conf']['use_pager']) ? $form_state['conf']['use_pager'] : $targetblock->use_pager 
   );
   $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings'] ['pager_type'] = array (
     '#type' => 'select',
@@ -355,7 +376,7 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
       'mini' => t ( "Mini Pager" ),
       'full' => t ( 'full' ) 
     ),
-    '#default_value' => 'mini',
+    '#default_value' => ($form_state['conf']['pager_type']) ? $form_state['conf']['pager_type'] : 'mini',
     '#states' => array (
       'visible' => array ( // action to take.
         ':input[name="use_pager"]' =>         // element to evaluate condition on
@@ -364,6 +385,21 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
         )  // condition
             ) 
     ) 
+  );
+  $form ['form_targetblock'] ['targetblok_settings'] ['use_pager_settings']  ['hide_pager'] = array (
+    '#type' => 'checkbox',
+    '#default_value' => $targetblock->hide_pager,
+    '#title' => t ( 'Hide the pager on this targetblock' ),
+    '#size' => 4,
+    '#description' => t ( 'Check this if you don\'t want the pager to display above this targetblock instance' ),
+    '#states' => array (
+      'visible' => array ( // action to take.
+        ':input[name="use_pager"]' =>         // element to evaluate condition on
+        array (
+          'checked' => TRUE
+        )  // condition
+      )
+    )
   );
   
   $form ['form_targetblock'] ['targetblok_settings'] ['split_settings'] = array (
@@ -376,12 +412,12 @@ function dpidestinations_targetblock_content_type_edit_form($form, &$form_state)
     '#title' => t ( 'Override split Delta' ),
     '#description' => t ( 'Manually define the order across each targetblock instances.
         The default behavior is to use the date of creation of the targetblock instance to define the order.' ),
-    '#default_value' => $targetblock->use_split 
+    '#default_value' => ($form_state['conf']['use_split']) ? $form_state['conf']['use_split'] : $targetblock->use_split 
   );
   
   $form ['form_targetblock'] ['targetblok_settings'] ['split_settings'] ['split_delta'] = array (
     '#type' => 'textfield',
-    '#default_value' => $targetblock->split_delta,
+    '#default_value' => ($form_state['conf']['split_delta']) ? $form_state['conf']['split_delta'] : $targetblock->split_delta,
     '#title' => t ( 'Override targetblock instance order' ),
     '#size' => 4,
     '#description' => t ( 'Define the order across splitted redacblock
@@ -452,6 +488,30 @@ function dpidestinations_targetblock_content_type_edit_form_submit($form, &$form
   } /*
      * else{ if(isset($form_state ['conf'] ['targetblock_rank_settings'])){ unset($form_state ['conf'] ['targetblock_rank_settings']); } }
      */
+  
+  
+  /* Synchro */
+  $targetblockController = new TargetBlockController("targetblock");
+  $targetblocks = $targetblockController->load_targetblocks_by_did_and_target($form_state["pane"]->did, $form_state["pane"]->subtype);
+  if(count($targetblocks)>1){
+    $sav_infos_updated = variable_get("dpidestinations_targetblock_updated_conf_value", array());
+    $msg = (isset($sav_infos_updated['msg'])) ? $sav_infos_updated['msg'] : "Synchronization of splitted targetblock : ";    
+    foreach($targetblocks as $targetblockid => $targetblock){   
+      $msg .= $targetblock->target . ' ('.$targetblockid.') - ';
+      /* Save only other element because this one is gonna save by ctools */
+      if(($targetblock->use_pager != intval($form_state["values"]["use_pager"])) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["use_pager"] != intval($form_state["values"]["use_pager"]))){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["use_pager"] = $form_state ['values'] ['use_pager'];
+      }
+      if(($targetblock->pager_type != $form_state["values"]["pager_type"]) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["pager_type"] != $form_state["values"]["pager_type"])){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["pager_type"] = $form_state ['values'] ['pager_type'];
+      }
+      if(($targetblock->rank_max_value != $form_state["values"]["rank_max_value"]) || ($sav_infos_updated[$targetblock->did][$targetblock->pid]["rank_max_value"] != intval($form_state["values"]["rank_max_value"]))){
+        $sav_infos_updated[$targetblock->did][$targetblock->pid]["rank_max_value"] = $form_state ['values'] ['rank_max_value'];
+      }    
+    }
+    $sav_infos_updated['msg'] = substr($msg, 0, -2) . " | ";
+    variable_set('dpidestinations_targetblock_updated_conf_value', $sav_infos_updated);
+  }  
   
   // We log the change to allow override when edit of another pane before page is saved
   // @see: dpidestinations_targetblock_content_type_edit_form()

@@ -1,0 +1,424 @@
+<?php 
+
+/* Include theme */
+include_once(drupal_get_path('module', 'dpicomments') . '/theme/theme.inc');
+
+/* Include userfull functions */
+include_once(drupal_get_path('module', 'dpicomments') . '/includes/dpicomments.functions.inc');
+
+/**
+ * Implementing hook_permission()
+ */
+function dpicomments_permission() {
+    return array(
+    	// Report abuse comments access permission
+        'report abuse' => array(
+            'title' => t('Report comment abuse'),
+            'description' => t('Allow users to report the abusive comments.'),
+            'restrict access' => TRUE,
+        ),
+    );
+}
+
+/**
+ * Implementation of hook_menu
+*/
+function dpicomments_menu() {
+  $items = array();
+
+  // General settings for dpi comments
+  $items[DPI_ADMIN_PATH.'/dpicomments'] = array(
+    'title' => 'DPI Comments',
+    'description' => 'Administer DPI247 comments settings.',
+    'weight' => 0,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpicomments_settings'),
+    'access arguments' => array('access administration pages'),
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
+  // Menu callback for setting report comment abuse
+  $items['report-abuse/report/%/%'] = array(
+    'title' => 'Vote',
+    'page callback' => 'dpicomments_reportabuse_vote',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'dpicomments_user_access',
+    'access arguments' => array('report abuse'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // Menu callback for cancelled report comment abuse
+  $items['report-abuse/undo-report/%/%'] = array(
+    'title' => 'Undo vote',
+    'page callback' => 'dpicomments_reportabuse_undo_vote',
+    'page arguments' => array(2, 3, 4),
+    'access callback' => 'dpicomments_user_access',
+    'access arguments' => array('report abuse'),
+    'type' => MENU_CALLBACK,
+  );
+
+  // Report abusive comment (publish)
+  $items['admin/content/comment/abusive'] = array(
+    'title' => 'Abusive comments already publish',
+    //'title callback' => 'comment_count_abusive',
+    'page callback' => 'dpicomments_admin',
+    'page arguments' => array('abusive'),
+    'access arguments' => array('administer comments'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
+  // Report abusive comment (unpublish)
+  $items['admin/content/comment/abusive_unpublish'] = array(
+    'title' => 'Unpublished abusive comments',
+    //'title callback' => 'comment_count_abusive',
+    'page callback' => 'dpicomments_admin',
+    'page arguments' => array('abusive_unpublish'),
+    'access arguments' => array('administer comments'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+    'file' => 'includes/dpicomments.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Custom access function, works with array of permissions.
+ */
+function dpicomments_user_access() {
+  global $user;
+  $permissions = func_get_args();
+  if ($user->uid == 1) {
+    return TRUE;
+  }
+  foreach ($permissions as $perm) {
+    if (user_access($perm))
+      return TRUE;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dpicomments_theme() {
+  return array(
+    'dpicomments_reportabuse_widget' => array(
+      'variables' => array(
+        'logged_in' => FALSE,
+        'is_author' => FALSE,
+        'voted' => FALSE,
+        'vote_link' => NULL,
+        'undo_vote_link' => NULL,
+        'link_query' => array(),
+        'can_vote' => NULL,
+        'can_undo_vote' => NULL,
+        'undo_vote_text' => NULL,
+        'vote_text' => NULL,
+        'score' => 0,
+      ),
+      'template' => 'dpicomments-reportabuse-widget',
+      'path' => drupal_get_path('module', 'dpicomments') . '/theme',
+    ),
+    'dpicomments_reportabuse_json_response' => array(
+      'variables' => array('entity_type' => NULL, 'entity_id' => NULL, 'tag' => NULL, 'score' => NULL, 'vote_type' => NULL),
+    ),
+
+    'dpicomments_comment_wrapper' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+
+
+/**
+ * Create report abuse voting widget to display on the webpage.
+ */
+function dpicomments_reportabuse_build_comment_jquery_widget($entity_id, $tag = 'dpicomments_comment_vote') {
+  global $user;
+  $comment = comment_load($entity_id);
+  $score = dpicomments_reportabuse_get_score('comment', $comment->cid, $tag);
+  $logged_in = $user->uid > 0;
+  $is_author = $comment->uid == $user->uid;
+  $voted = dpicomments_reportabuse_get_votes('comment', $comment->cid, $user->uid, $tag);
+  $build = array(
+    '#theme' => 'dpicomments_reportabuse_widget__comment__' . $tag,
+    '#logged_in' => $logged_in,
+    '#is_author' => $is_author,
+    '#voted' => $voted,
+    '#vote_link' => 'report-abuse/report/comment/' . $comment->cid . '/' . $tag,
+    '#undo_vote_link' => 'report-abuse/undo-report/comment/' . $comment->cid . '/' . $tag,
+    '#link_query' => array('token' => drupal_get_token($comment->cid), dpicomments_reportabuse_get_cleared_destination()),
+    '#can_vote' => user_access('report abuse'),
+    '#can_undo_vote' => variable_get('dpicomments_comment_undo_vote', 0),
+    '#undo_vote_text' => check_plain(variable_get('dpicomments_comment_undo_vote_text', "")),
+    '#vote_text' => check_plain(variable_get('dpicomments_comment_vote_text', t('Vote'))),
+    '#score' => $score,
+  );
+  if (variable_get('dpicomments_add_js', 1)) {
+    $build['#attached']['js'][] = drupal_get_path('module', 'dpicomments') . '/js/jquery.dpicomments.js';
+  }
+  return $build;
+}
+
+
+/**
+ * Implements hook_comment_view().
+ */
+function dpicomments_comment_view($comment, $view_mode, $langcode) {
+
+	// Signature : soit le pseudo, soit nom+prenom
+  $field_signature = field_get_items('comment', $comment, 'field_signature');
+  $signature = $field_signature[0]['value'];
+
+  $allow_reply_comment = variable_get('dpicomments_comment_reply_com_limite', 1);
+
+  // Interdiction de commenter les commentaire 
+  // (On peu faire ca ici car le commentaire 'parent' est chargé > on a donc facilement son PID)
+  // > Si ce n'est pas autorisé en back office
+  // > Ou si c'est authorisé, on limite a 1 le niveau de descendance
+  if (arg(0) == "comment" && arg(1) == "reply") {
+    if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
+      // Commentaire non authorisé > redirection vers l'article
+      drupal_goto(drupal_get_path_alias('node/'.arg(2)));
+    }
+  }
+
+
+  // Supprésion du lien "reply" pour un commentaire "non commentable"
+  if (!$allow_reply_comment || ($allow_reply_comment && $comment->pid>0)) {
+    unset($comment->content['links']['comment']['#links']['comment-reply']);
+  } 
+
+  // La signature est devenu un champ obligatoire, et initialisé au nom+prenom de la personne
+  // Le test ci dessous ne va donc -en theorie- plus servir.
+	if (isset($signature) && !empty($signature)) {
+    // On devrait toujours tombé dans ce cas.
+		$comment->content['comment_body']['#object']->name = $signature;
+	} else {
+		// Mais, on ne sait jamais :(
+    global $user;
+		$comment->content['comment_body']['#object']->name = isset($user)?$user->name:'Votre nom';
+	}
+
+	// Signaler un abus
+  if (variable_get('dpicomments_comment_widget_show', 0) && !isset($comment->in_preview)) {
+    $comment->content['dpicomments_reportabuse_widget'] = dpicomments_reportabuse_build_comment_jquery_widget($comment->cid);
+  }
+}
+
+ /**
+ * Implements hook_comment_delete().
+ */
+function dpicomments_comment_delete($comment) {
+  dpicomments_delete_votes_comment_abusive($comment);
+}
+
+ /**
+ * Implements hook_comment_publish().
+ */
+function dpicomments_comment_publish($comment) {
+  // Lorsqu'un admin publie un commentaire, on supprime les votes effectué dessus
+  // Cela empeche un commentaire qui a été automatiquement dépublié apres X signalements d'abus d'etre re-dépublié au prochain signalement
+  dpicomments_delete_votes_comment_abusive($comment, 'dpicomments_comment_vote');
+}
+
+/**
+ * Implements hook_votingapi_metadata_alter().
+ */
+function dpicomments_votingapi_metadata_alter(&$data) {
+  // Document several custom tags for rating restaurants and meals.
+  $data['tags']['dpicomments_comment_vote'] = array(
+    'name' => t('Report abuse comment vote'),
+    'description' => t('Dpicomments report abuse votes for comments.'),
+    'module' => 'dpicomments',
+  );
+}
+
+/**
+ * Implements hook_form_comment_form_alter().
+ */
+function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
+  // Setting default signature value
+  global $user;
+  if (!empty($form['field_signature']) && !empty($form['field_signature']['#language']) )
+    $language = $form['field_signature']['#language'];
+  else $language = LANGUAGE_NONE;
+  $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
+
+  // Adding javascript to check max limit of character
+  $form['comment_body'][$language][0]['value']['#attached'] ['js'][] = array(
+    'data' => drupal_get_path('module', 'dpicomments').'/js/dpicomments.form.functions.js',
+    'type' => 'file'
+  );
+
+  // Adding term of use (if exists)
+  if (variable_get('dpicomments_add_terms_of_use_link', 0)) {
+    $options = array();
+    if (variable_get('dpicomments_terms_of_use_target_blank', 0)) {
+      $options['attributes'] = array('target' => '_blank');
+    }
+    $form['terms'] = array(
+      '#markup' => l(variable_get('dpicomments_terms_of_use_label', ''),variable_get('dpicomments_terms_of_use_link', ''), $options),
+      '#weight' => 10,
+    );
+  }
+
+  // Suppresion de l'affichage du premier champ avec le nom de l'auteur
+  $form['author']['#type'] = 'hidden';
+
+  // onKeyPress : check if user can add character
+  $max_length = variable_get('dpicomments_comment_limite_nb_caractere', 500);
+  $language = $form['comment_body']['#language'];
+  $form['comment_body'][$language][0]['value']['#attributes']['onKeyPress'] = array("return textareaMaxLength(this, event, $max_length);");
+  // Adding validate
+  $form['#validate'][] = 'dpicomments_form_comment_form_validate';
+}
+
+/**
+ * Implements hook_form_comment_form_validate().
+ */
+function dpicomments_form_comment_form_validate(&$form, &$form_state, $form_id) {
+  // Limite un commentaire à X caractères
+  $language = $form['comment_body']['#language'];
+  if (strlen($form['comment_body'][$language][0]['value']['#value']) > variable_get('dpicomments_comment_limite_nb_caractere', 500)){
+    form_set_error(t('Maximum character number is'), t('Maximum character number is'));
+  }
+}
+
+/**
+ * Implements hook_form_ctools_node_comments_content_type_edit_form_alter().
+ * > Formulaire settings des commentaire dans panel
+ * > Modifie le champ comments_per_page pour être désormais un textfield plutot qu'un select
+ * > Permet de saisir n'importe quel nombre
+ */
+function dpicomments_form_ctools_node_comments_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Type textfield (older type is select)
+  $form['comments_per_page']['#type'] = 'textfield';
+  $form['comments_per_page']['#size'] = 5;
+  $form['comments_per_page']['#title'] = t('Number of comments to display');
+  //Unsetting options
+  unset($form['comments_per_page']['#options']);
+
+  // Adding validate
+  $form['#validate'][] = 'dpicomments_form_ctools_node_comments_content_type_edit_form_validate';
+}
+
+/**
+ * Implements hook_form_ctools_node_comments_content_type_edit_form_validate().
+ * Test si le nombre de commentaires par page est bien un entier
+ */
+function dpicomments_form_ctools_node_comments_content_type_edit_form_validate(&$form, &$form_state, $form_id) {
+  if (!is_numeric($form['comments_per_page']['#value'])) {
+     form_set_error('Number of comments to display', 'Number of comments to display must be a number');
+  }
+}
+
+/**
+ * This hook is called when user votes on some content.
+ * @param  $vote_type
+ *    Vote type, "vote" or "undo_vote"
+ * @param  $entity_type
+ *    Entity type, node, comment etc.
+ * @param  $entity_id
+ * @param  $tag
+ * @param  $score
+ * @param  $user
+ * @return void
+ */
+function hook_dpicomments_voted($vote_type, $entity_type, $entity_id, $tag, $score, $user) {
+}
+
+/**
+ * Implements hook_panels_pane_content_alter().
+ */
+function dpicomments_panels_pane_content_alter(& $content, $pane, $args, $contexts) {
+  
+  if($pane->type=='node_comments'){
+
+    $conf=$pane->configuration;
+    $node=$contexts[$conf['context']]->data;
+
+    $output = '';
+    if (user_access('access comments') || !$node->comment) {
+      
+      $mode = $conf['mode'];
+      $comments_per_page = $conf['comments_per_page'];
+
+      $cids = dpicomments_custom_comment_get_thread($node, $mode, $comments_per_page);
+      $comments = comment_load_multiple($cids);
+      if ($comments) {
+        drupal_add_css(drupal_get_path('module', 'comment') . '/comment.css');
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        if (arg(2) == "comments") {
+          // Ajout d'un pager sur la page de tous les commentaires
+          $build['pager']['#theme'] = 'pager';
+        }
+
+        // Est-ce qu'on ajoute un lien + de com?
+        if (count($cids) != $node->comment_count && arg(2)!="comments") {
+          $build['show_more_comment_link'] = true;
+        } else {
+          $build['show_more_comment_link'] = false;
+        }
+        $build['nid'] = intval($node->nid);
+        $build["#theme"]='dpicomments_comment_wrapper';
+        $output =  drupal_render($build);
+      }
+    }
+    $content->content=$output;
+  }
+  // Don't display titles.
+}
+
+/**
+ * Implements hook_trigger_info().
+ */
+function dpicomments_trigger_info() {
+  return array(
+    'comment' => array(
+      'report_abuse_after_posted' => array(
+        'label' => "When a user report an abusive comment",
+      ),
+      'report_abuse_after_n_posted' => array(
+        'label' => "When " . variable_get('dpicomments_comment_nb_abuse_before_seccond_trigger',5) . " users report an abusive comment",
+      ),
+      'report_abuse_after_undo_posted' => array(
+        'label' => "When a user cancelled its report of an abusive comment",
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_action_info().
+ */
+function dpicomments_action_info() {
+  return array(
+    // Dépublication d'un' commentaire
+    'custom_unpublish_comment' => array(
+      'label' => t('Unpublish comment'),
+      'type' => 'comment',
+      'configurable' => FALSE,
+      'triggers' => array('report_abuse_after_posted', 'report_abuse_after_n_posted'),
+    ),
+  );
+}
+
+/**
+ * Action for unpublish a comment
+ *
+ * @param object
+ * A comment
+ * @param context
+ * the context
+ */
+function custom_unpublish_comment($object, $context=array()) {
+  if (isset($object->cid)) {
+    $object->status = COMMENT_NOT_PUBLISHED;
+    comment_save($object);
+  }
+}

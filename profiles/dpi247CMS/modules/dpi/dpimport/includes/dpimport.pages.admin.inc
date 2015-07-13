@@ -345,7 +345,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state) {
   foreach ( $importer_plugins as $plugin ) {
     $options [$plugin ['type']] = $plugin ['label'];
   }
-  
+
   $form ['default'] ['type'] = array (
     '#type' => 'select',
     '#title' => t ( 'Importer' ),
@@ -354,7 +354,7 @@ function dpimport_form_importer_stagedefault_form(&$form, &$form_state) {
         The importer is also responsible for the creation of entities, it could create nodes or atoms for example, or it could produce nodes without saving them (it is the case for a preview importer for example).' ),
     '#required' => TRUE,
     '#options' => $options,
-    '#default_value' => isset ( $values ['type'] ) ? $values ['type'] : NULL,
+    '#default_value' => (isset ( $values ['type'] )) ? $values ['type'] : NULL,
     '#ajax' => array (
       'event' => 'change',
       'wrapper' => 'importer-version',
@@ -446,6 +446,7 @@ function dpimport_form_importer_stageimporter_form(&$form, &$form_state) {
   foreach ( $importer_plugin ['dispatchers'] as $dispatcher ) {
     $options [$dispatcher] = $dispatcher;
   }
+  
   $form ['importer'] ['dispatcher'] = array (
     '#type' => 'select',
     '#title' => t ( 'Dispatcher' ),
@@ -453,7 +454,7 @@ function dpimport_form_importer_stageimporter_form(&$form, &$form_state) {
         For example, the URL dispatcher will fetch an XML from a given URL while the folder dispatcher will fetch XMLs from a local repository.' ),
     '#required' => TRUE,
     '#options' => $options,
-    '#default_value' => isset ( $values ['dispatcher'] ) ? $values ['dispatcher'] : NULL,
+    '#default_value' => (isset ( $values ['dispatcher'] ) && $values['dispatcher']!= "") ? $values ['dispatcher'] : (current($options)!==NULL) ? current($options) : NULL,
     '#weight' => - 10 
   );
 }

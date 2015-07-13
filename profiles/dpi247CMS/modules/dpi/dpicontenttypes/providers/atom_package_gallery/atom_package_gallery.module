@@ -1,0 +1,74 @@
+<?php 
+
+/**
+ * Implements hook_scald_atom_providers().
+ * Tell Scald that we'll be providing some video atoms.
+ */
+function atom_package_gallery_scald_atom_providers() {
+  return array(
+    'atom_package' => 'Atom package gallery provider'
+  );
+  // This code will never be hit, but is necessary to mark the string
+  // for translation on localize.d.o
+  t('Atom package gallery provider');
+}
+
+function atom_package_gallery_scald_add_form(&$form, &$form_state){
+  $form["test"] = array(
+    '#markup' => t("L'atom package gallery sera automatiquement créer lors de la création du contenu"),
+  );
+  unset($form['buttons']['next']);
+}
+
+function atom_package_gallery_scald_add_form_fill(&$atom, $form, $form_state){
+  $langcode = field_language('scald_atom', $atom, 'scald_thumbnail');
+  $atom->scald_thumbnail[$langcode][0] = array('public://styles/Library/public/icon_package.png');
+  $atom->scald_authors = $atom->data['author'];
+}
+
+function atom_package_gallery_scald_fetch($atom, $type) {
+  $atom->file_source = $atom->thumbnail_source = 'public://styles/Library/public/icon_package.png';
+}
+
+function atom_package_gallery_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    $node_info = node_load($atom->data['nid']);
+    $node_info->field_atompackage = array();
+    $package_type = field_get_items('node', $node_info, 'field_packagetype');
+    if (isset($package_type[0])) {
+      $term = taxonomy_term_load($package_type[0]['tid']);
+      if ($term->name == 'Hors-texte') {
+        // Hors texte
+        $theme_name = 'atom_package_gallery_player_hors_texte';
+        $view_mode = 'dpi_hors_texte';
+        drupal_alter('dpi_atom_hors_texte_view_mode_alter', $view_mode);
+      } else {
+        // Article secondaire
+        $theme_name = 'atom_package_gallery_player';
+        $view_mode = 'dpi_article_secondaire';
+        drupal_alter('dpi_atom_article_view_mode_alter', $view_mode);
+      }
+    }
+    $atom->rendered->player = theme($theme_name,
+      array('vars' =>
+        array(
+          'node'    => node_view($node_info, $view_mode),
+        ),
+        'atom' => $atom, 
+      )
+    );
+  }
+}
+
+function atom_package_gallery_theme(){
+  return array(
+    'atom_package_gallery_player' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'atom_package_gallery_player'
+    ),
+    'atom_package_gallery_player_hors_texte' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'atom_package_gallery_player_hors_texte'
+    ),
+  );
+}

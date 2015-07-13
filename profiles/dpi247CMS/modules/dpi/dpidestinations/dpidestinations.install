@@ -1,7 +1,7 @@
-<?php 
+<?php
 
 function dpidestinations_schema() {
-  $schema['dpidestinations_target'] = array (
+  $schema['dpidestinations_target'] = array(
     'description' => 'The target entity table',
     'fields' => array(
       'targetid' => array(
@@ -29,12 +29,12 @@ function dpidestinations_schema() {
         'object default' => '',
       ),
       'view_name' => array(
-        'type'=>'varchar',
+        'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE
       ),
-      'view_display' =>array(
-        'type'=>'varchar',
+      'view_display' => array(
+        'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
       ),
@@ -69,7 +69,7 @@ function dpidestinations_schema() {
     'primary key' => array('targetid'),
   );
 
-  $schema['dpidestinations_targetblock'] = array (
+  $schema['dpidestinations_targetblock'] = array(
     'description' => 'The target entity table',
     'fields' => array(
       'targetblockid' => array(
@@ -78,7 +78,6 @@ function dpidestinations_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-     
       'target' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
@@ -102,7 +101,7 @@ function dpidestinations_schema() {
         'type' => 'int',
         'not null' => TRUE
       ),
-      'template_rule'=> array(
+      'template_rule' => array(
         'description' => 'The machine name of the target',
         'type' => 'varchar',
         'length' => '255',
@@ -131,7 +130,7 @@ function dpidestinations_schema() {
         'length' => '255',
         'not null' => FALSE
       ),
-      'rank_max_value'=>array(
+      'rank_max_value' => array(
         'type' => 'int',
         'not null' => TRUE,
         // Set the default to ENTITY_CUSTOM without using the constant as it is
@@ -176,6 +175,26 @@ function dpidestinations_schema() {
     ),
     'primary key' => array('targetblockid'),
   );
+
+  $schema['dpidestinations_targetblock_config'] = array(
+    'description' => 'The target entity table config',
+    'fields' => array(
+      'targetblock_name' => array(
+        'description' => 'the config manchine name',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'serialize_conf' => array(
+        'description' => 'the serialize information for config targetblock',
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('targetblock_name'),
+  );
+
   /*
    $schema['dpidestinations_destinationvariant'] = array (
      'description' => 'The target entity table',
@@ -229,28 +248,71 @@ function dpidestinations_schema() {
      'primary key' => array('targetblockid'),
    );
   */
+  
+  $schema['dpidestinations_topic_term_elu'] = array (
+    'description' => 'Informations about topic term elu. This table gonna sav informations to restore after election.',
+    'fields' => array(
+      'topicid' => array(
+        'description' => 'Primary key for our table of topic term elu',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'tid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'tvalue' => array(
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'description' => 'This is the varchar value of the term.',
+      ),
+      'originalurls' => array(
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'newurls' => array(
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => TRUE,
+        'description' => 'This is the term id from my term.',
+      ),
+      'timestamptodelete' => array(
+        'description' => 'This time is gonna set after suppression term to redirect user one week after deletation',
+        'type' => 'varchar',
+        'length' => 1000,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('topicid'),
+  );
 
   return $schema;
 }
 
-function dpidestinations_install(){
+function dpidestinations_install() {
   _dpidestinations_variable_set("dpidestinations_targetview_reorder_default", array("targetview_reorder_default", "targetview_1"));
   _dpidestinations_variable_set("dpidestinations_virtualrank_delta", 1000);
-   
+
   $edit = array(
     "name" => "Sections",
-    "machine_name" =>"sections",
+    "machine_name" => "sections",
     "description" => t("Sections represent the structure of your editorial content."),
     "module" => "taxonomy",
   );
 
-  $vocabulary = (object)$edit;
+  $vocabulary = (object) $edit;
   taxonomy_vocabulary_save($vocabulary);
   _dpidestinations_variable_set('dpidestinations_section_vid', $vocabulary->vid);
 
-  $field_info=_dpidestination_get_field_info_for_destination();
+  $field_info = _dpidestination_get_field_info_for_destination();
   field_create_field($field_info);
   _dpidestination_attach_field_destination_to_bundle('node', 'package');
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
 
   // Add "view section" permission to anonymous and authenticated user roles
   $rids = array(1, 2);
@@ -260,8 +322,8 @@ function dpidestinations_install(){
   }
 }
 
-function dpidestinations_uninstall(){
-  taxonomy_vocabulary_delete( _dpidestinations_variable_get('dpidestinations_section_vid', 2));
+function dpidestinations_uninstall() {
+  taxonomy_vocabulary_delete(_dpidestinations_variable_get('dpidestinations_section_vid', 2));
   _dpidestinations_variable_del("dpidestinations_targetview_reorder_default");
   _dpidestinations_variable_del("dpidestinations_virtualrank_delta");
   _dpidestinations_variable_del("dpidestinations_section_vid");
@@ -292,7 +354,7 @@ function dpidestinations_field_schema($field) {
     'target' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
     'layout' => array('type' => 'varchar', 'length' => 254, 'not null' => FALSE),
     'rank' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE),
-    'virtual_rank' => array('type' => 'int',  'size' => 'big','not null' => FALSE),
+    'virtual_rank' => array('type' => 'int', 'size' => 'big', 'not null' => FALSE),
   );
 
   $indexes = array(
@@ -320,3 +382,35 @@ function dpidestinations_update_7001() {
   }
 }
 
+function dpidestinations_update_7002() {
+  _dpidestination_attach_field_destination_to_bundle('node', 'package_gallery');
+}
+
+/**
+ * Create targetblock config table
+ */
+function dpidestinations_update_7003() {
+  if (!db_table_exists('dpidestinations_targetblock_config')) {
+    $schema = drupal_get_schema('dpidestinations_targetblock_config', TRUE);
+    db_create_table('dpidestinations_targetblock_config', $schema);
+  }
+}
+
+/**
+ * Update database dpidestinations_targetblock_config, field serialize_conf on longblob
+ */
+function dpidestinations_update_7004() {
+  if (db_table_exists('dpidestinations_targetblock_config')) {
+    db_query("ALTER TABLE dpidestinations_targetblock_config MODIFY serialize_conf longblob NULL")->execute();
+  }
+}
+
+/**
+ * 
+ */
+function dpidestinations_update_7005(){
+  if (!db_table_exists('dpidestinations_topic_term_elu')) {
+    $schema = drupal_get_schema('dpidestinations_topic_term_elu', TRUE);
+    db_create_table('dpidestinations_topic_term_elu', $schema);
+  }
+}

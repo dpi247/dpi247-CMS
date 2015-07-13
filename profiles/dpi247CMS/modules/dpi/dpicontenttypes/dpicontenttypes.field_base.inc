@@ -100,6 +100,32 @@ function dpicontenttypes_field_default_field_bases() {
     'type' => 'datestamp',
   );
 
+  // Exported field_base: 'field_autopublish'
+  $field_bases['field_forceeditorialupdatedate'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_forceeditorialupdatedate',
+    'foreign keys' => array(),
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(
+        0 => '',
+        1 => '',
+      ),
+      'allowed_values_function' => '',
+    ),
+    'translatable' => 0,
+    'type' => 'list_boolean',
+  );
+  
   // Exported field_base: 'field_byline'
   $field_bases['field_byline'] = array(
     'active' => 1,
@@ -123,7 +149,7 @@ function dpicontenttypes_field_default_field_bases() {
     'locked' => 0,
     'module' => 'text',
     'settings' => array(
-      'max_length' => 255,
+      'max_length' => 1000,
     ),
     'translatable' => 0,
     'type' => 'text',
@@ -578,7 +604,7 @@ function dpicontenttypes_field_default_field_bases() {
     'type' => 'taxonomy_term_reference',
   );
   // Exported field_base: 'field_packagetype'
-  $field_bases['field_packagetype'] = array(
+  $field_bases['field_packagetype'] = array(    
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
@@ -1129,6 +1155,6 @@ function dpicontenttypes_field_default_field_bases() {
     'translatable' => 0,
     'type' => 'text_long',
   );
-
+  
   return $field_bases;
 }

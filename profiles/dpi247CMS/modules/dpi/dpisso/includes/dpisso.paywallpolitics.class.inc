@@ -19,7 +19,7 @@ abstract class PaywallPolitics {
    * @return Array
    *   A form array with paywall politics settings.
    */
-  public function settingsform($form, $form_state) {
+  public function settingsform($defaul_val) {
     $politic_settings = array();
     return $politic_settings;
   }
@@ -67,8 +67,8 @@ abstract class PaywallPolitics {
    * 
    * @return boolean Granted access (or not) to the page.
    */
-  public function issecurepage($url, $roles) {
-  	return false;
+  public function issecurepage($url, $roles = null) {
+    return array('code'=>403,'data'=>"Access denied by default pawall politic plugin");
   }
   
   /**
@@ -80,6 +80,10 @@ abstract class PaywallPolitics {
    */
   public function getmodulelist() {
   	return array();
+  }
+  
+  public function haveAccess(){
+    return false;
   }
   
 }

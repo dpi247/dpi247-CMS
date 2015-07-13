@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * Implementation of hook_schema
+ * 
+ * @return multitype:array
+ */
+function dpistate_schema() {
+  $schema = array ();
+  $schema ['dpi_state'] = array (
+    'description' => 'dpi_state',
+    'fields' => array (
+      'label' => array (
+        'description' => 'label for this field',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE 
+      ),
+      'type' => array (
+        'description' => 'type of this context, string, int or date',
+        'type' => 'varchar',
+        'length' => '255',
+        'default' => 'int',
+        'not null' => TRUE 
+      ),
+      'value' => array (
+        'description' => 'values for this context',
+        'type' => 'varchar',
+        'length' => '255',
+        'default' => serialize ( range ( 0, 5 ) ),
+        'not null' => TRUE 
+      ),
+      'id' => array (
+        'description' => 'id',
+        'type' => 'serial',
+        'not null' => TRUE 
+      ) 
+    ),
+    'primary key' => array (
+      'id' 
+    ) 
+  );
+  return $schema;
+}

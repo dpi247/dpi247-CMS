@@ -86,7 +86,8 @@ function _dpidestinations_get_all_targetviews() {
 
 function _dpidestinations_get_panels_displayid_for_sectionterm($term_id) {
   $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
-  return $handler->did;
+
+  return $handler->conf['did'];
 }
 
 function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
@@ -98,8 +99,11 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
 
     $handler = _dpidestinations_get_panels_handler_for_sectionterm($term_id);
     ctools_plugin_load_function('page_manager', 'task_handlers', $handler->handler, 'render');
-
-    $display = panels_panel_context_get_display($handler);
+    
+    //@todo problem avec cette fonction => il ne parviens pas à la trouver
+    if(isset($handler) && function_exists('panels_panel_context_get_display')){     
+      $display = panels_panel_context_get_display($handler);
+    }    
 
     $displays[$term_id] = $display;
   }
@@ -111,13 +115,15 @@ function _dpidestinations_get_panels_display_for_sectionterm($term_id) {
  */
 function _dpidestinations_get_pagemanager_handler_name_for_displayid($did) {
   $db_names = db_select('page_manager_handlers', 'p')
-    ->fields('p', array('name'))
-    ->condition('p.did', $did)
+    ->fields('p')
     ->execute();
   $name = FALSE;
-  foreach ($db_names as $db_name) {
-    $name = $db_name;
-    break;
+  foreach ($db_names as $db_name) {    
+    $conf = unserialize($db_name->conf);
+    if(isset($conf['did']) && $conf['did'] == $did){
+      $name = $db_name;
+      break;
+    }    
   }
   return $name;
 }
@@ -244,17 +250,23 @@ function _targetblock_metadata_getter($object, $options, $property_name) {
 
 /**
  * Update the virtualtrank of each items of a node
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_items(&$items) {
+function _dpidestinations_virtualrank_update_items(&$items,$nid) {
   foreach($items as &$item) {
-    _dpidestinations_virtualrank_update_item($item);
+    if($item['target']!="none"){
+      _dpidestinations_virtualrank_update_item($item,$nid);
+    }    
   }
 }
 
 /**
  * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
  */
-function _dpidestinations_virtualrank_update_item(&$item) {
+function _dpidestinations_virtualrank_update_item(&$item,$nid) {
   if($item['rank'] == 'default') {
     $controller = new TargetBlockController('targetblock');
     $targetblock = $controller->load_targetblock_by_termid_and_target($item['tid'], $item['target']);
@@ -280,26 +292,76 @@ function _dpidestinations_virtualrank_update_item(&$item) {
 
   if($item['rank'] != 'DNC') {
     //Caclulate virtual_rank
-    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank']);
+    $item['virtual_rank'] = _dpidestinations_virtualrank_give_virtual_rank_for_position($item['tid'], $item['target'], $item['rank'],$nid);
   }
   else {
-    $item['rank'] = 0;
+    //leave the rankk as it was
+    //@todo: find the old rank with a querry ?
+     $item['rank'] = 0;
   }
 }
 
 /**
- * Update the virtualrank of an item
+ * 
+ * @param type $tid
+ * @param type $target
+ * @param type $position
+ * @param type $nid
  */
-function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position) {
-  //@todo: avoid hard coding of the table...
-  $destination_table = 'field_data_field_destinations';
-
+function _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,$nid, $destination_table) {
+  
+  /*
+   * $controller = new TargetBlockController('targetblock');
+   * $targetblock = $controller->load_targetblock_by_termid_and_target($tid, $target);
+   * 
+   * $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
+   * $rank_max_value = $wrapper->rank_max_value->value(); 
+   */
+  
+  $query = db_select($destination_table, 'd');
+  $query->condition('d.field_destinations_tid', $tid, '=');
+  $query->condition('d.field_destinations_target', $target, '=');
+  $query->orderBy('d.field_destinations_virtual_rank', 'DESC');
+  //@todo:limit the query for performance reason ?
+  //$query->range(0, $rank_max_value); // Offset is the first argument, second argument is  
+  
+  $number_of_packages_in_target=$query->fields(NULL, array('field'))->countQuery()->execute()->fetchField();
+  
   // USING OFFSET for efficency
   if($position == 0 || $position == 1 || $position == 2) {
     $offset = 0;
   } else {
     $offset = $position - 2;
   }
+  
+  if($offset>($number_of_packages_in_target-1)){    
+    $offset = max($number_of_packages_in_target-1,0);
+  }
+  
+  return $offset;
+}
+
+
+/**
+ * Update the virtualrank of an item
+ *
+ * @ingroup dpidestination_reorder
+ */
+function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $target, $position,$nid) {
+  //@todo: avoid hard coding of the table...
+  $destination_table = 'field_data_field_destinations';
+
+
+
+  $actual_time_rank=dpidestinations_api_get_current_node_virtual_rank_for_targetblock($nid,$tid,$target);
+  $time_rank_in_position=dpidestinations_api_get_virtual_rank_of_position_for_targetblock($position,$tid,$target);
+
+  if($actual_time_rank!==NULL and $actual_time_rank>$time_rank_in_position){
+    $position++;
+  }
+  
+  $offset= _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,$nid, $destination_table);
+
 
   $query = db_select($destination_table, 'd');
   //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
@@ -339,11 +401,11 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
     $virtual_rank = (int)$virtual_rank;
 
     if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
-      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
-      drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));
-
+      module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder');      
+      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));      
+      //drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));      
+      
       //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
-
       $query2 = db_select($destination_table, 'd');
       //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
       $query2->condition('d.field_destinations_tid', $tid, '=');
@@ -639,6 +701,10 @@ function __dpidestinations_get_selectoption_get_targets_for_sectionterm($term_id
     $options[$subtype]=$target->label;
   }
 
+  if(_dpidestinations_variable_get('dpidestination_allow_none_value_target',FALSE)){
+    $options = $options + array( "none" => t('Aucun'));
+  }
+  
   return $options;
 }
 

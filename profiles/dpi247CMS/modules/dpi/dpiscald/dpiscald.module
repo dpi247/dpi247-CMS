@@ -11,9 +11,13 @@ function dpiscald_scald_atom_providers() {
     'googlemap' => 'DPI Maps hosted on Google Maps',
     'storify' => 'DPI Storify ressources hosted on Storify',
     'timelinejs' => 'DPI TimelineJs ressources hosted on timelinejs',
-    'coveritlive' => 'DPI Media hosted on CoveritLive',
     'picktochart' => 'DPI Media hosted on Picktochart',
-    'scribblelive' => 'DPI Media hosted on Scribblelive'
+    'scribblelive' => 'DPI Media hosted on Scribblelive',
+    'facebook_status' => 'DPI Facebook status ressources hosted on Facebook',
+    'infogram' => 'DPI Infogram ressources hosted on Infogram',
+    'slideshare' => 'DPI Slideshare ressources hosted on Slideshare',
+    'idalgo' => 'DPI Idalgo ressources hosted on Idalgo',
+    'link' => 'Media link for link item',
   );
 }
 
@@ -26,10 +30,14 @@ function dpiscald_scald_atom_providers_alter(&$types){
   $types['image']['dpiscald_flickr'] ='DPI Images on Flickr';
   //audios
   $types['audio']['dpiscald_soundcloud'] ='DPI Sounds on Soundcloud';
+  $types['audio']['dpiscald_deezer'] = 'DPI Sounds on Deezer';
+  $types['audio']['dpiscald_spotify'] = 'DPI Sounds on Spotify';
   //videos
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
   $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
+  $types['video']['dpiscald_ustream'] ='DPI Videos on Ustream';
+  $types['video']['dpiscald_videortl'] ='DPI Videos on RTL';
   $types['video']['dpiscald_vimeo'] = 'DPI Videos on Vimeo';
   $types['video']['dpiscald_youtube'] ='DPI Videos on Youtube';
 }
@@ -85,6 +93,75 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
   if (!isset($atom->rendered->player)) {
     _dpiscald_image_prerender($atom, $context, $options, $mode);
   }
+
+  $config = scald_context_config_load($context);
+  $player = $config->player[$atom->type];
+  switch ($player["*"]) {
+    case "dpiyoutube" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_youtube_player');
+      dpiscald_youtube_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpidailymotion" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_dailymotion_player');
+      dpiscald_dailymotion_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpivimeo" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_vimeo_player');
+      dpiscald_vimeo_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpisoundcloud" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_soundcloud_player');
+      dpiscald_soundcloud_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpideezer" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_deezer_player');
+      dpiscald_deezer_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpispotify" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_spotify_player');
+      dpiscald_spotify_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpigooglemap" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_googlemap_player');
+      dpiscald_googlemap_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiscribblelive" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_scribblelive_player');
+      dpiscald_scribblelive_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpifacebook_status" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_facebook_status_player');
+      dpiscald_facebook_status_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiinfogram" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_infogram_player');
+      dpiscald_infogram_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiidalgo" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_idalgo_player');
+      dpiscald_idalgo_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpitwitter" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_twitter_player');
+      dpiscald_twitter_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpistorify" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_storify_player');
+      dpiscald_storify_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpivideortl" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_videortl_player');
+      dpiscald_videortl_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpislideshare" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_slideshare_player');
+      dpiscald_slideshare_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiustream" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_ustream_player');
+      dpiscald_ustream_build_render($atom, $context, $options, $mode, $config);
+      break;
+  }
 }
 
 /**
@@ -108,13 +185,25 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'coveritlive','picktochart','scribblelive');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'idalgo', 'twitter', 'ustream', 'link');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
-    $themeReturn = $function_name();
-    $theme = array_merge($theme,$themeReturn);
+    if(function_exists($function_name)){
+      $themeReturn = $function_name();
+      $theme = array_merge($theme,$themeReturn);
+    }
   }
+  
+  $theme['atom_package_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-inline'
+  );
+  
+  $theme['atom_package_gallery_inline'] = array(
+    'variables' => array('atom' => NULL),
+    'template' => 'templates/atom-package-gallery-inline'
+  );
   
   return $theme;
 }
@@ -357,7 +446,6 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
     $scald['source'] = 'dpiscald_'.$tmp;
   }
   $function = $scald['source'] . '_scald_add_form';
-
   if (function_exists($function)) {
     $function($form, $form_state);
   }
@@ -366,7 +454,6 @@ function dpiscald_atom_add_form_add($form, &$form_state) {
       '#markup' => 'Import without form; does it makes sense ?',
     );
   }
-
   return $form;
 }
 
@@ -448,7 +535,7 @@ function dpiscald_menu_alter(&$items){
   );
   
   $items['admin/dpi247/mediacontext'] = array(
-    'title' => 'Manage mediaContext',
+    'title' => 'DPI Scald : manage mediaContext',
     'description'=>'You can define different element for media context',
     'page callback'=>'drupal_get_form',
     'page arguments'=>array('dpiscald_media_context_admin_form'),
@@ -457,11 +544,24 @@ function dpiscald_menu_alter(&$items){
     'file path' => drupal_get_path('module', 'dpiscald').'/includes',
   );
   
-  $items['admin/dpi247/mediacontext/management'] = array(
+    $items['admin/dpi247/mediacontext/management'] = array(
     'title' => 'Manage Context Element',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array(TRUE),
   );
+ 
+
+	$items['admin/dpi247/mediacontext/link-settings'] = array(
+		'title' => 'Manage link url list',
+		'description' => 'Manage link list',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('dpiscald_link_settings_form'),
+		'access arguments' => array(TRUE),
+		'file' => 'dpiscald.admin.link-settings.inc',
+		'file path' => drupal_get_path('module', 'dpiscald') . '/includes',
+		'type' => MENU_LOCAL_TASK,
+		'weight' => 2,
+	);
 }
 
 /**
@@ -469,7 +569,7 @@ function dpiscald_menu_alter(&$items){
  * @param unknown $output
  * @param unknown $context
  */
-function dpiscald_field_attach_view_alter(&$output, $context){
+function dpiscald_field_attach_view_alter(&$output, $context){  
   if (variable_get('mee_store_sas', TRUE)) {
     list($id, $revision_id, $bundle) = entity_extract_ids($context['entity_type'], $context['entity']);
     $fields = field_info_instances($context['entity_type'], $bundle);
@@ -477,34 +577,61 @@ function dpiscald_field_attach_view_alter(&$output, $context){
       if (!empty($field['settings']['dnd_enabled']) && isset($output[$name])) {
         foreach (element_children($output[$name]) as $key) {
           $info_context = 'full';
-          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode']);
+          $output[$name][$key]['#markup'] = dpiscald_scald_sas_to_rendered($output[$name][$key]['#markup'], $info_context, true, $context['view_mode'], $output[$name]["#object"]->nid);
         }
       }
     }
   }
 }
 
-function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL) {
+function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FALSE, $view_mode = NULL, $dpi_nid_context = NULL) {
   if (empty($context)) {
     $context = 'title';
   }
-  
   preg_match_all(SCALD_SAS_MATCH_PATTERN, $string, $matches);
   $atoms_info = array();
   $cpt = 0;
-  if(is_array($matches[0]) && is_array($matches[1])){
+  
+  if(is_array($matches[0]) && is_array($matches[1])){    
     foreach($matches[1] as $id){
-      if(($atom = scald_atom_load( intval($matches[1])))!=false){
+      if(($atom = scald_atom_load( intval($id)))!=false){
         $tmp_context = dpiscald_get_media_context_from_view_mode($view_mode,$atom->type, $context);
-        $atoms_info[] = scald_render($id, $tmp_context);
-      }else{
+        switch($atom->provider){
+          case 'atom_package':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_inline', array('node' => $node));
+            break;
+          case 'atom_package_gallery':
+              $node = node_load(intval($atom->data['nid']));
+              $atoms_info[] = theme('atom_package_gallery_inline', array('node' => $node));
+            break;
+          case "scald_image":
+              $transcoders = scald_transcoders();
+              $contexts = scald_contexts();
+              $context_config = $contexts[$tmp_context];
+              $transcoder = $transcoders[$context_config['type_format'][$atom->type]['transcoder']];
+              $arguments = array(
+                'context' => $tmp_context,
+                'atom' => scald_atom_load(intval($id)),
+                'style_name' => $transcoder['style'],
+                'options' => array('entity' => array("type" => "node", "id" => $dpi_nid_context))
+              );              
+              $default_theme = 'dpicontenttypes_image_render_context';
+              drupal_alter('dpicontenttypes_default_theme_image_inline', $default_theme, $arguments, $tmp_context);
+              $atoms_info[] = theme($default_theme, $arguments);
+            break;
+          default:
+              $atoms_info[] = scald_render($id, $tmp_context);
+            break;
+        }
+        
+      }else{        
         $atoms_info[] = scald_render($id, $matches[2][$cpt]);
       }        
       $cpt++;
     }
     $string_updated = str_replace($matches[0], $atoms_info, $string);
   }
-  
   return $string_updated;
 }
 
@@ -515,5 +642,54 @@ function dpiscald_scald_sas_to_rendered($string, $context = NULL, $override = FA
  */
 function dpiscald_get_media_context_from_view_mode($entity_view_mode,$media_type, $scald_context){
   $val_context = variable_get("dpiscald_media_context_table_value", NULL);
-  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context['view_mode'];
+  return (isset($val_context[$media_type][$entity_view_mode]) && $val_context[$media_type][$entity_view_mode])? $val_context[$media_type][$entity_view_mode] : $scald_context;
+}
+
+/**
+ * Implements hook_scald_player().
+ */
+function dpiscald_scald_player() {
+  $players = array();
+
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player';
+    $players['dpi'.$type] = $function_name();
+  }
+    
+  return $players;
+}
+
+/**
+ * Implements hook_scald_player_settings_form().
+ */
+function dpiscald_scald_player_settings_form($form, &$form_state) {
+  $element = array();
+
+  $types = _dpiscald_get_type_with_a_dpiplayer();
+
+  foreach ($types as $type) {
+    module_load_include('inc','dpiscald','includes/players/dpiscald_'.$type.'_player');
+    $function_name = 'dpiscald_'.$type.'_player_settings_form';
+    $function_name($form, $form_state, $element);
+  }
+
+  return $element;
+}
+
+function _dpiscald_get_type_with_a_dpiplayer() {
+  return array('youtube', 'dailymotion', 'vimeo', 'soundcloud', 'deezer', 'spotify', 'googlemap', 'scribblelive', 'facebook_status', 'infogram', 'idalgo', 'twitter', 'storify', 'videortl', 'slideshare', 'ustream');
+}
+
+/**
+ * Implements hook_dpilog_register().
+ */
+function dpiscald_dpilog_register(){
+  return array(
+    "dpiscald"=>array(
+      "actions"=>array("import"),
+    ),
+  );
 }

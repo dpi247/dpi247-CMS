@@ -8,6 +8,7 @@ abstract class Dispatcher {
    *
    */
   protected $zip;
+  protected $text_format;
   protected $cron;
   protected $cron_frequency;
   protected $temp_folder;
@@ -27,6 +28,7 @@ abstract class Dispatcher {
   public function Dispatcher($importer, $settings) {
     $this->importer = $importer;
     $this->zip = isset ( $settings ['zip'] ) ? $settings ['zip'] : 0;
+    $this->text_format = isset ( $settings ['text_format'] ) ? $settings ['text_format'] : NULL;
     $this->cron = isset ( $settings ['cron'] ) ? $settings ['cron'] : 0;
     $this->cron_frequency = isset ( $settings ['cron_frequency'] ) ? $settings ['cron_frequency'] : 10;
     $this->temp_folder = isset ( $settings ['temp_folder'] ) ? $settings ['temp_folder'] : NULL;
@@ -115,6 +117,15 @@ abstract class Dispatcher {
   }
   
   /**
+   * Return the text format of the class
+   * 
+   * @return String
+   */
+  public function getTextFormat(){
+    return $this->text_format;
+  }
+  
+  /**
    * Process a XML file source
    *
    * @param string $source          
@@ -183,14 +194,22 @@ abstract class Dispatcher {
    * @param Object $object2          
    */
   function processChildren($dom, $object, $object2) {
-    $importer = $this->getImporter ();
+    $importer = $this->getImporter ();    
     foreach ( $dom->childNodes as $child ) {
       $name = strtolower ( $child->nodeName );
       if ($name != '#text') {
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
-          $importer->$method_name ( $child, $object, $object2 );
+          if($method_name == 'builddestinations'){
+            $importer->$method_name ( $child, $object, $object2, $dom );
+          }else{
+            if($method_name == 'buildterm'){
+              $importer->$method_name ( $child, $object, $object2, $dom );
+            }else{
+              $importer->$method_name ( $child, $object, $object2 );
+            }            
+          }          
         }
       }
     }
@@ -206,9 +225,15 @@ abstract class Dispatcher {
   function processList($dom, $object, $object2) {
     $list = array ();
     $importer = $this->getImporter ();
-    foreach ( $dom->childNodes as $child ) {
-      $name = strtolower ( $child->nodeName );
-      if ($name != '#text') {
+    foreach ( $dom->childNodes as $child ) {      
+      $name = strtolower ( $child->nodeName );      
+      /**
+       * $child->getAttribute('xsi:type') ne peut pas être égal a TextObjectType
+       * Car cela viens des archives qui sur certaine version papier contienne des
+       * object embeded de type text qui écrase les valeurs de l'article si on le laisse processer
+       * Voir dam ref : d-20070521-W22A4M
+       */
+      if ($name != '#text' && $child->getAttribute('xsi:type') != 'TextObjectType') {
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
@@ -305,9 +330,9 @@ abstract class Dispatcher {
     // Check if directory exists.
     if (! is_dir ( $directory )) {
       if (($mode & FILE_CREATE_DIRECTORY) && @mkdir ( $directory, 0775, TRUE )) {
-        drupal_set_message ( t ( 'The directory %directory has been created.', array (
+        watchdog ( 'dpimport', t ( 'The directory %directory has been created.', array (
           '%directory' => $directory 
-        ) ) );
+        ) ), WATCHDOG_NOTICE);
         @chmod ( $directory, 0775 ); // Necessary for non-webserver users.
       } else {
         if ($form_item) {
@@ -322,9 +347,9 @@ abstract class Dispatcher {
     // Check to see if the directory is writable.
     if (! is_writable ( $directory )) {
       if (($mode & FILE_MODIFY_PERMISSIONS) && @chmod ( $directory, 0775 )) {
-        drupal_set_message ( t ( 'The permissions of directory %directory have been changed to make it writable.', array (
+        watchdog ( 'dpimport', t ( 'The permissions of directory %directory have been changed to make it writable.', array (
           '%directory' => $directory 
-        ) ) );
+        ) ) , WATCHDOG_CRITICAL);
       } else {
         form_set_error ( $form_item, t ( 'The directory %directory is not writable', array (
           '%directory' => $directory 
@@ -403,6 +428,23 @@ abstract class Dispatcher {
       '#required' => TRUE 
     );
     
+    $all_formats = filter_formats();
+    $els = array();
+    if($all_formats && is_array($all_formats)){
+      foreach($all_formats as $format){
+        $els[$format->format] = $format->name;
+      }
+    }
+    
+    $form ['dispatcher'] ['text_format'] = array (
+      '#type' => 'select',
+      '#title' => t ( 'Choose text format for textfield' ),
+      '#description' => '',
+      '#options' => $els,
+      '#default_value' => isset ( $values ['text_format'] ) ? $values ['text_format'] : 0,
+      '#required' => TRUE 
+    );
+    
     $form ['dispatcher'] ['cron'] = array (
       '#type' => 'select',
       '#title' => t ( 'Are the data imported by a CRON job?' ),
@@ -462,7 +504,7 @@ abstract class Dispatcher {
   public function submitSettingsForm($values, $form_state_multistep) {
     $default_path = $_SERVER ["DOCUMENT_ROOT"] . "/sites/default/importer/" . $form_state_multistep["default"] ["name"];
     $old = umask ( 0 );
-    if (mkdir ( $default_path . "/done", 0777, true )) {
+    if (@mkdir ( $default_path . "/done", 0777, true )) {
       if (mkdir ( $default_path . "/tmp", 0777, true )) {
         if (! mkdir ( $default_path . "/error", 0777, true )) {
           rmdir ( $default_path . "/tmp" );
@@ -482,6 +524,7 @@ abstract class Dispatcher {
     
     $dispatcher_settings = array (
       'zip' => $values ['zip'],
+      'text_format' => $values ['text_format'],
       'cron' => $values ['cron'],
       'cron_frequency' => $values ['cron_frequency'],
       'temp_folder' =>  $form_state_multistep ["default"] ["name"] . "/tmp",
@@ -501,6 +544,7 @@ abstract class Dispatcher {
   public function initializeForm() {
     return array (
       'zip' => $this->isZip (),
+      'text_format' => $this->text_format,
       'cron' => $this->isCron (),
       'cron_frequency' => $this->cron_frequency,
       'temp_folder' => $this->temp_folder,

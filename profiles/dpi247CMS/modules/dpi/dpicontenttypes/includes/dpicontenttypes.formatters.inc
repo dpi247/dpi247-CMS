@@ -92,7 +92,6 @@ function dpicontenttypes_field_formatter_view_sclad_context($entity_type, $entit
       $count++;
     }
   }
-
   return $element;
 }
 

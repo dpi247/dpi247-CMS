@@ -23,7 +23,7 @@ function dpicommons_menu() {
   );
 
   $items[DPI_ADMIN_PATH.'/general-settings'] = array(
-    'title' => 'DPI247 Settings',
+    'title' => 'DPI Settings',
     'description' => 'General settings for DPI247',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('dpicommons_admin_settings_form'),
@@ -37,6 +37,7 @@ function dpicommons_menu() {
     'title' => 'DPI247 Finalize install process',
     'description' => 'Save section page manager tasks in DB',
     'page callback' => '_dpicommons_finalize_install_process',
+    'access callback' => TRUE,
     'access arguments' => TRUE,
     'type'=>MENU_CALLBACK,
     'file' => 'dpicommons.pages.admin.inc',
@@ -61,6 +62,16 @@ function dpicommons_theme() {
   return array(
     'dpi_vertical_tabs' => array(
       'variables' => array('data' => null),
+      'file' => 'templates/theme.inc',
+    ),
+    'dpi_render_wrapper' => array(
+      'variables' => array(
+        'tag' => NULL, 
+        'attributes' => NULL, 
+        'value_prefix' => NULL, 
+        'value_suffix' => NULL, 
+        'value' => NULL
+      ),
       'file' => 'templates/theme.inc',
     ),
     'dpicommons_line_chart'	=> $chart_base + array(
@@ -106,6 +117,11 @@ function dpicommons_theme() {
         'height' => NULL,
         'jsprint' => FALSE,
       ),
+    ),
+    'checkboxgrid' => array(
+      'render element' => 'element',
+      'file' => 'theme.inc',
+      'path' => drupal_get_path ( 'module', 'dpicommons' ) . '/theme' 
     ),
   );
 }

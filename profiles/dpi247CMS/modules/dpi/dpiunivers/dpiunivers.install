@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implementation of hook_schema
+ * @return multitype:array
+ */
+function dpiunivers_schema() {
+  $schema = array ();
+  $schema ['dpi_univers'] = array (
+    'description' => 'dpi_univers',
+    'fields' => array (
+      'label' => array (
+        'description' => 'label for this field',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE 
+      ),
+      'theme' => array (
+        'description' => 'theme to use for this univers',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE 
+      ),
+      'menu' => array (
+        'description' => 'menu to use for this univers',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE 
+      ),
+      'id' => array (
+        'description' => 'id',
+        'type' => 'serial',
+        'not null' => TRUE 
+      ) 
+    ),
+    'primary key' => array (
+      'id' 
+    ) 
+  );
+  return $schema;
+}

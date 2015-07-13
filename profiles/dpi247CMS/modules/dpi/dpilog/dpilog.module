@@ -357,10 +357,15 @@ function _dpilog_watchdog_save($watchdogs){
   module_load_include('inc', 'dpilog', 'dpilog.private');
   $watchdog_table_name = _dpilog_get_table_name('watchdogs');
 
-  $insert = Database::getConnection('default', 'default')->insert($watchdog_table_name);
-  foreach($watchdogs as $watchdog){
-    $insert->fields(array_keys($watchdog));
-    $insert->values(array_values($watchdog));
+  try {
+    $insert = Database::getConnection('default', 'default')->insert($watchdog_table_name);
+    foreach($watchdogs as $watchdog){
+      $insert->fields(array_keys($watchdog));
+      $insert->values(array_values($watchdog));
+    }
+    $insert->execute();
   }
-  $insert->execute();
+  catch (Exception $exc) {
+    watchdog('error', 'Important error occur during watchdogs insert for unserialize value : '.  serialize($watchdogs));
+  }
 }

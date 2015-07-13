@@ -252,7 +252,20 @@ function dpidestinations_rules_action_info() {
       'callbacks' => array (
         'execute' => 'dpidestinations_clear_cache_of_node_content' 
       ) 
-    ) 
+    ),
+    'regenerate_targetblock_destination' => array (
+      'label' => t ( 'Refresh destinations from targetblocks' ),
+      'parameter' => array (
+        'node' => array (
+          'type' => 'targetblock',
+          'label' => t ( 'Content' ) 
+        ) 
+      ),
+      'group' => t ( 'Dpi Actions Rules' ),
+      'callbacks' => array (
+        'execute' => 'dpidestinations_targetblock_regenerate_cache' 
+      ) 
+    ),
   );
 }
 
@@ -299,4 +312,13 @@ function dpidestinations_clear_cache_of_node_content($node) {
   foreach ( dpicommons_api_get_all_path_alias_for_node ( $node ) as $url_alias ) {
     dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
   }
+}
+
+/**
+ * Invalidation targetblock cash entry
+ * 
+ * @param targetblock $targetblock
+ */
+function dpidestinations_targetblock_regenerate_cache($targetblock){
+  dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $targetblock->did.'_%_'.$targetblock->target );
 }

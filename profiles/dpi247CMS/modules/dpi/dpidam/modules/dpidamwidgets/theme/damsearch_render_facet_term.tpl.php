@@ -12,5 +12,5 @@ if ($term_active) {
 } else {
 	print "<span class='lsf symbol'>checkboxempty</span> ";
 } 
-print "<a href='$term_url'>$term_display ($term_frequency)</a></li>";
+print "<a href='$term_url'>".t($term_display)." ($term_frequency)</a></li>";
 

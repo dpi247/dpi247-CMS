@@ -21,14 +21,15 @@
  *   The created/updated file if no problem occured, FALSE otherwise
  */
 function dpicontenttypes_api_create_or_update_file($file_uri, $path, $stream = 'public', $requestor = NULL, $replace = FALSE, $cron_delete = TRUE) {
-  $new_file_path = $stream.'://'.$path.'/'.date('Ymd', time());
+  $new_file_path = $stream . '://' . $path . '/' . date('Ymd', time());
 
   $file_query = db_select('dpicontenttypes_external_files', 'def')
-    ->fields('def', array('fid'))
-    ->condition('def.uri', $file_uri);
+      ->fields('def', array('fid'))
+      ->condition('def.uri', $file_uri);
   if ($requestor) {
     $file_query->condition('def.requestor', $requestor);
-  } else {
+  }
+  else {
     $file_query->isNULL('def.requestor');
   }
   $db_existing_files = $file_query->execute();
@@ -40,14 +41,15 @@ function dpicontenttypes_api_create_or_update_file($file_uri, $path, $stream = '
       if ($replace) {
         if (!file_delete($existing_file)) {
           db_delete('file_managed')
-            ->condition('fid', $fid)
-            ->execute();
+              ->condition('fid', $fid)
+              ->execute();
           //_field_file_cache(NULL, $existing_file); // Delete the file from the cache
         }
         db_delete('dpicontenttypes_external_files')
-          ->condition('fid', $fid)
-          ->execute();
-      } else {
+            ->condition('fid', $fid)
+            ->execute();
+      }
+      else {
         return $existing_file;
       }
     }
@@ -116,7 +118,6 @@ function dpicontenttypes_api_truncate_text($text, $size, $nocut_words = NULL, $f
 
     // If the delimiter has not been specified, try to split at paragraph or
     // sentence boundaries.
-
     // The substring may not be longer than maximum length specified. Initial slice.
     $substring = truncate_utf8($text, $size);
 
@@ -176,7 +177,8 @@ function dpicontenttypes_api_truncate_text($text, $size, $nocut_words = NULL, $f
         $substring = ($min_rpos === 0) ? $substring : substr($substring, 0, 0 - $min_rpos);
       }
     }
-  } else {
+  }
+  else {
     $substring = truncate_utf8($text, $size, " ");
     $substring = wordwrap($substring, $size);
   }
@@ -249,7 +251,7 @@ function dpicontenttypes_api_get_embeds_view($node, $content, $type = FALSE, $pr
   $rendered_embeds = array();
   if (isset($content['field_embededobjects'])) {
     $embeds_content = $content['field_embededobjects'];
-    if($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, FALSE, $inline)) {
+    if ($embeds = dpicontenttypes_api_get_embeds($node, $type, $provider, FALSE, $inline)) {
       foreach ($embeds as $delta => $embed) {
         if (isset($embeds_content[$delta]) && isset($embeds_content[$delta]['#markup'])) {
           $rendered_embeds[$delta] = $embeds_content[$delta]['#markup'];
@@ -352,9 +354,10 @@ function dpicontenttypes_api_get_embeds_by_type($node, $load_atom = FALSE) {
 function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE, $load_atom = FALSE, $inline = NULL) {
   static $static_embeds = array();
   if (isset($node->nid)) {
-    if(isset($static_embeds[$node->nid])) {
+    if (isset($static_embeds[$node->nid])) {
       $embeds = $static_embeds[$node->nid];
-    } else {
+    }
+    else {
       $embeds = dpicommons_get_field_from_entity($node, 'node', 'field_embededobjects', array(), array('identifier' => TRUE));
       $static_embeds[$node->nid] = $embeds;
     }
@@ -400,6 +403,7 @@ function dpicontenttypes_api_get_embeds($node, $type = FALSE, $provider = FALSE,
 function dpicontenttypes_api_getdpicontenttypes() {
   return array(
     'package',
+    'package_gallery'
   );
 }
 
@@ -451,7 +455,7 @@ function dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid = NULL) {
   $result = NULL;
   $vocabulary_name = NULL;
 
-  if ($vid != NULL){
+  if ($vid != NULL) {
     $vocabulary = taxonomy_vocabulary_load($vid);
     $vocabulary_name = $vocabulary->machine_name;
   }
@@ -466,8 +470,8 @@ function dpicontenttypes_api_taxonomy_get_term_by_path($path, $vid = NULL) {
   foreach ($terms as $term) {
     $term_path = '';
     $parents = taxonomy_get_parents_all($term->tid);
-    foreach ($parents as $parent){
-      $term_path = strtolower($parent->name)."/".$term_path;
+    foreach ($parents as $parent) {
+      $term_path = strtolower($parent->name) . "/" . $term_path;
     }
     if (trim($term_path, '/') == strtolower(trim($path, '/'))) {
       $result[] = $term;
@@ -518,7 +522,8 @@ function dpicontenttypes_api_get_cropings_for_entity_and_atom($entity_type, $eid
   // Get default cropings values, if not set in DB
   if ($style_name) {
     $styles = array(image_style_load($style_name));
-  } else {
+  }
+  else {
     $styles = image_styles();
   }
   $merged_cropings = array();
@@ -527,23 +532,23 @@ function dpicontenttypes_api_get_cropings_for_entity_and_atom($entity_type, $eid
       $existing_ratio = 0;
       if ($existing_cropings && isset($existing_cropings[$style['name']]) && sizeof($existing_cropings[$style['name']]) == 4) {
         $merged_cropings[$style['name']] = $existing_cropings[$style['name']];
-        $existing_ratio = $merged_cropings[$style['name']][2]/$merged_cropings[$style['name']][3];
+        $existing_ratio = $merged_cropings[$style['name']][2] / $merged_cropings[$style['name']][3];
       }
 
       if (isset($style['effects'])) {
         foreach ($style['effects'] as $effect) {
           if (isset($effect['name']) && $effect['name'] == 'dpicontenttypes_dpicrop') {
             $data = $effect['data'];
-            $style_ratio = $data['width']/$data['height'];
-            $ratio_error = abs($existing_ratio - $style_ratio)/$style_ratio;
+            $style_ratio = $data['width'] / $data['height'];
+            $ratio_error = abs($existing_ratio - $style_ratio) / $style_ratio;
             if (!isset($merged_cropings[$style['name']]) || ($ratio_error > 0.02)) {
               // The croping has no existing value or the ratio has changed (2% error)
 
               $crop = array(
-                is_numeric($data['xoffset']) ? (int)$data['xoffset'] : $data['xoffset'],
-                is_numeric($data['yoffset']) ? (int)$data['yoffset'] : $data['yoffset'],
-                (int)$data['width'],
-                (int)$data['height'],
+                is_numeric($data['xoffset']) ? (int) $data['xoffset'] : $data['xoffset'],
+                is_numeric($data['yoffset']) ? (int) $data['yoffset'] : $data['yoffset'],
+                (int) $data['width'],
+                (int) $data['height'],
               );
               $merged_cropings[$style['name']] = $crop;
             }
@@ -602,11 +607,11 @@ function dpicontenttypes_api_image_path_flush($path) {
   foreach ($styles as $style) {
     $style_name = $style['name'];
     $file_directory_path = file_stream_wrapper_get_instance_by_scheme('public')->getDirectoryPath();
-    $entities_dir = file_scan_directory($file_directory_path.'/dpistyles/'.$style_name, '/.*/', array('recurse' => FALSE));
+    $entities_dir = file_scan_directory($file_directory_path . '/dpistyles/' . $style_name, '/.*/', array('recurse' => FALSE));
     foreach ($entities_dir as $entity_dir) {
       if (is_dir($entity_dir->uri)) {
         $entity_name = $entity_dir->name;
-        $atoms_dir = file_scan_directory($file_directory_path.'/dpistyles/'.$style_name.'/'.$entity_name, '/.*/', array('recurse' => FALSE));
+        $atoms_dir = file_scan_directory($file_directory_path . '/dpistyles/' . $style_name . '/' . $entity_name, '/.*/', array('recurse' => FALSE));
         foreach ($atoms_dir as $atom_dir) {
           if (is_dir($atom_dir->uri)) {
             $image_path = _dpicontenttypes_image_style_path($style_name, $entity_name, $atom_dir->name, $path);
@@ -621,4 +626,281 @@ function dpicontenttypes_api_image_path_flush($path) {
 
   // Throw event to allow specific actions on a path flush
   module_invoke_all('dpistyles_path_flush', $path);
+}
+
+function dpicontenttypes_api_modify_embedded_objects(& $node, $langcode, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options = null) {
+  if (!isset($node->$updated_field[$langcode]))
+    $langcode = 'und';
+  $field_element = $node->$updated_field;
+  if (!empty($field_element[$langcode])) {
+    $settings = field_info_instance('node', $updated_field, $node->type);
+    $setting_full = $settings['display']['default']['settings'];
+    dpicontenttypes_api_define_element_without_mediabox($node, $langcode, $setting_full, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options);
+  }
+}
+
+function dpicontenttypes_api_define_element_without_mediabox(& $node, $langcode, $setting_full, $updated_field, $hors_text_field_name, $bottom_box_field_name, $options) {
+  $elements_embed = array();
+  $elements_outembed = array();
+  $type_nb = dpicontenttypes_api_define_nb_items_and_type($setting_full);
+  if (!isset($options)) {
+    $options = dpicontenttypes_api_get_default_extra_embedded_objects_render();
+  }
+  foreach (field_get_items('node', $node, $updated_field) as $element) {
+    if (in_array($element['type'], $type_nb['type']) && ($type_nb['nb'] > 0 || $type_nb['nb'] == -1)) {
+      $elements_embed[] = $element;
+      if ($type_nb['nb'] != -1)
+        $type_nb['nb'] --;
+    }else {
+      $elements_outembed[] = $element;
+    }
+  }
+
+  $node->$updated_field[$langcode] = $elements_embed;
+  $vars_out_embed = dpicontenttypes_api_define_hors_text($elements_outembed, $options);
+  $node->$bottom_box_field_name = $vars_out_embed['other'];
+  $node->content[$bottom_box_field_name] = array();
+  $tmp = $node->$bottom_box_field_name;
+  foreach ($tmp as $elm) {
+    $node->content[$bottom_box_field_name][] = array(
+      '#markup' => scald_render($elm->sid, (isset($options[$elm->type])) ? $options[$elm->type] : 'full')
+    );
+  }
+  $node->$hors_text_field_name = $vars_out_embed['hors_texte'];
+  $node->content[$hors_text_field_name] = array();
+  $tmp = $node->$hors_text_field_name;
+  foreach ($tmp as $elem) {
+    $node->content[$hors_text_field_name][] = array(
+      '#markup' => scald_render($elem->sid, (isset($options[$elem->type])) ? $options[$elem->type] : 'full')
+    );
+  }
+}
+
+function dpicontenttypes_api_define_nb_items_and_type($setting_full) {
+  $return = array('type' => array(), 'nb' => 0);
+  if ($setting_full['type_number'] == 'all') {
+    $return['nb'] = -1;
+  }
+  else {
+    $return['nb'] = $setting_full['value_number'];
+  }
+  foreach ($setting_full as $k => $v) {
+    if (strstr($k, 'type_') && $v && !is_string($v)) {
+      $return['type'][] = substr($k, 5);
+    }
+  }
+  return $return;
+}
+
+function dpicontenttypes_api_define_hors_text($elements_outembed, $options) {
+  $hors_text = array();
+  $others = dpicontenttypes_api_create_default_table_options($options);
+  foreach ($elements_outembed as $elem) {
+    $scald_info_from_atom = scald_atom_load($elem['sid']);
+    if (isset($elem['inline']) && $elem['inline'] != '1') {
+      if ($scald_info_from_atom->type == "atom_package") {
+        $node_info_from_atom = node_load($scald_info_from_atom->data['nid']);
+        $field = field_get_items('node', $node_info_from_atom, 'field_packagetype');
+        $taxonomy_term = taxonomy_term_load(intval($field[0]['tid']));
+        if ($taxonomy_term->name == "Hors-texte") {
+          $hors_text[] = $scald_info_from_atom;
+        }
+        else {
+          $var = dpicontenttypes_api_get_provider_without($scald_info_from_atom->provider);
+          if (isset($var) && isset($others[$var])) {
+            $others[$scald_info_from_atom->provider][] = $scald_info_from_atom;
+          }
+          else {
+            $others['elem_other'][] = $scald_info_from_atom;
+          }
+        }
+      }
+      else {
+        $var = dpicontenttypes_api_get_provider_without($scald_info_from_atom->provider);
+        if (isset($var) && isset($others[$var])) {
+          $others[$var][] = $scald_info_from_atom;
+        }
+        else {
+          $others['elem_other'][] = $scald_info_from_atom;
+        }
+      }
+    }
+  }
+  $tmp_others = array();
+  foreach ($others as $other) {
+    foreach ($other as $element) {
+      $tmp_others[] = $element;
+    }
+  }
+  $others = $tmp_others;
+  return array('hors_texte' => $hors_text, 'other' => $others);
+}
+
+function dpicontenttypes_api_get_provider_without($provider) {
+  $return = $provider;
+  if (strstr($provider, 'scald_') != FALSE || strstr($provider, 'dpiscald_') != FALSE) {
+    $tmp = explode('_', $provider);
+    $return = (isset($tmp[1])) ? $tmp[1] : $provider;
+  }
+  return $return;
+}
+
+function dpicontenttypes_api_get_default_extra_embedded_objects_render() {
+  $return = array();
+  $providers = scald_atom_providers();
+  foreach ($providers as $kprov => $provider) {
+    foreach ($provider as $ktype => $type) {
+      if ($ktype == 'dpiscald' || $ktype == 'dpicontenttypes') {
+        $k = $kprov;
+      }
+      else {
+        $k = $ktype;
+      }
+      if (strstr($k, 'scald_') != FALSE) {
+        $tmp = explode('_', $k);
+        $k = (isset($tmp[1])) ? $tmp[1] : $k;
+      }
+      $return[$k] = 'full';
+    }
+  }
+  return $return;
+}
+
+function dpicontenttypes_api_create_default_table_options($options = array()) {
+  $return = array();
+  foreach ($options as $k => $v) {
+    $return[$k] = array();
+  }
+  $return['elem_other'] = array();
+  return $return;
+}
+
+/**
+ * This function merge informations about autopublish node
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_insert_autopublish($element) {
+  $return = FALSE;
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    try {
+      $fields = array(
+        'nid' => $element->nid,
+        'status' => $element->status,
+        'date_info' => $element->date,
+        'action' => $element->action,
+        'date_timezone' => $element->timezone,
+      );
+
+      db_merge('dpicontenttypes_temp_nodetopublish')
+          ->key(array('nid' => $element->nid, 'action' => $element->action))
+          ->fields($fields)
+          ->execute();
+      $return = TRUE;
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Successful insertion of the temporary line to the node @nid", array("@nid" => $element->nid)));
+    } catch (Exception $exc) {
+      dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Catch an error into db_merge execution with error : " . $exc->getMessage()));
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "add_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
+/**
+ * This function delete informations about autopublish node pass by parameter
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_delete_autopublish($node) {
+  $return = FALSE;
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    try {
+      db_delete('dpicontenttypes_temp_nodetopublish')
+          ->condition('nid', $node->nid)
+          ->execute();
+      $return = TRUE;
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line to node @nid", array("@nid" => $node->nid)));
+    } catch (Exception $exc) {
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution with message : " . $exc->getMessage()));
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("dpi_autopublish : Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
+/**
+ * This function delete informations about autopublish node pass by parameter
+ * @param stdClass $node
+ */
+function dpicontenttypes_api_delete_by_action_autopublish($node, $action) {
+  $return = FALSE;
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    try {
+      db_delete('dpicontenttypes_temp_nodetopublish')
+          ->condition('nid', $node->nid)
+          ->condition('action', $action)
+          ->execute();
+      $return = TRUE;
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Removal successfully temporary line for node @nid with action @action", array("@nid" => $node->nid, '@action' => ($action == 0) ? 'unpublish' : 'publish')));
+    } catch (Exception $exc) {
+      dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Catch an error into db_delete execution"));
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+  return $return;
+}
+
+/**
+ * 
+ * @param type $node
+ */
+function dpicontenttypes_api_check_autopublish($node) {
+  if (db_table_exists('dpicontenttypes_temp_nodetopublish')) {
+    $useautopublishdates = field_get_items('node', $node, 'field_autopublish');
+    if (!empty($useautopublishdates))
+      $useautopublishdate = current($useautopublishdates);
+    if (isset($useautopublishdate['value']) && $useautopublishdate['value']) {
+      $autopublishdates = field_get_items('node', $node, 'field_autopublishdate');
+      $autopublishdate = current($autopublishdates);
+      if (isset($autopublishdate['value'])) {
+        $date = $autopublishdate;
+        //@todo Confirmer la validité en fonction du fuseau horaire        
+        if (intval($date['value']) <= time() && ($date['value2'] == NULL || intval($date['value2']) >= time())) {
+          $node->status = 1;
+        }
+        else {
+          if(intval($date['value']) == intval($date['value2'])){
+            $node->status = 1; //that mean no use unpublish date
+          }else{
+            $node->status = 0; 
+          }          
+        }
+      }
+      else {
+        $node->status = 0;
+      }
+    }
+    else {
+      $node->status = 1;
+    }
+  }
+  else {
+    dpi_log('dpi_autopublish', "del_tmp_table_embargo", t("Table doesn't exist (dpicontenttypes_temp_nodetopublish)"));
+  }
+}
+
+function dpicontenttypes_api_truncate_autopublish() {
+  $return = FALSE;
+  try {
+    db_truncate('dpicontenttypes_temp_nodetopublish')->execute();
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table success"));
+    $return = TRUE;
+  } catch (Exception $exc) {
+    dpi_log('dpi_autopublish', "delete_autopublish_table", t("Truncate table impossible"));
+  }
+  return $return;
 }

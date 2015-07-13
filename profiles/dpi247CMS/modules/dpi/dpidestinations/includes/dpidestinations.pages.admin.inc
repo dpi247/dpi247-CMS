@@ -61,25 +61,32 @@ class DpidestinationsTargetblockUIController extends EntityDefaultUIController {
       $items['admin/dpi247/dpidestinations/targetblock']['weight']=9;
 
     }
+    unset($items['admin/dpi247/dpidestinations/targetblock/add']);
     return $items;
   }
-
+  
   /**
    * Builds the entity overview form.
    */
   public function overviewForm($form, &$form_state) {
     //FAKE the exportable behavior cause it is confusing...
     $this->entityInfo['exportable']=FALSE;
-
+    
     if ($filters = $this->overviewFilters()) {
       $form['filters'] = $this->buildFiltersForm($filters);
     }
     // By default just show a simple overview for all entities.
     $form['table'] = $this->overviewTable();
-    $form['pager'] = array('#theme' => 'pager');
+    
+    /* Suppression de l'édition */
+    foreach($form['table']['#rows'] as $k => $row){
+      unset($form['table']['#rows'][$k][7]);
+    }
+    
+    $form['pager'] = array('#theme' => 'pager');       
     return $form;
   }
-
+  
   /**
    * Generates the render array for the overview table for arbitrary entities
    * matching the given conditions.
@@ -408,6 +415,7 @@ function dpidestinations_page_administration_destinations(){
 
 function dpidestinations_page_administration_configuration(){
   // @todo : quel est l'intérêt des 4 premières lignes?
+  $rank_max_value = 5;
   $virtual_rank =  _dpidestinations_variable_get('dpidestinations_virtualrank_delta',1000)* ($rank_max_value+1);
   list($targetview_reorder_view_name,$targetview_reorder_display)=_dpidestinations_variable_get("dpidestinations_targetview_reorder_default",array("targetview_reorder_default","targetview1"));
   _dpidestinations_variable_get('dpidestinations_destination_vid',2);
@@ -459,7 +467,14 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#description' => t('The rank mak value can be defined in each targetblock but cannot be bigger than the absolute rank max value'),
     '#default_value'=>_dpidestinations_variable_get('dpidestination_max_reserved_position',10),
   );
-
+  
+  $form["default"]['dpidestination_allow_none_value_target']=array(
+    "#type"=>'checkbox',
+    '#title' => t('Allow none value for target'),
+    '#description' => t('This checkbox allow to define a none value for target.'),
+    '#default_value'=>_dpidestinations_variable_get('dpidestination_allow_none_value_target',FALSE),
+  );
+  
   $help="This value is used as a multiplicator in the timerank calculation when a package is placed on the first position of a destination<br/>";
 
   $form["advanced"]['dpidestinations_virtualrank_delta']=array(
@@ -511,7 +526,7 @@ function dpidestinations_form_configuration_form($form,& $form_state){
     '#prefix' => '<div id="dropdown-view-display">',
     '#suffix' => '</div>',
   );
-
+  
   $form["submit"] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -521,11 +536,12 @@ function dpidestinations_form_configuration_form($form,& $form_state){
 }
 
 function dpidestinations_form_configuration_form_submit($form, &$form_state){
-
+  module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder'); 
   $values=$form_state['values'];
 
   _dpidestinations_variable_set('dpidestinations_section_vid',$values['dpidestinations_section_vid']);
   _dpidestinations_variable_set('dpidestinations_virtualrank_delta',$values['dpidestinations_virtualrank_delta']);
+  _dpidestinations_variable_set('dpidestination_allow_none_value_target',$values['dpidestination_allow_none_value_target']);
   _dpidestinations_variable_set('dpidestination_max_reserved_position',$values['dpidestination_max_reserved_position']);
   _dpidestinations_variable_set('dpidestinations_targetview_reorder_default',array($values['view_name'],$values['view_display']));
 }
@@ -533,3 +549,106 @@ function dpidestinations_form_configuration_form_submit($form, &$form_state){
 function _dpidestinations_ajaxcallback_viewname_viewdisplay_config( $form, $form_state){
   return $form["advanced"]['reorder_view']['view_display'];
 }
+
+function dpidestinations_page_admin_default_targetblock(){
+  return drupal_get_form("dpidestinations_page_admin_default_targetblock_form");
+}
+
+function dpidestinations_page_admin_default_targetblock_form($form, &$form_state){
+  $menus = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
+  $default_value = variable_get('dpidestinations_default_targetblock_for_section', array());
+  $result = array();
+  foreach($menus as $k => $v){
+    if($k){
+      $result[$k] = $v;
+    }
+  }
+  $header = array(
+    'Section name',
+    'Targetblock selection',
+  );
+  $rows = array();
+  foreach($result as $key => $menu){
+    $rows['r'.$key] = array();
+    $targetOptions = __dpidestinations_get_selectoption_get_targets_for_sectionterm ( $key );
+    $rows[$key]['title'] = array(
+      '#markup' => $menu,
+    );
+    $tmp = array(
+      '#type' => 'select',
+      '#options' => array( 'undefined' => t('Undefined targetblock')) + $targetOptions,
+      '#default_value' => (isset($default_value[$key]['select'])) ? $default_value[$key]['select'] : NULL ,
+    );
+    $rows[$key]['select'] = $tmp;
+  }
+  $form ["table"] = array (
+    "#theme" => "destinations_form_table",
+    "#header" => $header,
+    "rows" => array("#tree" => TRUE)+$rows,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save')
+  );
+  
+  return $form;
+}
+
+function dpidestinations_page_admin_default_targetblock_form_submit($form, &$form_state){
+  if(isset($form_state['values']['rows'])){
+    try {
+      variable_set('dpidestinations_default_targetblock_for_section', $form_state['values']['rows']);
+      drupal_set_message(t('Enregistrement bien effectué'));
+    } catch (Exception $e) {
+      drupal_set_message(t('Une erreur est survenue durant l\'enregistrement'), 'error');
+    }    
+  }
+}
+
+function dpidestinations_get_menu_tree(){
+  module_load_include('inc', 'pathauto', 'pathauto');
+  $json_export = array();
+  $sql = "
+    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
+    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
+    WHERE ml.menu_name = :menu
+    ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
+  $result = db_query($sql, array(':menu' => 'main-menu'), array('fetch' => PDO::FETCH_ASSOC));
+  $links = array();
+  
+  foreach ($result as $item) {
+    $links[] = $item;
+  }
+  $tree = menu_tree_data($links);
+  
+  return $tree;
+}
+
+
+function theme_destinations_form_table(&$variables){
+  $form = $variables ["form"];
+  $rows = $form ["rows"];
+  $header = $form ["#header"];
+  
+  $content = array (
+    "#theme" => "table",
+    "#header" => $header,
+    "#rows" => array (),
+  );
+  
+  foreach ( $rows as $k => $tmp ) {
+    $row = array ();
+    if(strstr($k, '#') ===FALSE){
+      foreach ( $tmp as $key => $el ) {
+        if(strstr($key, '#') ===FALSE){
+          $row[] = render($el);
+        }
+      } 
+    }
+    $content ["#rows"] [] = $row;
+  }
+  
+  return drupal_render ( $content );
+}
+

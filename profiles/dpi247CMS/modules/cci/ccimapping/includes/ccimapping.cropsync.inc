@@ -25,8 +25,7 @@ function ccimapping_cropsync_form_cropings_editor_form($form, $form_state) {
   );
 
   $form['fyi']['markup'] = array(
-    '#type' => 'markup',
-    '#value' => '<pre>'.htmlentities(ccimapping_cropsync_get_cropings_fromWS()).'</pre>',
+    '#markup' => '<pre>'.htmlentities(ccimapping_cropsync_get_cropings_fromWS()).'</pre>',
   );
 
   return $form;
@@ -66,13 +65,7 @@ function ccimapping_cropsync_form_cropings_editor_form_submit($form, $form_state
       drupal_set_message(t('The cropings have been sent to CCI'));
     } catch (SoapFault $exception) {
       cciadmin_api_output_webservice_error('WebService error while sending the Cropings XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
     }
-
-    /*dsm($client->__getLastRequest(), 'submit req');
-    dsm($client->__getLastRequestHeaders(), 'submit reqhead');
-    dsm($client->__getLastResponse(), 'submit rep');
-    dsm($client->__getLastResponseHeaders(), 'submit rephead');*/
   }
 }
 
@@ -109,20 +102,12 @@ function ccimapping_cropsync_get_cropings_fromWS() {
   );
 
   if ($client = cciadmin_api_load_soapclient($wsdl_uri)) {
-    //dsm($client->__getFunctions(), 'fct');
-    //dsm($client->__getTypes(), 'types');
     try {
       $result = $client->getImageSettings($parameters_array);
       return $result->return;
     } catch (SoapFault $exception) {
-      cciadmin_api_output_webservice_error('WebService error while getting the Cropings XML', $exception->faultstring, $exception->faultcode);
-      dsm($exception);
+      cciadmin_api_output_webservice_error('WebService error while getting the Cropings XML', $exception->faultstring, $exception->faultcode);    
     }
-
-    /*dsm($client->__getLastRequest(), 'req');
-    dsm($client->__getLastRequestHeaders(), 'reqhead');
-    dsm($client->__getLastResponse(), 'rep');
-    dsm($client->__getLastResponseHeaders(), 'rephead');*/
   }
 
   return '';

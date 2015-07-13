@@ -13,8 +13,11 @@ function dpiservices_pages_form_add_map_form(){
 
   $textarea_default_content = '';
   
-  foreach(unserialize(dpi_variable_get('dpiservices_preset', '')) as $value){
-    $textarea_default_content .= $value."\n";
+  $tmp = dpi_variable_get('dpiservices_preset', '');
+  if(isset($tmp) && $tmp!=''){
+    foreach(unserialize($tmp) as $value){
+      $textarea_default_content .= $value."\n";
+    }
   }
   
   $form['info']=array(
@@ -31,7 +34,8 @@ function dpiservices_pages_form_add_map_form(){
     '#type' => 'textarea',
     '#required' => TRUE,
     '#default_value' => $textarea_default_content,
-  );
+    '#description' => t("Define some abstract image styles as \"round\", \"square\" or \"landscape\". We could next associate each one of them with a real image style in the service products. See more at !a_path_doc_user link!a_path_close.", array("!a_path_doc_user" => '<a href="http://cms.dpi247.com/en/node/650">', "!a_path_close" => "</a>")),
+  ); 
   
   $form['submit'] = array(
     '#type' => 'submit',
