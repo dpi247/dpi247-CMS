@@ -114,7 +114,7 @@ function googletagmanager_esi_add_datalayer(& $variables)
 {
 
 	$url = "/googletagmanager/esi/render?url=" . $_GET['q'];
-	$esi_tag = "<esi src=" . $url . ">";
+	$esi_tag = "<esi:include src=" . $url . " />";
 	if (isset($variables['gtm_snippet']))
 		$variables['gtm_snippet'] = $esi_tag . $variables['gtm_snippet'];
 	else

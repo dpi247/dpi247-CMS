@@ -25,6 +25,10 @@
 define('DRUPAL_ROOT', getcwd());
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
+<<<<<<< HEAD
+=======
+//drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+>>>>>>> 156df61eab40f6a81772f52875f38bad720c26e1
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 
