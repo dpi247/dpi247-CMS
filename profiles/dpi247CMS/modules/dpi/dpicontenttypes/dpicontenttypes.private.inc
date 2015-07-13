@@ -140,7 +140,6 @@ function _dpicontenttypes_file_check_directory_recursive($directory, $mode = 0, 
     // Check if directory exists.
     if (!is_dir($real_path)) {
       if (($mode & FILE_CREATE_DIRECTORY) && @mkdir($real_path, 0775, TRUE)) {
-        drupal_set_message(t('The directory %directory has been created.', array('%directory' => $real_path)));
         watchdog('file system', t('The directory %directory has been created.'), array('%directory' => $real_path), WATCHDOG_INFO);
         @chmod($real_path, 0775); // Necessary for non-webserver users.
       }
@@ -155,7 +154,7 @@ function _dpicontenttypes_file_check_directory_recursive($directory, $mode = 0, 
     // Check to see if the directory is writable.
     if (!is_writable($real_path)) {
       if (($mode & FILE_MODIFY_PERMISSIONS) && @chmod($real_path, 0775)) {
-        drupal_set_message(t('The permissions of directory %directory have been changed to make it writable.', array('%directory' => $real_path)));
+        watchdog('file system', t('The permissions of directory %directory have been changed to make it writable.'), array('%directory' => $real_path), WATCHDOG_ERROR);
       }
       else {
         if ($form_item) {
