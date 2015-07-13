@@ -140,7 +140,7 @@ function _dpicontenttypes_file_check_directory_recursive($directory, $mode = 0, 
     // Check if directory exists.
     if (!is_dir($real_path)) {
       if (($mode & FILE_CREATE_DIRECTORY) && @mkdir($real_path, 0775, TRUE)) {
-        watchdog('file system', t('The directory %directory has been created.'), array('%directory' => $real_path), WATCHDOG_NOTICE);
+        watchdog('file system', t('The directory %directory has been created.'), array('%directory' => $real_path), WATCHDOG_INFO);
         @chmod($real_path, 0775); // Necessary for non-webserver users.
       }
       else {
