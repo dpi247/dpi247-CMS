@@ -528,6 +528,8 @@ class WallyXmlV1 extends PackageHelper {
           '!package_layout' => $value
         )));
       }
+    }elseif($value == "Aucun"){
+      $wrapper->field_packagelayout->set(null);
     }
   }
 
