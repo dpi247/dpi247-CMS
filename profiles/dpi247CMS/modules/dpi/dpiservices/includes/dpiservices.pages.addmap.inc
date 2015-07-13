@@ -34,8 +34,8 @@ function dpiservices_pages_form_add_map_form(){
     '#type' => 'textarea',
     '#required' => TRUE,
     '#default_value' => $textarea_default_content,
-    '#description' => t('You can enter terms like round, square, diamond or label to be used to export images'),
-  );
+    '#description' => t("Define some abstract image styles as \"round\", \"square\" or \"landscape\". We could next associate each one of them with a real image style in the service products. See more at !a_path_doc_user link!a_path_close.", array("!a_path_doc_user" => '<a href="http://cms.dpi247.com/en/node/650">', "!a_path_close" => "</a>")),
+  ); 
   
   $form['submit'] = array(
     '#type' => 'submit',
