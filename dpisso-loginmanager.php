@@ -1,12 +1,4 @@
 <?php
-
-//SANS hops
-//http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginToken=c083264f7a4fa40b4210e20e2d8d33342702f0863b24322835c5b83222d34392&loginTokenValidity=Coco&longTerm=tata&longTermValidity=tutu&returnPage=http://francois.be
-
-
-//Avec HOP ET RETURN PAGE
-//http://dpi7-dev.drupal.dev/dpisso-loginmanager.php?operation=login&loginToken=c083264f7a4fa40b4210e20e2d8d33342702f0863b24322835c5b83222d34392&hops[]=http://one.com&hops[]=http://two.com&loginTokenValidity=Coco&longTerm=tata&longTermValidity=tutu&returnPage=francois.be
-
 /**
  * @file
  * The PHP page that serves all page requests on a Drupal installation.
@@ -25,10 +17,6 @@
 define('DRUPAL_ROOT', getcwd());
 
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-<<<<<<< HEAD
-=======
-//drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
->>>>>>> 156df61eab40f6a81772f52875f38bad720c26e1
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 
