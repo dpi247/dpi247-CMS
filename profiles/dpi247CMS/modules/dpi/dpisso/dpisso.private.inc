@@ -99,7 +99,7 @@ function dpisso_user_external_login_register($name, $module,$sso_user_infos) {
     user_set_authmaps($account, array("authname_$module" => $name));
   }else{
     // Update user information
-    user_save($account, array('roles' => $sso_user_infos['roles']));
+    user_save($account, array('roles' => $sso_user_infos['roles'], 'field_user_sso_name' => $sso_user_infos['field_user_sso_name'], 'name' => $name));
   }
   
   // Log user in.
