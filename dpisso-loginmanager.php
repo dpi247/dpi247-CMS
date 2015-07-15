@@ -40,7 +40,7 @@ if($login_id=$SsoSession->getLoginId()){
   $profile=$SsoSession->getProfile();
   $roles=$SsoSession->getRoles($_SERVER["REQUEST_URI"]);
   $sso_user_infos['mail']=$profile->mail;
-  $sso_user_infos['name']=$profile->cn;
+  $sso_user_infos['field_user_sso_name']['und'][0]['value']=$profile->cn;
   $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
   
   dpisso_user_external_login_register($login_id, 'dpisso',$sso_user_infos);
