@@ -1,13 +1,58 @@
 <?php 
 
+/**
+ * Implementation of hook_install()
+ */
+function dpisso_install(){
+  $field_name = "field_user_sso_name";
+  
+  dpisso_create_field_base($field_name);
+  dpisso_create_field_instance($field_name);
+}
 
+function dpisso_create_field_base($field_name){
+  $field = array(
+    'field_name'    => $field_name,
+    'type'          => 'text',
+  );
+  field_create_field($field);
+}
 
+function dpisso_create_field_instance($field_name){
+  $field_instance = array(
+    'field_name'    => $field_name,
+    'entity_type'   => 'user', // change this to 'node' to add attach the field to a node
+    'bundle'        => 'user', // if chosen 'node', type here the machine name of the content type. e.g. 'page'
+    'label'         => t('Dpisso User Name'),
+    'description'   => t(''),
+    'widget'        => array(
+        'type'      => 'text_textfield',
+        'weight'    => 10,
+    ),
+    'formatter'     => array(
+        'label'     => t('field formatter label'),
+        'format'    => 'text_default'
+    ),
+    'settings'      => array()
+  );
+  field_create_instance($field_instance);
+}
 
 /**
  * Implementation of hook_uninstall()
  */
 function dpisso_uninstall() {
+  $instance = field_info_instance('user', 'field_user_sso_name', 'user');
+  field_delete_instance($instance);
+  field_delete_field('field_user_sso_name');
   dpi_variable_del_namespace('dpisso');
 }
 
-
+/**
+ * Ajout du field sso name pour le user & suppression de tout les utilisateurs
+ */
+function dpisso_update_7001(){
+  $field_name = "field_user_sso_name";  
+  dpisso_create_field_base($field_name);
+  dpisso_create_field_instance($field_name);
+}
