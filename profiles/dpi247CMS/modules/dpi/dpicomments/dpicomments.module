@@ -200,7 +200,8 @@ function dpicomments_comment_view($comment, $view_mode, $langcode) {
 	} else {
 		// Mais, on ne sait jamais :(
     global $user;
-		$comment->content['comment_body']['#object']->name = isset($user)?$user->name:'Votre nom';
+    $user_info = user_load($user->uid);
+		$comment->content['comment_body']['#object']->name = isset($user_info)?$user_info->field_user_sso_name['und'][0]['value']:'Votre nom';
 	}
 
 	// Signaler un abus
@@ -243,10 +244,11 @@ function dpicomments_votingapi_metadata_alter(&$data) {
 function dpicomments_form_comment_form_alter(&$form, &$form_state, $form_id) {
   // Setting default signature value
   global $user;
+  $user_info = user_load($user->uid);
   if (!empty($form['field_signature']) && !empty($form['field_signature']['#language']) )
     $language = $form['field_signature']['#language'];
   else $language = LANGUAGE_NONE;
-  $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user->name:'Votre nom';
+  $form['field_signature'][$language][0]['value']['#default_value'] = isset($user)?$user_info->field_user_sso_name['und'][0]['value']:'Votre nom';
 
   // Adding javascript to check max limit of character
   $form['comment_body'][$language][0]['value']['#attached'] ['js'][] = array(
