@@ -425,8 +425,9 @@ function dpisso_tokens($type, $tokens, array $data = array(), array $options = a
           libraries_load ( "ssophptoolbox" );
           $ssoSession = new SsoSession ( DRUPAL_ROOT . '/sites/all/libraries/ssophptoolbox/config.json' );          
           $name = "anonymous";
-          if(isset($ssoSession->config->loginToken_cookie_name) && $ssoSession->config->loginToken_cookie_name!="" && isset($_COOKIE[$ssoSession->config->loginToken_cookie_name])){
-            $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
+          if(user_is_logged_in()){
+            global $user;
+            $name = $user->name;
           }elseif(isset($ssoSession->config->anonymousId_cookie_name) && $ssoSession->config->anonymousId_cookie_name!="" && isset($_COOKIE[$ssoSession->config->anonymousId_cookie_name])){
             $name = $_COOKIE[$ssoSession->config->loginToken_cookie_name];
           }
