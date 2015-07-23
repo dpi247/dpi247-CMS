@@ -232,10 +232,32 @@ $plugin = array(
  * to the task handler.
 */
 function dpidestinations_dpisectionspanels_context_edit_content($form, &$form_state) {
+	ctools_include('ajax');
+  ctools_include('plugins', 'panels');
+  ctools_include('common', 'panels');
+  ctools_include('context');
+  ctools_include('context-task-handler');
 
-	ctools_include('plugins', 'panels');
+  $cache = panels_edit_cache_get('panel_context:' . $form_state['task_name'] . '::' . $form_state['handler_id'] . '::::');
+  $form_state['renderer'] = panels_get_renderer_handler('dpieditor', $cache->display);
+  $form_state['renderer']->cache = &$cache;
 
-	return  panels_panel_context_edit_content($form, $form_state);
+  $form_state['display'] = &$cache->display;
+  $form_state['content_types'] = $cache->content_types;
+  // Tell the Panels form not to display save & cancel buttons.
+  $form_state['no buttons'] = TRUE;
+
+  $form_state['display_title'] = !empty($cache->display_title);
+  $form_state['no preview'] = TRUE;
+  $form_state['page']->display_cache[$form_state['handler_id']] = $cache;
+
+  $form = panels_edit_display_form($form, $form_state);
+
+  if (!isset($form_state['type']) || $form_state['type'] != 'add' && !empty($form_state['handler_id']) && !empty($form['buttons'])) {
+    $form['buttons']['preview'] = $form['buttons']['return'];
+    $form['buttons']['preview']['#value'] = t('Update and preview');
+  };
+  return $form;
 }
 
 /**
