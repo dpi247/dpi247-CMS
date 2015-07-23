@@ -6,12 +6,11 @@
  * Like (Headless RESTFul Server or mobile application)
  * use the url drupal_get_messages_with_javascript.php?format=json
  */
-define('DRUPAL_ROOT', getcwd());
+define('DRUPAL_ROOT', $_SERVER["DOCUMENT_ROOT"]);
 require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 require_once DRUPAL_ROOT . '/includes/theme.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 load_all_module_using_ctools_plugin();
-
 $variables['display']=NULL;
 print drupal_get_status_messages_with_javascript($variables);
 
