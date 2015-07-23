@@ -84,6 +84,7 @@ function drupal_get_status_messages_with_javascript($variables) {
 		'warning' => t('Warning message'),
 	);
 	foreach (drupal_get_messages($display) as $type => $messages) {
+    $output .= variable_get("dpicache_comment_".$type."_message_start", "");
 		$output .= "<div class=\"messages $type\">\n";
 		if (!empty($status_heading [$type])) {
 			$output .= '<h2 class="element-invisible">' . $status_heading [$type] . "</h2>\n";
@@ -99,6 +100,7 @@ function drupal_get_status_messages_with_javascript($variables) {
 			$output .= reset($messages);
 		}
 		$output .= "</div>\n";
+    $output .= variable_get("dpicache_comment_".$type."_message_end", "");
 	}
 	return $output;
 }
