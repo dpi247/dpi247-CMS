@@ -1,10 +1,6 @@
 <?php
 /**
  * This file is used to load messages from Drupal's drupal_get_message()
- *
- * and additional argument allow to retrive the format in JSON for future purpose
- * Like (Headless RESTFul Server or mobile application)
- * use the url drupal_get_messages_with_javascript.php?format=json
  */
 define('DRUPAL_ROOT', $_SERVER['DOCUMENT_ROOT']);
 $base_url = 'http://'.$_SERVER['HTTP_HOST'];
@@ -15,7 +11,24 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
 
 load_all_module_using_ctools_plugin();
 $variables['display']=NULL;
-print drupal_get_status_messages_with_javascript($variables);
+
+if(isset($_GET['format'])){
+  switch($_GET['format']){
+    case "json": //xml Version
+        print json_encode(drupal_get_messages($variables['display']));
+      break;
+    case "xml": //json Version
+        print xml_encode(drupal_get_messages($variables['display']));
+      break;
+    default : //html Version
+        print drupal_get_status_messages_with_javascript($variables);
+      break;
+  }
+}else{
+  print drupal_get_status_messages_with_javascript($variables);
+}
+
+
 
 /**
  * Load plugin ctools needed to process elements.
@@ -86,4 +99,44 @@ function drupal_get_status_messages_with_javascript($variables) {
     $output .= variable_get("dpicache_comment_".$type."_message_end", "");
 	}
 	return $output;
+}
+
+/**
+ * This function create xml document
+ * @param mixed $mixed
+ * @param dom $domElement
+ * @param DOMDocument $DOMDocument
+ */
+function xml_encode($mixed, $domElement=null, $DOMDocument=null) {
+  if (is_null($DOMDocument)) {
+    $DOMDocument =new DOMDocument;
+    $DOMDocument->formatOutput = true;
+    xml_encode($mixed, $DOMDocument, $DOMDocument);
+    echo $DOMDocument->saveXML();
+  } else {
+    if (is_array($mixed)) {
+      foreach ($mixed as $index => $mixedElement) {
+        if (is_int($index)) {
+          if ($index === 0) {
+            $node = $domElement;
+          } else {
+            $node = $DOMDocument->createElement($domElement->tagName);
+            $domElement->parentNode->appendChild($node);
+          }
+        } else {
+          $plural = $DOMDocument->createElement($index);
+          $domElement->appendChild($plural);
+          $node = $plural;
+          if (!(rtrim($index, 's') === $index)) {
+            $singular = $DOMDocument->createElement(rtrim($index, 's'));
+            $plural->appendChild($singular);
+            $node = $singular;
+          }
+        }
+        xml_encode($mixedElement, $node, $DOMDocument);
+      }
+    } else {
+      $domElement->appendChild($DOMDocument->createTextNode($mixed));
+    }
+  }
 }
