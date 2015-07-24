@@ -701,7 +701,7 @@ function dpicache_preprocess_page(& $variables){
 		$js="(function($) {
       Drupal.behaviors.dpicachemessageswithesi = {
         attach: function(context, settings) {
-          $('div#dpicache-messages-with-esi', context).load('/".  drupal_get_path('module', 'dpicache')."/ajax/drupal_get_messages_with_javascript.php');
+          $('div#dpicache-messages-with-esi', context).load('/".  drupal_get_path('module', 'dpicache')."/ajax/dpicache__get_messages_with_javascript.php');
         }
       }
     })(jQuery);";
