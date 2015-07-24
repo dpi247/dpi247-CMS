@@ -6,10 +6,13 @@
  * Like (Headless RESTFul Server or mobile application)
  * use the url drupal_get_messages_with_javascript.php?format=json
  */
-define('DRUPAL_ROOT', $_SERVER["DOCUMENT_ROOT"]);
-require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
-require_once DRUPAL_ROOT . '/includes/theme.inc';
+define('DRUPAL_ROOT', $_SERVER['DOCUMENT_ROOT']);
+$base_url = 'http://'.$_SERVER['HTTP_HOST'];
+require_once DRUPAL_ROOT.'/includes/bootstrap.inc';
+require_once DRUPAL_ROOT.'/includes/theme.inc';
+
 drupal_bootstrap(DRUPAL_BOOTSTRAP_SESSION);
+
 load_all_module_using_ctools_plugin();
 $variables['display']=NULL;
 print drupal_get_status_messages_with_javascript($variables);
@@ -17,8 +20,7 @@ print drupal_get_status_messages_with_javascript($variables);
 /**
  * Load plugin ctools needed to process elements.
  */
-function load_all_module_using_ctools_plugin()
-{
+function load_all_module_using_ctools_plugin(){
 	/*
 	  You should maintain this list manually .
 	  All the keys of this call should belong to the array:
@@ -26,7 +28,6 @@ function load_all_module_using_ctools_plugin()
 	  module_load_include('inc','ctools','includes/plugins');
 	  dsm(ctools_get_plugins_info());
 	*/
-
 	$modules_that_uses_ctools_plugin_system = array(
 		'ctools',
 		'dpiblocks',
@@ -45,8 +46,8 @@ function load_all_module_using_ctools_plugin()
 	foreach ($modules_that_uses_ctools_plugin_system as $module_name) {
 		/*
 		 * module_load_include() isn't yet available
-		module_load_include('module', $module_name);
-		*/
+     * module_load_include('module', $module_name);
+     */
 		drupal_load('module', $module_name);
 	}
 }
