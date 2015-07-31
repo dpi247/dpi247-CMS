@@ -100,7 +100,7 @@ function dpidestinations_destination_breadcrumb($conf, $context) {
   $current->tid = $context->data->tid;
   while ($parents = taxonomy_get_parents($current->tid)) {
     $current = array_shift($parents);
-    $breadcrumb[] = l($current->name, 'destination/' . $current->tid);
+    $breadcrumb[] = l($current->name, 'section/' . $current->tid);
   }
 
   $breadcrumb = array_merge(drupal_get_breadcrumb(), array_reverse($breadcrumb));
