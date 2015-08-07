@@ -425,7 +425,7 @@ function dpicache_form_block_admin_configure_alter(&$form, $form_state)
  */
 function dpicache_block_admin_configure_submit($form, &$form_state)
 {
-
+  $role_visibility = array();
 	//We remove drupal role and relace with esi role visibility
 	if ($form_state['values']['esi_enabled']) {
 		$role_visibility = $form_state["values"]['roles'];
