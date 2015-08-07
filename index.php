@@ -106,6 +106,7 @@ if( dpi247_activate_autoconnect() && isset($drupal_session_auto_connect) && $dru
     $sso_user_infos['field_user_sso_name']['und'][0]['value']=$profile->cn;
     $sso_user_infos['field_user_sso_civility']['und'][0]['value']=(isset($profile->title))?$profile->title : "";
     $sso_user_infos['roles'] = dpisso_api_parse_array_to_role_array($roles);
+    drupal_alter('dpisso_profile_info', $sso_user_infos, $profile);
     dpisso_user_external_login_register($loginId, 'dpisso',$sso_user_infos);
     LoginManager::setCookie ( 'dpisso_is_connected', true, Time()+3600*24*52, $config->cookies_domain, $config->cookies_path);
 }
