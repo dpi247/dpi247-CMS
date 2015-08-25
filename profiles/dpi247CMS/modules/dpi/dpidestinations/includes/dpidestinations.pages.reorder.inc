@@ -117,6 +117,9 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   
 }
 
+function dpidestinations_page_targetview_reorder_form_validate(&$form, &$form_state){
+  dsm($form_state);
+}
 
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   
