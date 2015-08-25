@@ -131,7 +131,7 @@ function dpidestinations_page_targetview_reorder_form_validate(&$form, &$form_st
       }
     }
   }
-  if(!$continue){
+  if($continue){
     form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
   }
 }
