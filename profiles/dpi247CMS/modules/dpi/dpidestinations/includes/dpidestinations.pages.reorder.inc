@@ -119,21 +119,22 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
 
 function dpidestinations_page_targetview_reorder_form_validate(&$form, &$form_state){
   dsm($form_state);
-  $continue = true;
-  $cpt = 0;
-  if(isset($form_state['values']['nodes']) && is_array($form_state['values']['nodes'])){
-    foreach($form_state['values']['nodes'] as $nid => $v){
-      if($cpt == $v['original_weight']){
-        $cpt++;
-      }else{
-        $continue = false;
-        break;
-      }
-    }
-  }
-  if($continue){
-    form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
-  }
+//  $continue = true;  
+//  if(isset($form_state['values']['nodes']) && is_array($form_state['values']['nodes'])){
+//    $first_value = current($form_state['values']['nodes']);
+//    $cpt = 0;
+//    foreach($form_state['values']['nodes'] as $nid => $v){
+//      if($cpt == $v['original_weight']){
+//        $cpt++;
+//      }else{
+//        $continue = false;
+//        break;
+//      }
+//    }
+//  }
+//  if($continue){
+//    form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
+//  }
 }
 
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
