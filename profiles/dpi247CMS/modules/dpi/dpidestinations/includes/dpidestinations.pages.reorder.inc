@@ -118,23 +118,12 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
 }
 
 function dpidestinations_page_targetview_reorder_form_validate(&$form, &$form_state){
-  dsm($form_state);
-//  $continue = true;  
-//  if(isset($form_state['values']['nodes']) && is_array($form_state['values']['nodes'])){
-//    $first_value = current($form_state['values']['nodes']);
-//    $cpt = 0;
-//    foreach($form_state['values']['nodes'] as $nid => $v){
-//      if($cpt == $v['original_weight']){
-//        $cpt++;
-//      }else{
-//        $continue = false;
-//        break;
-//      }
-//    }
-//  }
-//  if($continue){
-//    form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
-//  }
+  if(isset($form_state['values']['nodes']) && is_array($form_state['values']['nodes'])){
+    $first_value = current($form_state['values']['nodes']);
+    if(isset($first_value['weight']) && intval($first_value['weight']) == 0){
+      form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
+    }
+  }
 }
 
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
