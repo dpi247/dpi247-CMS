@@ -35,6 +35,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   //videos
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
+  $types['video']['dpiscald_kaltura'] ='DPI Videos on Kaltura';
   $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
   $types['video']['dpiscald_ustream'] ='DPI Videos on Ustream';
   $types['video']['dpiscald_videortl'] ='DPI Videos on RTL';
@@ -161,6 +162,10 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
       module_load_include('inc','dpiscald','includes/players/dpiscald_ustream_player');
       dpiscald_ustream_build_render($atom, $context, $options, $mode, $config);
       break;
+    case "dpikaltura" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_kaltura_player');
+      dpiscald_kaltura_build_render($atom, $context, $options, $mode, $config);
+      break;
   }
 }
 
@@ -185,7 +190,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'idalgo', 'twitter', 'ustream', 'link');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'kaltura','facebook_status', 'infogram', 'slideshare', 'idalgo', 'twitter', 'ustream', 'link');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
