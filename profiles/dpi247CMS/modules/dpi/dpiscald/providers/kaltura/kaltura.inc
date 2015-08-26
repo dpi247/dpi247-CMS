@@ -41,10 +41,13 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
     'taxonomy_term' => (object)(array('name' => $infos['author']))
   );
 
-  // Save video width and height
-  if (!isset($atom->data)) {
-    $atom->data = array();
-  }
+  // Prefill tags
+  // foreach ($infos->tags as $index => $tag) {
+  //   $atom->scald_tags[LANGUAGE_NONE][$index] = array(
+  //     'tid' => $index,  // Beware, this is not a real tid, it's just an index
+  //     'taxonomy_term' => (object)(array('name' => $tag))
+  //   );
+  // }
 
   $thumbnail_url = $infos['thumbnail_url'];
   if (!empty($thumbnail_url)) {
@@ -66,6 +69,21 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
         $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
       }
     }
+  }
+
+  // Prefill tags
+  $tags = explode(',', $infos['tags']);
+  foreach ($tags as $index => $tag) {
+    $tag = trim($tag);
+    $atom->scald_tags[LANGUAGE_NONE][$index] = array(
+      'tid' => $index,  // Beware, this is not a real tid, it's just an index
+      'taxonomy_term' => (object)(array('name' => $tag))
+    );
+  }
+
+  // Save video data information
+  if (!isset($atom->data)) {
+    $atom->data = array();
   }
 
   $atom->data['url_src'] = $form_state['values']['identifier'];
