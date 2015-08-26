@@ -233,14 +233,20 @@ abstract class Dispatcher {
        * object embeded de type text qui écrase les valeurs de l'article si on le laisse processer
        * Voir dam ref : d-20070521-W22A4M
        */
-      if ($name != '#text' && $child->getAttribute('xsi:type') != 'TextObjectType') {
+      if($name != '#text' && !empty($object2->mainObjectPhotoGallery)){
         $callback = $importer->getCallback ( $child );
         $method_name = 'build' . $callback;
         if (method_exists ( $importer, $method_name )) {
           $list [] = $importer->$method_name ( $child, $object, $object2 );
         }
-      }
-    }
+      }elseif($name != '#text' && $child->getAttribute('xsi:type') != 'TextObjectType' ){
+        $callback = $importer->getCallback ( $child );
+        $method_name = 'build' . $callback;
+        if (method_exists ( $importer, $method_name )) {
+          $list [] = $importer->$method_name ( $child, $object, $object2 );
+        }
+      }    
+     }
     return $list;
   }
   

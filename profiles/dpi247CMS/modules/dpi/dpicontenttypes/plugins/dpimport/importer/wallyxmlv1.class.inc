@@ -89,7 +89,7 @@ class WallyXmlV1 extends PackageHelper {
       $this->_replace_inline_object($package);
       /* Hack to change external url */
       $this->_buildExternalUrl($package);
-      
+
       $this->savePackage($dom, $package);      
       $this->_save_external_package_informations($package);
       
@@ -566,10 +566,10 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildMainStory($dom, $wrapper, $entity) {   
-    $dispatcher = $this->getDispatcher();
+    $dispatcher = $this->getDispatcher();    
     $dispatcher->processChildren($dom, $wrapper, $entity);
   }
-
+  
   /**
    * Set field Copyright
    *
@@ -882,6 +882,7 @@ class WallyXmlV1 extends PackageHelper {
     
     /* Sav object to embeded (Package gallery element) */
     if($dom->nodeName == 'MainObject'){
+      $entity->mainObjectPhotoGallery = 'TRUE';
       $package_wrapper->field_embededobjects->set(NULL);
       $embededobject = array(
         'sid' => $atom->sid,

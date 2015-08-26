@@ -2,8 +2,9 @@
 /**
  * This file is used to load messages from Drupal's drupal_get_message()
  */
-define('DRUPAL_ROOT', $_SERVER['DOCUMENT_ROOT']);
-$base_url = 'http://'.$_SERVER['HTTP_HOST'];
+//define('DRUPAL_ROOT', $_SERVER['DOCUMENT_ROOT']);
+//$base_url = 'http://'.$_SERVER['HTTP_HOST'];
+define('DRUPAL_ROOT', getcwd());
 require_once DRUPAL_ROOT.'/includes/bootstrap.inc';
 require_once DRUPAL_ROOT.'/includes/theme.inc';
 
