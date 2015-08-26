@@ -46,6 +46,29 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
     $atom->data = array();
   }
 
+  $thumbnail_url = $infos['thumbnail_url'];
+  if (!empty($thumbnail_url)) {
+    // Download a copy of the media thumbnail. This makes it possible
+    // to do interesting manipulation with image styles presets.
+    $thumb = drupal_http_request($thumbnail_url);
+    $dir = 'public://kaltura';
+    if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+      $dest = $dir . '/' . $atom->base_id . '.jpg';
+      $file = file_save_data($thumb->data, $dest);
+
+      if ($file) {
+        // Set the file status to temporary.
+        $query = db_update('file_managed')
+          ->condition('fid', $file->fid)
+          ->fields(array('status' => 0))
+          ->execute();
+
+        $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+      }
+    }
+  }
+
+
   $atom->data['video_id'] = $identifier;
 }
 
