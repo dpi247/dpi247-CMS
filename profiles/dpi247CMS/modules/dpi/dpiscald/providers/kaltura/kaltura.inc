@@ -10,7 +10,7 @@
 function dpiscald_kaltura_scald_add_form(&$form, &$form_state) {
   $form['identifier'] = array(
     '#type' => 'textfield',
-    '#title' => t('Vidéo Kaltura identifier or URL'),
+    '#title' => t('Vidéo Kaltura URL'),
     '#element_validate' => array('dpiscald_kaltura_validate_id'),
     '#default_value' => '',
     '#maxlength' => 1000
@@ -121,10 +121,12 @@ function dpiscald_kaltura_validate_id($element, &$form_state) {
     form_error($element, t('Invalid media url, you must specify an absolute url.'));
   }
 
-  $url = "xxxxxxxx";
+  $id = dpiscald_kaltura_parse_id($url);
 
-  $id = md5($url);
-
+  if ($id ==  NULL) {
+    form_error($element, t('Invalid Kaltura url.'));
+  }
+ 
   if (dpiscald_kaltura_already_imported($id)) {
     form_error($element, t('Media already imported.'));
   }
@@ -136,12 +138,16 @@ function dpiscald_kaltura_validate_id($element, &$form_state) {
  */
 function dpiscald_kaltura_parse_id($string, $check) {
   $id = NULL;
-  $string = trim($string);
 
-  if (preg_match('/videoid=([0-9]*)/i', $string,$urlT)) {
-    $id = $urlT[1];
+  $string = trim($string);
+  parse_str($string, $url_parse);
+
+  if (isset($url_parse['entry_id']) && !empty($url_parse['entry_id'])) {
+    $id = $url_parse['entry_id'];
   }
 
+  dsm($id);
+ 
   return $id;
 }
 
