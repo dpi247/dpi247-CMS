@@ -68,8 +68,9 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
     }
   }
 
-
-  $atom->data['video_id'] = $identifier;
+  $atom->data['url_src'] = $form_state['values']['identifier'];
+  $atom->data['entry_id'] = $infos['entry_id'];
+  $atom->data['description'] = $infos['description'];
 }
 
 /**
@@ -91,7 +92,9 @@ function dpiscald_kaltura_scald_prerender($atom, $context, $options, $mode) {
     $atom->rendered->player = theme($theme_name,
       array('vars' =>
         array(
-          'video_id'      => $atom->data['video_id'],
+          'url_src'      => $atom->data['url_src'],
+          'entry_id'     => $atom->data['entry_id'],
+          'description'  => $atom->data['description'],
         ),
         'atom' => $atom,
       )
@@ -136,7 +139,6 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
   $infos['title'] = "Default title";
 
   $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"], $infos['partnerId']);
-dsm($infos_from_api);
   if ($infos_from_api != NULL) {
     $infos['title'] = $infos_from_api->name;
     $infos['description'] = $infos_from_api->description;
@@ -144,7 +146,6 @@ dsm($infos_from_api);
     $infos['tags'] = $infos_from_api->tags;
   }
 
-dsm($infos); 
   return $infos;
 }
 
