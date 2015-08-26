@@ -25,7 +25,7 @@ function dpiservices_create_table_product() {
   
   $products = dpiservices_product_get_all_product_info (10);
   
-  $render = l(t('Add product'), 'admin/dpi247/dpijsonexporter/add', array('attributes' => array('class' => 'btn-dpiservices')));
+  $render = l(t('Add product'), 'admin/dpi247/dpiservices/add', array('attributes' => array('class' => 'btn-dpiservices')));
   
   $header_row = array (
     'Label',
@@ -49,7 +49,7 @@ function dpiservices_create_table_product() {
       $product ['product'],
       $product ['product_type'],
       '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See the result</a>',
-      '<a href="/admin/dpi247/dpijsonexporter/edit/'.$product ['label'].'">Modify</a> - <a href="/admin/dpi247/dpijsonexporter/del/'.$product ['label'].'">Delete</a>',      
+      '<a href="/admin/dpi247/dpiservices/edit/'.$product ['label'].'">Modify</a> - <a href="/admin/dpi247/dpiservices/del/'.$product ['label'].'">Delete</a>',      
     );
   }
   

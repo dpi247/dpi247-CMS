@@ -15,7 +15,7 @@ function dpiservices_pages_form_delete($arg){
   }else{
     drupal_set_message("Argument is not valid", 'error');
   }
-  drupal_goto('admin/dpi247/dpijsonexporter');
+  drupal_goto('admin/dpi247/dpiservices');
 }
 
 /**

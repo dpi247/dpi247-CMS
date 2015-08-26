@@ -4,10 +4,17 @@
  * Implementation of hook_install()
  */
 function dpisso_install(){
+  /* Champs name */
   $field_name = "field_user_sso_name";
-  
+  $description = "Dpisso User Name";
   dpisso_create_field_base($field_name);
-  dpisso_create_field_instance($field_name);
+  dpisso_create_field_instance($field_name,$description);
+  
+  /* Champs civility */
+  $field_name = "field_user_sso_civility";  
+  $description = "Dpisso User Civility";
+  dpisso_create_field_base($field_name);
+  dpisso_create_field_instance($field_name, $description);
 }
 
 function dpisso_create_field_base($field_name){
@@ -18,13 +25,13 @@ function dpisso_create_field_base($field_name){
   field_create_field($field);
 }
 
-function dpisso_create_field_instance($field_name){
+function dpisso_create_field_instance($field_name, $description){
   $field_instance = array(
     'field_name'    => $field_name,
     'entity_type'   => 'user', // change this to 'node' to add attach the field to a node
     'bundle'        => 'user', // if chosen 'node', type here the machine name of the content type. e.g. 'page'
-    'label'         => t('Dpisso User Name'),
-    'description'   => t(''),
+    'label'         => t($description),
+    'description'   => t($description),
     'widget'        => array(
         'type'      => 'text_textfield',
         'weight'    => 10,
@@ -45,6 +52,9 @@ function dpisso_uninstall() {
   $instance = field_info_instance('user', 'field_user_sso_name', 'user');
   field_delete_instance($instance);
   field_delete_field('field_user_sso_name');
+  $instance = field_info_instance('user', 'field_user_sso_civility', 'user');
+  field_delete_instance($instance);
+  field_delete_field('field_user_sso_civility');
   dpi_variable_del_namespace('dpisso');
 }
 
@@ -53,6 +63,17 @@ function dpisso_uninstall() {
  */
 function dpisso_update_7001(){
   $field_name = "field_user_sso_name";  
+  $description = "Dpisso User Name";
   dpisso_create_field_base($field_name);
-  dpisso_create_field_instance($field_name);
+  dpisso_create_field_instance($field_name, $desc);
+}
+
+/**
+ * Ajout du field civility pour les templates
+ */
+function dpisso_update_7002(){
+  $field_name = "field_user_sso_civility";  
+  $description = "Dpisso User Civility";
+  dpisso_create_field_base($field_name);
+  dpisso_create_field_instance($field_name, $description);
 }
