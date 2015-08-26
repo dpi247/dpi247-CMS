@@ -698,10 +698,17 @@ function dpicache_preprocess_page(& $variables){
 		$add_js_options['type']='inline';
 		$add_js_options['requires_jquery']=TRUE;
 
-		$js="(function($) {
+//		$js="(function($) {
+//      Drupal.behaviors.dpicachemessageswithesi = {
+//        attach: function(context, settings) {
+//          $('div#dpicache-messages-with-esi', context).load('/".  drupal_get_path('module', 'dpicache')."/ajax/dpicache__get_messages_with_javascript.php');
+//        }
+//      }
+//    })(jQuery);";
+    $js="(function($) {
       Drupal.behaviors.dpicachemessageswithesi = {
         attach: function(context, settings) {
-          $('div#dpicache-messages-with-esi', context).load('/".  drupal_get_path('module', 'dpicache')."/ajax/dpicache__get_messages_with_javascript.php');
+          $('div#dpicache-messages-with-esi', context).load('/dpicache__get_messages_with_javascript.php');
         }
       }
     })(jQuery);";
