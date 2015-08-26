@@ -41,14 +41,6 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
     'taxonomy_term' => (object)(array('name' => $infos['author']))
   );
 
-  // Prefill tags
-  // foreach ($infos->tags as $index => $tag) {
-  //   $atom->scald_tags[LANGUAGE_NONE][$index] = array(
-  //     'tid' => $index,  // Beware, this is not a real tid, it's just an index
-  //     'taxonomy_term' => (object)(array('name' => $tag))
-  //   );
-  // }
-
   $thumbnail_url = $infos['thumbnail_url'];
   if (!empty($thumbnail_url)) {
     // Download a copy of the media thumbnail. This makes it possible
