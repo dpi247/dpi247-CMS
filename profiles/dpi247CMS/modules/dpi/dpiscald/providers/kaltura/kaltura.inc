@@ -110,8 +110,49 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
     $infos['uiConfId'] = $urlT[1];
   }
 
+  $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"], $infos['partnerId']);
+
   $infos['title'] = "TEST";
   return $infos;
+}
+
+function dpiscald_kaltura_get_media_infos_from_api($entry_id, $partnerId) {
+  $available_partner = array(
+    '1992451' => array(
+      'user' => 'csp', // cette valeur n'a peu d'imprtance, mais doit etre setter
+      'admin_secret' => '89925f0331b17179ba622e76b823ef20',
+      'user_secret' => 'a73296ff24fabcf5a733cf1b159db863',
+    ),
+  );
+
+  if (!isset($available_partner[$partnerId])) {
+    return array();
+  }
+
+  require_once(dirname(__FILE__) . '/api/KalturaClient.php');
+  $kconf = new KalturaConfiguration($partnerId);
+  // If you want to use the API against your self-hosted CE,
+  // go to your KMC and look at Settings -> Integration Settings to find your partner credentials
+  // and add them above. Then insert the domain name of your CE below.
+  // $kconf->serviceUrl = "http://www.mySelfHostedCEsite.com/";
+  $kclient = new KalturaClient($kconf);
+  $ksession = $kclient->session->start($available_partner[$partnerId]['admin_secret'], $available_partner['user'], KalturaSessionType::ADMIN, $partnerId);
+  if (!isset($ksession)) {
+    dsm("Could not establish Kaltura session. Please verify that you are using valid Kaltura partner credentials.");
+  }
+  $kclient->setKs($ksession);
+  // Set the response format
+  // KALTURA_SERVICE_FORMAT_JSON  json
+  // KALTURA_SERVICE_FORMAT_XML   xml
+  // KALTURA_SERVICE_FORMAT_PHP   php
+  $kconf->format = KalturaClientBase::KALTURA_SERVICE_FORMAT_PHP;
+  $kfilter = new KalturaMediaEntryFilter();
+  // $kfilter->mediaTypeEqual = KalturaMediaType::VIDEO;
+  $kfilter->idIn = $entry_id;
+  $kfilter->status = KalturaEntryStatus::READY;
+  $result = $kclient->media->listAction($kfilter);
+
+  dsm($result->objects);
 }
 
 /**
