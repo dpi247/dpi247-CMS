@@ -93,6 +93,23 @@ function dpiscald_kaltura_theme() {
  */
 function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
   $infos = array();
+
+  $infos["id"] = dpiscald_kaltura_parse_id($url, false);
+
+  parse_str($url, $url_parse);
+
+  if (isset($url_parse["playerId"])) $infos['playerId'] = $url_parse["playerId"];
+  if (isset($url_parse["width"])) $infos['width'] = $url_parse["width"];
+  if (isset($url_parse["height"])) $infos['height'] = $url_parse["height"];
+
+  if (preg_match('/\/p\/([0-9]*)\/sp/i', $url,$urlT)) {
+    $infos['partnerId'] = $urlT[1];
+  }
+
+  if (preg_match('/\/uiconf_id\/([0-9]*)\/partner_id/i', $url,$urlT)) {
+    $infos['uiConfId'] = $urlT[1];
+  }
+
   $infos['title'] = "TEST";
   return $infos;
 }
@@ -145,8 +162,6 @@ function dpiscald_kaltura_parse_id($string, $check) {
   if (isset($url_parse['entry_id']) && !empty($url_parse['entry_id'])) {
     $id = $url_parse['entry_id'];
   }
-
-  dsm($id);
  
   return $id;
 }
