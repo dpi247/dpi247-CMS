@@ -38,7 +38,7 @@ function dpiscald_kaltura_scald_add_form_fill(&$atom, $form, $form_state) {
   $langcode = field_language('scald_atom', $atom, 'scald_authors');
   $atom->scald_authors[$langcode][0] = array(
     'tid' => 0,
-    'taxonomy_term' => (object)(array('name' => $infos->author))
+    'taxonomy_term' => (object)(array('name' => $infos['author']))
   );
 
   // Save video width and height
@@ -110,9 +110,18 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
     $infos['uiConfId'] = $urlT[1];
   }
 
-  $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"], $infos['partnerId']);
+  $infos['title'] = "Default title";
 
-  $infos['title'] = "TEST";
+  $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"], $infos['partnerId']);
+dsm($infos_from_api);
+  if ($infos_from_api != NULL) {
+    $infos['title'] = $infos_from_api->name;
+    $infos['description'] = $infos_from_api->description;
+    $infos['thumbnail_url'] = $infos_from_api->thumbnailUrl;
+    $infos['tags'] = $infos_from_api->tags;
+  }
+
+dsm($infos); 
   return $infos;
 }
 
@@ -126,7 +135,7 @@ function dpiscald_kaltura_get_media_infos_from_api($entry_id, $partnerId) {
   );
 
   if (!isset($available_partner[$partnerId])) {
-    return array();
+    return NULL;
   }
 
   require_once(dirname(__FILE__) . '/api/KalturaClient.php');
@@ -152,7 +161,11 @@ function dpiscald_kaltura_get_media_infos_from_api($entry_id, $partnerId) {
   $kfilter->status = KalturaEntryStatus::READY;
   $result = $kclient->media->listAction($kfilter);
 
-  dsm($result->objects);
+  if (isset($result->objects[0])) {
+    return $result->objects[0];
+  }
+
+  return NULL;
 }
 
 /**
@@ -214,8 +227,8 @@ function dpiscald_kaltura_get_import_info($importer, & $entity, & $wrapper, $url
     $entity->base_id = $identifier;
     $wrapper->base_id->set ( md5($identifier) );
     $infos = dpiscald_kaltura_get_media_infos_from_url ( $url );
-    if(isset($infos->thumbnail_url)){
-      $file = $importer->createFile ( $infos->thumbnail_url, scald_atom_thumbnail_path ( $entity->type ) );
+    if(isset($infos['thumbnail_url'])){
+      $file = $importer->createFile ( $infos['thumbnail_url'], scald_atom_thumbnail_path ( $entity->type ) );
       $wrapper->scald_thumbnail->set ( ( array ) $file );
     }
     $entity->title = $infos['title'];
