@@ -17,6 +17,20 @@ function dpiscald_kaltura_scald_add_form(&$form, &$form_state) {
   );
 }
 
+/**
+ * Implements hook_menu(). (not anymore)
+ */
+function dpiscald_kaltura_menu(&$items) {
+  $items['admin/dpi247/dpiscald/kaltura'] = array(
+    'title' => 'Kaltura',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiscald_kaltura_configuration_form'),
+    'access arguments' => array(TRUE),
+    'description' => 'Configure the videos',
+    'file' => 'providers/kaltura/dpiscald_kaltura.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+}
 
 /**
  * Implements hook_scald_add_form_fill().
@@ -148,7 +162,7 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
 
   $infos['title'] = "Default title";
 
-  $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"], $infos['partnerId']);
+  $infos_from_api = dpiscald_kaltura_get_media_infos_from_api($infos["id"]);
   if ($infos_from_api != NULL) {
     $infos['title'] = $infos_from_api->name;
     $infos['description'] = $infos_from_api->description;
@@ -159,18 +173,23 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
   return $infos;
 }
 
-function dpiscald_kaltura_get_media_infos_from_api($entry_id, $partnerId) {
-  $available_partner = array(
-    '1992451' => array(
-      'user' => 'csp', // cette valeur n'a peu d'imprtance, mais doit etre setter
-      'admin_secret' => '89925f0331b17179ba622e76b823ef20',
-      'user_secret' => 'a73296ff24fabcf5a733cf1b159db863',
-    ),
-  );
+function dpiscald_kaltura_get_media_infos_from_api($entry_id) {
+  // $available_partner = array(
+  //   '1986501' => array(
+  //     'user' => 'xdecock', // cette valeur n'a peu d'imprtance, mais doit etre setter
+  //     'admin_secret' => '5fcd1d63c31c748600ed23e0e6415164',
+  //     'user_secret' => '7fc8fe4f93a8690cbc73af9c368658a7',
+  //   ),
+  // );
 
-  if (!isset($available_partner[$partnerId])) {
-    return NULL;
-  }
+  $partner_id = variable_get('dpiscald_kaltura_partner_id', "1986501");
+  $user = variable_get('dpiscald_kaltura_user', "xdecock");
+  $admin_secret = variable_get('dpiscald_kaltura_admin_secret', "5fcd1d63c31c748600ed23e0e6415164");
+  $user_secret = variable_get('dpiscald_kaltura_user_secret', "7fc8fe4f93a8690cbc73af9c368658a7");
+
+  // if (!isset($available_partner[$partnerId])) {
+  //   return NULL;
+  // }
 
   require_once(dirname(__FILE__) . '/api/KalturaClient.php');
   $kconf = new KalturaConfiguration($partnerId);
@@ -179,7 +198,7 @@ function dpiscald_kaltura_get_media_infos_from_api($entry_id, $partnerId) {
   // and add them above. Then insert the domain name of your CE below.
   // $kconf->serviceUrl = "http://www.mySelfHostedCEsite.com/";
   $kclient = new KalturaClient($kconf);
-  $ksession = $kclient->session->start($available_partner[$partnerId]['admin_secret'], $available_partner['user'], KalturaSessionType::ADMIN, $partnerId);
+  $ksession = $kclient->session->start($admin_secret, $user, KalturaSessionType::ADMIN, $partner_id);
   if (!isset($ksession)) {
     dsm("Could not establish Kaltura session. Please verify that you are using valid Kaltura partner credentials.");
   }

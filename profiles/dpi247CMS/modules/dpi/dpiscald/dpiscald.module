@@ -174,7 +174,7 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
  */
 function dpiscald_menu(){
   $items = array();
-  $types=array('dailymotion','flickr');
+  $types=array('dailymotion','flickr', 'kaltura');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_menu';
@@ -551,6 +551,22 @@ function dpiscald_menu_alter(&$items){
   
     $items['admin/dpi247/mediacontext/management'] = array(
     'title' => 'Manage Context Element',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array(TRUE),
+  );
+
+  $items['admin/dpi247/dpiscald'] = array(
+    'title' => 'DPI Scald : manage dpiscald',
+    'description'=>'Manage module dpiscald',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiscald_global_parameters_admin_form'),
+    'access arguments' => array(TRUE),
+    'file'=>'dpiscald.admin.globalparameters.inc',
+    'file path' => drupal_get_path('module', 'dpiscald').'/includes',
+  );
+
+  $items['admin/dpi247/dpiscald/global'] = array(
+    'title' => 'Global parameters',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array(TRUE),
   );
