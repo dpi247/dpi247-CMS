@@ -189,6 +189,7 @@ function dpiscald_kaltura_get_media_infos_from_api($entry_id) {
   $ksession = $kclient->session->start($admin_secret, $user, KalturaSessionType::ADMIN, $partner_id);
   if (!isset($ksession)) {
     dsm("Could not establish Kaltura session. Please verify that you are using valid Kaltura partner credentials.");
+    return NULL;
   }
   $kclient->setKs($ksession);
   // Set the response format
