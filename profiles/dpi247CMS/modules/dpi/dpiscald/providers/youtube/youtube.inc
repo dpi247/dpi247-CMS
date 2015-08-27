@@ -206,7 +206,6 @@ function dpiscald_youtube_register($video) {
  */
 function dpiscald_youtube_feed($type, $id) {
   $url = "https://www.googleapis.com/youtube/v3/videos?id=" . $id . "&key=". variable_get("dpiscald_youtube_api_key", '')."&part=".$type;
-  dsm($url);
   $response = drupal_http_request($url);
   $return = FALSE;
   if ($response->code = 200 && !empty($response->data)) {
@@ -215,7 +214,6 @@ function dpiscald_youtube_feed($type, $id) {
           $return = $data->items[0];
       }
   }
-  dsm($return);
   return $return;
 }
 
@@ -298,12 +296,9 @@ function dpiscald_youtube_validate_id($element, &$form_state) {
 function dpiscald_youtube_parse_id($string, $check) {
   $id = NULL;
   $string = trim($string);
-  dsm($string);
   if (!preg_match(YOUTUBE_ID_REGEXP, $string)) {
-    dsm('coucou');
     // The string ID is not easy to parse, let's try to analyze it
     if (preg_match(YOUTUBE_WEB_REGEXP, $string, $m)) {
-      dsm($m);
       // This string is a full YouTube URL
       $id = $m[1];
     }
