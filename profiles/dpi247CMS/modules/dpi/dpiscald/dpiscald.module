@@ -174,7 +174,7 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
  */
 function dpiscald_menu(){
   $items = array();
-  $types=array('dailymotion','flickr', 'kaltura');
+  $types=array('dailymotion','flickr', 'kaltura', 'youtube');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_menu';
