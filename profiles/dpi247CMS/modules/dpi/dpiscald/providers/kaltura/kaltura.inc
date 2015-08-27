@@ -174,22 +174,10 @@ function dpiscald_kaltura_get_media_infos_from_url($url, $id_elem = NULL) {
 }
 
 function dpiscald_kaltura_get_media_infos_from_api($entry_id) {
-  // $available_partner = array(
-  //   '1986501' => array(
-  //     'user' => 'xdecock', // cette valeur n'a peu d'imprtance, mais doit etre setter
-  //     'admin_secret' => '5fcd1d63c31c748600ed23e0e6415164',
-  //     'user_secret' => '7fc8fe4f93a8690cbc73af9c368658a7',
-  //   ),
-  // );
-
   $partner_id = variable_get('dpiscald_kaltura_partner_id', "1986501");
   $user = variable_get('dpiscald_kaltura_user', "xdecock");
   $admin_secret = variable_get('dpiscald_kaltura_admin_secret', "5fcd1d63c31c748600ed23e0e6415164");
   $user_secret = variable_get('dpiscald_kaltura_user_secret', "7fc8fe4f93a8690cbc73af9c368658a7");
-
-  // if (!isset($available_partner[$partnerId])) {
-  //   return NULL;
-  // }
 
   require_once(dirname(__FILE__) . '/api/KalturaClient.php');
   $kconf = new KalturaConfiguration($partnerId);
