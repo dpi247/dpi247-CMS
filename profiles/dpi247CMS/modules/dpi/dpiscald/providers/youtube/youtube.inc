@@ -27,6 +27,21 @@ function dpiscald_youtube_scald_add_form(&$form, &$form_state) {
 }
 
 /**
+ * Implements hook_menu(). (not anymore)
+ */
+function dpiscald_youtube_menu(&$items) {
+  $items['admin/dpi247/dpiscald/youtube'] = array(
+    'title' => 'Youtube',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dpiscald_youtube_configuration_form'),
+    'access arguments' => array(TRUE),
+    'description' => 'Configure the videos',
+    'file' => 'providers/youtube/dpiscald_youtube.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+}
+
+/**
  * Implements hook_scald_add_form_fill().
  */
 function dpiscald_youtube_scald_add_form_fill(&$atom, $form, $form_state) {
