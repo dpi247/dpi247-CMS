@@ -316,8 +316,7 @@ function _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,
    * 
    * $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
    * $rank_max_value = $wrapper->rank_max_value->value(); 
-   */
-  
+   */  
   $query = db_select($destination_table, 'd');
   $query->condition('d.field_destinations_tid', $tid, '=');
   $query->condition('d.field_destinations_target', $target, '=');
