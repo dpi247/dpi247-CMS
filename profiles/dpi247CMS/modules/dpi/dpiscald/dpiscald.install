@@ -40,10 +40,11 @@ function dpiscald_install() {
   scald_add_type('ustream', 'Ustream', 'Resource Ustream');
   scald_add_type('link', 'Link', 'Link media');
   scald_add_type('kaltura', 'Kaltura', 'Resource Kaltura');
+  scald_add_type('imageexterne', 'Image externe', 'Resource Image externe');
   
   //Changer le provider par defaut des types créés, ci-dessus via le module scald, de "scald" à "dpiscald".
   $providers = array('flickr', 'soundcloud', 'youtube', 'dailymotion', 'vimeo', 'twitter', 'equipefr', 'kewego', 'googlemap',
-       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'ustream', 'link', 'kaltura');
+       'embedly', 'storify', 'timelinejs', 'coveritlive', 'picktochart', 'scribblelive', 'spotify', 'deezer', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'ustream', 'link', 'kaltura', 'imageexterne');
   $requete='UPDATE {scald_types} SET provider=\'dpiscald\' where ';
   foreach($providers as $provider){
   	$requete.='type = \''.$provider.'\' OR ';
@@ -134,6 +135,7 @@ function dpiscald_uninstall() {
   scald_remove_type('ustream');
   scald_remove_type('link');
   scald_remove_type('kaltura');
+  scald_remove_type('imageexterne');
 }
 
 /**
@@ -182,5 +184,13 @@ function dpiscald_update_7004(){
 function dpiscald_update_7005(){
   scald_add_type('kaltura', 'Kaltura', 'Resource Kaltura');
   $requete="UPDATE {scald_types} SET provider='dpiscald' where type='kaltura'";
+  db_query ( $requete );
+}
+/**
+ * Add Image externe provider and modify type of this provider 
+ */
+function dpiscald_update_7006(){
+  scald_add_type('imageexterne', 'Image externe', 'Resource Image externe');
+  $requete="UPDATE {scald_types} SET provider='dpiscald' where type='imageexterne'";
   db_query ( $requete );
 }
