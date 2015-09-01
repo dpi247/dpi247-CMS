@@ -277,7 +277,7 @@ function dpidestinations_reorder_all_targetblock_by_publication_date(){
   $delta = _dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000);
   foreach($base_array as $base_k => $base_v){ // boucle sur le tid
     foreach($base_v as $k => $v){ // boucle sur les targets
-      $nb_elements = count($v);
+      $nb_elements = 0;
       foreach($v as $keys => $v_entity){
         /* Update base table */
         $query = "UPDATE field_data_field_destinations "
@@ -291,7 +291,7 @@ function dpidestinations_reorder_all_targetblock_by_publication_date(){
                . "WHERE entity_id=".$v_entity["entity_id"]." AND field_destinations_tid=".$base_k." AND field_destinations_target='".$k."'";
         db_query($query)->execute();
         
-        $nb_elements--;
+        $nb_elements++;
       }
     }
   } 
