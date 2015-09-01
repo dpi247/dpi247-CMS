@@ -625,6 +625,6 @@ function dpidestinations_api_delete_topic_term_elu_by_timestamp(){
  * @param String $target
  * @param Void $eyed_nids
  */
-function dpidestinations_dpidestinations_virtualrank_dispersion($tid, $target, $eyed_nids){
+function dpidestinations_dpidestinations_virtualrank_dispersion($tid, $target){
   dpidestinations_update_virtual_rank_for_saturation($tid, $target);
 }

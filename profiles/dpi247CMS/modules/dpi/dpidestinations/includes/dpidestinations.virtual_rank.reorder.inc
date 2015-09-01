@@ -151,15 +151,10 @@ function dpidestinations_update_virtual_rank_for_saturation($tid, $target){
   $results = dpidestinations_get_virtual_rank_saturation($tid, $target);   
   if($results){
     module_load_include('inc', 'dpidestinations', 'dpidestinations.api');
-    $max_rank_value = (isset($results[0]->field_destinations_virtual_rank)) ? $results[0]->field_destinations_virtual_rank*2 : 0;
-    $min_rank_value = (isset($results[count($results)-1]->field_destinations_virtual_rank)) ? $results[count($results)-1]->field_destinations_virtual_rank : 0;
     $nb_result = count($results)-1;    
     if( $nb_result > 0 ){
-      $range = $max_rank_value - $min_rank_value;
-      $jump = $range/$nb_result;
-      for($i=0; $i< count($results);$i++){
-        $virtual_rank = (int) ($max_rank_value - ($i*$jump));
-        _dpidestinations_virtualrank_update_virtualrank($results[$i]->entity_id, $tid, $target, $virtual_rank);
+      for($i=0; $i< $nb_result;$i++){
+        _dpidestinations_virtualrank_update_virtualrank($results[$i]->entity_id, $tid, $target, $results[$i]->field_destinations_virtual_rank+_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000));
       } 
     }
   }
