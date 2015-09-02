@@ -164,13 +164,13 @@ function dpisso_get_connect_form() {
     $config = $ssoSession->config;
     if ($unitId = $config->LM_unitId) {
       if (user_is_anonymous ()) {
-        $return = l ( 'Login', $config->login . '/html/login?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Login', dpisso_get_login_url($config->login, $unitId), array (
           'attributes' => array (
             'class' => 'btn blue' 
           ) 
         ) );
       } else {
-        $return = l ( 'Logout', $config->login . '/html/logout?unitId=' . $unitId . '&returnPage=' . urlencode ( dpisso_api_get_current_url () ), array (
+        $return = l ( 'Logout', dpisso_get_logout_url($config->login, $unitId), array (
           'attributes' => array (
             'class' => 'btn blue' 
           ) 
