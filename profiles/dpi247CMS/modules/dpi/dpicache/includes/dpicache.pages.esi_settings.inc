@@ -41,17 +41,91 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
 		'#title' => t('Drupal messages wit ESI'),
 		'#type' => 'fieldset',
 	);
+  
 	$form['drupal_messages_with_esi']['drupal_get_status_messages_with_javascript'] = array(
-		'#title' => t('Load drupal messages with javascript (Usefull if the system use ESI to render page elements'),
+		'#title' => t('Load drupal messages with javascript (Usefull if the system use ESI to render page elements)'),
 		'#type' => 'checkbox',
 		'#default_value'=>variable_get('drupal_get_status_messages_with_javascript', FALSE),
 	);
-
+  
+  $form['drupal_messages_with_esi']['info'] = array(
+    '#title' => t('Settings for status message'),
+		'#type' => 'fieldset',
+    '#collapsible'=>TRUE,
+    '#collapsed'=>TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="drupal_get_status_messages_with_javascript"]' => array('checked' => true),
+      ),
+    ),
+  );
+  
+  $form['drupal_messages_with_esi']['info']['dpicache_comment_status_message_start'] = array(
+		'#title' => t('Add html content for info drupal message to the begin'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_status_message_start', ""),    
+	);
+  
+  $form['drupal_messages_with_esi']['info']['dpicache_comment_status_message_end'] = array(
+		'#title' => t('Add html content for info drupal message to the end'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_status_message_end', ""),
+	);
+  
+  $form['drupal_messages_with_esi']['error'] = array(
+    '#title' => t('Settings for error message'),
+		'#type' => 'fieldset',
+    '#collapsible'=>TRUE,
+    '#collapsed'=>TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="drupal_get_status_messages_with_javascript"]' => array('checked' => true),
+      ),
+    ),
+  );
+  
+  $form['drupal_messages_with_esi']['error']['dpicache_comment_error_message_start'] = array(
+		'#title' => t('Add html content for error drupal message to the begin'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_error_message_start', ""),
+    
+	);
+  
+  $form['drupal_messages_with_esi']['error']['dpicache_comment_error_message_end'] = array(
+		'#title' => t('Add html content for error drupal message to the end'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_error_message_end', ""),
+	);
+  
+  $form['drupal_messages_with_esi']['warning'] = array(
+    '#title' => t('Settings for warning message'),
+		'#type' => 'fieldset',
+    '#collapsible'=>TRUE,
+    '#collapsed'=>TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="drupal_get_status_messages_with_javascript"]' => array('checked' => true),
+      ),
+    ),
+  );
+  
+  $form['drupal_messages_with_esi']['warning']['dpicache_comment_warning_message_start'] = array(
+		'#title' => t('Add html content for warning drupal message to the begin'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_warning_message_start', ""),
+	);
+  
+  $form['drupal_messages_with_esi']['warning']['dpicache_comment_warning_message_end'] = array(
+		'#title' => t('Add html content for warning drupal message to the end'),
+		'#type' => 'textfield',
+		'#default_value' => variable_get('dpicache_comment_warning_message_end', ""),
+	);
 
   $form['varnish_purge'] = array(
     '#title' => t('Varnish purge method'),
     '#type' => 'fieldset',
   );
+  
   $form['varnish_purge']['dpicache_varnish_purge_method'] = array(
     '#title' => t('Varnish url'),
     '#type' => 'radios',
@@ -121,7 +195,7 @@ function dpicache_pages_form_esi_settings_form($form, &$form_state){
 
 }
 
-function dpicache_pages_form_esi_settings_form_submit($form, & $form_state){
+function dpicache_pages_form_esi_settings_form_submit($form, & $form_state){  
   //Check if we have a modification in use of esi
   if($form_state['values']['dpicache_disable_esi']!=variable_get('dpicache_disable_esi', FALSE)){
     drupal_set_message("We have to sync Esi roles and Drupal Roles");

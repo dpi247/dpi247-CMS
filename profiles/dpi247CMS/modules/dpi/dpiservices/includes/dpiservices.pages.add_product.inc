@@ -126,7 +126,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
   );
   
   $form['back'] = array(
-    '#markup' => l('Back', 'admin/dpi247/dpijsonexporter', array('attributes' => array('class' => 'btn-dpiservices-back'))),
+    '#markup' => l('Back', 'admin/dpi247/dpiservices', array('attributes' => array('class' => 'btn-dpiservices-back'))),
   );
   
   return $form;
@@ -164,7 +164,7 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
           ->execute();
           
       drupal_set_message('Modification for '.$form_state['values']['label'].' is saved');
-      drupal_goto('admin/dpi247/dpijsonexporter');
+      drupal_goto('admin/dpi247/dpiservices');
     } catch (Exception $e) {
       dsm($e);
       drupal_set_message("Une erreur sql a interrompu le traitement", 'error');

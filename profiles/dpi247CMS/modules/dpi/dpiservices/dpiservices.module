@@ -25,7 +25,7 @@ function dpiservices_ctools_plugin_api($owner, $api) {
  * @return array
  */
 function dpiservices_menu() {
-  $items ['admin/dpi247/dpijsonexporter'] = array (
+  $items ['admin/dpi247/dpiservices'] = array (
     'title' => 'Dpi Services',
     'description' => 'Administer return json exporter',
     'page callback' => 'dpiservices_pages_form_table_product_form',
@@ -36,13 +36,13 @@ function dpiservices_menu() {
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/products'] = array (
+  $items ['admin/dpi247/dpiservices/products'] = array (
     'title' => 'Product panel',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/add'] = array (
+  $items ['admin/dpi247/dpiservices/add'] = array (
     'title' => 'Add product',
     'description' => 'Manage view from dpiservices for product',
     'page callback' => 'drupal_get_form',
@@ -58,7 +58,7 @@ function dpiservices_menu() {
     'weight' => 1 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/edit/%'] = array (
+  $items ['admin/dpi247/dpiservices/edit/%'] = array (
     'page callback' => 'drupal_get_form',
     'page arguments' => array (
       'dpiservices_pages_form_add_or_edit_product_form',
@@ -71,7 +71,7 @@ function dpiservices_menu() {
     'file path' => drupal_get_path ( 'module', 'dpiservices' ) . '/includes' 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/settings'] = array (
+  $items ['admin/dpi247/dpiservices/settings'] = array (
     'title' => 'Settings',
     'description' => 'Add map',
     'page callback' => 'drupal_get_form',
@@ -87,7 +87,7 @@ function dpiservices_menu() {
     'weight' => 2 
   );
   
-  $items ['admin/dpi247/dpijsonexporter/del/%'] = array (
+  $items ['admin/dpi247/dpiservices/del/%'] = array (
     'page callback' => 'dpiservices_pages_form_delete',
     'page arguments' => array (
       4 

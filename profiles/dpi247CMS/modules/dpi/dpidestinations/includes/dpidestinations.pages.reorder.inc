@@ -117,6 +117,14 @@ function dpidestinations_page_targetview_reorder_form($form, &$form_state, $node
   
 }
 
+function dpidestinations_page_targetview_reorder_form_validate(&$form, &$form_state){
+  if(isset($form_state['values']['nodes']) && is_array($form_state['values']['nodes'])){
+    $first_value = current($form_state['values']['nodes']);
+    if(isset($first_value['weight']) && intval($first_value['weight']) == 0){
+      form_set_error('No modification', 'Veuillez réaliser une modification avant de cliquer sur le réordonnancement');
+    }
+  }
+}
 
 function dpidestinations_page_targetview_reorder_form_submit(& $form, &$form_state){
   

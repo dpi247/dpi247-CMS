@@ -316,8 +316,7 @@ function _dpidestinations_virtualrank_calculate_offset($tid, $target, $position,
    * 
    * $wrapper = entity_metadata_wrapper('targetblock', $targetblock);
    * $rank_max_value = $wrapper->rank_max_value->value(); 
-   */
-  
+   */  
   $query = db_select($destination_table, 'd');
   $query->condition('d.field_destinations_tid', $tid, '=');
   $query->condition('d.field_destinations_target', $target, '=');
@@ -402,26 +401,23 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
 
     if($virtual_rank == $array_results[0]->field_destinations_virtual_rank) {
       module_load_include('inc', 'dpidestinations', 'includes/dpidestinations.virtual_rank.reorder');      
-      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));      
-      //drupal_set_message(t('Virtual_rank saturation for term %tid and target %target at position %position this can lead to ordering issue for this targetblock... if the problem perssist please contact your support team', array('%tid' => $tid, '%target' => $target, '%position' => $position)));      
+      watchdog('dpidestinations', 'Virtual_rank saturation for term %tid and target %target at position %position', array('%tid' => $tid, '%target' => $target, '%position' => $position));
       
       //We are gonna update the virtual rank directly in DB .... if we have trouble with that we should use node_save...
       $query2 = db_select($destination_table, 'd');
-      //$query->join('node', 'n', 'n.nid = d.entity_id and n.vid=d.revision_id');
       $query2->condition('d.field_destinations_tid', $tid, '=');
       $query2->condition('d.field_destinations_target', $target, '=');
       $query2->fields('d', array('field_destinations_virtual_rank','entity_id','delta'));
       $query2->orderBy('d.field_destinations_virtual_rank', 'DESC');
       $query2->range(0,$position -1); //offset is the first argument, second argument is
-      $results2 = $query2->execute();
-
+      $results2 = $query2->execute()->fetchAll();
+      dsm($results2);
       $nids = array();
       foreach($results2 as $index => $row_result) {
-        $new_virtual_rank = $virtual_rank+((count($results2)-$index+1)*_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000));
+        $new_virtual_rank =  $row_result->field_destinations_virtual_rank + _dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000);
         $nids[] = array('nid' => $row_result->entity_id, 'virtual_rank' => $new_virtual_rank);
         $keyed_nids[$index] = $row_result->entity_id;
         $keyed_virtualranks[$index] = $new_virtual_rank;
-
         db_update($destination_table) // Table name no longer needs {}
           ->fields(array('field_destinations_virtual_rank' => $new_virtual_rank))
           ->condition('entity_id', $row_result->entity_id)
@@ -430,10 +426,7 @@ function _dpidestinations_virtualrank_give_virtual_rank_for_position($tid, $targ
           ->condition('delta',$row_result->delta)
           ->execute();
       }
-
       entity_get_controller('node')->resetCache($keyed_nids);
-
-      module_invoke_all('dpidestinations_virtualrank_dispersion', $tid, $target, $keyed_nids);
     }
   }
 
