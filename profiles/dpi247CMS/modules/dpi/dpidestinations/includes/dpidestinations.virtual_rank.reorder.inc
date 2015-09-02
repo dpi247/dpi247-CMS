@@ -17,6 +17,8 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     1 => t('Redéfinir le virtual rank de toutes les destinations'), 
     2 => t('Redéfinir le virtual rank d\'une destination'),
     3 => t('Redéfinir un virtual rank pour les valeurs null'),
+    4 => t('Réordonner les articles de chacun des destinations par date de publication'),
+    5 => t('Voir le tableau des articles en fonction de leur tid et target par date de publication'),
   );
 
   $form['select'] = array(
@@ -95,6 +97,16 @@ function dpidestinations_reform_virtual_rank($form, &$form_state) {
     ),
   );
   
+  $form ["reorderall"] = array(
+    '#type' => 'item',
+    "#markup" => t('Réordonne chacun des targetblocks de chacune des sections en fonction de leur publication date.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="select"]' => array('value' => 4),
+      ),
+    ),
+  );
+  
   $form['submit'] = array('#type' => 'submit', '#value' => t('Execute'));
 
   return $form;
@@ -138,11 +150,18 @@ function dpidestinations_reform_virtual_rank_submit($form, &$form_state){
           $return_msg = dpidestinations_change_null_virtual_rank_value(0);
           drupal_set_message($return_msg);
         break;
+      case 4:
+          dpidestinations_reorder_all_targetblock_by_publication_date();
+        break;
+      case 5:
+          dpidestinations_get_reordered_all_targetblock_by_publication_date();
+        break;
       default:
           drupal_set_message('La valeur selectionnée n\'est pas prise en charge');
         break;
     }    
   } catch (Exception $exc) {
+    dsm($exc->getMessage());
     drupal_set_message('Updating with error', 'error');  
   }
 }
@@ -151,15 +170,10 @@ function dpidestinations_update_virtual_rank_for_saturation($tid, $target){
   $results = dpidestinations_get_virtual_rank_saturation($tid, $target);   
   if($results){
     module_load_include('inc', 'dpidestinations', 'dpidestinations.api');
-    $max_rank_value = (isset($results[0]->field_destinations_virtual_rank)) ? $results[0]->field_destinations_virtual_rank*2 : 0;
-    $min_rank_value = (isset($results[count($results)-1]->field_destinations_virtual_rank)) ? $results[count($results)-1]->field_destinations_virtual_rank : 0;
     $nb_result = count($results)-1;    
     if( $nb_result > 0 ){
-      $range = $max_rank_value - $min_rank_value;
-      $jump = $range/$nb_result;
-      for($i=0; $i< count($results);$i++){
-        $virtual_rank = (int) ($max_rank_value - ($i*$jump));
-        _dpidestinations_virtualrank_update_virtualrank($results[$i]->entity_id, $tid, $target, $virtual_rank);
+      for($i=0; $i< $nb_result;$i++){
+        _dpidestinations_virtualrank_update_virtualrank($results[$i]->entity_id, $tid, $target, $results[$i]->field_destinations_virtual_rank+_dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000));
       } 
     }
   }
@@ -220,4 +234,106 @@ function dpidestinations_get_null_virtual_rank(){
   } catch (Exception $exc) {      
   }  
   return $return;
+}
+
+function dpidestinations_reorder_all_targetblock_by_publication_date(){
+  $query = "SELECT epd.entity_id, epd.field_editorialpublicationdate_value, d.field_destinations_virtual_rank, d.field_destinations_tid, d.field_destinations_target 
+            FROM field_data_field_destinations d, field_revision_field_editorialpublicationdate epd
+            WHERE epd.entity_id=d.entity_id";
+  $results = db_query($query)->fetchAll();
+  $base_array = array();
+  
+  /* order element by tid and target */
+  foreach($results as $node_info){
+    $base_array[$node_info->field_destinations_tid][$node_info->field_destinations_target][] = array(
+      'entity_id' => $node_info->entity_id,
+      'field_editorialpublicationdate_value' => $node_info->field_editorialpublicationdate_value,
+      'field_destinations_virtual_rank' => $node_info->field_destinations_virtual_rank,      
+    );
+  }
+
+  /* Rearrange le tableau des éléments en fonction de la clé représentant la date de publication */
+  $sorted_array = array();
+  foreach($base_array as $base_k => $base_v){ // boucle sur le tid
+    foreach($base_v as $k => $v){ // boucle sur les targets
+      usort($base_array[$base_k][$k], function($a,$b){
+        if($a['field_editorialpublicationdate_value']>$b["field_editorialpublicationdate_value"]){
+          $return = 1;
+        }elseif($a['field_editorialpublicationdate_value']==$b["field_editorialpublicationdate_value"]){
+          if($a["entity_id"]>$b["entity_id"]){
+            $return = -1;            
+          }else{
+            $return = 1;
+          }
+        }else{
+          $return = -1;
+        }
+        return $return;
+      });
+    }
+  }
+  
+  /* Redifinition de toutes les valeurs */
+  $delta = _dpidestinations_variable_get('dpidestinations_virtualrank_delta', 1000);
+  foreach($base_array as $base_k => $base_v){ // boucle sur le tid
+    foreach($base_v as $k => $v){ // boucle sur les targets
+      $nb_elements = 0;
+      foreach($v as $keys => $v_entity){
+        /* Update base table */
+        $query = "UPDATE field_data_field_destinations "
+               . "SET field_destinations_virtual_rank=".($nb_elements*$delta)." "
+               . "WHERE entity_id=".$v_entity["entity_id"]." AND field_destinations_tid=".$base_k." AND field_destinations_target='".$k."'";
+        db_query($query)->execute();
+        
+        /* Update revision table */
+        $query = "UPDATE field_revision_field_destinations "
+               . "SET field_destinations_virtual_rank=".($nb_elements*$delta)." "
+               . "WHERE entity_id=".$v_entity["entity_id"]." AND field_destinations_tid=".$base_k." AND field_destinations_target='".$k."'";
+        db_query($query)->execute();
+        
+        $nb_elements++;
+      }
+    }
+  } 
+  
+  drupal_set_message("Mise à jours réussie");
+}
+
+function dpidestinations_get_reordered_all_targetblock_by_publication_date(){
+  $query = "SELECT epd.entity_id, epd.field_editorialpublicationdate_value, d.field_destinations_virtual_rank, d.field_destinations_tid, d.field_destinations_target 
+            FROM field_data_field_destinations d, field_revision_field_editorialpublicationdate epd
+            WHERE epd.entity_id=d.entity_id";
+  $results = db_query($query)->fetchAll();
+  $base_array = array();
+  
+  /* order element by tid and target */
+  foreach($results as $node_info){
+    $base_array[$node_info->field_destinations_tid][$node_info->field_destinations_target][] = array(
+      'entity_id' => $node_info->entity_id,
+      'field_editorialpublicationdate_value' => $node_info->field_editorialpublicationdate_value,
+      'field_destinations_virtual_rank' => $node_info->field_destinations_virtual_rank,      
+    );
+  }
+
+  /* Rearrange le tableau des éléments en fonction de la clé représentant la date de publication */
+  $sorted_array = array();
+  foreach($base_array as $base_k => $base_v){ // boucle sur le tid
+    foreach($base_v as $k => $v){ // boucle sur les targets
+      usort($base_array[$base_k][$k], function($a,$b){
+        if($a['field_editorialpublicationdate_value']>$b["field_editorialpublicationdate_value"]){
+          $return = 1;
+        }elseif($a['field_editorialpublicationdate_value']==$b["field_editorialpublicationdate_value"]){
+          if($a["entity_id"]>$b["entity_id"]){
+            $return = -1;            
+          }else{
+            $return = 1;
+          }
+        }else{
+          $return = -1;
+        }
+        return $return;
+      });
+    }
+  }
+  dsm($base_array);
 }
