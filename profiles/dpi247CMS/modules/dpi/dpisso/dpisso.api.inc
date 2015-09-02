@@ -81,4 +81,30 @@ function dpisso_api_set_paywall_info($info) {
   return $ssoSession->accessManager->setPaywallInfo ( $info );
 }
 
+/**
+* Provides a URL allowing to log in to SSO V2 and to redirect to the specified return page.
+* @param {String} $login The domain name from which you wish to login
+* @param {String} $unit_id The site identifier for the login manager
+* @param {String|NULL} $return_page The page you are redirected to after logging in
+* @return {String} The full login URL
+**/
+function dpisso_get_login_url($login, $unit_id, $return_page=NULL){
+  if(!$return_page){
+    $return_page = urlencode(dpisso_api_get_current_url());
+  }
+  return $login . '/html/login?unitId=' . $unit_id . '&returnPage=' . $return_page;
+}
 
+/**
+* Provides a URL allowing to log out from SSO V2 and to redirect to the specified return page.
+* @param {String} $login The domain name from which you wish to logout
+* @param {String} $unit_id The site identifier for the login manager
+* @param {String|NULL} $return_page The page you are redirected to after logging out
+* @return {String} The full logout URL
+**/
+function dpisso_get_logout_url($login, $unit_id, $return_page=NULL){
+  if(!$return_page){
+    $return_page = urlencode(dpisso_api_get_current_url());
+  }
+  return $login . '/html/logout?unitId=' . $unit_id . '&returnPage=' . $return_page;
+}
