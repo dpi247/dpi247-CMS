@@ -1239,7 +1239,7 @@ class WallyXmlV1 extends PackageHelper {
             $t_machine_name = strtolower($taxonomy_name);
             $t_machine_name = str_replace(' ', '', $t_machine_name);
             $field_name = 'field_'.strtolower($t_machine_name);  
-            if(isset($entity->type) && $entity->type != "package"){
+            if(isset($entity->type) && $entity->type != "package" && $entity->type != "package_gallery"){
               switch($t_machine_name){
                 case "authors":
                     $field_name = 'scald_'.strtolower($t_machine_name);
