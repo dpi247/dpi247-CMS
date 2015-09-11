@@ -16,7 +16,7 @@ function dpiservices_api_packages_get_field_element_by_search_value($type = null
   if($info = field_get_items ( $type, $node, $field_name )){
     $element = current($info);
   }
-  return (isset($element[$search_value])) ? $element[$search_value] : FALSE;
+  return (isset($element[$search_value])) ? check_markup($element[$search_value], 'plain_text') : FALSE;
 }
 
 /**
