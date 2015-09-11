@@ -101,7 +101,7 @@ function dpiservices_api_packages_generate_default_preset($nid, $sid){
         'start_height' => $value [1],
         'width' => $value [2],
         'height' => $value [3],
-        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key)
+        'url' => dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source)
       );  
       $letter++;
     }
