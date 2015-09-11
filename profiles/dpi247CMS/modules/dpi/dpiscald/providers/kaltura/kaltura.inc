@@ -135,6 +135,10 @@ function dpiscald_kaltura_theme() {
       'variables' => array('vars' => NULL, 'atom' => NULL),
       'template' => 'providers/kaltura/dpiscald_kaltura_player'
     ),
+    'dpiscald_youtube_player_thumbnail' => array(
+      'variables' => array('vars' => NULL, 'atom' => NULL),
+      'template' => 'templates/players/dpiscald_youtube_player_thumbnail'
+    ),
   );
 }
 
