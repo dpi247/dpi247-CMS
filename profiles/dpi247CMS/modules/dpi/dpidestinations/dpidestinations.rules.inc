@@ -227,8 +227,8 @@ function dpidestinations_rules_condition_has_section_and_target($node, $sections
  */
 function dpidestinations_rules_action_info() {
   return array (
-    'regenerate_node' => array (
-      'label' => t ( 'Refresh targetblocks associated to the node' ),
+    'regenerate_node_drupal_content' => array (
+      'label' => t ( 'Refresh targetblocks associated to the node (Drupal Content)' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
@@ -237,11 +237,25 @@ function dpidestinations_rules_action_info() {
       ),
       'group' => t ( 'Dpi Actions Rules' ),
       'callbacks' => array (
-        'execute' => 'dpidestinations_clear_cache_of_targetbloks_for_a_node' 
+        'execute' => 'dpidestinations_clear_cache_of_targetbloks_for_a_node_drupal_content' 
+      ) 
+    ),
+    'regenerate_node_varnish_content' => array (
+      'label' => t ( 'Refresh targetblocks associated to the node (Varnish Content)' ),
+      'parameter' => array (
+        'node' => array (
+          'type' => 'node',
+          'label' => t ( 'Content' ) 
+        ) 
+      ),
+      'group' => t ( 'Dpi Actions Rules' ),
+
+      'callbacks' => array ( 	
+        'execute' => 'dpidestinations_clear_cache_of_targetbloks_for_a_node_varnish_content' 
       ) 
     ),
     'refresh_node_cash' => array (
-      'label' => t ( 'Refresh node page' ),
+      'label' => t ( 'Refresh node page (Varnish)' ),
       'parameter' => array (
         'node' => array (
           'type' => 'node',
@@ -274,7 +288,7 @@ function dpidestinations_rules_action_info() {
  *
  * @param node $node          
  */
-function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
+function dpidestinations_clear_cache_of_targetbloks_for_a_node_drupal_content($node) {
   /**
    * Invalidation cache for this node because the pre_render of
    * dpidestinations_plugin_row_node_targetview give the precedent node
@@ -290,14 +304,24 @@ function dpidestinations_clear_cache_of_targetbloks_for_a_node($node) {
     if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {
       $category = dpidestination_api_get_category ( $destination );
       // Clean dpicache for targetblocks
-      dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );
-      
-      // clean varnish for argetblocks
+      dpicache_api_regenerate_all_cache_entry_callback ( 'dpidestinations_targetblock_render', $category );     
+    } else {
+      drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
+    }
+  }
+}
+
+/**
+ * Function to invalidate cash for varnish and dpicache
+ *
+ * @param node $node          
+ */
+function dpidestinations_clear_cache_of_targetbloks_for_a_node_varnish_content($node){
+  foreach ( field_get_items ( 'node', $node, 'field_destinations' ) as $destination ) {
+    if (isset ( $destination ['tid'] ) && is_numeric ( $destination ['tid'] ) && isset ( $destination ['target'] )) {      // clean varnish for argetblocks
       foreach ( dpicommons_api_get_all_path_alias_for_taxonomy ( $destination ['tid'] ) as $url_alias ) {
         dpicache_api_varnish_purge_pattern ( '/' . $url_alias );
       }
-    } else {
-      drupal_set_message ( 'Cache entry is not refresh for this content', 'error' );
     }
   }
 }
