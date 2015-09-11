@@ -117,7 +117,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
       );
     }
   }else{
-    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpijsonexporter/add_map">map settings</a>'), 'error');
+    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpiservices/settings">map settings</a>'), 'error');
   }
   
   $form['submit'] = array(

@@ -89,7 +89,7 @@ function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
  * @return array
  */
 function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $field_name) {
-  $table_value = array ();
+  $table_value = array ();  
   foreach ( field_get_items ( 'node', $node, $field_name ) as $items ) {
     $element = array ();
     foreach ( $items as $k => $v ) {
@@ -97,6 +97,10 @@ function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $fi
         $var = taxonomy_term_load ( $v );
         $element ["code"] = $v;
         $element ['name'] = $var->name;
+        
+      }
+      if($k == "layout"){
+        $element ['layout'] = $v;
       }
     }
     $table_value [] = $element;
