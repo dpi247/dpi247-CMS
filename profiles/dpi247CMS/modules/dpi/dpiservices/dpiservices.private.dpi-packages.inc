@@ -11,7 +11,7 @@ module_load_include ( 'inc', 'dpiservices', 'dpiservices.api' );
  * @return array()
  */
 function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
-  return dpicache_get_cache_entry ( 'dpiservices_dpijson_render', $nid, $product_name = null );
+  return dpicache_get_cache_entry ( 'dpiservices_dpijson_render', $nid, $product_name);
 }
 
 /**
@@ -23,8 +23,7 @@ function dpiservices_dpi_packages_retrieve($nid, $product_name = null) {
  */
 function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
   global $present_definition;
-  $present_definition = array ();
-  
+  $present_definition = array ();  
   $node = node_load ( $nid );
   
   $packages_return = array (
