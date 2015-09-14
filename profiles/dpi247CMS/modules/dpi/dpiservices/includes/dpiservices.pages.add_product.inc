@@ -145,7 +145,7 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
       $preset_db_value = array();
       
       foreach ($presets as $preset){
-        if(isset($form_state['values'][$preset])) $preset_db_value[$preset] = $form_state['values'][$preset];
+        if(isset($form_state['values']['subfieldset'][$preset])) $preset_db_value[$preset] = $form_state['values']['subfieldset'][$preset];
       }
       
       db_merge('dpiservices_product')
