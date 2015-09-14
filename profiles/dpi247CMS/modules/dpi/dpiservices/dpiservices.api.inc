@@ -167,7 +167,7 @@ function dpiservices_api_product_get_one_product_by_label($label = null){
   
   try {
     return db_select('dpiservices_product', 'dp')
-    ->condition('label', $label, '=')
+    ->condition('machine_name', $label, '=')
     ->fields('dp', array())
     ->execute()->fetchAssoc();
   } catch (Exception $e) {
