@@ -60,11 +60,13 @@ function dpiservices_api_packages_generate_crop_informations($sid=null, $nid=nul
     if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
       foreach ($info as $key => $value ) { 
         if(dpiservices_api_packages_crop_in_array($key, $preset)){
+          $a = dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source);
           $crop_definition_value [$key] = array (
             'start_width' => $value [0],
             'start_height' => $value [1],
             'width' => $value [2],
             'height' => $value [3],
+            'url' => (file_exists($a))? $a : image_style_url($key, $atom->file_source),
           );
         }
       }
@@ -96,12 +98,13 @@ function dpiservices_api_packages_generate_default_preset($nid, $sid){
     foreach ($info as $key => $value ) { 
       $random_id = rand(1000, 9999);
       $crop_value[hex2bin($letter).$random_id] = $key;
+      $a = dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source);
       $crop_definition_value [$key] = array (
         'start_width' => $value [0],
         'start_height' => $value [1],
         'width' => $value [2],
         'height' => $value [3],
-        'url' => dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source)
+        'url' => (file_exists($a))? $a : image_style_url($key, $atom->file_source),
       );  
       $letter++;
     }
@@ -110,6 +113,10 @@ function dpiservices_api_packages_generate_default_preset($nid, $sid){
   $gen_value [] = $crop_definition_value;    
 
   return $gen_value;
+}
+
+function dpiservices_api_packages_generate_default_preset_element($nid, $sid){
+  
 }
 
 /**

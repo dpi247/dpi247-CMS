@@ -42,6 +42,7 @@ function dpiservices_dpi_packages_retrieve_process($nid, $product_name = null) {
     'barette' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_textbarette', 'value' ),
     'byline' => dpiservices_api_packages_get_field_element_by_search_value ( 'node', $node, 'field_byline', 'value' ),
     'authors' => dpiservices_api_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_authors', 'tid', 'name' ),
+    'package_layout' => dpiservices_api_packages_get_one_element_from_item_from_node ( 'node', $node, 'field_packagelayout', 'tid', 'name' ),
     'qualities' => '@todo',
     'url' => drupal_get_path_alias ( 'node/' . $nid ),
     'uri' => dpi_variable_get ( 'dpicommons_product', '' ) . '.' . dpi_variable_get ( 'dpicommons_environment', '' ) . '/node/' . $nid,
@@ -97,9 +98,6 @@ function dpiservices_dpi_packages_get_all_element_from_item_from_node($node, $fi
         $element ["code"] = $v;
         $element ['name'] = $var->name;
         
-      }
-      if($k == "layout"){
-        $element ['layout'] = $v;
       }
     }
     $table_value [] = $element;
