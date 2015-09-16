@@ -682,12 +682,21 @@ class WallyXmlV1 extends PackageHelper {
    * @param Object $entity          
    */
   public function buildTextBody($dom, $wrapper, $entity) {
-    $value = $dom->nodeValue;
-    $format = $this->getDefaultTextFormat();
-    $wrapper->field_textbody->set(array(
-      'value' => $value,
-      'format' => $format
-    ));
+    if($entity->type == "package_gallery"){ //field chapo for package gallery @see 15214
+      $value = $dom->nodeValue;
+      $format = $this->getDefaultTextFormat();
+      $wrapper->field_textchapo->set(array(
+        'value' => $value,
+        'format' => $format
+      ));
+    }else{
+      $value = $dom->nodeValue;
+      $format = $this->getDefaultTextFormat();
+      $wrapper->field_textbody->set(array(
+        'value' => $value,
+        'format' => $format
+      ));
+    }
   }
 
   /**
