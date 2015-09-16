@@ -138,6 +138,8 @@ class dpiscald_plugin_display_library extends scald_plugin_display_library {
     unset($atom_types['spotify']);
     unset($atom_types['ustream']);
     unset($atom_types['videortl']);
+    unset($atom_types['kaltura']);
+    unset($atom_types['imageexterne']);
     $buttons = array('type' => 'ul', 'title' => NULL, 'attributes' => array());
     ctools_include('ajax');
     ctools_include('modal');

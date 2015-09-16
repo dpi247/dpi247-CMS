@@ -28,6 +28,7 @@ function dpiscald_scald_atom_providers() {
 function dpiscald_scald_atom_providers_alter(&$types){
   //images
   $types['image']['dpiscald_flickr'] ='DPI Images on Flickr';
+  $types['image']['dpiscald_imageexterne'] ='DPI Images externe (not download locally)';
   //audios
   $types['audio']['dpiscald_soundcloud'] ='DPI Sounds on Soundcloud';
   $types['audio']['dpiscald_deezer'] = 'DPI Sounds on Deezer';
@@ -35,6 +36,7 @@ function dpiscald_scald_atom_providers_alter(&$types){
   //videos
   $types['video']['dpiscald_dailymotion'] ='DPI Videos on Dailymotion';
   $types['video']['dpiscald_equipefr'] ='DPI Videos on Equipefr';
+  $types['video']['dpiscald_kaltura'] ='DPI Videos on Kaltura';
   $types['video']['dpiscald_kewego'] ='DPI Videos on Kewego';
   $types['video']['dpiscald_ustream'] ='DPI Videos on Ustream';
   $types['video']['dpiscald_videortl'] ='DPI Videos on RTL';
@@ -161,6 +163,14 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
       module_load_include('inc','dpiscald','includes/players/dpiscald_ustream_player');
       dpiscald_ustream_build_render($atom, $context, $options, $mode, $config);
       break;
+    case "dpikaltura" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_kaltura_player');
+      dpiscald_kaltura_build_render($atom, $context, $options, $mode, $config);
+      break;
+    case "dpiimageexterne" :
+      module_load_include('inc','dpiscald','includes/players/dpiscald_imageexterne_player');
+      dpiscald_imageexterne_build_render($atom, $context, $options, $mode, $config);
+      break;
   }
 }
 
@@ -169,7 +179,7 @@ function dpiscald_scald_prerender($atom, $context, $options, $mode) {
  */
 function dpiscald_menu(){
   $items = array();
-  $types=array('dailymotion','flickr');
+  $types=array('dailymotion','flickr', 'kaltura', 'youtube');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_menu';
@@ -185,7 +195,7 @@ function dpiscald_menu(){
 function dpiscald_theme(){
   $theme=array();
   $types=array('youtube','dailymotion','vimeo','soundcloud','flickr','storify','googlemap','equipefr','timelinejs',
-    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'facebook_status', 'infogram', 'slideshare', 'idalgo', 'twitter', 'ustream', 'link');
+    'picktochart','scribblelive', 'spotify', 'deezer', 'embedly', 'videortl', 'kaltura','facebook_status', 'infogram', 'slideshare', 'idalgo', 'twitter', 'ustream', 'link', 'imageexterne');
   foreach($types as $type){
     module_load_include('inc', 'dpiscald', 'providers/'.$type.'/'.$type);
     $function_name='dpiscald_'.$type.'_theme';
@@ -549,6 +559,22 @@ function dpiscald_menu_alter(&$items){
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array(TRUE),
   );
+
+  $items['admin/dpi247/dpiscald'] = array(
+    'title' => 'DPI Scald : manage dpiscald',
+    'description'=>'Manage module dpiscald',
+    'page callback'=>'drupal_get_form',
+    'page arguments'=>array('dpiscald_global_parameters_admin_form'),
+    'access arguments' => array(TRUE),
+    'file'=>'dpiscald.admin.globalparameters.inc',
+    'file path' => drupal_get_path('module', 'dpiscald').'/includes',
+  );
+
+  $items['admin/dpi247/dpiscald/global'] = array(
+    'title' => 'Global parameters',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array(TRUE),
+  );
  
 
 	$items['admin/dpi247/mediacontext/link-settings'] = array(
@@ -680,7 +706,7 @@ function dpiscald_scald_player_settings_form($form, &$form_state) {
 }
 
 function _dpiscald_get_type_with_a_dpiplayer() {
-  return array('youtube', 'dailymotion', 'vimeo', 'soundcloud', 'deezer', 'spotify', 'googlemap', 'scribblelive', 'facebook_status', 'infogram', 'idalgo', 'twitter', 'storify', 'videortl', 'slideshare', 'ustream');
+  return array('youtube', 'dailymotion', 'vimeo', 'soundcloud', 'deezer', 'spotify', 'googlemap', 'scribblelive', 'facebook_status', 'infogram', 'idalgo', 'twitter', 'storify', 'videortl', 'slideshare', 'ustream', 'imageexterne');
 }
 
 /**

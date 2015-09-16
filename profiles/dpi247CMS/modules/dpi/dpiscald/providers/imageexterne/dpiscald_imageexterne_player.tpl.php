@@ -1,0 +1,1 @@
+<img src="<?php print $vars['url'];?>" alt="<?php print $vars['title'];?>" alt="<?php print $vars['title'];?>" style="max-width:100%"/>
