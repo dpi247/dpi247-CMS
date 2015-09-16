@@ -8,4 +8,6 @@ dependencies[] = rest_server
 dependencies[] = scald
 dependencies[] = scald_image
 dependencies[] = dpidestinations
+;For the function dpicontenttypes_api_image_style_url
+dependencies[] = dpicontenttypes
 files[] = dpiservices.test

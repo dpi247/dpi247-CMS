@@ -48,8 +48,8 @@ function dpiservices_create_table_product() {
       $product ['description'],
       $product ['product'],
       $product ['product_type'],
-      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['label'].'.json">See the result</a>',
-      '<a href="/admin/dpi247/dpiservices/edit/'.$product ['label'].'">Modify</a> - <a href="/admin/dpi247/dpiservices/del/'.$product ['label'].'">Delete</a>',      
+      '<a href="http://'.$_SERVER['SERVER_NAME'].'/'.$product ['version'].'/'.$resource_info.'/'.$product ['machine_name'].'.json">See the result</a>',
+      '<a href="/admin/dpi247/dpiservices/edit/'.$product ['machine_name'].'">Modify</a> - <a href="/admin/dpi247/dpiservices/del/'.$product ['machine_name'].'">Delete</a>',      
     );
   }
   

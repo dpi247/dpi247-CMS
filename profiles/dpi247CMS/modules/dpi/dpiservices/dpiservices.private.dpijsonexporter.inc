@@ -100,10 +100,11 @@ function dpiservices_dpijsonexporter_product_get_element($tree, $product_element
  */
 function dpiservices_dpijsonexporter_product_get_feed($path, $product_element, $wildcard){
   $feed;
+  $nb = count($wildcard)-1;
   if(is_numeric(strpos($product_element["version"], "dpi"))){
-    $feed = $product_element["version"].'/dpi-section/'.$wildcard[2].'.json';
+    $feed = $product_element["version"].'/dpi-section/'.$wildcard[$nb].'/'.$product_element["machine_name"].'.json';
   }else{
-    $feed = $product_element["version"].'/wally-section/'.$wildcard[2].'.json';
+    $feed = $product_element["version"].'/wally-section/'.$wildcard[$nb].'.json';
   }
   return $feed;
 }

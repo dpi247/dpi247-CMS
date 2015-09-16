@@ -16,7 +16,7 @@ function dpiservices_api_packages_get_field_element_by_search_value($type = null
   if($info = field_get_items ( $type, $node, $field_name )){
     $element = current($info);
   }
-  return (isset($element[$search_value])) ? $element[$search_value] : FALSE;
+  return (isset($element[$search_value])) ? check_markup($element[$search_value], 'plain_text') : FALSE;
 }
 
 /**
@@ -60,11 +60,13 @@ function dpiservices_api_packages_generate_crop_informations($sid=null, $nid=nul
     if($info =  _dpicontenttypes_get_saved_cropings_for_entity_and_atom ( 'node', $nid, $sid )){
       foreach ($info as $key => $value ) { 
         if(dpiservices_api_packages_crop_in_array($key, $preset)){
+          $a = dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source);
           $crop_definition_value [$key] = array (
             'start_width' => $value [0],
             'start_height' => $value [1],
             'width' => $value [2],
             'height' => $value [3],
+            'url' => (file_exists($a))? $a : image_style_url($key, $atom->file_source),
           );
         }
       }
@@ -96,12 +98,13 @@ function dpiservices_api_packages_generate_default_preset($nid, $sid){
     foreach ($info as $key => $value ) { 
       $random_id = rand(1000, 9999);
       $crop_value[hex2bin($letter).$random_id] = $key;
+      $a = dpicontenttypes_api_image_style_url($key, $node->nid, $atom->nid, $atom->file_source);
       $crop_definition_value [$key] = array (
         'start_width' => $value [0],
         'start_height' => $value [1],
         'width' => $value [2],
         'height' => $value [3],
-        'url' => dpiflexiscald_api_get_path_for_atom($atom, $key)
+        'url' => (file_exists($a))? $a : image_style_url($key, $atom->file_source),
       );  
       $letter++;
     }
@@ -110,6 +113,10 @@ function dpiservices_api_packages_generate_default_preset($nid, $sid){
   $gen_value [] = $crop_definition_value;    
 
   return $gen_value;
+}
+
+function dpiservices_api_packages_generate_default_preset_element($nid, $sid){
+  
 }
 
 /**
@@ -160,7 +167,7 @@ function dpiservices_api_product_get_one_product_by_label($label = null){
   
   try {
     return db_select('dpiservices_product', 'dp')
-    ->condition('label', $label, '=')
+    ->condition('machine_name', $label, '=')
     ->fields('dp', array())
     ->execute()->fetchAssoc();
   } catch (Exception $e) {

@@ -117,7 +117,7 @@ function dpiservices_pages_form_add_or_edit_product_form($form, &$form_state, $a
       );
     }
   }else{
-    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpijsonexporter/add_map">map settings</a>'), 'error');
+    drupal_set_message(t('Configure add map before completing this form : <a href="/admin/dpi247/dpiservices/settings">map settings</a>'), 'error');
   }
   
   $form['submit'] = array(
@@ -145,7 +145,7 @@ function dpiservices_pages_form_add_or_edit_product_form_submit($form, &$form_st
       $preset_db_value = array();
       
       foreach ($presets as $preset){
-        if(isset($form_state['values'][$preset])) $preset_db_value[$preset] = $form_state['values'][$preset];
+        if(isset($form_state['values']['subfieldset'][$preset])) $preset_db_value[$preset] = $form_state['values']['subfieldset'][$preset];
       }
       
       db_merge('dpiservices_product')
