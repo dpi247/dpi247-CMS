@@ -9,20 +9,21 @@
 
 function dpidestinations_default_rules_configuration() {
   $configs = array ();
-  $rule = '{ "rules_refresh_content_rules" : {
+  $rule = '{ "rules_regenerate_cache_node" : {
               "LABEL" : "Refresh content rules",
               "PLUGIN" : "reaction rule",
               "OWNER" : "rules",
-              "REQUIRES" : [ "dpidestinations" ],
+              "REQUIRES" : [ "dpidestinations", "dpiblocks" ],
               "ON" : {
                 "dpidestinations_rules_event_package_create" : [],
                 "dpidestinations_rules_event_package_edit" : [],
                 "dpidestinations_rules_event_package_deleted" : []
               },
               "DO" : [
-                { "regenerate_node" : { "node" : [ "node" ] } },
                 { "refresh_node_cash" : { "node" : [ "node" ] } },
-                { "regenerate_accroche_cache" : { "node" : [ "node" ] } }
+                { "regenerate_accroche_cache" : { "node" : [ "node" ] } },
+                { "regenerate_node_drupal_content" : { "node" : [ "node" ] } },
+                { "regenerate_node_varnish_content" : { "node" : [ "node" ] } }
               ]
             }
           }';
