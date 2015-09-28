@@ -1,6 +1,11 @@
 <?php
 /**
- * @author LBA
+ * @file
+ * Access plugin to test element state.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**

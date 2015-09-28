@@ -1,7 +1,13 @@
 
 <?php
 /**
- * @author GVD - LBA
+ * @file
+ * Delete dpi state element
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @author  Van Delsen Guillaume <gvd@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**

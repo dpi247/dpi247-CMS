@@ -1,5 +1,21 @@
 <?php
 /**
+ * @file
+ * This module allow to create a state for a website and create some rules. 
+ * Then you can view or hide an element really quickly. You can create 4 types of
+ * state (Date with between-above, number with bigger-slower-.., ...)
+ * You can extend different state really easily.
+ * @see dpiunivers
+ * See dpiunivers.private.state.inc This fille impléments hook that you need
+ * to define an other state.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @author  Van Delsen Guillaume <gvd@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
+
+/**
  * @author GVD - LBA
  */
 module_load_include ( 'php', 'dpistate', 'dpistate.api' );

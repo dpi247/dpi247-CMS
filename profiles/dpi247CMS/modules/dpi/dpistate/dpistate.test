@@ -1,8 +1,15 @@
 <?php
+/**
+ * @file
+ * This file create some test for test module api and access module.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
 
 /**
  * This test class is for api
- * @author lba@audaxis.com
  */
 class SimpleTestDpiStateApiToolsTestCase extends DrupalWebTestCase {
 
@@ -44,8 +51,6 @@ class SimpleTestDpiStateApiToolsTestCase extends DrupalWebTestCase {
 /**
  * This function is use to test return about plugins access function
  * Date not tested because you need records context date to have a good element
- *
- * @author lba
  */
 class SimpleTestDpiStateAccessToolsTestCase extends DrupalWebTestCase {
 

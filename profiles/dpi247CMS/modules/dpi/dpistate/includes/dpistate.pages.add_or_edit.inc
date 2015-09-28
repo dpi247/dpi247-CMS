@@ -1,7 +1,12 @@
 <?php
-
 /**
- * @author GVD - LBA
+ * @file
+ * This file allow to add or edit a state
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @author  Van Delsen Guillaume <gvd@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**

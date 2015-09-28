@@ -1,7 +1,11 @@
 <?php
-
 /**
- * @author LBA 
+ * @file
+ * Create settings form to define the website state at the moment.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**

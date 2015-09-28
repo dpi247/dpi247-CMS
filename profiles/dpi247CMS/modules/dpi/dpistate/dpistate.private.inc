@@ -1,4 +1,13 @@
 <?php
+/**
+ * @file
+ * Private fonction use to manage module element.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @author  Van Delsen Guillaume <gvd@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
 
 /**
  * This function define a new type of dpistate

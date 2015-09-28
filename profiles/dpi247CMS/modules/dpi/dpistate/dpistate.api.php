@@ -1,4 +1,12 @@
 <?php
+/**
+ * @file
+ * Function available for external user.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
 
 /**
  * This function get all states present into db

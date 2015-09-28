@@ -1,7 +1,13 @@
 <?php
-
 /**
- * @author GVD - LBA
+ * @file
+ * View with render arry with state elements.
+ * Form to create Dpi State.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @author  Van Delsen Guillaume <gvd@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**
