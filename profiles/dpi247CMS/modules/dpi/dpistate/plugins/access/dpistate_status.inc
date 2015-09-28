@@ -7,12 +7,6 @@
  * @package DPI
  * @version  1.0
  */
-
-/**
- * @file
- * Plugin to provide access control/visibility based on length of
- * simplecontext argument (in URL).
- */
 $plugin = array (
   'title' => t ( "DpiState: State" ),
   'description' => t ( 'Control access by dpistate status argument.' ),
