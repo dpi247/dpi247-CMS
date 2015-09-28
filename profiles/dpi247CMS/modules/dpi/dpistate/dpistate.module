@@ -14,10 +14,6 @@
  * @package DPI
  * @version  1.0
  */
-
-/**
- * @author GVD - LBA
- */
 module_load_include ( 'php', 'dpistate', 'dpistate.api' );
 module_load_include ( 'inc', 'dpistate', 'dpistate.private' );
 
