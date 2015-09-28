@@ -1,4 +1,12 @@
 <?php
+/**
+ * @file
+ * Implementations of Dpi State module
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
 
 /**
  * Define default dpistate settings

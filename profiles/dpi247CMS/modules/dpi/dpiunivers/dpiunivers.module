@@ -1,4 +1,14 @@
 <?php
+/**
+ * @file
+ * This module allow to create a conceptual thème en menu for a user
+ * when you use a condition define into a hook.
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
+
 module_load_include ( 'php', 'dpiunivers', 'dpiunivers.api' );
 module_load_include ( 'inc', 'dpiunivers', 'dpiunivers.private.state' );
 

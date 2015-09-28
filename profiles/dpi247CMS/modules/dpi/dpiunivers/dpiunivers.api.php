@@ -1,4 +1,12 @@
 <?php
+/**
+ * @file
+ * Api available for all users
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
+ */
 
 /**
  * This function get all universes present into db

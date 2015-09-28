@@ -1,7 +1,11 @@
-
 <?php
 /**
- * @author NMO
+ * @file
+ * This form allow to delete a univers
+ * 
+ * @author  Barthélemi Laurent <lba@audaxis.com>
+ * @package DPI
+ * @version  1.0
  */
 
 /**
