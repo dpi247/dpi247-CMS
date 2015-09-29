@@ -8,15 +8,15 @@
  * @package DPI
  * @version  1.0
  */
-$plugin = array (
-  'title' => t ( "DpiDestinations: Main Destination Path" ),
-  'description' => t ( 'Control access by main destination.' ),
-  'callback' => 'dpidestinations_status_ctools_access_check',
-  'default' => array('field_destinations' => NULL),
-  'settings form' => 'dpidestinations_status_ctools_access_settings',
-  'settings form submit' => 'dpidestinations_status_ctools_access_settings_submit',
-  'summary' => 'dpidestinations_status_ctools_access_summary',
+$plugin = array(
+  'title' => t ( "Node: Main Destination Path" ),
+  'description' => t('Only displays this pane if the Widget field on the related Home Page for this Organic Group is set to On.'),
+  'callback' => 'dpidestinations_node_ctools_access_check',
+  'default' => array('node' => 1),
+  'summary' => 'dpidestinations_node_ctools_access_summary',
   'required context' => new ctools_context_required(t('Node'), 'node'),
+  'settings form' => 'dpidestinations_node_ctools_access_settings',
+  'settings form submit' => 'dpidestinations_node_ctools_access_settings_submit',
 );
 
 /**
@@ -26,10 +26,22 @@ $plugin = array (
  * @param string $state
  * @return boolean
  */
-function dpidestinations_status_ctools_access_check($conf, $context){
-  dsm($conf, 'conf');
-  dsm($context, 'nid');
-  return TRUE;
+function dpidestinations_node_ctools_access_check($conf, $context = NULL){
+  /* Return false if no context found */
+  if(empty($context) || empty($context->data)){
+   return FALSE;
+  }
+  
+  /* Get items from node data context */
+  $items = field_get_items('node', $context->data, 'field_destinations');
+  $item = !empty($items) ? current($items) : array();
+
+  /* Test presence of tid and test if he is concerne by this access */
+  if(!empty($item) && in_array($item['tid'], $conf['destination_vid'])===TRUE){
+    return TRUE;
+  }
+  
+  return FALSE;
 }
 
 /**
@@ -39,7 +51,7 @@ function dpidestinations_status_ctools_access_check($conf, $context){
  * @param array $state
  * @return String
  */
-function dpidestinations_status_ctools_access_summary($conf, $node){
+function dpidestinations_node_ctools_access_summary($conf, $node){
   $destinations = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
   $str = "Dpidestinations : Define for ";
   foreach($conf["destination_vid"] as $v){
@@ -56,10 +68,9 @@ function dpidestinations_status_ctools_access_summary($conf, $node){
  * @param Array $conf
  * @return Array
  */
-function dpidestinations_status_ctools_access_settings($form, &$form_state, $conf){
+function dpidestinations_node_ctools_access_settings($form, &$form_state, $conf){
   /* Get all destination name with vid key */
   $destinations_tmp = dpidestinations_api_get_all_sections_term_available_as_select_options(FALSE);
-  $form = array();
   
   /* Delete first element */
   $destinations = array();
@@ -87,6 +98,6 @@ function dpidestinations_status_ctools_access_settings($form, &$form_state, $con
  * @param array $form
  * @param array $form_state
  */
-function dpidestinations_status_ctools_access_settings_submit($form, &$form_state){
+function dpidestinations_node_ctools_access_settings_submit($form, &$form_state){
   $form_state['values']['settings']['destination_vid'] = $form_state['values']['destination_vid'];
 }
